@@ -1,4 +1,4 @@
-.PHONY: testc testpython testrust
+.PHONY: cext testc pyext pyinstall testpython echo_pyexport testrust doctest cdoc docs docsclean lint style
 
 export QISKIT_CEXT_INSTALL_METHOD := path
 export QISKIT_CEXT_PATH := $(shell python -c "import os; import qiskit; print(os.path.dirname(qiskit._accelerate.__file__) + '/..')")
@@ -44,6 +44,9 @@ testc: cext
 pyext:
 	LD_LIBRARY_PATH="${LD_LIBRARY_PATH}/qiskit" cargo run --bin stub_gen -p qiskit-fermions-pyext --no-default-features
 	LD_LIBRARY_PATH="${LD_LIBRARY_PATH}/qiskit" python setup.py build_rust --inplace --release
+
+pyinstall: pyext
+	LD_LIBRARY_PATH="${LD_LIBRARY_PATH}/qiskit" pip install -e .
 
 testpython: pyext
 	LD_LIBRARY_PATH="${LD_LIBRARY_PATH}/qiskit" python setup.py build_rust --inplace --release
