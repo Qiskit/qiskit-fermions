@@ -45,7 +45,7 @@ pyext:
 	LD_LIBRARY_PATH="${QISKIT_CEXT_PATH}/qiskit:${LD_LIBRARY_PATH}" python setup.py build_rust --inplace --release
 
 pyinstall: pyext
-	LD_LIBRARY_PATH="${QISKIT_CEXT_PATH}/qiskit:${LD_LIBRARY_PATH}" pip install -e .
+	LD_LIBRARY_PATH="${QISKIT_CEXT_PATH}/qiskit:${LD_LIBRARY_PATH}" pip install -e ".$(DEPS)"
 
 testpython: pyext
 	LD_LIBRARY_PATH="${QISKIT_CEXT_PATH}/qiskit:${LD_LIBRARY_PATH}" python setup.py build_rust --inplace --release
