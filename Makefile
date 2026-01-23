@@ -2,6 +2,7 @@
 
 export QISKIT_CEXT_INSTALL_METHOD := path
 export QISKIT_CEXT_PATH := $(shell python -c "import os; import qiskit; print(os.path.dirname(qiskit._accelerate.__file__) + '/..')")
+export PYTHON_LIB_PATH := $(shell python -c "import os; from sys import version_info; from ctypes.util import find_library; print(os.path.dirname(find_library(f'python{version_info.major}.{version_info.minor}')))")
 export LD_LIBRARY_PATH := $(shell python -c "import os; import qiskit; print(os.path.dirname(qiskit._accelerate.__file__) + '/..')")
 export BINDGEN_EXTRA_CLANG_ARGS := "-I$(shell python -c "import sysconfig; print(sysconfig.get_path('include'))")"
 
@@ -32,25 +33,25 @@ $(C_DIR_INCLUDE):
 	mkdir -p $(C_DIR_INCLUDE)/
 
 cext: $(C_DIR_LIB) $(C_DIR_INCLUDE)
-	LD_LIBRARY_PATH="${LD_LIBRARY_PATH}/dist/c/lib" cargo rustc --release --crate-type cdylib -p qiskit-fermions-cext
+	LD_LIBRARY_PATH="${PYTHON_LIB_PATH}:${LD_LIBRARY_PATH}/dist/c/lib" cargo rustc --release --crate-type cdylib -p qiskit-fermions-cext
 	cp $(C_LIB_CARGO_PATH) $(C_DIR_LIB)/$(subst _cext,,$(C_LIB_CARGO_FILENAME))
 	cp target/qiskit_fermions.h $(C_DIR_INCLUDE)/qiskit_fermions.h
 
 testc: cext
-	LD_LIBRARY_PATH="${LD_LIBRARY_PATH}/dist/c/lib" cmake -S. -B$(C_DIR_TEST_BUILD)
-	LD_LIBRARY_PATH="${LD_LIBRARY_PATH}/dist/c/lib" cmake --build $(C_DIR_TEST_BUILD)
-	LD_LIBRARY_PATH="${LD_LIBRARY_PATH}/dist/c/lib" ctest -V -C Debug --test-dir $(C_DIR_TEST_BUILD)
+	LD_LIBRARY_PATH="${PYTHON_LIB_PATH}:${LD_LIBRARY_PATH}/dist/c/lib" cmake -S. -B$(C_DIR_TEST_BUILD)
+	LD_LIBRARY_PATH="${PYTHON_LIB_PATH}:${LD_LIBRARY_PATH}/dist/c/lib" cmake --build $(C_DIR_TEST_BUILD)
+	LD_LIBRARY_PATH="${PYTHON_LIB_PATH}:${LD_LIBRARY_PATH}/dist/c/lib" ctest -V -C Debug --test-dir $(C_DIR_TEST_BUILD)
 
 pyext:
-	LD_LIBRARY_PATH="${LD_LIBRARY_PATH}/qiskit" cargo run --bin stub_gen -p qiskit-fermions-pyext --no-default-features
-	LD_LIBRARY_PATH="${LD_LIBRARY_PATH}/qiskit" python setup.py build_rust --inplace --release
+	LD_LIBRARY_PATH="${PYTHON_LIB_PATH}:${LD_LIBRARY_PATH}/qiskit" cargo run --bin stub_gen -p qiskit-fermions-pyext --no-default-features
+	LD_LIBRARY_PATH="${PYTHON_LIB_PATH}:${LD_LIBRARY_PATH}/qiskit" python setup.py build_rust --inplace --release
 
 pyinstall: pyext
-	LD_LIBRARY_PATH="${LD_LIBRARY_PATH}/qiskit" pip install -e .
+	LD_LIBRARY_PATH="${PYTHON_LIB_PATH}:${LD_LIBRARY_PATH}/qiskit" pip install -e .
 
 testpython: pyext
-	LD_LIBRARY_PATH="${LD_LIBRARY_PATH}/qiskit" python setup.py build_rust --inplace --release
-	LD_LIBRARY_PATH="${LD_LIBRARY_PATH}/qiskit" python -m pytest -s --doctest-plus --doctest-glob "*.pyi"
+	LD_LIBRARY_PATH="${PYTHON_LIB_PATH}:${LD_LIBRARY_PATH}/qiskit" python setup.py build_rust --inplace --release
+	LD_LIBRARY_PATH="${PYTHON_LIB_PATH}:${LD_LIBRARY_PATH}/qiskit" python -m pytest -s --doctest-plus --doctest-glob "*.pyi"
 
 echo_pyexport:
 	@echo export QISKIT_CEXT_INSTALL_METHOD="${QISKIT_CEXT_INSTALL_METHOD}"
@@ -59,25 +60,25 @@ echo_pyexport:
 	@echo export BINDGEN_EXTRA_CLANG_ARGS="${BINDGEN_EXTRA_CLANG_ARGS}"
 
 testrust:
-	LD_LIBRARY_PATH="${LD_LIBRARY_PATH}/dist/c/lib" cargo test -p qiskit-fermions-core --no-default-features
+	LD_LIBRARY_PATH="${PYTHON_LIB_PATH}:${LD_LIBRARY_PATH}/dist/c/lib" cargo test -p qiskit-fermions-core --no-default-features
 
 doctest: pyext
-	LD_LIBRARY_PATH="${LD_LIBRARY_PATH}/qiskit" python -m pytest docs/ -s --doctest-plus --doctest-only --doctest-glob "*.rst"
+	LD_LIBRARY_PATH="${PYTHON_LIB_PATH}:${LD_LIBRARY_PATH}/qiskit" python -m pytest docs/ -s --doctest-plus --doctest-only --doctest-glob "*.rst"
 
 cdoc: cext
 	doxygen docs/Doxyfile
 
 docs: cdoc pyext
-	LD_LIBRARY_PATH="${LD_LIBRARY_PATH}/qiskit" sphinx-build -W -j auto -T -E --keep-going -b html docs/ docs/_build/html
+	LD_LIBRARY_PATH="${PYTHON_LIB_PATH}:${LD_LIBRARY_PATH}/qiskit" sphinx-build -W -j auto -T -E --keep-going -b html docs/ docs/_build/html
 
 docsclean:
 	rm -rf docs/stubs/ docs/_build docs/xml
 
 lint:
-	LD_LIBRARY_PATH="${LD_LIBRARY_PATH}/qiskit" cargo clippy
+	LD_LIBRARY_PATH="${PYTHON_LIB_PATH}:${LD_LIBRARY_PATH}/qiskit" cargo clippy
 	tox -e lint
 
 style:
-	LD_LIBRARY_PATH="${LD_LIBRARY_PATH}/qiskit" cargo fmt
+	LD_LIBRARY_PATH="${PYTHON_LIB_PATH}:${LD_LIBRARY_PATH}/qiskit" cargo fmt
 	tox -e style
 	clang-format --style="file:.clang-format" -i tests/c/*.c tests/c/*.h
