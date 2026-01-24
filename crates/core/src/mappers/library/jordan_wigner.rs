@@ -12,7 +12,6 @@
 
 use crate::operators::fermion_operator::{FermionAction, FermionOperator};
 use rayon::prelude::*;
-use std::mem::MaybeUninit;
 use std::sync::{Arc, Mutex};
 
 fn map_action(action: FermionAction, num_qubits: u32) -> *mut qiskit_sys::QkObs {
@@ -91,26 +90,15 @@ pub fn jordan_wigner(fer_op: &FermionOperator, num_qubits: u32) -> *mut qiskit_s
                 mapped_term = new_term;
             });
 
-            let scaled_term = unsafe { qiskit_sys::qk_obs_multiply(mapped_term, &qk_coeff) };
+            let canon_term = unsafe { qiskit_sys::qk_obs_canonicalize(mapped_term, 1e-18) };
             unsafe { qiskit_sys::qk_obs_free(mapped_term) };
-
-            let canon_term = unsafe { qiskit_sys::qk_obs_canonicalize(scaled_term, 1e-18) };
-            unsafe { qiskit_sys::qk_obs_free(scaled_term) };
 
             let qubit_op = qubit_ops[pool.current_thread_index().unwrap()]
                 // this should never lock because we have one item per thread
                 .lock()
                 .unwrap();
 
-            // PERF: we are addinf the terms one-by-one manually since this is significantly more
-            // efficient that many repetitive calls to qk_obs_add. In-place addition support within
-            // Qiskit would alleviate the need for this.
-            let num_add_terms = unsafe { qiskit_sys::qk_obs_num_terms(canon_term) };
-            let mut term = MaybeUninit::uninit();
-            (0..num_add_terms).for_each(|j| unsafe {
-                qiskit_sys::qk_obs_term(canon_term, j as u64, term.as_mut_ptr());
-                qiskit_sys::qk_obs_add_term(qubit_op.ptr, term.as_ptr());
-            });
+            unsafe { qiskit_sys::qk_obs_scaled_add_inplace(qubit_op.ptr, canon_term, &qk_coeff)};
 
             unsafe { qiskit_sys::qk_obs_free(canon_term) };
         });
@@ -125,16 +113,8 @@ pub fn jordan_wigner(fer_op: &FermionOperator, num_qubits: u32) -> *mut qiskit_s
             {
                 |op1: Wrapper, op2| {
                     let op_locked = op2.lock().unwrap();
-
-                    let num_add_terms = unsafe { qiskit_sys::qk_obs_num_terms(op_locked.ptr) };
-                    let mut term = MaybeUninit::uninit();
-                    (0..num_add_terms).for_each(|j| unsafe {
-                        qiskit_sys::qk_obs_term(op_locked.ptr, j as u64, term.as_mut_ptr());
-                        qiskit_sys::qk_obs_add_term(op1.ptr, term.as_ptr());
-                    });
-
+                    unsafe { qiskit_sys::qk_obs_add_inplace(op1.ptr, op_locked.ptr) };
                     unsafe { qiskit_sys::qk_obs_free(op_locked.ptr) };
-
                     op1
                 }
             },
@@ -148,19 +128,11 @@ pub fn jordan_wigner(fer_op: &FermionOperator, num_qubits: u32) -> *mut qiskit_s
                     let num_add_terms1 = unsafe { qiskit_sys::qk_obs_num_terms(op1.ptr) };
                     let num_add_terms2 = unsafe { qiskit_sys::qk_obs_num_terms(op2.ptr) };
                     if num_add_terms1 > num_add_terms2 {
-                        let mut term = MaybeUninit::uninit();
-                        (0..num_add_terms2).for_each(|j| unsafe {
-                            qiskit_sys::qk_obs_term(op2.ptr, j as u64, term.as_mut_ptr());
-                            qiskit_sys::qk_obs_add_term(op1.ptr, term.as_ptr());
-                        });
+                        unsafe { qiskit_sys::qk_obs_add_inplace(op1.ptr, op2.ptr) };
                         unsafe { qiskit_sys::qk_obs_free(op2.ptr) };
                         op1
                     } else {
-                        let mut term = MaybeUninit::uninit();
-                        (0..num_add_terms1).for_each(|j| unsafe {
-                            qiskit_sys::qk_obs_term(op1.ptr, j as u64, term.as_mut_ptr());
-                            qiskit_sys::qk_obs_add_term(op2.ptr, term.as_ptr());
-                        });
+                        unsafe { qiskit_sys::qk_obs_add_inplace(op2.ptr, op1.ptr) };
                         unsafe { qiskit_sys::qk_obs_free(op1.ptr) };
                         op2
                     }
