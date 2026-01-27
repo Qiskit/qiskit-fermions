@@ -1,4 +1,4 @@
-.PHONY: cext testc pyext pyinstall testpython echo_pyexport testrust doctest cdoc docs docsclean lint style
+.PHONY: cext testc pyext pyinstall testpython echo_ld_lib_path testrust doctest cdoc docs docsclean lint style
 
 export QISKIT_CEXT_INSTALL_METHOD := path
 export QISKIT_CEXT_PATH := $(shell python -c "import os; import qiskit; print(os.path.dirname(qiskit._accelerate.__file__) + '/..')")
@@ -51,11 +51,8 @@ pyinstall:
 testpython: pyext
 	LD_LIBRARY_PATH="${QISKIT_CEXT_PATH}/qiskit:${LD_LIBRARY_PATH}" python -m pytest -s --doctest-plus --doctest-glob "*.pyi"
 
-echo_pyexport:
-	@echo export QISKIT_CEXT_INSTALL_METHOD="${QISKIT_CEXT_INSTALL_METHOD}"
-	@echo export QISKIT_CEXT_PATH="${QISKIT_CEXT_PATH}"
+echo_ld_lib_path:
 	@echo export LD_LIBRARY_PATH="${QISKIT_CEXT_PATH}/qiskit:${LD_LIBRARY_PATH}"
-	@echo export BINDGEN_EXTRA_CLANG_ARGS="${BINDGEN_EXTRA_CLANG_ARGS}"
 
 testrust:
 	LD_LIBRARY_PATH="${QISKIT_CEXT_PATH}/dist/c/lib:${LD_LIBRARY_PATH}" cargo test -p qiskit-fermions-core --no-default-features

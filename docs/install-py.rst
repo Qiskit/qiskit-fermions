@@ -23,19 +23,19 @@ simple:
 
       $ make pyext
 
-4. get the correct environment variables:
+4. install the Python package:
 
    .. code:: console
 
-      $ make echo_pyexport
+      $ make pyinstall
 
-5. copy the output from the previous command and execute each line
-
-6. install the Python package:
+5. get the correct ``LD_LIBRARY_PATH``:
 
    .. code:: console
 
-      $ SETUPTOOLS_RUST_CARGO_PROFILE=release pip install -e ".[test]"
+      $ make echo_ld_lib_path
+
+6. ensure that you copy and run the output above
 
 7. verify that everything worked by running the Python API tests:
 
