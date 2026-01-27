@@ -35,7 +35,7 @@ simple:
 
    .. code:: console
 
-      $ pip install -e ".[test]"
+      $ SETUPTOOLS_RUST_CARGO_PROFILE=release pip install -e ".[test]"
 
 7. verify that everything worked by running the Python API tests:
 
