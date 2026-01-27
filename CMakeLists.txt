@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.27)
+cmake_minimum_required (VERSION 3.22)
 project (QiskitFermions)
 
 # We are using CMake to build our C API test suite, and we leverage ctest to run
