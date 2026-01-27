@@ -57,7 +57,7 @@ jobs:
           cd build/qiskit
           make c
           pip install -c constraints.txt -r requirements.txt
-          pip install -c constraints.txt -e .
+          SETUPTOOLS_RUST_CARGO_PROFILE=release pip install -c constraints.txt -e .
           cd qiskit/
           ln -s _accelerate.*.so libqiskit.so
           cd ../../..
