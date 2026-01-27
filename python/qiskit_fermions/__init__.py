@@ -19,7 +19,7 @@
 import sys
 from inspect import ismodule
 
-from . import _lib
+from . import _lib  # type: ignore[attr-defined]
 
 __modules = {_lib: "qiskit_fermions._lib"}
 
