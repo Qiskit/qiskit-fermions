@@ -69,7 +69,6 @@ use qiskit_fermions_core::operators::fermion_operator::FermionOperator;
 ///
 /// @endrst
 #[unsafe(no_mangle)]
-#[cfg(feature = "cbinding")]
 pub unsafe extern "C" fn qf_jordan_wigner(
     op: *const FermionOperator,
     num_qubits: u32,

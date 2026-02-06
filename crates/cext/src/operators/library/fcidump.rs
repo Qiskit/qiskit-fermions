@@ -38,7 +38,6 @@ use qiskit_fermions_core::operators::library::fcidump::FCIDump;
 ///
 /// @endrst
 #[unsafe(no_mangle)]
-#[cfg(feature = "cbinding")]
 pub unsafe extern "C" fn qf_fcidump_from_file(file_path: *mut c_char) -> *mut FCIDump {
     let rust_file_path = unsafe { CStr::from_ptr(file_path).to_string_lossy().into_owned() };
     let fcidump = FCIDump::from_file(rust_file_path);
@@ -64,7 +63,6 @@ pub unsafe extern "C" fn qf_fcidump_from_file(file_path: *mut c_char) -> *mut FC
 ///
 /// @endrst
 #[unsafe(no_mangle)]
-#[cfg(feature = "cbinding")]
 pub unsafe extern "C" fn qf_fcidump_free(fcidump: *mut FCIDump) {
     if !fcidump.is_null() {
         if !fcidump.is_aligned() {
@@ -102,7 +100,6 @@ pub unsafe extern "C" fn qf_fcidump_free(fcidump: *mut FCIDump) {
 ///
 /// @endrst
 #[unsafe(no_mangle)]
-#[cfg(feature = "cbinding")]
 pub unsafe extern "C" fn qf_fcidump_norb(fcidump: *const FCIDump) -> u32 {
     let fcidump = unsafe { const_ptr_as_ref(fcidump) };
     fcidump.norb
@@ -132,7 +129,6 @@ pub unsafe extern "C" fn qf_fcidump_norb(fcidump: *const FCIDump) -> u32 {
 ///
 /// @endrst
 #[unsafe(no_mangle)]
-#[cfg(feature = "cbinding")]
 pub unsafe extern "C" fn qf_fcidump_nelec(fcidump: *const FCIDump) -> u32 {
     let fcidump = unsafe { const_ptr_as_ref(fcidump) };
     fcidump.nelec
@@ -162,7 +158,6 @@ pub unsafe extern "C" fn qf_fcidump_nelec(fcidump: *const FCIDump) -> u32 {
 ///
 /// @endrst
 #[unsafe(no_mangle)]
-#[cfg(feature = "cbinding")]
 pub unsafe extern "C" fn qf_fcidump_ms2(fcidump: *const FCIDump) -> u32 {
     let fcidump = unsafe { const_ptr_as_ref(fcidump) };
     fcidump.ms2
@@ -189,7 +184,6 @@ pub unsafe extern "C" fn qf_fcidump_ms2(fcidump: *const FCIDump) -> u32 {
 ///
 /// @endrst
 #[unsafe(no_mangle)]
-#[cfg(feature = "cbinding")]
 pub unsafe extern "C" fn qf_ferm_op_from_fcidump(fcidump: *const FCIDump) -> *mut FermionOperator {
     let fcidump = unsafe { const_ptr_as_ref(fcidump) };
     let op = FermionOperator::from(fcidump);

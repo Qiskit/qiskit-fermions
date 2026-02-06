@@ -21,7 +21,3 @@ thiserror.workspace = true
 
 [build-dependencies]
 cbindgen = "0.29"
-
-[features]
-default = ["cbinding"]
-cbinding = []

@@ -51,7 +51,6 @@ use qiskit_fermions_core::operators::{OperatorMacro, OperatorTrait};
 ///
 /// @endrst
 #[unsafe(no_mangle)]
-#[cfg(feature = "cbinding")]
 pub unsafe extern "C" fn qf_ferm_op_new(
     num_terms: u64,
     num_actions: u64,
@@ -108,7 +107,6 @@ pub unsafe extern "C" fn qf_ferm_op_new(
 ///
 /// @endrst
 #[unsafe(no_mangle)]
-#[cfg(feature = "cbinding")]
 pub unsafe extern "C" fn qf_ferm_op_free(op: *mut FermionOperator) {
     if !op.is_null() {
         if !op.is_aligned() {
@@ -146,7 +144,6 @@ pub unsafe extern "C" fn qf_ferm_op_free(op: *mut FermionOperator) {
 ///
 /// @endrst
 #[unsafe(no_mangle)]
-#[cfg(feature = "cbinding")]
 pub unsafe extern "C" fn qf_ferm_op_zero() -> *mut FermionOperator {
     let op = FermionOperator::zero();
     Box::into_raw(Box::new(op))
@@ -176,7 +173,6 @@ pub unsafe extern "C" fn qf_ferm_op_zero() -> *mut FermionOperator {
 ///
 /// @endrst
 #[unsafe(no_mangle)]
-#[cfg(feature = "cbinding")]
 pub unsafe extern "C" fn qf_ferm_op_one() -> *mut FermionOperator {
     let op = FermionOperator::one();
     Box::into_raw(Box::new(op))
@@ -217,7 +213,6 @@ pub unsafe extern "C" fn qf_ferm_op_one() -> *mut FermionOperator {
 ///
 /// @endrst
 #[unsafe(no_mangle)]
-#[cfg(feature = "cbinding")]
 pub unsafe extern "C" fn qf_ferm_op_add_term(
     op: *mut FermionOperator,
     num_actions: u64,
@@ -275,7 +270,6 @@ pub unsafe extern "C" fn qf_ferm_op_add_term(
 ///
 /// @endrst
 #[unsafe(no_mangle)]
-#[cfg(feature = "cbinding")]
 pub unsafe extern "C" fn qf_ferm_op_add(
     left: *const FermionOperator,
     right: *const FermionOperator,
@@ -318,7 +312,6 @@ pub unsafe extern "C" fn qf_ferm_op_add(
 ///
 /// @endrst
 #[unsafe(no_mangle)]
-#[cfg(feature = "cbinding")]
 pub unsafe extern "C" fn qf_ferm_op_mul(
     op: *const FermionOperator,
     scalar: *const Complex64,
@@ -357,7 +350,6 @@ pub unsafe extern "C" fn qf_ferm_op_mul(
 ///
 /// @endrst
 #[unsafe(no_mangle)]
-#[cfg(feature = "cbinding")]
 pub unsafe extern "C" fn qf_ferm_op_compose(
     left: *const FermionOperator,
     right: *const FermionOperator,
@@ -407,7 +399,6 @@ pub unsafe extern "C" fn qf_ferm_op_compose(
 ///
 /// @endrst
 #[unsafe(no_mangle)]
-#[cfg(feature = "cbinding")]
 pub unsafe extern "C" fn qf_ferm_op_adjoint(op: *const FermionOperator) -> *mut FermionOperator {
     // SAFETY: Per documentation, the pointers are non-null and aligned.
     let op = unsafe { const_ptr_as_ref(op) };
@@ -450,7 +441,6 @@ pub unsafe extern "C" fn qf_ferm_op_adjoint(op: *const FermionOperator) -> *mut 
 ///
 /// @endrst
 #[unsafe(no_mangle)]
-#[cfg(feature = "cbinding")]
 pub unsafe extern "C" fn qf_ferm_op_ichop(op: *mut FermionOperator, atol: f64) -> ExitCode {
     // SAFETY: Per documentation, the pointers are non-null and aligned.
     let op = unsafe { mut_ptr_as_ref(op) };
@@ -510,7 +500,6 @@ pub unsafe extern "C" fn qf_ferm_op_ichop(op: *mut FermionOperator, atol: f64) -
 ///
 /// @endrst
 #[unsafe(no_mangle)]
-#[cfg(feature = "cbinding")]
 pub unsafe extern "C" fn qf_ferm_op_simplify(
     op: *const FermionOperator,
     atol: f64,
@@ -570,7 +559,6 @@ pub unsafe extern "C" fn qf_ferm_op_simplify(
 ///
 /// @endrst
 #[unsafe(no_mangle)]
-#[cfg(feature = "cbinding")]
 pub unsafe extern "C" fn qf_ferm_op_normal_ordered(
     op: *const FermionOperator,
 ) -> *mut FermionOperator {
@@ -618,7 +606,6 @@ pub unsafe extern "C" fn qf_ferm_op_normal_ordered(
 ///
 /// @endrst
 #[unsafe(no_mangle)]
-#[cfg(feature = "cbinding")]
 pub unsafe extern "C" fn qf_ferm_op_is_hermitian(op: *const FermionOperator, atol: f64) -> bool {
     // SAFETY: Per documentation, the pointers are non-null and aligned.
     let op = unsafe { const_ptr_as_ref(op) };
@@ -655,7 +642,6 @@ pub unsafe extern "C" fn qf_ferm_op_is_hermitian(op: *const FermionOperator, ato
 ///
 /// @endrst
 #[unsafe(no_mangle)]
-#[cfg(feature = "cbinding")]
 pub unsafe extern "C" fn qf_ferm_op_many_body_order(op: *const FermionOperator) -> u32 {
     // SAFETY: Per documentation, the pointers are non-null and aligned.
     let op = unsafe { const_ptr_as_ref(op) };
@@ -694,7 +680,6 @@ pub unsafe extern "C" fn qf_ferm_op_many_body_order(op: *const FermionOperator) 
 ///
 /// @endrst
 #[unsafe(no_mangle)]
-#[cfg(feature = "cbinding")]
 pub unsafe extern "C" fn qf_ferm_op_conserves_particle_number(op: *const FermionOperator) -> bool {
     // SAFETY: Per documentation, the pointers are non-null and aligned.
     let op = unsafe { const_ptr_as_ref(op) };
@@ -727,7 +712,6 @@ pub unsafe extern "C" fn qf_ferm_op_conserves_particle_number(op: *const Fermion
 ///
 /// @endrst
 #[unsafe(no_mangle)]
-#[cfg(feature = "cbinding")]
 pub unsafe extern "C" fn qf_ferm_op_equal(
     left: *const FermionOperator,
     right: *const FermionOperator,
@@ -774,7 +758,6 @@ pub unsafe extern "C" fn qf_ferm_op_equal(
 ///
 /// @endrst
 #[unsafe(no_mangle)]
-#[cfg(feature = "cbinding")]
 pub unsafe extern "C" fn qf_ferm_op_equiv(
     left: *const FermionOperator,
     right: *const FermionOperator,
@@ -813,7 +796,6 @@ pub unsafe extern "C" fn qf_ferm_op_equiv(
 ///
 /// @endrst
 #[unsafe(no_mangle)]
-#[cfg(feature = "cbinding")]
 pub unsafe extern "C" fn qf_ferm_op_len(op: *const FermionOperator) -> usize {
     // SAFETY: Per documentation, the pointers are non-null and aligned.
     let op = unsafe { const_ptr_as_ref(op) };

@@ -6,10 +6,6 @@ cpp_compat = true
 usize_is_size_t = true
 
 after_includes = """
-// Always expose [cfg(feature = "cbinding")] -- workaround for
-// https://github.com/mozilla/cbindgen/issues/995
-#define QISKIT_FERMIONS_WITH_CBINDINGS
-
 #include <qiskit.h>
 """
 
@@ -32,9 +28,6 @@ QfMajoranaOperator *qf_maj_op_anti_commutator(const QfMajoranaOperator *op_a, co
 /// @ingroup qf_commutators
 QfMajoranaOperator *qf_maj_op_double_commutator(const QfMajoranaOperator *op_a, const QfMajoranaOperator *op_b, const QfMajoranaOperator *op_c, bool sign);
 """
-
-[defines]
-"feature = cbinding" = "QISKIT_FERMIONS_WITH_CBINDINGS"
 
 [parse]
 parse_deps = true

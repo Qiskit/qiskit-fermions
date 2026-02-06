@@ -22,7 +22,6 @@ macro_rules! impl_commutators {
         paste::item! {
             /// @ingroup qf_commutators
             #[unsafe(no_mangle)]
-            #[cfg(feature = "cbinding")]
             pub unsafe extern "C" fn [<qf_ $prefix _commutator>](
                 op_a: *const $name,
                 op_b: *const $name,
@@ -37,7 +36,6 @@ macro_rules! impl_commutators {
 
             /// @ingroup qf_commutators
             #[unsafe(no_mangle)]
-            #[cfg(feature = "cbinding")]
             pub unsafe extern "C" fn [<qf_ $prefix _anti_commutator>](
                 op_a: *const $name,
                 op_b: *const $name,
@@ -52,7 +50,6 @@ macro_rules! impl_commutators {
 
             /// @ingroup qf_commutators
             #[unsafe(no_mangle)]
-            #[cfg(feature = "cbinding")]
             pub unsafe extern "C" fn [<qf_ $prefix _double_commutator>](
                 op_a: *const $name,
                 op_b: *const $name,

@@ -48,7 +48,6 @@ use qiskit_fermions_core::operators::{OperatorMacro, OperatorTrait};
 ///
 /// @endrst
 #[unsafe(no_mangle)]
-#[cfg(feature = "cbinding")]
 pub unsafe extern "C" fn qf_maj_op_new(
     num_terms: u64,
     num_modes: u64,
@@ -100,7 +99,6 @@ pub unsafe extern "C" fn qf_maj_op_new(
 ///
 /// @endrst
 #[unsafe(no_mangle)]
-#[cfg(feature = "cbinding")]
 pub unsafe extern "C" fn qf_maj_op_free(op: *mut MajoranaOperator) {
     if !op.is_null() {
         if !op.is_aligned() {
@@ -138,7 +136,6 @@ pub unsafe extern "C" fn qf_maj_op_free(op: *mut MajoranaOperator) {
 ///
 /// @endrst
 #[unsafe(no_mangle)]
-#[cfg(feature = "cbinding")]
 pub unsafe extern "C" fn qf_maj_op_zero() -> *mut MajoranaOperator {
     let op = MajoranaOperator::zero();
     Box::into_raw(Box::new(op))
@@ -168,7 +165,6 @@ pub unsafe extern "C" fn qf_maj_op_zero() -> *mut MajoranaOperator {
 ///
 /// @endrst
 #[unsafe(no_mangle)]
-#[cfg(feature = "cbinding")]
 pub unsafe extern "C" fn qf_maj_op_one() -> *mut MajoranaOperator {
     let op = MajoranaOperator::one();
     Box::into_raw(Box::new(op))
@@ -206,7 +202,6 @@ pub unsafe extern "C" fn qf_maj_op_one() -> *mut MajoranaOperator {
 ///
 /// @endrst
 #[unsafe(no_mangle)]
-#[cfg(feature = "cbinding")]
 pub unsafe extern "C" fn qf_maj_op_add_term(
     op: *mut MajoranaOperator,
     num_modes: u64,
@@ -257,7 +252,6 @@ pub unsafe extern "C" fn qf_maj_op_add_term(
 ///
 /// @endrst
 #[unsafe(no_mangle)]
-#[cfg(feature = "cbinding")]
 pub unsafe extern "C" fn qf_maj_op_add(
     left: *const MajoranaOperator,
     right: *const MajoranaOperator,
@@ -299,7 +293,6 @@ pub unsafe extern "C" fn qf_maj_op_add(
 ///
 /// @endrst
 #[unsafe(no_mangle)]
-#[cfg(feature = "cbinding")]
 pub unsafe extern "C" fn qf_maj_op_mul(
     op: *const MajoranaOperator,
     scalar: *const Complex64,
@@ -338,7 +331,6 @@ pub unsafe extern "C" fn qf_maj_op_mul(
 ///
 /// @endrst
 #[unsafe(no_mangle)]
-#[cfg(feature = "cbinding")]
 pub unsafe extern "C" fn qf_maj_op_compose(
     left: *const MajoranaOperator,
     right: *const MajoranaOperator,
@@ -387,7 +379,6 @@ pub unsafe extern "C" fn qf_maj_op_compose(
 ///
 /// @endrst
 #[unsafe(no_mangle)]
-#[cfg(feature = "cbinding")]
 pub unsafe extern "C" fn qf_maj_op_adjoint(op: *const MajoranaOperator) -> *mut MajoranaOperator {
     // SAFETY: Per documentation, the pointers are non-null and aligned.
     let op = unsafe { const_ptr_as_ref(op) };
@@ -429,7 +420,6 @@ pub unsafe extern "C" fn qf_maj_op_adjoint(op: *const MajoranaOperator) -> *mut 
 ///
 /// @endrst
 #[unsafe(no_mangle)]
-#[cfg(feature = "cbinding")]
 pub unsafe extern "C" fn qf_maj_op_ichop(op: *mut MajoranaOperator, atol: f64) -> ExitCode {
     // SAFETY: Per documentation, the pointers are non-null and aligned.
     let op = unsafe { mut_ptr_as_ref(op) };
@@ -488,7 +478,6 @@ pub unsafe extern "C" fn qf_maj_op_ichop(op: *mut MajoranaOperator, atol: f64) -
 ///
 /// @endrst
 #[unsafe(no_mangle)]
-#[cfg(feature = "cbinding")]
 pub unsafe extern "C" fn qf_maj_op_simplify(
     op: *const MajoranaOperator,
     atol: f64,
@@ -535,7 +524,6 @@ pub unsafe extern "C" fn qf_maj_op_simplify(
 ///
 /// @endrst
 #[unsafe(no_mangle)]
-#[cfg(feature = "cbinding")]
 pub unsafe extern "C" fn qf_maj_op_normal_ordered(
     op: *const MajoranaOperator,
     reduce: bool,
@@ -582,7 +570,6 @@ pub unsafe extern "C" fn qf_maj_op_normal_ordered(
 ///
 /// @endrst
 #[unsafe(no_mangle)]
-#[cfg(feature = "cbinding")]
 pub unsafe extern "C" fn qf_maj_op_is_hermitian(op: *const MajoranaOperator, atol: f64) -> bool {
     // SAFETY: Per documentation, the pointers are non-null and aligned.
     let op = unsafe { const_ptr_as_ref(op) };
@@ -618,7 +605,6 @@ pub unsafe extern "C" fn qf_maj_op_is_hermitian(op: *const MajoranaOperator, ato
 ///
 /// @endrst
 #[unsafe(no_mangle)]
-#[cfg(feature = "cbinding")]
 pub unsafe extern "C" fn qf_maj_op_many_body_order(op: *const MajoranaOperator) -> u32 {
     // SAFETY: Per documentation, the pointers are non-null and aligned.
     let op = unsafe { const_ptr_as_ref(op) };
@@ -659,7 +645,6 @@ pub unsafe extern "C" fn qf_maj_op_many_body_order(op: *const MajoranaOperator) 
 ///
 /// @endrst
 #[unsafe(no_mangle)]
-#[cfg(feature = "cbinding")]
 pub unsafe extern "C" fn qf_maj_op_is_even(op: *const MajoranaOperator) -> bool {
     // SAFETY: Per documentation, the pointers are non-null and aligned.
     let op = unsafe { const_ptr_as_ref(op) };
@@ -692,7 +677,6 @@ pub unsafe extern "C" fn qf_maj_op_is_even(op: *const MajoranaOperator) -> bool 
 ///
 /// @endrst
 #[unsafe(no_mangle)]
-#[cfg(feature = "cbinding")]
 pub unsafe extern "C" fn qf_maj_op_equal(
     left: *const MajoranaOperator,
     right: *const MajoranaOperator,
@@ -738,7 +722,6 @@ pub unsafe extern "C" fn qf_maj_op_equal(
 ///
 /// @endrst
 #[unsafe(no_mangle)]
-#[cfg(feature = "cbinding")]
 pub unsafe extern "C" fn qf_maj_op_equiv(
     left: *const MajoranaOperator,
     right: *const MajoranaOperator,
@@ -776,7 +759,6 @@ pub unsafe extern "C" fn qf_maj_op_equiv(
 ///
 /// @endrst
 #[unsafe(no_mangle)]
-#[cfg(feature = "cbinding")]
 pub unsafe extern "C" fn qf_maj_op_len(op: *const MajoranaOperator) -> usize {
     // SAFETY: Per documentation, the pointers are non-null and aligned.
     let op = unsafe { const_ptr_as_ref(op) };

@@ -50,7 +50,6 @@ use qiskit_fermions_core::operators::library::electronic_integrals::{From1Body, 
 ///
 /// @endrst
 #[unsafe(no_mangle)]
-#[cfg(feature = "cbinding")]
 pub unsafe extern "C" fn qf_ferm_op_from_1body_tril_spin_sym(
     one_body_a: *mut f64,
     norb: u32,
@@ -105,7 +104,6 @@ pub unsafe extern "C" fn qf_ferm_op_from_1body_tril_spin_sym(
 ///
 /// @endrst
 #[unsafe(no_mangle)]
-#[cfg(feature = "cbinding")]
 pub unsafe extern "C" fn qf_ferm_op_from_1body_tril_spin(
     one_body_a: *mut f64,
     one_body_b: *mut f64,
@@ -179,7 +177,6 @@ pub unsafe extern "C" fn qf_ferm_op_from_1body_tril_spin(
 ///
 /// @endrst
 #[unsafe(no_mangle)]
-#[cfg(feature = "cbinding")]
 pub unsafe extern "C" fn qf_ferm_op_from_2body_tril_spin_sym(
     two_body_aa: *mut f64,
     norb: u32,
@@ -259,7 +256,6 @@ pub unsafe extern "C" fn qf_ferm_op_from_2body_tril_spin_sym(
 ///
 /// @endrst
 #[unsafe(no_mangle)]
-#[cfg(feature = "cbinding")]
 pub unsafe extern "C" fn qf_ferm_op_from_2body_tril_spin(
     two_body_aa: *mut f64,
     two_body_ab: *mut f64,

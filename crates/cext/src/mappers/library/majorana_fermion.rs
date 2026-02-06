@@ -57,7 +57,6 @@ use qiskit_fermions_core::operators::majorana_operator::MajoranaOperator;
 ///
 /// @endrst
 #[unsafe(no_mangle)]
-#[cfg(feature = "cbinding")]
 pub unsafe extern "C" fn qf_fermion_to_majorana(
     fer_op: *const FermionOperator,
 ) -> *mut MajoranaOperator {
@@ -106,7 +105,6 @@ pub unsafe extern "C" fn qf_fermion_to_majorana(
 ///
 /// @endrst
 #[unsafe(no_mangle)]
-#[cfg(feature = "cbinding")]
 pub unsafe extern "C" fn qf_majorana_to_fermion(
     maj_op: *const MajoranaOperator,
 ) -> *mut FermionOperator {
