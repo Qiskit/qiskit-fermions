@@ -1,74 +1,21 @@
-.PHONY: cext testc pyext pyinstall testpython echo_ld_lib_path testrust doctest cdoc docs docsclean lint style
+export QISKIT_ROOT := $(shell python -c "import os; import qiskit; print(os.path.dirname(qiskit._accelerate.__file__) + '/..')")
 
+# For the time being, we are hard-coding the `qiskit-sys` installation method
+# settings. We should figure out how to relax this in the future...
 export QISKIT_CEXT_INSTALL_METHOD := path
-export QISKIT_CEXT_PATH := $(shell python -c "import os; import qiskit; print(os.path.dirname(qiskit._accelerate.__file__) + '/..')")
+export QISKIT_CEXT_PATH := ${QISKIT_ROOT}
+
+# We must export this variable to ensure that `qiskit-sys` can find the Python.h
+# correctly. Arguably, it should be able to handle that itself within its build
+# script.
 export BINDGEN_EXTRA_CLANG_ARGS := "-I$(shell python -c "import sysconfig; print(sysconfig.get_path('include'))")"
-export SETUPTOOLS_RUST_CARGO_PROFILE := release
 
-C_DIR_OUT = dist/c
-C_DIR_LIB = $(C_DIR_OUT)/lib
-C_DIR_INCLUDE = $(C_DIR_OUT)/include
-C_DIR_TEST_BUILD = tests/c/build
-# Whether this is target/debug or target/release depends on the flags in the
-# `cheader` recipe.  For now, they're just hardcoded.
-C_CARGO_TARGET_DIR = target/release
-ifeq ($(OS), Windows_NT)
-	C_LIB_CARGO_FILENAME=qiskit_fermions_cext.dll
-else ifeq ($(shell uname), Darwin)
-	C_LIB_CARGO_FILENAME=libqiskit_fermions_cext.dylib
-else
-	# ... probably.
-	C_LIB_CARGO_FILENAME=libqiskit_fermions_cext.so
-endif
-C_LIB_CARGO_PATH=$(C_CARGO_TARGET_DIR)/$(C_LIB_CARGO_FILENAME)
+# ==============================================================================
+# Recipes for Linting
+# ==============================================================================
+.PHONY: lint style
 
-C_LIBQISKIT_FERMIONS=$(C_DIR_LIB)/$(subst _cext,,$(C_LIB_CARGO_FILENAME))
-C_QISKIT_FERMIONS_H=$(C_DIR_INCLUDE)/qiskit_fermions.h
-
-$(C_DIR_LIB):
-	mkdir -p $(C_DIR_LIB)
-
-$(C_DIR_INCLUDE):
-	mkdir -p $(C_DIR_INCLUDE)/
-
-cext: $(C_DIR_LIB) $(C_DIR_INCLUDE)
-	cargo rustc --release --crate-type cdylib -p qiskit-fermions-cext
-	cp $(C_LIB_CARGO_PATH) $(C_DIR_LIB)/$(subst _cext,,$(C_LIB_CARGO_FILENAME))
-	cp target/qiskit_fermions.h $(C_DIR_INCLUDE)/qiskit_fermions.h
-
-testc: cext
-	cmake -S. -B$(C_DIR_TEST_BUILD)
-	cmake --build $(C_DIR_TEST_BUILD)
-	ctest -V -C Debug --test-dir $(C_DIR_TEST_BUILD)
-
-pyext:
-	cargo run --bin stub_gen -p qiskit-fermions-pyext --no-default-features
-	python setup.py build_rust --inplace --release
-
-pyinstall:
-	pip install -e ".$(DEPS)"
-
-testpython: pyext
-	LD_LIBRARY_PATH="${QISKIT_CEXT_PATH}/qiskit:${LD_LIBRARY_PATH}" python -m pytest -s --doctest-plus --doctest-glob "*.pyi"
-
-echo_ld_lib_path:
-	@echo export LD_LIBRARY_PATH="${QISKIT_CEXT_PATH}/qiskit:${LD_LIBRARY_PATH}"
-
-testrust:
-	LD_LIBRARY_PATH="${QISKIT_CEXT_PATH}/dist/c/lib:${LD_LIBRARY_PATH}" cargo test -p qiskit-fermions-core --no-default-features
-
-doctest: pyext
-	LD_LIBRARY_PATH="${QISKIT_CEXT_PATH}/qiskit:${LD_LIBRARY_PATH}" python -m pytest docs/ -s --doctest-plus --doctest-only --doctest-glob "*.rst"
-
-cdoc: cext
-	doxygen docs/Doxyfile
-
-docs: cdoc pyext
-	LD_LIBRARY_PATH="${QISKIT_CEXT_PATH}/qiskit:${LD_LIBRARY_PATH}" sphinx-build -W -j auto -T -E --keep-going -b html docs/ docs/_build/html
-
-docsclean:
-	rm -rf docs/stubs/ docs/_build docs/xml
-
+lint: export LD_LIBRARY_PATH += ${QISKIT_ROOT}/qiskit
 lint:
 	cargo clippy
 	tox -e lint
@@ -77,3 +24,206 @@ style:
 	cargo fmt
 	tox -e style
 	clang-format --style="file:.clang-format" -i tests/c/*.c tests/c/*.h
+
+# ==============================================================================
+# Recipes for Docs
+# ==============================================================================
+.PHONY: doxygen docs docsclean
+
+doxygen: cheader
+	doxygen docs/Doxyfile
+
+docs: export LD_LIBRARY_PATH += ${QISKIT_ROOT}/qiskit
+docs: doxygen pyext
+	sphinx-build -W -j auto -T -E --keep-going -b html docs/ docs/_build/html
+
+docsclean:
+	rm -rf docs/stubs/ docs/_build docs/xml
+
+# ==============================================================================
+# Recipes for Rust
+# ==============================================================================
+.PHONY: testrust
+testrust: export LD_LIBRARY_PATH += ${QISKIT_ROOT}/dist/c/lib
+testrust:
+	cargo test -p qiskit-fermions-core --no-default-features
+
+# ==============================================================================
+# Recipes for Python Building
+# ==============================================================================
+
+# `pystubs` and `pystubs-dev` are conflicting rules - they both attempt to
+# generate the Python stub files, but they differ between release and dev mode.
+.PHONY: pystubs pystubs-dev
+pystubs:
+	cargo run --release --bin stub_gen -p qiskit-fermions-pyext --no-default-features
+
+pystubs-dev:
+	cargo run --bin stub_gen -p qiskit-fermions-pyext --no-default-features
+
+# `pyext` and `pyext-dev` are conflicting rules - they both attempt to "install"
+# the compiled Rust acceleration library, but they differ between release and
+# dev mode.
+.PHONY: pyext pyext-dev
+pyext: pystubs
+	python setup.py build_rust --inplace --release
+
+pyext-dev: pystubs-dev
+	python setup.py build_rust --inplace
+
+# ==============================================================================
+# Recipes for Python Installing
+# ==============================================================================
+
+.PHONY: pyinstall
+pyinstall:
+	pip install -e ".$(DEPS)"
+
+# ==============================================================================
+# Recipes for Python Testing
+# ==============================================================================
+
+.PHONY: testpython
+testpython: export LD_LIBRARY_PATH += ${QISKIT_ROOT}/qiskit
+testpython: pyext
+	python -m pytest -s --doctest-plus --doctest-glob "*.pyi"
+
+.PHONY: pydoctest
+pydoctest: export LD_LIBRARY_PATH += ${QISKIT_ROOT}/qiskit
+pydoctest: pyext
+	python -m pytest docs/ -s --doctest-plus --doctest-only --doctest-glob "*.rst"
+
+# ==============================================================================
+# Variables that can be set/modified to modify the C builds.
+# ==============================================================================
+
+# Include files that are manually written, relative to the `include` directory
+# (both in and out).
+C_INCLUDE_FILES_MANUAL=
+# Include files that are generated by a build script, relative to the output
+# `include` directory.
+C_INCLUDE_FILES_GENERATED=\
+	qiskit_fermions.h
+# Directories used in the structure of the include-files output.
+C_DIR_INCLUDE_INTERNAL=qiskit_fermions
+
+# Output directories.
+C_DIR_OUT=dist/c
+C_DIR_OUT_LIB=$(C_DIR_OUT)/lib
+C_DIR_OUT_INCLUDE=$(C_DIR_OUT)/include
+C_DIR_TEST=tests/c
+C_DIR_TEST_BUILD=tests/c/build
+
+# Input directories
+C_DIR_CARGO_TARGET=target
+C_DIR_SRC_INCLUDE=crates/cext/include
+
+# ==============================================================================
+# Variables that we derive from the settings above.
+# ==============================================================================
+
+ifeq ($(OS), Windows_NT)
+	C_LIB_CARGO_FILENAME=qiskit_fermions_cext.dll
+else ifeq ($(shell uname), Darwin)
+	C_LIB_CARGO_FILENAME=libqiskit_fermions_cext.dylib
+else
+	# ... probably.
+	C_LIB_CARGO_FILENAME=libqiskit_fermions_cext.so
+endif
+
+C_DIR_OUT_INCLUDE_ALL=$(C_DIR_OUT_INCLUDE) $(addprefix $(C_DIR_OUT_INCLUDE)/,$(C_DIR_INCLUDE_INTERNAL))
+
+C_INCLUDE_FILES_ABS_GENERATED=$(addprefix $(C_DIR_CARGO_TARGET)/,$(C_INCLUDE_FILES_GENERATED))
+C_INCLUDE_FILES_OUT_MANUAL=$(addprefix $(C_DIR_OUT_INCLUDE)/,$(C_INCLUDE_FILES_MANUAL))
+C_INCLUDE_FILES_OUT_GENERATED=$(addprefix $(C_DIR_OUT_INCLUDE)/,$(C_INCLUDE_FILES_GENERATED))
+
+C_LIBQISKIT_FERMIONS_OUT=$(C_DIR_OUT_LIB)/$(subst _cext,,$(C_LIB_CARGO_FILENAME))
+
+# ==============================================================================
+# Recipes for the C components.
+# ==============================================================================
+
+# Abstraction over calling Cargo to build the C extension in "standalone" C
+# mode.  This _also_ builds the C header file as a side-effect into
+# `target/qiskit_fermions.h`.  Recipes that use this as a prerequisite should
+# ensure they set `C_LIB_CARGO_FLAGS` to choose the build profile.  The
+# `C_LIB_RUSTC_FLAGS` variable can also be set to add additional logic (like
+# coverage instructions).
+#
+# Typically, downstream recipes should depend on `build-clib-release` or
+# `build-clib-dev` instead.
+.PHONY: build-clib build-clib-release build-clib-dev
+build-clib:
+	cargo rustc -p qiskit-fermions-cext --crate-type cdylib ${C_LIB_CARGO_FLAGS} -- ${C_LIB_RUSTC_FLAGS}
+build-clib-release: C_LIB_CARGO_FLAGS=--release
+build-clib-release: build-clib
+build-clib-dev: C_LIB_CARGO_FLAGS=--profile dev
+build-clib-dev: build-clib
+# This is the minimal amount of work we can do that builds the generated header
+# file(s) (by force running the build script of `qiskit-fermions-cext`).  You do
+# not need to run this rule if you also depend on `build-clib`, but it doesn't
+# hugely hurt.  Use the `cheader` rule to install these files into the correct
+# place.
+.PHONY: build-cheader
+build-cheader:
+	cargo check -p qiskit-fermions-cext
+
+# Catch-all directory-creation rule.
+$(C_DIR_OUT_LIB) $(C_DIR_OUT_INCLUDE_ALL):
+	mkdir -p $@
+
+$(C_INCLUDE_FILES_ABS_GENERATED): build-cheader
+$(C_INCLUDE_FILES_OUT_MANUAL): $(C_DIR_OUT_INCLUDE)/%.h: $(C_DIR_SRC_INCLUDE)/%.h | $(C_DIR_OUT_INCLUDE_ALL)
+	cp $< $@
+$(C_INCLUDE_FILES_OUT_GENERATED): $(C_DIR_OUT_INCLUDE)/%.h: $(C_DIR_CARGO_TARGET)/%.h | $(C_DIR_OUT_INCLUDE_ALL)
+	cp $< $@
+
+.PHONY: cheader
+cheader: $(C_INCLUDE_FILES_OUT_GENERATED) $(C_INCLUDE_FILES_OUT_MANUAL)
+# `clib` and `clib-dev` are conflicting rules - they both attempt to "install" the
+# shared library into the output `lib` directory, but they differ between release
+# and dev mode.
+.PHONY: clib clib-dev
+clib: build-clib-release | $(C_DIR_OUT_LIB)
+	cp $(C_DIR_CARGO_TARGET)/release/$(C_LIB_CARGO_FILENAME) $(C_LIBQISKIT_FERMIONS_OUT)
+
+clib-dev: build-clib-dev | $(C_DIR_OUT_LIB)
+	cp $(C_DIR_CARGO_TARGET)/debug/$(C_LIB_CARGO_FILENAME) $(C_LIBQISKIT_FERMIONS_OUT)
+
+.PHONY: cext
+cext: cheader clib
+
+.PHONY: testc
+# Use ctest to run C API tests.
+testc: cheader build-clib-dev
+# `-S` specifies the source (including the `CMakeLists.txt` file, `-B` is where
+# to put the build files, including the generated CMake stuff.  See the
+# `CMakeLists.txt` file for the build variables.
+	cmake -S$(C_DIR_TEST) -B$(C_DIR_TEST_BUILD) \
+		-DQISKIT_PATH=$(abspath $(QISKIT_ROOT)/dist/c) \
+		-DCARGO_LIB_DIR=$(abspath $(C_DIR_CARGO_TARGET))/debug \
+		-DQISKIT_FERMIONS_INCLUDE_PATH=$(abspath $(C_DIR_OUT_INCLUDE))
+# Actually build the test.
+	cmake --build $(C_DIR_TEST_BUILD)
+# -V ensures we always produce a logging output to indicate the subtests
+# -C Debug is needed for windows to work, if you don't specify Debug (or
+# Release) explicitly ctest doesn't run on windows
+	ctest -V -C Debug --test-dir $(C_DIR_TEST_BUILD)
+
+.PHONY: ccoverage
+ccoverage: C_LIB_RUSTC_FLAGS=-Cinstrument-coverage -Cincremental=false
+ccoverage: testc
+
+.PHONY: cclean
+cclean:
+	rm -rf $(C_DIR_OUT) $(C_DIR_TEST_BUILD) $(C_INCLUDE_FILES_ABS_GENERATED)
+	cargo clean --package qiskit-fermions-cext
+
+# ==============================================================================
+# Random recipes
+# ==============================================================================
+
+.PHONY: echo_ld_lib_path
+echo_ld_lib_path: export LD_LIBRARY_PATH += ${QISKIT_ROOT}/qiskit
+echo_ld_lib_path:
+	@echo export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}"
