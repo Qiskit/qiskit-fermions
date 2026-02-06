@@ -17,7 +17,7 @@
 #include <stdnoreturn.h>
 
 static int test_from_file(void) {
-    QfFCIDump *fcidump = qf_fcidump_from_file("../../../../h2.fcidump");
+    QfFCIDump *fcidump = qf_fcidump_from_file("../../h2.fcidump");
     QfFermionOperator *op = qf_ferm_op_from_fcidump(fcidump);
 
     // TODO: actually assert all results!
@@ -38,7 +38,7 @@ static int test_from_file(void) {
 }
 
 static int test_from_file_beta(void) {
-    QfFCIDump *fcidump = qf_fcidump_from_file("../../../../heh.fcidump");
+    QfFCIDump *fcidump = qf_fcidump_from_file("../../heh.fcidump");
     QfFermionOperator *op = qf_ferm_op_from_fcidump(fcidump);
 
     // TODO: actually assert all results!
