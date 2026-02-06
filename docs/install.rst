@@ -50,13 +50,13 @@ located at ``build/qiskit``. Thus, the following steps are required:
       $ pip install -r requirements.txt -c constraints.txt
       $ SETUPTOOLS_RUST_CARGO_PROFILE=release pip install -e .
 
-6. symlink the compiled library (replace ``*`` to match your local filename):
+6. symlink the compiled library (replace ``*`` to match your local filename and
+   update the ``.so`` suffix if it differs on your platform):
 
    .. code:: console
 
       $ cd qiskit/
       $ ln -s _accelerate.*.so libqiskit.so
-      $ ln -s _accelerate.*.dylib libqiskit.dylib
 
 7. verify that everything worked by running the ``qiskit-fermions`` Rust tests:
 
