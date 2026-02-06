@@ -48,6 +48,10 @@ testrust: export LD_LIBRARY_PATH := $(LD_LIBRARY_PATH):${QISKIT_ROOT}/dist/c/lib
 testrust:
 	cargo test -p qiskit-fermions-core --no-default-features
 
+.PHONY: rustcoverage
+rustcoverage: export RUSTFLAGS:=-Cinstrument-coverage
+rustcoverage: testrust
+
 # ==============================================================================
 # Recipes for Python Building
 # ==============================================================================
@@ -87,6 +91,11 @@ pyinstall:
 testpython: export LD_LIBRARY_PATH := $(LD_LIBRARY_PATH):${QISKIT_ROOT}/qiskit
 testpython: pyext
 	python -m pytest -s --doctest-plus --doctest-glob "*.pyi"
+
+.PHONY: pycoverage
+pycoverage: export LD_LIBRARY_PATH := $(LD_LIBRARY_PATH):${QISKIT_ROOT}/qiskit
+pycoverage: pyext
+	python -m pytest -s --doctest-plus --doctest-glob "*.pyi" --cov=python/qiskit_fermions/
 
 .PHONY: pydoctest
 pydoctest: export LD_LIBRARY_PATH := $(LD_LIBRARY_PATH):${QISKIT_ROOT}/qiskit
@@ -211,13 +220,32 @@ testc: cheader build-clib-dev
 	ctest -V -C Debug --test-dir $(C_DIR_TEST_BUILD)
 
 .PHONY: ccoverage
-ccoverage: C_LIB_RUSTC_FLAGS=-Cinstrument-coverage -Cincremental=false
+ccoverage: export C_LIB_RUSTC_FLAGS:=-Cinstrument-coverage
 ccoverage: testc
 
 .PHONY: cclean
 cclean:
 	rm -rf $(C_DIR_OUT) $(C_DIR_TEST_BUILD) $(C_INCLUDE_FILES_ABS_GENERATED)
 	cargo clean --package qiskit-fermions-cext
+
+# ==============================================================================
+# Coverage recipes
+# ==============================================================================
+
+.PHONY: coverage
+coverage: rustcoverage ccoverage pycoverage
+	cp tests/c/build/*.profraw .
+	grcov . --binary-path target/debug/ --source-dir . --output-type lcov --output-path rust.info --llvm --branch --parallel --keep-only 'crates/*'
+	coverage lcov -o python.info
+	lcov --add-tracefile python.info --add-tracefile rust.info --output-file coveralls.info
+
+.PHONY: coveragereport
+coveragereport: coverage
+	genhtml -o htmlcov coveralls.info
+
+.PHONY: coverageclean
+coverageclean:
+	rm *.profraw python.info rust.info coveralls.info tests/c/build/*.profraw
 
 # ==============================================================================
 # Random recipes
