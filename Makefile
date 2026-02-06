@@ -15,7 +15,7 @@ export BINDGEN_EXTRA_CLANG_ARGS := "-I$(shell python -c "import sysconfig; print
 # ==============================================================================
 .PHONY: lint style
 
-lint: export LD_LIBRARY_PATH += ${QISKIT_ROOT}/qiskit
+lint: export LD_LIBRARY_PATH := $(LD_LIBRARY_PATH):${QISKIT_ROOT}/qiskit
 lint:
 	cargo clippy
 	tox -e lint
@@ -33,7 +33,7 @@ style:
 doxygen: cheader
 	doxygen docs/Doxyfile
 
-docs: export LD_LIBRARY_PATH += ${QISKIT_ROOT}/qiskit
+docs: export LD_LIBRARY_PATH := $(LD_LIBRARY_PATH):${QISKIT_ROOT}/qiskit
 docs: doxygen pyext
 	sphinx-build -W -j auto -T -E --keep-going -b html docs/ docs/_build/html
 
@@ -44,7 +44,7 @@ docsclean:
 # Recipes for Rust
 # ==============================================================================
 .PHONY: testrust
-testrust: export LD_LIBRARY_PATH += ${QISKIT_ROOT}/dist/c/lib
+testrust: export LD_LIBRARY_PATH := $(LD_LIBRARY_PATH):${QISKIT_ROOT}/dist/c/lib
 testrust:
 	cargo test -p qiskit-fermions-core --no-default-features
 
@@ -84,12 +84,12 @@ pyinstall:
 # ==============================================================================
 
 .PHONY: testpython
-testpython: export LD_LIBRARY_PATH += ${QISKIT_ROOT}/qiskit
+testpython: export LD_LIBRARY_PATH := $(LD_LIBRARY_PATH):${QISKIT_ROOT}/qiskit
 testpython: pyext
 	python -m pytest -s --doctest-plus --doctest-glob "*.pyi"
 
 .PHONY: pydoctest
-pydoctest: export LD_LIBRARY_PATH += ${QISKIT_ROOT}/qiskit
+pydoctest: export LD_LIBRARY_PATH := $(LD_LIBRARY_PATH):${QISKIT_ROOT}/qiskit
 pydoctest: pyext
 	python -m pytest docs/ -s --doctest-plus --doctest-only --doctest-glob "*.rst"
 
@@ -224,6 +224,6 @@ cclean:
 # ==============================================================================
 
 .PHONY: echo_ld_lib_path
-echo_ld_lib_path: export LD_LIBRARY_PATH += ${QISKIT_ROOT}/qiskit
+echo_ld_lib_path: export LD_LIBRARY_PATH := $(LD_LIBRARY_PATH):${QISKIT_ROOT}/qiskit
 echo_ld_lib_path:
 	@echo export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}"
