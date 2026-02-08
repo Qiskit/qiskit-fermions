@@ -232,20 +232,24 @@ cclean:
 # Coverage recipes
 # ==============================================================================
 
-.PHONY: coverage
-coverage: rustcoverage ccoverage pycoverage
+.PHONY: coveragecombine
+coveragecombine:
 	cp tests/c/build/*.profraw .
 	grcov . --binary-path target/debug/ --source-dir . --output-type lcov --output-path rust.info --llvm --branch --parallel --keep-only 'crates/*'
 	coverage lcov -o python.info
 	lcov --add-tracefile python.info --add-tracefile rust.info --output-file coveralls.info
 
 .PHONY: coveragereport
-coveragereport: coverage
+coveragereport: coveragecombine
 	genhtml -o htmlcov coveralls.info
+
+.PHONY: coverage
+coverage: rustcoverage ccoverage pycoverage coveragereport
 
 .PHONY: coverageclean
 coverageclean:
 	rm *.profraw python.info rust.info coveralls.info tests/c/build/*.profraw
+	rm -rf htmlcov/
 
 # ==============================================================================
 # Random recipes
