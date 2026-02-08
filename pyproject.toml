@@ -45,7 +45,7 @@ test = [
     "qiskit-fermions[basetest,doctest]",
 ]
 coverage = [
-    "qiskit-fermions[basetest]",
+    "qiskit-fermions[test]",
     "pytest-cov>=7.0",
 ]
 doctest = [
