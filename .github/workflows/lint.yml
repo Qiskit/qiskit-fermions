@@ -41,6 +41,20 @@ jobs:
             python -m pip install -U pip
             sudo apt-get install -y clang-format
 
+      - name: Install Package
+        shell: bash
+        run: |
+          git clone https://github.com/Qiskit/qiskit build/qiskit
+          cd build/qiskit
+          make c
+          pip install -c constraints.txt -r requirements.txt
+          SETUPTOOLS_RUST_CARGO_PROFILE=release pip install -c constraints.txt -e .
+          cd qiskit/
+          ln -s _accelerate.*.so libqiskit.so
+          cd ../../..
+          pip install setuptools setuptools_rust
+          DEPS=lint make pyinstall
+
       - name: Run lint check
         shell: bash
         run: |

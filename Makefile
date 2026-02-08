@@ -20,6 +20,7 @@ lint:
 	cargo clippy
 	tox -e lint
 
+style: export LD_LIBRARY_PATH := $(LD_LIBRARY_PATH):${QISKIT_ROOT}/qiskit
 style:
 	cargo fmt
 	tox -e style
