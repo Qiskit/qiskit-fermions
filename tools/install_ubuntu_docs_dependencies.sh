@@ -20,8 +20,7 @@ if [ -z $GITHUB_TOKEN ]; then
     exit 1
 fi
 
-python -m pip install --upgrade pip setuptools setuptools_rust wheel
-python -m pip install --upgrade tox
+python -m pip install --upgrade pip setuptools setuptools_rust wheel tox
 
 sudo apt-get update
 sudo apt-get install -y graphviz pandoc

@@ -81,7 +81,7 @@ pyext-dev: pystubs-dev
 
 .PHONY: pyinstall
 pyinstall:
-	pip install -e ".$(DEPS)"
+	pip install --group "$(DEPS)" .
 
 # ==============================================================================
 # Recipes for Python Testing

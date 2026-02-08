@@ -15,7 +15,7 @@ simple:
 
    .. code:: console
 
-      $ pip install setuptools setuptools_rust
+      $ pip install --group build
 
 3. compile the `pyext` crate:
 

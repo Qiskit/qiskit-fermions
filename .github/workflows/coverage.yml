@@ -39,6 +39,7 @@ jobs:
 
       - name: Install dependencies
         run: |
+            python -m pip install -U pip
             cargo install grcov@0.8.20
             sudo apt-get install lcov
 
@@ -54,7 +55,7 @@ jobs:
           ln -s _accelerate.*.so libqiskit.so
           cd ../../..
           pip install setuptools setuptools_rust
-          DEPS=[coverage] make pyinstall
+          DEPS=coverage make pyinstall
 
       - name: Rust coverage
         shell: bash

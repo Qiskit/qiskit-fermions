@@ -1,4 +1,5 @@
 [build-system]
+# This is duplicated as `dependency-groups.build` for convenience.
 requires = [
     "setuptools>=77.0",
     "setuptools-rust",
@@ -32,38 +33,39 @@ dependencies = [
     "typing-extensions",
 ]
 
-[project.optional-dependencies]
-dev = [
-    "qiskit-fermions[docs,lint,test]",
-    "tox>=4.4.3",
-]
-basetest = [
-    "pytest>=8.0",
-    "pytest-subtests>=0.14",
-]
-test = [
-    "qiskit-fermions[basetest,doctest]",
-]
-coverage = [
-    "qiskit-fermions[test]",
-    "pytest-cov>=7.0",
-]
-doctest = [
-    "qiskit-fermions[basetest]",
-    "pytest-doctestplus>=1.2.1",
+[dependency-groups]
+build = [
+    "setuptools>=77.0",
+    "setuptools-rust",
 ]
 style = [
     "ruff==0.14.14",
     "typos>=1.20.0",
 ]
 lint = [
-    "qiskit-fermions[style]",
+    {include-group = "style"},
     "mypy==1.19.1",
     "reno>=4.1",
     "toml>=0.9.6",
 ]
+basetest = [
+    "pytest>=8.0",
+    "pytest-subtests>=0.14",
+]
+doctest = [
+    {include-group = "basetest"},
+    "pytest-doctestplus>=1.2.1",
+]
+test = [
+    {include-group = "basetest"},
+    {include-group = "doctest"},
+]
+coverage = [
+    {include-group = "test"},
+    "pytest-cov>=7.0",
+]
 docs = [
-    "qiskit-fermions[doctest]",
+    {include-group = "doctest"},
     "qiskit-sphinx-theme~=2.0.0",
     "sphinx-design",
     "sphinx-autodoc-typehints",
@@ -74,6 +76,12 @@ docs = [
     "reno>=4.1",
     "breathe>=4.35.0",
     "matplotlib",
+]
+dev = [
+    {include-group = "docs"},
+    {include-group = "lint"},
+    {include-group = "coverage"},
+    "tox>=4.28.0",
 ]
 
 [tool.setuptools]

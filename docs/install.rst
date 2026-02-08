@@ -12,6 +12,7 @@ To compile and install this package, you need to install the following
 dependencies:
 
 - a Python (`>=3.10`) virtual environment
+- `pip>=25.1`
 - `The Rust toolchain <https://rust-lang.org/tools/install/>`_
 - `clang <https://clang.llvm.org/>`_
 

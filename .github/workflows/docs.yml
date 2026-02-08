@@ -61,7 +61,7 @@ jobs:
           cd qiskit/
           ln -s _accelerate.*.so libqiskit.so
           cd ../../..
-          DEPS=[docs] make pyinstall
+          DEPS=docs make pyinstall
           make docs
 
       - name: Upload docs artifact for GitHub Pages
