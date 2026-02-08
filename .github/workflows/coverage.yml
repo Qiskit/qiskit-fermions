@@ -53,6 +53,7 @@ jobs:
           cd qiskit/
           ln -s _accelerate.*.so libqiskit.so
           cd ../../..
+          pip install setuptools setuptools_rust
           DEPS=[test] make pyinstall
 
       - name: Rust coverage
