@@ -1,0 +1,61 @@
+name: Lint
+
+on:
+  push:
+    branches:
+      - main
+      - 'stable/**'
+  pull_request:
+    branches:
+      - main
+      - 'stable/**'
+
+concurrency:
+  group: ${{ github.repository }}-${{ github.ref }}-${{ github.head_ref }}-${{ github.workflow }}
+  # Only cancel in PR mode, otherwise we may have weird half-uploaded docs...
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  lint:
+    if: github.repository_owner == 'Qiskit'
+    name: lint check
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v6
+        name: Install Python
+        with:
+          python-version: '3.10'
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: llvm-tools-preview
+
+      - name: Install dependencies
+        run: |
+            python -m pip install -U pip tox
+            sudo apt-get install -y clang-format
+
+      - name: Install Package
+        shell: bash
+        run: |
+          git clone https://github.com/Qiskit/qiskit build/qiskit
+          cd build/qiskit
+          make c
+          pip install -c constraints.txt -r requirements.txt
+          SETUPTOOLS_RUST_CARGO_PROFILE=release pip install -c constraints.txt -e .
+          cd qiskit/
+          ln -s _accelerate.*.so libqiskit.so
+          cd ../../..
+          pip install setuptools setuptools_rust
+          DEPS=lint make pyinstall
+
+      - name: Run lint check
+        shell: bash
+        run: |
+          make lint
