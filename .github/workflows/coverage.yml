@@ -1,0 +1,82 @@
+name: Coverage
+
+on:
+  push:
+    branches:
+      - main
+      - 'stable/**'
+  pull_request:
+    branches:
+      - main
+      - 'stable/**'
+
+concurrency:
+  group: ${{ github.repository }}-${{ github.ref }}-${{ github.head_ref }}-${{ github.workflow }}
+  # Only cancel in PR mode.  In push mode, don't cancel so we don't see spurious test "failures",
+  # and we get coverage reports on Coveralls for every push.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  coverage:
+    if: github.repository_owner == 'Qiskit'
+    name: Coverage
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v6
+        name: Install Python
+        with:
+          python-version: '3.11'
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: llvm-tools-preview
+
+      - name: Install dependencies
+        run: |
+            cargo install grcov@0.8.20
+            sudo apt-get install lcov
+
+      - name: Install Package
+        shell: bash
+        run: |
+          git clone https://github.com/Qiskit/qiskit build/qiskit
+          cd build/qiskit
+          make c
+          pip install -c constraints.txt -r requirements.txt
+          SETUPTOOLS_RUST_CARGO_PROFILE=release pip install -c constraints.txt -e .
+          cd qiskit/
+          ln -s _accelerate.*.so libqiskit.so
+          cd ../../..
+          DEPS=[test] make pyinstall
+
+      - name: Rust coverage
+        shell: bash
+        run: |
+          make rustcoverage
+
+      - name: C coverage
+        shell: bash
+        run: |
+          make ccoverage
+
+      - name: Python coverage
+        shell: bash
+        run: |
+          make pycoverage
+
+      - name: Combine coverage
+        shell: bash
+        run: |
+          make coveragecombine
+
+      - name: Coveralls
+        uses: coverallsapp/github-action@v2.3.7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path-to-lcov: coveralls.info
