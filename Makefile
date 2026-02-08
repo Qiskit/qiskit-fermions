@@ -97,9 +97,13 @@ pycoverage: export LD_LIBRARY_PATH := $(LD_LIBRARY_PATH):${QISKIT_ROOT}/qiskit
 pycoverage: pyext
 	python -m pytest -s --doctest-plus --doctest-glob "*.pyi" --cov=python/qiskit_fermions/
 
-.PHONY: pydoctest
-pydoctest: export LD_LIBRARY_PATH := $(LD_LIBRARY_PATH):${QISKIT_ROOT}/qiskit
-pydoctest: pyext
+# ==============================================================================
+# Recipes for Documentation Testing
+# ==============================================================================
+
+.PHONY: doctest
+doctest: export LD_LIBRARY_PATH := $(LD_LIBRARY_PATH):${QISKIT_ROOT}/qiskit
+doctest: pyext
 	python -m pytest docs/ -s --doctest-plus --doctest-only --doctest-glob "*.rst"
 
 # ==============================================================================
