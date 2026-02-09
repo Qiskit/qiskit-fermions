@@ -11,7 +11,7 @@
 // that they have been altered from the originals.
 
 use crate::exit_codes::ExitCode;
-use crate::pointers::{check_ptr, const_ptr_as_ref, mut_ptr_as_ref};
+use crate::pointers::{const_ptr_as_ref, mut_ptr_as_ref, slice_from_ptr};
 
 use num_complex::Complex64;
 use qiskit_fermions_core::operators::fermion_operator::FermionOperator;
@@ -33,6 +33,8 @@ use qiskit_fermions_core::operators::{OperatorMacro, OperatorTrait};
 ///     array should be ``num_terms + 1``.
 ///
 /// @rst
+///
+/// Any of the pointer arguments may be ``NULL`` if and only if their corresponding length is zero.
 ///
 /// Example
 /// -------
@@ -59,31 +61,19 @@ pub unsafe extern "C" fn qf_ferm_op_new(
     indices: *const u32,
     boundaries: *const u32,
 ) -> *mut FermionOperator {
-    let coeffs = unsafe { const_ptr_as_ref(coeffs) };
-    let actions = unsafe { const_ptr_as_ref(actions) };
-    let indices = unsafe { const_ptr_as_ref(indices) };
-    let boundaries = unsafe { const_ptr_as_ref(boundaries) };
-
     let num_terms = num_terms as usize;
     let num_actions = num_actions as usize;
 
-    check_ptr(coeffs).unwrap();
-    check_ptr(actions).unwrap();
-    check_ptr(indices).unwrap();
-    check_ptr(boundaries).unwrap();
-    // SAFETY: At this point we know the pointers are non-null and aligned. We rely on C that
-    // the pointers point to arrays of appropriate length, as specified in the function docs.
-    let ccoeffs = unsafe { ::std::slice::from_raw_parts(coeffs, num_terms).to_vec() };
-    let cactions = unsafe { ::std::slice::from_raw_parts(actions, num_actions).to_vec() };
-    let cindices = unsafe { ::std::slice::from_raw_parts(indices, num_actions).to_vec() };
-    let cboundaries = unsafe { ::std::slice::from_raw_parts(boundaries, num_terms + 1) };
-    let cboundaries_usize = cboundaries.iter().map(|b| *b as usize).collect();
-
     let op = FermionOperator {
-        coeffs: ccoeffs,
-        actions: cactions,
-        indices: cindices,
-        boundaries: cboundaries_usize,
+        coeffs: unsafe { slice_from_ptr(coeffs, num_terms).to_vec() },
+        actions: unsafe { slice_from_ptr(actions, num_actions).to_vec() },
+        indices: unsafe { slice_from_ptr(indices, num_actions).to_vec() },
+        boundaries: unsafe {
+            slice_from_ptr(boundaries, num_terms + 1)
+                .into_iter()
+                .map(|b| *b as usize)
+                .collect()
+        },
     };
     Box::into_raw(Box::new(op))
 }
@@ -194,6 +184,8 @@ pub unsafe extern "C" fn qf_ferm_op_one() -> *mut FermionOperator {
 ///
 /// @rst
 ///
+/// Any of the pointer arguments may be ``NULL`` if and only if their corresponding length is zero.
+///
 /// Example
 /// -------
 ///
@@ -226,19 +218,11 @@ pub unsafe extern "C" fn qf_ferm_op_add_term(
 
     let num_actions = num_actions as usize;
 
-    check_ptr(actions).unwrap();
-    // SAFETY: At this point we know the pointers are non-null and aligned. We rely on C that
-    // the pointers point to arrays of appropriate length, as specified in the function docs.
-    let cactions = unsafe { ::std::slice::from_raw_parts(actions, num_actions) };
-
-    check_ptr(indices).unwrap();
-    // SAFETY: At this point we know the pointers are non-null and aligned. We rely on C that
-    // the pointers point to arrays of appropriate length, as specified in the function docs.
-    let cindices = unsafe { ::std::slice::from_raw_parts(indices, num_actions) };
-
     op.coeffs.push(*coeff);
-    op.actions.extend_from_slice(cactions);
-    op.indices.extend_from_slice(cindices);
+    op.actions
+        .extend_from_slice(unsafe { slice_from_ptr(actions, num_actions) });
+    op.indices
+        .extend_from_slice(unsafe { slice_from_ptr(indices, num_actions) });
     op.boundaries.push(op.indices.len());
 
     ExitCode::Success
