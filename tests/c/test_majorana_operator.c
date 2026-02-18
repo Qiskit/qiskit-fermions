@@ -25,9 +25,8 @@ static int test_new(void) {
     QfMajoranaOperator *op = qf_maj_op_new(num_terms, num_modes, coeffs, modes, boundaries);
 
     QfMajoranaOperator *expected = qf_maj_op_zero();
-    uint32_t modes0[0] = {};
     QkComplex64 coeff0 = {1.0, 0.0};
-    qf_maj_op_add_term(expected, 0, modes0, &coeff0);
+    qf_maj_op_add_term(expected, 0, NULL, &coeff0);
     uint32_t modes1[2] = {0, 1};
     QkComplex64 coeff1 = {-1.0, 0.0};
     qf_maj_op_add_term(expected, 2, modes1, &coeff1);
@@ -66,10 +65,9 @@ static int test_add_term(void) {
     QfMajoranaOperator *one = qf_maj_op_one();
 
     QfMajoranaOperator *op = qf_maj_op_zero();
-    uint32_t modes[0] = {};
     QkComplex64 coeff = {1.0, 0.0};
 
-    qf_maj_op_add_term(op, 0, modes, &coeff);
+    qf_maj_op_add_term(op, 0, NULL, &coeff);
 
     bool is_equal = qf_maj_op_equal(op, one);
 
@@ -83,10 +81,9 @@ static int test_add_term(void) {
 
 static int test_equiv_pos(void) {
     QfMajoranaOperator *op = qf_maj_op_zero();
-    uint32_t modes[0] = {};
     QkComplex64 coeff = {1e-7, 0.0};
 
-    qf_maj_op_add_term(op, 0, modes, &coeff);
+    qf_maj_op_add_term(op, 0, NULL, &coeff);
 
     QfMajoranaOperator *zero = qf_maj_op_zero();
 
@@ -102,10 +99,9 @@ static int test_equiv_pos(void) {
 
 static int test_equiv_neg(void) {
     QfMajoranaOperator *op = qf_maj_op_zero();
-    uint32_t modes[0] = {};
     QkComplex64 coeff = {1e-7, 0.0};
 
-    qf_maj_op_add_term(op, 0, modes, &coeff);
+    qf_maj_op_add_term(op, 0, NULL, &coeff);
 
     QfMajoranaOperator *zero = qf_maj_op_zero();
 
@@ -127,8 +123,7 @@ static int test_mul(void) {
     QfMajoranaOperator *op = qf_maj_op_mul(one, &coeff);
 
     QfMajoranaOperator *expected = qf_maj_op_zero();
-    uint32_t modes[0] = {};
-    qf_maj_op_add_term(expected, 0, modes, &coeff);
+    qf_maj_op_add_term(expected, 0, NULL, &coeff);
 
     bool is_equal = qf_maj_op_equal(op, expected);
 
@@ -143,16 +138,14 @@ static int test_mul(void) {
 static int test_compose(void) {
     QfMajoranaOperator *op1 = qf_maj_op_zero();
     QkComplex64 coeff1a = {2.0, 0.0};
-    uint32_t modes1a[0] = {};
-    qf_maj_op_add_term(op1, 0, modes1a, &coeff1a);
+    qf_maj_op_add_term(op1, 0, NULL, &coeff1a);
     QkComplex64 coeff1b = {3.0, 0.0};
     uint32_t modes1b[2] = {0, 1};
     qf_maj_op_add_term(op1, 2, modes1b, &coeff1b);
 
     QfMajoranaOperator *op2 = qf_maj_op_zero();
     QkComplex64 coeff2a = {1.5, 0.0};
-    uint32_t modes2a[0] = {};
-    qf_maj_op_add_term(op2, 0, modes2a, &coeff2a);
+    qf_maj_op_add_term(op2, 0, NULL, &coeff2a);
     QkComplex64 coeff2b = {4.0, 0.0};
     uint32_t modes2b[2] = {1, 0};
     qf_maj_op_add_term(op2, 2, modes2b, &coeff2b);
@@ -161,8 +154,7 @@ static int test_compose(void) {
 
     QfMajoranaOperator *expected = qf_maj_op_zero();
     QkComplex64 coeff_exp1 = {3.0, 0.0};
-    uint32_t modes_exp1[0] = {};
-    qf_maj_op_add_term(expected, 0, modes_exp1, &coeff_exp1);
+    qf_maj_op_add_term(expected, 0, NULL, &coeff_exp1);
     QkComplex64 coeff_exp2 = {8.0, 0.0};
     uint32_t modes_exp2[2] = {1, 0};
     qf_maj_op_add_term(expected, 2, modes_exp2, &coeff_exp2);
@@ -188,9 +180,8 @@ static int test_compose(void) {
 
 static int test_ichop(void) {
     QfMajoranaOperator *op = qf_maj_op_zero();
-    uint32_t modes[0] = {};
     QkComplex64 coeff = {1e-8, 0.0};
-    qf_maj_op_add_term(op, 0, modes, &coeff);
+    qf_maj_op_add_term(op, 0, NULL, &coeff);
 
     qf_maj_op_ichop(op, 1e-6);
 
@@ -237,7 +228,6 @@ static int test_simplify(void) {
 static int test_simplify_vs_ichop(void) {
     uint64_t num_terms = 100000;
     uint64_t num_modes = 0;
-    uint32_t modes[0] = {};
     QkComplex64 coeffs[100000];
     uint32_t boundaries[100001];
     for (int i = 0; i < 100000; i++) {
@@ -246,7 +236,7 @@ static int test_simplify_vs_ichop(void) {
         boundaries[i] = 0;
     }
     boundaries[100000] = 0;
-    QfMajoranaOperator *op = qf_maj_op_new(num_terms, num_modes, coeffs, modes, boundaries);
+    QfMajoranaOperator *op = qf_maj_op_new(num_terms, num_modes, coeffs, NULL, boundaries);
 
     QfMajoranaOperator *canon = qf_maj_op_simplify(op, 1e-4);
 
@@ -273,15 +263,14 @@ static int test_simplify_vs_ichop(void) {
 
 static int test_adjoint(void) {
     QfMajoranaOperator *op = qf_maj_op_zero();
-    uint32_t modes[0] = {};
     QkComplex64 coeff = {0.0, 1.0};
-    qf_maj_op_add_term(op, 0, modes, &coeff);
+    qf_maj_op_add_term(op, 0, NULL, &coeff);
 
     QfMajoranaOperator *adjoint = qf_maj_op_adjoint(op);
 
     QfMajoranaOperator *expected = qf_maj_op_zero();
     QkComplex64 coeff_adj = {0.0, -1.0};
-    qf_maj_op_add_term(expected, 0, modes, &coeff_adj);
+    qf_maj_op_add_term(expected, 0, NULL, &coeff_adj);
 
     bool is_equal = qf_maj_op_equal(adjoint, expected);
 
