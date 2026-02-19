@@ -54,10 +54,23 @@ located at ``build/qiskit``. Thus, the following steps are required:
 6. symlink the compiled library (replace ``*`` to match your local filename and
    update the ``.so`` suffix if it differs on your platform):
 
-   .. code:: console
+   .. tab-set::
 
-      $ cd qiskit/
-      $ ln -s _accelerate.*.so libqiskit.so
+     .. tab-item:: Linux
+        :sync: linux
+
+        .. code:: console
+
+           $ cd qiskit/
+           $ ln -s $(realpath _accelerate.*.so) libqiskit.so
+
+     .. tab-item:: MacOS
+        :sync: macos
+
+        .. code:: console
+
+           $ cd qiskit/
+           $ ln -s $(realpath _accelerate.*.so) libqiskit.dylib
 
 7. verify that everything worked by running the ``qiskit-fermions`` Rust tests:
 

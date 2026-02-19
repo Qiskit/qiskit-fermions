@@ -29,11 +29,27 @@ simple:
 
       $ make pyinstall
 
-5. get the correct ``LD_LIBRARY_PATH``:
+5. ensure that the shared library object can be found during linking:
 
-   .. code:: console
+   .. tab-set::
 
-      $ make echo_ld_lib_path
+     .. tab-item:: Linux
+        :sync: linux
+
+        Copy and export the ``LD_LIBRARY_PATH`` from the output below.
+
+        .. code:: console
+
+           $ make echo_ld_lib_path
+
+     .. tab-item:: MacOS
+        :sync: macos
+
+        Copy and export the ``DYLD_LIBRARY_PATH`` from the output below.
+
+        .. code:: console
+
+           $ make echo_ld_lib_path
 
 6. ensure that you copy and run the output above
 
