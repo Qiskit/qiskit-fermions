@@ -30,8 +30,8 @@ jobs:
         os: [ubuntu-latest]
         python-version: ["3.10", "3.13"]
         include:
-        #   - os: macos-latest
-        #     python-version: "3.13"
+          - os: macos-latest
+            python-version: "3.13"
           - os: windows-latest
             python-version: "3.13"
     steps:
@@ -42,7 +42,7 @@ jobs:
       - uses: actions/setup-python@v6
         name: Install Python
         with:
-          python-version: '3.11'
+          python-version: ${{ matrix.python-version }}
 
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
@@ -62,7 +62,11 @@ jobs:
           pip install -c constraints.txt -r requirements.txt
           SETUPTOOLS_RUST_CARGO_PROFILE=release pip install -c constraints.txt -e .
           cd qiskit/
-          ln -s _accelerate.*.so libqiskit.so
+          if [[ "$OSTYPE" == "darwin"* ]]; then
+            ln -s $(realpath _accelerate.*.so) libqiskit.dylib
+          else
+            ln -s $(realpath _accelerate.*.so) libqiskit.so
+          fi
           cd ../../..
           pip install setuptools setuptools_rust
           DEPS=coverage make pyinstall

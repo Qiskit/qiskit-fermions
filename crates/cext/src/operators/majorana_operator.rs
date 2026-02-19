@@ -11,7 +11,7 @@
 // that they have been altered from the originals.
 
 use crate::exit_codes::ExitCode;
-use crate::pointers::{check_ptr, const_ptr_as_ref, mut_ptr_as_ref};
+use crate::pointers::{const_ptr_as_ref, mut_ptr_as_ref, slice_from_ptr};
 
 use num_complex::Complex64;
 use qiskit_fermions_core::operators::majorana_operator::MajoranaOperator;
@@ -31,6 +31,8 @@ use qiskit_fermions_core::operators::{OperatorMacro, OperatorTrait};
 ///     array should be ``num_terms + 1``.
 ///
 /// @rst
+///
+/// Any of the pointer arguments may be ``NULL`` if and only if their corresponding length is zero.
 ///
 /// Example
 /// -------
@@ -55,27 +57,18 @@ pub unsafe extern "C" fn qf_maj_op_new(
     modes: *const u32,
     boundaries: *const u32,
 ) -> *mut MajoranaOperator {
-    let coeffs = unsafe { const_ptr_as_ref(coeffs) };
-    let modes = unsafe { const_ptr_as_ref(modes) };
-    let boundaries = unsafe { const_ptr_as_ref(boundaries) };
-
     let num_terms = num_terms as usize;
     let num_modes = num_modes as usize;
 
-    check_ptr(coeffs).unwrap();
-    check_ptr(modes).unwrap();
-    check_ptr(boundaries).unwrap();
-    // SAFETY: At this point we know the pointers are non-null and aligned. We rely on C that
-    // the pointers point to arrays of appropriate length, as specified in the function docs.
-    let ccoeffs = unsafe { ::std::slice::from_raw_parts(coeffs, num_terms).to_vec() };
-    let cmodes = unsafe { ::std::slice::from_raw_parts(modes, num_modes).to_vec() };
-    let cboundaries = unsafe { ::std::slice::from_raw_parts(boundaries, num_terms + 1) };
-    let cboundaries_usize = cboundaries.iter().map(|b| *b as usize).collect();
-
     let op = MajoranaOperator {
-        coeffs: ccoeffs,
-        modes: cmodes,
-        boundaries: cboundaries_usize,
+        coeffs: unsafe { slice_from_ptr(coeffs, num_terms).to_vec() },
+        modes: unsafe { slice_from_ptr(modes, num_modes).to_vec() },
+        boundaries: unsafe {
+            slice_from_ptr(boundaries, num_terms + 1)
+                .into_iter()
+                .map(|b| *b as usize)
+                .collect()
+        },
     };
     Box::into_raw(Box::new(op))
 }
@@ -184,6 +177,8 @@ pub unsafe extern "C" fn qf_maj_op_one() -> *mut MajoranaOperator {
 ///
 /// @rst
 ///
+/// Any of the pointer arguments may be ``NULL`` if and only if their corresponding length is zero.
+///
 /// Example
 /// -------
 ///
@@ -214,13 +209,9 @@ pub unsafe extern "C" fn qf_maj_op_add_term(
 
     let num_modes = num_modes as usize;
 
-    check_ptr(modes).unwrap();
-    // SAFETY: At this point we know the pointers are non-null and aligned. We rely on C that
-    // the pointers point to arrays of appropriate length, as specified in the function docs.
-    let cmodes = unsafe { ::std::slice::from_raw_parts(modes, num_modes) };
-
     op.coeffs.push(*coeff);
-    op.modes.extend_from_slice(cmodes);
+    op.modes
+        .extend_from_slice(unsafe { slice_from_ptr(modes, num_modes) });
     op.boundaries.push(op.modes.len());
 
     ExitCode::Success

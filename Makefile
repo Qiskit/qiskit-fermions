@@ -16,11 +16,13 @@ export BINDGEN_EXTRA_CLANG_ARGS := "-I$(shell python -c "import sysconfig; print
 .PHONY: lint style
 
 lint: export LD_LIBRARY_PATH := $(LD_LIBRARY_PATH):${QISKIT_ROOT}/qiskit
+lint: export DYLD_LIBRARY_PATH := $(DYLD_LIBRARY_PATH):${QISKIT_ROOT}/qiskit
 lint:
 	cargo clippy
 	tox -e lint
 
 style: export LD_LIBRARY_PATH := $(LD_LIBRARY_PATH):${QISKIT_ROOT}/qiskit
+style: export DYLD_LIBRARY_PATH := $(DYLD_LIBRARY_PATH):${QISKIT_ROOT}/qiskit
 style:
 	cargo fmt
 	tox -e style
@@ -35,6 +37,7 @@ doxygen: cheader
 	doxygen docs/Doxyfile
 
 docs: export LD_LIBRARY_PATH := $(LD_LIBRARY_PATH):${QISKIT_ROOT}/qiskit
+docs: export DYLD_LIBRARY_PATH := $(DYLD_LIBRARY_PATH):${QISKIT_ROOT}/qiskit
 docs: doxygen pyext
 	sphinx-build -W -j auto -T -E --keep-going -b html docs/ docs/_build/html
 
@@ -46,6 +49,7 @@ docsclean:
 # ==============================================================================
 .PHONY: testrust
 testrust: export LD_LIBRARY_PATH := $(LD_LIBRARY_PATH):${QISKIT_ROOT}/dist/c/lib
+testrust: export DYLD_LIBRARY_PATH := $(DYLD_LIBRARY_PATH):${QISKIT_ROOT}/dist/c/lib
 testrust:
 	cargo test -p qiskit-fermions-core --no-default-features
 
@@ -90,11 +94,13 @@ pyinstall:
 
 .PHONY: testpython
 testpython: export LD_LIBRARY_PATH := $(LD_LIBRARY_PATH):${QISKIT_ROOT}/qiskit
+testpython: export DYLD_LIBRARY_PATH := $(DYLD_LIBRARY_PATH):${QISKIT_ROOT}/qiskit
 testpython: pyext
 	python -m pytest -s --doctest-plus --doctest-glob "*.pyi"
 
 .PHONY: pycoverage
 pycoverage: export LD_LIBRARY_PATH := $(LD_LIBRARY_PATH):${QISKIT_ROOT}/qiskit
+pycoverage: export DYLD_LIBRARY_PATH := $(DYLD_LIBRARY_PATH):${QISKIT_ROOT}/qiskit
 pycoverage: pyext
 	python -m pytest -s --doctest-plus --doctest-glob "*.pyi" --cov=python/qiskit_fermions/
 
@@ -104,6 +110,7 @@ pycoverage: pyext
 
 .PHONY: doctest
 doctest: export LD_LIBRARY_PATH := $(LD_LIBRARY_PATH):${QISKIT_ROOT}/qiskit
+doctest: export DYLD_LIBRARY_PATH := $(DYLD_LIBRARY_PATH):${QISKIT_ROOT}/qiskit
 doctest: pyext
 	python -m pytest docs/ -s --doctest-plus --doctest-only --doctest-glob "*.rst"
 
@@ -262,5 +269,7 @@ coverageclean:
 
 .PHONY: echo_ld_lib_path
 echo_ld_lib_path: export LD_LIBRARY_PATH := $(LD_LIBRARY_PATH):${QISKIT_ROOT}/qiskit
+echo_ld_lib_path: export DYLD_LIBRARY_PATH := $(DYLD_LIBRARY_PATH):${QISKIT_ROOT}/qiskit
 echo_ld_lib_path:
 	@echo export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}"
+	@echo export DYLD_LIBRARY_PATH="${DYLD_LIBRARY_PATH}"

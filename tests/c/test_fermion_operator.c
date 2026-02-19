@@ -28,10 +28,8 @@ static int test_new(void) {
         qf_ferm_op_new(num_terms, num_actions, coeffs, actions, indices, boundaries);
 
     QfFermionOperator *expected = qf_ferm_op_zero();
-    bool action0[0] = {};
-    uint32_t indices0[0] = {};
     QkComplex64 coeff0 = {1.0, 0.0};
-    qf_ferm_op_add_term(expected, 0, action0, indices0, &coeff0);
+    qf_ferm_op_add_term(expected, 0, NULL, NULL, &coeff0);
     bool action1[2] = {true, false};
     uint32_t indices1[2] = {0, 1};
     QkComplex64 coeff1 = {-1.0, 0.0};
@@ -72,11 +70,9 @@ static int test_add_term(void) {
     QfFermionOperator *one = qf_ferm_op_one();
 
     QfFermionOperator *op = qf_ferm_op_zero();
-    bool action[0] = {};
-    uint32_t indices[0] = {};
     QkComplex64 coeff = {1.0, 0.0};
 
-    qf_ferm_op_add_term(op, 0, action, indices, &coeff);
+    qf_ferm_op_add_term(op, 0, NULL, NULL, &coeff);
 
     bool is_equal = qf_ferm_op_equal(op, one);
 
@@ -90,11 +86,9 @@ static int test_add_term(void) {
 
 static int test_equiv_pos(void) {
     QfFermionOperator *op = qf_ferm_op_zero();
-    bool action[0] = {};
-    uint32_t indices[0] = {};
     QkComplex64 coeff = {1e-7, 0.0};
 
-    qf_ferm_op_add_term(op, 0, action, indices, &coeff);
+    qf_ferm_op_add_term(op, 0, NULL, NULL, &coeff);
 
     QfFermionOperator *zero = qf_ferm_op_zero();
 
@@ -110,11 +104,9 @@ static int test_equiv_pos(void) {
 
 static int test_equiv_neg(void) {
     QfFermionOperator *op = qf_ferm_op_zero();
-    bool action[0] = {};
-    uint32_t indices[0] = {};
     QkComplex64 coeff = {1e-7, 0.0};
 
-    qf_ferm_op_add_term(op, 0, action, indices, &coeff);
+    qf_ferm_op_add_term(op, 0, NULL, NULL, &coeff);
 
     QfFermionOperator *zero = qf_ferm_op_zero();
 
@@ -136,9 +128,7 @@ static int test_mul(void) {
     QfFermionOperator *op = qf_ferm_op_mul(one, &coeff);
 
     QfFermionOperator *expected = qf_ferm_op_zero();
-    bool action[0] = {};
-    uint32_t indices[0] = {};
-    qf_ferm_op_add_term(expected, 0, action, indices, &coeff);
+    qf_ferm_op_add_term(expected, 0, NULL, NULL, &coeff);
 
     bool is_equal = qf_ferm_op_equal(op, expected);
 
@@ -191,10 +181,8 @@ static int test_compose(void) {
 
 static int test_ichop(void) {
     QfFermionOperator *op = qf_ferm_op_zero();
-    bool action[0] = {};
-    uint32_t indices[0] = {};
     QkComplex64 coeff = {1e-8, 0.0};
-    qf_ferm_op_add_term(op, 0, action, indices, &coeff);
+    qf_ferm_op_add_term(op, 0, NULL, NULL, &coeff);
 
     qf_ferm_op_ichop(op, 1e-6);
 
@@ -244,8 +232,6 @@ static int test_simplify(void) {
 static int test_simplify_vs_ichop(void) {
     uint64_t num_terms = 100000;
     uint64_t num_actions = 0;
-    bool actions[0] = {};
-    uint32_t indices[0] = {};
     QkComplex64 coeffs[100000];
     uint32_t boundaries[100001];
     for (int i = 0; i < 100000; i++) {
@@ -254,8 +240,7 @@ static int test_simplify_vs_ichop(void) {
         boundaries[i] = 0;
     }
     boundaries[100000] = 0;
-    QfFermionOperator *op =
-        qf_ferm_op_new(num_terms, num_actions, coeffs, actions, indices, boundaries);
+    QfFermionOperator *op = qf_ferm_op_new(num_terms, num_actions, coeffs, NULL, NULL, boundaries);
 
     QfFermionOperator *canon = qf_ferm_op_simplify(op, 1e-4);
 
@@ -282,16 +267,14 @@ static int test_simplify_vs_ichop(void) {
 
 static int test_adjoint(void) {
     QfFermionOperator *op = qf_ferm_op_zero();
-    bool action[0] = {};
-    uint32_t indices[0] = {};
     QkComplex64 coeff = {0.0, 1.0};
-    qf_ferm_op_add_term(op, 0, action, indices, &coeff);
+    qf_ferm_op_add_term(op, 0, NULL, NULL, &coeff);
 
     QfFermionOperator *adjoint = qf_ferm_op_adjoint(op);
 
     QfFermionOperator *expected = qf_ferm_op_zero();
     QkComplex64 coeff_adj = {0.0, -1.0};
-    qf_ferm_op_add_term(expected, 0, action, indices, &coeff_adj);
+    qf_ferm_op_add_term(expected, 0, NULL, NULL, &coeff_adj);
 
     bool is_equal = qf_ferm_op_equal(adjoint, expected);
 
