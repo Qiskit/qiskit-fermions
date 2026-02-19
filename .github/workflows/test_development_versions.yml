@@ -65,7 +65,7 @@ jobs:
           if [[ "$RUNNER_OS" == "macOS" ]]; then
             ln -s $(realpath _accelerate.*.so) libqiskit.dylib
           elif [[ "$RUNNER_OS" == "Windows" ]]; then
-            ln -s $(realpath _accelerate.*.pyd) libqiskit.dll
+            ln -s $(realpath _accelerate.*.pyd) qiskit.dll
           else
             ln -s $(realpath _accelerate.*.so) libqiskit.so
           fi
