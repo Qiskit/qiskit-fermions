@@ -393,6 +393,71 @@ static int test_len(void) {
     return Ok;
 }
 
+static int test_permute_modes(void) {
+    QfMajoranaOperator *op = qf_maj_op_zero();
+    QkComplex64 coeff = {1.0, 0.0};
+    uint32_t modes1[2] = {0, 1};
+    qf_maj_op_add_term(op, 2, modes1, &coeff);
+    uint32_t modes2[4] = {0, 0, 2, 3};
+    qf_maj_op_add_term(op, 4, modes2, &coeff);
+
+    uint32_t permutation[4] = {4, 2, 5, 3};
+
+    QfExitCode exit = qf_maj_op_permute_modes(op, 4, permutation);
+
+    if (exit != QfExitCode_Success) {
+        qf_maj_op_free(op);
+        return RuntimeError;
+    }
+
+    uint64_t num_terms = 2;
+    uint64_t num_modes = 6;
+    uint32_t modes_exp[6] = {4, 2, 4, 4, 5, 3};
+    QkComplex64 coeffs_exp[2] = {{1.0, 0.0}, {1.0, 0.0}};
+    uint32_t boundaries_exp[3] = {0, 2, 6};
+    QfMajoranaOperator *expected = qf_maj_op_new(num_terms, num_modes, coeffs_exp, modes_exp, boundaries_exp);
+
+    bool is_equal = qf_maj_op_equal(op, expected);
+
+    qf_maj_op_free(op);
+    qf_maj_op_free(expected);
+
+    if (!is_equal) {
+        return EqualityError;
+    }
+    return Ok;
+}
+
+static int test_permute_modes_duplicate_err(void) {
+    QfMajoranaOperator *op = qf_maj_op_zero();
+    QkComplex64 coeff = {1.0, 0.0};
+    uint32_t modes1[2] = {0, 1};
+    qf_maj_op_add_term(op, 2, modes1, &coeff);
+    uint32_t modes2[4] = {0, 0, 2, 3};
+    qf_maj_op_add_term(op, 4, modes2, &coeff);
+
+    uint32_t permutation[4] = {4, 4, 5, 3};
+
+    QfExitCode exit = qf_maj_op_permute_modes(op, 4, permutation);
+
+    return exit == QfExitCode_DuplicateIndexError ? Ok : EqualityError;
+}
+
+static int test_permute_modes_too_small_err(void) {
+    QfMajoranaOperator *op = qf_maj_op_zero();
+    QkComplex64 coeff = {1.0, 0.0};
+    uint32_t modes1[2] = {0, 1};
+    qf_maj_op_add_term(op, 2, modes1, &coeff);
+    uint32_t modes2[4] = {0, 0, 2, 3};
+    qf_maj_op_add_term(op, 4, modes2, &coeff);
+
+    uint32_t permutation[4] = {4, 2, 5};
+
+    QfExitCode exit = qf_maj_op_permute_modes(op, 3, permutation);
+
+    return exit == QfExitCode_IndexError ? Ok : EqualityError;
+}
+
 int test_majorana_operator(void) {
     int num_failed = 0;
     num_failed += RUN_TEST(test_new);
@@ -411,6 +476,9 @@ int test_majorana_operator(void) {
     num_failed += RUN_TEST(test_many_body_order);
     num_failed += RUN_TEST(test_is_even);
     num_failed += RUN_TEST(test_len);
+    num_failed += RUN_TEST(test_permute_modes);
+    num_failed += RUN_TEST(test_permute_modes_duplicate_err);
+    num_failed += RUN_TEST(test_permute_modes_too_small_err);
 
     fflush(stderr);
     fprintf(stderr, "=== Number of failed subtests: %i\n", num_failed);

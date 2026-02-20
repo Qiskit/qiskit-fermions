@@ -120,6 +120,7 @@ The following functions provide operator manipulation logic:
   :c:func:`qf_maj_op_ichop`           Removes terms with small coefficient magnitudes.
   :c:func:`qf_maj_op_simplify`        Returns an equivalent but simplified operator.
   :c:func:`qf_maj_op_normal_ordered`  Returns an equivalent operator with normal ordered terms.
+  :c:func:`qf_maj_op_permute_modes`   Permutes the modes of an operator.
   ==================================  =========================================================
 
 Properties
