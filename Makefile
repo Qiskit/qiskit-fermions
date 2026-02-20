@@ -18,7 +18,7 @@ export BINDGEN_EXTRA_CLANG_ARGS := "-I$(shell python -c "import sysconfig; print
 lint: export LD_LIBRARY_PATH := $(LD_LIBRARY_PATH):${QISKIT_ROOT}/qiskit
 lint: export DYLD_LIBRARY_PATH := $(DYLD_LIBRARY_PATH):${QISKIT_ROOT}/qiskit
 lint:
-	cargo clippy
+	cargo clippy -- -D warnings
 	tox -e lint
 
 style: export LD_LIBRARY_PATH := $(LD_LIBRARY_PATH):${QISKIT_ROOT}/qiskit

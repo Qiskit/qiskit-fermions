@@ -65,7 +65,7 @@ pub unsafe extern "C" fn qf_maj_op_new(
         modes: unsafe { slice_from_ptr(modes, num_modes).to_vec() },
         boundaries: unsafe {
             slice_from_ptr(boundaries, num_terms + 1)
-                .into_iter()
+                .iter()
                 .map(|b| *b as usize)
                 .collect()
         },
