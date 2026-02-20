@@ -15,7 +15,7 @@ use crate::pointers::{const_ptr_as_ref, mut_ptr_as_ref, slice_from_ptr};
 
 use num_complex::Complex64;
 use qiskit_fermions_core::operators::fermion_operator::FermionOperator;
-use qiskit_fermions_core::operators::{OperatorMacro, OperatorTrait};
+use qiskit_fermions_core::operators::{CoherenceError, OperatorMacro, OperatorTrait};
 
 /// @ingroup qf_ferm_op
 ///
@@ -785,4 +785,63 @@ pub unsafe extern "C" fn qf_ferm_op_len(op: *const FermionOperator) -> usize {
     let op = unsafe { const_ptr_as_ref(op) };
 
     op.boundaries.len() - 1
+}
+
+/// @ingroup qf_ferm_op
+///
+/// @brief Permutes the indices of the provided operator.
+///
+/// @param op A pointer to the fermionic operator.
+/// @param num_indices The number of indices in the provided permutation list.
+/// @param permutation The index permutation list.
+///
+/// @return An exit code.
+/// * ``QfExitCode_Success`` upon success
+/// * ``QfExitCode_DuplicateIndexError`` if duplicate indices were found in the permutation
+/// * ``QfExitCode_IndexError`` for any other index errors, such as invalid indices.
+///
+/// @rst
+///
+/// Example
+/// -------
+///
+/// .. code-block:: c
+///     :linenos:
+///
+///     QfFermionOperator *op = qf_ferm_op_zero();
+///     bool actions[4] = {true, false, true, false};
+///     uint32_t indices[4] = {0, 1, 2, 3};
+///     QkComplex64 coeff = {1.0, 0.0};
+///     qf_ferm_op_add_term(op, 4, actions, indices, &coeff);
+///
+///     uint32_t permutation[4] = {3, 2, 1, 0};
+///
+///     QfExitCode exit = qf_ferm_op_permute_indices(op, 4, permutation);
+///
+///     assert(exit == QfExitCode_Success);
+///
+/// @endrst
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn qf_ferm_op_permute_indices(
+    op: *mut FermionOperator,
+    num_indices: u64,
+    permutation: *const u32,
+) -> ExitCode {
+    // SAFETY: Per documentation, the pointers are non-null and aligned.
+    let op = unsafe { mut_ptr_as_ref(op) };
+
+    let permutation = unsafe { slice_from_ptr(permutation, num_indices as usize).to_vec() };
+
+    let permuted_op = match  op.permute_indices(permutation) {
+        Ok(permuted) => permuted,
+        Err(e) => {
+            return match e {
+                CoherenceError::DuplicateIndices => ExitCode::DuplicateIndexError,
+                _ => ExitCode::IndexError,
+            };
+        }
+    };
+
+    *op = permuted_op;
+    ExitCode::Success
 }

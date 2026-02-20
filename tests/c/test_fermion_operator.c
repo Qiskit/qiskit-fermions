@@ -407,6 +407,79 @@ static int test_len(void) {
     return Ok;
 }
 
+static int test_permute_indices(void) {
+    QfFermionOperator *op = qf_ferm_op_zero();
+    QkComplex64 coeff = {1.0, 0.0};
+    bool action1[2] = {true, false};
+    uint32_t indices1[2] = {0, 1};
+    qf_ferm_op_add_term(op, 2, action1, indices1, &coeff);
+    bool action2[4] = {true, false, true, false};
+    uint32_t indices2[4] = {0, 0, 2, 3};
+    qf_ferm_op_add_term(op, 4, action2, indices2, &coeff);
+
+    uint32_t permutation[4] = {4, 2, 5, 3};
+
+    QfExitCode exit = qf_ferm_op_permute_indices(op, 4, permutation);
+
+    if (exit != QfExitCode_Success) {
+        qf_ferm_op_free(op);
+        return RuntimeError;
+    }
+
+    uint64_t num_terms = 2;
+    uint64_t num_actions = 6;
+    bool actions_exp[6] = {true, false, true, false, true, false};
+    uint32_t indices_exp[6] = {4, 2, 4, 4, 5, 3};
+    QkComplex64 coeffs_exp[2] = {{1.0, 0.0}, {1.0, 0.0}};
+    uint32_t boundaries_exp[3] = {0, 2, 6};
+    QfFermionOperator *expected = qf_ferm_op_new(num_terms, num_actions, coeffs_exp, actions_exp,
+                                                 indices_exp, boundaries_exp);
+
+    bool is_equal = qf_ferm_op_equal(op, expected);
+
+    qf_ferm_op_free(op);
+    qf_ferm_op_free(expected);
+
+    if (!is_equal) {
+        return EqualityError;
+    }
+    return Ok;
+}
+
+static int test_permute_indices_duplicate_err(void) {
+    QfFermionOperator *op = qf_ferm_op_zero();
+    QkComplex64 coeff = {1.0, 0.0};
+    bool action1[2] = {true, false};
+    uint32_t indices1[2] = {0, 1};
+    qf_ferm_op_add_term(op, 2, action1, indices1, &coeff);
+    bool action2[4] = {true, false, true, false};
+    uint32_t indices2[4] = {0, 0, 2, 3};
+    qf_ferm_op_add_term(op, 4, action2, indices2, &coeff);
+
+    uint32_t permutation[4] = {4, 4, 5, 3};
+
+    QfExitCode exit = qf_ferm_op_permute_indices(op, 4, permutation);
+
+    return exit == QfExitCode_DuplicateIndexError ? Ok : EqualityError;
+}
+
+static int test_permute_indices_too_small_err(void) {
+    QfFermionOperator *op = qf_ferm_op_zero();
+    QkComplex64 coeff = {1.0, 0.0};
+    bool action1[2] = {true, false};
+    uint32_t indices1[2] = {0, 1};
+    qf_ferm_op_add_term(op, 2, action1, indices1, &coeff);
+    bool action2[4] = {true, false, true, false};
+    uint32_t indices2[4] = {0, 0, 2, 3};
+    qf_ferm_op_add_term(op, 4, action2, indices2, &coeff);
+
+    uint32_t permutation[4] = {4, 2, 5};
+
+    QfExitCode exit = qf_ferm_op_permute_indices(op, 3, permutation);
+
+    return exit == QfExitCode_IndexError ? Ok : EqualityError;
+}
+
 int test_fermion_operator(void) {
     int num_failed = 0;
     num_failed += RUN_TEST(test_new);
@@ -425,6 +498,9 @@ int test_fermion_operator(void) {
     num_failed += RUN_TEST(test_many_body_order);
     num_failed += RUN_TEST(test_conserves_particle_number);
     num_failed += RUN_TEST(test_len);
+    num_failed += RUN_TEST(test_permute_indices);
+    num_failed += RUN_TEST(test_permute_indices_duplicate_err);
+    num_failed += RUN_TEST(test_permute_indices_too_small_err);
 
     fflush(stderr);
     fprintf(stderr, "=== Number of failed subtests: %i\n", num_failed);
