@@ -98,7 +98,7 @@ pub fn jordan_wigner(fer_op: &FermionOperator, num_qubits: u32) -> *mut qiskit_s
                 .lock()
                 .unwrap();
 
-            unsafe { qiskit_sys::qk_obs_scaled_add_inplace(qubit_op.ptr, canon_term, &qk_coeff)};
+            unsafe { qiskit_sys::qk_obs_scaled_add_inplace(qubit_op.ptr, canon_term, &qk_coeff) };
 
             unsafe { qiskit_sys::qk_obs_free(canon_term) };
         });

@@ -70,7 +70,7 @@ pub unsafe extern "C" fn qf_ferm_op_new(
         indices: unsafe { slice_from_ptr(indices, num_actions).to_vec() },
         boundaries: unsafe {
             slice_from_ptr(boundaries, num_terms + 1)
-                .into_iter()
+                .iter()
                 .map(|b| *b as usize)
                 .collect()
         },
