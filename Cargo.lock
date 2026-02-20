@@ -1063,6 +1063,7 @@ dependencies = [
  "qiskit-sys",
  "rayon",
  "regex",
+ "thiserror",
 ]
 
 [[package]]
