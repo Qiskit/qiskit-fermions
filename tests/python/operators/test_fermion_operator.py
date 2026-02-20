@@ -13,7 +13,6 @@
 from abc import ABC, abstractmethod
 
 import pytest
-
 from qiskit_fermions.operators import FermionOperator, ann, cre
 from qiskit_fermions.operators.library import anti_commutator, commutator
 

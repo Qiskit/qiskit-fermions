@@ -832,7 +832,7 @@ pub unsafe extern "C" fn qf_ferm_op_permute_indices(
 
     let permutation = unsafe { slice_from_ptr(permutation, num_indices as usize).to_vec() };
 
-    let permuted_op = match  op.permute_indices(permutation) {
+    let permuted_op = match op.permute_indices(permutation) {
         Ok(permuted) => permuted,
         Err(e) => {
             return match e {
