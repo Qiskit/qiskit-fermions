@@ -255,6 +255,7 @@ impl FermionOperatorDataIter {
 ///    ichop
 ///    simplify
 ///    normal_ordered
+///    permute_indices
 ///
 /// Properties
 /// ^^^^^^^^^^
