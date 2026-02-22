@@ -506,16 +506,16 @@ impl PyMajoranaOperator {
     /// .. doctest::
     ///     >>> from qiskit_fermions.operators import MajoranaOperator
     ///     >>> op = MajoranaOperator.from_dict({(): 1e-4, (0,): 1e-6, (1,): 1e-10})
-    ///     >>> print(op)  # doctest: +FLOAT_CMP
+    ///     >>> print(op)
     ///       1.000000e-4 +0.000000e0j * ()
     ///       1.000000e-6 +0.000000e0j * (0)
     ///      1.000000e-10 +0.000000e0j * (1)
     ///     >>> op.ichop()
-    ///     >>> print(op)  # doctest: +FLOAT_CMP
+    ///     >>> print(op)
     ///       1.000000e-4 +0.000000e0j * ()
     ///       1.000000e-6 +0.000000e0j * (0)
     ///     >>> op.ichop(1e-5)
-    ///     >>> print(op)  # doctest: +FLOAT_CMP
+    ///     >>> print(op)
     ///       1.000000e-4 +0.000000e0j * ()
     ///
     /// Args:
@@ -560,7 +560,7 @@ impl PyMajoranaOperator {
     ///     >>> from qiskit_fermions.operators import MajoranaOperator
     ///     >>> op = MajoranaOperator.from_dict({(): -1.0j, (gamma(0, False), gamma(0, True)): 1.0})
     ///     >>> adj = op.adjoint()
-    ///     >>> print(adj)  # doctest: +FLOAT_CMP
+    ///     >>> print(adj)
     ///      -0.000000e0 +1.000000e0j * ()
     ///       1.000000e0 -0.000000e0j * (1 0)
     ///
