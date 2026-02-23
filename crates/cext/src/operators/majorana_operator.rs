@@ -10,7 +10,6 @@
 // copyright notice, and modified files need to carry a notice indicating
 // that they have been altered from the originals.
 
-use crate::exit_codes::ExitCode;
 use crate::pointers::{const_ptr_as_ref, mut_ptr_as_ref, slice_from_ptr};
 
 use num_complex::Complex64;
@@ -173,8 +172,6 @@ pub unsafe extern "C" fn qf_maj_op_one() -> *mut MajoranaOperator {
 ///     ``num_modes``.
 /// @param coeff A pointer to the complex coefficient.
 ///
-/// @return An exit code.
-///
 /// @rst
 ///
 /// Any of the pointer arguments may be ``NULL`` if and only if their corresponding length is zero.
@@ -202,7 +199,7 @@ pub unsafe extern "C" fn qf_maj_op_add_term(
     num_modes: u64,
     modes: *const u32,
     coeff: *const Complex64,
-) -> ExitCode {
+) {
     // SAFETY: Per documentation, the pointers are non-null and aligned.
     let op = unsafe { mut_ptr_as_ref(op) };
     let coeff = unsafe { const_ptr_as_ref(coeff) };
@@ -213,8 +210,6 @@ pub unsafe extern "C" fn qf_maj_op_add_term(
     op.modes
         .extend_from_slice(unsafe { slice_from_ptr(modes, num_modes) });
     op.boundaries.push(op.modes.len());
-
-    ExitCode::Success
 }
 
 /// @ingroup qf_maj_op
@@ -403,7 +398,7 @@ pub unsafe extern "C" fn qf_maj_op_adjoint(op: *const MajoranaOperator) -> *mut 
 ///     QkComplex64 coeff = {1e-8};
 ///     qf_maj_op_add_term(op, 0, modes, &coeff);
 ///
-///     QfExitCode result = qf_maj_op_ichop(op, 1e-6);
+///     qf_maj_op_ichop(op, 1e-6);
 ///
 ///     QfMajoranaOperator *expected = qf_maj_op_zero();
 ///
@@ -411,13 +406,11 @@ pub unsafe extern "C" fn qf_maj_op_adjoint(op: *const MajoranaOperator) -> *mut 
 ///
 /// @endrst
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn qf_maj_op_ichop(op: *mut MajoranaOperator, atol: f64) -> ExitCode {
+pub unsafe extern "C" fn qf_maj_op_ichop(op: *mut MajoranaOperator, atol: f64) {
     // SAFETY: Per documentation, the pointers are non-null and aligned.
     let op = unsafe { mut_ptr_as_ref(op) };
 
     op.ichop(atol);
-
-    ExitCode::Success
 }
 
 /// @ingroup qf_maj_op
