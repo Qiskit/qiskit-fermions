@@ -75,9 +75,9 @@ class FermionOperatorTests(ABC):
         cls = self.get_class()
         coeffs = [1e-10, 2, 3, 4, -4]
         actions = [True, True, False, False]
-        indices = [0, 0, 1, 1]
+        modes = [0, 0, 1, 1]
         boundaries = [0, 0, 1, 2, 3, 4]
-        op = cls(coeffs, actions, indices, boundaries)
+        op = cls(coeffs, actions, modes, boundaries)
         canon = op.simplify()
         assert canon.equiv(cls.from_dict({((True, 0),): 5}), 1e-12)
 
@@ -85,9 +85,9 @@ class FermionOperatorTests(ABC):
         cls = self.get_class()
         coeffs = [1e-5] * int(1e5)
         actions = []
-        indices = []
+        modes = []
         boundaries = [0] + [0] * int(1e5)
-        op = cls(coeffs, actions, indices, boundaries)
+        op = cls(coeffs, actions, modes, boundaries)
         canon = op.simplify(1e-4)
         assert canon.equiv(op.one(), 1e-6)
         op.ichop(1e-4)

@@ -25,22 +25,22 @@ pub type FermionAction<'a> = (&'a bool, &'a u32);
 pub struct FermionOperatorTermView<'a> {
     pub coeff: Complex64,
     pub actions: &'a [bool],
-    pub indices: &'a [u32],
+    pub modes: &'a [u32],
 }
 
 impl FermionOperatorTermView<'_> {
     pub fn iter(&'_ self) -> impl ExactSizeIterator<Item = FermionAction<'_>> + '_ {
-        zip(self.actions, self.indices)
+        zip(self.actions, self.modes)
     }
 
     // TODO: refactor these following methods
 
     pub fn to_vec(&'_ self) -> Vec<FermionAction<'_>> {
-        zip(self.actions, self.indices).collect()
+        zip(self.actions, self.modes).collect()
     }
 
     pub fn into_vec(&'_ self) -> Vec<(bool, u32)> {
-        zip(self.actions.to_vec(), self.indices.to_vec()).collect()
+        zip(self.actions.to_vec(), self.modes.to_vec()).collect()
     }
 }
 
@@ -48,7 +48,7 @@ impl FermionOperatorTermView<'_> {
 pub struct FermionOperator {
     pub coeffs: Vec<Complex64>,
     pub actions: Vec<bool>,
-    pub indices: Vec<u32>,
+    pub modes: Vec<u32>,
     pub boundaries: Vec<usize>,
 }
 
@@ -59,7 +59,7 @@ impl FermionOperator {
         let mut terms = HashMap::new();
         for term in self.iter() {
             terms
-                .entry((term.indices, term.actions))
+                .entry((term.modes, term.actions))
                 .and_modify(|c| *c += term.coeff)
                 .or_insert(term.coeff);
         }
@@ -67,11 +67,11 @@ impl FermionOperator {
         terms
             .iter()
             .filter(|((_, _), coeff)| coeff.abs() > atol)
-            .for_each(|((indices, actions), coeff)| {
+            .for_each(|((modes, actions), coeff)| {
                 out.coeffs.push(*coeff);
                 out.actions.extend_from_slice(actions);
-                out.indices.extend_from_slice(indices);
-                out.boundaries.push(out.indices.len());
+                out.modes.extend_from_slice(modes);
+                out.boundaries.push(out.modes.len());
             });
         out
     }
@@ -83,7 +83,7 @@ impl FermionOperator {
             FermionOperatorTermView {
                 coeff: *coeff,
                 actions: &self.actions[start..end],
-                indices: &self.indices[start..end],
+                modes: &self.modes[start..end],
             }
         })
     }
@@ -156,7 +156,7 @@ impl FermionOperator {
 fn _normal_ordered_term(term_view: FermionOperatorTermView) -> FermionOperator {
     let mut coeffs = vec![];
     let mut actions = vec![];
-    let mut indices = vec![];
+    let mut modes = vec![];
     let mut boundaries = vec![0];
 
     let mut stack = vec![(term_view.to_vec(), term_view.coeff)];
@@ -206,14 +206,14 @@ fn _normal_ordered_term(term_view: FermionOperatorTermView) -> FermionOperator {
         coeffs.push(signed_coeff);
         term.iter().for_each(|&(&a, &i)| {
             actions.push(a);
-            indices.push(i);
+            modes.push(i);
         });
-        boundaries.push(indices.len())
+        boundaries.push(modes.len())
     }
     FermionOperator {
         coeffs,
         actions,
-        indices,
+        modes,
         boundaries,
     }
 }
@@ -223,7 +223,7 @@ impl OperatorTrait for FermionOperator {
         Self {
             coeffs: vec![],
             actions: vec![],
-            indices: vec![],
+            modes: vec![],
             boundaries: vec![0],
         }
     }
@@ -232,7 +232,7 @@ impl OperatorTrait for FermionOperator {
         Self {
             coeffs: vec![Complex64::new(1.0, 0.0)],
             actions: vec![],
-            indices: vec![],
+            modes: vec![],
             boundaries: vec![0, 0],
         }
     }
@@ -251,18 +251,18 @@ impl OperatorTrait for FermionOperator {
     fn adjoint(&self) -> Self {
         let mut coeffs = vec![];
         let mut actions = vec![];
-        let mut indices = vec![];
+        let mut modes = vec![];
 
         self.iter().for_each(|term| {
             coeffs.push(term.coeff.conj());
             actions.extend(term.actions.iter().rev().map(|a| !a));
-            indices.extend(term.indices.iter().rev());
+            modes.extend(term.modes.iter().rev());
         });
 
         Self {
             coeffs,
             actions,
-            indices,
+            modes,
             boundaries: self.boundaries.to_vec(),
         }
     }
@@ -270,7 +270,7 @@ impl OperatorTrait for FermionOperator {
     fn __iadd__(&mut self, other: &Self) {
         self.coeffs.extend_from_slice(&other.coeffs);
         self.actions.extend_from_slice(&other.actions);
-        self.indices.extend_from_slice(&other.indices);
+        self.modes.extend_from_slice(&other.modes);
         let offset = self.boundaries[self.boundaries.len() - 1];
         self.boundaries
             .extend(other.boundaries[1..].iter().map(|b| b + offset));
@@ -283,7 +283,7 @@ impl OperatorTrait for FermionOperator {
     fn __iand__(&mut self, other: &Self) {
         let mut coeffs = vec![];
         let mut actions = vec![];
-        let mut indices = vec![];
+        let mut modes = vec![];
         let mut boundaries = vec![0];
 
         for left in self.iter() {
@@ -291,22 +291,22 @@ impl OperatorTrait for FermionOperator {
                 coeffs.push(left.coeff * right.coeff);
                 actions.extend_from_slice(right.actions);
                 actions.extend_from_slice(left.actions);
-                indices.extend_from_slice(right.indices);
-                indices.extend_from_slice(left.indices);
-                boundaries.push(indices.len());
+                modes.extend_from_slice(right.modes);
+                modes.extend_from_slice(left.modes);
+                boundaries.push(modes.len());
             }
         }
 
         self.coeffs = coeffs;
         self.actions = actions;
-        self.indices = indices;
+        self.modes = modes;
         self.boundaries = boundaries;
     }
 
     fn ichop(&mut self, atol: f64) {
         let mut coeffs = vec![];
         let mut actions = vec![];
-        let mut indices = vec![];
+        let mut modes = vec![];
         let mut boundaries = vec![0];
 
         self.iter()
@@ -314,13 +314,13 @@ impl OperatorTrait for FermionOperator {
             .for_each(|term| {
                 coeffs.push(term.coeff.conj());
                 actions.extend_from_slice(term.actions);
-                indices.extend_from_slice(term.indices);
-                boundaries.push(indices.len());
+                modes.extend_from_slice(term.modes);
+                boundaries.push(modes.len());
             });
 
         self.coeffs = coeffs;
         self.actions = actions;
-        self.indices = indices;
+        self.modes = modes;
         self.boundaries = boundaries;
     }
 }
@@ -337,7 +337,7 @@ mod tests {
             FermionOperator {
                 coeffs: vec![],
                 actions: vec![],
-                indices: vec![],
+                modes: vec![],
                 boundaries: vec![0],
             }
         );
@@ -351,7 +351,7 @@ mod tests {
             FermionOperator {
                 coeffs: vec![Complex64::new(1.0, 0.0)],
                 actions: vec![],
-                indices: vec![],
+                modes: vec![],
                 boundaries: vec![0, 0],
             }
         );
@@ -363,7 +363,7 @@ mod tests {
         let two = FermionOperator {
             coeffs: vec![Complex64::new(2.0, 0.0)],
             actions: vec![],
-            indices: vec![],
+            modes: vec![],
             boundaries: vec![0, 0],
         };
         let three = one + two;
@@ -372,7 +372,7 @@ mod tests {
             FermionOperator {
                 coeffs: vec![Complex64::new(1.0, 0.0), Complex64::new(2.0, 0.0)],
                 actions: vec![],
-                indices: vec![],
+                modes: vec![],
                 boundaries: vec![0, 0, 0],
             }
         );
@@ -384,7 +384,7 @@ mod tests {
         let two = FermionOperator {
             coeffs: vec![Complex64::new(2.0, 0.0)],
             actions: vec![],
-            indices: vec![],
+            modes: vec![],
             boundaries: vec![0, 0],
         };
         op += two;
@@ -393,7 +393,7 @@ mod tests {
             FermionOperator {
                 coeffs: vec![Complex64::new(1.0, 0.0), Complex64::new(2.0, 0.0)],
                 actions: vec![],
-                indices: vec![],
+                modes: vec![],
                 boundaries: vec![0, 0, 0],
             }
         );
@@ -405,7 +405,7 @@ mod tests {
         let two = FermionOperator {
             coeffs: vec![Complex64::new(2.0, 0.0)],
             actions: vec![],
-            indices: vec![],
+            modes: vec![],
             boundaries: vec![0, 0],
         };
         let new_one = two - one;
@@ -414,7 +414,7 @@ mod tests {
             FermionOperator {
                 coeffs: vec![Complex64::new(2.0, 0.0), Complex64::new(-1.0, 0.0)],
                 actions: vec![],
-                indices: vec![],
+                modes: vec![],
                 boundaries: vec![0, 0, 0],
             }
         );
@@ -426,7 +426,7 @@ mod tests {
         let two = FermionOperator {
             coeffs: vec![Complex64::new(2.0, 0.0)],
             actions: vec![],
-            indices: vec![],
+            modes: vec![],
             boundaries: vec![0, 0],
         };
         op -= two;
@@ -435,7 +435,7 @@ mod tests {
             FermionOperator {
                 coeffs: vec![Complex64::new(1.0, 0.0), Complex64::new(-2.0, 0.0)],
                 actions: vec![],
-                indices: vec![],
+                modes: vec![],
                 boundaries: vec![0, 0, 0],
             }
         );
@@ -450,7 +450,7 @@ mod tests {
             FermionOperator {
                 coeffs: vec![Complex64::new(3.0, 0.0)],
                 actions: vec![],
-                indices: vec![],
+                modes: vec![],
                 boundaries: vec![0, 0],
             }
         );
@@ -465,7 +465,7 @@ mod tests {
             FermionOperator {
                 coeffs: vec![Complex64::new(3.0, 0.0)],
                 actions: vec![],
-                indices: vec![],
+                modes: vec![],
                 boundaries: vec![0, 0],
             }
         );
@@ -480,7 +480,7 @@ mod tests {
             FermionOperator {
                 coeffs: vec![Complex64::new(3.0, 0.0)],
                 actions: vec![],
-                indices: vec![],
+                modes: vec![],
                 boundaries: vec![0, 0],
             }
         );
@@ -491,7 +491,7 @@ mod tests {
         let three = FermionOperator {
             coeffs: vec![Complex64::new(3.0, 0.0)],
             actions: vec![],
-            indices: vec![],
+            modes: vec![],
             boundaries: vec![0, 0],
         };
         let one_half = three / Complex64::new(2.0, 0.0);
@@ -500,7 +500,7 @@ mod tests {
             FermionOperator {
                 coeffs: vec![Complex64::new(1.5, 0.0)],
                 actions: vec![],
-                indices: vec![],
+                modes: vec![],
                 boundaries: vec![0, 0],
             }
         );
@@ -511,7 +511,7 @@ mod tests {
         let mut op = FermionOperator {
             coeffs: vec![Complex64::new(3.0, 0.0)],
             actions: vec![],
-            indices: vec![],
+            modes: vec![],
             boundaries: vec![0, 0],
         };
         op /= Complex64::new(2.0, 0.0);
@@ -520,7 +520,7 @@ mod tests {
             FermionOperator {
                 coeffs: vec![Complex64::new(1.5, 0.0)],
                 actions: vec![],
-                indices: vec![],
+                modes: vec![],
                 boundaries: vec![0, 0],
             }
         );
@@ -534,7 +534,7 @@ mod tests {
             FermionOperator {
                 coeffs: vec![Complex64::new(-1.0, 0.0)],
                 actions: vec![],
-                indices: vec![],
+                modes: vec![],
                 boundaries: vec![0, 0],
             }
         );
@@ -545,13 +545,13 @@ mod tests {
         let op1 = FermionOperator {
             coeffs: vec![Complex64::new(2.0, 0.0), Complex64::new(3.0, 0.0)],
             actions: vec![true, false],
-            indices: vec![0, 1],
+            modes: vec![0, 1],
             boundaries: vec![0, 0, 2],
         };
         let op2 = FermionOperator {
             coeffs: vec![Complex64::new(1.5, 0.0), Complex64::new(4.0, 0.0)],
             actions: vec![true, false],
-            indices: vec![1, 0],
+            modes: vec![1, 0],
             boundaries: vec![0, 0, 2],
         };
         let result = op1 & op2;
@@ -565,7 +565,7 @@ mod tests {
                     Complex64::new(12.0, 0.0),
                 ],
                 actions: vec![true, false, true, false, true, false, true, false],
-                indices: vec![1, 0, 0, 1, 1, 0, 0, 1],
+                modes: vec![1, 0, 0, 1, 1, 0, 0, 1],
                 boundaries: vec![0, 0, 2, 4, 8],
             }
         );
@@ -576,13 +576,13 @@ mod tests {
         let mut op1 = FermionOperator {
             coeffs: vec![Complex64::new(2.0, 0.0), Complex64::new(3.0, 0.0)],
             actions: vec![true, false],
-            indices: vec![0, 1],
+            modes: vec![0, 1],
             boundaries: vec![0, 0, 2],
         };
         let op2 = FermionOperator {
             coeffs: vec![Complex64::new(1.5, 0.0), Complex64::new(4.0, 0.0)],
             actions: vec![true, false],
-            indices: vec![1, 0],
+            modes: vec![1, 0],
             boundaries: vec![0, 0, 2],
         };
         op1 &= op2;
@@ -596,7 +596,7 @@ mod tests {
                     Complex64::new(12.0, 0.0),
                 ],
                 actions: vec![true, false, true, false, true, false, true, false],
-                indices: vec![1, 0, 0, 1, 1, 0, 0, 1],
+                modes: vec![1, 0, 0, 1, 1, 0, 0, 1],
                 boundaries: vec![0, 0, 2, 4, 8],
             }
         );
@@ -607,7 +607,7 @@ mod tests {
         let op = FermionOperator {
             coeffs: vec![Complex64::new(2.0, 0.0)],
             actions: vec![true],
-            indices: vec![0],
+            modes: vec![0],
             boundaries: vec![0, 1],
         };
         // exponent=0
@@ -624,7 +624,7 @@ mod tests {
             FermionOperator {
                 coeffs: vec![Complex64::new(4.0, 0.0)],
                 actions: vec![true, true],
-                indices: vec![0, 0],
+                modes: vec![0, 0],
                 boundaries: vec![0, 2],
             }
         );
@@ -639,7 +639,7 @@ mod tests {
                 Complex64::new(1e-8, 0.0),
             ],
             actions: vec![true, false],
-            indices: vec![0, 0],
+            modes: vec![0, 0],
             boundaries: vec![0, 0, 1, 2],
         };
 
@@ -648,7 +648,7 @@ mod tests {
         let expected1 = FermionOperator {
             coeffs: vec![Complex64::new(1e-4, 0.0), Complex64::new(1e-6, 0.0)],
             actions: vec![true],
-            indices: vec![0],
+            modes: vec![0],
             boundaries: vec![0, 0, 1],
         };
 
@@ -659,7 +659,7 @@ mod tests {
         let expected2 = FermionOperator {
             coeffs: vec![Complex64::new(1e-4, 0.0)],
             actions: vec![],
-            indices: vec![],
+            modes: vec![],
             boundaries: vec![0, 0],
         };
 
@@ -671,7 +671,7 @@ mod tests {
         let op1 = FermionOperator {
             coeffs: vec![Complex64::new(0.0, 2.0), Complex64::new(3.0, 0.0)],
             actions: vec![true, false],
-            indices: vec![0, 1],
+            modes: vec![0, 1],
             boundaries: vec![0, 0, 2],
         };
         let adj = op1.adjoint();
@@ -680,7 +680,7 @@ mod tests {
             FermionOperator {
                 coeffs: vec![Complex64::new(0.0, -2.0), Complex64::new(3.0, 0.0)],
                 actions: vec![true, false],
-                indices: vec![1, 0],
+                modes: vec![1, 0],
                 boundaries: vec![0, 0, 2],
             }
         );
@@ -699,7 +699,7 @@ mod tests {
         let op = FermionOperator {
             coeffs: vec![Complex64::new(1.0, 0.0)],
             actions: vec![true, false],
-            indices: vec![0, 1],
+            modes: vec![0, 1],
             boundaries: vec![0, 2],
         };
 
@@ -711,14 +711,14 @@ mod tests {
         let op = FermionOperator {
             coeffs: vec![Complex64::new(1.0, 0.0)],
             actions: vec![true, true],
-            indices: vec![0, 1],
+            modes: vec![0, 1],
             boundaries: vec![0, 2],
         };
 
         let expected = FermionOperator {
             coeffs: vec![Complex64::new(-1.0, 0.0)],
             actions: vec![true, true],
-            indices: vec![1, 0],
+            modes: vec![1, 0],
             boundaries: vec![0, 2],
         };
 
@@ -730,14 +730,14 @@ mod tests {
         let op = FermionOperator {
             coeffs: vec![Complex64::new(1.0, 0.0)],
             actions: vec![false, true],
-            indices: vec![0, 0],
+            modes: vec![0, 0],
             boundaries: vec![0, 2],
         };
 
         let expected = FermionOperator {
             coeffs: vec![Complex64::new(-1.0, 0.0), Complex64::new(1.0, 0.0)],
             actions: vec![true, false],
-            indices: vec![0, 0],
+            modes: vec![0, 0],
             boundaries: vec![0, 2, 2],
         };
 
@@ -749,7 +749,7 @@ mod tests {
         let op = FermionOperator {
             coeffs: vec![Complex64::new(0.0, 1.00001), Complex64::new(0.0, -1.0)],
             actions: vec![true, false, true, false],
-            indices: vec![0, 1, 1, 0],
+            modes: vec![0, 1, 1, 0],
             boundaries: vec![0, 2, 4],
         };
         assert!(op.is_hermitian(1e-4));
@@ -764,7 +764,7 @@ mod tests {
             FermionOperator {
                 coeffs: vec![Complex64::new(1.0, 0.0)],
                 actions: vec![true],
-                indices: vec![0],
+                modes: vec![0],
                 boundaries: vec![0, 1],
             }
             .many_body_order(),
@@ -775,7 +775,7 @@ mod tests {
             FermionOperator {
                 coeffs: vec![Complex64::new(1.0, 0.0)],
                 actions: vec![true, false],
-                indices: vec![0, 1],
+                modes: vec![0, 1],
                 boundaries: vec![0, 2],
             }
             .many_body_order(),
@@ -788,7 +788,7 @@ mod tests {
         let op1 = FermionOperator {
             coeffs: vec![Complex64::new(1.0, 0.0)],
             actions: vec![true, false],
-            indices: vec![0, 1],
+            modes: vec![0, 1],
             boundaries: vec![0, 2],
         };
 
@@ -797,7 +797,7 @@ mod tests {
         let op2 = FermionOperator {
             coeffs: vec![Complex64::new(1.0, 0.0)],
             actions: vec![true],
-            indices: vec![0],
+            modes: vec![0],
             boundaries: vec![0, 1],
         };
 

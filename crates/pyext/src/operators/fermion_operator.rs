@@ -89,12 +89,12 @@ impl FermionOperatorDataIter {
 ///    ============== =================================================================================
 ///    ``coeffs``     A vector of complex coefficients consisting of two 64-bit floating point numbers.
 ///    ``actions``    A vector of booleans storing the nature of the second-quantization actions.
-///    ``indices``    A vector of 32-bit integers storing the fermionic mode indices acted upon.
-///    ``boundaries`` A vector of integers indicating the boundaries in ``actions`` and ``indices``.
+///    ``modes``      A vector of 32-bit integers storing the fermionic mode indices acted upon.
+///    ``boundaries`` A vector of integers indicating the boundaries in ``actions`` and ``modes``.
 ///    ============== =================================================================================
 ///
 /// Entries in ``actions`` indicate creation (annihilation) operators by ``True`` (``False``).
-/// Fermionic modes indexed by ``indices`` are considered spinless.
+/// Fermionic modes indexed by ``modes`` are considered spinless.
 ///
 /// This data structure allows for very efficient construction and manipulation of operators.
 /// However, it implies that duplicate terms may be contained in an operator at any moment.
@@ -106,12 +106,13 @@ impl FermionOperatorDataIter {
 /// An operator can be constructed directly by providing the arrays outlined above:
 ///
 /// .. doctest::
+///
 ///     >>> from qiskit_fermions.operators import FermionOperator
 ///     >>> coeffs = [1.0, 2.0, -3.0, 4.0j, -0.5j]
 ///     >>> actions = [True, False, False, True, True, True, False, False]
-///     >>> indices = [0, 0, 0, 1, 0, 1, 2, 3]
+///     >>> modes = [0, 0, 0, 1, 0, 1, 2, 3]
 ///     >>> boundaries = [0, 0, 1, 2, 4, 8]
-///     >>> op = FermionOperator(coeffs, actions, indices, boundaries)
+///     >>> op = FermionOperator(coeffs, actions, modes, boundaries)
 ///     >>> print(op)
 ///       1.000000e0 +0.000000e0j * ()
 ///      -3.000000e0 +0.000000e0j * (-_0)
@@ -122,6 +123,7 @@ impl FermionOperatorDataIter {
 /// For convenience, it is possible to construct an operator from a Python dictionary like so:
 ///
 /// .. doctest::
+///
 ///     >>> from qiskit_fermions.operators import cre, ann
 ///     >>> op = FermionOperator.from_dict(
 ///     ...     {
@@ -140,7 +142,7 @@ impl FermionOperatorDataIter {
 ///      -0.000000e0-5.000000e-1j * (+_0 +_1 -_2 -_3)
 ///
 /// In this example, we have leveraged :func:`.cre` and :func:`.ann` for creating the creation and
-/// annihilation operators at the specified indices.
+/// annihilation operators at the specified modes.
 ///
 /// In addition, the following construction and quick helper methods are available:
 ///
@@ -156,6 +158,7 @@ impl FermionOperatorDataIter {
 /// cannot be iterated over directly:
 ///
 /// .. doctest::
+///
 ///     >>> list(iter(op))
 ///     Traceback (most recent call last):
 ///       ...
@@ -164,6 +167,7 @@ impl FermionOperatorDataIter {
 /// Instead, this class provides custom iterators to fulfill this purpose:
 ///
 /// .. doctest::
+///
 ///     >>> list(sorted(op.iter_terms()))
 ///     [([], (1+0j)), ([(False, 0)], (-3+0j)), ([(False, 0), (True, 1)], 4j), ([(True, 0)], (2+0j)), ([(True, 0), (True, 1), (False, 2), (False, 3)], (-0-0.5j))]
 ///
@@ -186,6 +190,7 @@ impl FermionOperatorDataIter {
 /// ^^^^^^^^^^^^^^^^^^^^
 ///
 /// .. doctest::
+///
 ///     >>> op = FermionOperator.one()
 ///     >>> (op + op).simplify()
 ///     FermionOperator.from_dict({(): 2+0j})
@@ -202,6 +207,7 @@ impl FermionOperatorDataIter {
 /// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ///
 /// .. doctest::
+///
 ///     >>> op = FermionOperator.one()
 ///     >>> (2 * op).simplify()
 ///     FermionOperator.from_dict({(): 2+0j})
@@ -223,6 +229,7 @@ impl FermionOperatorDataIter {
 ///    operator that performs "first ``a`` and then ``b``".
 ///
 /// .. doctest::
+///
 ///     >>> op1 = FermionOperator.from_dict({(): 2.0, (cre(0),): 3.0})
 ///     >>> op2 = FermionOperator.from_dict({(): 1.5, (ann(1),): 4.0})
 ///     >>> comp = (op1 & op2).simplify()
@@ -290,14 +297,14 @@ impl PyFermionOperator {
     fn new(
         coeffs: Vec<Complex64>,
         actions: Vec<bool>,
-        indices: Vec<u32>,
+        modes: Vec<u32>,
         boundaries: Vec<usize>,
     ) -> Self {
         Self {
             inner: FermionOperator {
                 coeffs,
                 actions,
-                indices,
+                modes,
                 boundaries,
             },
         }
@@ -306,6 +313,7 @@ impl PyFermionOperator {
     /// Constructs a new operator from a dictionary.
     ///
     /// .. doctest::
+    ///
     ///     >>> from qiskit_fermions.operators import FermionOperator
     ///     >>> op = FermionOperator.from_dict(
     ///     ...     {
@@ -328,23 +336,23 @@ impl PyFermionOperator {
     fn from_dict(_cls: &Bound<'_, PyType>, data: HashMap<Vec<(bool, u32)>, Complex64>) -> Self {
         let mut coeffs = vec![];
         let mut actions = vec![];
-        let mut indices = vec![];
+        let mut modes = vec![];
         let mut boundaries = vec![0];
 
         data.iter().for_each(|(terms, coeff)| {
             coeffs.push(*coeff);
             terms.iter().for_each(|(action, idx)| {
                 actions.push(*action);
-                indices.push(*idx);
+                modes.push(*idx);
             });
-            boundaries.push(indices.len());
+            boundaries.push(modes.len());
         });
 
         Self {
             inner: FermionOperator {
                 coeffs,
                 actions,
-                indices,
+                modes,
                 boundaries,
             },
         }
@@ -361,8 +369,8 @@ impl PyFermionOperator {
                 if !actions_eq {
                     return Ok(false);
                 }
-                let indices_eq = self.inner.indices == other.inner.indices;
-                if !indices_eq {
+                let modes_eq = self.inner.modes == other.inner.modes;
+                if !modes_eq {
                     return Ok(false);
                 }
                 let boundaries_eq = self.inner.boundaries == other.inner.boundaries;
@@ -380,8 +388,8 @@ impl PyFermionOperator {
                 if !actions_neq {
                     return Ok(false);
                 }
-                let indices_neq = self.inner.indices != other.inner.indices;
-                if !indices_neq {
+                let modes_neq = self.inner.modes != other.inner.modes;
+                if !modes_neq {
                     return Ok(false);
                 }
                 let boundaries_neq = self.inner.boundaries != other.inner.boundaries;
@@ -434,6 +442,7 @@ impl PyFermionOperator {
     /// Adding the operator that is constructed by this method to another one has no effect.
     ///
     /// .. doctest::
+    ///
     ///     >>> from qiskit_fermions.operators import FermionOperator
     ///     >>> op = FermionOperator.from_dict({(): 2.0})
     ///     >>> zero = FermionOperator.zero()
@@ -453,6 +462,7 @@ impl PyFermionOperator {
     /// Composing the operator that is constructed by this method with another one has no effect.
     ///
     /// .. doctest::
+    ///
     ///     >>> from qiskit_fermions.operators import FermionOperator
     ///     >>> op = FermionOperator.from_dict({(): 2.0})
     ///     >>> one = FermionOperator.one()
@@ -496,6 +506,7 @@ impl PyFermionOperator {
     /// magnitude which should not be truncated:
     ///
     /// .. doctest::
+    ///
     ///     >>> from qiskit_fermions.operators import FermionOperator
     ///     >>> coeffs = [1e-5] * int(1e5)
     ///     >>> boundaries = [0] + [0] * int(1e5)
@@ -524,6 +535,7 @@ impl PyFermionOperator {
     ///    separate coefficients for duplicate terms consider calling :meth:`.simplify` instead!
     ///
     /// .. doctest::
+    ///
     ///     >>> from qiskit_fermions.operators import FermionOperator
     ///     >>> op = FermionOperator.from_dict({(): 1e-4, ((True, 0),): 1e-6, ((False, 0),): 1e-10})
     ///     >>> print(op)
@@ -551,6 +563,7 @@ impl PyFermionOperator {
     ///    Mutating the iteration items does **not** affect the underlying operator data.
     ///
     /// .. doctest::
+    ///
     ///     >>> from qiskit_fermions.operators import FermionOperator
     ///     >>> op = FermionOperator.from_dict({(): 2.0, ((True, 0),): 1.0, ((False, 1),): -1.0j})
     ///     >>> list(sorted(op.iter_terms()))
@@ -577,6 +590,7 @@ impl PyFermionOperator {
     /// - the coefficients are complex conjugated
     ///
     /// .. doctest::
+    ///
     ///     >>> from qiskit_fermions.operators import FermionOperator
     ///     >>> op = FermionOperator.from_dict({(): -1.0j, ((True, 0), (False, 1)): 1.0})
     ///     >>> adj = op.adjoint()
@@ -599,6 +613,7 @@ impl PyFermionOperator {
     /// ``atol``.
     ///
     /// .. doctest::
+    ///
     ///     >>> from qiskit_fermions.operators import FermionOperator
     ///     >>> op = FermionOperator.from_dict({(): 1e-7})
     ///     >>> zero = FermionOperator.zero()
@@ -620,7 +635,7 @@ impl PyFermionOperator {
     /// Returns an equivalent operator with normal ordered terms.
     ///
     /// The normal order of an operator term is defined such that all creation actions before all
-    /// annihilation actions and the indices of actions within each group descend lexicographically
+    /// annihilation actions and the modes of actions within each group descend lexicographically
     /// (e.g. ``+_1 +_0 -_1 -_0``).
     ///
     /// .. note::
@@ -629,6 +644,7 @@ impl PyFermionOperator {
     ///    number of terms may change.
     ///
     /// .. doctest::
+    ///
     ///     >>> from qiskit_fermions.operators import FermionOperator
     ///     >>> op = FermionOperator.from_dict({((False, 1), (True, 1), (False, 0), (True, 0)): 1})
     ///     >>> print(op.normal_ordered().simplify())
@@ -652,6 +668,7 @@ impl PyFermionOperator {
     ///    of ``self`` and its :meth:`.adjoint` and :meth:`.zero`.
     ///
     /// .. doctest::
+    ///
     ///     >>> from qiskit_fermions.operators import FermionOperator
     ///     >>> op = FermionOperator.from_dict({
     ///     ...     ((True, 0), (False, 1)): 1.00001j,
@@ -680,6 +697,7 @@ impl PyFermionOperator {
     ///    operator.
     ///
     /// .. doctest::
+    ///
     ///     >>> from qiskit_fermions.operators import FermionOperator
     ///     >>> op = FermionOperator.from_dict({
     ///     ...     ((True, 0), (False, 1), (True, 2), (False, 3)): 1,
@@ -696,6 +714,7 @@ impl PyFermionOperator {
     /// Returns whether this operator is particle-number conserving.
     ///
     /// .. doctest::
+    ///
     ///     >>> from qiskit_fermions.operators import FermionOperator
     ///     >>> op = FermionOperator.from_dict({((True, 0), (False, 1)): 1})
     ///     >>> op.conserves_particle_number()
