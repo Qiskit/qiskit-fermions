@@ -308,30 +308,30 @@ class MajoranaOperatorTests(ABC):
         comm = anti_commutator(op1, op2)
         assert comm.equiv(cls.from_dict({(gamma(0, True), gamma(0, True)): 2}))
 
-    def test_permute_modes(self, subtests):
+    def test_relabel_modes(self, subtests):
         cls = self.get_class()
 
         op = cls.from_dict({(0, 1): 1, (0, 0, 2, 3): 1})
 
         with subtests.test("valid"):
             permutation = [4, 2, 5, 3]
-            permuted = op.permute_modes(permutation)
+            relabeled = op.relabel_modes(permutation)
             expected = cls.from_dict({(4, 2): 1, (4, 4, 5, 3): 1})
-            assert permuted.equiv(expected)
+            assert relabeled.equiv(expected)
 
         with (
             subtests.test("duplicate indices"),
             pytest.raises(ValueError, match="duplicate indices"),
         ):
             permutation = [4, 4, 5, 3]
-            op.permute_modes(permutation)
+            op.relabel_modes(permutation)
 
         with (
             subtests.test("index map too small"),
             pytest.raises(ValueError, match="does not account for the entire length"),
         ):
             permutation = [4, 2, 5]
-            op.permute_modes(permutation)
+            op.relabel_modes(permutation)
 
 
 class TestMajoranaOperator(MajoranaOperatorTests):

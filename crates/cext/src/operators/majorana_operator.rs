@@ -753,7 +753,7 @@ pub unsafe extern "C" fn qf_maj_op_len(op: *const MajoranaOperator) -> usize {
 
 /// @ingroup qf_maj_op
 ///
-/// @brief Permutes the modes of the provided operator.
+/// @brief Relabels the modes of the provided operator.
 ///
 /// @param op A pointer to the Majorana operator.
 /// @param num_modes The number of modes in the provided permutation list.
@@ -779,13 +779,13 @@ pub unsafe extern "C" fn qf_maj_op_len(op: *const MajoranaOperator) -> usize {
 ///
 ///     uint32_t permutation[4] = {3, 2, 1, 0};
 ///
-///     QfExitCode exit = qf_maj_op_permute_modes(op, 4, permutation);
+///     QfExitCode exit = qf_maj_op_relabel_modes(op, 4, permutation);
 ///
 ///     assert(exit == QfExitCode_Success);
 ///
 /// @endrst
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn qf_maj_op_permute_modes(
+pub unsafe extern "C" fn qf_maj_op_relabel_modes(
     op: *mut MajoranaOperator,
     num_modes: u64,
     permutation: *const u32,
@@ -795,8 +795,8 @@ pub unsafe extern "C" fn qf_maj_op_permute_modes(
 
     let permutation = unsafe { slice_from_ptr(permutation, num_modes as usize).to_vec() };
 
-    let permuted_op = match op.permute_modes(permutation) {
-        Ok(permuted) => permuted,
+    let relabeled_op = match op.relabel_modes(permutation) {
+        Ok(relabeled) => relabeled,
         Err(e) => {
             return match e {
                 CoherenceError::DuplicateIndices => ExitCode::DuplicateIndexError,
@@ -805,6 +805,6 @@ pub unsafe extern "C" fn qf_maj_op_permute_modes(
         }
     };
 
-    *op = permuted_op;
+    *op = relabeled_op;
     ExitCode::Success
 }

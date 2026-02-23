@@ -393,7 +393,7 @@ static int test_len(void) {
     return Ok;
 }
 
-static int test_permute_modes(void) {
+static int test_relabel_modes(void) {
     QfMajoranaOperator *op = qf_maj_op_zero();
     QkComplex64 coeff = {1.0, 0.0};
     uint32_t modes1[2] = {0, 1};
@@ -403,7 +403,7 @@ static int test_permute_modes(void) {
 
     uint32_t permutation[4] = {4, 2, 5, 3};
 
-    QfExitCode exit = qf_maj_op_permute_modes(op, 4, permutation);
+    QfExitCode exit = qf_maj_op_relabel_modes(op, 4, permutation);
 
     if (exit != QfExitCode_Success) {
         qf_maj_op_free(op);
@@ -428,7 +428,7 @@ static int test_permute_modes(void) {
     return Ok;
 }
 
-static int test_permute_modes_duplicate_err(void) {
+static int test_relabel_modes_duplicate_err(void) {
     QfMajoranaOperator *op = qf_maj_op_zero();
     QkComplex64 coeff = {1.0, 0.0};
     uint32_t modes1[2] = {0, 1};
@@ -438,12 +438,12 @@ static int test_permute_modes_duplicate_err(void) {
 
     uint32_t permutation[4] = {4, 4, 5, 3};
 
-    QfExitCode exit = qf_maj_op_permute_modes(op, 4, permutation);
+    QfExitCode exit = qf_maj_op_relabel_modes(op, 4, permutation);
 
     return exit == QfExitCode_DuplicateIndexError ? Ok : EqualityError;
 }
 
-static int test_permute_modes_too_small_err(void) {
+static int test_relabel_modes_too_small_err(void) {
     QfMajoranaOperator *op = qf_maj_op_zero();
     QkComplex64 coeff = {1.0, 0.0};
     uint32_t modes1[2] = {0, 1};
@@ -453,7 +453,7 @@ static int test_permute_modes_too_small_err(void) {
 
     uint32_t permutation[4] = {4, 2, 5};
 
-    QfExitCode exit = qf_maj_op_permute_modes(op, 3, permutation);
+    QfExitCode exit = qf_maj_op_relabel_modes(op, 3, permutation);
 
     return exit == QfExitCode_IndexError ? Ok : EqualityError;
 }
@@ -476,9 +476,9 @@ int test_majorana_operator(void) {
     num_failed += RUN_TEST(test_many_body_order);
     num_failed += RUN_TEST(test_is_even);
     num_failed += RUN_TEST(test_len);
-    num_failed += RUN_TEST(test_permute_modes);
-    num_failed += RUN_TEST(test_permute_modes_duplicate_err);
-    num_failed += RUN_TEST(test_permute_modes_too_small_err);
+    num_failed += RUN_TEST(test_relabel_modes);
+    num_failed += RUN_TEST(test_relabel_modes_duplicate_err);
+    num_failed += RUN_TEST(test_relabel_modes_too_small_err);
 
     fflush(stderr);
     fprintf(stderr, "=== Number of failed subtests: %i\n", num_failed);

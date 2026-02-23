@@ -256,7 +256,7 @@ impl MajoranaOperatorDataIter {
 ///    ichop
 ///    simplify
 ///    normal_ordered
-///    permute_modes
+///    relabel_modes
 ///
 /// Properties
 /// ^^^^^^^^^^
@@ -694,7 +694,7 @@ impl PyMajoranaOperator {
         self.inner.is_even()
     }
 
-    /// Returns a new operator with permuted modes.
+    /// Returns a new operator with relabeled modes.
     ///
     /// .. doctest::
     ///     >>> from qiskit_fermions.operators import MajoranaOperator
@@ -703,8 +703,8 @@ impl PyMajoranaOperator {
     ///     ...     (0, 1, 2, 3): 1,
     ///     ... })
     ///     >>> permutation = [5, 6, 4, 3]
-    ///     >>> permuted = op.permute_modes(permutation)
-    ///     >>> print(permuted)
+    ///     >>> relabeled = op.relabel_modes(permutation)
+    ///     >>> print(relabeled)
     ///       1.000000e0 +0.000000e0j * (5 6)
     ///       1.000000e0 +0.000000e0j * (5 6 4 3)
     ///
@@ -712,9 +712,9 @@ impl PyMajoranaOperator {
     ///     permutation: the index permutation list.
     ///
     /// Returns:
-    ///     A new operator with its modes permuted.
-    fn permute_modes(&self, permutation: Vec<u32>) -> PyResult<Self> {
-        let out = self.inner.permute_modes(permutation);
+    ///     A new operator with its modes relabeled.
+    fn relabel_modes(&self, permutation: Vec<u32>) -> PyResult<Self> {
+        let out = self.inner.relabel_modes(permutation);
         match out {
             Ok(op) => Ok(Self { inner: op }),
             Err(e) => Err(PyValueError::new_err(e.to_string())),

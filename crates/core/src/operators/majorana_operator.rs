@@ -134,7 +134,7 @@ impl MajoranaOperator {
         true
     }
 
-    pub fn permute_modes(&self, permutation: Vec<u32>) -> Result<Self, CoherenceError> {
+    pub fn relabel_modes(&self, permutation: Vec<u32>) -> Result<Self, CoherenceError> {
         if permutation.iter().collect::<HashSet<_>>().len() != permutation.len() {
             return Err(CoherenceError::DuplicateIndices);
         }
@@ -776,7 +776,7 @@ mod tests {
     }
 
     #[test]
-    fn test_permute_modes() {
+    fn test_relabel_modes() {
         let op = MajoranaOperator {
             coeffs: vec![Complex64::new(1.0, 0.0), Complex64::new(1.0, 0.0)],
             modes: vec![0, 1, 0, 0, 2, 3],
@@ -785,7 +785,7 @@ mod tests {
 
         let permutation = vec![4, 2, 5, 3];
 
-        let permuted = op.permute_modes(permutation).ok();
+        let relabeled = op.relabel_modes(permutation).ok();
 
         let expected = MajoranaOperator {
             coeffs: vec![Complex64::new(1.0, 0.0), Complex64::new(1.0, 0.0)],
@@ -793,11 +793,11 @@ mod tests {
             boundaries: vec![0, 2, 6],
         };
 
-        assert_eq!(permuted, Some(expected));
+        assert_eq!(relabeled, Some(expected));
     }
 
     #[test]
-    fn test_permute_modes_duplicate_err() {
+    fn test_relabel_modes_duplicate_err() {
         let op = MajoranaOperator {
             coeffs: vec![Complex64::new(1.0, 0.0), Complex64::new(1.0, 0.0)],
             modes: vec![0, 1, 0, 0, 2, 3],
@@ -806,13 +806,13 @@ mod tests {
 
         let permutation = vec![4, 4, 2, 3];
 
-        let permuted = op.permute_modes(permutation);
+        let relabeled = op.relabel_modes(permutation);
 
-        assert!(matches!(permuted, Err(CoherenceError::DuplicateIndices)));
+        assert!(matches!(relabeled, Err(CoherenceError::DuplicateIndices)));
     }
 
     #[test]
-    fn test_permute_modes_index_too_small_err() {
+    fn test_relabel_modes_index_too_small_err() {
         let op = MajoranaOperator {
             coeffs: vec![Complex64::new(1.0, 0.0), Complex64::new(1.0, 0.0)],
             modes: vec![0, 1, 0, 0, 2, 3],
@@ -821,8 +821,8 @@ mod tests {
 
         let permutation = vec![4, 2, 5];
 
-        let permuted = op.permute_modes(permutation);
+        let relabeled = op.relabel_modes(permutation);
 
-        assert!(matches!(permuted, Err(CoherenceError::IndexMapTooSmall)));
+        assert!(matches!(relabeled, Err(CoherenceError::IndexMapTooSmall)));
     }
 }

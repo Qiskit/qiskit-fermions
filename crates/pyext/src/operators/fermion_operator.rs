@@ -255,7 +255,7 @@ impl FermionOperatorDataIter {
 ///    ichop
 ///    simplify
 ///    normal_ordered
-///    permute_indices
+///    relabel_modes
 ///
 /// Properties
 /// ^^^^^^^^^^
@@ -710,7 +710,7 @@ impl PyFermionOperator {
         self.inner.conserves_particle_number()
     }
 
-    /// Returns a new operator with permuted indices.
+    /// Returns a new operator with relabeled modes.
     ///
     /// .. doctest::
     ///     >>> from qiskit_fermions.operators import FermionOperator
@@ -719,8 +719,8 @@ impl PyFermionOperator {
     ///     ...     ((True, 0), (False, 1), (True, 2), (False, 3)): 1,
     ///     ... })
     ///     >>> permutation = [5, 6, 4, 3]
-    ///     >>> permuted = op.permute_indices(permutation)
-    ///     >>> print(permuted)
+    ///     >>> relabeled = op.relabel_modes(permutation)
+    ///     >>> print(relabeled)
     ///       1.000000e0 +0.000000e0j * (+_5 -_6)
     ///       1.000000e0 +0.000000e0j * (+_5 -_6 +_4 -_3)
     ///
@@ -728,9 +728,9 @@ impl PyFermionOperator {
     ///     permutation: the index permutation list.
     ///
     /// Returns:
-    ///     A new operator with its indices permuted.
-    fn permute_indices(&self, permutation: Vec<u32>) -> PyResult<Self> {
-        let out = self.inner.permute_indices(permutation);
+    ///     A new operator with its modes relabeled.
+    fn relabel_modes(&self, permutation: Vec<u32>) -> PyResult<Self> {
+        let out = self.inner.relabel_modes(permutation);
         match out {
             Ok(op) => Ok(Self { inner: op }),
             Err(e) => Err(PyValueError::new_err(e.to_string())),

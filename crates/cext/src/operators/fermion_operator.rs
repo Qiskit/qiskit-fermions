@@ -783,7 +783,7 @@ pub unsafe extern "C" fn qf_ferm_op_len(op: *const FermionOperator) -> usize {
 
 /// @ingroup qf_ferm_op
 ///
-/// @brief Permutes the indices of the provided operator.
+/// @brief Relabels the indices of the provided operator.
 ///
 /// @param op A pointer to the fermionic operator.
 /// @param num_indices The number of indices in the provided permutation list.
@@ -810,13 +810,13 @@ pub unsafe extern "C" fn qf_ferm_op_len(op: *const FermionOperator) -> usize {
 ///
 ///     uint32_t permutation[4] = {3, 2, 1, 0};
 ///
-///     QfExitCode exit = qf_ferm_op_permute_indices(op, 4, permutation);
+///     QfExitCode exit = qf_ferm_op_relabel_modes(op, 4, permutation);
 ///
 ///     assert(exit == QfExitCode_Success);
 ///
 /// @endrst
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn qf_ferm_op_permute_indices(
+pub unsafe extern "C" fn qf_ferm_op_relabel_modes(
     op: *mut FermionOperator,
     num_indices: u64,
     permutation: *const u32,
@@ -826,8 +826,8 @@ pub unsafe extern "C" fn qf_ferm_op_permute_indices(
 
     let permutation = unsafe { slice_from_ptr(permutation, num_indices as usize).to_vec() };
 
-    let permuted_op = match op.permute_indices(permutation) {
-        Ok(permuted) => permuted,
+    let relabeled_op = match op.relabel_modes(permutation) {
+        Ok(relabeled) => relabeled,
         Err(e) => {
             return match e {
                 CoherenceError::DuplicateIndices => ExitCode::DuplicateIndexError,
@@ -836,6 +836,6 @@ pub unsafe extern "C" fn qf_ferm_op_permute_indices(
         }
     };
 
-    *op = permuted_op;
+    *op = relabeled_op;
     ExitCode::Success
 }

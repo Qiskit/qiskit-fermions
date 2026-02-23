@@ -293,30 +293,30 @@ class FermionOperatorTests(ABC):
         comm.ichop()
         assert comm.equiv(cls.one())
 
-    def test_permute_indices(self, subtests):
+    def test_relabel_modes(self, subtests):
         cls = self.get_class()
 
         op = cls.from_dict({(cre(0), ann(1)): 1, (cre(0), ann(0), cre(2), ann(3)): 1})
 
         with subtests.test("valid"):
             permutation = [4, 2, 5, 3]
-            permuted = op.permute_indices(permutation)
+            relabeled = op.relabel_modes(permutation)
             expected = cls.from_dict({(cre(4), ann(2)): 1, (cre(4), ann(4), cre(5), ann(3)): 1})
-            assert permuted.equiv(expected)
+            assert relabeled.equiv(expected)
 
         with (
             subtests.test("duplicate indices"),
             pytest.raises(ValueError, match="duplicate indices"),
         ):
             permutation = [4, 4, 5, 3]
-            op.permute_indices(permutation)
+            op.relabel_modes(permutation)
 
         with (
             subtests.test("index map too small"),
             pytest.raises(ValueError, match="does not account for the entire length"),
         ):
             permutation = [4, 2, 5]
-            op.permute_indices(permutation)
+            op.relabel_modes(permutation)
 
 
 class TestFermionOperator(FermionOperatorTests):
