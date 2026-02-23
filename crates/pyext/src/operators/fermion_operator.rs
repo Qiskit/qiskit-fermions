@@ -88,12 +88,12 @@ impl FermionOperatorDataIter {
 ///    ============== =================================================================================
 ///    ``coeffs``     A vector of complex coefficients consisting of two 64-bit floating point numbers.
 ///    ``actions``    A vector of booleans storing the nature of the second-quantization actions.
-///    ``indices``    A vector of 32-bit integers storing the fermionic mode indices acted upon.
-///    ``boundaries`` A vector of integers indicating the boundaries in ``actions`` and ``indices``.
+///    ``modes``      A vector of 32-bit integers storing the fermionic mode indices acted upon.
+///    ``boundaries`` A vector of integers indicating the boundaries in ``actions`` and ``modes``.
 ///    ============== =================================================================================
 ///
 /// Entries in ``actions`` indicate creation (annihilation) operators by ``True`` (``False``).
-/// Fermionic modes indexed by ``indices`` are considered spinless.
+/// Fermionic modes indexed by ``modes`` are considered spinless.
 ///
 /// This data structure allows for very efficient construction and manipulation of operators.
 /// However, it implies that duplicate terms may be contained in an operator at any moment.
@@ -109,9 +109,9 @@ impl FermionOperatorDataIter {
 ///     >>> from qiskit_fermions.operators import FermionOperator
 ///     >>> coeffs = [1.0, 2.0, -3.0, 4.0j, -0.5j]
 ///     >>> actions = [True, False, False, True, True, True, False, False]
-///     >>> indices = [0, 0, 0, 1, 0, 1, 2, 3]
+///     >>> modes = [0, 0, 0, 1, 0, 1, 2, 3]
 ///     >>> boundaries = [0, 0, 1, 2, 4, 8]
-///     >>> op = FermionOperator(coeffs, actions, indices, boundaries)
+///     >>> op = FermionOperator(coeffs, actions, modes, boundaries)
 ///     >>> print(op)
 ///       1.000000e0 +0.000000e0j * ()
 ///      -3.000000e0 +0.000000e0j * (-_0)
@@ -141,7 +141,7 @@ impl FermionOperatorDataIter {
 ///      -0.000000e0-5.000000e-1j * (+_0 +_1 -_2 -_3)
 ///
 /// In this example, we have leveraged :func:`.cre` and :func:`.ann` for creating the creation and
-/// annihilation operators at the specified indices.
+/// annihilation operators at the specified modes.
 ///
 /// In addition, the following construction and quick helper methods are available:
 ///
@@ -295,14 +295,14 @@ impl PyFermionOperator {
     fn new(
         coeffs: Vec<Complex64>,
         actions: Vec<bool>,
-        indices: Vec<u32>,
+        modes: Vec<u32>,
         boundaries: Vec<usize>,
     ) -> Self {
         Self {
             inner: FermionOperator {
                 coeffs,
                 actions,
-                indices,
+                modes,
                 boundaries,
             },
         }
@@ -334,23 +334,23 @@ impl PyFermionOperator {
     fn from_dict(_cls: &Bound<'_, PyType>, data: HashMap<Vec<(bool, u32)>, Complex64>) -> Self {
         let mut coeffs = vec![];
         let mut actions = vec![];
-        let mut indices = vec![];
+        let mut modes = vec![];
         let mut boundaries = vec![0];
 
         data.iter().for_each(|(terms, coeff)| {
             coeffs.push(*coeff);
             terms.iter().for_each(|(action, idx)| {
                 actions.push(*action);
-                indices.push(*idx);
+                modes.push(*idx);
             });
-            boundaries.push(indices.len());
+            boundaries.push(modes.len());
         });
 
         Self {
             inner: FermionOperator {
                 coeffs,
                 actions,
-                indices,
+                modes,
                 boundaries,
             },
         }
@@ -367,8 +367,8 @@ impl PyFermionOperator {
                 if !actions_eq {
                     return Ok(false);
                 }
-                let indices_eq = self.inner.indices == other.inner.indices;
-                if !indices_eq {
+                let modes_eq = self.inner.modes == other.inner.modes;
+                if !modes_eq {
                     return Ok(false);
                 }
                 let boundaries_eq = self.inner.boundaries == other.inner.boundaries;
@@ -386,8 +386,8 @@ impl PyFermionOperator {
                 if !actions_neq {
                     return Ok(false);
                 }
-                let indices_neq = self.inner.indices != other.inner.indices;
-                if !indices_neq {
+                let modes_neq = self.inner.modes != other.inner.modes;
+                if !modes_neq {
                     return Ok(false);
                 }
                 let boundaries_neq = self.inner.boundaries != other.inner.boundaries;
@@ -633,7 +633,7 @@ impl PyFermionOperator {
     /// Returns an equivalent operator with normal ordered terms.
     ///
     /// The normal order of an operator term is defined such that all creation actions before all
-    /// annihilation actions and the indices of actions within each group descend lexicographically
+    /// annihilation actions and the modes of actions within each group descend lexicographically
     /// (e.g. ``+_1 +_0 -_1 -_0``).
     ///
     /// .. note::

@@ -104,16 +104,16 @@ impl FermionOperator {
         op.coeffs.push(c);
         op.actions.push(true);
         op.actions.push(false);
-        op.indices.push(i);
-        op.indices.push(a);
-        op.boundaries.push(op.indices.len());
+        op.modes.push(i);
+        op.modes.push(a);
+        op.boundaries.push(op.modes.len());
         if i != a {
             op.coeffs.push(c);
             op.actions.push(true);
             op.actions.push(false);
-            op.indices.push(a);
-            op.indices.push(i);
-            op.boundaries.push(op.indices.len());
+            op.modes.push(a);
+            op.modes.push(i);
+            op.boundaries.push(op.modes.len());
         }
     }
 
@@ -124,11 +124,11 @@ impl FermionOperator {
         op.actions.push(true);
         op.actions.push(false);
         op.actions.push(false);
-        op.indices.push(i);
-        op.indices.push(j);
-        op.indices.push(b);
-        op.indices.push(a);
-        op.boundaries.push(op.indices.len());
+        op.modes.push(i);
+        op.modes.push(j);
+        op.modes.push(b);
+        op.modes.push(a);
+        op.boundaries.push(op.modes.len());
     }
 }
 
@@ -314,7 +314,7 @@ mod tests {
                 .map(|c| Complex64::new(*c, 0.0))
                 .collect(),
             actions: vec![true, false].iter().cloned().cycle().take(16).collect(),
-            indices: vec![0, 0, 2, 2, 1, 0, 0, 1, 3, 2, 2, 3, 1, 1, 3, 3],
+            modes: vec![0, 0, 2, 2, 1, 0, 0, 1, 3, 2, 2, 3, 1, 1, 3, 3],
             boundaries: vec![0, 2, 4, 6, 8, 10, 12, 14, 16],
         };
 
@@ -339,7 +339,7 @@ mod tests {
                 .map(|c| Complex64::new(*c, 0.0))
                 .collect(),
             actions: vec![true, false].iter().cloned().cycle().take(16).collect(),
-            indices: vec![0, 0, 1, 0, 0, 1, 1, 1, 2, 2, 3, 2, 2, 3, 3, 3],
+            modes: vec![0, 0, 1, 0, 0, 1, 1, 1, 2, 2, 3, 2, 2, 3, 3, 3],
             boundaries: vec![0, 2, 4, 6, 8, 10, 12, 14, 16],
         };
 
@@ -369,7 +369,7 @@ mod tests {
                 .cycle()
                 .take(256)
                 .collect(),
-            indices: vec![
+            modes: vec![
                 0, 0, 0, 0, 2, 0, 0, 2, 0, 2, 2, 0, 2, 2, 2, 2, 1, 0, 0, 0, 3, 0, 0, 2, 1, 2, 2, 0,
                 3, 2, 2, 2, 0, 0, 0, 1, 2, 0, 0, 3, 0, 2, 2, 1, 2, 2, 2, 3, 0, 1, 0, 0, 2, 1, 0, 2,
                 0, 3, 2, 0, 2, 3, 2, 2, 0, 0, 1, 0, 2, 0, 1, 2, 0, 2, 3, 0, 2, 2, 3, 2, 1, 1, 0, 0,
@@ -418,7 +418,7 @@ mod tests {
                 .cycle()
                 .take(256)
                 .collect(),
-            indices: vec![
+            modes: vec![
                 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 1, 0, 1,
                 1, 0, 1, 0, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0,
                 0, 1, 1, 1, 1, 1, 1, 1, 0, 2, 2, 0, 2, 0, 0, 2, 0, 3, 2, 0, 3, 0, 0, 2, 0, 2, 3, 0,
