@@ -526,16 +526,16 @@ impl PyFermionOperator {
     /// .. doctest::
     ///     >>> from qiskit_fermions.operators import FermionOperator
     ///     >>> op = FermionOperator.from_dict({(): 1e-4, ((True, 0),): 1e-6, ((False, 0),): 1e-10})
-    ///     >>> print(op)  # doctest: +FLOAT_CMP
+    ///     >>> print(op)
     ///       1.000000e-4 +0.000000e0j * ()
     ///      1.000000e-10 +0.000000e0j * (-_0)
     ///       1.000000e-6 +0.000000e0j * (+_0)
     ///     >>> op.ichop()
-    ///     >>> print(op)  # doctest: +FLOAT_CMP
+    ///     >>> print(op)
     ///       1.000000e-4 +0.000000e0j * ()
     ///       1.000000e-6 +0.000000e0j * (+_0)
     ///     >>> op.ichop(1e-5)
-    ///     >>> print(op)  # doctest: +FLOAT_CMP
+    ///     >>> print(op)
     ///       1.000000e-4 +0.000000e0j * ()
     ///
     /// Args:
@@ -580,7 +580,7 @@ impl PyFermionOperator {
     ///     >>> from qiskit_fermions.operators import FermionOperator
     ///     >>> op = FermionOperator.from_dict({(): -1.0j, ((True, 0), (False, 1)): 1.0})
     ///     >>> adj = op.adjoint()
-    ///     >>> print(adj)  # doctest: +FLOAT_CMP
+    ///     >>> print(adj)
     ///      -0.000000e0 +1.000000e0j * ()
     ///       1.000000e0 -0.000000e0j * (+_1 -_0)
     ///
@@ -631,7 +631,7 @@ impl PyFermionOperator {
     /// .. doctest::
     ///     >>> from qiskit_fermions.operators import FermionOperator
     ///     >>> op = FermionOperator.from_dict({((False, 1), (True, 1), (False, 0), (True, 0)): 1})
-    ///     >>> print(op.normal_ordered().simplify())  # doctest: +FLOAT_CMP
+    ///     >>> print(op.normal_ordered().simplify())
     ///       1.000000e0 +0.000000e0j * ()
     ///      -1.000000e0 +0.000000e0j * (+_0 -_0)
     ///      -1.000000e0 +0.000000e0j * (+_1 -_1)

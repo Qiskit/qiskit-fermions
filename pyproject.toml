@@ -54,7 +54,7 @@ basetest = [
 ]
 doctest = [
     {include-group = "basetest"},
-    "pytest-doctestplus>=1.2.1",
+    "sybil>=9.3.0",
 ]
 test = [
     {include-group = "basetest"},

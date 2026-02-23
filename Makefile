@@ -18,7 +18,7 @@ export BINDGEN_EXTRA_CLANG_ARGS := "-I$(shell python -c "import sysconfig; print
 lint: export LD_LIBRARY_PATH := $(LD_LIBRARY_PATH):${QISKIT_ROOT}/qiskit
 lint: export DYLD_LIBRARY_PATH := $(DYLD_LIBRARY_PATH):${QISKIT_ROOT}/qiskit
 lint:
-	cargo clippy
+	cargo clippy -- -D warnings
 	tox -e lint
 
 style: export LD_LIBRARY_PATH := $(LD_LIBRARY_PATH):${QISKIT_ROOT}/qiskit
@@ -96,13 +96,13 @@ pyinstall:
 testpython: export LD_LIBRARY_PATH := $(LD_LIBRARY_PATH):${QISKIT_ROOT}/qiskit
 testpython: export DYLD_LIBRARY_PATH := $(DYLD_LIBRARY_PATH):${QISKIT_ROOT}/qiskit
 testpython: pyext
-	python -m pytest -s --doctest-plus --doctest-glob "*.pyi"
+	python -m pytest -s -p no:doctest
 
 .PHONY: pycoverage
 pycoverage: export LD_LIBRARY_PATH := $(LD_LIBRARY_PATH):${QISKIT_ROOT}/qiskit
 pycoverage: export DYLD_LIBRARY_PATH := $(DYLD_LIBRARY_PATH):${QISKIT_ROOT}/qiskit
 pycoverage: pyext
-	python -m pytest -s --doctest-plus --doctest-glob "*.pyi" --cov=python/qiskit_fermions/
+	python -m pytest -s -p no:doctest --cov=python/qiskit_fermions/
 
 # ==============================================================================
 # Recipes for Documentation Testing
@@ -112,7 +112,7 @@ pycoverage: pyext
 doctest: export LD_LIBRARY_PATH := $(LD_LIBRARY_PATH):${QISKIT_ROOT}/qiskit
 doctest: export DYLD_LIBRARY_PATH := $(DYLD_LIBRARY_PATH):${QISKIT_ROOT}/qiskit
 doctest: pyext
-	python -m pytest docs/ -s --doctest-plus --doctest-only --doctest-glob "*.rst"
+	python -m pytest docs/ -s -p no:doctest docs/
 
 # ==============================================================================
 # Variables that can be set/modified to modify the C builds.
