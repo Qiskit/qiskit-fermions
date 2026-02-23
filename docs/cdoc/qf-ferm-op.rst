@@ -53,12 +53,12 @@ commonly used for sparse matrices. More concretely, a single operator contains 4
    ============== =================================================================================
    ``coeffs``     A vector of complex coefficients consisting of two 64-bit floating point numbers.
    ``actions``    A vector of booleans storing the nature of the second-quantization actions.
-   ``indices``    A vector of 32-bit integers storing the fermionic mode indices acted upon.
-   ``boundaries`` A vector of integers indicating the boundaries in ``actions`` and ``indices``.
+   ``modes``      A vector of 32-bit integers storing the fermionic mode indices acted upon.
+   ``boundaries`` A vector of integers indicating the boundaries in ``actions`` and ``modes``.
    ============== =================================================================================
 
 Entries in ``actions`` indicate creation (annihilation) operators by ``True`` (``False``).
-Fermionic modes indexed by ``indices`` are considered spinless.
+Fermionic modes indexed by ``modes`` are considered spinless.
 
 This data structure allows for very efficient construction and manipulation of operators.
 However, it implies that duplicate terms may be contained in an operator at any moment.

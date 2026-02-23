@@ -39,13 +39,13 @@ Example
    QfFermionOperator *op1 = qf_ferm_op_zero();
    QkComplex64 coeff1 = {1.0, 0.0};
    bool action1[2] = {true, false};
-   uint32_t indices1[2] = {0, 0};
-   qf_ferm_op_add_term(op1, 2, action1, indices1, &coeff1);
+   uint32_t modes1[2] = {0, 0};
+   qf_ferm_op_add_term(op1, 2, action1, modes1, &coeff1);
    QfFermionOperator *op2 = qf_ferm_op_zero();
    QkComplex64 coeff2 = {2.0, 0.0};
    bool action2[2] = {false, true};
-   uint32_t indices2[2] = {0, 0};
-   qf_ferm_op_add_term(op2, 2, action2, indices2, &coeff2);
+   uint32_t modes2[2] = {0, 0};
+   qf_ferm_op_add_term(op2, 2, action2, modes2, &coeff2);
 
    QfFermionOperator *comm = qf_ferm_op_commutator(op1, op2);
 
@@ -79,13 +79,13 @@ Example
    QfFermionOperator *op1 = qf_ferm_op_zero();
    QkComplex64 coeff1 = {1.0, 0.0};
    bool action1[2] = {true, false};
-   uint32_t indices1[2] = {0, 0};
-   qf_ferm_op_add_term(op1, 2, action1, indices1, &coeff1);
+   uint32_t modes1[2] = {0, 0};
+   qf_ferm_op_add_term(op1, 2, action1, modes1, &coeff1);
    QfFermionOperator *op2 = qf_ferm_op_zero();
    QkComplex64 coeff2 = {2.0, 0.0};
    bool action2[2] = {false, true};
-   uint32_t indices2[2] = {0, 0};
-   qf_ferm_op_add_term(op2, 2, action2, indices2, &coeff2);
+   uint32_t modes2[2] = {0, 0};
+   qf_ferm_op_add_term(op2, 2, action2, modes2, &coeff2);
 
    QfFermionOperator *anti_comm = qf_ferm_op_anti_commutator(op1, op2);
 
@@ -133,17 +133,17 @@ Example
    QfFermionOperator *op1 = qf_ferm_op_zero();
    QkComplex64 coeff1 = {1.0, 0.0};
    bool action1[2] = {true, false};
-   uint32_t indices1[2] = {0, 0};
-   qf_ferm_op_add_term(op1, 2, action1, indices1, &coeff1);
+   uint32_t modes1[2] = {0, 0};
+   qf_ferm_op_add_term(op1, 2, action1, modes1, &coeff1);
    QfFermionOperator *op2 = qf_ferm_op_zero();
    QkComplex64 coeff2 = {2.0, 0.0};
    bool action2[2] = {false, true};
-   uint32_t indices2[2] = {0, 0};
-   qf_ferm_op_add_term(op2, 2, action2, indices2, &coeff2);
+   uint32_t modes2[2] = {0, 0};
+   qf_ferm_op_add_term(op2, 2, action2, modes2, &coeff2);
    QfFermionOperator *op3 = qf_ferm_op_zero();
-   qf_ferm_op_add_term(op3, 2, action1, indices1, &coeff1);
+   qf_ferm_op_add_term(op3, 2, action1, modes1, &coeff1);
    QkComplex64 coeff3 = {2.0, 0.5};
-   qf_ferm_op_add_term(op3, 2, action2, indices2, &coeff3);
+   qf_ferm_op_add_term(op3, 2, action2, modes2, &coeff3);
 
    QfFermionOperator *double_comm = qf_ferm_op_double_commutator(op1, op2, op3, false);
 
