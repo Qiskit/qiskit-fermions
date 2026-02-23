@@ -75,13 +75,13 @@ mod tests {
         let op1 = FermionOperator {
             coeffs: vec![Complex64::new(1.0, 0.0), Complex64::new(2.0, 0.0)],
             actions: vec![true, false, true, false],
-            indices: vec![0, 1, 2, 3],
+            modes: vec![0, 1, 2, 3],
             boundaries: vec![0, 2, 4],
         };
         let op2 = FermionOperator {
             coeffs: vec![Complex64::new(1.0, 0.0), Complex64::new(2.0, 0.0)],
             actions: vec![true, false, true, false],
-            indices: vec![1, 0, 3, 2],
+            modes: vec![1, 0, 3, 2],
             boundaries: vec![0, 2, 4],
         };
         let comm = commutator(&op1, &op2);
@@ -92,7 +92,7 @@ mod tests {
                 .map(|c| Complex64::new(*c, 0.0))
                 .collect(),
             actions: vec![true, false].iter().cloned().cycle().take(32).collect(),
-            indices: vec![
+            modes: vec![
                 1, 0, 0, 1, 3, 2, 0, 1, 1, 0, 2, 3, 3, 2, 2, 3, 0, 1, 1, 0, 2, 3, 1, 0, 0, 1, 3, 2,
                 2, 3, 3, 2,
             ],
@@ -107,13 +107,13 @@ mod tests {
         let op1 = FermionOperator {
             coeffs: vec![Complex64::new(1.0, 0.0), Complex64::new(2.0, 0.0)],
             actions: vec![true, false, true, false],
-            indices: vec![0, 1, 2, 3],
+            modes: vec![0, 1, 2, 3],
             boundaries: vec![0, 2, 4],
         };
         let op2 = FermionOperator {
             coeffs: vec![Complex64::new(1.0, 0.0), Complex64::new(2.0, 0.0)],
             actions: vec![true, false, true, false],
-            indices: vec![1, 0, 3, 2],
+            modes: vec![1, 0, 3, 2],
             boundaries: vec![0, 2, 4],
         };
         let comm = anti_commutator(&op1, &op2);
@@ -124,7 +124,7 @@ mod tests {
                 .map(|c| Complex64::new(*c, 0.0))
                 .collect(),
             actions: vec![true, false].iter().cloned().cycle().take(32).collect(),
-            indices: vec![
+            modes: vec![
                 1, 0, 0, 1, 3, 2, 0, 1, 1, 0, 2, 3, 3, 2, 2, 3, 0, 1, 1, 0, 2, 3, 1, 0, 0, 1, 3, 2,
                 2, 3, 3, 2,
             ],
@@ -139,19 +139,19 @@ mod tests {
         let op1 = FermionOperator {
             coeffs: vec![Complex64::new(1.0, 0.0)],
             actions: vec![true, false],
-            indices: vec![0, 0],
+            modes: vec![0, 0],
             boundaries: vec![0, 2],
         };
         let op2 = FermionOperator {
             coeffs: vec![Complex64::new(2.0, 0.0)],
             actions: vec![false, true],
-            indices: vec![0, 0],
+            modes: vec![0, 0],
             boundaries: vec![0, 2],
         };
         let op3 = FermionOperator {
             coeffs: vec![Complex64::new(1.0, 0.0), Complex64::new(2.0, 0.5)],
             actions: vec![true, false, false, true],
-            indices: vec![0, 0, 0, 0],
+            modes: vec![0, 0, 0, 0],
             boundaries: vec![0, 2, 4],
         };
         let comm = double_commutator(&op1, &op2, &op3, false);
