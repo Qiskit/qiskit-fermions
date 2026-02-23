@@ -824,7 +824,7 @@ pub unsafe extern "C" fn qf_ferm_op_relabel_modes(
     // SAFETY: Per documentation, the pointers are non-null and aligned.
     let op = unsafe { mut_ptr_as_ref(op) };
 
-    let permutation = unsafe { slice_from_ptr(permutation, num_indices as usize).to_vec() };
+    let permutation = unsafe { slice_from_ptr(permutation, num_modes as usize).to_vec() };
 
     let relabeled_op = match op.relabel_modes(permutation) {
         Ok(relabeled) => relabeled,
