@@ -61,7 +61,6 @@ extensions = [
     "sphinx_design",
     "nbsphinx",
     "qiskit_sphinx_theme",
-    "pytest_doctestplus.sphinx.doctestplus",
     "sphinxcontrib.katex",
     "breathe",
 ]
