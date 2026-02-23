@@ -111,6 +111,7 @@ impl MajoranaOperatorDataIter {
 /// An operator can be constructed directly by providing the arrays outlined above:
 ///
 /// .. doctest::
+///
 ///     >>> from qiskit_fermions.operators import MajoranaOperator
 ///     >>> coeffs = [1.0, -2.0, 3.0j, -0.5j]
 ///     >>> modes = [0, 1, 0, 2, 0, 1, 2, 3]
@@ -125,6 +126,7 @@ impl MajoranaOperatorDataIter {
 /// For convenience, it is possible to construct an operator from a Python dictionary like so:
 ///
 /// .. doctest::
+///
 ///     >>> from qiskit_fermions.operators import gamma
 ///     >>> op = MajoranaOperator.from_dict(
 ///     ...     {
@@ -156,6 +158,7 @@ impl MajoranaOperatorDataIter {
 /// cannot be iterated over directly:
 ///
 /// .. doctest::
+///
 ///     >>> list(iter(op))
 ///     Traceback (most recent call last):
 ///       ...
@@ -164,6 +167,7 @@ impl MajoranaOperatorDataIter {
 /// Instead, this class provides custom iterators to fulfill this purpose:
 ///
 /// .. doctest::
+///
 ///     >>> list(sorted(op.iter_terms()))
 ///     [([], (1+0j)), ([0, 1], (-2+0j)), ([0, 1, 2, 3], (-0-0.5j)), ([0, 2], 3j)]
 ///
@@ -186,6 +190,7 @@ impl MajoranaOperatorDataIter {
 /// ^^^^^^^^^^^^^^^^^^^^
 ///
 /// .. doctest::
+///
 ///     >>> op = MajoranaOperator.one()
 ///     >>> (op + op).simplify()
 ///     MajoranaOperator.from_dict({(): 2+0j})
@@ -202,6 +207,7 @@ impl MajoranaOperatorDataIter {
 /// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ///
 /// .. doctest::
+///
 ///     >>> op = MajoranaOperator.one()
 ///     >>> (2 * op).simplify()
 ///     MajoranaOperator.from_dict({(): 2+0j})
@@ -223,6 +229,7 @@ impl MajoranaOperatorDataIter {
 ///    operator that performs "first ``a`` and then ``b``".
 ///
 /// .. doctest::
+///
 ///     >>> op1 = MajoranaOperator.from_dict({(): 2.0, (gamma(0, False),): 3.0})
 ///     >>> op2 = MajoranaOperator.from_dict({(): 1.5, (gamma(0, True),): 4.0})
 ///     >>> comp = (op1 & op2).simplify()
@@ -300,6 +307,7 @@ impl PyMajoranaOperator {
     /// Constructs a new operator from a dictionary.
     ///
     /// .. doctest::
+    ///
     ///     >>> from qiskit_fermions.operators import MajoranaOperator
     ///     >>> op = MajoranaOperator.from_dict(
     ///     ...     {
@@ -414,6 +422,7 @@ impl PyMajoranaOperator {
     /// Adding the operator that is constructed by this method to another one has no effect.
     ///
     /// .. doctest::
+    ///
     ///     >>> from qiskit_fermions.operators import MajoranaOperator
     ///     >>> op = MajoranaOperator.from_dict({(): 2.0})
     ///     >>> zero = MajoranaOperator.zero()
@@ -433,6 +442,7 @@ impl PyMajoranaOperator {
     /// Composing the operator that is constructed by this method with another one has no effect.
     ///
     /// .. doctest::
+    ///
     ///     >>> from qiskit_fermions.operators import MajoranaOperator
     ///     >>> op = MajoranaOperator.from_dict({(): 2.0})
     ///     >>> one = MajoranaOperator.one()
@@ -476,6 +486,7 @@ impl PyMajoranaOperator {
     /// magnitude which should not be truncated:
     ///
     /// .. doctest::
+    ///
     ///     >>> from qiskit_fermions.operators import MajoranaOperator
     ///     >>> coeffs = [1e-5] * int(1e5)
     ///     >>> boundaries = [0] + [0] * int(1e5)
@@ -504,6 +515,7 @@ impl PyMajoranaOperator {
     ///    separate coefficients for duplicate terms consider calling :meth:`.simplify` instead!
     ///
     /// .. doctest::
+    ///
     ///     >>> from qiskit_fermions.operators import MajoranaOperator
     ///     >>> op = MajoranaOperator.from_dict({(): 1e-4, (0,): 1e-6, (1,): 1e-10})
     ///     >>> print(op)
@@ -531,6 +543,7 @@ impl PyMajoranaOperator {
     ///    Mutating the iteration items does **not** affect the underlying operator data.
     ///
     /// .. doctest::
+    ///
     ///     >>> from qiskit_fermions.operators import MajoranaOperator
     ///     >>> op = MajoranaOperator.from_dict({(): 2.0, (0,): 1.0, (1,): -1.0j})
     ///     >>> list(sorted(op.iter_terms()))
@@ -557,6 +570,7 @@ impl PyMajoranaOperator {
     /// - the coefficients are complex conjugated
     ///
     /// .. doctest::
+    ///
     ///     >>> from qiskit_fermions.operators import MajoranaOperator
     ///     >>> op = MajoranaOperator.from_dict({(): -1.0j, (gamma(0, False), gamma(0, True)): 1.0})
     ///     >>> adj = op.adjoint()
@@ -579,6 +593,7 @@ impl PyMajoranaOperator {
     /// ``atol``.
     ///
     /// .. doctest::
+    ///
     ///     >>> from qiskit_fermions.operators import MajoranaOperator
     ///     >>> op = MajoranaOperator.from_dict({(): 1e-7})
     ///     >>> zero = MajoranaOperator.zero()
@@ -606,6 +621,7 @@ impl PyMajoranaOperator {
     /// ``[\gamma(1, True), \gamma(1, False), \gamma(0, True), \gamma(0, False)] = [3, 2, 1, 0]``.
     ///
     /// .. doctest::
+    ///
     ///     >>> from qiskit_fermions.operators import MajoranaOperator
     ///     >>> op = MajoranaOperator.from_dict({(gamma(0, False), gamma(0, True), gamma(0, False)): 1})
     ///     >>> print(op.normal_ordered(reduce=False))
@@ -633,6 +649,7 @@ impl PyMajoranaOperator {
     ///    of ``self`` and its :meth:`.adjoint` and :meth:`.zero`.
     ///
     /// .. doctest::
+    ///
     ///     >>> from qiskit_fermions.operators import MajoranaOperator
     ///     >>> op = MajoranaOperator.from_dict({
     ///     ...     (0, 1, 2, 3): 1.00001j,
@@ -661,6 +678,7 @@ impl PyMajoranaOperator {
     ///    operator.
     ///
     /// .. doctest::
+    ///
     ///     >>> from qiskit_fermions.operators import MajoranaOperator
     ///     >>> op = MajoranaOperator.from_dict({(0, 1, 2, 3): 1})
     ///     >>> op.many_body_order()
@@ -678,6 +696,7 @@ impl PyMajoranaOperator {
     ///    An operator is considered even when all of its terms contain an even number of actions.
     ///
     /// .. doctest::
+    ///
     ///     >>> from qiskit_fermions.operators import MajoranaOperator
     ///     >>> op = MajoranaOperator.from_dict({(0, 1): 1})
     ///     >>> op.is_even()
