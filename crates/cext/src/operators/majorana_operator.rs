@@ -756,7 +756,7 @@ pub unsafe extern "C" fn qf_maj_op_len(op: *const MajoranaOperator) -> usize {
 /// @brief Relabels the modes of the provided operator.
 ///
 /// @param op A pointer to the Majorana operator.
-/// @param num_modes The number of modes in the provided permutation list.
+/// @param num_modes The number of mode indices in the provided permutation list.
 /// @param permutation The index permutation list.
 ///
 /// @return An exit code.

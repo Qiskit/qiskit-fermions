@@ -786,7 +786,7 @@ pub unsafe extern "C" fn qf_ferm_op_len(op: *const FermionOperator) -> usize {
 /// @brief Relabels the indices of the provided operator.
 ///
 /// @param op A pointer to the fermionic operator.
-/// @param num_indices The number of indices in the provided permutation list.
+/// @param num_modes The number of mode indices in the provided permutation list.
 /// @param permutation The index permutation list.
 ///
 /// @return An exit code.
@@ -818,7 +818,7 @@ pub unsafe extern "C" fn qf_ferm_op_len(op: *const FermionOperator) -> usize {
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn qf_ferm_op_relabel_modes(
     op: *mut FermionOperator,
-    num_indices: u64,
+    num_modes: u64,
     permutation: *const u32,
 ) -> ExitCode {
     // SAFETY: Per documentation, the pointers are non-null and aligned.

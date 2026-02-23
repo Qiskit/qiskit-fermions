@@ -138,8 +138,8 @@ impl FermionOperator {
             return Err(CoherenceError::DuplicateIndices);
         }
         let mut out = self.clone();
-        let new_indices: Result<Vec<u32>, CoherenceError> = self
-            .indices
+        let new_modes: Result<Vec<u32>, CoherenceError> = self
+            .modes
             .iter()
             .map(|&idx| {
                 permutation
@@ -148,7 +148,7 @@ impl FermionOperator {
                     .ok_or(CoherenceError::IndexMapTooSmall)
             })
             .collect();
-        out.indices = new_indices?;
+        out.modes = new_modes?;
         Ok(out)
     }
 }
@@ -809,7 +809,7 @@ mod tests {
         let op = FermionOperator {
             coeffs: vec![Complex64::new(1.0, 0.0), Complex64::new(1.0, 0.0)],
             actions: vec![true, false, true, false, true, false],
-            indices: vec![0, 1, 0, 0, 2, 3],
+            modes: vec![0, 1, 0, 0, 2, 3],
             boundaries: vec![0, 2, 6],
         };
 
@@ -820,7 +820,7 @@ mod tests {
         let expected = FermionOperator {
             coeffs: vec![Complex64::new(1.0, 0.0), Complex64::new(1.0, 0.0)],
             actions: vec![true, false, true, false, true, false],
-            indices: vec![4, 2, 4, 4, 5, 3],
+            modes: vec![4, 2, 4, 4, 5, 3],
             boundaries: vec![0, 2, 6],
         };
 
@@ -832,7 +832,7 @@ mod tests {
         let op = FermionOperator {
             coeffs: vec![Complex64::new(1.0, 0.0), Complex64::new(1.0, 0.0)],
             actions: vec![true, false, true, false, true, false],
-            indices: vec![0, 1, 0, 0, 2, 3],
+            modes: vec![0, 1, 0, 0, 2, 3],
             boundaries: vec![0, 2, 6],
         };
 
@@ -848,7 +848,7 @@ mod tests {
         let op = FermionOperator {
             coeffs: vec![Complex64::new(1.0, 0.0), Complex64::new(1.0, 0.0)],
             actions: vec![true, false, true, false, true, false],
-            indices: vec![0, 1, 0, 0, 2, 3],
+            modes: vec![0, 1, 0, 0, 2, 3],
             boundaries: vec![0, 2, 6],
         };
 
