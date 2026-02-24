@@ -77,12 +77,14 @@ mod tests {
             actions: vec![true, false, true, false],
             modes: vec![0, 1, 2, 3],
             boundaries: vec![0, 2, 4],
+            groups: None,
         };
         let op2 = FermionOperator {
             coeffs: vec![Complex64::new(1.0, 0.0), Complex64::new(2.0, 0.0)],
             actions: vec![true, false, true, false],
             modes: vec![1, 0, 3, 2],
             boundaries: vec![0, 2, 4],
+            groups: None,
         };
         let comm = commutator(&op1, &op2);
 
@@ -97,6 +99,7 @@ mod tests {
                 2, 3, 3, 2,
             ],
             boundaries: vec![0, 4, 8, 12, 16, 20, 24, 28, 32],
+            groups: None,
         };
 
         assert_eq!(comm, expected);
@@ -109,12 +112,14 @@ mod tests {
             actions: vec![true, false, true, false],
             modes: vec![0, 1, 2, 3],
             boundaries: vec![0, 2, 4],
+            groups: None,
         };
         let op2 = FermionOperator {
             coeffs: vec![Complex64::new(1.0, 0.0), Complex64::new(2.0, 0.0)],
             actions: vec![true, false, true, false],
             modes: vec![1, 0, 3, 2],
             boundaries: vec![0, 2, 4],
+            groups: None,
         };
         let comm = anti_commutator(&op1, &op2);
 
@@ -129,6 +134,7 @@ mod tests {
                 2, 3, 3, 2,
             ],
             boundaries: vec![0, 4, 8, 12, 16, 20, 24, 28, 32],
+            groups: None,
         };
 
         assert_eq!(comm, expected);
@@ -141,18 +147,21 @@ mod tests {
             actions: vec![true, false],
             modes: vec![0, 0],
             boundaries: vec![0, 2],
+            groups: None,
         };
         let op2 = FermionOperator {
             coeffs: vec![Complex64::new(2.0, 0.0)],
             actions: vec![false, true],
             modes: vec![0, 0],
             boundaries: vec![0, 2],
+            groups: None,
         };
         let op3 = FermionOperator {
             coeffs: vec![Complex64::new(1.0, 0.0), Complex64::new(2.0, 0.5)],
             actions: vec![true, false, false, true],
             modes: vec![0, 0, 0, 0],
             boundaries: vec![0, 2, 4],
+            groups: None,
         };
         let comm = double_commutator(&op1, &op2, &op3, false);
         let normal_ordered = comm.normal_ordered();

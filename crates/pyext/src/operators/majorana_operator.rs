@@ -302,6 +302,7 @@ impl PyMajoranaOperator {
                 coeffs,
                 modes,
                 boundaries,
+                groups: None,
             },
         }
     }
@@ -347,6 +348,7 @@ impl PyMajoranaOperator {
                 coeffs,
                 modes,
                 boundaries,
+                groups: None,
             },
         }
     }

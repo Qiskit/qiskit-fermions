@@ -74,6 +74,8 @@ pub unsafe extern "C" fn qf_ferm_op_new(
                 .map(|b| *b as usize)
                 .collect()
         },
+        // TODO: expose groups (?)
+        groups: None,
     };
     Box::into_raw(Box::new(op))
 }
@@ -222,6 +224,8 @@ pub unsafe extern "C" fn qf_ferm_op_add_term(
     op.modes
         .extend_from_slice(unsafe { slice_from_ptr(modes, num_actions) });
     op.boundaries.push(op.modes.len());
+
+    // TODO: handle groups
 }
 
 /// @ingroup qf_ferm_op

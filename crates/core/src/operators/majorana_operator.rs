@@ -46,6 +46,7 @@ pub struct MajoranaOperator {
     pub coeffs: Vec<Complex64>,
     pub modes: Vec<u32>,
     pub boundaries: Vec<usize>,
+    pub groups: Option<Vec<u32>>,
 }
 
 crate::impl_operator_macro!(MajoranaOperator);
@@ -100,6 +101,7 @@ impl MajoranaOperator {
             coeffs,
             modes,
             boundaries,
+            groups: None,
         }
     }
 
@@ -242,6 +244,7 @@ impl OperatorTrait for MajoranaOperator {
             coeffs: vec![],
             modes: vec![],
             boundaries: vec![0],
+            groups: None,
         }
     }
 
@@ -250,6 +253,7 @@ impl OperatorTrait for MajoranaOperator {
             coeffs: vec![Complex64::new(1.0, 0.0)],
             modes: vec![],
             boundaries: vec![0, 0],
+            groups: None,
         }
     }
 
@@ -277,6 +281,7 @@ impl OperatorTrait for MajoranaOperator {
             coeffs,
             modes,
             boundaries: self.boundaries.to_vec(),
+            groups: self.groups.clone(),
         }
     }
 
@@ -286,6 +291,7 @@ impl OperatorTrait for MajoranaOperator {
         let offset = self.boundaries[self.boundaries.len() - 1];
         self.boundaries
             .extend(other.boundaries[1..].iter().map(|b| b + offset));
+        self.groups = None;
     }
 
     fn __imul__(&mut self, other: Complex64) {
@@ -309,6 +315,7 @@ impl OperatorTrait for MajoranaOperator {
         self.coeffs = coeffs;
         self.modes = modes;
         self.boundaries = boundaries;
+        self.groups = None;
     }
 
     fn ichop(&mut self, atol: f64) {
@@ -327,6 +334,7 @@ impl OperatorTrait for MajoranaOperator {
         self.coeffs = coeffs;
         self.modes = modes;
         self.boundaries = boundaries;
+        self.groups = None;
     }
 }
 
@@ -343,6 +351,7 @@ mod tests {
                 coeffs: vec![],
                 modes: vec![],
                 boundaries: vec![0],
+                groups: None,
             }
         );
     }
@@ -356,6 +365,7 @@ mod tests {
                 coeffs: vec![Complex64::new(1.0, 0.0)],
                 modes: vec![],
                 boundaries: vec![0, 0],
+                groups: None,
             }
         );
     }
@@ -367,6 +377,7 @@ mod tests {
             coeffs: vec![Complex64::new(2.0, 0.0)],
             modes: vec![],
             boundaries: vec![0, 0],
+            groups: None,
         };
         let three = one + two;
         assert_eq!(
@@ -375,6 +386,7 @@ mod tests {
                 coeffs: vec![Complex64::new(1.0, 0.0), Complex64::new(2.0, 0.0)],
                 modes: vec![],
                 boundaries: vec![0, 0, 0],
+                groups: None,
             }
         );
     }
@@ -386,6 +398,7 @@ mod tests {
             coeffs: vec![Complex64::new(2.0, 0.0)],
             modes: vec![],
             boundaries: vec![0, 0],
+            groups: None,
         };
         op += two;
         assert_eq!(
@@ -394,6 +407,7 @@ mod tests {
                 coeffs: vec![Complex64::new(1.0, 0.0), Complex64::new(2.0, 0.0)],
                 modes: vec![],
                 boundaries: vec![0, 0, 0],
+                groups: None,
             }
         );
     }
@@ -405,6 +419,7 @@ mod tests {
             coeffs: vec![Complex64::new(2.0, 0.0)],
             modes: vec![],
             boundaries: vec![0, 0],
+            groups: None,
         };
         let new_one = two - one;
         assert_eq!(
@@ -413,6 +428,7 @@ mod tests {
                 coeffs: vec![Complex64::new(2.0, 0.0), Complex64::new(-1.0, 0.0)],
                 modes: vec![],
                 boundaries: vec![0, 0, 0],
+                groups: None,
             }
         );
     }
@@ -424,6 +440,7 @@ mod tests {
             coeffs: vec![Complex64::new(2.0, 0.0)],
             modes: vec![],
             boundaries: vec![0, 0],
+            groups: None,
         };
         op -= two;
         assert_eq!(
@@ -432,6 +449,7 @@ mod tests {
                 coeffs: vec![Complex64::new(1.0, 0.0), Complex64::new(-2.0, 0.0)],
                 modes: vec![],
                 boundaries: vec![0, 0, 0],
+                groups: None,
             }
         );
     }
@@ -446,6 +464,7 @@ mod tests {
                 coeffs: vec![Complex64::new(3.0, 0.0)],
                 modes: vec![],
                 boundaries: vec![0, 0],
+                groups: None,
             }
         );
     }
@@ -460,6 +479,7 @@ mod tests {
                 coeffs: vec![Complex64::new(3.0, 0.0)],
                 modes: vec![],
                 boundaries: vec![0, 0],
+                groups: None,
             }
         );
     }
@@ -474,6 +494,7 @@ mod tests {
                 coeffs: vec![Complex64::new(3.0, 0.0)],
                 modes: vec![],
                 boundaries: vec![0, 0],
+                groups: None,
             }
         );
     }
@@ -484,6 +505,7 @@ mod tests {
             coeffs: vec![Complex64::new(3.0, 0.0)],
             modes: vec![],
             boundaries: vec![0, 0],
+            groups: None,
         };
         let one_half = three / Complex64::new(2.0, 0.0);
         assert_eq!(
@@ -492,6 +514,7 @@ mod tests {
                 coeffs: vec![Complex64::new(1.5, 0.0)],
                 modes: vec![],
                 boundaries: vec![0, 0],
+                groups: None,
             }
         );
     }
@@ -502,6 +525,7 @@ mod tests {
             coeffs: vec![Complex64::new(3.0, 0.0)],
             modes: vec![],
             boundaries: vec![0, 0],
+            groups: None,
         };
         op /= Complex64::new(2.0, 0.0);
         assert_eq!(
@@ -510,6 +534,7 @@ mod tests {
                 coeffs: vec![Complex64::new(1.5, 0.0)],
                 modes: vec![],
                 boundaries: vec![0, 0],
+                groups: None,
             }
         );
     }
@@ -523,6 +548,7 @@ mod tests {
                 coeffs: vec![Complex64::new(-1.0, 0.0)],
                 modes: vec![],
                 boundaries: vec![0, 0],
+                groups: None,
             }
         );
     }
@@ -533,11 +559,13 @@ mod tests {
             coeffs: vec![Complex64::new(2.0, 0.0), Complex64::new(3.0, 0.0)],
             modes: vec![0, 1],
             boundaries: vec![0, 0, 2],
+            groups: None,
         };
         let op2 = MajoranaOperator {
             coeffs: vec![Complex64::new(1.5, 0.0), Complex64::new(4.0, 0.0)],
             modes: vec![1, 0],
             boundaries: vec![0, 0, 2],
+            groups: None,
         };
         let result = op1 & op2;
         assert_eq!(
@@ -551,6 +579,7 @@ mod tests {
                 ],
                 modes: vec![1, 0, 0, 1, 1, 0, 0, 1],
                 boundaries: vec![0, 0, 2, 4, 8],
+                groups: None,
             }
         );
     }
@@ -561,11 +590,13 @@ mod tests {
             coeffs: vec![Complex64::new(2.0, 0.0), Complex64::new(3.0, 0.0)],
             modes: vec![0, 1],
             boundaries: vec![0, 0, 2],
+            groups: None,
         };
         let op2 = MajoranaOperator {
             coeffs: vec![Complex64::new(1.5, 0.0), Complex64::new(4.0, 0.0)],
             modes: vec![1, 0],
             boundaries: vec![0, 0, 2],
+            groups: None,
         };
         op1 &= op2;
         assert_eq!(
@@ -579,6 +610,7 @@ mod tests {
                 ],
                 modes: vec![1, 0, 0, 1, 1, 0, 0, 1],
                 boundaries: vec![0, 0, 2, 4, 8],
+                groups: None,
             }
         );
     }
@@ -589,6 +621,7 @@ mod tests {
             coeffs: vec![Complex64::new(2.0, 0.0)],
             modes: vec![0],
             boundaries: vec![0, 1],
+            groups: None,
         };
         // exponent=0
         let one = MajoranaOperator::one();
@@ -605,6 +638,7 @@ mod tests {
                 coeffs: vec![Complex64::new(4.0, 0.0),],
                 modes: vec![0, 0],
                 boundaries: vec![0, 2],
+                groups: None,
             }
         );
     }
@@ -619,6 +653,7 @@ mod tests {
             ],
             modes: vec![0, 1],
             boundaries: vec![0, 0, 1, 2],
+            groups: None,
         };
 
         op.ichop(1e-7);
@@ -627,6 +662,7 @@ mod tests {
             coeffs: vec![Complex64::new(1e-4, 0.0), Complex64::new(1e-6, 0.0)],
             modes: vec![0],
             boundaries: vec![0, 0, 1],
+            groups: None,
         };
 
         assert_eq!(op, expected1);
@@ -637,6 +673,7 @@ mod tests {
             coeffs: vec![Complex64::new(1e-4, 0.0)],
             modes: vec![],
             boundaries: vec![0, 0],
+            groups: None,
         };
 
         assert_eq!(op, expected2);
@@ -648,6 +685,7 @@ mod tests {
             coeffs: vec![Complex64::new(0.0, 2.0), Complex64::new(3.0, 0.0)],
             modes: vec![0, 1],
             boundaries: vec![0, 0, 2],
+            groups: None,
         };
         let adj = op1.adjoint();
         assert_eq!(
@@ -656,6 +694,7 @@ mod tests {
                 coeffs: vec![Complex64::new(0.0, -2.0), Complex64::new(3.0, 0.0)],
                 modes: vec![1, 0],
                 boundaries: vec![0, 0, 2],
+                groups: None,
             }
         );
     }
@@ -667,6 +706,7 @@ mod tests {
             coeffs: vec![Complex64::new(1e-8, 0.0)],
             modes: vec![],
             boundaries: vec![0, 0],
+            groups: None,
         };
         assert!(op.equiv(&zero, 1e-6));
         assert!(!op.equiv(&zero, 1e-10));
@@ -678,6 +718,7 @@ mod tests {
             coeffs: vec![Complex64::new(1.0, 0.0)],
             modes: vec![1, 0],
             boundaries: vec![0, 2],
+            groups: None,
         };
 
         assert_eq!(op.normal_ordered(false), op);
@@ -689,12 +730,14 @@ mod tests {
             coeffs: vec![Complex64::new(1.0, 0.0)],
             modes: vec![0, 1],
             boundaries: vec![0, 2],
+            groups: None,
         };
 
         let expected = MajoranaOperator {
             coeffs: vec![Complex64::new(-1.0, 0.0)],
             modes: vec![1, 0],
             boundaries: vec![0, 2],
+            groups: None,
         };
 
         assert_eq!(op.normal_ordered(false), expected);
@@ -706,12 +749,14 @@ mod tests {
             coeffs: vec![Complex64::new(1.0, 0.0)],
             modes: vec![0, 0],
             boundaries: vec![0, 2],
+            groups: None,
         };
 
         let expected = MajoranaOperator {
             coeffs: vec![Complex64::new(1.0, 0.0)],
             modes: vec![],
             boundaries: vec![0, 0],
+            groups: None,
         };
 
         assert_eq!(op.normal_ordered(true), expected);
@@ -723,6 +768,7 @@ mod tests {
             coeffs: vec![Complex64::new(0.0, 1.00001), Complex64::new(0.0, -1.0)],
             modes: vec![0, 1, 2, 3, 3, 2, 1, 0],
             boundaries: vec![0, 4, 8],
+            groups: None,
         };
         assert!(op.is_hermitian(1e-4));
         assert!(!op.is_hermitian(1e-6));
@@ -737,6 +783,7 @@ mod tests {
                 coeffs: vec![Complex64::new(1.0, 0.0)],
                 modes: vec![0],
                 boundaries: vec![0, 1],
+                groups: None,
             }
             .many_body_order(),
             1
@@ -747,6 +794,7 @@ mod tests {
                 coeffs: vec![Complex64::new(1.0, 0.0)],
                 modes: vec![0, 1],
                 boundaries: vec![0, 2],
+                groups: None,
             }
             .many_body_order(),
             2
@@ -762,6 +810,7 @@ mod tests {
                 coeffs: vec![Complex64::new(1.0, 0.0)],
                 modes: vec![0],
                 boundaries: vec![0, 1],
+                groups: None,
             }
             .is_even()
         );
@@ -770,6 +819,7 @@ mod tests {
                 coeffs: vec![Complex64::new(1.0, 0.0)],
                 modes: vec![0, 1, 2, 3],
                 boundaries: vec![0, 4],
+                groups: None,
             }
             .is_even()
         );
@@ -781,6 +831,7 @@ mod tests {
             coeffs: vec![Complex64::new(1.0, 0.0), Complex64::new(1.0, 0.0)],
             modes: vec![0, 1, 0, 0, 2, 3],
             boundaries: vec![0, 2, 6],
+            groups: None,
         };
 
         let permutation = vec![4, 2, 5, 3];
@@ -791,6 +842,7 @@ mod tests {
             coeffs: vec![Complex64::new(1.0, 0.0), Complex64::new(1.0, 0.0)],
             modes: vec![4, 2, 4, 4, 5, 3],
             boundaries: vec![0, 2, 6],
+            groups: None,
         };
 
         assert_eq!(relabeled, Some(expected));
@@ -802,6 +854,7 @@ mod tests {
             coeffs: vec![Complex64::new(1.0, 0.0), Complex64::new(1.0, 0.0)],
             modes: vec![0, 1, 0, 0, 2, 3],
             boundaries: vec![0, 2, 6],
+            groups: None,
         };
 
         let permutation = vec![4, 4, 2, 3];
@@ -817,6 +870,7 @@ mod tests {
             coeffs: vec![Complex64::new(1.0, 0.0), Complex64::new(1.0, 0.0)],
             modes: vec![0, 1, 0, 0, 2, 3],
             boundaries: vec![0, 2, 6],
+            groups: None,
         };
 
         let permutation = vec![4, 2, 5];

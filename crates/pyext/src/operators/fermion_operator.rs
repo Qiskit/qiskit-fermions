@@ -306,6 +306,7 @@ impl PyFermionOperator {
                 actions,
                 modes,
                 boundaries,
+                groups: None,
             },
         }
     }
@@ -354,6 +355,7 @@ impl PyFermionOperator {
                 actions,
                 modes,
                 boundaries,
+                groups: None,
             },
         }
     }
