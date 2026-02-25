@@ -221,5 +221,6 @@ pub enum CoherenceError {
 }
 
 pub mod fermion_operator;
+pub mod grouping;
 pub mod library;
 pub mod majorana_operator;
