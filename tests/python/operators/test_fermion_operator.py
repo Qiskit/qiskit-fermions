@@ -12,6 +12,7 @@
 
 from abc import ABC, abstractmethod
 
+import pytest
 from qiskit_fermions.operators import FermionOperator, ann, cre
 from qiskit_fermions.operators.library import anti_commutator, commutator
 
@@ -74,9 +75,9 @@ class FermionOperatorTests(ABC):
         cls = self.get_class()
         coeffs = [1e-10, 2, 3, 4, -4]
         actions = [True, True, False, False]
-        indices = [0, 0, 1, 1]
+        modes = [0, 0, 1, 1]
         boundaries = [0, 0, 1, 2, 3, 4]
-        op = cls(coeffs, actions, indices, boundaries)
+        op = cls(coeffs, actions, modes, boundaries)
         canon = op.simplify()
         assert canon.equiv(cls.from_dict({((True, 0),): 5}), 1e-12)
 
@@ -84,9 +85,9 @@ class FermionOperatorTests(ABC):
         cls = self.get_class()
         coeffs = [1e-5] * int(1e5)
         actions = []
-        indices = []
+        modes = []
         boundaries = [0] + [0] * int(1e5)
-        op = cls(coeffs, actions, indices, boundaries)
+        op = cls(coeffs, actions, modes, boundaries)
         canon = op.simplify(1e-4)
         assert canon.equiv(op.one(), 1e-6)
         op.ichop(1e-4)
@@ -291,6 +292,31 @@ class FermionOperatorTests(ABC):
         comm = comm.normal_ordered()
         comm.ichop()
         assert comm.equiv(cls.one())
+
+    def test_relabel_modes(self, subtests):
+        cls = self.get_class()
+
+        op = cls.from_dict({(cre(0), ann(1)): 1, (cre(0), ann(0), cre(2), ann(3)): 1})
+
+        with subtests.test("valid"):
+            permutation = [4, 2, 5, 3]
+            relabeled = op.relabel_modes(permutation)
+            expected = cls.from_dict({(cre(4), ann(2)): 1, (cre(4), ann(4), cre(5), ann(3)): 1})
+            assert relabeled.equiv(expected)
+
+        with (
+            subtests.test("duplicate indices"),
+            pytest.raises(ValueError, match="duplicate indices"),
+        ):
+            permutation = [4, 4, 5, 3]
+            op.relabel_modes(permutation)
+
+        with (
+            subtests.test("index map too small"),
+            pytest.raises(ValueError, match="does not account for the entire length"),
+        ):
+            permutation = [4, 2, 5]
+            op.relabel_modes(permutation)
 
 
 class TestFermionOperator(FermionOperatorTests):

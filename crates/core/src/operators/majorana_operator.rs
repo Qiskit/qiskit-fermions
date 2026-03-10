@@ -10,9 +10,9 @@
 // copyright notice, and modified files need to carry a notice indicating
 // that they have been altered from the originals.
 
-use crate::operators::{OperatorMacro, OperatorTrait};
+use crate::operators::{CoherenceError, OperatorMacro, OperatorTrait};
 use num_complex::{Complex64, ComplexFloat};
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::ops::{
     Add, AddAssign, BitAnd, BitAndAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign,
 };
@@ -132,6 +132,25 @@ impl MajoranaOperator {
             prev_b = *b;
         }
         true
+    }
+
+    pub fn relabel_modes(&self, permutation: Vec<u32>) -> Result<Self, CoherenceError> {
+        if permutation.iter().collect::<HashSet<_>>().len() != permutation.len() {
+            return Err(CoherenceError::DuplicateIndices);
+        }
+        let mut out = self.clone();
+        let new_modes: Result<Vec<u32>, CoherenceError> = self
+            .modes
+            .iter()
+            .map(|&idx| {
+                permutation
+                    .get(idx as usize)
+                    .cloned()
+                    .ok_or(CoherenceError::IndexMapTooSmall)
+            })
+            .collect();
+        out.modes = new_modes?;
+        Ok(out)
     }
 }
 
@@ -754,5 +773,56 @@ mod tests {
             }
             .is_even()
         );
+    }
+
+    #[test]
+    fn test_relabel_modes() {
+        let op = MajoranaOperator {
+            coeffs: vec![Complex64::new(1.0, 0.0), Complex64::new(1.0, 0.0)],
+            modes: vec![0, 1, 0, 0, 2, 3],
+            boundaries: vec![0, 2, 6],
+        };
+
+        let permutation = vec![4, 2, 5, 3];
+
+        let relabeled = op.relabel_modes(permutation).ok();
+
+        let expected = MajoranaOperator {
+            coeffs: vec![Complex64::new(1.0, 0.0), Complex64::new(1.0, 0.0)],
+            modes: vec![4, 2, 4, 4, 5, 3],
+            boundaries: vec![0, 2, 6],
+        };
+
+        assert_eq!(relabeled, Some(expected));
+    }
+
+    #[test]
+    fn test_relabel_modes_duplicate_err() {
+        let op = MajoranaOperator {
+            coeffs: vec![Complex64::new(1.0, 0.0), Complex64::new(1.0, 0.0)],
+            modes: vec![0, 1, 0, 0, 2, 3],
+            boundaries: vec![0, 2, 6],
+        };
+
+        let permutation = vec![4, 4, 2, 3];
+
+        let relabeled = op.relabel_modes(permutation);
+
+        assert!(matches!(relabeled, Err(CoherenceError::DuplicateIndices)));
+    }
+
+    #[test]
+    fn test_relabel_modes_index_too_small_err() {
+        let op = MajoranaOperator {
+            coeffs: vec![Complex64::new(1.0, 0.0), Complex64::new(1.0, 0.0)],
+            modes: vec![0, 1, 0, 0, 2, 3],
+            boundaries: vec![0, 2, 6],
+        };
+
+        let permutation = vec![4, 2, 5];
+
+        let relabeled = op.relabel_modes(permutation);
+
+        assert!(matches!(relabeled, Err(CoherenceError::IndexMapTooSmall)));
     }
 }

@@ -68,6 +68,7 @@ def commutator(op_a: SupportsCommutators, op_b: SupportsCommutators) -> Supports
        Both inputs must be of the same operator type. This will also determine the output type.
 
     .. doctest::
+
        >>> from qiskit_fermions.operators import FermionOperator
        >>> from qiskit_fermions.operators.library import commutator
        >>> op1 = FermionOperator.from_dict({((True, 0), (False, 0)): 1})
@@ -102,6 +103,7 @@ def anti_commutator(op_a: SupportsCommutators, op_b: SupportsCommutators) -> Sup
        Both inputs must be of the same operator type. This will also determine the output type.
 
     .. doctest::
+
        >>> from qiskit_fermions.operators import FermionOperator
        >>> from qiskit_fermions.operators.library import anti_commutator
        >>> op1 = FermionOperator.from_dict({((True, 0), (False, 0)): 1})
@@ -147,6 +149,7 @@ def double_commutator(
        All three inputs must be of the same operator type. This will also determine the output type.
 
     .. doctest::
+
        >>> from qiskit_fermions.operators import FermionOperator
        >>> from qiskit_fermions.operators.library import anti_commutator
        >>> op1 = FermionOperator.from_dict({((True, 0), (False, 0)): 1})

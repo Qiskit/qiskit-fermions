@@ -21,23 +21,23 @@ static int test_new(void) {
     uint64_t num_terms = 3;
     uint64_t num_actions = 4;
     bool actions[4] = {true, false, true, false};
-    uint32_t indices[4] = {0, 1, 2, 3};
+    uint32_t modes[4] = {0, 1, 2, 3};
     QkComplex64 coeffs[3] = {{1.0, 0.0}, {-1.0, 0.0}, {0.0, -1.0}};
     uint32_t boundaries[4] = {0, 0, 2, 4};
     QfFermionOperator *op =
-        qf_ferm_op_new(num_terms, num_actions, coeffs, actions, indices, boundaries);
+        qf_ferm_op_new(num_terms, num_actions, coeffs, actions, modes, boundaries);
 
     QfFermionOperator *expected = qf_ferm_op_zero();
     QkComplex64 coeff0 = {1.0, 0.0};
     qf_ferm_op_add_term(expected, 0, NULL, NULL, &coeff0);
     bool action1[2] = {true, false};
-    uint32_t indices1[2] = {0, 1};
+    uint32_t modes1[2] = {0, 1};
     QkComplex64 coeff1 = {-1.0, 0.0};
-    qf_ferm_op_add_term(expected, 2, action1, indices1, &coeff1);
+    qf_ferm_op_add_term(expected, 2, action1, modes1, &coeff1);
     bool action2[2] = {true, false};
-    uint32_t indices2[2] = {2, 3};
+    uint32_t modes2[2] = {2, 3};
     QkComplex64 coeff2 = {0.0, -1.0};
-    qf_ferm_op_add_term(expected, 2, action2, indices2, &coeff2);
+    qf_ferm_op_add_term(expected, 2, action2, modes2, &coeff2);
 
     bool is_equal = qf_ferm_op_equal(op, expected);
 
@@ -145,26 +145,26 @@ static int test_compose(void) {
     uint64_t num_actions = 2;
     bool actions[2] = {true, false};
     uint32_t boundaries[3] = {0, 0, 2};
-    uint32_t indices1[2] = {0, 1};
+    uint32_t modes1[2] = {0, 1};
     QkComplex64 coeffs1[2] = {{2.0, 0.0}, {3.0, 0.0}};
     QfFermionOperator *op1 =
-        qf_ferm_op_new(num_terms, num_actions, coeffs1, actions, indices1, boundaries);
+        qf_ferm_op_new(num_terms, num_actions, coeffs1, actions, modes1, boundaries);
 
-    uint32_t indices2[2] = {1, 0};
+    uint32_t modes2[2] = {1, 0};
     QkComplex64 coeffs2[2] = {{1.5, 0.0}, {4.0, 0.0}};
     QfFermionOperator *op2 =
-        qf_ferm_op_new(num_terms, num_actions, coeffs2, actions, indices2, boundaries);
+        qf_ferm_op_new(num_terms, num_actions, coeffs2, actions, modes2, boundaries);
 
     QfFermionOperator *result = qf_ferm_op_compose(op1, op2);
 
     num_terms = 4;
     num_actions = 8;
     bool actions_exp[8] = {true, false, true, false, true, false, true, false};
-    uint32_t indices_exp[8] = {1, 0, 0, 1, 1, 0, 0, 1};
+    uint32_t modes_exp[8] = {1, 0, 0, 1, 1, 0, 0, 1};
     QkComplex64 coeffs_exp[4] = {{3.0, 0.0}, {8.0, 0.0}, {4.5, 0.0}, {12.0, 0.0}};
     uint32_t boundaries_exp[5] = {0, 0, 2, 4, 8};
-    QfFermionOperator *expected = qf_ferm_op_new(num_terms, num_actions, coeffs_exp, actions_exp,
-                                                 indices_exp, boundaries_exp);
+    QfFermionOperator *expected =
+        qf_ferm_op_new(num_terms, num_actions, coeffs_exp, actions_exp, modes_exp, boundaries_exp);
 
     bool is_equal = qf_ferm_op_equal(result, expected);
 
@@ -203,19 +203,19 @@ static int test_simplify(void) {
     uint64_t num_terms = 5;
     uint64_t num_actions = 4;
     bool actions[4] = {true, true, false, false};
-    uint32_t indices[4] = {0, 0, 1, 1};
+    uint32_t modes[4] = {0, 0, 1, 1};
     QkComplex64 coeffs[5] = {{1e-10, 0.0}, {2.0, 0.0}, {3.0, 0.0}, {4.0, 0.0}, {-4.0, 0.0}};
     uint32_t boundaries[6] = {0, 0, 1, 2, 3, 4};
     QfFermionOperator *op =
-        qf_ferm_op_new(num_terms, num_actions, coeffs, actions, indices, boundaries);
+        qf_ferm_op_new(num_terms, num_actions, coeffs, actions, modes, boundaries);
 
     QfFermionOperator *canon = qf_ferm_op_simplify(op, 1e-8);
 
     QfFermionOperator *expected = qf_ferm_op_zero();
     bool actions_exp[1] = {true};
-    uint32_t indices_exp[1] = {0};
+    uint32_t modes_exp[1] = {0};
     QkComplex64 coeff = {5.0, 0.0};
-    qf_ferm_op_add_term(expected, 1, actions_exp, indices_exp, &coeff);
+    qf_ferm_op_add_term(expected, 1, actions_exp, modes_exp, &coeff);
 
     bool is_equal = qf_ferm_op_equiv(canon, expected, 1e-10);
 
@@ -291,20 +291,20 @@ static int test_adjoint(void) {
 static int test_normal_ordered(void) {
     QfFermionOperator *op = qf_ferm_op_zero();
     bool action[4] = {false, true, false, true};
-    uint32_t indices[4] = {1, 1, 0, 0};
+    uint32_t modes[4] = {1, 1, 0, 0};
     QkComplex64 coeff = {1.0, 0.0};
-    qf_ferm_op_add_term(op, 4, action, indices, &coeff);
+    qf_ferm_op_add_term(op, 4, action, modes, &coeff);
 
     QfFermionOperator *normal_ordered = qf_ferm_op_normal_ordered(op);
 
     uint64_t num_terms = 4;
     uint64_t num_actions = 8;
     bool actions_exp[8] = {true, false, true, false, true, true, false, false};
-    uint32_t indices_exp[8] = {0, 0, 1, 1, 1, 0, 1, 0};
+    uint32_t modes_exp[8] = {0, 0, 1, 1, 1, 0, 1, 0};
     QkComplex64 coeffs_exp[4] = {{1.0, 0.0}, {-1.0, 0.0}, {-1.0, 0.0}, {-1.0, 0.0}};
     uint32_t boundaries_exp[5] = {0, 0, 2, 4, 8};
-    QfFermionOperator *expected = qf_ferm_op_new(num_terms, num_actions, coeffs_exp, actions_exp,
-                                                 indices_exp, boundaries_exp);
+    QfFermionOperator *expected =
+        qf_ferm_op_new(num_terms, num_actions, coeffs_exp, actions_exp, modes_exp, boundaries_exp);
 
     bool is_equal = qf_ferm_op_equiv(normal_ordered, expected, 1e-10);
 
@@ -321,12 +321,12 @@ static int test_normal_ordered(void) {
 static int test_is_hermitian(void) {
     QfFermionOperator *op = qf_ferm_op_zero();
     bool action[2] = {true, false};
-    uint32_t indices1[2] = {0, 1};
+    uint32_t modes1[2] = {0, 1};
     QkComplex64 coeff1 = {0.0, 1.00001};
-    qf_ferm_op_add_term(op, 2, action, indices1, &coeff1);
-    uint32_t indices2[2] = {1, 0};
+    qf_ferm_op_add_term(op, 2, action, modes1, &coeff1);
+    uint32_t modes2[2] = {1, 0};
     QkComplex64 coeff2 = {0.0, -1};
-    qf_ferm_op_add_term(op, 2, action, indices2, &coeff2);
+    qf_ferm_op_add_term(op, 2, action, modes2, &coeff2);
 
     bool is_hermitian = qf_ferm_op_is_hermitian(op, 1e-4);
 
@@ -345,9 +345,9 @@ static int test_is_hermitian(void) {
 static int test_many_body_order(void) {
     QfFermionOperator *op = qf_ferm_op_zero();
     bool action[4] = {true, false, true, false};
-    uint32_t indices[4] = {0, 1, 2, 3};
+    uint32_t modes[4] = {0, 1, 2, 3};
     QkComplex64 coeff = {1.0, 0.0};
-    qf_ferm_op_add_term(op, 4, action, indices, &coeff);
+    qf_ferm_op_add_term(op, 4, action, modes, &coeff);
 
     uint32_t many_body_order = qf_ferm_op_many_body_order(op);
 
@@ -364,16 +364,16 @@ static int test_many_body_order(void) {
 static int test_conserves_particle_number(void) {
     QfFermionOperator *op1 = qf_ferm_op_zero();
     bool action1[2] = {true, false};
-    uint32_t indices1[2] = {0, 1};
+    uint32_t modes1[2] = {0, 1};
     QkComplex64 coeff = {1.0, 0.0};
-    qf_ferm_op_add_term(op1, 2, action1, indices1, &coeff);
+    qf_ferm_op_add_term(op1, 2, action1, modes1, &coeff);
 
     bool conserves = qf_ferm_op_conserves_particle_number(op1);
 
     QfFermionOperator *op2 = qf_ferm_op_zero();
     bool action2[1] = {true};
-    uint32_t indices2[1] = {0};
-    qf_ferm_op_add_term(op2, 1, action2, indices2, &coeff);
+    uint32_t modes2[1] = {0};
+    qf_ferm_op_add_term(op2, 1, action2, modes2, &coeff);
 
     bool not_conserves = qf_ferm_op_conserves_particle_number(op2);
 
@@ -391,9 +391,9 @@ static int test_conserves_particle_number(void) {
 static int test_len(void) {
     QfFermionOperator *op = qf_ferm_op_zero();
     bool action[4] = {true, false, true, false};
-    uint32_t indices[4] = {0, 1, 2, 3};
+    uint32_t modes[4] = {0, 1, 2, 3};
     QkComplex64 coeff = {1.0, 0.0};
-    qf_ferm_op_add_term(op, 4, action, indices, &coeff);
+    qf_ferm_op_add_term(op, 4, action, modes, &coeff);
 
     size_t len = qf_ferm_op_len(op);
 
@@ -405,6 +405,79 @@ static int test_len(void) {
         return EqualityError;
     }
     return Ok;
+}
+
+static int test_relabel_modes(void) {
+    QfFermionOperator *op = qf_ferm_op_zero();
+    QkComplex64 coeff = {1.0, 0.0};
+    bool action1[2] = {true, false};
+    uint32_t modes1[2] = {0, 1};
+    qf_ferm_op_add_term(op, 2, action1, modes1, &coeff);
+    bool action2[4] = {true, false, true, false};
+    uint32_t modes2[4] = {0, 0, 2, 3};
+    qf_ferm_op_add_term(op, 4, action2, modes2, &coeff);
+
+    uint32_t permutation[4] = {4, 2, 5, 3};
+
+    QfExitCode exit = qf_ferm_op_relabel_modes(op, 4, permutation);
+
+    if (exit != QfExitCode_Success) {
+        qf_ferm_op_free(op);
+        return RuntimeError;
+    }
+
+    uint64_t num_terms = 2;
+    uint64_t num_actions = 6;
+    bool actions_exp[6] = {true, false, true, false, true, false};
+    uint32_t modes_exp[6] = {4, 2, 4, 4, 5, 3};
+    QkComplex64 coeffs_exp[2] = {{1.0, 0.0}, {1.0, 0.0}};
+    uint32_t boundaries_exp[3] = {0, 2, 6};
+    QfFermionOperator *expected = qf_ferm_op_new(num_terms, num_actions, coeffs_exp, actions_exp,
+                                                 modes_exp, boundaries_exp);
+
+    bool is_equal = qf_ferm_op_equal(op, expected);
+
+    qf_ferm_op_free(op);
+    qf_ferm_op_free(expected);
+
+    if (!is_equal) {
+        return EqualityError;
+    }
+    return Ok;
+}
+
+static int test_relabel_modes_duplicate_err(void) {
+    QfFermionOperator *op = qf_ferm_op_zero();
+    QkComplex64 coeff = {1.0, 0.0};
+    bool action1[2] = {true, false};
+    uint32_t modes1[2] = {0, 1};
+    qf_ferm_op_add_term(op, 2, action1, modes1, &coeff);
+    bool action2[4] = {true, false, true, false};
+    uint32_t modes2[4] = {0, 0, 2, 3};
+    qf_ferm_op_add_term(op, 4, action2, modes2, &coeff);
+
+    uint32_t permutation[4] = {4, 4, 5, 3};
+
+    QfExitCode exit = qf_ferm_op_relabel_modes(op, 4, permutation);
+
+    return exit == QfExitCode_DuplicateIndexError ? Ok : EqualityError;
+}
+
+static int test_relabel_modes_too_small_err(void) {
+    QfFermionOperator *op = qf_ferm_op_zero();
+    QkComplex64 coeff = {1.0, 0.0};
+    bool action1[2] = {true, false};
+    uint32_t modes1[2] = {0, 1};
+    qf_ferm_op_add_term(op, 2, action1, modes1, &coeff);
+    bool action2[4] = {true, false, true, false};
+    uint32_t modes2[4] = {0, 0, 2, 3};
+    qf_ferm_op_add_term(op, 4, action2, modes2, &coeff);
+
+    uint32_t permutation[4] = {4, 2, 5};
+
+    QfExitCode exit = qf_ferm_op_relabel_modes(op, 3, permutation);
+
+    return exit == QfExitCode_IndexError ? Ok : EqualityError;
 }
 
 int test_fermion_operator(void) {
@@ -425,6 +498,9 @@ int test_fermion_operator(void) {
     num_failed += RUN_TEST(test_many_body_order);
     num_failed += RUN_TEST(test_conserves_particle_number);
     num_failed += RUN_TEST(test_len);
+    num_failed += RUN_TEST(test_relabel_modes);
+    num_failed += RUN_TEST(test_relabel_modes_duplicate_err);
+    num_failed += RUN_TEST(test_relabel_modes_too_small_err);
 
     fflush(stderr);
     fprintf(stderr, "=== Number of failed subtests: %i\n", num_failed);

@@ -53,6 +53,7 @@ use qiskit_fermions_core::mappers::library::jordan_wigner::jordan_wigner;
 /// upon, one can specify the number of qubits to map onto when calling this function.
 ///
 /// .. doctest::
+///
 ///     >>> from qiskit_fermions.mappers.library import jordan_wigner
 ///     >>> from qiskit_fermions.operators import FermionOperator
 ///     >>> fop = FermionOperator.from_dict(

@@ -40,6 +40,7 @@ def map_fermion_action_generators(
        If ``compose=None`` it must also support composition of two instances via ``__and__``.
 
     .. doctest::
+
         >>> from qiskit_fermions.mappers import map_fermion_action_generators
         >>> from qiskit_fermions.operators import FermionAction, FermionOperator, ann, cre
         >>> from qiskit.quantum_info import SparsePauliOp

@@ -15,7 +15,7 @@ use crate::pointers::{const_ptr_as_ref, mut_ptr_as_ref, slice_from_ptr};
 
 use num_complex::Complex64;
 use qiskit_fermions_core::operators::majorana_operator::MajoranaOperator;
-use qiskit_fermions_core::operators::{OperatorMacro, OperatorTrait};
+use qiskit_fermions_core::operators::{CoherenceError, OperatorMacro, OperatorTrait};
 
 /// @ingroup qf_maj_op
 ///
@@ -173,8 +173,6 @@ pub unsafe extern "C" fn qf_maj_op_one() -> *mut MajoranaOperator {
 ///     ``num_modes``.
 /// @param coeff A pointer to the complex coefficient.
 ///
-/// @return An exit code.
-///
 /// @rst
 ///
 /// Any of the pointer arguments may be ``NULL`` if and only if their corresponding length is zero.
@@ -202,7 +200,7 @@ pub unsafe extern "C" fn qf_maj_op_add_term(
     num_modes: u64,
     modes: *const u32,
     coeff: *const Complex64,
-) -> ExitCode {
+) {
     // SAFETY: Per documentation, the pointers are non-null and aligned.
     let op = unsafe { mut_ptr_as_ref(op) };
     let coeff = unsafe { const_ptr_as_ref(coeff) };
@@ -213,8 +211,6 @@ pub unsafe extern "C" fn qf_maj_op_add_term(
     op.modes
         .extend_from_slice(unsafe { slice_from_ptr(modes, num_modes) });
     op.boundaries.push(op.modes.len());
-
-    ExitCode::Success
 }
 
 /// @ingroup qf_maj_op
@@ -403,7 +399,7 @@ pub unsafe extern "C" fn qf_maj_op_adjoint(op: *const MajoranaOperator) -> *mut 
 ///     QkComplex64 coeff = {1e-8};
 ///     qf_maj_op_add_term(op, 0, modes, &coeff);
 ///
-///     QfExitCode result = qf_maj_op_ichop(op, 1e-6);
+///     qf_maj_op_ichop(op, 1e-6);
 ///
 ///     QfMajoranaOperator *expected = qf_maj_op_zero();
 ///
@@ -411,13 +407,11 @@ pub unsafe extern "C" fn qf_maj_op_adjoint(op: *const MajoranaOperator) -> *mut 
 ///
 /// @endrst
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn qf_maj_op_ichop(op: *mut MajoranaOperator, atol: f64) -> ExitCode {
+pub unsafe extern "C" fn qf_maj_op_ichop(op: *mut MajoranaOperator, atol: f64) {
     // SAFETY: Per documentation, the pointers are non-null and aligned.
     let op = unsafe { mut_ptr_as_ref(op) };
 
     op.ichop(atol);
-
-    ExitCode::Success
 }
 
 /// @ingroup qf_maj_op
@@ -755,4 +749,62 @@ pub unsafe extern "C" fn qf_maj_op_len(op: *const MajoranaOperator) -> usize {
     let op = unsafe { const_ptr_as_ref(op) };
 
     op.boundaries.len() - 1
+}
+
+/// @ingroup qf_maj_op
+///
+/// @brief Relabels the modes of the provided operator.
+///
+/// @param op A pointer to the Majorana operator.
+/// @param num_modes The number of mode indices in the provided permutation list.
+/// @param permutation The index permutation list.
+///
+/// @return An exit code.
+/// * ``QfExitCode_Success`` upon success
+/// * ``QfExitCode_DuplicateIndexError`` if duplicate indices were found in the permutation
+/// * ``QfExitCode_IndexError`` for any other index errors, such as invalid indices.
+///
+/// @rst
+///
+/// Example
+/// -------
+///
+/// .. code-block:: c
+///     :linenos:
+///
+///     QfMajoranaOperator *op = qf_maj_op_zero();
+///     uint32_t modes[4] = {0, 1, 2, 3};
+///     QkComplex64 coeff = {1.0, 0.0};
+///     qf_maj_op_add_term(op, 4, modes, &coeff);
+///
+///     uint32_t permutation[4] = {3, 2, 1, 0};
+///
+///     QfExitCode exit = qf_maj_op_relabel_modes(op, 4, permutation);
+///
+///     assert(exit == QfExitCode_Success);
+///
+/// @endrst
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn qf_maj_op_relabel_modes(
+    op: *mut MajoranaOperator,
+    num_modes: u64,
+    permutation: *const u32,
+) -> ExitCode {
+    // SAFETY: Per documentation, the pointers are non-null and aligned.
+    let op = unsafe { mut_ptr_as_ref(op) };
+
+    let permutation = unsafe { slice_from_ptr(permutation, num_modes as usize).to_vec() };
+
+    let relabeled_op = match op.relabel_modes(permutation) {
+        Ok(relabeled) => relabeled,
+        Err(e) => {
+            return match e {
+                CoherenceError::DuplicateIndices => ExitCode::DuplicateIndexError,
+                _ => ExitCode::IndexError,
+            };
+        }
+    };
+
+    *op = relabeled_op;
+    ExitCode::Success
 }

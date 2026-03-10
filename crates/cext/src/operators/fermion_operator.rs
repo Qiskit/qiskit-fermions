@@ -15,7 +15,7 @@ use crate::pointers::{const_ptr_as_ref, mut_ptr_as_ref, slice_from_ptr};
 
 use num_complex::Complex64;
 use qiskit_fermions_core::operators::fermion_operator::FermionOperator;
-use qiskit_fermions_core::operators::{OperatorMacro, OperatorTrait};
+use qiskit_fermions_core::operators::{CoherenceError, OperatorMacro, OperatorTrait};
 
 /// @ingroup qf_ferm_op
 ///
@@ -27,8 +27,8 @@ use qiskit_fermions_core::operators::{OperatorMacro, OperatorTrait};
 ///     ``num_terms``.
 /// @param actions A pointer to an array of actions over all terms. The length of this array should
 ///     be ``num_actions``.
-/// @param indices A pointer to an array of action indices over all terms. The length of this
-///     array should be ``num_actions``.
+/// @param modes A pointer to an array of action modes over all terms. The length of this array
+///     should be ``num_actions``.
 /// @param boundaries A pointer to an array of the boundaries between terms. The length of this
 ///     array should be ``num_terms + 1``.
 ///
@@ -45,11 +45,11 @@ use qiskit_fermions_core::operators::{OperatorMacro, OperatorTrait};
 ///     uint64_t num_terms = 3;
 ///     uint64_t num_actions = 4;
 ///     bool actions[4] = {true, false, true, false};
-///     uint32_t indices[4] = {0, 1, 2, 3};
+///     uint32_t modes[4] = {0, 1, 2, 3};
 ///     QkComplex64 coeffs[3] = {{1.0, 0.0}, {-1.0, 0.0}, {0.0, -1.0}};
 ///     uint32_t boundaries[4] = {0, 0, 2, 4};
 ///     QfFermionOperator *op = qf_ferm_op_new(num_terms, num_actions, coeffs,
-///                                            actions, indices, boundaries);
+///                                            actions, modes, boundaries);
 ///
 /// @endrst
 #[unsafe(no_mangle)]
@@ -58,7 +58,7 @@ pub unsafe extern "C" fn qf_ferm_op_new(
     num_actions: u64,
     coeffs: *const Complex64,
     actions: *const bool,
-    indices: *const u32,
+    modes: *const u32,
     boundaries: *const u32,
 ) -> *mut FermionOperator {
     let num_terms = num_terms as usize;
@@ -67,7 +67,7 @@ pub unsafe extern "C" fn qf_ferm_op_new(
     let op = FermionOperator {
         coeffs: unsafe { slice_from_ptr(coeffs, num_terms).to_vec() },
         actions: unsafe { slice_from_ptr(actions, num_actions).to_vec() },
-        indices: unsafe { slice_from_ptr(indices, num_actions).to_vec() },
+        modes: unsafe { slice_from_ptr(modes, num_actions).to_vec() },
         boundaries: unsafe {
             slice_from_ptr(boundaries, num_terms + 1)
                 .iter()
@@ -176,11 +176,9 @@ pub unsafe extern "C" fn qf_ferm_op_one() -> *mut FermionOperator {
 /// @param num_actions The length of the actions array.
 /// @param actions A pointer to an array of actions. The length of this array should be
 ///     ``num_actions``.
-/// @param indices A pointer to an array of action indices. The length of this array should be
+/// @param modes A pointer to an array of action modes. The length of this array should be
 ///     ``num_actions``.
 /// @param coeff A pointer to the complex coefficient.
-///
-/// @return An exit code.
 ///
 /// @rst
 ///
@@ -196,10 +194,10 @@ pub unsafe extern "C" fn qf_ferm_op_one() -> *mut FermionOperator {
 ///
 ///     QfFermionOperator *op = qf_ferm_op_zero();
 ///     bool actions[0] = {};
-///     uint32_t indices[0] = {};
+///     uint32_t modes[0] = {};
 ///     QkComplex64 coeff = {1.0, 0.0};
 ///
-///     qf_ferm_op_add_term(op, 0, actions, indices, &coeff);
+///     qf_ferm_op_add_term(op, 0, actions, modes, &coeff);
 ///
 ///     assert(qf_ferm_op_equal(op, one));
 ///
@@ -209,9 +207,9 @@ pub unsafe extern "C" fn qf_ferm_op_add_term(
     op: *mut FermionOperator,
     num_actions: u64,
     actions: *const bool,
-    indices: *const u32,
+    modes: *const u32,
     coeff: *const Complex64,
-) -> ExitCode {
+) {
     // SAFETY: Per documentation, the pointers are non-null and aligned.
     let op = unsafe { mut_ptr_as_ref(op) };
     let coeff = unsafe { const_ptr_as_ref(coeff) };
@@ -221,11 +219,9 @@ pub unsafe extern "C" fn qf_ferm_op_add_term(
     op.coeffs.push(*coeff);
     op.actions
         .extend_from_slice(unsafe { slice_from_ptr(actions, num_actions) });
-    op.indices
-        .extend_from_slice(unsafe { slice_from_ptr(indices, num_actions) });
-    op.boundaries.push(op.indices.len());
-
-    ExitCode::Success
+    op.modes
+        .extend_from_slice(unsafe { slice_from_ptr(modes, num_actions) });
+    op.boundaries.push(op.modes.len());
 }
 
 /// @ingroup qf_ferm_op
@@ -289,8 +285,8 @@ pub unsafe extern "C" fn qf_ferm_op_add(
 ///
 ///     QfFermionOperator *expected = qf_ferm_op_zero();
 ///     bool actions[0] = {};
-///     uint32_t indices[0] = {};
-///     qf_ferm_op_add_term(expected, 0, actions, indices, &coeff);
+///     uint32_t modes[0] = {};
+///     qf_ferm_op_add_term(expected, 0, actions, modes, &coeff);
 ///
 ///     assert(qf_ferm_op_equal(result, expected));
 ///
@@ -369,15 +365,15 @@ pub unsafe extern "C" fn qf_ferm_op_compose(
 ///
 ///     QfFermionOperator *op = qf_ferm_op_zero();
 ///     bool actions[0] = {};
-///     uint32_t indices[0] = {};
+///     uint32_t modes[0] = {};
 ///     QkComplex64 coeff = {0.0, 1.0};
-///     qf_ferm_op_add_term(op, 0, actions, indices, &coeff);
+///     qf_ferm_op_add_term(op, 0, actions, modes, &coeff);
 ///
 ///     QfFermionOperator *adjoint = qf_ferm_op_adjoint(op);
 ///
 ///     QfFermionOperator *expected = qf_ferm_op_zero();
 ///     QkComplex64 coeff_adj = {0.0, -1.0};
-///     qf_ferm_op_add_term(expected, 0, actions, indices, &coeff_adj);
+///     qf_ferm_op_add_term(expected, 0, actions, modes, &coeff_adj);
 ///
 ///     assert(qf_ferm_op_equal(adjoint, expected));
 ///
@@ -413,11 +409,11 @@ pub unsafe extern "C" fn qf_ferm_op_adjoint(op: *const FermionOperator) -> *mut 
 ///
 ///     QfFermionOperator *op = qf_ferm_op_zero();
 ///     bool actions[0] = {};
-///     uint32_t indices[0] = {};
+///     uint32_t modes[0] = {};
 ///     QkComplex64 coeff = {1e-8};
-///     qf_ferm_op_add_term(op, 0, actions, indices, &coeff);
+///     qf_ferm_op_add_term(op, 0, actions, modes, &coeff);
 ///
-///     QfExitCode result = qf_ferm_op_ichop(op, 1e-6);
+///     qf_ferm_op_ichop(op, 1e-6);
 ///
 ///     QfFermionOperator *expected = qf_ferm_op_zero();
 ///
@@ -425,13 +421,11 @@ pub unsafe extern "C" fn qf_ferm_op_adjoint(op: *const FermionOperator) -> *mut 
 ///
 /// @endrst
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn qf_ferm_op_ichop(op: *mut FermionOperator, atol: f64) -> ExitCode {
+pub unsafe extern "C" fn qf_ferm_op_ichop(op: *mut FermionOperator, atol: f64) {
     // SAFETY: Per documentation, the pointers are non-null and aligned.
     let op = unsafe { mut_ptr_as_ref(op) };
 
     op.ichop(atol);
-
-    ExitCode::Success
 }
 
 /// @ingroup qf_ferm_op
@@ -460,7 +454,7 @@ pub unsafe extern "C" fn qf_ferm_op_ichop(op: *mut FermionOperator, atol: f64) -
 ///     uint64_t num_terms = 100000;
 ///     uint64_t num_actions = 0;
 ///     bool actions[0] = {};
-///     uint32_t indices[0] = {};
+///     uint32_t modes[0] = {};
 ///     QkComplex64 coeffs[100000];
 ///     uint32_t boundaries[100001];
 ///     for (int i = 0; i < 100000; i++) {
@@ -470,7 +464,7 @@ pub unsafe extern "C" fn qf_ferm_op_ichop(op: *mut FermionOperator, atol: f64) -
 ///     }
 ///     boundaries[100000] = 0;
 ///     QfFermionOperator *op = qf_ferm_op_new(num_terms, num_actions, coeffs,
-///                                            actions, indices, boundaries);
+///                                            actions, modes, boundaries);
 ///
 ///     QfFermionOperator *canon = qf_ferm_op_simplify(op, 1e-4);
 ///
@@ -500,7 +494,7 @@ pub unsafe extern "C" fn qf_ferm_op_simplify(
 /// @brief Returns an equivalent operator with normal ordered terms.
 ///
 /// The normal order of an operator term is defined such that all creation actions before all
-/// annihilation actions and the indices of actions within each group descend lexicographically
+/// annihilation actions and the modes of actions within each group descend lexicographically
 /// (e.g. ``+_1 +_0 -_1 -_0``).
 ///
 /// @param op A pointer to the operator.
@@ -522,22 +516,22 @@ pub unsafe extern "C" fn qf_ferm_op_simplify(
 ///
 ///     QfFermionOperator *op = qf_ferm_op_zero();
 ///     bool actions[4] = {false, true, false, true};
-///     uint32_t indices[4] = {1, 1, 0, 0};
+///     uint32_t modes[4] = {1, 1, 0, 0};
 ///     QkComplex64 coeff = {1.0, 0.0};
-///     qf_ferm_op_add_term(op, 4, actions, indices, &coeff);
+///     qf_ferm_op_add_term(op, 4, actions, modes, &coeff);
 ///
 ///     QfFermionOperator *normal_ordered = qf_ferm_op_normal_ordered(op);
 ///
 ///     uint64_t num_terms = 4;
 ///     uint64_t num_actions = 8;
 ///     bool actions_exp[8] = {true, false, true, false, true, true, false, false};
-///     uint32_t indices_exp[8] = {0, 0, 1, 1, 1, 0, 1, 0};
+///     uint32_t modes_exp[8] = {0, 0, 1, 1, 1, 0, 1, 0};
 ///     QkComplex64 coeffs_exp[4] = {
 ///         {1.0, 0.0}, {-1.0, 0.0}, {-1.0, 0.0}, {-1.0, 0.0}};
 ///     uint32_t boundaries_exp[5] = {0, 0, 2, 4, 8};
 ///     QfFermionOperator *expected =
 ///         qf_ferm_op_new(num_terms, num_actions, coeffs_exp, actions_exp,
-///                        indices_exp, boundaries_exp);
+///                        modes_exp, boundaries_exp);
 ///
 ///     assert(qf_ferm_op_equal(normal_ordered, expected));
 ///
@@ -577,13 +571,13 @@ pub unsafe extern "C" fn qf_ferm_op_normal_ordered(
 ///
 ///     QfFermionOperator *op = qf_ferm_op_zero();
 ///     bool actions1[2] = {true, false};
-///     uint32_t indices1[2] = {0, 1};
+///     uint32_t modes1[2] = {0, 1};
 ///     QkComplex64 coeff1 = {0.0, 1.00001};
-///     qf_ferm_op_add_term(op, 2, actions1, indices1, &coeff1);
+///     qf_ferm_op_add_term(op, 2, actions1, modes1, &coeff1);
 ///     bool actions2[2] = {true, false};
-///     uint32_t indices2[2] = {1, 0};
+///     uint32_t modes2[2] = {1, 0};
 ///     QkComplex64 coeff2 = {0.0, -1};
-///     qf_ferm_op_add_term(op, 2, actions2, indices2, &coeff1);
+///     qf_ferm_op_add_term(op, 2, actions2, modes2, &coeff1);
 ///
 ///     assert(qf_ferm_op_is_hermitian(op, 1e-4));
 ///     assert(!qf_ferm_op_is_hermitian(op, 1e-8));
@@ -618,9 +612,9 @@ pub unsafe extern "C" fn qf_ferm_op_is_hermitian(op: *const FermionOperator, ato
 ///
 ///     QfFermionOperator *op = qf_ferm_op_zero();
 ///     bool actions[4] = {true, false, true, false};
-///     uint32_t indices[4] = {0, 1, 2, 3};
+///     uint32_t modes[4] = {0, 1, 2, 3};
 ///     QkComplex64 coeff = {1.0, 0.0};
-///     qf_ferm_op_add_term(op, 4, actions, indices, &coeff);
+///     qf_ferm_op_add_term(op, 4, actions, modes, &coeff);
 ///
 ///     assert(qf_ferm_op_many_body_order(op, 4));
 ///
@@ -651,13 +645,13 @@ pub unsafe extern "C" fn qf_ferm_op_many_body_order(op: *const FermionOperator) 
 ///
 ///     QfFermionOperator *op = qf_ferm_op_zero();
 ///     bool actions1[2] = {true, false};
-///     uint32_t indices1[2] = {0, 1};
+///     uint32_t modes1[2] = {0, 1};
 ///     QkComplex64 coeff1 = {0.0, 1.00001};
-///     qf_ferm_op_add_term(op, 2, actions1, indices1, &coeff1);
+///     qf_ferm_op_add_term(op, 2, actions1, modes1, &coeff1);
 ///     bool actions2[2] = {true, false};
-///     uint32_t indices2[2] = {1, 0};
+///     uint32_t modes2[2] = {1, 0};
 ///     QkComplex64 coeff2 = {0.0, -1};
-///     qf_ferm_op_add_term(op, 2, actions2, indices2, &coeff2);
+///     qf_ferm_op_add_term(op, 2, actions2, modes2, &coeff2);
 ///
 ///     assert(qf_ferm_op_is_hermitian(op, 1e-4));
 ///     assert(!qf_ferm_op_is_hermitian(op, 1e-8));
@@ -733,9 +727,9 @@ pub unsafe extern "C" fn qf_ferm_op_equal(
 ///
 ///     QfFermionOperator *op = qf_ferm_op_zero();
 ///     bool actions[0] = {};
-///     uint32_t indices[0] = {};
+///     uint32_t modes[0] = {};
 ///     QkComplex64 coeff = {1e-7, 0.0};
-///     qf_ferm_op_add_term(op, 0, actions, indices, &coeff);
+///     qf_ferm_op_add_term(op, 0, actions, modes, &coeff);
 ///
 ///     assert(qf_ferm_op_equiv(op, zero, 1e-6));
 ///     assert(!qf_ferm_op_equiv(op, zero, 1e-8));
@@ -772,9 +766,9 @@ pub unsafe extern "C" fn qf_ferm_op_equiv(
 ///
 ///     QfFermionOperator *op = qf_ferm_op_zero();
 ///     bool actions[4] = {true, false, true, false};
-///     uint32_t indices[4] = {0, 1, 2, 3};
+///     uint32_t modes[4] = {0, 1, 2, 3};
 ///     QkComplex64 coeff = {1.0, 0.0};
-///     qf_ferm_op_add_term(op, 4, actions, indices, &coeff);
+///     qf_ferm_op_add_term(op, 4, actions, modes, &coeff);
 ///
 ///     assert(qf_ferm_op_len(op) == 1);
 ///
@@ -785,4 +779,63 @@ pub unsafe extern "C" fn qf_ferm_op_len(op: *const FermionOperator) -> usize {
     let op = unsafe { const_ptr_as_ref(op) };
 
     op.boundaries.len() - 1
+}
+
+/// @ingroup qf_ferm_op
+///
+/// @brief Relabels the indices of the provided operator.
+///
+/// @param op A pointer to the fermionic operator.
+/// @param num_modes The number of mode indices in the provided permutation list.
+/// @param permutation The index permutation list.
+///
+/// @return An exit code.
+/// * ``QfExitCode_Success`` upon success
+/// * ``QfExitCode_DuplicateIndexError`` if duplicate indices were found in the permutation
+/// * ``QfExitCode_IndexError`` for any other index errors, such as invalid indices.
+///
+/// @rst
+///
+/// Example
+/// -------
+///
+/// .. code-block:: c
+///     :linenos:
+///
+///     QfFermionOperator *op = qf_ferm_op_zero();
+///     bool actions[4] = {true, false, true, false};
+///     uint32_t indices[4] = {0, 1, 2, 3};
+///     QkComplex64 coeff = {1.0, 0.0};
+///     qf_ferm_op_add_term(op, 4, actions, indices, &coeff);
+///
+///     uint32_t permutation[4] = {3, 2, 1, 0};
+///
+///     QfExitCode exit = qf_ferm_op_relabel_modes(op, 4, permutation);
+///
+///     assert(exit == QfExitCode_Success);
+///
+/// @endrst
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn qf_ferm_op_relabel_modes(
+    op: *mut FermionOperator,
+    num_modes: u64,
+    permutation: *const u32,
+) -> ExitCode {
+    // SAFETY: Per documentation, the pointers are non-null and aligned.
+    let op = unsafe { mut_ptr_as_ref(op) };
+
+    let permutation = unsafe { slice_from_ptr(permutation, num_modes as usize).to_vec() };
+
+    let relabeled_op = match op.relabel_modes(permutation) {
+        Ok(relabeled) => relabeled,
+        Err(e) => {
+            return match e {
+                CoherenceError::DuplicateIndices => ExitCode::DuplicateIndexError,
+                _ => ExitCode::IndexError,
+            };
+        }
+    };
+
+    *op = relabeled_op;
+    ExitCode::Success
 }

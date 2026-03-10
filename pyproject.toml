@@ -39,7 +39,7 @@ build = [
     "setuptools-rust",
 ]
 style = [
-    "ruff==0.14.14",
+    "ruff==0.15.4",
     "typos>=1.20.0",
 ]
 lint = [
@@ -54,7 +54,7 @@ basetest = [
 ]
 doctest = [
     {include-group = "basetest"},
-    "pytest-doctestplus>=1.2.1",
+    "sybil>=9.3.0",
 ]
 test = [
     {include-group = "basetest"},
