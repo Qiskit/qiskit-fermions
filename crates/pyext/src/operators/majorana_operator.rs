@@ -83,6 +83,8 @@ impl MajoranaOperatorDataIter {
 ///
 /// ----
 ///
+/// .. _MajoranaOperator-implementation:
+///
 /// Implementation
 /// ==============
 ///
@@ -101,6 +103,10 @@ impl MajoranaOperatorDataIter {
 ///
 /// The integers in ``modes`` index the Majorana modes, :math:`j`. When using the convenience
 /// function :py:func:`.gamma`, even (odd) indices are used for :math`\gamma` (:math:`\gamma'`).
+///
+/// .. note::
+///    You may access **read-only copies** of these internal arrays via their respective methods:
+///    :meth:`.get_coeffs`, :meth:`.get_modes`, and :meth:`.get_boundaries`.
 ///
 /// This data structure allows for very efficient construction and manipulation of operators.
 /// However, it implies that duplicate terms may be contained in an operator at any moment.
@@ -360,6 +366,75 @@ impl PyMajoranaOperator {
                 groups: None,
             },
         }
+    }
+
+    /// Returns a read-only list of the operator's coefficients.
+    ///
+    /// .. note::
+    ///    This method returns a *copy* of the internal data.
+    ///
+    /// .. seealso::
+    ///    The explanation of the internal data structure,
+    ///    :ref:`here <MajoranaOperator-implementation>`.
+    ///
+    /// .. doctest::
+    ///
+    ///     >>> from qiskit_fermions.operators import MajoranaOperator
+    ///     >>> op = MajoranaOperator.one()
+    ///     >>> op += -1j * MajoranaOperator.one()
+    ///     >>> op.get_coeffs()
+    ///     [(1+0j), -1j]
+    ///
+    /// Returns:
+    ///     A list of the operator's coefficients.
+    fn get_coeffs(&self) -> Vec<Complex64> {
+        self.inner.coeffs().to_vec()
+    }
+
+    /// Returns a read-only list of the operator's acted-upon mode indices.
+    ///
+    /// .. note::
+    ///    This method returns a **copy** of the internal data.
+    ///
+    /// .. seealso::
+    ///    The explanation of the internal data structure,
+    ///    :ref:`here <MajoranaOperator-implementation>`.
+    ///
+    /// .. doctest::
+    ///
+    ///     >>> from qiskit_fermions.operators import MajoranaOperator
+    ///     >>> op = MajoranaOperator.one()
+    ///     >>> op += MajoranaOperator.from_dict({(0, 1): 1.0})
+    ///     >>> op.get_modes()
+    ///     [0, 1]
+    ///
+    /// Returns:
+    ///     A list of the operator's modes.
+    fn get_modes(&self) -> Vec<u32> {
+        self.inner.modes().to_vec()
+    }
+
+    /// Returns a read-only list of the indices indicating the boundaries between operator terms.
+    ///
+    /// .. note::
+    ///    This method returns a **copy** of the internal data.
+    ///
+    /// .. seealso::
+    ///    The explanation of the internal data structure,
+    ///    :ref:`here <MajoranaOperator-implementation>`.
+    ///
+    /// .. doctest::
+    ///
+    ///     >>> from qiskit_fermions.operators import MajoranaOperator
+    ///     >>> op = MajoranaOperator.one()
+    ///     >>> op += MajoranaOperator.from_dict({(0, 1): 1.0})
+    ///     >>> op.get_boundaries()
+    ///     [0, 0, 2]
+    ///
+    /// Returns:
+    ///     A list of the operator's terms boundaries.
+    fn get_boundaries(&self) -> Vec<usize> {
+        self.inner.boundaries().to_vec()
     }
 
     fn __richcmp__(&self, other: &Self, op: CompareOp, _py: Python<'_>) -> PyResult<bool> {
