@@ -15,3 +15,4 @@ num-traits.workspace = true
 qiskit-sys.workspace = true
 rayon.workspace = true
 regex.workspace = true
+thiserror.workspace = true

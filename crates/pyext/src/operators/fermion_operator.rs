@@ -11,6 +11,7 @@
 // that they have been altered from the originals.
 
 use num_complex::Complex64;
+use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
 use pyo3::types::PyType;
 use pyo3::{class::basic::CompareOp, exceptions::PyNotImplementedError};
@@ -261,6 +262,7 @@ impl FermionOperatorDataIter {
 ///    ichop
 ///    simplify
 ///    normal_ordered
+///    relabel_modes
 ///
 /// Properties
 /// ^^^^^^^^^^
@@ -725,6 +727,33 @@ impl PyFermionOperator {
     ///     Whether this operator is particle-number conserving.
     fn conserves_particle_number(&self) -> bool {
         self.inner.conserves_particle_number()
+    }
+
+    /// Returns a new operator with relabeled modes.
+    ///
+    /// .. doctest::
+    ///     >>> from qiskit_fermions.operators import FermionOperator
+    ///     >>> op = FermionOperator.from_dict({
+    ///     ...     ((True, 0), (False, 1)): 1,
+    ///     ...     ((True, 0), (False, 1), (True, 2), (False, 3)): 1,
+    ///     ... })
+    ///     >>> permutation = [5, 6, 4, 3]
+    ///     >>> relabeled = op.relabel_modes(permutation)
+    ///     >>> print(relabeled)
+    ///       1.000000e0 +0.000000e0j * (+_5 -_6)
+    ///       1.000000e0 +0.000000e0j * (+_5 -_6 +_4 -_3)
+    ///
+    /// Args:
+    ///     permutation: the index permutation list.
+    ///
+    /// Returns:
+    ///     A new operator with its modes relabeled.
+    fn relabel_modes(&self, permutation: Vec<u32>) -> PyResult<Self> {
+        let out = self.inner.relabel_modes(permutation);
+        match out {
+            Ok(op) => Ok(Self { inner: op }),
+            Err(e) => Err(PyValueError::new_err(e.to_string())),
+        }
     }
 }
 

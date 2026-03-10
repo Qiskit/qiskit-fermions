@@ -10,11 +10,12 @@
 // copyright notice, and modified files need to carry a notice indicating
 // that they have been altered from the originals.
 
+use crate::exit_codes::ExitCode;
 use crate::pointers::{const_ptr_as_ref, mut_ptr_as_ref, slice_from_ptr};
 
 use num_complex::Complex64;
 use qiskit_fermions_core::operators::fermion_operator::FermionOperator;
-use qiskit_fermions_core::operators::{OperatorMacro, OperatorTrait};
+use qiskit_fermions_core::operators::{CoherenceError, OperatorMacro, OperatorTrait};
 
 /// @ingroup qf_ferm_op
 ///
@@ -778,4 +779,63 @@ pub unsafe extern "C" fn qf_ferm_op_len(op: *const FermionOperator) -> usize {
     let op = unsafe { const_ptr_as_ref(op) };
 
     op.boundaries.len() - 1
+}
+
+/// @ingroup qf_ferm_op
+///
+/// @brief Relabels the indices of the provided operator.
+///
+/// @param op A pointer to the fermionic operator.
+/// @param num_modes The number of mode indices in the provided permutation list.
+/// @param permutation The index permutation list.
+///
+/// @return An exit code.
+/// * ``QfExitCode_Success`` upon success
+/// * ``QfExitCode_DuplicateIndexError`` if duplicate indices were found in the permutation
+/// * ``QfExitCode_IndexError`` for any other index errors, such as invalid indices.
+///
+/// @rst
+///
+/// Example
+/// -------
+///
+/// .. code-block:: c
+///     :linenos:
+///
+///     QfFermionOperator *op = qf_ferm_op_zero();
+///     bool actions[4] = {true, false, true, false};
+///     uint32_t indices[4] = {0, 1, 2, 3};
+///     QkComplex64 coeff = {1.0, 0.0};
+///     qf_ferm_op_add_term(op, 4, actions, indices, &coeff);
+///
+///     uint32_t permutation[4] = {3, 2, 1, 0};
+///
+///     QfExitCode exit = qf_ferm_op_relabel_modes(op, 4, permutation);
+///
+///     assert(exit == QfExitCode_Success);
+///
+/// @endrst
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn qf_ferm_op_relabel_modes(
+    op: *mut FermionOperator,
+    num_modes: u64,
+    permutation: *const u32,
+) -> ExitCode {
+    // SAFETY: Per documentation, the pointers are non-null and aligned.
+    let op = unsafe { mut_ptr_as_ref(op) };
+
+    let permutation = unsafe { slice_from_ptr(permutation, num_modes as usize).to_vec() };
+
+    let relabeled_op = match op.relabel_modes(permutation) {
+        Ok(relabeled) => relabeled,
+        Err(e) => {
+            return match e {
+                CoherenceError::DuplicateIndices => ExitCode::DuplicateIndexError,
+                _ => ExitCode::IndexError,
+            };
+        }
+    };
+
+    *op = relabeled_op;
+    ExitCode::Success
 }

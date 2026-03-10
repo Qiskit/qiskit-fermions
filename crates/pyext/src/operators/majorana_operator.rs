@@ -11,6 +11,7 @@
 // that they have been altered from the originals.
 
 use num_complex::Complex64;
+use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
 use pyo3::types::PyType;
 use pyo3::{class::basic::CompareOp, exceptions::PyNotImplementedError};
@@ -262,6 +263,7 @@ impl MajoranaOperatorDataIter {
 ///    ichop
 ///    simplify
 ///    normal_ordered
+///    relabel_modes
 ///
 /// Properties
 /// ^^^^^^^^^^
@@ -709,6 +711,33 @@ impl PyMajoranaOperator {
     ///     Whether this operator is even.
     fn is_even(&self) -> bool {
         self.inner.is_even()
+    }
+
+    /// Returns a new operator with relabeled modes.
+    ///
+    /// .. doctest::
+    ///     >>> from qiskit_fermions.operators import MajoranaOperator
+    ///     >>> op = MajoranaOperator.from_dict({
+    ///     ...     (0, 1): 1,
+    ///     ...     (0, 1, 2, 3): 1,
+    ///     ... })
+    ///     >>> permutation = [5, 6, 4, 3]
+    ///     >>> relabeled = op.relabel_modes(permutation)
+    ///     >>> print(relabeled)
+    ///       1.000000e0 +0.000000e0j * (5 6)
+    ///       1.000000e0 +0.000000e0j * (5 6 4 3)
+    ///
+    /// Args:
+    ///     permutation: the index permutation list.
+    ///
+    /// Returns:
+    ///     A new operator with its modes relabeled.
+    fn relabel_modes(&self, permutation: Vec<u32>) -> PyResult<Self> {
+        let out = self.inner.relabel_modes(permutation);
+        match out {
+            Ok(op) => Ok(Self { inner: op }),
+            Err(e) => Err(PyValueError::new_err(e.to_string())),
+        }
     }
 }
 
