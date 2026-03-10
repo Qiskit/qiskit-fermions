@@ -14,16 +14,18 @@
 
 from collections.abc import Callable
 from operator import and_
-from typing import TypeVar
+from typing import TYPE_CHECKING, TypeVar
 
-from ..operators import MajoranaAction, MajoranaOperator
+if TYPE_CHECKING:
+    from qiskit_fermions._lib.operators.majorana_operator import MajoranaOperator
+    from qiskit_fermions.operators.majorana_action import MajoranaAction
 
 T = TypeVar("T")
 
 
 def map_majorana_action_generators(
-    operator: MajoranaOperator,
-    map_action: Callable[[MajoranaAction], T],
+    operator: "MajoranaOperator",
+    map_action: Callable[["MajoranaAction"], T],
     identity: Callable[[], T],
     compose: Callable[[T, T], T] | None = None,
 ) -> T:
