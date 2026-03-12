@@ -47,6 +47,7 @@ use qiskit_fermions_core::mappers::library::majorana_fermion::{
 /// =====
 ///
 /// .. doctest::
+///
 ///     >>> from qiskit_fermions.mappers.library import fermion_to_majorana
 ///     >>> from qiskit_fermions.operators import FermionOperator
 ///     >>> fer_op = FermionOperator.from_dict({((True, 0), (False, 0)): 1})
@@ -92,6 +93,7 @@ pub fn py_fermion_to_majorana(fer_op: PyFermionOperator) -> PyMajoranaOperator {
 /// =====
 ///
 /// .. doctest::
+///
 ///     >>> from qiskit_fermions.mappers.library import majorana_to_fermion
 ///     >>> from qiskit_fermions.operators import MajoranaOperator
 ///     >>> maj_op = MajoranaOperator.from_dict({(0, 1): 1})

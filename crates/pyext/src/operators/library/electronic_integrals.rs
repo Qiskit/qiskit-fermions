@@ -36,6 +36,7 @@ impl PyFermionOperator {
     /// the array, and :math:`n` is the number of orbitals, ``norb``.
     ///
     /// .. doctest::
+    ///
     ///    >>> import numpy as np
     ///    >>> from qiskit_fermions.operators import FermionOperator
     ///    >>> one_body_a = np.array([1.0, 2.0, 3.0])
@@ -86,6 +87,7 @@ impl PyFermionOperator {
     /// of orbitals, ``norb``.
     ///
     /// .. doctest::
+    ///
     ///    >>> import numpy as np
     ///    >>> from qiskit_fermions.operators import FermionOperator
     ///    >>> one_body_a = np.array([1.0, 2.0, 3.0])
@@ -156,6 +158,7 @@ impl PyFermionOperator {
     ///     index permutations :math:`(i,j,k,l)` that index this 4-dimensional array.
     ///
     /// .. doctest::
+    ///
     ///    >>> import numpy as np
     ///    >>> from qiskit_fermions.operators import FermionOperator
     ///    >>> two_body_aa = np.arange(1, 7, dtype=float)
@@ -217,6 +220,7 @@ impl PyFermionOperator {
     ///     index :math:`ijkl` as an abuse of notation.)
     ///
     /// .. doctest::
+    ///
     ///    >>> import numpy as np
     ///    >>> from qiskit_fermions.operators import FermionOperator
     ///    >>> two_body_aa = np.arange(1, 7, dtype=float)
