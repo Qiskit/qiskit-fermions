@@ -143,7 +143,11 @@ fn generate_bindings(qiskit_path_str: &str) {
     };
 
     println!("cargo:rustc-link-search={}/{}", qiskit_path_str, subpath);
-    println!("cargo:rustc-link-lib=qiskit");
+    if std::env::var_os("CARGO_CFG_TARGET_OS").unwrap() == "windows" {
+        println!("cargo:rustc-link-lib=qiskit_cext.dll");
+    } else {
+        println!("cargo:rustc-link-lib=qiskit");
+    }
 
     let bindings: bindgen::Bindings = if cfg!(feature = "python_binding") {
         bindgen::Builder::default()
