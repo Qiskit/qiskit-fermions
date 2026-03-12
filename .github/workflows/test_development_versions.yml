@@ -59,13 +59,21 @@ jobs:
           git clone https://github.com/Qiskit/qiskit build/qiskit
           cd build/qiskit
           make c
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            # NOTE: we manually need to copy the `.dll.lib` file for now
+            cp target/release/qiskit_cext.dll.lib dist/c/lib/qiskit.dll.lib
+            # NOTE: for lack of a better solution, we also need to copy thr
+            # `_cext` files
+            cp target/release/qiskit_cext.dll dist/c/lib/qiskit_cext.dll
+            cp target/release/qiskit_cext.dll.lib dist/c/lib/qiskit_cext.dll.lib
+          fi
           pip install -c constraints.txt -r requirements.txt
           SETUPTOOLS_RUST_CARGO_PROFILE=release pip install -c constraints.txt -e .
           cd qiskit/
           if [[ "$RUNNER_OS" == "macOS" ]]; then
             ln -s $(realpath _accelerate.*.so) libqiskit.dylib
           elif [[ "$RUNNER_OS" == "Windows" ]]; then
-            ln -s $(realpath _accelerate.*.pyd) qiskit.dll
+            ln -s $(realpath _accelerate.*.pyd) qiskit.pyd
           else
             ln -s $(realpath _accelerate.*.so) libqiskit.so
           fi
