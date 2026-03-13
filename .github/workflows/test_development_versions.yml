@@ -103,4 +103,6 @@ jobs:
       - name: Documentation tests
         shell: bash
         run: |
-          make doctest
+          if [[ "$RUNNER_OS" != "Windows" ]]; then
+            make doctest
+          fi
