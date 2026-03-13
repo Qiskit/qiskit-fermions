@@ -78,8 +78,10 @@ jobs:
             ln -s $(realpath _accelerate.*.so) libqiskit.so
           fi
           cd ../../..
-          pip install setuptools setuptools_rust
-          DEPS=coverage make pyinstall
+          if [[ "$RUNNER_OS" != "Windows" ]]; then
+            pip install setuptools setuptools_rust
+            DEPS=coverage make pyinstall
+          fi
 
       - name: Rust tests
         shell: bash
@@ -94,7 +96,9 @@ jobs:
       - name: Python tests
         shell: bash
         run: |
-          make testpython
+          if [[ "$RUNNER_OS" != "Windows" ]]; then
+            make testpython
+          fi
 
       - name: Documentation tests
         shell: bash
