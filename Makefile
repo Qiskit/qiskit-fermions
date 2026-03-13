@@ -50,6 +50,7 @@ docsclean:
 .PHONY: testrust
 testrust: export LD_LIBRARY_PATH := $(LD_LIBRARY_PATH):${QISKIT_ROOT}/dist/c/lib
 testrust: export DYLD_LIBRARY_PATH := $(DYLD_LIBRARY_PATH):${QISKIT_ROOT}/dist/c/lib
+testrust: export PATH := $(PATH):${QISKIT_ROOT}/dist/c/lib
 testrust:
 	cargo test -p qiskit-fermions-core --no-default-features
 
