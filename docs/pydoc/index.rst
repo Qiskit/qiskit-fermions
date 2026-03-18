@@ -24,3 +24,13 @@ Mappers
 
    qiskit_fermions.mappers
    qiskit_fermions.mappers.library
+
+
+**************
+Linear Algebra
+**************
+
+.. toctree::
+   :maxdepth: 1
+
+   qiskit_fermions.linalg

@@ -14,6 +14,7 @@ license = "Apache-2.0"
 #
 # Each crate can add on specific features freely as it inherits.
 [workspace.dependencies]
+nalgebra = { version = "0.34", features = ["rand"] }
 ndarray = "0.17"
 num-complex = "0.4"
 num-traits = "0.2"

@@ -13,11 +13,15 @@
 use pyo3::prelude::*;
 use pyo3_stub_gen::{Result, StubGenConfig, StubInfo};
 
+pub mod linalg;
 pub mod mappers;
 pub mod operators;
 
 #[pymodule]
 mod _lib {
+    #[pymodule_export]
+    use super::linalg::linalg;
+
     #[pymodule_export]
     use super::operators::operators;
 
