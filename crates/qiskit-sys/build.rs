@@ -147,13 +147,10 @@ fn generate_bindings(qiskit_path_str: &str) {
 
     let bindings: bindgen::Bindings = if cfg!(feature = "python_binding") {
         bindgen::Builder::default()
+            .clang_arg(format!("-I{}/dist/c/include", qiskit_path_str))
             .clang_arg("-DQISKIT_C_PYTHON_INTERFACE=1")
             .raw_line("use pyo3::ffi::PyObject;")
             .header(format!("{}/dist/c/include/qiskit.h", qiskit_path_str))
-            .header(format!(
-                "{}/dist/c/include/qiskit/complex.h",
-                qiskit_path_str
-            ))
             .allowlist_item("^(qk_.*)$")
             .allowlist_item("^(Qk.*)$")
             .blocklist_item("^(Py.*)$")
@@ -163,11 +160,8 @@ fn generate_bindings(qiskit_path_str: &str) {
             .expect("Unable to generate bindings")
     } else {
         bindgen::Builder::default()
+            .clang_arg(format!("-I{}/dist/c/include", qiskit_path_str))
             .header(format!("{}/dist/c/include/qiskit.h", qiskit_path_str))
-            .header(format!(
-                "{}/dist/c/include/qiskit/complex.h",
-                qiskit_path_str
-            ))
             .parse_callbacks(Box::new(CargoCallbacks))
             .generate()
             .expect("Unable to generate bindings")
