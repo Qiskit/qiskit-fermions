@@ -10,19 +10,26 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
-# ruff: noqa: D205,D212,D415
-"""
-======================
-Circuit Representation
-======================
+"""FermionGate."""
 
-.. currentmodule:: qiskit_fermions.circuit
-"""
+from __future__ import annotations
 
-from .fermion_circuit import FermionCircuit
-from .fermion_gate import FermionGate
+from qiskit.circuit import Gate
 
-__all__ = [
-    "FermionCircuit",
-    "FermionGate",
-]
+
+class FermionGate(Gate):
+    """TODO."""
+
+    def __init__(
+        self,
+        name: str,
+        num_fermions: int,
+        /,
+        params: list | None = None,
+        *,
+        label: str | None = None,
+    ) -> None:
+        """TODO."""
+        if params is None:
+            params = []
+        super().__init__(name, num_fermions, params, label)

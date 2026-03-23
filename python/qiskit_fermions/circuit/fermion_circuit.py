@@ -12,7 +12,22 @@
 
 """FermionCircuit."""
 
-from qiskit.circuit import QuantumCircuit, QuantumRegister
+from __future__ import annotations
+
+from collections.abc import Sequence
+
+from qiskit.circuit import QuantumCircuit, QuantumRegister, Qubit
+
+from .fermion_gate import FermionGate
+
+Fermion = Qubit
+"""TODO."""
+
+FermionRegister = QuantumRegister
+"""TODO."""
+
+FermionSpecifier = Fermion | FermionRegister | int | slice | Sequence[Fermion | int]
+"""TODO."""
 
 
 class FermionCircuit:
@@ -24,3 +39,25 @@ class FermionCircuit:
         """TODO."""
 
         self._inner = QuantumCircuit(self.register)
+
+    @property
+    def fermions(self) -> list[Fermion]:
+        """TODO."""
+        return self._inner.qubits
+
+    def append(
+        self, gate: FermionGate, fargs: FermionSpecifier, cargs: None = None, *, copy: bool = True
+    ) -> None:
+        """TODO."""
+        if not isinstance(gate, FermionGate):
+            raise ValueError("Unsupported instruction type: %s", type(gate))
+
+        self._inner.append(gate, fargs, cargs, copy=copy)
+
+    def decompose(self) -> QuantumCircuit:
+        """TODO."""
+        return self._inner.decompose()
+
+    def draw(self, *args, **kwargs):
+        """TODO."""
+        return self._inner.draw(*args, **kwargs)

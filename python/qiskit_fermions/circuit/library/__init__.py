@@ -12,17 +12,11 @@
 
 # ruff: noqa: D205,D212,D415
 """
-======================
-Circuit Representation
-======================
+===============
+Circuit Library
+===============
 
-.. currentmodule:: qiskit_fermions.circuit
+.. currentmodule:: qiskit_fermions.circuit.library
 """
 
-from .fermion_circuit import FermionCircuit
-from .fermion_gate import FermionGate
-
-__all__ = [
-    "FermionCircuit",
-    "FermionGate",
-]
+__all__ = []
