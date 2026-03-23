@@ -10,8 +10,19 @@
 // copyright notice, and modified files need to carry a notice indicating
 // that they have been altered from the originals.
 
-pub mod linalg;
-pub mod mappers;
-pub mod operators;
-pub mod random;
-pub mod testing;
+use ndarray::Array2;
+use num_complex::Complex64;
+
+pub fn matrices_approx_equal(a: &Array2<Complex64>, b: &Array2<Complex64>, tol: f64) -> bool {
+    if a.nrows() != b.nrows() || a.ncols() != b.ncols() {
+        return false;
+    }
+    for i in 0..a.nrows() {
+        for j in 0..a.ncols() {
+            if (a[[i, j]] - b[[i, j]]).norm() > tol {
+                return false;
+            }
+        }
+    }
+    true
+}

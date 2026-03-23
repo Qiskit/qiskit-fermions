@@ -10,8 +10,12 @@
 // copyright notice, and modified files need to carry a notice indicating
 // that they have been altered from the originals.
 
-pub mod linalg;
-pub mod mappers;
-pub mod operators;
-pub mod random;
-pub mod testing;
+use pyo3::prelude::*;
+
+pub mod givens;
+
+#[pymodule]
+pub mod linalg {
+    #[pymodule_export]
+    use super::givens::givens;
+}
