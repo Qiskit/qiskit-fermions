@@ -56,7 +56,7 @@ class F2QLayout:
     def trivial(cls, fermions: QuantumRegister) -> Self:
         """TODO."""
         qubits = QuantumRegister(len(fermions))
-        return cls(fermions, qubits, {qubit: fermions[qubit._index] for qubit in qubits})
+        return cls(fermions, qubits, {qubit: fermions[qubits.index(qubit)] for qubit in qubits})
 
 
 class F2QEncodingPlugin(Protocol):

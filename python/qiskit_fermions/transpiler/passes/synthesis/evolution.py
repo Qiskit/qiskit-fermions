@@ -47,7 +47,7 @@ class EvolutionSynthesis:
     def run(self, node: DAGOpNode, layout: F2QLayout) -> DAGCircuit:
         """TODO."""
         qubits = [layout.f2q[fermion] for fermion in node.qargs]
-        mode_relabeling = [qubit._index for qubit in qubits]
+        mode_relabeling = [qubits.index(qubit) for qubit in qubits]
 
         pauli_op = self.mapper_fn(node.op.operator.relabel_modes(mode_relabeling)).simplify()
 
