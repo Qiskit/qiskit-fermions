@@ -20,18 +20,19 @@ from typing import TYPE_CHECKING
 from qiskit.circuit import QuantumCircuit
 from qiskit.circuit.library import PauliEvolutionGate
 from qiskit.converters import circuit_to_dag
-from qiskit.dagcircuit import DAGCircuit
+from qiskit.dagcircuit import DAGCircuit, DAGOpNode
 from qiskit.quantum_info import SparseObservable
-from qiskit.transpiler import TransformationPass
 
-from qiskit_fermions.circuit.library.evolution import Evolution
+from .. import F2QLayout
 
 if TYPE_CHECKING:
     from qiskit_fermions._lib.operators.fermion_operator import FermionOperator
     from qiskit_fermions._lib.operators.majorana_operator import MajoranaOperator
+else:
+    from qiskit_fermions.operators import FermionOperator, MajoranaOperator
 
 
-class EvolutionSynthesis(TransformationPass):
+class EvolutionSynthesis:
     """TODO."""
 
     # TODO: add an OperatorProtocol to avoid hard-coding this list of types from our package
@@ -43,20 +44,14 @@ class EvolutionSynthesis(TransformationPass):
         super().__init__()
         self.mapper_fn = mapper_fn
 
-    def run(self, dag: DAGCircuit) -> DAGCircuit:
+    def run(self, node: DAGOpNode, layout: F2QLayout) -> DAGCircuit:
         """TODO."""
-        # FIXME: the provided DAGCircuit still has a "fermion register" rather than one with qubits
+        qubits = [layout.f2q[fermion] for fermion in node.qargs]
+        mode_relabeling = [qubit._index for qubit in qubits]
 
-        for node in dag.op_nodes():
-            if not isinstance(node.op, Evolution):
-                continue
+        pauli_op = self.mapper_fn(node.op.operator.relabel_modes(mode_relabeling)).simplify()
 
-            pauli_op = self.mapper_fn(node.op.operator).simplify()
+        circ = QuantumCircuit(len(node.qargs))
+        circ.append(PauliEvolutionGate(pauli_op, time=node.op.params[0]), circ.qubits)
 
-            node_circ = QuantumCircuit(dag.qubits)
-            node_circ.append(PauliEvolutionGate(pauli_op, time=node.op.params[0]), node.qargs)
-            node_dag = circuit_to_dag(node_circ)
-
-            dag.substitute_node_with_dag(node, node_dag)
-
-        return dag
+        return (circuit_to_dag(circ), qubits)

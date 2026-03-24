@@ -10,18 +10,19 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
-# ruff: noqa: D205,D212,D415
-"""
-====================
-Transpilation Passes
-====================
+"""A trivial fermion-to-qubit layout."""
 
-.. currentmodule:: qiskit_fermions.transpiler.passes
-"""
+from __future__ import annotations
 
-from .f2q import F2QEncoding, F2QLayout
+from qiskit.dagcircuit import DAGCircuit
+from qiskit.transpiler import AnalysisPass
 
-__all__ = [
-    "F2QEncoding",
-    "F2QLayout",
-]
+from .. import F2QLayout
+
+
+class TrivialF2QLayout(AnalysisPass):
+    """TODO."""
+
+    def run(self, dag: DAGCircuit) -> None:
+        """TODO."""
+        self.property_set["f2q_layout"] = F2QLayout.trivial(dag.qregs["f"])

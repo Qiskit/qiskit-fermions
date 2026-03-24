@@ -12,16 +12,15 @@
 
 # ruff: noqa: D205,D212,D415
 """
-====================
-Transpilation Passes
-====================
+=============
+Layout Passes
+=============
 
-.. currentmodule:: qiskit_fermions.transpiler.passes
+.. currentmodule:: qiskit_fermions.transpiler.passes.layout
 """
 
-from .f2q import F2QEncoding, F2QLayout
+from .trivial import TrivialF2QLayout
 
 __all__ = [
-    "F2QEncoding",
-    "F2QLayout",
+    "TrivialF2QLayout",
 ]
