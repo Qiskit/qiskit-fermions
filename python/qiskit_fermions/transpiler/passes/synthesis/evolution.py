@@ -47,12 +47,10 @@ class EvolutionSynthesis:
     def run(self, node: DAGOpNode, layout: F2QLayout) -> DAGCircuit:
         """TODO."""
         qubits = [layout.f2q[fermion] for fermion in node.qargs]
-        mode_relabeling = [qubits.index(qubit) for qubit in qubits]
+        mode_relabeling = [layout.qubits.index(qubit) for qubit in qubits]
 
         pauli_op = self.mapper_fn(node.op.operator.relabel_modes(mode_relabeling)).simplify()
 
-        # TODO: verify that the qubit-reording is handled correctly w.r.t. the modes already being
-        # relabeled above!
         qubits_reordered = [qubits[idx] for idx in mode_relabeling]
         circ = QuantumCircuit(qubits_reordered)
         circ.append(PauliEvolutionGate(pauli_op, time=node.op.params[0]), qubits_reordered)
