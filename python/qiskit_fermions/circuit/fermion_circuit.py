@@ -15,18 +15,19 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
+from typing import TypeAlias, cast
 
 from qiskit.circuit import QuantumCircuit, QuantumRegister, Qubit
 
 from .fermion_gate import FermionGate
 
-Fermion = Qubit
+Fermion: TypeAlias = Qubit
 """TODO."""
 
-FermionRegister = QuantumRegister
+FermionRegister: TypeAlias = QuantumRegister
 """TODO."""
 
-FermionSpecifier = Fermion | FermionRegister | int | slice | Sequence[Fermion | int]
+FermionSpecifier: TypeAlias = Fermion | FermionRegister | int | slice | Sequence[Fermion | int]
 """TODO."""
 
 
@@ -43,7 +44,7 @@ class FermionCircuit:
     @property
     def fermions(self) -> list[Fermion]:
         """TODO."""
-        return self._inner.qubits
+        return cast(list[Fermion], self._inner.qubits)
 
     def append(
         self, gate: FermionGate, fargs: FermionSpecifier, cargs: None = None, *, copy: bool = True

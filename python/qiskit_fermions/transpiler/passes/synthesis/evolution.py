@@ -15,6 +15,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from typing import TYPE_CHECKING
 
 from qiskit.circuit import QuantumCircuit
 from qiskit.circuit.library import PauliEvolutionGate
@@ -24,7 +25,10 @@ from qiskit.quantum_info import SparseObservable
 from qiskit.transpiler import TransformationPass
 
 from qiskit_fermions.circuit.library.evolution import Evolution
-from qiskit_fermions.operators import FermionOperator, MajoranaOperator
+
+if TYPE_CHECKING:
+    from qiskit_fermions._lib.operators.fermion_operator import FermionOperator
+    from qiskit_fermions._lib.operators.majorana_operator import MajoranaOperator
 
 
 class EvolutionSynthesis(TransformationPass):

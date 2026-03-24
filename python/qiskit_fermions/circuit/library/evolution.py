@@ -14,8 +14,13 @@
 
 from __future__ import annotations
 
-from ...operators import FermionOperator, MajoranaOperator
+from typing import TYPE_CHECKING
+
 from .. import FermionGate
+
+if TYPE_CHECKING:
+    from qiskit_fermions._lib.operators.fermion_operator import FermionOperator
+    from qiskit_fermions._lib.operators.majorana_operator import MajoranaOperator
 
 
 class Evolution(FermionGate):
