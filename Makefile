@@ -18,15 +18,17 @@ export BINDGEN_EXTRA_CLANG_ARGS := "-I$(shell python -c "import sysconfig; print
 lint: export LD_LIBRARY_PATH := $(LD_LIBRARY_PATH):${QISKIT_ROOT}/qiskit
 lint: export DYLD_LIBRARY_PATH := $(DYLD_LIBRARY_PATH):${QISKIT_ROOT}/qiskit
 lint:
+	cargo metadata --format-version=1 --locked >/dev/null
 	cargo clippy -- -D warnings
 	tox -e lint
+	clang-format --dry-run -Werror --style="file:.clang-format" -i tests/c/*.c tests/c/*.h
 
 style: export LD_LIBRARY_PATH := $(LD_LIBRARY_PATH):${QISKIT_ROOT}/qiskit
 style: export DYLD_LIBRARY_PATH := $(DYLD_LIBRARY_PATH):${QISKIT_ROOT}/qiskit
 style:
 	cargo fmt
 	tox -e style
-	clang-format --style="file:.clang-format" -i tests/c/*.c tests/c/*.h
+	clang-format --fail-on-incomplete-format -Werror --style="file:.clang-format" -i tests/c/*.c tests/c/*.h
 
 # ==============================================================================
 # Recipes for Docs
@@ -63,12 +65,15 @@ rustcoverage: testrust
 
 # `pystubs` and `pystubs-dev` are conflicting rules - they both attempt to
 # generate the Python stub files, but they differ between release and dev mode.
-.PHONY: pystubs pystubs-dev
+.PHONY: pystubs pystubs-dev pystubs-clean
 pystubs:
 	cargo run --release --bin stub_gen -p qiskit-fermions-pyext --no-default-features
 
 pystubs-dev:
 	cargo run --bin stub_gen -p qiskit-fermions-pyext --no-default-features
+
+pystubs-clean:
+	find python/ -name '*.pyi' -delete
 
 # `pyext` and `pyext-dev` are conflicting rules - they both attempt to "install"
 # the compiled Rust acceleration library, but they differ between release and

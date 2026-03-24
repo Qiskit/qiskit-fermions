@@ -432,8 +432,8 @@ static int test_relabel_modes(void) {
     uint32_t modes_exp[6] = {4, 2, 4, 4, 5, 3};
     QkComplex64 coeffs_exp[2] = {{1.0, 0.0}, {1.0, 0.0}};
     uint32_t boundaries_exp[3] = {0, 2, 6};
-    QfFermionOperator *expected = qf_ferm_op_new(num_terms, num_actions, coeffs_exp, actions_exp,
-                                                 modes_exp, boundaries_exp);
+    QfFermionOperator *expected =
+        qf_ferm_op_new(num_terms, num_actions, coeffs_exp, actions_exp, modes_exp, boundaries_exp);
 
     bool is_equal = qf_ferm_op_equal(op, expected);
 
