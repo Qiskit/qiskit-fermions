@@ -64,12 +64,15 @@ rustcoverage: testrust
 
 # `pystubs` and `pystubs-dev` are conflicting rules - they both attempt to
 # generate the Python stub files, but they differ between release and dev mode.
-.PHONY: pystubs pystubs-dev
+.PHONY: pystubs pystubs-dev pystubs-clean
 pystubs:
 	cargo run --release --bin stub_gen -p qiskit-fermions-pyext --no-default-features
 
 pystubs-dev:
 	cargo run --bin stub_gen -p qiskit-fermions-pyext --no-default-features
+
+pystubs-clean:
+	find python/ -name '*.pyi' -delete
 
 # `pyext` and `pyext-dev` are conflicting rules - they both attempt to "install"
 # the compiled Rust acceleration library, but they differ between release and
