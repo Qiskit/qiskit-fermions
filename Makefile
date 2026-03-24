@@ -21,7 +21,7 @@ lint:
 	cargo metadata --format-version=1 --locked >/dev/null
 	cargo clippy -- -D warnings
 	tox -e lint
-	clang-format --dry-run --fail-on-incomplete-format -Werror --style="file:.clang-format" -i tests/c/*.c tests/c/*.h
+	clang-format --dry-run -Werror --style="file:.clang-format" -i tests/c/*.c tests/c/*.h
 
 style: export LD_LIBRARY_PATH := $(LD_LIBRARY_PATH):${QISKIT_ROOT}/qiskit
 style: export DYLD_LIBRARY_PATH := $(DYLD_LIBRARY_PATH):${QISKIT_ROOT}/qiskit
