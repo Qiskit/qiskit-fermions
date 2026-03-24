@@ -16,7 +16,6 @@ from __future__ import annotations
 
 from collections.abc import Callable
 
-import numpy as np
 from qiskit.circuit import QuantumCircuit
 from qiskit.circuit.library import PauliEvolutionGate
 from qiskit.converters import circuit_to_dag
@@ -48,19 +47,10 @@ class EvolutionSynthesis(TransformationPass):
             if not isinstance(node.op, Evolution):
                 continue
 
-            pauli_op = self.mapper_fn(node.op.operator)
-            # TODO: add a SparseObservable.real_if_close method
-            real_pauli_op = SparseObservable.from_raw_parts(
-                pauli_op.num_qubits,
-                np.asarray(pauli_op.coeffs).real,
-                pauli_op.bit_terms,
-                pauli_op.indices,
-                pauli_op.boundaries,
-                check=False,
-            )
+            pauli_op = self.mapper_fn(node.op.operator).simplify()
 
             node_circ = QuantumCircuit(dag.qubits)
-            node_circ.append(PauliEvolutionGate(real_pauli_op, time=node.op.params[0]), node.qargs)
+            node_circ.append(PauliEvolutionGate(pauli_op, time=node.op.params[0]), node.qargs)
             node_dag = circuit_to_dag(node_circ)
 
             dag.substitute_node_with_dag(node, node_dag)
