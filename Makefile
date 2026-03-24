@@ -20,13 +20,14 @@ lint: export DYLD_LIBRARY_PATH := $(DYLD_LIBRARY_PATH):${QISKIT_ROOT}/qiskit
 lint:
 	cargo clippy -- -D warnings
 	tox -e lint
+	clang-format --dry-run --fail-on-incomplete-format -Werror --style="file:.clang-format" -i tests/c/*.c tests/c/*.h
 
 style: export LD_LIBRARY_PATH := $(LD_LIBRARY_PATH):${QISKIT_ROOT}/qiskit
 style: export DYLD_LIBRARY_PATH := $(DYLD_LIBRARY_PATH):${QISKIT_ROOT}/qiskit
 style:
 	cargo fmt
 	tox -e style
-	clang-format --style="file:.clang-format" -i tests/c/*.c tests/c/*.h
+	clang-format --fail-on-incomplete-format -Werror --style="file:.clang-format" -i tests/c/*.c tests/c/*.h
 
 # ==============================================================================
 # Recipes for Docs
