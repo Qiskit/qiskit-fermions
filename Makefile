@@ -18,6 +18,7 @@ export BINDGEN_EXTRA_CLANG_ARGS := "-I$(shell python -c "import sysconfig; print
 lint: export LD_LIBRARY_PATH := $(LD_LIBRARY_PATH):${QISKIT_ROOT}/qiskit
 lint: export DYLD_LIBRARY_PATH := $(DYLD_LIBRARY_PATH):${QISKIT_ROOT}/qiskit
 lint:
+	cargo metadata --format-version=1 --locked >/dev/null
 	cargo clippy -- -D warnings
 	tox -e lint
 	clang-format --dry-run --fail-on-incomplete-format -Werror --style="file:.clang-format" -i tests/c/*.c tests/c/*.h
