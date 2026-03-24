@@ -51,7 +51,10 @@ class EvolutionSynthesis:
 
         pauli_op = self.mapper_fn(node.op.operator.relabel_modes(mode_relabeling)).simplify()
 
-        circ = QuantumCircuit(len(node.qargs))
-        circ.append(PauliEvolutionGate(pauli_op, time=node.op.params[0]), circ.qubits)
+        # TODO: verify that the qubit-reording is handled correctly w.r.t. the modes already being
+        # relabeled above!
+        qubits_reordered = [qubits[idx] for idx in mode_relabeling]
+        circ = QuantumCircuit(qubits_reordered)
+        circ.append(PauliEvolutionGate(pauli_op, time=node.op.params[0]), qubits_reordered)
 
-        return (circuit_to_dag(circ), qubits)
+        return (circuit_to_dag(circ), qubits_reordered)
