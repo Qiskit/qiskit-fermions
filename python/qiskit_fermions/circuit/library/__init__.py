@@ -19,4 +19,8 @@ Circuit Library
 .. currentmodule:: qiskit_fermions.circuit.library
 """
 
-__all__ = []
+from .evolution import Evolution
+
+__all__ = [
+    "Evolution",
+]

@@ -28,7 +28,7 @@ from qiskit_fermions.circuit.library.evolution import Evolution
 from qiskit_fermions.operators import FermionOperator, MajoranaOperator
 
 
-class SynthesizeEvolution(TransformationPass):
+class EvolutionSynthesis(TransformationPass):
     """TODO."""
 
     # TODO: add an OperatorProtocol to avoid hard-coding this list of types from our package

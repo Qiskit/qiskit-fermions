@@ -12,11 +12,15 @@
 
 # ruff: noqa: D205,D212,D415
 """
-====================
-Transpilation Passes
-====================
+================
+Synthesis Passes
+================
 
-.. currentmodule:: qiskit_fermions.transpiler.passes
+.. currentmodule:: qiskit_fermions.transpiler.passes.synthesis
 """
 
-__all__ = []
+from .evolution import EvolutionSynthesis
+
+__all__ = [
+    "EvolutionSynthesis",
+]
