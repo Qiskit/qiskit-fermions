@@ -17,6 +17,39 @@ Transpilation Passes
 ====================
 
 .. currentmodule:: qiskit_fermions.transpiler.passes
+
+Principal Components
+--------------------
+
+.. autosummary::
+   :toctree: ../stubs/
+
+   F2QLayout
+   F2QSynthesis
+
+Layouting Passes
+----------------
+
+.. autosummary::
+   :toctree: ../stubs/
+
+   TrivialF2QLayout
+
+Synthesis Plugins
+-----------------
+
+.. autosummary::
+   :toctree: ../stubs/
+
+   EvolutionSynthesis
 """
 
-__all__ = []
+from .layout import F2QLayout, TrivialF2QLayout
+from .synthesis import EvolutionSynthesis, F2QSynthesis
+
+__all__ = [
+    "EvolutionSynthesis",
+    "F2QLayout",
+    "F2QSynthesis",
+    "TrivialF2QLayout",
+]
