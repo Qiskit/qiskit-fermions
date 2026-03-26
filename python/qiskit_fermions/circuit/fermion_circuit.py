@@ -14,51 +14,65 @@
 
 from __future__ import annotations
 
-from collections.abc import Sequence
-from typing import TypeAlias, cast
+from typing import Any, cast
 
-from qiskit.circuit import QuantumCircuit, QuantumRegister, Qubit
+from qiskit.circuit import QuantumCircuit, QuantumRegister
 
+from . import Fermion, FermionSpecifier
 from .fermion_gate import FermionGate
-
-Fermion: TypeAlias = Qubit
-"""TODO."""
-
-FermionRegister: TypeAlias = QuantumRegister
-"""TODO."""
-
-FermionSpecifier: TypeAlias = Fermion | FermionRegister | int | slice | Sequence[Fermion | int]
-"""TODO."""
 
 
 class FermionCircuit:
-    """TODO."""
+    """A wrapper around :class:`~qiskit.circuit.QuantumCircuit` for expressing fermionic circuits.
+
+    This class maintains a reduced API compared to the full API of the underlying
+    :class:`~qiskit.circuit.QuantumCircuit`. This is done to avoid exposing (amongst other methods)
+    the ability to apply qubit-based gates onto a fermionic circuit, which would not be a
+    well-defined operation in the general case.
+    """
 
     def __init__(self, num_fermions: int) -> None:
-        """TODO."""
-        self.register = QuantumRegister(num_fermions, "f")
-        """TODO."""
+        """Initializes a FermionCircuit instance.
 
-        self._inner = QuantumCircuit(self.register)
+        Args:
+            num_fermions: the number of fermionic modes on which this circuit acts.
+        """
+        register = QuantumRegister(num_fermions, "f")
+        self._inner = QuantumCircuit(register)
 
     @property
     def fermions(self) -> list[Fermion]:
-        """TODO."""
+        """The fermionic mode `bits` that this circuit acts upon."""
         return cast(list[Fermion], self._inner.qubits)
 
     def append(
-        self, gate: FermionGate, fargs: FermionSpecifier, cargs: None = None, *, copy: bool = True
+        self,
+        gate: FermionGate,
+        fargs: FermionSpecifier,
+        cargs: None = None,
+        *,
+        copy: bool = True,
     ) -> None:
-        """TODO."""
+        """Appends a :class:`.FermionGate` to this circuit.
+
+        Args:
+            gate: the fermionic gate to apply.
+            fargs: the fermionic modes on which this gate acts.
+            cargs: the classical bits on which this gate acts.
+
+              .. warning::
+                 No gates of this kind are currently supported.
+
+            copy: forwarded to :meth:`~qiskit.circuit.QuantumCircuit.append`.
+
+        Raises:
+            ValueError: if the provided ``gate`` is not an instance of :class:`.FermionGate`.
+        """
         if not isinstance(gate, FermionGate):
             raise ValueError("Unsupported instruction type: %s", type(gate))
 
         self._inner.append(gate, fargs, cargs, copy=copy)
 
-    def decompose(self) -> QuantumCircuit:
-        """TODO."""
-        return self._inner.decompose()
-
-    def draw(self, *args, **kwargs):
-        """TODO."""
+    def draw(self, *args, **kwargs) -> Any:
+        """Directly exposes the inner circuit's :meth:`~qiskit.circuit.QuantumCircuit.draw` method."""
         return self._inner.draw(*args, **kwargs)

@@ -17,6 +17,15 @@ Circuit Library
 ===============
 
 .. currentmodule:: qiskit_fermions.circuit.library
+
+This module provides a library of :class:`.FermionGate` implementations.
+
+
+.. autosummary::
+   :toctree: ../stubs/
+   :template: autosummary/class_without_inheritance.rst
+
+   Evolution
 """
 
 from .evolution import Evolution

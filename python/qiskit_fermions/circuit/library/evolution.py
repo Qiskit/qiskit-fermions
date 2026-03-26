@@ -24,11 +24,19 @@ if TYPE_CHECKING:
 
 
 class Evolution(FermionGate):
-    """TODO."""
+    """Implements the time-evolution of an operator."""
 
     def __init__(
         self, num_fermions: int, operator: FermionOperator | MajoranaOperator, time: float = 1.0
     ) -> None:
-        """TODO."""
+        """Initializes an Evolution gate.
+
+        Args:
+            num_fermions: the number of fermionic modes on which this gate acts.
+            operator: the operator under which to time-evolve the acted-upon fermionic modes.
+            time: the evolution time.
+        """
         self.operator = operator
+        """The operator under which to time-evolve the acted-upon fermionic modes."""
+
         super().__init__("Evolution", num_fermions, [time])

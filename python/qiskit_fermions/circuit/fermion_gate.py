@@ -14,11 +14,25 @@
 
 from __future__ import annotations
 
+from typing import cast
+
 from qiskit.circuit import Gate
 
 
 class FermionGate(Gate):
-    """TODO."""
+    """The base class for all fermionic gates.
+
+    To ensure consistency only subclasses of this gate class can be added to instances of
+    :class:`.FermionCircuit`. As such, this class (mostly) serves as a type (for the time being).
+
+    .. caution::
+       Since this is a subclass of :class:`~qiskit.circuit.Gate` the documentation of its methods
+       may refer to `qubits`. Those references should be interpreted as referring to `fermions` in
+       the context of instances of this subclass.
+
+       It may also happen that some of the inherited methods may not always make sense because of
+       this `re-interpretation`. You have been warned.
+    """
 
     def __init__(
         self,
@@ -29,7 +43,12 @@ class FermionGate(Gate):
         *,
         label: str | None = None,
     ) -> None:
-        """TODO."""
+        """Initializes a FermionGate instance."""
         if params is None:
             params = []
         super().__init__(name, num_fermions, params, label)
+
+    @property
+    def num_fermions(self) -> int:
+        """The number of fermionic modes that this gate acts upon."""
+        return cast(int, self._num_qubits)
