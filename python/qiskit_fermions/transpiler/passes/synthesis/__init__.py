@@ -20,7 +20,9 @@ Synthesis Passes
 """
 
 from .evolution import EvolutionSynthesis
+from .synthesis import F2QSynthesis
 
 __all__ = [
     "EvolutionSynthesis",
+    "F2QSynthesis",
 ]

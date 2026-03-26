@@ -19,9 +19,4 @@ Transpilation Passes
 .. currentmodule:: qiskit_fermions.transpiler.passes
 """
 
-from .f2q import F2QEncoding, F2QLayout
-
-__all__ = [
-    "F2QEncoding",
-    "F2QLayout",
-]
+__all__ = []

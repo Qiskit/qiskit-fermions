@@ -10,19 +10,12 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
-# ruff: noqa: D205,D212,D415
-"""
-=============
-Layout Passes
-=============
+"""TODO."""
 
-.. currentmodule:: qiskit_fermions.transpiler.passes.layout
-"""
+from __future__ import annotations
 
-from .layout import F2QLayout
-from .trivial import TrivialF2QLayout
+from typing import TypeAlias
 
-__all__ = [
-    "F2QLayout",
-    "TrivialF2QLayout",
-]
+from qiskit.circuit import QuantumRegister
+
+F2QLayout: TypeAlias = dict[QuantumRegister, QuantumRegister]

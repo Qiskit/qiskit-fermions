@@ -17,13 +17,13 @@ from __future__ import annotations
 from collections.abc import Callable
 from typing import TYPE_CHECKING
 
-from qiskit.circuit import QuantumCircuit
+from qiskit.circuit import QuantumCircuit, QuantumRegister
 from qiskit.circuit.library import PauliEvolutionGate
 from qiskit.converters import circuit_to_dag
 from qiskit.dagcircuit import DAGCircuit, DAGOpNode
 from qiskit.quantum_info import SparseObservable
 
-from .. import F2QLayout
+from ..layout import F2QLayout
 
 if TYPE_CHECKING:
     from qiskit_fermions._lib.operators.fermion_operator import FermionOperator
@@ -44,15 +44,31 @@ class EvolutionSynthesis:
         super().__init__()
         self.mapper_fn = mapper_fn
 
-    def run(self, node: DAGOpNode, layout: F2QLayout) -> DAGCircuit:
+    def run(self, in_node: DAGOpNode, out_dag: DAGCircuit, *, f2q_layout: F2QLayout):
         """TODO."""
-        qubits = [layout.f2q[fermion] for fermion in node.qargs]
-        mode_relabeling = [layout.qubits.index(qubit) for qubit in qubits]
+        local_op = in_node.op.operator
+        # First, we must expand the local node indices to the global fermion register
+        encountered_fermion_registers: set[QuantumRegister] = set()
+        global_fermion_indices = []
+        for fermion in in_node.qargs:
+            for freg in f2q_layout:
+                if fermion in freg:
+                    encountered_fermion_registers.add(freg)
+                    global_fermion_indices.append(freg.index(fermion))
+                    break
 
-        pauli_op = self.mapper_fn(node.op.operator.relabel_modes(mode_relabeling)).simplify()
+        if len(encountered_fermion_registers) > 1:
+            # TODO: improve error message
+            raise NotImplementedError("Multiple fermion registers not supported!")
 
-        qubits_reordered = [qubits[idx] for idx in mode_relabeling]
-        circ = QuantumCircuit(qubits_reordered)
-        circ.append(PauliEvolutionGate(pauli_op, time=node.op.params[0]), qubits_reordered)
+        freg = encountered_fermion_registers.pop()
+        qreg = f2q_layout[freg]
 
-        return (circuit_to_dag(circ), qubits_reordered)
+        global_op = local_op.relabel_modes(global_fermion_indices)
+        pauli_op = self.mapper_fn(global_op).simplify()
+
+        circ = QuantumCircuit(qreg)
+        circ.append(PauliEvolutionGate(pauli_op, time=in_node.op.params[0]), qreg)
+        new_dag = circuit_to_dag(circ)
+
+        out_dag.compose(new_dag, qubits=list(qreg), front=False, inplace=True)

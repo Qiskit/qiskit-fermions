@@ -14,10 +14,11 @@
 
 from __future__ import annotations
 
+from qiskit.circuit import QuantumRegister
 from qiskit.dagcircuit import DAGCircuit
 from qiskit.transpiler import AnalysisPass
 
-from .. import F2QLayout
+from .layout import F2QLayout
 
 
 class TrivialF2QLayout(AnalysisPass):
@@ -25,4 +26,8 @@ class TrivialF2QLayout(AnalysisPass):
 
     def run(self, dag: DAGCircuit) -> None:
         """TODO."""
-        self.property_set["f2q_layout"] = F2QLayout.trivial(dag.qregs["f"])
+        layout: F2QLayout = {}
+        for qreg in dag.qregs.values():
+            layout[qreg] = QuantumRegister(len(qreg))
+
+        self.property_set["f2q_layout"] = layout
