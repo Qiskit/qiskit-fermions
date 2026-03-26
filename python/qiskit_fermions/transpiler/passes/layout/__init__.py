@@ -19,10 +19,8 @@ Layout Passes
 .. currentmodule:: qiskit_fermions.transpiler.passes.layout
 """
 
-from .layout import F2QLayout
 from .trivial import TrivialF2QLayout
 
 __all__ = [
-    "F2QLayout",
     "TrivialF2QLayout",
 ]

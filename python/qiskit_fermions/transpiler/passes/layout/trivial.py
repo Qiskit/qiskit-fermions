@@ -18,7 +18,7 @@ from qiskit.circuit import QuantumRegister
 from qiskit.dagcircuit import DAGCircuit
 from qiskit.transpiler import AnalysisPass
 
-from .layout import F2QLayout
+from ... import F2QLayout
 
 
 class TrivialF2QLayout(AnalysisPass):

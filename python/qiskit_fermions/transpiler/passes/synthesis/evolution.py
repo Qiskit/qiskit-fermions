@@ -23,7 +23,7 @@ from qiskit.converters import circuit_to_dag
 from qiskit.dagcircuit import DAGCircuit, DAGOpNode
 from qiskit.quantum_info import SparseObservable
 
-from ..layout import F2QLayout
+from ... import F2QLayout
 
 if TYPE_CHECKING:
     from qiskit_fermions._lib.operators.fermion_operator import FermionOperator

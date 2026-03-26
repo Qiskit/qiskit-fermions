@@ -24,7 +24,6 @@ Principal Components
 .. autosummary::
    :toctree: ../stubs/
 
-   F2QLayout
    F2QSynthesis
 
 Layouting Passes
@@ -44,12 +43,11 @@ Synthesis Plugins
    EvolutionSynthesis
 """
 
-from .layout import F2QLayout, TrivialF2QLayout
+from .layout import TrivialF2QLayout
 from .synthesis import EvolutionSynthesis, F2QSynthesis
 
 __all__ = [
     "EvolutionSynthesis",
-    "F2QLayout",
     "F2QSynthesis",
     "TrivialF2QLayout",
 ]

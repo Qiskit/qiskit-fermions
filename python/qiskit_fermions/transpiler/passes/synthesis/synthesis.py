@@ -21,7 +21,7 @@ from qiskit.transpiler import TransformationPass
 
 from qiskit_fermions.circuit import FermionGate
 
-from ..layout import F2QLayout
+from ... import F2QLayout
 
 
 class F2QSynthesisPlugin(Protocol):

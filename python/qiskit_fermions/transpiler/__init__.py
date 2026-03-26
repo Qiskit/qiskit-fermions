@@ -17,6 +17,21 @@ Transpiler
 ==========
 
 .. currentmodule:: qiskit_fermions.transpiler
+
+.. autosummary::
+   :toctree: ../stubs/
+
+   F2QLayout
 """
 
-__all__ = []
+from __future__ import annotations
+
+from typing import TypeAlias
+
+from qiskit.circuit import QuantumRegister
+
+F2QLayout: TypeAlias = dict[QuantumRegister, QuantumRegister]
+
+__all__ = [
+    "F2QLayout",
+]
