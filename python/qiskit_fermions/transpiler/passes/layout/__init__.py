@@ -10,14 +10,7 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
-# ruff: noqa: D205,D212,D415
-"""
-=============
-Layout Passes
-=============
-
-.. currentmodule:: qiskit_fermions.transpiler.passes.layout
-"""
+"""Layout passes."""
 
 from .custom import CustomF2QLayout
 from .trivial import TrivialF2QLayout

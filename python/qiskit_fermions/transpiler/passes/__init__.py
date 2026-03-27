@@ -18,28 +18,48 @@ Transpilation Passes
 
 .. currentmodule:: qiskit_fermions.transpiler.passes
 
-Principal Components
---------------------
+This module provides various transpiler passes for the stages explained in
+:mod:`qiskit_fermions.transpiler`.
 
-.. autosummary::
-   :toctree: ../stubs/
+.. _qiskit_fermions-transpiler-passes-optimization:
 
-   F2QSynthesis
+Optimization Passes
+-------------------
+
+.. hint::
+   Coming soon!
 
 .. _qiskit_fermions-transpiler-passes-layout:
 
 Layouting Passes
 ----------------
 
+These passes are designed to help configuring the global
+:type:`~qiskit_fermions.transpiler.F2QLayout` setting for the transpilation process. This setting
+needs to be placed in the ``f2q_layout`` field of the
+:attr:`~qiskit.passmanager.PassManagerState.property_set`, from where it will be read during the
+:ref:`qiskit_fermions-transpiler-passes-synthesis`.
+
 .. autosummary::
    :toctree: ../stubs/
 
    TrivialF2QLayout
+   CustomF2QLayout
+
+.. _qiskit_fermions-transpiler-passes-synthesis:
+
+Synthesis Passes
+----------------
+
+.. autosummary::
+   :toctree: ../stubs/
+
+   F2QSynthesis
 
 .. _qiskit_fermions-transpiler-passes-synthesis-plugins:
 
-Synthesis Plugins
------------------
+Plugins
+^^^^^^^
 
 .. autosummary::
    :toctree: ../stubs/
@@ -47,10 +67,11 @@ Synthesis Plugins
    EvolutionSynthesis
 """
 
-from .layout import TrivialF2QLayout
+from .layout import CustomF2QLayout, TrivialF2QLayout
 from .synthesis import EvolutionSynthesis, F2QSynthesis
 
 __all__ = [
+    "CustomF2QLayout",
     "EvolutionSynthesis",
     "F2QSynthesis",
     "TrivialF2QLayout",

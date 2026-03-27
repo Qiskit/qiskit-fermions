@@ -22,10 +22,20 @@ from ... import F2QLayout
 
 
 class TrivialF2QLayout(AnalysisPass):
-    """TODO."""
+    """Trivially maps :math:`n` fermionic modes to :math:`n` qubits.
+
+    This pass simply populates the ``f2q_layout`` field of the
+    :attr:`~qiskit.passmanager.PassManagerState.property_set`, with a dictionary associating each
+    :type:`~qiskit_fermions.circuit.FermionRegister` with an equally sized
+    :class:`~qiskit.circuit.QuantumRegister`.
+    """
 
     def run(self, dag: DAGCircuit) -> None:
-        """TODO."""
+        """Runs this analysis pass.
+
+        Args:
+            dag: the DAG circuit representation of a :class:`.FermionCircuit`.
+        """
         layout: F2QLayout = {}
         for qreg in dag.qregs.values():
             layout[qreg] = QuantumRegister(len(qreg))
