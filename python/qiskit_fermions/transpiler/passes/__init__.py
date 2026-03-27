@@ -26,6 +26,8 @@ Principal Components
 
    F2QSynthesis
 
+.. _qiskit_fermions-transpiler-passes-layout:
+
 Layouting Passes
 ----------------
 
@@ -33,6 +35,8 @@ Layouting Passes
    :toctree: ../stubs/
 
    TrivialF2QLayout
+
+.. _qiskit_fermions-transpiler-passes-synthesis-plugins:
 
 Synthesis Plugins
 -----------------
