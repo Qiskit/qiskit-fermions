@@ -10,19 +10,13 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
-# ruff: noqa: D205,D212,D415
-"""
-================
-Synthesis Passes
-================
-
-.. currentmodule:: qiskit_fermions.transpiler.passes.synthesis
-"""
+"""Synthesis passes."""
 
 from .evolution import EvolutionSynthesis
-from .synthesis import F2QSynthesis
+from .synthesis import F2QSynthesis, F2QSynthesisPlugin
 
 __all__ = [
     "EvolutionSynthesis",
     "F2QSynthesis",
+    "F2QSynthesisPlugin",
 ]

@@ -51,6 +51,13 @@ needs to be placed in the ``f2q_layout`` field of the
 Synthesis Passes
 ----------------
 
+The main logic for mapping a :class:`.FermionCircuit` to a :class:`~qiskit.circuit.QuantumCircuit`
+is implemented by a single synthesis pass, namely the :class:`.F2QSynthesis`. It is conceptually
+similar to Qiskit's :class:`~qiskit.transpiler.passes.HighLevelSynthesis` because it simply iterates
+over the :class:`.FermionCircuit` instructions and delegates the mapping to qubit-based instructions
+to :ref:`qiskit_fermions-transpiler-passes-synthesis-plugins` for each of the encountered types of
+:class:`.FermionGate`.
+
 .. autosummary::
    :toctree: ../stubs/
 
@@ -61,6 +68,13 @@ Synthesis Passes
 Plugins
 ^^^^^^^
 
+As mentioned above, the :class:`.F2QSynthesis` transpiler pass exposes a `plugin interface` through
+which implementations for mapping fermion-based instructions to qubit-based ones can be registered.
+For more details on how to implement your own plugin, refer to :attr:`.F2QSynthesis.plugins`.
+
+For most common gates provided by :mod:`qiskit_fermions.circuit.library`, this module already
+provides builtin plugins:
+
 .. autosummary::
    :toctree: ../stubs/
 
@@ -68,11 +82,12 @@ Plugins
 """
 
 from .layout import CustomF2QLayout, TrivialF2QLayout
-from .synthesis import EvolutionSynthesis, F2QSynthesis
+from .synthesis import EvolutionSynthesis, F2QSynthesis, F2QSynthesisPlugin
 
 __all__ = [
     "CustomF2QLayout",
     "EvolutionSynthesis",
     "F2QSynthesis",
+    "F2QSynthesisPlugin",
     "TrivialF2QLayout",
 ]
