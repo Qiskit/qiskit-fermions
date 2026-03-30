@@ -86,8 +86,10 @@ class EvolutionSynthesis:
                     break
 
         if len(encountered_fermion_registers) > 1:
-            # TODO: improve error message
-            raise NotImplementedError("Multiple fermion registers not supported!")
+            raise NotImplementedError(
+                "Cannot map an Evolution gate acting on fermionic modes that are spread across "
+                "multiple FermionRegister instances."
+            )
 
         freg = encountered_fermion_registers.pop()
         qreg = f2q_layout[freg]

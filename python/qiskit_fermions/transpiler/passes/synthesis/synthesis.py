@@ -84,7 +84,7 @@ class F2QSynthesis(TransformationPass):
             The output circuit with qubit-based instructions.
 
         Raises:
-            NotImplementedError: when a :class:`~qiskit.dagcircuit.DAGOpNode` is encountered whose
+            ValueError: when a :class:`~qiskit.dagcircuit.DAGOpNode` is encountered whose
                 :attr:`~qiskit.dagcircuit.DAGOpNode.op` is not of type :class:`.FermionGate`.
             TypeError: when a :class:`.FermionGate` type is encountered for which no translation
                 plugin is present in :attr:`plugins`.
@@ -99,12 +99,16 @@ class F2QSynthesis(TransformationPass):
             out_dag.remove_qubits(*freg)
 
         for node in dag.op_nodes():
+            op_type = type(node.op)
             if not isinstance(node.op, FermionGate):
-                raise NotImplementedError("TODO.")
+                raise ValueError("Encountered an unsupported circuit instruction type: {}", op_type)
 
-            plugin = self.plugins.get(type(node.op), None)
+            plugin = self.plugins.get(op_type, None)
             if plugin is None:
-                raise TypeError("TODO.")
+                raise TypeError(
+                    "No plugin registered for transpiling a circuit instruction of type: {}",
+                    op_type,
+                )
 
             plugin.run(node, out_dag, f2q_layout=f2q_layout)
 
