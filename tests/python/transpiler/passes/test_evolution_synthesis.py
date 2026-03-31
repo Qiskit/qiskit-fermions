@@ -10,7 +10,7 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
-"""Fermion-to-qubit synthesis tests."""
+"""Evolution synthesis tests."""
 
 from __future__ import annotations
 
@@ -59,7 +59,7 @@ def test_evolution_gate_synthesis():
     assert qu_circ_decomp.depth(lambda instr: len(instr.qubits) == 2) == 16
 
 
-def test_custom_layout():
+def test_custom_qubit_ordering():
     hamil = FermionOperator.from_dict(
         {
             ((True, 0), (False, 2)): 2.0,
@@ -74,14 +74,14 @@ def test_custom_layout():
     evo = Evolution(num_fermions, hamil, time=time)
     circ.append(evo, circ.fermions)
 
-    custom_layout = [0, 2, 1, 3]
+    custom_qubit_ordering = [0, 2, 1, 3]
 
-    def custom_layout_mapper_fn(op):
-        relabeled = op.relabel_modes(custom_layout)
+    def custom_qubit_ordering_mapper_fn(op):
+        relabeled = op.relabel_modes(custom_qubit_ordering)
         return jordan_wigner(relabeled, num_fermions)
 
     synth = F2QSynthesis()
-    synth.plugins[Evolution] = EvolutionSynthesis(custom_layout_mapper_fn)
+    synth.plugins[Evolution] = EvolutionSynthesis(custom_qubit_ordering_mapper_fn)
 
     pm = PassManager([TrivialF2QLayout(), synth])
 
