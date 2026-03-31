@@ -30,13 +30,8 @@ The following objects are simple type aliases to make this re-interpretation mor
    FermionRegister
    FermionSpecifier
 
-..
-   TODO: revisit the summary above once qiskit-sphinx-theme updates furo (and therefore support
-   Sphinx 9, which added a .. autotype:: directive). That may result in better (and actually
-   customizable) docstrings for these type aliases.
-
 For actually expressing your circuits, you should use the :class:`.FermionCircuit` class along with
-the library of :class:`.FermionGate` implementations in :mod:`qiskit_fermions.circuit.library`.
+the :mod:`~qiskit_fermions.circuit.library` of :class:`.FermionGate` implementations.
 
 .. autosummary::
    :toctree: ../stubs/
