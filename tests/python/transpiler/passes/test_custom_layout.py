@@ -16,8 +16,13 @@ from __future__ import annotations
 
 from collections import defaultdict
 
+from qiskit.circuit import QuantumRegister
 from qiskit.quantum_info import SparseObservable, SparsePauliOp
+from qiskit.transpiler import PassManager
+from qiskit_fermions.circuit import FermionCircuit
+from qiskit_fermions.circuit.library import Evolution
 from qiskit_fermions.operators import MajoranaOperator
+from qiskit_fermions.transpiler.passes import CustomF2QLayout, EvolutionSynthesis, F2QSynthesis
 
 
 def build_fermi_hubbard_4x4(interaction: complex, tunneling: complex):
@@ -451,10 +456,12 @@ def test_dk_edge_vertical_down_with_face_left():
 
 
 def test_custom_layout():
+    num_fermions = 16
+    num_qubits = 20
     hamil = build_fermi_hubbard_4x4(5.0, 5.0)
     initial_state = [True, False] * 8
     edge_face_map = build_derby_klassen_edge_face_map_4x4()
-    qop = derby_klassen(hamil, initial_state, edge_face_map, 20)
+    qop = derby_klassen(hamil, initial_state, edge_face_map, num_qubits)
 
     pauli_op = SparsePauliOp.from_sparse_observable(qop)
 
@@ -503,4 +510,21 @@ def test_custom_layout():
     # fmt: on
 
     diff = (expected - pauli_op).simplify(atol=0.0)
-    assert diff == SparsePauliOp.from_sparse_list([], 20)
+    assert diff == SparsePauliOp.from_sparse_list([], num_qubits)
+
+    circ = FermionCircuit(num_fermions)
+    circ.append(Evolution(num_fermions, hamil), circ.fermions)
+
+    layout = CustomF2QLayout({circ.register: QuantumRegister(num_qubits)})
+
+    def mapper_fn(op):
+        return derby_klassen(op, initial_state, edge_face_map, num_qubits)
+
+    synth = F2QSynthesis()
+    synth.plugins[Evolution] = EvolutionSynthesis(mapper_fn)
+
+    pm = PassManager([layout, synth])
+
+    qu_circ = pm.run(circ._inner)
+    qu_circ_decomp = qu_circ.decompose()
+    assert qu_circ_decomp.depth(lambda instr: len(instr.qubits) == 2) == 121

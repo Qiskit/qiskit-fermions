@@ -14,12 +14,15 @@
 
 from __future__ import annotations
 
-from typing import Any, cast
+from typing import TYPE_CHECKING, Any, cast
 
 from qiskit.circuit import QuantumCircuit, QuantumRegister
 
 from . import Fermion, FermionSpecifier
 from .fermion_gate import FermionGate
+
+if TYPE_CHECKING:
+    from . import FermionRegister
 
 
 class FermionCircuit:
@@ -37,8 +40,9 @@ class FermionCircuit:
         Args:
             num_fermions: the number of fermionic modes on which this circuit acts.
         """
-        register = QuantumRegister(num_fermions, "f")
-        self._inner = QuantumCircuit(register)
+        self.register: FermionRegister = QuantumRegister(num_fermions, "f")
+        """The inner circuit's :type:`~qiskit_fermions.circuit.FermionRegister`."""
+        self._inner = QuantumCircuit(self.register)
 
     @property
     def fermions(self) -> list[Fermion]:
