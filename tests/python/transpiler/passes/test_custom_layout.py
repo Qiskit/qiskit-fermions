@@ -17,7 +17,7 @@ from __future__ import annotations
 from collections import defaultdict
 
 from qiskit.quantum_info import SparseObservable, SparsePauliOp
-from qiskit_fermions.operators import MajoranaOperator, gamma
+from qiskit_fermions.operators import MajoranaOperator
 
 
 def build_fermi_hubbard_4x4(interaction: complex, tunneling: complex):
@@ -60,13 +60,13 @@ def build_fermi_hubbard_4x4(interaction: complex, tunneling: complex):
 
         for j in js:
             # interaction
-            data[(gamma(i, False), gamma(i, True))] -= interaction
-            data[(gamma(j, False), gamma(j, True))] -= interaction
-            data[(gamma(i, False), gamma(i, True), gamma(j, False), gamma(j, True))] += interaction
+            data[(i, i)] -= interaction
+            data[(j, j)] -= interaction
+            data[(i, i, j, j)] += interaction
 
             # tunneling
-            data[(gamma(i, False), gamma(i, True), gamma(i, False), gamma(j, False))] += tunneling
-            data[(gamma(j, False), gamma(j, True), gamma(i, False), gamma(j, False))] -= tunneling
+            data[(i, i, i, j)] += tunneling
+            data[(j, j, i, j)] -= tunneling
 
     return MajoranaOperator.from_dict(data)
 
@@ -109,8 +109,6 @@ def derby_klassen(
         mapped_terms = SparseObservable.identity(num_qubits)
 
         for i, j in zip(terms[::2], terms[1::2], strict=True):
-            i = i // 2
-            j = j // 2
             dij = abs(i - j)
 
             face_qubit: int | None = None
@@ -157,9 +155,9 @@ def derby_klassen(
 def test_dk_vertex_horizontal():
     hamil = MajoranaOperator.from_dict(
         {
-            (gamma(0, False), gamma(0, True)): -1.25,
-            (gamma(1, False), gamma(1, True)): -1.25,
-            (gamma(0, False), gamma(0, True), gamma(1, False), gamma(1, True)): 1.25,
+            (0, 0): -1.25,
+            (1, 1): -1.25,
+            (0, 0, 1, 1): 1.25,
         }
     )
     initial_state = [True, False] * 8
@@ -180,9 +178,9 @@ def test_dk_vertex_horizontal():
 def test_dk_vertex_vertical():
     hamil = MajoranaOperator.from_dict(
         {
-            (gamma(0, False), gamma(0, True)): -1.25,
-            (gamma(7, False), gamma(7, True)): -1.25,
-            (gamma(0, False), gamma(0, True), gamma(7, False), gamma(7, True)): 1.25,
+            (0, 0): -1.25,
+            (7, 7): -1.25,
+            (0, 0, 7, 7): 1.25,
         }
     )
     initial_state = [True, False] * 8
@@ -203,8 +201,8 @@ def test_dk_vertex_vertical():
 def test_dk_edge_horizontal_right():
     hamil = MajoranaOperator.from_dict(
         {
-            (gamma(0, False), gamma(0, True), gamma(0, False), gamma(1, False)): 2.5j,
-            (gamma(1, False), gamma(1, True), gamma(0, False), gamma(1, False)): -2.5j,
+            (0, 0, 0, 1): 2.5j,
+            (1, 1, 0, 1): -2.5j,
         }
     )
     initial_state = [True, False] * 8
@@ -224,8 +222,8 @@ def test_dk_edge_horizontal_right():
 def test_dk_edge_horizontal_right_with_face_below():
     hamil = MajoranaOperator.from_dict(
         {
-            (gamma(1, False), gamma(1, True), gamma(1, False), gamma(2, False)): 2.5j,
-            (gamma(2, False), gamma(2, True), gamma(1, False), gamma(2, False)): -2.5j,
+            (1, 1, 1, 2): 2.5j,
+            (2, 2, 1, 2): -2.5j,
         }
     )
     initial_state = [True, False] * 8
@@ -245,8 +243,8 @@ def test_dk_edge_horizontal_right_with_face_below():
 def test_dk_edge_horizontal_right_with_face_above():
     hamil = MajoranaOperator.from_dict(
         {
-            (gamma(8, False), gamma(8, True), gamma(8, False), gamma(9, False)): 2.5j,
-            (gamma(9, False), gamma(9, True), gamma(8, False), gamma(9, False)): -2.5j,
+            (8, 8, 8, 9): 2.5j,
+            (9, 9, 8, 9): -2.5j,
         }
     )
     initial_state = [True, False] * 8
@@ -266,8 +264,8 @@ def test_dk_edge_horizontal_right_with_face_above():
 def test_dk_edge_horizontal_left():
     hamil = MajoranaOperator.from_dict(
         {
-            (gamma(14, False), gamma(14, True), gamma(14, False), gamma(15, False)): 2.5j,
-            (gamma(15, False), gamma(15, True), gamma(14, False), gamma(15, False)): -2.5j,
+            (14, 14, 14, 15): 2.5j,
+            (15, 15, 14, 15): -2.5j,
         }
     )
     initial_state = [True, False] * 8
@@ -287,8 +285,8 @@ def test_dk_edge_horizontal_left():
 def test_dk_edge_horizontal_left_with_face_above():
     hamil = MajoranaOperator.from_dict(
         {
-            (gamma(13, False), gamma(13, True), gamma(13, False), gamma(14, False)): 2.5j,
-            (gamma(14, False), gamma(14, True), gamma(13, False), gamma(14, False)): -2.5j,
+            (13, 13, 13, 14): 2.5j,
+            (14, 14, 13, 14): -2.5j,
         }
     )
     initial_state = [True, False] * 8
@@ -308,8 +306,8 @@ def test_dk_edge_horizontal_left_with_face_above():
 def test_dk_edge_horizontal_left_with_face_below():
     hamil = MajoranaOperator.from_dict(
         {
-            (gamma(4, False), gamma(4, True), gamma(4, False), gamma(5, False)): 2.5j,
-            (gamma(5, False), gamma(5, True), gamma(4, False), gamma(5, False)): -2.5j,
+            (4, 4, 4, 5): 2.5j,
+            (5, 5, 4, 5): -2.5j,
         }
     )
     initial_state = [True, False] * 8
@@ -329,8 +327,8 @@ def test_dk_edge_horizontal_left_with_face_below():
 def test_dk_edge_vertical_up():
     hamil = MajoranaOperator.from_dict(
         {
-            (gamma(7, False), gamma(7, True), gamma(7, False), gamma(0, False)): 2.5j,
-            (gamma(0, False), gamma(0, True), gamma(7, False), gamma(0, False)): -2.5j,
+            (7, 7, 7, 0): 2.5j,
+            (0, 0, 7, 0): -2.5j,
         }
     )
     initial_state = [True, False] * 8
@@ -350,8 +348,8 @@ def test_dk_edge_vertical_up():
 def test_dk_edge_vertical_up_with_face_left():
     hamil = MajoranaOperator.from_dict(
         {
-            (gamma(5, False), gamma(5, True), gamma(5, False), gamma(2, False)): 2.5j,
-            (gamma(2, False), gamma(2, True), gamma(5, False), gamma(2, False)): -2.5j,
+            (5, 5, 5, 2): 2.5j,
+            (2, 2, 5, 2): -2.5j,
         }
     )
     initial_state = [True, False] * 8
@@ -371,8 +369,8 @@ def test_dk_edge_vertical_up_with_face_left():
 def test_dk_edge_vertical_up_with_face_right():
     hamil = MajoranaOperator.from_dict(
         {
-            (gamma(10, False), gamma(10, True), gamma(10, False), gamma(5, False)): 2.5j,
-            (gamma(5, False), gamma(5, True), gamma(10, False), gamma(5, False)): -2.5j,
+            (10, 10, 10, 5): 2.5j,
+            (5, 5, 10, 5): -2.5j,
         }
     )
     initial_state = [True, False] * 8
@@ -392,8 +390,8 @@ def test_dk_edge_vertical_up_with_face_right():
 def test_dk_edge_vertical_down():
     hamil = MajoranaOperator.from_dict(
         {
-            (gamma(3, False), gamma(3, True), gamma(3, False), gamma(4, False)): 2.5j,
-            (gamma(4, False), gamma(4, True), gamma(3, False), gamma(4, False)): -2.5j,
+            (3, 3, 3, 4): 2.5j,
+            (4, 4, 3, 4): -2.5j,
         }
     )
     initial_state = [True, False] * 8
@@ -413,8 +411,8 @@ def test_dk_edge_vertical_down():
 def test_dk_edge_vertical_down_with_face_right():
     hamil = MajoranaOperator.from_dict(
         {
-            (gamma(1, False), gamma(1, True), gamma(1, False), gamma(6, False)): 2.5j,
-            (gamma(6, False), gamma(6, True), gamma(1, False), gamma(6, False)): -2.5j,
+            (1, 1, 1, 6): 2.5j,
+            (6, 6, 1, 6): -2.5j,
         }
     )
     initial_state = [True, False] * 8
@@ -434,8 +432,8 @@ def test_dk_edge_vertical_down_with_face_right():
 def test_dk_edge_vertical_down_with_face_left():
     hamil = MajoranaOperator.from_dict(
         {
-            (gamma(6, False), gamma(6, True), gamma(6, False), gamma(9, False)): 2.5j,
-            (gamma(9, False), gamma(9, True), gamma(6, False), gamma(9, False)): -2.5j,
+            (6, 6, 6, 9): 2.5j,
+            (9, 9, 6, 9): -2.5j,
         }
     )
     initial_state = [True, False] * 8
