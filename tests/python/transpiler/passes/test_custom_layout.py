@@ -17,7 +17,7 @@ from __future__ import annotations
 from collections import defaultdict
 
 from qiskit.circuit import QuantumRegister
-from qiskit.quantum_info import SparseObservable, SparsePauliOp
+from qiskit.quantum_info import SparseObservable
 from qiskit.transpiler import PassManager
 from qiskit_fermions.circuit import FermionCircuit
 from qiskit_fermions.circuit.library import Evolution
@@ -25,20 +25,36 @@ from qiskit_fermions.operators import MajoranaOperator
 from qiskit_fermions.transpiler.passes import CustomF2QLayout, EvolutionSynthesis, F2QSynthesis
 
 
-def build_fermi_hubbard_4x4(interaction: complex, tunneling: complex):
-    """Defines a Fermi-Hubbard Hamiltonian on a 4 by 4 lattice of spinless fermionic sites."""
+# NOTE: this is a very specific implementation of the Fermi-Hubbard model on a square lattice. It is
+# not intended for general purpose use and tailored to the purposes of this test case.
+def build_fermi_hubbard_square_lattice(
+    ncols: int, nrows: int, interaction: complex, tunneling: complex
+) -> MajoranaOperator:
+    """Defines a Fermi-Hubbard Hamiltonian on a 4 by 4 lattice of spinless fermionic sites.
+
+    Args:
+        ncols: the number of columns in the square lattice of spinless fermionic sites.
+        nrows: the number of rows in the square lattice of spinless fermionic sites.
+        interaction: the strength of the Coulomb terms.
+        tunneling: the strength of the tunneling terms.
+
+    Returns:
+        The spinless Fermi-Hubbard Hamiltonian as a Majorana-operator.
+    """
     interaction /= 4
     tunneling *= 0.5j
 
+    nsites = nrows * ncols
+
     data: dict[tuple[int, ...], complex] = defaultdict(complex)
-    for i in range(16):
-        row = i // 4
-        col = i % 4
+    for i in range(nsites):
+        row = i // ncols
+        col = i % nrows
 
         js = []
 
         # horizontal edges
-        if col != 3 and row % 2 == 0:
+        if col != (ncols - 1) and row % 2 == 0:
             js.append(i + 1)
         elif col != 0 and row % 2 == 1:
             js.append(i - 1)
@@ -46,12 +62,12 @@ def build_fermi_hubbard_4x4(interaction: complex, tunneling: complex):
         # vertical edges
         if col % 2 == 1:
             # down: i < j
-            j = i + 4
-            if j < 16:
+            j = i + nrows
+            if j < nsites:
                 js.append(j)
         else:
             # up: i > j
-            j = i - 4
+            j = i - ncols
             if j >= 0:
                 js.append(j)
 
@@ -68,36 +84,29 @@ def build_fermi_hubbard_4x4(interaction: complex, tunneling: complex):
     return MajoranaOperator.from_dict(data)
 
 
-def build_derby_klassen_edge_face_map_4x4():
-    """Defines the edge-to-face map for a 4 by 4 lattice used in the Derby-Klassen F2Q encoding."""
-    edge_face_map = {
-        (1, 2): 16,
-        (1, 5): 16,
-        (6, 2): 16,
-        (6, 5): 16,
-        (6, 7): 18,
-        (6, 10): 18,
-        (11, 7): 18,
-        (11, 10): 18,
-        (4, 5): 17,
-        (4, 8): 17,
-        (9, 5): 17,
-        (9, 8): 17,
-        (9, 10): 19,
-        (9, 13): 19,
-        (14, 10): 19,
-        (14, 13): 19,
-    }
-    return edge_face_map
-
-
+# NOTE: this implementation of the Derby-Klassen fermion-to-qubit encoding is not necessarily
+# general and only implemented for the purposes of this test.
 def derby_klassen(
     op: MajoranaOperator,
     initial_state: list[bool],
     edge_face_map: dict[tuple[int, int], int],
     num_qubits: int,
 ) -> SparseObservable:
-    """Implements the Derby-Klassen fermion-to-qubit encoding."""
+    """Implements the Derby-Klassen fermion-to-qubit encoding. [1]_
+
+    Args:
+        op: the operator to encode.
+        initial_state: the initial occupation state of the fermionic modes.
+        edge_face_map: a mapping of fermionic lattice edges to auxiliary qubit indices.
+        num_qubits: the total number of qubits in the resulting operator.
+
+    Returns:
+        The mapped operator.
+
+    .. [1] C. Derby, J. Klassen, J. Bausch, and T. Cubitt, Compact fermion to qubit mappings,
+           Phys. Rev. B 104, 035118 (2021),
+           `doi:10.1103/PhysRevB.104.035118 <http://dx.doi.org/10.1103/PhysRevB.104.035118>`_.
+    """
     assert op.is_even()
 
     mapped_operator = SparseObservable.zero(num_qubits)
@@ -146,74 +155,177 @@ def derby_klassen(
     return mapped_operator
 
 
-def test_custom_layout():
-    num_fermions = 16
+def test_derby_klassen():
+    """Tests the implementation of the Derby-Klassen fermion-to-qubit encoding. [1]_
+
+    .. note::
+       This test exists solely as an auxiliary test to `test_custom_layout`.
+
+    .. [1] C. Derby, J. Klassen, J. Bausch, and T. Cubitt, Compact fermion to qubit mappings,
+           Phys. Rev. B 104, 035118 (2021),
+           `doi:10.1103/PhysRevB.104.035118 <http://dx.doi.org/10.1103/PhysRevB.104.035118>`_.
+    """
     num_qubits = 20
-    hamil = build_fermi_hubbard_4x4(5.0, 5.0)
-    print()
-    initial_state = [True, False, True, False, False, True, False, True] * 2
-    edge_face_map = build_derby_klassen_edge_face_map_4x4()
+    hamil = build_fermi_hubbard_square_lattice(4, 4, 5.0, 5.0)
+    initial_state = [bool(int(c)) for c in "1010010110100101"]
+    edge_face_map = {
+        (1, 2): 16,
+        (1, 5): 16,
+        (6, 2): 16,
+        (6, 5): 16,
+        (4, 5): 17,
+        (4, 8): 17,
+        (9, 5): 17,
+        (9, 8): 17,
+        (6, 7): 18,
+        (6, 10): 18,
+        (11, 7): 18,
+        (11, 10): 18,
+        (9, 10): 19,
+        (9, 13): 19,
+        (14, 10): 19,
+        (14, 13): 19,
+    }
     qop = derby_klassen(hamil, initial_state, edge_face_map, num_qubits)
 
-    pauli_op = SparsePauliOp.from_sparse_observable(qop)
-
-    # fmt: off
-    expected = SparsePauliOp(
+    expected = SparseObservable.from_list(
         [
-            "IIIIIIIIIIIIIIIIIIYY", "IIIIIIIIIIIIIIIIIIXX", "IIIIIIIIIIIIIIIIIIZI", "IIIIIIIIIIIIIIIIIIIZ",
-            "IIIIIIIIIIIIIIIIIIZZ", "IIIIIIIIIIIIYIIIIIIY", "IIIIIIIIIIIIXIIIIIIX", "IIIIIIIIIIIIZIIIIIII",
-            "IIIIIIIIIIIIZIIIIIIZ", "IIIYIIIIIIIIIIIIIYYI", "IIIYIIIIIIIIIIIIIXXI", "IIIIIIIIIIIIIIIIIZII",
-            "IIIIIIIIIIIIIIIIIZZI", "IIIXIIIIIIIIIYIIIIYI", "IIIXIIIIIIIIIXIIIIXI", "IIIIIIIIIIIIIZIIIIII",
-            "IIIIIIIIIIIIIZIIIIZI", "IIIIIIIIIIIIIIIIYYII", "IIIIIIIIIIIIIIIIXXII", "IIIIIIIIIIIIIIIIZIII",
-            "IIIIIIIIIIIIIIIIZZII", "IIIXIIIIIIIIIIYIIYII", "IIIXIIIIIIIIIIXIIXII", "IIIIIIIIIIIIIIZIIIII",
-            "IIIIIIIIIIIIIIZIIZII", "IIIIIIIIIIIIIIIYYIII", "IIIIIIIIIIIIIIIXXIII", "IIIIIIIIIIIIIIIZIIII",
-            "IIIIIIIIIIIIIIIZZIII", "IIYIIIIIIIIIYYIIIIII", "IIYIIIIIIIIIXXIIIIII", "IIIIIIIIIIIIZZIIIIII",
-            "IIXIIIIIIIIYYIIIIIII", "IIXIIIIIIIIXXIIIIIII", "IIIIIIIIIIIZIIIIIIII", "IIIIIIIIIIIZZIIIIIII",
-            "IIIYIIIIIIIIIYYIIIII", "IIIYIIIIIIIIIXXIIIII", "IIIIIIIIIIIIIZZIIIII", "IIXIIIIIIIYIIYIIIIII",
-            "IIXIIIIIIIXIIXIIIIII", "IIIIIIIIIIZIIIIIIIII", "IIIIIIIIIIZIIZIIIIII", "IYIIIIIIIIIIIIYYIIII",
-            "IYIIIIIIIIIIIIXXIIII", "IIIIIIIIIIIIIIZZIIII", "IXIIIIIIIYIIIIYIIIII", "IXIIIIIIIXIIIIXIIIII",
-            "IIIIIIIIIZIIIIIIIIII", "IIIIIIIIIZIIIIZIIIII", "IXIIIIIIYIIIIIIYIIII", "IXIIIIIIXIIIIIIXIIII",
-            "IIIIIIIIZIIIIIIIIIII", "IIIIIIIIZIIIIIIZIIII", "IIYIIIIIIIYYIIIIIIII", "IIYIIIIIIIXXIIIIIIII",
-            "IIIIIIIIIIZZIIIIIIII", "IIIIYIIIIIIYIIIIIIII", "IIIIXIIIIIIXIIIIIIII", "IIIIZIIIIIIIIIIIIIII",
-            "IIIIZIIIIIIZIIIIIIII", "YIIIIIIIIYYIIIIIIIII", "YIIIIIIIIXXIIIIIIIII", "IIIIIIIIIZZIIIIIIIII",
-            "XIIIIYIIIIYIIIIIIIII", "XIIIIXIIIIXIIIIIIIII", "IIIIIZIIIIIIIIIIIIII", "IIIIIZIIIIZIIIIIIIII",
-            "IYIIIIIIYYIIIIIIIIII", "IYIIIIIIXXIIIIIIIIII", "IIIIIIIIZZIIIIIIIIII", "XIIIIIYIIYIIIIIIIIII",
-            "XIIIIIXIIXIIIIIIIIII", "IIIIIIZIIIIIIIIIIIII", "IIIIIIZIIZIIIIIIIIII", "IIIIIIIYYIIIIIIIIIII",
-            "IIIIIIIXXIIIIIIIIIII", "IIIIIIIZIIIIIIIIIIII", "IIIIIIIZZIIIIIIIIIII", "IIIIYYIIIIIIIIIIIIII",
-            "IIIIXXIIIIIIIIIIIIII", "IIIIZZIIIIIIIIIIIIII", "YIIIIYYIIIIIIIIIIIII", "YIIIIXXIIIIIIIIIIIII",
-            "IIIIIZZIIIIIIIIIIIII", "IIIIIIYYIIIIIIIIIIII", "IIIIIIXXIIIIIIIIIIII", "IIIIIIZZIIIIIIIIIIII",
-        ],
-        coeffs=[
-            -2.5 + 0.0j, 2.5 + 0.0j, 3.75 + 0.0j, -2.5 + 0.0j, -1.25 + 0.0j, -2.5 + 0.0j, 2.5 + 0.0j,
-            3.75 + 0.0j, -1.25 + 0.0j, 2.5 + 0.0j, -2.5 + 0.0j, -3.75 + 0.0j, -1.25 + 0.0j, 2.5 + 0.0j,
-            -2.5 + 0.0j, -5.0 + 0.0j, -1.25 + 0.0j, -2.5 + 0.0j, 2.5 + 0.0j, 2.5 + 0.0j, -1.25 + 0.0j,
-            -2.5 + 0.0j, 2.5 + 0.0j, 5.0 + 0.0j, -1.25 + 0.0j, 2.5 + 0.0j, -2.5 + 0.0j, -3.75 + 0.0j,
-            -1.25 + 0.0j, -2.5 + 0.0j, 2.5 + 0.0j, -1.25 + 0.0j, 2.5 + 0.0j, -2.5 + 0.0j, -3.75 + 0.0j,
-            -1.25 + 0.0j, 2.5 + 0.0j, -2.5 + 0.0j, -1.25 + 0.0j, -2.5 + 0.0j, 2.5 + 0.0j, 5.0 + 0.0j,
-            -1.25 + 0.0j, -2.5 + 0.0j, 2.5 + 0.0j, -1.25 + 0.0j, 2.5 + 0.0j, -2.5 + 0.0j, -5.0 + 0.0j,
-            -1.25 + 0.0j, -2.5 + 0.0j, 2.5 + 0.0j, 3.75 + 0.0j, -1.25 + 0.0j, -2.5 + 0.0j, 2.5 + 0.0j,
-            -1.25 + 0.0j, -2.5 + 0.0j, 2.5 + 0.0j, 2.5 + 0.0j, -1.25 + 0.0j, 2.5 + 0.0j, -2.5 + 0.0j,
-            -1.25 + 0.0j, 2.5 + 0.0j, -2.5 + 0.0j, -3.75 + 0.0j, -1.25 + 0.0j, -2.5 + 0.0j, 2.5 + 0.0j,
-            -1.25 + 0.0j, -2.5 + 0.0j, 2.5 + 0.0j, 3.75 + 0.0j, -1.25 + 0.0j, 2.5 + 0.0j, -2.5 + 0.0j,
-            -2.5 + 0.0j, -1.25 + 0.0j, -2.5 + 0.0j, 2.5 + 0.0j, -1.25 + 0.0j, 2.5 + 0.0j, -2.5 + 0.0j,
-            -1.25 + 0.0j, -2.5 + 0.0j, 2.5 + 0.0j, -1.25 + 0.0j,
-        ],
+            ("IIIIIIIIIIIIIIIIIIYY", -2.5),
+            ("IIIIIIIIIIIIIIIIIIXX", 2.5),
+            ("IIIIIIIIIIIIIIIIIIZI", 3.75),
+            ("IIIIIIIIIIIIIIIIIIIZ", -2.5),
+            ("IIIIIIIIIIIIIIIIIIZZ", -1.25),
+            ("IIIIIIIIIIIIIIIYIIIY", -2.5),
+            ("IIIIIIIIIIIIIIIXIIIX", 2.5),
+            ("IIIIIIIIIIIIIIIZIIII", 3.75),
+            ("IIIIIIIIIIIIIIIZIIIZ", -1.25),
+            ("IIIYIIIIIIIIIIIIIYYI", 2.5),
+            ("IIIYIIIIIIIIIIIIIXXI", -2.5),
+            ("IIIIIIIIIIIIIIIIIZII", -3.75),
+            ("IIIIIIIIIIIIIIIIIZZI", -1.25),
+            ("IIIXIIIIIIIIIIYIIIYI", 2.5),
+            ("IIIXIIIIIIIIIIXIIIXI", -2.5),
+            ("IIIIIIIIIIIIIIZIIIII", -5.0),
+            ("IIIIIIIIIIIIIIZIIIZI", -1.25),
+            ("IIIIIIIIIIIIIIIIYYII", -2.5),
+            ("IIIIIIIIIIIIIIIIXXII", 2.5),
+            ("IIIIIIIIIIIIIIIIZIII", 2.5),
+            ("IIIIIIIIIIIIIIIIZZII", -1.25),
+            ("IIIXIIIIIIIIIYIIIYII", -2.5),
+            ("IIIXIIIIIIIIIXIIIXII", 2.5),
+            ("IIIIIIIIIIIIIZIIIIII", 5.0),
+            ("IIIIIIIIIIIIIZIIIZII", -1.25),
+            ("IIIIIIIIIIIIYIIIYIII", 2.5),
+            ("IIIIIIIIIIIIXIIIXIII", -2.5),
+            ("IIIIIIIIIIIIZIIIIIII", -3.75),
+            ("IIIIIIIIIIIIZIIIZIII", -1.25),
+            ("IIYIIIIIIIIIIIYYIIII", -2.5),
+            ("IIYIIIIIIIIIIIXXIIII", 2.5),
+            ("IIIIIIIIIIIIIIZZIIII", -1.25),
+            ("IIXIIIIIIIIYIIIYIIII", 2.5),
+            ("IIXIIIIIIIIXIIIXIIII", -2.5),
+            ("IIIIIIIIIIIZIIIIIIII", -3.75),
+            ("IIIIIIIIIIIZIIIZIIII", -1.25),
+            ("IIIYIIIIIIIIIYYIIIII", 2.5),
+            ("IIIYIIIIIIIIIXXIIIII", -2.5),
+            ("IIIIIIIIIIIIIZZIIIII", -1.25),
+            ("IIXIIIIIIIYIIIYIIIII", -2.5),
+            ("IIXIIIIIIIXIIIXIIIII", 2.5),
+            ("IIIIIIIIIIZIIIIIIIII", 5.0),
+            ("IIIIIIIIIIZIIIZIIIII", -1.25),
+            ("IYIIIIIIIIIIYYIIIIII", -2.5),
+            ("IYIIIIIIIIIIXXIIIIII", 2.5),
+            ("IIIIIIIIIIIIZZIIIIII", -1.25),
+            ("IXIIIIIIIYIIIYIIIIII", 2.5),
+            ("IXIIIIIIIXIIIXIIIIII", -2.5),
+            ("IIIIIIIIIZIIIIIIIIII", -5.0),
+            ("IIIIIIIIIZIIIZIIIIII", -1.25),
+            ("IXIIIIIIYIIIYIIIIIII", -2.5),
+            ("IXIIIIIIXIIIXIIIIIII", 2.5),
+            ("IIIIIIIIZIIIIIIIIIII", 3.75),
+            ("IIIIIIIIZIIIZIIIIIII", -1.25),
+            ("IIYIIIIIIIYYIIIIIIII", -2.5),
+            ("IIYIIIIIIIXXIIIIIIII", 2.5),
+            ("IIIIIIIIIIZZIIIIIIII", -1.25),
+            ("IIIIIIIYIIIYIIIIIIII", -2.5),
+            ("IIIIIIIXIIIXIIIIIIII", 2.5),
+            ("IIIIIIIZIIIIIIIIIIII", 2.5),
+            ("IIIIIIIZIIIZIIIIIIII", -1.25),
+            ("YIIIIIIIIYYIIIIIIIII", 2.5),
+            ("YIIIIIIIIXXIIIIIIIII", -2.5),
+            ("IIIIIIIIIZZIIIIIIIII", -1.25),
+            ("XIIIIIYIIIYIIIIIIIII", 2.5),
+            ("XIIIIIXIIIXIIIIIIIII", -2.5),
+            ("IIIIIIZIIIIIIIIIIIII", -3.75),
+            ("IIIIIIZIIIZIIIIIIIII", -1.25),
+            ("IYIIIIIIYYIIIIIIIIII", -2.5),
+            ("IYIIIIIIXXIIIIIIIIII", 2.5),
+            ("IIIIIIIIZZIIIIIIIIII", -1.25),
+            ("XIIIIYIIIYIIIIIIIIII", -2.5),
+            ("XIIIIXIIIXIIIIIIIIII", 2.5),
+            ("IIIIIZIIIIIIIIIIIIII", 3.75),
+            ("IIIIIZIIIZIIIIIIIIII", -1.25),
+            ("IIIIYIIIYIIIIIIIIIII", 2.5),
+            ("IIIIXIIIXIIIIIIIIIII", -2.5),
+            ("IIIIZIIIIIIIIIIIIIII", -2.5),
+            ("IIIIZIIIZIIIIIIIIIII", -1.25),
+            ("IIIIIIYYIIIIIIIIIIII", -2.5),
+            ("IIIIIIXXIIIIIIIIIIII", 2.5),
+            ("IIIIIIZZIIIIIIIIIIII", -1.25),
+            ("YIIIIYYIIIIIIIIIIIII", 2.5),
+            ("YIIIIXXIIIIIIIIIIIII", -2.5),
+            ("IIIIIZZIIIIIIIIIIIII", -1.25),
+            ("IIIIYYIIIIIIIIIIIIII", -2.5),
+            ("IIIIXXIIIIIIIIIIIIII", 2.5),
+            ("IIIIZZIIIIIIIIIIIIII", -1.25),
+        ]
     )
-    # fmt: on
 
-    layout = [0, 1, 2, 3, 7, 6, 5, 4, 8, 9, 10, 11, 15, 14, 13, 12, 16, 17, 18, 19]
-    pauli_op = pauli_op.apply_layout(layout)
+    diff = (expected - qop).simplify(tol=0.0)
+    assert diff == SparseObservable.zero(num_qubits)
 
-    diff = (expected - pauli_op).simplify(atol=0.0)
-    assert diff == SparsePauliOp.from_sparse_list([], num_qubits)
+
+def test_custom_layout():
+    """Tests the fermion-to-qubit transpilation pipeline with a custom fermion-to-qubit encoding.
+
+    The purpose of this test is to ensure that fermion-to-qubit encodings which result in a change
+    in the number of bits (fermionic modes vs. qubits) are correctly supported by the transpilation
+    pipeline. To this end, this test implements the Derby-Klassen fermion-to-qubit encoding. [1]_
+
+    .. [1] C. Derby, J. Klassen, J. Bausch, and T. Cubitt, Compact fermion to qubit mappings,
+           Phys. Rev. B 104, 035118 (2021),
+           `doi:10.1103/PhysRevB.104.035118 <http://dx.doi.org/10.1103/PhysRevB.104.035118>`_.
+    """
+    num_fermions = 16
+    num_qubits = 20
+    hamil = build_fermi_hubbard_square_lattice(4, 4, 5.0, 5.0)
+
+    def mapper_fn(op):
+        initial_state = [bool(int(c)) for c in "1010010110100101"]
+        edge_face_map = {
+            (1, 2): 16,
+            (1, 5): 16,
+            (6, 2): 16,
+            (6, 5): 16,
+            (6, 7): 18,
+            (6, 10): 18,
+            (11, 7): 18,
+            (11, 10): 18,
+            (4, 5): 17,
+            (4, 8): 17,
+            (9, 5): 17,
+            (9, 8): 17,
+            (9, 10): 19,
+            (9, 13): 19,
+            (14, 10): 19,
+            (14, 13): 19,
+        }
+        return derby_klassen(op, initial_state, edge_face_map, num_qubits)
 
     circ = FermionCircuit(num_fermions)
     circ.append(Evolution(num_fermions, hamil), circ.fermions)
 
     layout = CustomF2QLayout({circ.register: QuantumRegister(num_qubits)})
-
-    def mapper_fn(op):
-        return derby_klassen(op, initial_state, edge_face_map, num_qubits)
 
     synth = F2QSynthesis()
     synth.plugins[Evolution] = EvolutionSynthesis(mapper_fn)
