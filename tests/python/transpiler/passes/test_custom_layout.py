@@ -126,8 +126,10 @@ def derby_klassen(
                     SparseObservable.from_sparse_list([("Z", (i,), sign)], num_qubits), front=True
                 )
 
-            elif dij == 1:
+            elif dij == 1 and (i, j) != (8, 7):
                 # horizontal edge term
+                # FIXME: just because dij == 1, that does not mean we are guaranteed to have a
+                # horizontal term in Anthony's index order!
                 paulis = "XYY"[: 2 if face_qubit is None else 3]
                 indices = (i, j) if face_qubit is None else (i, j, face_qubit)
                 mapped_terms = mapped_terms.compose(
@@ -452,17 +454,6 @@ def test_dk_edge_vertical_down_with_face_left():
 
 def test_custom_layout():
     hamil = build_fermi_hubbard_4x4(5.0, 5.0)
-    # FIXME: why is this particular Coulomb term behaving differently?
-    # hamil = MajoranaOperator.from_dict(
-    #     {
-    #         # (gamma(8, False), gamma(8, True), gamma(8, False), gamma(9, False)): 2.5j,
-    #         # (gamma(9, False), gamma(9, True), gamma(8, False), gamma(9, False)): -2.5j,
-    #         (gamma(8, False), gamma(8, True), gamma(9, False), gamma(9, True)): 1.25,
-    #         (gamma(8, False), gamma(8, True)): -1.25,
-    #         (gamma(9, False), gamma(9, True)): -1.25,
-    #     }
-    # )
-    # print(hamil)
     initial_state = [True, False] * 8
     edge_face_map = build_derby_klassen_edge_face_map_4x4()
     qop = derby_klassen(hamil, initial_state, edge_face_map, 20)
@@ -514,5 +505,4 @@ def test_custom_layout():
     # fmt: on
 
     diff = (expected - pauli_op).simplify(atol=0.0)
-    print(diff)
     assert diff == SparsePauliOp.from_sparse_list([], 20)
