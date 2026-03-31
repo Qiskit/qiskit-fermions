@@ -483,6 +483,18 @@ impl PyFermionOperator {
         self.inner.boundaries.len() - 1
     }
 
+    /// TODO:
+    #[getter]
+    pub fn get_groups(&self) -> Option<Vec<u32>> {
+        self.inner.groups.clone()
+    }
+
+    /// TODO:
+    #[setter]
+    pub fn set_groups(&mut self, groups: Option<Vec<u32>>) {
+        self.inner.groups = groups.clone();
+    }
+
     fn __pow__(&self, exponent: u32, modulo: Option<u32>) -> PyResult<Self> {
         match modulo {
             Some(_) => Err(PyNotImplementedError::new_err("mod argument not supported")),

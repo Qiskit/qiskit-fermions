@@ -59,32 +59,11 @@ mod tests {
     use super::*;
 
     use crate::operators::library::fcidump::FCIDump;
-    use ndarray::Array1;
 
     #[test]
     fn test_group_terms_by_electronic_structure() {
-        let fcidump = FCIDump {
-            norb: 2,
-            nelec: 2,
-            ms2: 0,
-            constant: Some(0.7199689944489797),
-            one_body_a: Array1::from_vec(vec![
-                -1.2563390730032502,
-                -2.3575299028703285E-16,
-                -0.4718960072811406,
-            ]),
-            one_body_b: None,
-            two_body_aa: Array1::from_vec(vec![
-                0.6757101548035165,
-                0.0,
-                0.18093119978423133,
-                0.6645817302552967,
-                0.0,
-                0.6985737227320183,
-            ]),
-            two_body_ab: None,
-            two_body_bb: None,
-        };
+        let file_path = String::from("../../tests/h2.fcidump");
+        let fcidump = FCIDump::from_file(file_path);
 
         let op = FermionOperator::from(&fcidump);
 
