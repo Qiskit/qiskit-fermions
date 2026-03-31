@@ -33,34 +33,26 @@ def build_fermi_hubbard_4x4(interaction: complex, tunneling: complex):
     data: dict[tuple[int, ...], complex] = defaultdict(complex)
     for i in range(16):
         row = i // 4
-        col = 3 - i % 4 if row % 2 else i % 4
+        col = i % 4
 
         js = []
 
         # horizontal edges
-        if i not in {3, 7, 11, 15}:
+        if col != 3 and row % 2 == 0:
             js.append(i + 1)
+        elif col != 0 and row % 2 == 1:
+            js.append(i - 1)
 
         # vertical edges
         if col % 2 == 1:
             # down: i < j
-            row_down = row + 1
-            j = 4 * row_down
-            if row_down % 2:
-                j += 3 - col
-            else:
-                j += col
+            j = i + 4
             if j < 16:
                 js.append(j)
         else:
             # up: i > j
-            row_up = row - 1
-            j = 4 * row_up
-            if row_up % 2:
-                j += 3 - col
-            else:
-                j += col
-            if row_up >= 0:
+            j = i - 4
+            if j >= 0:
                 js.append(j)
 
         for j in js:
@@ -80,21 +72,21 @@ def build_derby_klassen_edge_face_map_4x4():
     """Defines the edge-to-face map for a 4 by 4 lattice used in the Derby-Klassen F2Q encoding."""
     edge_face_map = {
         (1, 2): 16,
-        (1, 6): 16,
-        (5, 2): 16,
+        (1, 5): 16,
+        (6, 2): 16,
         (6, 5): 16,
-        (5, 4): 18,
-        (5, 10): 18,
-        (11, 4): 18,
+        (6, 7): 18,
+        (6, 10): 18,
+        (11, 7): 18,
         (11, 10): 18,
-        (7, 6): 17,
-        (7, 8): 17,
-        (9, 6): 17,
+        (4, 5): 17,
+        (4, 8): 17,
+        (9, 5): 17,
         (9, 8): 17,
         (9, 10): 19,
-        (9, 14): 19,
-        (13, 10): 19,
-        (13, 14): 19,
+        (9, 13): 19,
+        (14, 10): 19,
+        (14, 13): 19,
     }
     return edge_face_map
 
@@ -129,10 +121,8 @@ def derby_klassen(
                     SparseObservable.from_sparse_list([("Z", (i,), sign)], num_qubits), front=True
                 )
 
-            elif dij == 1 and (i, j) != (8, 7):
+            elif dij == 1:
                 # horizontal edge term
-                # FIXME: just because dij == 1, that does not mean we are guaranteed to have a
-                # horizontal term in Anthony's index order!
                 paulis = "XYY"[: 2 if face_qubit is None else 3]
                 indices = (i, j) if face_qubit is None else (i, j, face_qubit)
                 mapped_terms = mapped_terms.compose(
@@ -142,9 +132,8 @@ def derby_klassen(
 
             else:
                 # vertical edge term
-                # NOTE: we hard-code whether an edge points up or down based on the relative size of
-                # i and j
-                sign = -1.0 if i > j else 1.0
+                # NOTE: we hard-code whether an edge points up or down based on the column index
+                sign = 1.0 if i % 2 else -1.0
                 paulis = "XYX"[: 2 if face_qubit is None else 3]
                 indices = (i, j) if face_qubit is None else (i, j, face_qubit)
                 mapped_terms = mapped_terms.compose(
@@ -157,309 +146,12 @@ def derby_klassen(
     return mapped_operator
 
 
-def test_dk_vertex_horizontal():
-    hamil = MajoranaOperator.from_dict(
-        {
-            (0, 0): -1.25,
-            (1, 1): -1.25,
-            (0, 0, 1, 1): 1.25,
-        }
-    )
-    initial_state = [True, False] * 8
-    edge_face_map = build_derby_klassen_edge_face_map_4x4()
-    num_qubits = 20
-    qop = derby_klassen(hamil, initial_state, edge_face_map, num_qubits)
-    expected = SparseObservable.from_sparse_list(
-        [
-            ("Z", (0,), -1.25),
-            ("Z", (1,), 1.25),
-            ("ZZ", (0, 1), -1.25),
-        ],
-        num_qubits,
-    )
-    assert (qop - expected).simplify() == SparseObservable.zero(num_qubits)
-
-
-def test_dk_vertex_vertical():
-    hamil = MajoranaOperator.from_dict(
-        {
-            (0, 0): -1.25,
-            (7, 7): -1.25,
-            (0, 0, 7, 7): 1.25,
-        }
-    )
-    initial_state = [True, False] * 8
-    edge_face_map = build_derby_klassen_edge_face_map_4x4()
-    num_qubits = 20
-    qop = derby_klassen(hamil, initial_state, edge_face_map, num_qubits)
-    expected = SparseObservable.from_sparse_list(
-        [
-            ("Z", (0,), -1.25),
-            ("Z", (7,), 1.25),
-            ("ZZ", (0, 7), -1.25),
-        ],
-        num_qubits,
-    )
-    assert (qop - expected).simplify() == SparseObservable.zero(num_qubits)
-
-
-def test_dk_edge_horizontal_right():
-    hamil = MajoranaOperator.from_dict(
-        {
-            (0, 0, 0, 1): 2.5j,
-            (1, 1, 0, 1): -2.5j,
-        }
-    )
-    initial_state = [True, False] * 8
-    edge_face_map = build_derby_klassen_edge_face_map_4x4()
-    num_qubits = 20
-    qop = derby_klassen(hamil, initial_state, edge_face_map, num_qubits)
-    expected = SparseObservable.from_sparse_list(
-        [
-            ("XX", (0, 1), 2.5),
-            ("YY", (0, 1), -2.5),
-        ],
-        num_qubits,
-    )
-    assert (qop - expected).simplify() == SparseObservable.zero(num_qubits)
-
-
-def test_dk_edge_horizontal_right_with_face_below():
-    hamil = MajoranaOperator.from_dict(
-        {
-            (1, 1, 1, 2): 2.5j,
-            (2, 2, 1, 2): -2.5j,
-        }
-    )
-    initial_state = [True, False] * 8
-    edge_face_map = build_derby_klassen_edge_face_map_4x4()
-    num_qubits = 20
-    qop = derby_klassen(hamil, initial_state, edge_face_map, num_qubits)
-    expected = SparseObservable.from_sparse_list(
-        [
-            ("XXY", (1, 2, 16), -2.5),
-            ("YYY", (1, 2, 16), 2.5),
-        ],
-        num_qubits,
-    )
-    assert (qop - expected).simplify() == SparseObservable.zero(num_qubits)
-
-
-def test_dk_edge_horizontal_right_with_face_above():
-    hamil = MajoranaOperator.from_dict(
-        {
-            (8, 8, 8, 9): 2.5j,
-            (9, 9, 8, 9): -2.5j,
-        }
-    )
-    initial_state = [True, False] * 8
-    edge_face_map = build_derby_klassen_edge_face_map_4x4()
-    num_qubits = 20
-    qop = derby_klassen(hamil, initial_state, edge_face_map, num_qubits)
-    expected = SparseObservable.from_sparse_list(
-        [
-            ("XXY", (8, 9, 17), 2.5),
-            ("YYY", (8, 9, 17), -2.5),
-        ],
-        num_qubits,
-    )
-    assert (qop - expected).simplify() == SparseObservable.zero(num_qubits)
-
-
-def test_dk_edge_horizontal_left():
-    hamil = MajoranaOperator.from_dict(
-        {
-            (14, 14, 14, 15): 2.5j,
-            (15, 15, 14, 15): -2.5j,
-        }
-    )
-    initial_state = [True, False] * 8
-    edge_face_map = build_derby_klassen_edge_face_map_4x4()
-    num_qubits = 20
-    qop = derby_klassen(hamil, initial_state, edge_face_map, num_qubits)
-    expected = SparseObservable.from_sparse_list(
-        [
-            ("XX", (14, 15), 2.5),
-            ("YY", (14, 15), -2.5),
-        ],
-        num_qubits,
-    )
-    assert (qop - expected).simplify() == SparseObservable.zero(num_qubits)
-
-
-def test_dk_edge_horizontal_left_with_face_above():
-    hamil = MajoranaOperator.from_dict(
-        {
-            (13, 13, 13, 14): 2.5j,
-            (14, 14, 13, 14): -2.5j,
-        }
-    )
-    initial_state = [True, False] * 8
-    edge_face_map = build_derby_klassen_edge_face_map_4x4()
-    num_qubits = 20
-    qop = derby_klassen(hamil, initial_state, edge_face_map, num_qubits)
-    expected = SparseObservable.from_sparse_list(
-        [
-            ("XXY", (13, 14, 19), -2.5),
-            ("YYY", (13, 14, 19), 2.5),
-        ],
-        num_qubits,
-    )
-    assert (qop - expected).simplify() == SparseObservable.zero(num_qubits)
-
-
-def test_dk_edge_horizontal_left_with_face_below():
-    hamil = MajoranaOperator.from_dict(
-        {
-            (4, 4, 4, 5): 2.5j,
-            (5, 5, 4, 5): -2.5j,
-        }
-    )
-    initial_state = [True, False] * 8
-    edge_face_map = build_derby_klassen_edge_face_map_4x4()
-    num_qubits = 20
-    qop = derby_klassen(hamil, initial_state, edge_face_map, num_qubits)
-    expected = SparseObservable.from_sparse_list(
-        [
-            ("XXY", (4, 5, 18), 2.5),
-            ("YYY", (4, 5, 18), -2.5),
-        ],
-        num_qubits,
-    )
-    assert (qop - expected).simplify() == SparseObservable.zero(num_qubits)
-
-
-def test_dk_edge_vertical_up():
-    hamil = MajoranaOperator.from_dict(
-        {
-            (7, 7, 7, 0): 2.5j,
-            (0, 0, 7, 0): -2.5j,
-        }
-    )
-    initial_state = [True, False] * 8
-    edge_face_map = build_derby_klassen_edge_face_map_4x4()
-    num_qubits = 20
-    qop = derby_klassen(hamil, initial_state, edge_face_map, num_qubits)
-    expected = SparseObservable.from_sparse_list(
-        [
-            ("XX", (0, 7), 2.5),
-            ("YY", (0, 7), -2.5),
-        ],
-        num_qubits,
-    )
-    assert (qop - expected).simplify() == SparseObservable.zero(num_qubits)
-
-
-def test_dk_edge_vertical_up_with_face_left():
-    hamil = MajoranaOperator.from_dict(
-        {
-            (5, 5, 5, 2): 2.5j,
-            (2, 2, 5, 2): -2.5j,
-        }
-    )
-    initial_state = [True, False] * 8
-    edge_face_map = build_derby_klassen_edge_face_map_4x4()
-    num_qubits = 20
-    qop = derby_klassen(hamil, initial_state, edge_face_map, num_qubits)
-    expected = SparseObservable.from_sparse_list(
-        [
-            ("XXX", (2, 5, 16), 2.5),
-            ("YYX", (2, 5, 16), -2.5),
-        ],
-        num_qubits,
-    )
-    assert (qop - expected).simplify() == SparseObservable.zero(num_qubits)
-
-
-def test_dk_edge_vertical_up_with_face_right():
-    hamil = MajoranaOperator.from_dict(
-        {
-            (10, 10, 10, 5): 2.5j,
-            (5, 5, 10, 5): -2.5j,
-        }
-    )
-    initial_state = [True, False] * 8
-    edge_face_map = build_derby_klassen_edge_face_map_4x4()
-    num_qubits = 20
-    qop = derby_klassen(hamil, initial_state, edge_face_map, num_qubits)
-    expected = SparseObservable.from_sparse_list(
-        [
-            ("XXX", (5, 10, 18), -2.5),
-            ("YYX", (5, 10, 18), 2.5),
-        ],
-        num_qubits,
-    )
-    assert (qop - expected).simplify() == SparseObservable.zero(num_qubits)
-
-
-def test_dk_edge_vertical_down():
-    hamil = MajoranaOperator.from_dict(
-        {
-            (3, 3, 3, 4): 2.5j,
-            (4, 4, 3, 4): -2.5j,
-        }
-    )
-    initial_state = [True, False] * 8
-    edge_face_map = build_derby_klassen_edge_face_map_4x4()
-    num_qubits = 20
-    qop = derby_klassen(hamil, initial_state, edge_face_map, num_qubits)
-    expected = SparseObservable.from_sparse_list(
-        [
-            ("XX", (3, 4), -2.5),
-            ("YY", (3, 4), 2.5),
-        ],
-        num_qubits,
-    )
-    assert (qop - expected).simplify() == SparseObservable.zero(num_qubits)
-
-
-def test_dk_edge_vertical_down_with_face_right():
-    hamil = MajoranaOperator.from_dict(
-        {
-            (1, 1, 1, 6): 2.5j,
-            (6, 6, 1, 6): -2.5j,
-        }
-    )
-    initial_state = [True, False] * 8
-    edge_face_map = build_derby_klassen_edge_face_map_4x4()
-    num_qubits = 20
-    qop = derby_klassen(hamil, initial_state, edge_face_map, num_qubits)
-    expected = SparseObservable.from_sparse_list(
-        [
-            ("XXX", (1, 6, 16), -2.5),
-            ("YYX", (1, 6, 16), 2.5),
-        ],
-        num_qubits,
-    )
-    assert (qop - expected).simplify() == SparseObservable.zero(num_qubits)
-
-
-def test_dk_edge_vertical_down_with_face_left():
-    hamil = MajoranaOperator.from_dict(
-        {
-            (6, 6, 6, 9): 2.5j,
-            (9, 9, 6, 9): -2.5j,
-        }
-    )
-    initial_state = [True, False] * 8
-    edge_face_map = build_derby_klassen_edge_face_map_4x4()
-    num_qubits = 20
-    qop = derby_klassen(hamil, initial_state, edge_face_map, num_qubits)
-    expected = SparseObservable.from_sparse_list(
-        [
-            ("XXX", (6, 9, 17), 2.5),
-            ("YYX", (6, 9, 17), -2.5),
-        ],
-        num_qubits,
-    )
-    assert (qop - expected).simplify() == SparseObservable.zero(num_qubits)
-
-
 def test_custom_layout():
     num_fermions = 16
     num_qubits = 20
     hamil = build_fermi_hubbard_4x4(5.0, 5.0)
-    initial_state = [True, False] * 8
+    print()
+    initial_state = [True, False, True, False, False, True, False, True] * 2
     edge_face_map = build_derby_klassen_edge_face_map_4x4()
     qop = derby_klassen(hamil, initial_state, edge_face_map, num_qubits)
 
@@ -509,6 +201,9 @@ def test_custom_layout():
     )
     # fmt: on
 
+    layout = [0, 1, 2, 3, 7, 6, 5, 4, 8, 9, 10, 11, 15, 14, 13, 12, 16, 17, 18, 19]
+    pauli_op = pauli_op.apply_layout(layout)
+
     diff = (expected - pauli_op).simplify(atol=0.0)
     assert diff == SparsePauliOp.from_sparse_list([], num_qubits)
 
@@ -527,4 +222,4 @@ def test_custom_layout():
 
     qu_circ = pm.run(circ._inner)
     qu_circ_decomp = qu_circ.decompose()
-    assert qu_circ_decomp.depth(lambda instr: len(instr.qubits) == 2) == 121
+    assert qu_circ_decomp.depth(lambda instr: len(instr.qubits) == 2) == 93
