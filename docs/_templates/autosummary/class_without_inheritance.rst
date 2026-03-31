@@ -1,6 +1,10 @@
 {#
-   We show all the class's methods and attributes on the same page. By default, we document
-   all methods, including those defined by parent classes.
+   We show all the class's methods and attributes on the same page.
+   This template does _NOT_ document attributes and methods inherited from
+   parent classes, but _only_ the ones explicitly defined by this class.
+   This is not the default template (see `class.rst` for that, which _does_
+   documented inherited attributes and methods, too) and must be chosen
+   explicitly when writing the `autosummary::` directive.
 -#}
 
 {{ objname | escape | underline }}
