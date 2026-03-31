@@ -56,6 +56,13 @@ pub struct FermionOperator {
 crate::impl_operator_macro!(FermionOperator);
 
 impl FermionOperator {
+    fn _append_term(&mut self, coeff: Complex64, actions: &[bool], modes: &[u32]) {
+        self.coeffs.push(coeff);
+        self.actions.extend_from_slice(actions);
+        self.modes.extend_from_slice(modes);
+        self.boundaries.push(self.modes.len());
+    }
+
     pub fn simplify(&self, atol: f64) -> Self {
         let mut terms = HashMap::new();
         for term in self.iter() {
@@ -69,10 +76,7 @@ impl FermionOperator {
             .iter()
             .filter(|((_, _), coeff)| coeff.abs() > atol)
             .for_each(|((modes, actions), coeff)| {
-                out.coeffs.push(*coeff);
-                out.actions.extend_from_slice(actions);
-                out.modes.extend_from_slice(modes);
-                out.boundaries.push(out.modes.len());
+                out._append_term(*coeff, actions, modes);
             });
         out
     }
@@ -87,6 +91,16 @@ impl FermionOperator {
                 modes: &self.modes[start..end],
             }
         })
+    }
+
+    pub fn split_out_groups(&self) -> Option<Vec<FermionOperator>> {
+        let self_groups = self.groups.as_ref()?;
+        let num_groups = self_groups.iter().max().unwrap();
+        let mut groups = vec![FermionOperator::zero(); (*num_groups as usize) + 1];
+        for (group_idx, term) in zip(self_groups.iter(), self.iter()) {
+            groups[*group_idx as usize]._append_term(term.coeff, term.actions, term.modes);
+        }
+        Some(groups)
     }
 
     pub fn normal_ordered(&self) -> Self {

@@ -20,21 +20,21 @@ fn _hash_electronic_structure_term(
     num_modes: u32,
 ) -> Result<u32, GroupingError> {
     match term.modes.len() {
-        0 => Ok(num_modes.pow(4)),
+        0 => Ok(num_modes.pow(4) + num_modes.pow(2)),
         2 => match term.actions {
-            [true, false] => Ok(num_modes.pow(2)
+            [true, false] => Ok(num_modes.pow(4)
                 + num_modes * min(term.modes[0], term.modes[1])
                 + max(term.modes[0], term.modes[1])),
-            _ => return Err(GroupingError::ElectronicStructureError),
+            _ => Err(GroupingError::ElectronicStructureError),
         },
         4 => match term.actions {
             [true, true, false, false] => Ok(num_modes.pow(3) * min(term.modes[0], term.modes[3])
                 + num_modes.pow(2) * min(term.modes[1], term.modes[2])
                 + num_modes * max(term.modes[1], term.modes[2])
                 + max(term.modes[0], term.modes[3])),
-            _ => return Err(GroupingError::ElectronicStructureError),
+            _ => Err(GroupingError::ElectronicStructureError),
         },
-        _ => return Err(GroupingError::ElectronicStructureError),
+        _ => Err(GroupingError::ElectronicStructureError),
     }
 }
 
@@ -88,13 +88,18 @@ mod tests {
 
         let op = FermionOperator::from(&fcidump);
 
-        let mut normal = op.normal_ordered();
+        let groups = op.split_out_groups();
+        // no groups yet!
+        assert!(groups.is_none());
+
+        let mut normal = op.normal_ordered().simplify(1e-16);
 
         let _ = group_terms_by_electronic_structure(&mut normal, 2 * fcidump.norb);
 
-        println!("{0:#?}", normal);
-        println!("{0:#?}", normal.coeffs.len());
+        let groups = normal.split_out_groups().unwrap();
+        assert!(groups.len() == 17);
 
-        assert!(false);
+        // TODO: We need to perform some actually useful assertion here! Ideally, we should use an
+        // operator that is slightly larger to verify that 2-body terms get grouped correctly, too.
     }
 }
