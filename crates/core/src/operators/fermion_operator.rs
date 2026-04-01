@@ -95,8 +95,8 @@ impl FermionOperator {
 
     pub fn split_out_groups(&self) -> Option<Vec<FermionOperator>> {
         let self_groups = self.groups.as_ref()?;
-        let num_groups = self_groups.iter().max().unwrap();
-        let mut groups = vec![FermionOperator::zero(); (*num_groups as usize) + 1];
+        let num_groups = self_groups.iter().max().unwrap() + 1;
+        let mut groups = vec![FermionOperator::zero(); num_groups as usize];
         for (group_idx, term) in zip(self_groups.iter(), self.iter()) {
             groups[*group_idx as usize]._append_term(term.coeff, term.actions, term.modes);
         }

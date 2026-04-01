@@ -30,8 +30,6 @@ def test_group_terms_by_electronic_structure():
     normal = op.normal_ordered().simplify(atol=1e-16)
 
     normal.groups = group_terms_by_electronic_structure(normal, 2 * fcidump.norb)
-    print(normal.groups)
 
-    # FIXME: why does this not match the internal result from within the core rust crate?
-    assert len(normal.groups) == 19
+    assert max(normal.groups) == 16
     # TODO: update this in accordance with the equivalent test inside the core rust crate
