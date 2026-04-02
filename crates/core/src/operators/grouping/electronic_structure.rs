@@ -18,7 +18,17 @@ use std::collections::HashMap;
 fn _hash_electronic_structure_term(
     term: FermionOperatorTermView,
     num_modes: u32,
+    two_body_physicist_order: bool,
 ) -> Result<u32, GroupingError> {
+    // NOTE: the 4 indices of 2-body term are matched as follows, depending on the value of
+    // two_body_physicist_order:
+    //   - two_body_physicist_order == False (default): i, a, j, b
+    //   - two_body_physicist_order == True: i, a, b, j
+    let (j, b) = if two_body_physicist_order {
+        (3, 2)
+    } else {
+        (2, 3)
+    };
     match term.modes.len() {
         0 => Ok(num_modes.pow(4) + num_modes.pow(2)),
         2 => match term.actions {
@@ -28,13 +38,10 @@ fn _hash_electronic_structure_term(
             _ => Err(GroupingError::ElectronicStructureError),
         },
         4 => match term.actions {
-            // TODO: expose configuration option for pairing in chemist vs. physicist ordering:
-            //   - chemist:   i a j b
-            //   - physicist: i a b j
-            [true, true, false, false] => Ok(num_modes.pow(3) * min(term.modes[0], term.modes[2])
-                + num_modes.pow(2) * min(term.modes[1], term.modes[3])
-                + num_modes * max(term.modes[1], term.modes[3])
-                + max(term.modes[0], term.modes[2])),
+            [true, true, false, false] => Ok(num_modes.pow(3) * min(term.modes[0], term.modes[j])
+                + num_modes.pow(2) * min(term.modes[1], term.modes[b])
+                + num_modes * max(term.modes[1], term.modes[b])
+                + max(term.modes[0], term.modes[j])),
             _ => Err(GroupingError::ElectronicStructureError),
         },
         _ => Err(GroupingError::ElectronicStructureError),
@@ -44,11 +51,12 @@ fn _hash_electronic_structure_term(
 pub fn group_terms_by_electronic_structure(
     op: &mut FermionOperator,
     num_modes: u32,
+    two_body_physicist_order: bool,
 ) -> Result<(), GroupingError> {
     let mut groups = HashMap::new();
     let mut group_indices: Vec<u32> = Vec::with_capacity(op.coeffs.len());
     for term in op.iter() {
-        let key = _hash_electronic_structure_term(term, num_modes)?;
+        let key = _hash_electronic_structure_term(term, num_modes, two_body_physicist_order)?;
         let num_groups = groups.len();
         let group_idx = groups.entry(key).or_insert(num_groups as u32);
         group_indices.push(*group_idx);
@@ -76,41 +84,12 @@ mod tests {
             groups: None,
         };
 
-        let err = group_terms_by_electronic_structure(&mut op, 2);
+        let err = group_terms_by_electronic_structure(&mut op, 2, false);
         assert!(err.is_err_and(|e| matches!(e, GroupingError::ElectronicStructureError)));
     }
 
-    #[test]
-    fn test_group_terms_by_electronic_structure() {
-        let file_path = String::from("../../tests/h2.fcidump");
-        let fcidump = FCIDump::from_file(file_path);
-
-        let op = FermionOperator::from(&fcidump);
-
-        let groups = op.split_out_groups();
-        assert!(
-            groups.is_none(),
-            "We should not have any group indices yet!"
-        );
-
-        let mut normal = op.normal_ordered().simplify(1e-16);
-
-        let res = group_terms_by_electronic_structure(&mut normal, 2 * fcidump.norb);
-        assert!(res.is_ok(), "We should not have a GroupingError here!");
-        assert!(normal.groups.is_some(), "Now we should have group indices!");
-        assert!(
-            *normal.groups.as_ref().unwrap().iter().max().unwrap() == 13,
-            "The number of groups we expect is 14, meaning the highest group index should be 13!",
-        );
-
-        let groups = normal.split_out_groups().unwrap();
-        assert!(
-            groups.len() == 14,
-            "Expected 14 individual operators, one for each group."
-        );
-
+    fn build_expected_group_ops() -> Vec<FermionOperator> {
         let mut expected = Vec::with_capacity(14);
-
         expected.push(FermionOperator {
             coeffs: vec![Complex64::new(0.7199689944489797, 0.0)],
             actions: vec![],
@@ -223,6 +202,114 @@ mod tests {
             boundaries: vec![0, 4, 8, 12, 16],
             groups: None,
         });
+        expected
+    }
+
+    /// Converts the integral order of 2-body terms from chemist's to physicist's order.
+    fn chem_to_phys(op: &mut FermionOperator) {
+        let mut new_modes = Vec::with_capacity(op.modes.len());
+        for term in op.clone().iter() {
+            match term.modes.len() {
+                4 => {
+                    new_modes.push(term.modes[0]);
+                    new_modes.push(term.modes[1]);
+                    new_modes.push(term.modes[3]);
+                    new_modes.push(term.modes[2]);
+                }
+                _ => new_modes.extend_from_slice(term.modes),
+            }
+        }
+        op.modes = new_modes;
+    }
+
+    #[test]
+    fn test_group_terms_by_electronic_structure() {
+        let file_path = String::from("../../tests/h2.fcidump");
+        let fcidump = FCIDump::from_file(file_path);
+
+        let op = FermionOperator::from(&fcidump);
+
+        let groups = op.split_out_groups();
+        assert!(
+            groups.is_none(),
+            "We should not have any group indices yet!"
+        );
+
+        let mut normal = op.normal_ordered().simplify(1e-16);
+
+        let res = group_terms_by_electronic_structure(&mut normal, 2 * fcidump.norb, false);
+        assert!(res.is_ok(), "We should not have a GroupingError here!");
+        assert!(normal.groups.is_some(), "Now we should have group indices!");
+        assert!(
+            *normal.groups.as_ref().unwrap().iter().max().unwrap() == 13,
+            "The number of groups we expect is 14, meaning the highest group index should be 13!",
+        );
+
+        let groups = normal.split_out_groups().unwrap();
+        assert!(
+            groups.len() == 14,
+            "Expected 14 individual operators, one for each group."
+        );
+
+        let mut expected = build_expected_group_ops();
+
+        for group in groups.iter() {
+            let prior_len = expected.len();
+            // for each group, remove the equivalent operator from the vector of expected groups
+            expected.retain(|e| !group.equiv(e, 1e-16));
+            let new_len = expected.len();
+            if new_len == prior_len {
+                // if we do not remove a group this time, we did not find a matching operator, thus
+                // we must fail the test.
+                assert!(
+                    false,
+                    "Could not find a matching group operator in the expected set!"
+                );
+            }
+        }
+        // if the expected groups are not fully consumed, we also must fail!
+        assert!(
+            expected.len() == 0,
+            "Did not generate a group operator for all expected groups!"
+        );
+    }
+
+    #[test]
+    fn test_group_terms_by_electronic_structure_phys_order() {
+        let file_path = String::from("../../tests/h2.fcidump");
+        let fcidump = FCIDump::from_file(file_path);
+
+        let op = FermionOperator::from(&fcidump);
+
+        let groups = op.split_out_groups();
+        assert!(
+            groups.is_none(),
+            "We should not have any group indices yet!"
+        );
+
+        let mut normal = op.normal_ordered().simplify(1e-16);
+        // NOTE: we know that the normal-ordered operator here is in chemist's integral order
+        // because it was generated from an FCIDump. Thus, we can convert it to physicist's
+        // integral order by manually manipulating the acted-upon mode indices of the two-body
+        // terms:
+        chem_to_phys(&mut normal);
+
+        let res = group_terms_by_electronic_structure(&mut normal, 2 * fcidump.norb, true);
+        assert!(res.is_ok(), "We should not have a GroupingError here!");
+        assert!(normal.groups.is_some(), "Now we should have group indices!");
+        assert!(
+            *normal.groups.as_ref().unwrap().iter().max().unwrap() == 13,
+            "The number of groups we expect is 14, meaning the highest group index should be 13!",
+        );
+
+        let groups = normal.split_out_groups().unwrap();
+        assert!(
+            groups.len() == 14,
+            "Expected 14 individual operators, one for each group."
+        );
+
+        let mut expected = build_expected_group_ops();
+        expected.iter_mut().for_each(|op| chem_to_phys(op));
 
         for group in groups.iter() {
             let prior_len = expected.len();

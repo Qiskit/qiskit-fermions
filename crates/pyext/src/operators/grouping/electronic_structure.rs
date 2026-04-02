@@ -18,8 +18,17 @@ use qiskit_fermions_core::operators::grouping::electronic_structure::group_terms
 /// Groups terms of an operator by their electronic structure.
 #[gen_stub_pyfunction(module = "qiskit_fermions.operators.grouping.electronic_structure")]
 #[pyfunction(name = "group_terms_by_electronic_structure")]
-pub fn py_group_terms_by_electronic_structure(op: &Bound<PyFermionOperator>, num_modes: u32) -> PyResult<()> {
-    let res = group_terms_by_electronic_structure(&mut op.borrow_mut().inner, num_modes);
+#[pyo3(signature = (op, num_modes, *, two_body_physicist_order=false))]
+pub fn py_group_terms_by_electronic_structure(
+    op: &Bound<PyFermionOperator>,
+    num_modes: u32,
+    two_body_physicist_order: bool,
+) -> PyResult<()> {
+    let res = group_terms_by_electronic_structure(
+        &mut op.borrow_mut().inner,
+        num_modes,
+        two_body_physicist_order,
+    );
     match res {
         Ok(_) => Ok(()),
         Err(e) => Err(PyValueError::new_err(e.to_string())),

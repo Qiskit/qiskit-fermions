@@ -35,7 +35,9 @@ def test_group_terms_by_electronic_structure():
 
     normal = op.normal_ordered().simplify(atol=1e-16)
 
-    res = group_terms_by_electronic_structure(normal, 2 * fcidump.norb)
+    res = group_terms_by_electronic_structure(
+        normal, 2 * fcidump.norb, two_body_physicist_order=False
+    )
     assert res is None, "We should not have a GroupingError here!"
     assert normal.groups is not None, "Now we should have group indices!"
     assert max(normal.groups) == 13, (
