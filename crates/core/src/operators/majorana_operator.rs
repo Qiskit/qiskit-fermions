@@ -13,6 +13,7 @@
 use crate::operators::{CoherenceError, OperatorMacro, OperatorTrait};
 use num_complex::{Complex64, ComplexFloat};
 use std::collections::{HashMap, HashSet};
+use std::iter::zip;
 use std::ops::{
     Add, AddAssign, BitAnd, BitAndAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign,
 };
@@ -52,6 +53,13 @@ pub struct MajoranaOperator {
 crate::impl_operator_macro!(MajoranaOperator);
 
 impl MajoranaOperator {
+    fn _append_term(&mut self, coeff: Complex64, modes: &[u32]) {
+        // WARNING: this does not handle `groups` by design!
+        self.coeffs.push(coeff);
+        self.modes.extend_from_slice(modes);
+        self.boundaries.push(self.modes.len());
+    }
+
     pub fn simplify(&self, atol: f64) -> Self {
         let mut terms = HashMap::new();
         for term in self.iter() {
@@ -64,11 +72,7 @@ impl MajoranaOperator {
         terms
             .iter()
             .filter(|(_, coeff)| coeff.abs() > atol)
-            .for_each(|(modes, coeff)| {
-                out.coeffs.push(*coeff);
-                out.modes.extend_from_slice(modes);
-                out.boundaries.push(out.modes.len());
-            });
+            .for_each(|(modes, coeff)| out._append_term(*coeff, modes));
         out
     }
 
@@ -81,6 +85,16 @@ impl MajoranaOperator {
                 modes: &self.modes[start..end],
             }
         })
+    }
+
+    pub fn split_out_groups(&self) -> Option<Vec<Self>> {
+        let self_groups = self.groups.as_ref()?;
+        let num_groups = self_groups.iter().max().unwrap() + 1;
+        let mut groups = vec![Self::zero(); num_groups as usize];
+        for (group_idx, term) in zip(self_groups.iter(), self.iter()) {
+            groups[*group_idx as usize]._append_term(term.coeff, term.modes);
+        }
+        Some(groups)
     }
 
     pub fn normal_ordered(&self, reduce: bool) -> Self {
@@ -878,5 +892,54 @@ mod tests {
         let relabeled = op.relabel_modes(permutation);
 
         assert!(matches!(relabeled, Err(CoherenceError::IndexMapTooSmall)));
+    }
+
+    #[test]
+    fn test_split_out_groups() {
+        let op = MajoranaOperator {
+            coeffs: vec![
+                Complex64::new(1.0, 0.0),
+                Complex64::new(1.0, 0.0),
+                Complex64::new(2.0, 0.0),
+            ],
+            modes: vec![0, 1, 1, 0, 0, 0, 1, 1],
+            boundaries: vec![0, 2, 4, 8],
+            groups: Some(vec![0, 0, 1]),
+        };
+
+        let expected = vec![
+            MajoranaOperator {
+                coeffs: vec![Complex64::new(1.0, 0.0), Complex64::new(1.0, 0.0)],
+                modes: vec![0, 1, 1, 0],
+                boundaries: vec![0, 2, 4],
+                groups: None,
+            },
+            MajoranaOperator {
+                coeffs: vec![Complex64::new(2.0, 0.0)],
+                modes: vec![0, 0, 1, 1],
+                boundaries: vec![0, 4],
+                groups: None,
+            },
+        ];
+
+        let groups = op.split_out_groups();
+        assert_eq!(groups, Some(expected));
+    }
+
+    #[test]
+    fn test_split_out_groups_err() {
+        let op = MajoranaOperator {
+            coeffs: vec![
+                Complex64::new(1.0, 0.0),
+                Complex64::new(1.0, 0.0),
+                Complex64::new(2.0, 0.0),
+            ],
+            modes: vec![0, 1, 1, 0, 0, 0, 1, 1],
+            boundaries: vec![0, 2, 4, 8],
+            groups: None,
+        };
+
+        let groups = op.split_out_groups();
+        assert!(groups.is_none());
     }
 }

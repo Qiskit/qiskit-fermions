@@ -57,6 +57,7 @@ crate::impl_operator_macro!(FermionOperator);
 
 impl FermionOperator {
     fn _append_term(&mut self, coeff: Complex64, actions: &[bool], modes: &[u32]) {
+        // WARNING: this does not handle `groups` by design!
         self.coeffs.push(coeff);
         self.actions.extend_from_slice(actions);
         self.modes.extend_from_slice(modes);
@@ -75,9 +76,7 @@ impl FermionOperator {
         terms
             .iter()
             .filter(|((_, _), coeff)| coeff.abs() > atol)
-            .for_each(|((modes, actions), coeff)| {
-                out._append_term(*coeff, actions, modes);
-            });
+            .for_each(|((modes, actions), coeff)| out._append_term(*coeff, actions, modes));
         out
     }
 
@@ -93,10 +92,10 @@ impl FermionOperator {
         })
     }
 
-    pub fn split_out_groups(&self) -> Option<Vec<FermionOperator>> {
+    pub fn split_out_groups(&self) -> Option<Vec<Self>> {
         let self_groups = self.groups.as_ref()?;
         let num_groups = self_groups.iter().max().unwrap() + 1;
-        let mut groups = vec![FermionOperator::zero(); num_groups as usize];
+        let mut groups = vec![Self::zero(); num_groups as usize];
         for (group_idx, term) in zip(self_groups.iter(), self.iter()) {
             groups[*group_idx as usize]._append_term(term.coeff, term.actions, term.modes);
         }
@@ -924,5 +923,58 @@ mod tests {
         let relabeled = op.relabel_modes(permutation);
 
         assert!(matches!(relabeled, Err(CoherenceError::IndexMapTooSmall)));
+    }
+
+    #[test]
+    fn test_split_out_groups() {
+        let op = FermionOperator {
+            coeffs: vec![
+                Complex64::new(1.0, 0.0),
+                Complex64::new(1.0, 0.0),
+                Complex64::new(2.0, 0.0),
+            ],
+            actions: vec![true, false, true, false, true, true, false, false],
+            modes: vec![0, 1, 1, 0, 0, 0, 1, 1],
+            boundaries: vec![0, 2, 4, 8],
+            groups: Some(vec![0, 0, 1]),
+        };
+
+        let expected = vec![
+            FermionOperator {
+                coeffs: vec![Complex64::new(1.0, 0.0), Complex64::new(1.0, 0.0)],
+                actions: vec![true, false, true, false],
+                modes: vec![0, 1, 1, 0],
+                boundaries: vec![0, 2, 4],
+                groups: None,
+            },
+            FermionOperator {
+                coeffs: vec![Complex64::new(2.0, 0.0)],
+                actions: vec![true, true, false, false],
+                modes: vec![0, 0, 1, 1],
+                boundaries: vec![0, 4],
+                groups: None,
+            },
+        ];
+
+        let groups = op.split_out_groups();
+        assert_eq!(groups, Some(expected));
+    }
+
+    #[test]
+    fn test_split_out_groups_err() {
+        let op = FermionOperator {
+            coeffs: vec![
+                Complex64::new(1.0, 0.0),
+                Complex64::new(1.0, 0.0),
+                Complex64::new(2.0, 0.0),
+            ],
+            actions: vec![true, false, true, false, true, true, false, false],
+            modes: vec![0, 1, 1, 0, 0, 0, 1, 1],
+            boundaries: vec![0, 2, 4, 8],
+            groups: None,
+        };
+
+        let groups = op.split_out_groups();
+        assert!(groups.is_none());
     }
 }
