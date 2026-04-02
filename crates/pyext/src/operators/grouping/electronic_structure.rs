@@ -18,13 +18,8 @@ use qiskit_fermions_core::operators::grouping::electronic_structure::group_terms
 /// Groups terms of an operator by their electronic structure.
 #[gen_stub_pyfunction(module = "qiskit_fermions.operators.grouping.electronic_structure")]
 #[pyfunction(name = "group_terms_by_electronic_structure")]
-pub fn py_group_terms_by_electronic_structure(
-    mut op: PyFermionOperator,
-    num_modes: u32,
-) -> Option<Vec<u32>> {
-    let _ = group_terms_by_electronic_structure(&mut op.inner, num_modes);
-    // FIXME: why do these in-place modified groups not carry through to Python space?
-    op.inner.groups.clone()
+pub fn py_group_terms_by_electronic_structure(op: &Bound<PyFermionOperator>, num_modes: u32) {
+    let _ = group_terms_by_electronic_structure(&mut op.borrow_mut().inner, num_modes);
 }
 
 #[pymodule]
