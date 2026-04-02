@@ -43,3 +43,7 @@ def test_group_terms_by_electronic_structure():
     assert max(normal.groups) == 13, (
         "The number of groups we expect is 14, meaning the highest group index should be 13!"
     )
+
+    groups = normal.split_out_groups()
+    assert len(groups) == 14, "Expected 14 individual operators, one for each group."
+    # NOTE: the content of the groups is asserted in the Rust-level unittest

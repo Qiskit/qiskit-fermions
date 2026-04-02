@@ -566,6 +566,32 @@ impl PyMajoranaOperator {
         Py::new(slf.py(), iter)
     }
 
+    /// TODO:
+    #[getter]
+    pub fn get_groups(&self) -> Option<Vec<u32>> {
+        self.inner.groups.clone()
+    }
+
+    /// TODO:
+    #[setter]
+    pub fn set_groups(&mut self, groups: Option<Vec<u32>>) {
+        self.inner.groups = groups.clone();
+    }
+
+    /// TODO:
+    fn split_out_groups(slf: PyRef<'_, Self>) -> Option<Vec<Self>> {
+        let groups = slf.inner.split_out_groups();
+        match groups {
+            None => None,
+            Some(g) => {
+                let mut out = Vec::with_capacity(g.len());
+                g.into_iter()
+                    .for_each(|group_op| out.push(Self { inner: group_op }));
+                Some(out)
+            }
+        }
+    }
+
     /// Returns the Hermitian conjugate (or adjoint) of this operator.
     ///
     /// This affects the terms and coefficients as follows:

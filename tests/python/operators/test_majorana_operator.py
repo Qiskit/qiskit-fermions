@@ -333,6 +333,29 @@ class MajoranaOperatorTests(ABC):
             permutation = [4, 2, 5]
             op.relabel_modes(permutation)
 
+    def test_split_out_groups(self):
+        cls = self.get_class()
+
+        # NOTE: we rely on Python dict's insertion order to guarantee the correct order of terms in
+        # the expected outcome groups
+        group0 = {}
+        group0[(0, 1)] = 1
+        group0[(1, 0)] = 1
+        op = cls.from_dict(group0)
+        group1 = {(0, 0, 1, 1): 2}
+        op += cls.from_dict(group1)
+        op.groups = [0, 0, 1]
+
+        groups = op.split_out_groups()
+        expected = [cls.from_dict(group0), cls.from_dict(group1)]
+        assert all([a.equiv(b) for a, b in zip(groups, expected, strict=True)])
+
+    def test_split_out_groups_err(self):
+        cls = self.get_class()
+
+        op = cls.from_dict({(0, 1): 1, (1, 0): 1, (0, 0, 1, 1): 2})
+        assert op.split_out_groups() is None
+
 
 class TestMajoranaOperator(MajoranaOperatorTests):
     @staticmethod

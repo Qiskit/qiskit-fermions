@@ -483,18 +483,6 @@ impl PyFermionOperator {
         self.inner.boundaries.len() - 1
     }
 
-    /// TODO:
-    #[getter]
-    pub fn get_groups(&self) -> Option<Vec<u32>> {
-        self.inner.groups.clone()
-    }
-
-    /// TODO:
-    #[setter]
-    pub fn set_groups(&mut self, groups: Option<Vec<u32>>) {
-        self.inner.groups = groups.clone();
-    }
-
     fn __pow__(&self, exponent: u32, modulo: Option<u32>) -> PyResult<Self> {
         match modulo {
             Some(_) => Err(PyNotImplementedError::new_err("mod argument not supported")),
@@ -594,6 +582,32 @@ impl PyFermionOperator {
             inner: vectorized.into_iter(),
         };
         Py::new(slf.py(), iter)
+    }
+
+    /// TODO:
+    #[getter]
+    pub fn get_groups(&self) -> Option<Vec<u32>> {
+        self.inner.groups.clone()
+    }
+
+    /// TODO:
+    #[setter]
+    pub fn set_groups(&mut self, groups: Option<Vec<u32>>) {
+        self.inner.groups = groups.clone();
+    }
+
+    /// TODO:
+    fn split_out_groups(slf: PyRef<'_, Self>) -> Option<Vec<Self>> {
+        let groups = slf.inner.split_out_groups();
+        match groups {
+            None => None,
+            Some(g) => {
+                let mut out = Vec::with_capacity(g.len());
+                g.into_iter()
+                    .for_each(|group_op| out.push(Self { inner: group_op }));
+                Some(out)
+            }
+        }
     }
 
     /// Returns the Hermitian conjugate (or adjoint) of this operator.
