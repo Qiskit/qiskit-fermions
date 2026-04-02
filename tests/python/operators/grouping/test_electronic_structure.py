@@ -24,12 +24,13 @@ def test_group_terms_by_electronic_structure():
     fcidump = FCIDump.from_file(str(file_path))
 
     op = FermionOperator.from_fcidump(fcidump)
-    # no groups yet
-    assert op.groups is None
+    assert op.groups is None, "We should not have any group indices yet!"
 
     normal = op.normal_ordered().simplify(atol=1e-16)
 
     group_terms_by_electronic_structure(normal, 2 * fcidump.norb)
 
-    assert max(normal.groups) == 16
-    # TODO: update this in accordance with the equivalent test inside the core rust crate
+    assert normal.groups is not None, "Now we should have group indices!"
+    assert max(normal.groups) == 13, (
+        "The number of groups we expect is 14, meaning the highest group index should be 13!"
+    )

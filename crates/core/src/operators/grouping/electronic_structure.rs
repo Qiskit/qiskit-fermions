@@ -28,10 +28,13 @@ fn _hash_electronic_structure_term(
             _ => Err(GroupingError::ElectronicStructureError),
         },
         4 => match term.actions {
-            [true, true, false, false] => Ok(num_modes.pow(3) * min(term.modes[0], term.modes[3])
-                + num_modes.pow(2) * min(term.modes[1], term.modes[2])
-                + num_modes * max(term.modes[1], term.modes[2])
-                + max(term.modes[0], term.modes[3])),
+            // TODO: expose configuration option for pairing in chemist vs. physicist ordering:
+            //   - chemist:   i a j b
+            //   - physicist: i a b j
+            [true, true, false, false] => Ok(num_modes.pow(3) * min(term.modes[0], term.modes[2])
+                + num_modes.pow(2) * min(term.modes[1], term.modes[3])
+                + num_modes * max(term.modes[1], term.modes[3])
+                + max(term.modes[0], term.modes[2])),
             _ => Err(GroupingError::ElectronicStructureError),
         },
         _ => Err(GroupingError::ElectronicStructureError),
@@ -56,8 +59,11 @@ pub fn group_terms_by_electronic_structure(
 
 #[cfg(test)]
 mod tests {
+    use num_complex::Complex64;
+
     use super::*;
 
+    use crate::operators::OperatorTrait;
     use crate::operators::library::fcidump::FCIDump;
 
     #[test]
@@ -68,17 +74,159 @@ mod tests {
         let op = FermionOperator::from(&fcidump);
 
         let groups = op.split_out_groups();
-        // no groups yet!
-        assert!(groups.is_none());
+        assert!(
+            groups.is_none(),
+            "We should not have any group indices yet!"
+        );
 
         let mut normal = op.normal_ordered().simplify(1e-16);
 
         let _ = group_terms_by_electronic_structure(&mut normal, 2 * fcidump.norb);
+        assert!(normal.groups.is_some(), "Now we should have group indices!");
+        assert!(
+            *normal.groups.as_ref().unwrap().iter().max().unwrap() == 13,
+            "The number of groups we expect is 14, meaning the highest group index should be 13!",
+        );
 
         let groups = normal.split_out_groups().unwrap();
-        assert!(groups.len() == 17);
+        assert!(
+            groups.len() == 14,
+            "Expected 14 individual operators, one for each group."
+        );
 
-        // TODO: We need to perform some actually useful assertion here! Ideally, we should use an
-        // operator that is slightly larger to verify that 2-body terms get grouped correctly, too.
+        let mut expected = Vec::with_capacity(14);
+
+        expected.push(FermionOperator {
+            coeffs: vec![Complex64::new(0.7199689944489797, 0.0)],
+            actions: vec![],
+            modes: vec![],
+            boundaries: vec![0, 0],
+            groups: None,
+        });
+        expected.push(FermionOperator {
+            coeffs: vec![Complex64::new(-1.2563390730032502, 0.0)],
+            actions: vec![true, false],
+            modes: vec![0, 0],
+            boundaries: vec![0, 2],
+            groups: None,
+        });
+        expected.push(FermionOperator {
+            coeffs: vec![Complex64::new(-0.4718960072811406, 0.0)],
+            actions: vec![true, false],
+            modes: vec![1, 1],
+            boundaries: vec![0, 2],
+            groups: None,
+        });
+        expected.push(FermionOperator {
+            coeffs: vec![Complex64::new(-1.2563390730032502, 0.0)],
+            actions: vec![true, false],
+            modes: vec![2, 2],
+            boundaries: vec![0, 2],
+            groups: None,
+        });
+        expected.push(FermionOperator {
+            coeffs: vec![Complex64::new(-0.4718960072811406, 0.0)],
+            actions: vec![true, false],
+            modes: vec![3, 3],
+            boundaries: vec![0, 2],
+            groups: None,
+        });
+        expected.push(FermionOperator {
+            coeffs: vec![
+                Complex64::new(-2.3575299028703285e-16, 0.0),
+                Complex64::new(-2.3575299028703285e-16, 0.0),
+            ],
+            actions: vec![true, false, true, false],
+            modes: vec![0, 1, 1, 0],
+            boundaries: vec![0, 2, 4],
+            groups: None,
+        });
+        expected.push(FermionOperator {
+            coeffs: vec![
+                Complex64::new(-2.3575299028703285e-16, 0.0),
+                Complex64::new(-2.3575299028703285e-16, 0.0),
+            ],
+            actions: vec![true, false, true, false],
+            modes: vec![3, 2, 2, 3],
+            boundaries: vec![0, 2, 4],
+            groups: None,
+        });
+        expected.push(FermionOperator {
+            coeffs: vec![Complex64::new(-0.4836505304710653, 0.0)],
+            actions: vec![true, true, false, false],
+            modes: vec![1, 0, 1, 0],
+            boundaries: vec![0, 4],
+            groups: None,
+        });
+        expected.push(FermionOperator {
+            coeffs: vec![Complex64::new(-0.6757101548035165, 0.0)],
+            actions: vec![true, true, false, false],
+            modes: vec![2, 0, 2, 0],
+            boundaries: vec![0, 4],
+            groups: None,
+        });
+        expected.push(FermionOperator {
+            coeffs: vec![Complex64::new(-0.6645817302552967, 0.0)],
+            actions: vec![true, true, false, false],
+            modes: vec![3, 0, 3, 0],
+            boundaries: vec![0, 4],
+            groups: None,
+        });
+        expected.push(FermionOperator {
+            coeffs: vec![Complex64::new(-0.6645817302552967, 0.0)],
+            actions: vec![true, true, false, false],
+            modes: vec![2, 1, 2, 1],
+            boundaries: vec![0, 4],
+            groups: None,
+        });
+        expected.push(FermionOperator {
+            coeffs: vec![Complex64::new(-0.6985737227320183, 0.0)],
+            actions: vec![true, true, false, false],
+            modes: vec![3, 1, 3, 1],
+            boundaries: vec![0, 4],
+            groups: None,
+        });
+        expected.push(FermionOperator {
+            coeffs: vec![Complex64::new(-0.4836505304710653, 0.0)],
+            actions: vec![true, true, false, false],
+            modes: vec![3, 2, 3, 2],
+            boundaries: vec![0, 4],
+            groups: None,
+        });
+        expected.push(FermionOperator {
+            coeffs: vec![
+                Complex64::new(-0.18093119978423133, 0.0),
+                Complex64::new(-0.18093119978423133, 0.0),
+                Complex64::new(-0.18093119978423133, 0.0),
+                Complex64::new(-0.18093119978423133, 0.0),
+            ],
+            actions: vec![
+                true, true, false, false, true, true, false, false, true, true, false, false, true,
+                true, false, false,
+            ],
+            modes: vec![2, 0, 3, 1, 2, 1, 3, 0, 3, 1, 2, 0, 3, 0, 2, 1],
+            boundaries: vec![0, 4, 8, 12, 16],
+            groups: None,
+        });
+
+        for group in groups.iter() {
+            let prior_len = expected.len();
+            // for each group, remove the equivalent operator from the vector of expected groups
+            expected.retain(|e| !group.equiv(e, 1e-16));
+            let new_len = expected.len();
+            if new_len == prior_len {
+                // if we do not remove a group this time, we did not find a matching operator, thus
+                // we must fail the test.
+                assert!(
+                    false,
+                    "Could not find a matching group operator in the expected set!"
+                );
+            }
+        }
+        // if the expected groups are not fully consumed, we also must fail!
+        assert!(
+            expected.len() == 0,
+            "Did not generate a group operator for all expected groups!"
+        );
     }
 }
