@@ -11,15 +11,19 @@
 // that they have been altered from the originals.
 
 use crate::operators::fermion_operator::PyFermionOperator;
-use pyo3::prelude::*;
+use pyo3::{exceptions::PyValueError, prelude::*};
 use pyo3_stub_gen::derive::*;
 use qiskit_fermions_core::operators::grouping::electronic_structure::group_terms_by_electronic_structure;
 
 /// Groups terms of an operator by their electronic structure.
 #[gen_stub_pyfunction(module = "qiskit_fermions.operators.grouping.electronic_structure")]
 #[pyfunction(name = "group_terms_by_electronic_structure")]
-pub fn py_group_terms_by_electronic_structure(op: &Bound<PyFermionOperator>, num_modes: u32) {
-    let _ = group_terms_by_electronic_structure(&mut op.borrow_mut().inner, num_modes);
+pub fn py_group_terms_by_electronic_structure(op: &Bound<PyFermionOperator>, num_modes: u32) -> PyResult<()> {
+    let res = group_terms_by_electronic_structure(&mut op.borrow_mut().inner, num_modes);
+    match res {
+        Ok(_) => Ok(()),
+        Err(e) => Err(PyValueError::new_err(e.to_string())),
+    }
 }
 
 #[pymodule]

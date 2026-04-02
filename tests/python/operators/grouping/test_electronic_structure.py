@@ -14,9 +14,16 @@
 
 from pathlib import Path
 
+import pytest
 from qiskit_fermions.operators import FermionOperator
 from qiskit_fermions.operators.grouping import group_terms_by_electronic_structure
 from qiskit_fermions.operators.library import FCIDump
+
+
+def test_grouping_error():
+    op = FermionOperator.from_dict({((True, 0),): 1.0})
+    with pytest.raises(ValueError, match="operator does not conform to an electronic structure"):
+        group_terms_by_electronic_structure(op, 2)
 
 
 def test_group_terms_by_electronic_structure():
@@ -28,8 +35,8 @@ def test_group_terms_by_electronic_structure():
 
     normal = op.normal_ordered().simplify(atol=1e-16)
 
-    group_terms_by_electronic_structure(normal, 2 * fcidump.norb)
-
+    res = group_terms_by_electronic_structure(normal, 2 * fcidump.norb)
+    assert res is None, "We should not have a GroupingError here!"
     assert normal.groups is not None, "Now we should have group indices!"
     assert max(normal.groups) == 13, (
         "The number of groups we expect is 14, meaning the highest group index should be 13!"

@@ -67,6 +67,20 @@ mod tests {
     use crate::operators::library::fcidump::FCIDump;
 
     #[test]
+    fn test_grouping_error() {
+        let mut op = FermionOperator {
+            coeffs: vec![Complex64::new(1.0, 0.0)],
+            actions: vec![true],
+            modes: vec![0],
+            boundaries: vec![0, 1],
+            groups: None,
+        };
+
+        let err = group_terms_by_electronic_structure(&mut op, 2);
+        assert!(err.is_err_and(|e| matches!(e, GroupingError::ElectronicStructureError)));
+    }
+
+    #[test]
     fn test_group_terms_by_electronic_structure() {
         let file_path = String::from("../../tests/h2.fcidump");
         let fcidump = FCIDump::from_file(file_path);
@@ -81,7 +95,8 @@ mod tests {
 
         let mut normal = op.normal_ordered().simplify(1e-16);
 
-        let _ = group_terms_by_electronic_structure(&mut normal, 2 * fcidump.norb);
+        let res = group_terms_by_electronic_structure(&mut normal, 2 * fcidump.norb);
+        assert!(res.is_ok(), "We should not have a GroupingError here!");
         assert!(normal.groups.is_some(), "Now we should have group indices!");
         assert!(
             *normal.groups.as_ref().unwrap().iter().max().unwrap() == 13,
