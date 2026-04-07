@@ -22,8 +22,8 @@ fn _hash_electronic_structure_term(
 ) -> Result<u32, GroupingError> {
     // NOTE: the 4 indices of 2-body term are matched as follows, depending on the value of
     // two_body_physicist_order:
-    //   - two_body_physicist_order == False (default): i, a, j, b
-    //   - two_body_physicist_order == True: i, a, b, j
+    //   - two_body_physicist_order == False (default): i, a, b, j
+    //   - two_body_physicist_order == True: i, a, j, b
     let (j, b) = if two_body_physicist_order {
         (3, 2)
     } else {

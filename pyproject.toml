@@ -54,6 +54,7 @@ basetest = [
 ]
 doctest = [
     {include-group = "basetest"},
+    "rustworkx",
     "sybil>=9.3.0",
 ]
 test = [
