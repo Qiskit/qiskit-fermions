@@ -566,19 +566,45 @@ impl PyMajoranaOperator {
         Py::new(slf.py(), iter)
     }
 
-    /// TODO:
+    /// An optional vector of `group indices` for each term.
+    ///
+    /// For more information refer to the :mod:`~qiskit_fermions.operators.grouping` module.
     #[getter]
     pub fn get_groups(&self) -> Option<Vec<u32>> {
         self.inner.groups.clone()
     }
 
-    /// TODO:
+    /// Sets the :attr:`groups` attribute.
     #[setter]
     pub fn set_groups(&mut self, groups: Option<Vec<u32>>) {
         self.inner.groups = groups.clone();
     }
 
-    /// TODO:
+    /// Splits this operator into an optional list of new operators based on :attr:`groups`.
+    ///
+    /// If :attr:`groups` is ``None``, this function also returns ``None``. Otherwise, it will
+    /// return a list of new operators that contain those terms of this operator with the
+    /// corresponding `group` index.
+    ///
+    /// .. doctest::
+    ///
+    ///     >>> from qiskit_fermions.operators import MajoranaOperator
+    ///     >>> op = MajoranaOperator(
+    ///     ...     [1.0, 2.0, -1.0, -2.0],
+    ///     ...     [0, 1, 2, 3, 1, 0, 3, 2],
+    ///     ...     [0, 2, 4, 6, 8],
+    ///     ... )
+    ///     >>> print(op.split_out_groups())
+    ///     None
+    ///     >>> op.groups = [0, 1, 0, 1]
+    ///     >>> groups = op.split_out_groups()
+    ///     >>> for g in groups:
+    ///     ...     print(list(sorted(g.iter_terms())))
+    ///     [([0, 1], (1+0j)), ([1, 0], (-1+0j))]
+    ///     [([2, 3], (2+0j)), ([3, 2], (-2+0j))]
+    ///
+    /// Returns:
+    ///     An optional vector of one new operator for each group index in :attr:`groups`.
     fn split_out_groups(slf: PyRef<'_, Self>) -> Option<Vec<Self>> {
         let groups = slf.inner.split_out_groups();
         match groups {
