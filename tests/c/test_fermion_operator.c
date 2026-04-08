@@ -502,6 +502,23 @@ static int test_groups(void) {
 
     bool correct_num_groups = num_groups == 2;
 
+    QfFermionOperator *group_ops[2];
+
+    qf_ferm_op_split_out_groups(op, group_ops);
+
+    uint32_t boundaries_group[3] = {0, 2, 4};
+    QkComplex64 coeffs_group[2] = {{1.0, 0.0}, {1.0, 0.0}};
+    bool actions_group[4] = {true, false, true, false};
+    uint32_t modes_g0[4] = {0, 1, 1, 0};
+    QfFermionOperator *group0 =
+        qf_ferm_op_new(2, 4, coeffs_group, actions_group, modes_g0, boundaries_group);
+    uint32_t modes_g1[4] = {2, 3, 3, 2};
+    QfFermionOperator *group1 =
+        qf_ferm_op_new(2, 4, coeffs_group, actions_group, modes_g1, boundaries_group);
+
+    bool correct_group0 = qf_ferm_op_equiv(group_ops[0], group0, 1e-10);
+    bool correct_group1 = qf_ferm_op_equiv(group_ops[1], group1, 1e-10);
+
     uint32_t *groups_out;
     uint32_t groups_len;
 
@@ -517,9 +534,10 @@ static int test_groups(void) {
 
     bool deleted_groups = !qf_ferm_op_has_groups(op);
 
-    bool passed_all = has_no_groups && has_some_groups && correct_num_groups &&
-                      correct_groups_len && correct_groups_out0 && correct_groups_out1 &&
-                      correct_groups_out2 && correct_groups_out3 && deleted_groups;
+    bool passed_all = has_no_groups && has_some_groups && correct_num_groups && correct_group0 &&
+                      correct_group1 && correct_groups_len && correct_groups_out0 &&
+                      correct_groups_out1 && correct_groups_out2 && correct_groups_out3 &&
+                      deleted_groups;
 
     qf_ferm_op_free(op);
 

@@ -224,6 +224,26 @@ pub unsafe extern "C" fn qf_ferm_op_del_groups(op: *mut FermionOperator) {
     op.groups = None;
 }
 
+/// TODO: docs
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn qf_ferm_op_split_out_groups(
+    op: *const FermionOperator,
+    group_ops_out: *mut *mut FermionOperator,
+) {
+    let op = unsafe { const_ptr_as_ref(op) };
+    let groups = op.split_out_groups().expect(
+        "Expected groups to be present. It is the user's responsibility to check this via \
+        qf_ferm_op_has_groups before calling this function.",
+    );
+    let cgroups: Vec<*mut FermionOperator> = groups
+        .into_iter()
+        .map(|g| Box::into_raw(Box::new(g)))
+        .collect();
+    for (i, ptr) in cgroups.iter().enumerate() {
+        unsafe { group_ops_out.add(i).write(*ptr) };
+    }
+}
+
 /// @ingroup qf_ferm_op
 ///
 /// @brief Adds a term to an existing operator.

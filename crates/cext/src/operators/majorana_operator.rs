@@ -219,6 +219,26 @@ pub unsafe extern "C" fn qf_maj_op_del_groups(op: *mut MajoranaOperator) {
     op.groups = None;
 }
 
+/// TODO: docs
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn qf_maj_op_split_out_groups(
+    op: *const MajoranaOperator,
+    group_ops_out: *mut *mut MajoranaOperator,
+) {
+    let op = unsafe { const_ptr_as_ref(op) };
+    let groups = op.split_out_groups().expect(
+        "Expected groups to be present. It is the user's responsibility to check this via \
+        qf_maj_op_has_groups before calling this function.",
+    );
+    let cgroups: Vec<*mut MajoranaOperator> = groups
+        .into_iter()
+        .map(|g| Box::into_raw(Box::new(g)))
+        .collect();
+    for (i, ptr) in cgroups.iter().enumerate() {
+        unsafe { group_ops_out.add(i).write(*ptr) };
+    }
+}
+
 /// @ingroup qf_maj_op
 ///
 /// @brief Adds a term to an existing operator.
