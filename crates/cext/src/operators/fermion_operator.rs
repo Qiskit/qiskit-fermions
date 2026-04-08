@@ -74,7 +74,6 @@ pub unsafe extern "C" fn qf_ferm_op_new(
                 .map(|b| *b as usize)
                 .collect()
         },
-        // TODO: expose groups (?)
         groups: None,
     };
     Box::into_raw(Box::new(op))
@@ -170,6 +169,50 @@ pub unsafe extern "C" fn qf_ferm_op_one() -> *mut FermionOperator {
     Box::into_raw(Box::new(op))
 }
 
+/// TODO: docs
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn qf_ferm_op_has_groups(op: *const FermionOperator) -> bool {
+    let op = unsafe { const_ptr_as_ref(op) };
+    op.groups.is_some()
+}
+
+/// TODO: docs
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn qf_ferm_op_get_groups(
+    op: *const FermionOperator,
+    groups_out: *mut *mut u32,
+    groups_len: *mut u32,
+) {
+    let op = unsafe { const_ptr_as_ref(op) };
+    let groups = &op.groups.as_ref().expect(
+        "Expected groups to be present. It is the user's responsibility to check this via \
+        qf_ferm_op_has_groups before calling this function.",
+    );
+    unsafe { groups_out.write(groups.as_ptr().cast_mut()) };
+    unsafe { groups_len.write(groups.len().try_into().unwrap()) };
+}
+
+/// TODO: docs
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn qf_ferm_op_set_groups(
+    op: *mut FermionOperator,
+    groups_in: *const u32,
+    groups_len: u32,
+) {
+    let op = unsafe { mut_ptr_as_ref(op) };
+    let groups_in = unsafe { const_ptr_as_ref(groups_in) };
+    let mut groups = vec![0; groups_len as usize];
+    groups.copy_from_slice(unsafe { slice_from_ptr(groups_in, groups_len as usize) });
+    op.groups = Some(groups);
+}
+
+/// TODO: docs
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn qf_ferm_op_del_groups(op: *mut FermionOperator) {
+    let op = unsafe { mut_ptr_as_ref(op) };
+    op.groups = None;
+}
+
 /// @ingroup qf_ferm_op
 ///
 /// @brief Adds a term to an existing operator.
@@ -185,6 +228,9 @@ pub unsafe extern "C" fn qf_ferm_op_one() -> *mut FermionOperator {
 /// @rst
 ///
 /// Any of the pointer arguments may be ``NULL`` if and only if their corresponding length is zero.
+///
+/// .. caution::
+///    This function resets the operator's ``groups`` attribute to ``NULL``.
 ///
 /// Example
 /// -------
@@ -225,7 +271,7 @@ pub unsafe extern "C" fn qf_ferm_op_add_term(
         .extend_from_slice(unsafe { slice_from_ptr(modes, num_actions) });
     op.boundaries.push(op.modes.len());
 
-    // TODO: handle groups
+    op.groups = None;
 }
 
 /// @ingroup qf_ferm_op
