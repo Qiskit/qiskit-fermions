@@ -178,6 +178,17 @@ pub unsafe extern "C" fn qf_ferm_op_has_groups(op: *const FermionOperator) -> bo
 
 /// TODO: docs
 #[unsafe(no_mangle)]
+pub unsafe extern "C" fn qf_ferm_op_num_groups(op: *const FermionOperator) -> u32 {
+    let op = unsafe { const_ptr_as_ref(op) };
+    let groups = &op.groups.as_ref().expect(
+        "Expected groups to be present. It is the user's responsibility to check this via \
+        qf_ferm_op_has_groups before calling this function.",
+    );
+    groups.iter().max().unwrap() + 1
+}
+
+/// TODO: docs
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn qf_ferm_op_get_groups(
     op: *const FermionOperator,
     groups_out: *mut *mut u32,

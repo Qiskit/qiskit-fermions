@@ -498,6 +498,10 @@ static int test_groups(void) {
 
     bool has_some_groups = qf_ferm_op_has_groups(op);
 
+    uint32_t num_groups = qf_ferm_op_num_groups(op);
+
+    bool correct_num_groups = num_groups == 2;
+
     uint32_t *groups_out;
     uint32_t groups_len;
 
@@ -513,9 +517,9 @@ static int test_groups(void) {
 
     bool deleted_groups = !qf_ferm_op_has_groups(op);
 
-    bool passed_all = has_no_groups && has_some_groups && correct_groups_len &&
-                      correct_groups_out0 && correct_groups_out1 && correct_groups_out2 &&
-                      correct_groups_out3 && deleted_groups;
+    bool passed_all = has_no_groups && has_some_groups && correct_num_groups &&
+                      correct_groups_len && correct_groups_out0 && correct_groups_out1 &&
+                      correct_groups_out2 && correct_groups_out3 && deleted_groups;
 
     qf_ferm_op_free(op);
 
