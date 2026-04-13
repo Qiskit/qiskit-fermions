@@ -169,14 +169,64 @@ pub unsafe extern "C" fn qf_ferm_op_one() -> *mut FermionOperator {
     Box::into_raw(Box::new(op))
 }
 
-/// TODO: docs
+/// @ingroup qf_ferm_op
+///
+/// @brief Checks whether this operator has a ``groups`` attribute that is not empty.
+///
+/// @param op A pointer to the fermionic operator to be checked.
+///
+/// @return Whether the provided operator has a non-empty ``groups`` attribute.
+///
+/// @rst
+///
+/// .. seealso::
+///    The explanation on :ref:`grouping_explanation`.
+///
+/// Example
+/// -------
+///
+/// .. code-block:: c
+///     :linenos:
+///
+///     QfFCIDump *fcidump = qf_fcidump_from_file("molecule.fcidump");
+///     QfFermionOperator *op = qf_ferm_op_from_fcidump(fcidump);
+///
+///     bool has_groups = qf_ferm_op_has_groups(op);
+///
+///     assert(!has_groups);
+///
+/// @endrst
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn qf_ferm_op_has_groups(op: *const FermionOperator) -> bool {
     let op = unsafe { const_ptr_as_ref(op) };
     op.groups.is_some()
 }
 
-/// TODO: docs
+/// @ingroup qf_ferm_op
+///
+/// @brief Gets the number of unique group indices from an operator.
+///
+/// @param op A pointer to the fermionic operator whose number of group indices to get.
+///
+/// @return The number of unique group indices from the operator's ``groups`` attribute.
+///
+/// @rst
+///
+/// .. seealso::
+///    The explanation on :ref:`grouping_explanation`.
+///
+/// Example
+/// -------
+///
+/// .. code-block:: c
+///     :linenos:
+///
+///     QfFCIDump *fcidump = qf_fcidump_from_file("molecule.fcidump");
+///     QfFermionOperator *op = qf_ferm_op_from_fcidump(fcidump);
+///
+///     uint32_t num_groups = qf_ferm_op_num_groups(op);
+///
+/// @endrst
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn qf_ferm_op_num_groups(op: *const FermionOperator) -> u32 {
     let op = unsafe { const_ptr_as_ref(op) };
@@ -187,7 +237,32 @@ pub unsafe extern "C" fn qf_ferm_op_num_groups(op: *const FermionOperator) -> u3
     groups.iter().max().unwrap() + 1
 }
 
-/// TODO: docs
+/// @ingroup qf_ferm_op
+///
+/// @brief Gets the group indices for all operator terms.
+///
+/// @param op A pointer to the fermionic operator whose group indices to get.
+/// @param groups_out A pointer to the integer array into which to write the group indices.
+/// @param groups_len A pointer to the integer into which to write the length of the output array.
+///
+/// @rst
+///
+/// .. seealso::
+///    The explanation on :ref:`grouping_explanation`.
+///
+/// Example
+/// -------
+///
+/// .. code-block:: c
+///     :linenos:
+///
+///     QfFermionOperator *op = ...;
+///     uint32_t *groups_out;
+///     uint32_t groups_len;
+///
+///     qf_ferm_op_get_groups(op, &groups_out, &groups_len);
+///
+/// @endrst
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn qf_ferm_op_get_groups(
     op: *const FermionOperator,
@@ -203,7 +278,32 @@ pub unsafe extern "C" fn qf_ferm_op_get_groups(
     unsafe { groups_len.write(groups.len().try_into().unwrap()) };
 }
 
-/// TODO: docs
+/// @ingroup qf_ferm_op
+///
+/// @brief Sets the ``groups`` attribute of the provided operator.
+///
+/// @param op A pointer to the fermionic operator whose ``groups`` attribute to write.
+/// @param groups_in A pointer to the ``groups`` integer array to write into the operator.
+/// @param groups_len The number of terms in the ``groups_in`` array.
+///
+/// @rst
+///
+/// .. seealso::
+///    The explanation on :ref:`grouping_explanation`.
+///
+/// Example
+/// -------
+///
+/// .. code-block:: c
+///     :linenos:
+///
+///     QfFermionOperator *op = ...;
+///
+///     uint32_t num_terms = 4;
+///     uint32_t groups_in[4] = {0, 1, 0, 1};
+///     qf_ferm_op_set_groups(op, groups_in, num_terms);
+///
+/// @endrst
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn qf_ferm_op_set_groups(
     op: *mut FermionOperator,
@@ -217,14 +317,69 @@ pub unsafe extern "C" fn qf_ferm_op_set_groups(
     op.groups = Some(groups);
 }
 
-/// TODO: docs
+/// @ingroup qf_ferm_op
+///
+/// @brief Deletes the ``groups`` attribute from the provided operator.
+///
+/// @param op A pointer to the fermionic operator whose ``groups`` attribute to delete.
+///
+/// @rst
+///
+/// .. seealso::
+///    The explanation on :ref:`grouping_explanation`.
+///
+/// Example
+/// -------
+///
+/// .. code-block:: c
+///     :linenos:
+///
+///     QfFermionOperator *op = ...;
+///
+///     qf_ferm_op_del_groups(op);
+///
+/// @endrst
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn qf_ferm_op_del_groups(op: *mut FermionOperator) {
     let op = unsafe { mut_ptr_as_ref(op) };
     op.groups = None;
 }
 
-/// TODO: docs
+/// @ingroup qf_ferm_op
+///
+/// @brief Splits this operator into a list of new operators based on its ``groups`` attribute.
+///
+/// @param op A pointer to the fermionic operator whose ``groups`` to split out.
+/// @param group_ops_out A pointer to the array of :c:struct:`QfFermionOperator` into which to
+///     write the operators for each group.
+///
+/// @rst
+///
+/// .. seealso::
+///    The explanation on :ref:`grouping_explanation`.
+///
+/// Example
+/// -------
+///
+/// .. code-block:: c
+///     :linenos:
+///
+///     uint64_t num_terms = 4;
+///     uint64_t num_actions = 8;
+///     bool actions[8] = {true, false, true, false, true, false, true, false};
+///     uint32_t modes[8] = {0, 1, 2, 3, 1, 0, 3, 2};
+///     QkComplex64 coeffs[4] = {{1.0, 0.0}, {1.0, 0.0}, {1.0, 0.0}, {1.0, 0.0}};
+///     uint32_t boundaries[5] = {0, 2, 4, 6, 8};
+///     QfFermionOperator *op =
+///         qf_ferm_op_new(num_terms, num_actions, coeffs, actions, modes, boundaries);
+///
+///     uint32_t groups_in[4] = {0, 1, 0, 1};
+///     qf_ferm_op_set_groups(op, groups_in, num_terms);
+///
+///     QfFermionOperator *group_ops[2];
+///     qf_ferm_op_split_out_groups(op, group_ops);
+///
+/// @endrst
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn qf_ferm_op_split_out_groups(
     op: *const FermionOperator,
