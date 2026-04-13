@@ -42,7 +42,8 @@ terms according to the `line flow sets` as shown in Fig. 1c of [1]_.
     >>> groups = [0, 0, 1, 2, 1, 3, 3]
     >>> edges_with_group_as_payload = [(i, j, g) for (i, j), g in zip(edges, groups)]
     >>> _ = graph.add_edges_from(edges_with_group_as_payload)
-    >>> rx.visualization.mpl_draw(
+    >>> from rustworkx.visualization import mpl_draw
+    >>> mpl_draw(
     ...     graph,
     ...     pos={i: (i % 3, i // 3) for i in range(6)},
     ...     edge_labels=str,
