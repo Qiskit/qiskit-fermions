@@ -577,7 +577,7 @@ impl PyMajoranaOperator {
     /// Sets the :attr:`groups` attribute.
     #[setter]
     pub fn set_groups(&mut self, groups: Option<Vec<u32>>) {
-        self.inner.groups = groups.clone();
+        self.inner.groups = groups;
     }
 
     /// Splits this operator into an optional list of new operators based on :attr:`groups`.
