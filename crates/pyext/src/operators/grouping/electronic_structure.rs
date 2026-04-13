@@ -25,7 +25,7 @@ use qiskit_fermions_core::operators::grouping::electronic_structure::group_terms
 /// .. caution::
 ///    The provided operator *must* be normal-ordered! This is an underlying assumption of the
 ///    implementation that is *not* being verified! See
-///    :meth:`~qiskit_fermions.operator.FermionOperator.normal_ordered` for how to get an operator
+///    :meth:`~qiskit_fermions.operators.FermionOperator.normal_ordered` for how to get an operator
 ///    of that form.
 ///
 /// More concretely, given an electronic-structure Hamiltonian of the form
