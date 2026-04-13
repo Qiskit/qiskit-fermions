@@ -540,6 +540,10 @@ static int test_groups(void) {
                       deleted_groups;
 
     qf_ferm_op_free(op);
+    qf_ferm_op_free(group0);
+    qf_ferm_op_free(group1);
+    qf_ferm_op_free(group_ops[0]);
+    qf_ferm_op_free(group_ops[1]);
 
     if (!passed_all) {
         return EqualityError;
