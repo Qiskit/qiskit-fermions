@@ -50,11 +50,20 @@ pub struct FermionOperator {
     pub actions: Vec<bool>,
     pub modes: Vec<u32>,
     pub boundaries: Vec<usize>,
+    pub groups: Option<Vec<u32>>,
 }
 
 crate::impl_operator_macro!(FermionOperator);
 
 impl FermionOperator {
+    fn _append_term(&mut self, coeff: Complex64, actions: &[bool], modes: &[u32]) {
+        // WARNING: this does not handle `groups` by design!
+        self.coeffs.push(coeff);
+        self.actions.extend_from_slice(actions);
+        self.modes.extend_from_slice(modes);
+        self.boundaries.push(self.modes.len());
+    }
+
     pub fn simplify(&self, atol: f64) -> Self {
         let mut terms = HashMap::new();
         for term in self.iter() {
@@ -67,12 +76,7 @@ impl FermionOperator {
         terms
             .iter()
             .filter(|((_, _), coeff)| coeff.abs() > atol)
-            .for_each(|((modes, actions), coeff)| {
-                out.coeffs.push(*coeff);
-                out.actions.extend_from_slice(actions);
-                out.modes.extend_from_slice(modes);
-                out.boundaries.push(out.modes.len());
-            });
+            .for_each(|((modes, actions), coeff)| out._append_term(*coeff, actions, modes));
         out
     }
 
@@ -86,6 +90,16 @@ impl FermionOperator {
                 modes: &self.modes[start..end],
             }
         })
+    }
+
+    pub fn split_out_groups(&self) -> Option<Vec<Self>> {
+        let self_groups = self.groups.as_ref()?;
+        let num_groups = self_groups.iter().max().unwrap() + 1;
+        let mut groups = vec![Self::zero(); num_groups as usize];
+        for (group_idx, term) in zip(self_groups.iter(), self.iter()) {
+            groups[*group_idx as usize]._append_term(term.coeff, term.actions, term.modes);
+        }
+        Some(groups)
     }
 
     pub fn normal_ordered(&self) -> Self {
@@ -215,6 +229,7 @@ fn _normal_ordered_term(term_view: FermionOperatorTermView) -> FermionOperator {
         actions,
         modes,
         boundaries,
+        groups: None,
     }
 }
 
@@ -225,6 +240,7 @@ impl OperatorTrait for FermionOperator {
             actions: vec![],
             modes: vec![],
             boundaries: vec![0],
+            groups: None,
         }
     }
 
@@ -234,6 +250,7 @@ impl OperatorTrait for FermionOperator {
             actions: vec![],
             modes: vec![],
             boundaries: vec![0, 0],
+            groups: None,
         }
     }
 
@@ -264,6 +281,7 @@ impl OperatorTrait for FermionOperator {
             actions,
             modes,
             boundaries: self.boundaries.to_vec(),
+            groups: self.groups.clone(),
         }
     }
 
@@ -274,6 +292,7 @@ impl OperatorTrait for FermionOperator {
         let offset = self.boundaries[self.boundaries.len() - 1];
         self.boundaries
             .extend(other.boundaries[1..].iter().map(|b| b + offset));
+        self.groups = None;
     }
 
     fn __imul__(&mut self, other: Complex64) {
@@ -301,6 +320,7 @@ impl OperatorTrait for FermionOperator {
         self.actions = actions;
         self.modes = modes;
         self.boundaries = boundaries;
+        self.groups = None;
     }
 
     fn ichop(&mut self, atol: f64) {
@@ -322,6 +342,7 @@ impl OperatorTrait for FermionOperator {
         self.actions = actions;
         self.modes = modes;
         self.boundaries = boundaries;
+        self.groups = None;
     }
 }
 
@@ -339,6 +360,7 @@ mod tests {
                 actions: vec![],
                 modes: vec![],
                 boundaries: vec![0],
+                groups: None,
             }
         );
     }
@@ -353,6 +375,7 @@ mod tests {
                 actions: vec![],
                 modes: vec![],
                 boundaries: vec![0, 0],
+                groups: None,
             }
         );
     }
@@ -365,6 +388,7 @@ mod tests {
             actions: vec![],
             modes: vec![],
             boundaries: vec![0, 0],
+            groups: None,
         };
         let three = one + two;
         assert_eq!(
@@ -374,6 +398,7 @@ mod tests {
                 actions: vec![],
                 modes: vec![],
                 boundaries: vec![0, 0, 0],
+                groups: None,
             }
         );
     }
@@ -386,6 +411,7 @@ mod tests {
             actions: vec![],
             modes: vec![],
             boundaries: vec![0, 0],
+            groups: None,
         };
         op += two;
         assert_eq!(
@@ -395,6 +421,7 @@ mod tests {
                 actions: vec![],
                 modes: vec![],
                 boundaries: vec![0, 0, 0],
+                groups: None,
             }
         );
     }
@@ -407,6 +434,7 @@ mod tests {
             actions: vec![],
             modes: vec![],
             boundaries: vec![0, 0],
+            groups: None,
         };
         let new_one = two - one;
         assert_eq!(
@@ -416,6 +444,7 @@ mod tests {
                 actions: vec![],
                 modes: vec![],
                 boundaries: vec![0, 0, 0],
+                groups: None,
             }
         );
     }
@@ -428,6 +457,7 @@ mod tests {
             actions: vec![],
             modes: vec![],
             boundaries: vec![0, 0],
+            groups: None,
         };
         op -= two;
         assert_eq!(
@@ -437,6 +467,7 @@ mod tests {
                 actions: vec![],
                 modes: vec![],
                 boundaries: vec![0, 0, 0],
+                groups: None,
             }
         );
     }
@@ -452,6 +483,7 @@ mod tests {
                 actions: vec![],
                 modes: vec![],
                 boundaries: vec![0, 0],
+                groups: None,
             }
         );
     }
@@ -467,6 +499,7 @@ mod tests {
                 actions: vec![],
                 modes: vec![],
                 boundaries: vec![0, 0],
+                groups: None,
             }
         );
     }
@@ -482,6 +515,7 @@ mod tests {
                 actions: vec![],
                 modes: vec![],
                 boundaries: vec![0, 0],
+                groups: None,
             }
         );
     }
@@ -493,6 +527,7 @@ mod tests {
             actions: vec![],
             modes: vec![],
             boundaries: vec![0, 0],
+            groups: None,
         };
         let one_half = three / Complex64::new(2.0, 0.0);
         assert_eq!(
@@ -502,6 +537,7 @@ mod tests {
                 actions: vec![],
                 modes: vec![],
                 boundaries: vec![0, 0],
+                groups: None,
             }
         );
     }
@@ -513,6 +549,7 @@ mod tests {
             actions: vec![],
             modes: vec![],
             boundaries: vec![0, 0],
+            groups: None,
         };
         op /= Complex64::new(2.0, 0.0);
         assert_eq!(
@@ -522,6 +559,7 @@ mod tests {
                 actions: vec![],
                 modes: vec![],
                 boundaries: vec![0, 0],
+                groups: None,
             }
         );
     }
@@ -536,6 +574,7 @@ mod tests {
                 actions: vec![],
                 modes: vec![],
                 boundaries: vec![0, 0],
+                groups: None,
             }
         );
     }
@@ -547,12 +586,14 @@ mod tests {
             actions: vec![true, false],
             modes: vec![0, 1],
             boundaries: vec![0, 0, 2],
+            groups: None,
         };
         let op2 = FermionOperator {
             coeffs: vec![Complex64::new(1.5, 0.0), Complex64::new(4.0, 0.0)],
             actions: vec![true, false],
             modes: vec![1, 0],
             boundaries: vec![0, 0, 2],
+            groups: None,
         };
         let result = op1 & op2;
         assert_eq!(
@@ -567,6 +608,7 @@ mod tests {
                 actions: vec![true, false, true, false, true, false, true, false],
                 modes: vec![1, 0, 0, 1, 1, 0, 0, 1],
                 boundaries: vec![0, 0, 2, 4, 8],
+                groups: None,
             }
         );
     }
@@ -578,12 +620,14 @@ mod tests {
             actions: vec![true, false],
             modes: vec![0, 1],
             boundaries: vec![0, 0, 2],
+            groups: None,
         };
         let op2 = FermionOperator {
             coeffs: vec![Complex64::new(1.5, 0.0), Complex64::new(4.0, 0.0)],
             actions: vec![true, false],
             modes: vec![1, 0],
             boundaries: vec![0, 0, 2],
+            groups: None,
         };
         op1 &= op2;
         assert_eq!(
@@ -598,6 +642,7 @@ mod tests {
                 actions: vec![true, false, true, false, true, false, true, false],
                 modes: vec![1, 0, 0, 1, 1, 0, 0, 1],
                 boundaries: vec![0, 0, 2, 4, 8],
+                groups: None,
             }
         );
     }
@@ -609,6 +654,7 @@ mod tests {
             actions: vec![true],
             modes: vec![0],
             boundaries: vec![0, 1],
+            groups: None,
         };
         // exponent=0
         let one = FermionOperator::one();
@@ -626,6 +672,7 @@ mod tests {
                 actions: vec![true, true],
                 modes: vec![0, 0],
                 boundaries: vec![0, 2],
+                groups: None,
             }
         );
     }
@@ -641,6 +688,7 @@ mod tests {
             actions: vec![true, false],
             modes: vec![0, 0],
             boundaries: vec![0, 0, 1, 2],
+            groups: None,
         };
 
         op.ichop(1e-7);
@@ -650,6 +698,7 @@ mod tests {
             actions: vec![true],
             modes: vec![0],
             boundaries: vec![0, 0, 1],
+            groups: None,
         };
 
         assert_eq!(op, expected1);
@@ -661,6 +710,7 @@ mod tests {
             actions: vec![],
             modes: vec![],
             boundaries: vec![0, 0],
+            groups: None,
         };
 
         assert_eq!(op, expected2);
@@ -673,6 +723,7 @@ mod tests {
             actions: vec![true, false],
             modes: vec![0, 1],
             boundaries: vec![0, 0, 2],
+            groups: None,
         };
         let adj = op1.adjoint();
         assert_eq!(
@@ -682,6 +733,7 @@ mod tests {
                 actions: vec![true, false],
                 modes: vec![1, 0],
                 boundaries: vec![0, 0, 2],
+                groups: None,
             }
         );
     }
@@ -701,6 +753,7 @@ mod tests {
             actions: vec![true, false],
             modes: vec![0, 1],
             boundaries: vec![0, 2],
+            groups: None,
         };
 
         assert_eq!(op.normal_ordered(), op);
@@ -713,6 +766,7 @@ mod tests {
             actions: vec![true, true],
             modes: vec![0, 1],
             boundaries: vec![0, 2],
+            groups: None,
         };
 
         let expected = FermionOperator {
@@ -720,6 +774,7 @@ mod tests {
             actions: vec![true, true],
             modes: vec![1, 0],
             boundaries: vec![0, 2],
+            groups: None,
         };
 
         assert_eq!(op.normal_ordered(), expected);
@@ -732,6 +787,7 @@ mod tests {
             actions: vec![false, true],
             modes: vec![0, 0],
             boundaries: vec![0, 2],
+            groups: None,
         };
 
         let expected = FermionOperator {
@@ -739,6 +795,7 @@ mod tests {
             actions: vec![true, false],
             modes: vec![0, 0],
             boundaries: vec![0, 2, 2],
+            groups: None,
         };
 
         assert_eq!(op.normal_ordered(), expected);
@@ -751,6 +808,7 @@ mod tests {
             actions: vec![true, false, true, false],
             modes: vec![0, 1, 1, 0],
             boundaries: vec![0, 2, 4],
+            groups: None,
         };
         assert!(op.is_hermitian(1e-4));
         assert!(!op.is_hermitian(1e-6));
@@ -766,6 +824,7 @@ mod tests {
                 actions: vec![true],
                 modes: vec![0],
                 boundaries: vec![0, 1],
+                groups: None,
             }
             .many_body_order(),
             1
@@ -777,6 +836,7 @@ mod tests {
                 actions: vec![true, false],
                 modes: vec![0, 1],
                 boundaries: vec![0, 2],
+                groups: None,
             }
             .many_body_order(),
             2
@@ -790,6 +850,7 @@ mod tests {
             actions: vec![true, false],
             modes: vec![0, 1],
             boundaries: vec![0, 2],
+            groups: None,
         };
 
         assert!(op1.conserves_particle_number());
@@ -799,6 +860,7 @@ mod tests {
             actions: vec![true],
             modes: vec![0],
             boundaries: vec![0, 1],
+            groups: None,
         };
 
         assert!(!op2.conserves_particle_number());
@@ -811,6 +873,7 @@ mod tests {
             actions: vec![true, false, true, false, true, false],
             modes: vec![0, 1, 0, 0, 2, 3],
             boundaries: vec![0, 2, 6],
+            groups: None,
         };
 
         let permutation = vec![4, 2, 5, 3];
@@ -822,6 +885,7 @@ mod tests {
             actions: vec![true, false, true, false, true, false],
             modes: vec![4, 2, 4, 4, 5, 3],
             boundaries: vec![0, 2, 6],
+            groups: None,
         };
 
         assert_eq!(relabeled, Some(expected));
@@ -834,6 +898,7 @@ mod tests {
             actions: vec![true, false, true, false, true, false],
             modes: vec![0, 1, 0, 0, 2, 3],
             boundaries: vec![0, 2, 6],
+            groups: None,
         };
 
         let permutation = vec![4, 4, 2, 3];
@@ -850,6 +915,7 @@ mod tests {
             actions: vec![true, false, true, false, true, false],
             modes: vec![0, 1, 0, 0, 2, 3],
             boundaries: vec![0, 2, 6],
+            groups: None,
         };
 
         let permutation = vec![4, 2, 5];
@@ -857,5 +923,58 @@ mod tests {
         let relabeled = op.relabel_modes(permutation);
 
         assert!(matches!(relabeled, Err(CoherenceError::IndexMapTooSmall)));
+    }
+
+    #[test]
+    fn test_split_out_groups() {
+        let op = FermionOperator {
+            coeffs: vec![
+                Complex64::new(1.0, 0.0),
+                Complex64::new(1.0, 0.0),
+                Complex64::new(2.0, 0.0),
+            ],
+            actions: vec![true, false, true, false, true, true, false, false],
+            modes: vec![0, 1, 1, 0, 0, 0, 1, 1],
+            boundaries: vec![0, 2, 4, 8],
+            groups: Some(vec![0, 0, 1]),
+        };
+
+        let expected = vec![
+            FermionOperator {
+                coeffs: vec![Complex64::new(1.0, 0.0), Complex64::new(1.0, 0.0)],
+                actions: vec![true, false, true, false],
+                modes: vec![0, 1, 1, 0],
+                boundaries: vec![0, 2, 4],
+                groups: None,
+            },
+            FermionOperator {
+                coeffs: vec![Complex64::new(2.0, 0.0)],
+                actions: vec![true, true, false, false],
+                modes: vec![0, 0, 1, 1],
+                boundaries: vec![0, 4],
+                groups: None,
+            },
+        ];
+
+        let groups = op.split_out_groups();
+        assert_eq!(groups, Some(expected));
+    }
+
+    #[test]
+    fn test_split_out_groups_err() {
+        let op = FermionOperator {
+            coeffs: vec![
+                Complex64::new(1.0, 0.0),
+                Complex64::new(1.0, 0.0),
+                Complex64::new(2.0, 0.0),
+            ],
+            actions: vec![true, false, true, false, true, true, false, false],
+            modes: vec![0, 1, 1, 0, 0, 0, 1, 1],
+            boundaries: vec![0, 2, 4, 8],
+            groups: None,
+        };
+
+        let groups = op.split_out_groups();
+        assert!(groups.is_none());
     }
 }

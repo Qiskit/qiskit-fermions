@@ -12,6 +12,7 @@ Operators
    :maxdepth: 1
 
    qiskit_fermions.operators
+   qiskit_fermions.operators.grouping
    qiskit_fermions.operators.library
 
 

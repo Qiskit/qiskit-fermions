@@ -23,6 +23,7 @@ fn map_fermion_action(action: FermionAction) -> MajoranaOperator {
         coeffs: vec![Complex64::new(0.5, 0.0), Complex64::new(0.0, im)],
         modes: vec![*action.1 * 2, *action.1 * 2 + 1],
         boundaries: vec![0, 1, 2],
+        groups: None,
     }
 }
 
@@ -52,6 +53,7 @@ fn map_majorana_action(mode: MajoranaAction) -> FermionOperator {
         actions: vec![true, false],
         modes: vec![idx, idx],
         boundaries: vec![0, 1, 2],
+        groups: None,
     }
 }
 
@@ -83,6 +85,7 @@ mod tests {
             actions: vec![true],
             modes: vec![0],
             boundaries: vec![0, 1],
+            groups: None,
         };
 
         let maj_op = fermion_to_majorana(&fer_op);
@@ -91,6 +94,7 @@ mod tests {
             coeffs: vec![Complex64::new(0.5, 0.0), Complex64::new(0.0, -0.5)],
             modes: vec![0, 1],
             boundaries: vec![0, 1, 2],
+            groups: None,
         };
 
         assert_eq!(maj_op, expected);
@@ -103,6 +107,7 @@ mod tests {
             actions: vec![false],
             modes: vec![0],
             boundaries: vec![0, 1],
+            groups: None,
         };
 
         let maj_op = fermion_to_majorana(&fer_op);
@@ -111,6 +116,7 @@ mod tests {
             coeffs: vec![Complex64::new(0.5, 0.0), Complex64::new(0.0, 0.5)],
             modes: vec![0, 1],
             boundaries: vec![0, 1, 2],
+            groups: None,
         };
 
         assert_eq!(maj_op, expected);
@@ -123,6 +129,7 @@ mod tests {
             actions: vec![true, false],
             modes: vec![0, 0],
             boundaries: vec![0, 2],
+            groups: None,
         };
 
         let maj_op = fermion_to_majorana(&fer_op);
@@ -133,6 +140,7 @@ mod tests {
             coeffs: vec![Complex64::new(0.5, 0.0), Complex64::new(0.0, 0.5)],
             modes: vec![1, 0],
             boundaries: vec![0, 0, 2],
+            groups: None,
         };
 
         assert!(canon.equiv(&expected, 1e-10));
@@ -145,6 +153,7 @@ mod tests {
             actions: vec![true, false, true, false],
             modes: vec![0, 1, 1, 0],
             boundaries: vec![0, 2, 4],
+            groups: None,
         };
 
         let maj_op = fermion_to_majorana(&fer_op);
@@ -155,6 +164,7 @@ mod tests {
             coeffs: vec![Complex64::new(0.0, 0.5), Complex64::new(0.0, -0.5)],
             modes: vec![3, 0, 2, 1],
             boundaries: vec![0, 2, 4],
+            groups: None,
         };
 
         assert!(canon.equiv(&expected, 1e-10));
@@ -166,6 +176,7 @@ mod tests {
             coeffs: vec![Complex64::new(1.0, 0.0)],
             modes: vec![0],
             boundaries: vec![0, 1],
+            groups: None,
         };
 
         let fer_op = majorana_to_fermion(&maj_op);
@@ -175,6 +186,7 @@ mod tests {
             actions: vec![true, false],
             modes: vec![0, 0],
             boundaries: vec![0, 1, 2],
+            groups: None,
         };
 
         assert_eq!(fer_op, expected);
@@ -186,6 +198,7 @@ mod tests {
             coeffs: vec![Complex64::new(1.0, 0.0)],
             modes: vec![1],
             boundaries: vec![0, 1],
+            groups: None,
         };
 
         let fer_op = majorana_to_fermion(&maj_op);
@@ -195,6 +208,7 @@ mod tests {
             actions: vec![true, false],
             modes: vec![0, 0],
             boundaries: vec![0, 1, 2],
+            groups: None,
         };
 
         assert_eq!(fer_op, expected);
@@ -206,6 +220,7 @@ mod tests {
             coeffs: vec![Complex64::new(1.0, 0.0)],
             modes: vec![0, 1],
             boundaries: vec![0, 2],
+            groups: None,
         };
 
         let fer_op = majorana_to_fermion(&maj_op);
@@ -217,6 +232,7 @@ mod tests {
             actions: vec![true, false],
             modes: vec![0, 0],
             boundaries: vec![0, 0, 2],
+            groups: None,
         };
 
         assert!(canon.equiv(&expected, 1e-10));
@@ -228,6 +244,7 @@ mod tests {
             coeffs: vec![Complex64::new(1.0, 0.0), Complex64::new(1.0, 0.0)],
             modes: vec![0, 3, 2, 1],
             boundaries: vec![0, 2, 4],
+            groups: None,
         };
 
         let fer_op = majorana_to_fermion(&maj_op);
@@ -239,6 +256,7 @@ mod tests {
             actions: vec![true, false, true, false],
             modes: vec![0, 1, 1, 0],
             boundaries: vec![0, 2, 4],
+            groups: None,
         };
 
         assert!(canon.equiv(&expected, 1e-10));

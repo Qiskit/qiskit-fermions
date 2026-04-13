@@ -12,6 +12,7 @@ Operators
    :maxdepth: 1
 
    qf-operators
+   qf-operators-grouping
    qf-operators-library
 
 

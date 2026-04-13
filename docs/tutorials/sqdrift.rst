@@ -1,3 +1,5 @@
+.. _sqdrift_tutorial:
+
 Generate SqDRIFT Circuits
 =========================
 

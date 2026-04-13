@@ -54,6 +54,7 @@ basetest = [
 ]
 doctest = [
     {include-group = "basetest"},
+    "rustworkx[mpl]",
     "sybil>=9.3.0",
 ]
 test = [
@@ -75,7 +76,6 @@ docs = [
     "nbsphinx>=0.9.4",
     "reno>=4.1",
     "breathe>=4.35.0",
-    "matplotlib",
 ]
 dev = [
     {include-group = "docs"},

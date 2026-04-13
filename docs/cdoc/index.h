@@ -23,6 +23,10 @@
  */
 
 /**
+ * @defgroup qf_operator_grouping qf_operator_grouping
+ */
+
+/**
  * @defgroup qf_operator_library qf_operator_library
  */
 

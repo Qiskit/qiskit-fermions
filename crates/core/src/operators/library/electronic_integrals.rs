@@ -316,6 +316,7 @@ mod tests {
             actions: vec![true, false].iter().cloned().cycle().take(16).collect(),
             modes: vec![0, 0, 2, 2, 1, 0, 0, 1, 3, 2, 2, 3, 1, 1, 3, 3],
             boundaries: vec![0, 2, 4, 6, 8, 10, 12, 14, 16],
+            groups: None,
         };
 
         assert_eq!(op, expected);
@@ -341,6 +342,7 @@ mod tests {
             actions: vec![true, false].iter().cloned().cycle().take(16).collect(),
             modes: vec![0, 0, 1, 0, 0, 1, 1, 1, 2, 2, 3, 2, 2, 3, 3, 3],
             boundaries: vec![0, 2, 4, 6, 8, 10, 12, 14, 16],
+            groups: None,
         };
 
         assert_eq!(op, expected);
@@ -382,6 +384,7 @@ mod tests {
                 3, 3, 3, 3,
             ],
             boundaries: (0..257).step_by(4).collect(),
+            groups: None,
         };
 
         assert_eq!(op, expected);
@@ -431,6 +434,7 @@ mod tests {
                 3, 3, 3, 3,
             ],
             boundaries: (0..257).step_by(4).collect(),
+            groups: None,
         };
 
         assert_eq!(op, expected);

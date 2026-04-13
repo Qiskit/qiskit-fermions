@@ -69,6 +69,7 @@ pub unsafe extern "C" fn qf_maj_op_new(
                 .map(|b| *b as usize)
                 .collect()
         },
+        groups: None,
     };
     Box::into_raw(Box::new(op))
 }
@@ -165,6 +166,230 @@ pub unsafe extern "C" fn qf_maj_op_one() -> *mut MajoranaOperator {
 
 /// @ingroup qf_maj_op
 ///
+/// @brief Checks whether this operator has a ``groups`` attribute that is not empty.
+///
+/// @param op A pointer to the majorana operator to be checked.
+///
+/// @return Whether the provided operator has a non-empty ``groups`` attribute.
+///
+/// @rst
+///
+/// .. seealso::
+///    The explanation on :ref:`grouping_explanation`.
+///
+/// Example
+/// -------
+///
+/// .. code-block:: c
+///     :linenos:
+///
+///     QfMajoranaOperator *op = ...;
+///
+///     bool has_groups = qf_maj_op_has_groups(op);
+///
+/// @endrst
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn qf_maj_op_has_groups(op: *const MajoranaOperator) -> bool {
+    let op = unsafe { const_ptr_as_ref(op) };
+    op.groups.is_some()
+}
+
+/// @ingroup qf_maj_op
+///
+/// @brief Gets the number of unique group indices from an operator.
+///
+/// @param op A pointer to the majorana operator whose number of group indices to get.
+///
+/// @return The number of unique group indices from the operator's ``groups`` attribute.
+///
+/// @rst
+///
+/// .. seealso::
+///    The explanation on :ref:`grouping_explanation`.
+///
+/// Example
+/// -------
+///
+/// .. code-block:: c
+///     :linenos:
+///
+///     QfMajoranaOperator *op = ...;
+///
+///     uint32_t num_groups = qf_maj_op_num_groups(op);
+///
+/// @endrst
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn qf_maj_op_num_groups(op: *const MajoranaOperator) -> u32 {
+    let op = unsafe { const_ptr_as_ref(op) };
+    let groups = &op.groups.as_ref().expect(
+        "Expected groups to be present. It is the user's responsibility to check this via \
+        qf_maj_op_has_groups before calling this function.",
+    );
+    groups.iter().max().unwrap() + 1
+}
+
+/// @ingroup qf_maj_op
+///
+/// @brief Gets the group indices for all operator terms.
+///
+/// @param op A pointer to the majorana operator whose group indices to get.
+/// @param groups_out A pointer to the integer array into which to write the group indices.
+/// @param groups_len A pointer to the integer into which to write the length of the output array.
+///
+/// @rst
+///
+/// .. seealso::
+///    The explanation on :ref:`grouping_explanation`.
+///
+/// Example
+/// -------
+///
+/// .. code-block:: c
+///     :linenos:
+///
+///     QfMajoranaOperator *op = ...;
+///     uint32_t *groups_out;
+///     uint32_t groups_len;
+///
+///     qf_maj_op_get_groups(op, &groups_out, &groups_len);
+///
+/// @endrst
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn qf_maj_op_get_groups(
+    op: *const MajoranaOperator,
+    groups_out: *mut *mut u32,
+    groups_len: *mut u32,
+) {
+    let op = unsafe { const_ptr_as_ref(op) };
+    let groups = &op.groups.as_ref().expect(
+        "Expected groups to be present. It is the user's responsibility to check this via \
+        qf_maj_op_has_groups before calling this function.",
+    );
+    unsafe { groups_out.write(groups.as_ptr().cast_mut()) };
+    unsafe { groups_len.write(groups.len().try_into().unwrap()) };
+}
+
+/// @ingroup qf_maj_op
+///
+/// @brief Sets the ``groups`` attribute of the provided operator.
+///
+/// @param op A pointer to the majorana operator whose ``groups`` attribute to write.
+/// @param groups_in A pointer to the ``groups`` integer array to write into the operator.
+/// @param groups_len The number of terms in the ``groups_in`` array.
+///
+/// @rst
+///
+/// .. seealso::
+///    The explanation on :ref:`grouping_explanation`.
+///
+/// Example
+/// -------
+///
+/// .. code-block:: c
+///     :linenos:
+///
+///     QfMajoranaOperator *op = ...;
+///
+///     uint32_t num_terms = 4;
+///     uint32_t groups_in[4] = {0, 1, 0, 1};
+///     qf_maj_op_set_groups(op, groups_in, num_terms);
+///
+/// @endrst
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn qf_maj_op_set_groups(
+    op: *mut MajoranaOperator,
+    groups_in: *const u32,
+    groups_len: u32,
+) {
+    let op = unsafe { mut_ptr_as_ref(op) };
+    let groups_in = unsafe { const_ptr_as_ref(groups_in) };
+    let mut groups = vec![0; groups_len as usize];
+    groups.copy_from_slice(unsafe { slice_from_ptr(groups_in, groups_len as usize) });
+    op.groups = Some(groups);
+}
+
+/// @ingroup qf_maj_op
+///
+/// @brief Deletes the ``groups`` attribute from the provided operator.
+///
+/// @param op A pointer to the majorana operator whose ``groups`` attribute to delete.
+///
+/// @rst
+///
+/// .. seealso::
+///    The explanation on :ref:`grouping_explanation`.
+///
+/// Example
+/// -------
+///
+/// .. code-block:: c
+///     :linenos:
+///
+///     QfMajoranaOperator *op = ...;
+///
+///     qf_maj_op_del_groups(op);
+///
+/// @endrst
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn qf_maj_op_del_groups(op: *mut MajoranaOperator) {
+    let op = unsafe { mut_ptr_as_ref(op) };
+    op.groups = None;
+}
+
+/// @ingroup qf_maj_op
+///
+/// @brief Splits this operator into a list of new operators based on its ``groups`` attribute.
+///
+/// @param op A pointer to the majorana operator whose ``groups`` to split out.
+/// @param group_ops_out A pointer to the array of :c:struct:`QfMajoranaOperator` into which to
+///     write the operators for each group.
+///
+/// @rst
+///
+/// .. seealso::
+///    The explanation on :ref:`grouping_explanation`.
+///
+/// Example
+/// -------
+///
+/// .. code-block:: c
+///     :linenos:
+///
+///     uint64_t num_terms = 4;
+///     uint64_t num_modes = 8;
+///     uint32_t modes[8] = {0, 1, 2, 3, 1, 0, 3, 2};
+///     QkComplex64 coeffs[4] = {{1.0, 0.0}, {1.0, 0.0}, {1.0, 0.0}, {1.0, 0.0}};
+///     uint32_t boundaries[5] = {0, 2, 4, 6, 8};
+///     QfMajoranaOperator *op = qf_maj_op_new(num_terms, num_modes, coeffs, modes, boundaries);
+///
+///     uint32_t groups_in[4] = {0, 1, 0, 1};
+///     qf_maj_op_set_groups(op, groups_in, num_terms);
+///
+///     QfMajoranaOperator *group_ops[2];
+///     qf_maj_op_split_out_groups(op, group_ops);
+///
+/// @endrst
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn qf_maj_op_split_out_groups(
+    op: *const MajoranaOperator,
+    group_ops_out: *mut *mut MajoranaOperator,
+) {
+    let op = unsafe { const_ptr_as_ref(op) };
+    let groups = op.split_out_groups().expect(
+        "Expected groups to be present. It is the user's responsibility to check this via \
+        qf_maj_op_has_groups before calling this function.",
+    );
+    let cgroups: Vec<*mut MajoranaOperator> = groups
+        .into_iter()
+        .map(|g| Box::into_raw(Box::new(g)))
+        .collect();
+    for (i, ptr) in cgroups.iter().enumerate() {
+        unsafe { group_ops_out.add(i).write(*ptr) };
+    }
+}
+
+/// @ingroup qf_maj_op
+///
 /// @brief Adds a term to an existing operator.
 ///
 /// @param op A pointer to the Majorana operator to be modified.
@@ -176,6 +401,9 @@ pub unsafe extern "C" fn qf_maj_op_one() -> *mut MajoranaOperator {
 /// @rst
 ///
 /// Any of the pointer arguments may be ``NULL`` if and only if their corresponding length is zero.
+///
+/// .. caution::
+///    This function resets the operator's ``groups`` attribute to ``NULL``.
 ///
 /// Example
 /// -------
@@ -211,6 +439,8 @@ pub unsafe extern "C" fn qf_maj_op_add_term(
     op.modes
         .extend_from_slice(unsafe { slice_from_ptr(modes, num_modes) });
     op.boundaries.push(op.modes.len());
+
+    op.groups = None;
 }
 
 /// @ingroup qf_maj_op
