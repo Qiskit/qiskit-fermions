@@ -77,6 +77,8 @@ jobs:
       - name: Install Python dependencies
         shell: bash
         run: |
+          echo $QISKIT_LIB
+          echo $QISKIT_INCLUDE
           pip install --pre qiskit
           pip install --group build --group coverage
           SETUPTOOLS_RUST_CARGO_PROFILE=release pip install -e .
