@@ -63,15 +63,15 @@ jobs:
       - name: Rust tests
         shell: bash
         run: |
-          QISKIT_LIB=$(find ./build/qiskit/dist/c/lib -name "libqiskit.*") \
-          QISKIT_INCLUDE=$(pwd)/build/qiskit/dist/c/include \
+          export QISKIT_LIB=$(find $(pwd)/build/qiskit/dist/c/lib -name "libqiskit.*")
+          export QISKIT_INCLUDE=$(pwd)/build/qiskit/dist/c/include
           make testrust
 
       - name: C tests
         shell: bash
         run: |
-          QISKIT_LIB=$(find ./build/qiskit/dist/c/lib -name "libqiskit.*") \
-          QISKIT_INCLUDE=$(pwd)/build/qiskit/dist/c/include \
+          export QISKIT_LIB=$(find $(pwd)/build/qiskit/dist/c/lib -name "libqiskit.*")
+          export QISKIT_INCLUDE=$(pwd)/build/qiskit/dist/c/include
           make testc
 
       - name: Install Python dependencies
