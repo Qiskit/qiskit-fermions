@@ -53,33 +53,33 @@ jobs:
         run: |
             python -m pip install -U pip
 
-      - name: Install Package
+      - name: Compile Qiskit C API
         shell: bash
         run: |
           git clone https://github.com/Qiskit/qiskit build/qiskit
           cd build/qiskit
           make c
-          pip install -c constraints.txt -r requirements.txt
-          SETUPTOOLS_RUST_CARGO_PROFILE=release pip install -c constraints.txt -e .
-          cd qiskit/
-          if [[ "$OSTYPE" == "darwin"* ]]; then
-            ln -s $(realpath _accelerate.*.so) libqiskit.dylib
-          else
-            ln -s $(realpath _accelerate.*.so) libqiskit.so
-          fi
-          cd ../../..
-          pip install setuptools setuptools_rust
-          DEPS=coverage make pyinstall
 
       - name: Rust tests
         shell: bash
         run: |
+          QISKIT_LIB=$(find ./build/qiskit/dist/c/lib -name "libqiskit.*") \
+          QISKIT_INCLUDE=$(pwd)/build/qiskit/dist/c/include \
           make testrust
 
       - name: C tests
         shell: bash
         run: |
+          QISKIT_LIB=$(find ./build/qiskit/dist/c/lib -name "libqiskit.*") \
+          QISKIT_INCLUDE=$(pwd)/build/qiskit/dist/c/include \
           make testc
+
+      - name: Install Python dependencies
+        shell: bash
+        run: |
+          pip install --pre qiskit
+          pip install --group build --group coverage
+          SETUPTOOLS_RUST_CARGO_PROFILE=release pip install -e .
 
       - name: Python tests
         shell: bash
