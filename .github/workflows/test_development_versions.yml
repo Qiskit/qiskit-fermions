@@ -83,10 +83,18 @@ jobs:
           pip install --group build --group coverage
           SETUPTOOLS_RUST_CARGO_PROFILE=release pip install -e .
 
+      - name: Debug ldd
+        shell: bash
+        run: |
+          ldd target/*/*.so
+          ldd python/qiskit_fermions/*.so
+          make pyext
+          ldd target/*/*.so
+          ldd python/qiskit_fermions/*.so
+
       - name: Python tests
         shell: bash
         run: |
-          ldd python/qiskit_fermions/*.so
           make testpython
 
       - name: Documentation tests
