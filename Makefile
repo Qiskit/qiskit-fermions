@@ -1,9 +1,5 @@
-export QISKIT_ROOT := $(shell python -c "import os; import qiskit; print(os.path.dirname(qiskit._accelerate.__file__) + '/..')")
-
-# For the time being, we are hard-coding the `qiskit-sys` installation method
-# settings. We should figure out how to relax this in the future...
-export QISKIT_CEXT_INSTALL_METHOD := path
-export QISKIT_CEXT_PATH := ${QISKIT_ROOT}
+export QISKIT_LIB ?= $(shell python -c "import qiskit; print(qiskit.capi.get_lib())")
+export QISKIT_INCLUDE ?= $(shell python -c "import qiskit; print(qiskit.capi.get_include())")
 
 # We must export this variable to ensure that `qiskit-sys` can find the Python.h
 # correctly. Arguably, it should be able to handle that itself within its build
@@ -15,16 +11,12 @@ export BINDGEN_EXTRA_CLANG_ARGS := "-I$(shell python -c "import sysconfig; print
 # ==============================================================================
 .PHONY: lint style
 
-lint: export LD_LIBRARY_PATH := $(LD_LIBRARY_PATH):${QISKIT_ROOT}/qiskit
-lint: export DYLD_LIBRARY_PATH := $(DYLD_LIBRARY_PATH):${QISKIT_ROOT}/qiskit
 lint:
 	cargo metadata --format-version=1 --locked >/dev/null
 	cargo clippy -- -D warnings
 	tox -e lint
 	clang-format --dry-run -Werror --style="file:.clang-format" -i tests/c/*.c tests/c/*.h
 
-style: export LD_LIBRARY_PATH := $(LD_LIBRARY_PATH):${QISKIT_ROOT}/qiskit
-style: export DYLD_LIBRARY_PATH := $(DYLD_LIBRARY_PATH):${QISKIT_ROOT}/qiskit
 style:
 	cargo fmt
 	tox -e style
@@ -38,8 +30,6 @@ style:
 doxygen: cheader
 	doxygen docs/Doxyfile
 
-docs: export LD_LIBRARY_PATH := $(LD_LIBRARY_PATH):${QISKIT_ROOT}/qiskit
-docs: export DYLD_LIBRARY_PATH := $(DYLD_LIBRARY_PATH):${QISKIT_ROOT}/qiskit
 docs: doxygen pyext
 	sphinx-build -W -j auto -T -E --keep-going -b html docs/ docs/_build/html
 
@@ -50,8 +40,6 @@ docsclean:
 # Recipes for Rust
 # ==============================================================================
 .PHONY: testrust
-testrust: export LD_LIBRARY_PATH := $(LD_LIBRARY_PATH):${QISKIT_ROOT}/dist/c/lib
-testrust: export DYLD_LIBRARY_PATH := $(DYLD_LIBRARY_PATH):${QISKIT_ROOT}/dist/c/lib
 testrust:
 	cargo test -p qiskit-fermions-core --no-default-features
 
@@ -89,23 +77,20 @@ pyext-dev: pystubs-dev
 # Recipes for Python Installing
 # ==============================================================================
 
+# NOTE: for this target to work correctly, the `DEPS` env variable must be set.
 .PHONY: pyinstall
 pyinstall:
-	pip install --group "$(DEPS)" .
+	pip install --group "$(DEPS)"
 
 # ==============================================================================
 # Recipes for Python Testing
 # ==============================================================================
 
 .PHONY: testpython
-testpython: export LD_LIBRARY_PATH := $(LD_LIBRARY_PATH):${QISKIT_ROOT}/qiskit
-testpython: export DYLD_LIBRARY_PATH := $(DYLD_LIBRARY_PATH):${QISKIT_ROOT}/qiskit
 testpython: pyext
 	python -m pytest -s -p no:doctest
 
 .PHONY: pycoverage
-pycoverage: export LD_LIBRARY_PATH := $(LD_LIBRARY_PATH):${QISKIT_ROOT}/qiskit
-pycoverage: export DYLD_LIBRARY_PATH := $(DYLD_LIBRARY_PATH):${QISKIT_ROOT}/qiskit
 pycoverage: pyext
 	python -m pytest -s -p no:doctest --cov=python/qiskit_fermions/
 
@@ -114,8 +99,6 @@ pycoverage: pyext
 # ==============================================================================
 
 .PHONY: doctest
-doctest: export LD_LIBRARY_PATH := $(LD_LIBRARY_PATH):${QISKIT_ROOT}/qiskit
-doctest: export DYLD_LIBRARY_PATH := $(DYLD_LIBRARY_PATH):${QISKIT_ROOT}/qiskit
 doctest: pyext
 	python -m pytest docs/ -s -p no:doctest docs/
 
@@ -219,6 +202,9 @@ clib-dev: build-clib-dev | $(C_DIR_OUT_LIB)
 .PHONY: cext
 cext: cheader clib
 
+# NOTE: for this target to work correctly, the `QISKIT_LIB` and `QISKIT_INCLUDE`
+# environment variables must be set correctly to point to the locations of the
+# compiled C API of the Qiskit SDK.
 .PHONY: testc
 # Use ctest to run C API tests.
 testc: cheader build-clib-dev
@@ -226,7 +212,8 @@ testc: cheader build-clib-dev
 # to put the build files, including the generated CMake stuff.  See the
 # `CMakeLists.txt` file for the build variables.
 	cmake -S$(C_DIR_TEST) -B$(C_DIR_TEST_BUILD) \
-		-DQISKIT_PATH=$(abspath $(QISKIT_ROOT)/dist/c) \
+		-DQISKIT_LIB_DIR=$(abspath $(dir $(QISKIT_LIB))) \
+		-DQISKIT_INCLUDE_DIR=$(abspath $(QISKIT_INCLUDE)) \
 		-DCARGO_LIB_DIR=$(abspath $(C_DIR_CARGO_TARGET))/debug \
 		-DQISKIT_FERMIONS_INCLUDE_PATH=$(abspath $(C_DIR_OUT_INCLUDE))
 # Actually build the test.
@@ -267,14 +254,3 @@ coverage: rustcoverage ccoverage pycoverage coveragereport
 coverageclean:
 	rm *.profraw python.info rust.info coveralls.info tests/c/build/*.profraw
 	rm -rf htmlcov/
-
-# ==============================================================================
-# Random recipes
-# ==============================================================================
-
-.PHONY: echo_ld_lib_path
-echo_ld_lib_path: export LD_LIBRARY_PATH := $(LD_LIBRARY_PATH):${QISKIT_ROOT}/qiskit
-echo_ld_lib_path: export DYLD_LIBRARY_PATH := $(DYLD_LIBRARY_PATH):${QISKIT_ROOT}/qiskit
-echo_ld_lib_path:
-	@echo export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}"
-	@echo export DYLD_LIBRARY_PATH="${DYLD_LIBRARY_PATH}"

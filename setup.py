@@ -13,6 +13,9 @@
 """Setup."""
 
 import os
+import sysconfig
+
+from qiskit.capi import get_include, get_lib
 from setuptools import setup
 from setuptools_rust import Binding, RustExtension
 
@@ -32,6 +35,13 @@ rust_debug = True if os.getenv("RUST_DEBUG") == "1" else None
 
 features = []
 
+env = os.environ.copy()
+if "QISKIT_LIB" not in env:
+    env["QISKIT_LIB"] = get_lib()
+if "QISKIT_INCLUDE" not in env:
+    env["QISKIT_INCLUDE"] = get_include()
+if "BINDGEN_EXTRA_CLANG_ARGS" not in env:
+    env["BINDGEN_EXTRA_CLANG_ARGS"] = f"-I{sysconfig.get_path('include')}"
 
 setup(
     rust_extensions=[
@@ -41,6 +51,7 @@ setup(
             binding=Binding.PyO3,
             debug=rust_debug,
             features=features,
+            env=env,
         )
     ],
     options={"bdist_wheel": {"py_limited_api": "cp310"}},
