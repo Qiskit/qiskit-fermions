@@ -91,6 +91,8 @@ jobs:
           make pyext
           ldd target/*/*.so
           ldd python/qiskit_fermions/*.so
+          python -c "import qiskit; print(qiskit.capi.get_lib())"
+          python -c "import qiskit; print(qiskit.capi.get_include())"
 
       - name: Python tests
         shell: bash
