@@ -48,6 +48,7 @@ setup(
         RustExtension(
             "qiskit_fermions._lib",
             "crates/pyext/Cargo.toml",
+            args=("--verbose",),
             binding=Binding.PyO3,
             debug=rust_debug,
             features=features,
