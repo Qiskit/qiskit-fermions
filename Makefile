@@ -198,7 +198,7 @@ cext: cheader clib
 # compiled C API of the Qiskit SDK.
 .PHONY: testc
 # Use ctest to run C API tests.
-testc:
+testc: build-clib-dev
 # `-S` specifies the source (including the `CMakeLists.txt` file, `-B` is where
 # to put the build files, including the generated CMake stuff.  See the
 # `CMakeLists.txt` file for the build variables.
@@ -216,7 +216,7 @@ testc:
 
 .PHONY: ccoverage
 ccoverage: export C_LIB_RUSTC_FLAGS:=-Cinstrument-coverage
-ccoverage: clib testc
+ccoverage: testc
 
 .PHONY: cclean
 cclean:
