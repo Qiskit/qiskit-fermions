@@ -67,6 +67,11 @@ jobs:
           export QISKIT_INCLUDE=$(pwd)/build/qiskit/dist/c/include
           make testrust
 
+      - name: Compile qiskit-fermions C API
+        shell: bash
+        run: |
+          make cext
+
       - name: C tests
         shell: bash
         run: |

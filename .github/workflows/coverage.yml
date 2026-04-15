@@ -57,6 +57,13 @@ jobs:
           export QISKIT_INCLUDE=$(pwd)/build/qiskit/dist/c/include
           make rustcoverage
 
+      - name: Compile qiskit-fermions C API
+        shell: bash
+        run: |
+          export QISKIT_LIB=$(find $(pwd)/build/qiskit/dist/c/lib -name "libqiskit.*")
+          export QISKIT_INCLUDE=$(pwd)/build/qiskit/dist/c/include
+          make cext
+
       - name: C coverage
         shell: bash
         run: |

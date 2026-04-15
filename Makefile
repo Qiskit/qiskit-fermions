@@ -30,7 +30,7 @@ style:
 doxygen: cheader
 	doxygen docs/Doxyfile
 
-docs: doxygen pyext
+docs: doxygen
 	sphinx-build -W -j auto -T -E --keep-going -b html docs/ docs/_build/html
 
 docsclean:
@@ -74,24 +74,15 @@ pyext-dev: pystubs-dev
 	python setup.py build_rust --inplace
 
 # ==============================================================================
-# Recipes for Python Installing
-# ==============================================================================
-
-# NOTE: for this target to work correctly, the `DEPS` env variable must be set.
-.PHONY: pyinstall
-pyinstall:
-	pip install --group "$(DEPS)"
-
-# ==============================================================================
 # Recipes for Python Testing
 # ==============================================================================
 
 .PHONY: testpython
-testpython: pyext
+testpython:
 	python -m pytest -s -p no:doctest
 
 .PHONY: pycoverage
-pycoverage: pyext
+pycoverage:
 	python -m pytest -s -p no:doctest --cov=python/qiskit_fermions/
 
 # ==============================================================================
@@ -99,7 +90,7 @@ pycoverage: pyext
 # ==============================================================================
 
 .PHONY: doctest
-doctest: pyext
+doctest:
 	python -m pytest docs/ -s -p no:doctest docs/
 
 # ==============================================================================
@@ -207,7 +198,7 @@ cext: cheader clib
 # compiled C API of the Qiskit SDK.
 .PHONY: testc
 # Use ctest to run C API tests.
-testc: cheader build-clib-dev
+testc:
 # `-S` specifies the source (including the `CMakeLists.txt` file, `-B` is where
 # to put the build files, including the generated CMake stuff.  See the
 # `CMakeLists.txt` file for the build variables.
