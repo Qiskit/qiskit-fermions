@@ -73,7 +73,8 @@ fn generate_bindings_py() {
 
     println!("cargo:rustc-link-search={}", qiskit_lib_dir);
     println!("cargo:rustc-link-arg=-Wl,-rpath,{}", qiskit_lib_dir);
-    println!("cargo:rustc-link-lib=dylib:+verbatim={}", qiskit_lib_name);
+    // println!("cargo:rustc-link-lib=dylib:+verbatim={}", qiskit_lib_name);
+    println!("cargo:rustc-link-arg=-undefined,dynamic_lookup,-Wl,-install_name,@rpath/{}", qiskit_lib_name);
 
     let bindings: bindgen::Bindings = bindgen::Builder::default()
         .clang_arg(format!("-I{}", qiskit_include))
