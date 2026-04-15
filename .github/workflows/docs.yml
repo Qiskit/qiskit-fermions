@@ -54,7 +54,7 @@ jobs:
         shell: bash
         run: |
           pip install --pre qiskit
-          pip install --group build --group lint
+          pip install --group build --group docs
           export QISKIT_LIB=$(python -c "import qiskit; print(qiskit.capi.get_lib())")
           export QISKIT_INCLUDE=$(python -c "import qiskit; print(qiskit.capi.get_include())")
           SETUPTOOLS_RUST_CARGO_PROFILE=release pip install -e .
