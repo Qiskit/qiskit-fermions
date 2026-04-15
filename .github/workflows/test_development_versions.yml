@@ -80,7 +80,7 @@ jobs:
           pip install --pre qiskit
           export QISKIT_LIB=$(python -c "import qiskit; print(qiskit.capi.get_lib())")
           export QISKIT_INCLUDE=$(python -c "import qiskit; print(qiskit.capi.get_include())")
-          export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:$(dirname QISKIT_LIB)
+          export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:$(dirname $QISKIT_LIB)
           echo $LD_LIBRARY_PATH
           ls -la $(dirname $QISKIT_LIB)
           pip install --group build --group coverage
