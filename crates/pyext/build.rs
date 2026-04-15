@@ -27,8 +27,9 @@ fn main() {
     }
 
     let qiskit_lib_dir = qiskit_lib_path.parent().unwrap().to_str().unwrap();
-    println!("cargo:rustc-link-arg=-Wl,-rpath,{}", qiskit_lib_dir);
-
     let qiskit_lib_name = qiskit_lib_path.file_name().unwrap().to_str().unwrap();
+
+    println!("cargo:rustc-link-search={}", qiskit_lib_dir);
+    println!("cargo:rustc-link-arg=-Wl,-rpath,{}", qiskit_lib_dir);
     println!("cargo:rustc-link-lib=dylib:+verbatim={}", qiskit_lib_name);
 }
