@@ -78,11 +78,6 @@ jobs:
         shell: bash
         run: |
           pip install --pre qiskit
-          export QISKIT_LIB=$(python -c "import qiskit; print(qiskit.capi.get_lib())")
-          export QISKIT_INCLUDE=$(python -c "import qiskit; print(qiskit.capi.get_include())")
-          export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:$(dirname $QISKIT_LIB)
-          export DYLD_LIBRARY_PATH=${DYLD_LIBRARY_PATH}:$(dirname $QISKIT_LIB)
-          ls -la $(dirname $QISKIT_LIB)
           pip install --group build --group coverage
           SETUPTOOLS_RUST_CARGO_PROFILE=release pip install -e .
 
