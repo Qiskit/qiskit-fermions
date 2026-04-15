@@ -80,6 +80,8 @@ jobs:
           pip install --pre qiskit
           export QISKIT_LIB=$(python -c "import qiskit; print(qiskit.capi.get_lib())")
           export QISKIT_INCLUDE=$(python -c "import qiskit; print(qiskit.capi.get_include())")
+          echo $QISKIT_LIB
+          ls -la $(dirname $QISKIT_LIB)
           pip install --group build --group coverage
           SETUPTOOLS_RUST_CARGO_PROFILE=release pip install -e .
 
