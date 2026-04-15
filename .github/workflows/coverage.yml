@@ -27,58 +27,64 @@ jobs:
         with:
           fetch-depth: 0
 
-      # - uses: actions/setup-python@v6
-      #   name: Install Python
-      #   with:
-      #     python-version: '3.11'
-      #
-      # - name: Install Rust toolchain
-      #   uses: dtolnay/rust-toolchain@stable
-      #   with:
-      #     components: llvm-tools-preview
-      #
-      # - name: Install dependencies
-      #   run: |
-      #       python -m pip install -U pip
-      #       cargo install grcov@0.8.20
-      #       sudo apt-get install lcov
-      #
-      # - name: Install Package
-      #   shell: bash
-      #   run: |
-      #     git clone https://github.com/Qiskit/qiskit build/qiskit
-      #     cd build/qiskit
-      #     make c
-      #     pip install -c constraints.txt -r requirements.txt
-      #     SETUPTOOLS_RUST_CARGO_PROFILE=release pip install -c constraints.txt -e .
-      #     cd qiskit/
-      #     ln -s _accelerate.*.so libqiskit.so
-      #     cd ../../..
-      #     pip install setuptools setuptools_rust
-      #     DEPS=coverage make pyinstall
-      #
-      # - name: Rust coverage
-      #   shell: bash
-      #   run: |
-      #     make rustcoverage
-      #
-      # - name: C coverage
-      #   shell: bash
-      #   run: |
-      #     make ccoverage
-      #
-      # - name: Python coverage
-      #   shell: bash
-      #   run: |
-      #     make pycoverage
-      #
-      # - name: Combine coverage
-      #   shell: bash
-      #   run: |
-      #     make coveragecombine
-      #
-      # - name: Coveralls
-      #   uses: coverallsapp/github-action@v2.3.7
-      #   with:
-      #     github-token: ${{ secrets.GITHUB_TOKEN }}
-      #     path-to-lcov: coveralls.info
+      - uses: actions/setup-python@v6
+        name: Install Python
+        with:
+          python-version: '3.11'
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: llvm-tools-preview
+
+      - name: Install dependencies
+        run: |
+            python -m pip install -U pip
+            cargo install grcov@0.8.20
+            sudo apt-get install lcov
+
+      - name: Compile Qiskit C API
+        shell: bash
+        run: |
+          git clone https://github.com/Qiskit/qiskit build/qiskit
+          cd build/qiskit
+          make c
+
+      - name: Rust coverage
+        shell: bash
+        run: |
+          export QISKIT_LIB=$(find $(pwd)/build/qiskit/dist/c/lib -name "libqiskit.*")
+          export QISKIT_INCLUDE=$(pwd)/build/qiskit/dist/c/include
+          make rustcoverage
+
+      - name: C coverage
+        shell: bash
+        run: |
+          export QISKIT_LIB=$(find $(pwd)/build/qiskit/dist/c/lib -name "libqiskit.*")
+          export QISKIT_INCLUDE=$(pwd)/build/qiskit/dist/c/include
+          make ccoverage
+
+      - name: Install Python dependencies
+        shell: bash
+        run: |
+          pip install --pre qiskit
+          pip install --group build --group coverage
+          export QISKIT_LIB=$(python -c "import qiskit; print(qiskit.capi.get_lib())")
+          export QISKIT_INCLUDE=$(python -c "import qiskit; print(qiskit.capi.get_include())")
+          SETUPTOOLS_RUST_CARGO_PROFILE=release pip install -e .
+
+      - name: Python coverage
+        shell: bash
+        run: |
+          make pycoverage
+
+      - name: Combine coverage
+        shell: bash
+        run: |
+          make coveragecombine
+
+      - name: Coveralls
+        uses: coverallsapp/github-action@v2.3.7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path-to-lcov: coveralls.info

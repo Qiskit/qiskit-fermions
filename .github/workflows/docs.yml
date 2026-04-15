@@ -29,74 +29,74 @@ jobs:
         with:
           fetch-depth: 0
 
-  #     - uses: actions/setup-python@v6
-  #       name: Install Python
-  #       with:
-  #         python-version: '3.11'
-  #
-  #     - name: Install Rust toolchain
-  #       uses: dtolnay/rust-toolchain@stable
-  #       with:
-  #         components: llvm-tools-preview
-  #
-  #     - name: Install dependencies
-  #       run: tools/install_ubuntu_docs_dependencies.sh
-  #       env:
-  #         GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-  #
-  #     - name: Tell reno to name the upcoming release after the branch we are on
-  #       shell: bash
-  #       run: |
-  #         sed -i.bak -e '/unreleased_version_title:*/d' releasenotes/config.yaml
-  #         echo unreleased_version_title: \"Upcoming release \(\`\`${GITHUB_REF_NAME}\`\`\)\" >> releasenotes/config.yaml
-  #
-  #     - name: Build docs
-  #       shell: bash
-  #       run: |
-  #         git clone https://github.com/Qiskit/qiskit build/qiskit
-  #         cd build/qiskit
-  #         make c
-  #         pip install -c constraints.txt -r requirements.txt
-  #         SETUPTOOLS_RUST_CARGO_PROFILE=release pip install -c constraints.txt -e .
-  #         cd qiskit/
-  #         ln -s _accelerate.*.so libqiskit.so
-  #         cd ../../..
-  #         DEPS=docs make pyinstall
-  #         make docs
-  #
-  #     - name: Upload docs artifact for GitHub Pages
-  #       uses: actions/upload-pages-artifact@v4
-  #       with:
-  #         path: docs/_build/html
-  #
-  #     # Provide a nicely named artifact that extracts into an
-  #     # identically named subdirectory.
-  #     - name: Prepare nice docs artifact for humans
-  #       if: always()
-  #       shell: bash
-  #       run: |
-  #         mkdir artifact
-  #         cp -a docs/_build/html artifact/qiskit-fermions-htmldocs
-  #
-  #     - name: Upload nice docs artifact
-  #       if: always()
-  #       uses: actions/upload-artifact@v7
-  #       with:
-  #         name: qiskit-fermions-htmldocs
-  #         path: ./artifact
-  #
-  # deploy:
-  #   name: deploy docs
-  #   if: ${{ github.ref == 'refs/heads/main' }}
-  #   needs: build
-  #   permissions:
-  #     pages: write
-  #     id-token: write
-  #   environment:
-  #     name: github-pages
-  #     url: ${{ steps.deployment.outputs.page_url }}
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Deploy to GitHub Pages
-  #       id: deployment
-  #       uses: actions/deploy-pages@v5
+      - uses: actions/setup-python@v6
+        name: Install Python
+        with:
+          python-version: '3.11'
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: llvm-tools-preview
+
+      - name: Install dependencies
+        run: tools/install_ubuntu_docs_dependencies.sh
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+
+      - name: Tell reno to name the upcoming release after the branch we are on
+        shell: bash
+        run: |
+          sed -i.bak -e '/unreleased_version_title:*/d' releasenotes/config.yaml
+          echo unreleased_version_title: \"Upcoming release \(\`\`${GITHUB_REF_NAME}\`\`\)\" >> releasenotes/config.yaml
+
+      - name: Install Package
+        shell: bash
+        run: |
+          pip install --pre qiskit
+          pip install --group build --group lint
+          export QISKIT_LIB=$(python -c "import qiskit; print(qiskit.capi.get_lib())")
+          export QISKIT_INCLUDE=$(python -c "import qiskit; print(qiskit.capi.get_include())")
+          SETUPTOOLS_RUST_CARGO_PROFILE=release pip install -e .
+
+      - name: Build docs
+        shell: bash
+        run: |
+          make docs
+
+      - name: Upload docs artifact for GitHub Pages
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: docs/_build/html
+
+      # Provide a nicely named artifact that extracts into an
+      # identically named subdirectory.
+      - name: Prepare nice docs artifact for humans
+        if: always()
+        shell: bash
+        run: |
+          mkdir artifact
+          cp -a docs/_build/html artifact/qiskit-fermions-htmldocs
+
+      - name: Upload nice docs artifact
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: qiskit-fermions-htmldocs
+          path: ./artifact
+
+  deploy:
+    name: deploy docs
+    if: ${{ github.ref == 'refs/heads/main' }}
+    needs: build
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5
