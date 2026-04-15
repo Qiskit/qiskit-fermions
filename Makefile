@@ -216,7 +216,7 @@ testc:
 
 .PHONY: ccoverage
 ccoverage: export C_LIB_RUSTC_FLAGS:=-Cinstrument-coverage
-ccoverage: testc
+ccoverage: clib testc
 
 .PHONY: cclean
 cclean:
