@@ -77,9 +77,9 @@ jobs:
       - name: Install Python dependencies
         shell: bash
         run: |
-          echo $QISKIT_LIB
-          echo $QISKIT_INCLUDE
           pip install --pre qiskit
+          export QISKIT_LIB=$(python -c "import qiskit; print(qiskit.capi.get_lib())")
+          export QISKIT_INCLUDE=$(python -c "import qiskit; print(qiskit.capi.get_include())")
           pip install --group build --group coverage
           SETUPTOOLS_RUST_CARGO_PROFILE=release pip install -e .
 
@@ -88,11 +88,6 @@ jobs:
         run: |
           ldd target/*/*.so
           ldd python/qiskit_fermions/*.so
-          make pyext
-          ldd target/*/*.so
-          ldd python/qiskit_fermions/*.so
-          python -c "import qiskit; print(qiskit.capi.get_lib())"
-          python -c "import qiskit; print(qiskit.capi.get_include())"
 
       - name: Python tests
         shell: bash
