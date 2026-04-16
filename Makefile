@@ -40,10 +40,6 @@ docsclean:
 # Recipes for Rust
 # ==============================================================================
 .PHONY: testrust
-buildrust:
-	cargo build -p qiskit-fermions-core --no-default-features
-
-.PHONY: testrust
 testrust:
 	cargo test -p qiskit-fermions-core --no-default-features
 
