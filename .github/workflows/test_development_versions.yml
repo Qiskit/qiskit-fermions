@@ -114,13 +114,9 @@ jobs:
       - name: Python tests
         shell: bash
         run: |
-          if [[ "$RUNNER_OS" != "Windows" ]]; then
-            make testpython
-          fi
+          make testpython
 
       - name: Documentation tests
         shell: bash
         run: |
-          if [[ "$RUNNER_OS" != "Windows" ]]; then
-            make doctest
-          fi
+          make doctest
