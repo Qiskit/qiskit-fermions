@@ -78,8 +78,13 @@ jobs:
           fi
           export QISKIT_INCLUDE=$(pwd)/build/qiskit/dist/c/include
           ls -la build/qiskit/target/release/
+          ls -la build/qiskit/dist/c/*
           make buildrust
           ls -la target/debug/
+          ls -la target/debug/deps/
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            export PATH=$(PATH):$(dirname $QISKIT_LIB)
+          fi
           make testrust
 
       - name: Compile qiskit-fermions C API
