@@ -12,6 +12,7 @@ Operators
    :maxdepth: 1
 
    qiskit_fermions.operators
+   qiskit_fermions.operators.grouping
    qiskit_fermions.operators.library
 
 
@@ -24,3 +25,35 @@ Mappers
 
    qiskit_fermions.mappers
    qiskit_fermions.mappers.library
+
+
+********
+Circuits
+********
+
+.. toctree::
+   :maxdepth: 1
+
+   qiskit_fermions.circuit
+   qiskit_fermions.circuit.library
+
+
+**********
+Transpiler
+**********
+
+.. toctree::
+   :maxdepth: 1
+
+   qiskit_fermions.transpiler
+   qiskit_fermions.transpiler.passes
+
+
+**************
+Linear Algebra
+**************
+
+.. toctree::
+   :maxdepth: 1
+
+   qiskit_fermions.linalg

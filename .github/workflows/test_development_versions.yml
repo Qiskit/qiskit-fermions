@@ -53,45 +53,50 @@ jobs:
         run: |
             python -m pip install -U pip
 
-      - name: Install Package
+      - name: Compile Qiskit C API
         shell: bash
         run: |
           git clone https://github.com/Qiskit/qiskit build/qiskit
           cd build/qiskit
           make c
-          if [[ "$RUNNER_OS" == "Windows" ]]; then
-            # NOTE: we manually need to copy the `.dll.lib` file for now
-            cp target/release/qiskit_cext.dll.lib dist/c/lib/qiskit.dll.lib
-            # NOTE: for lack of a better solution, we also need to copy thr
-            # `_cext` files
-            cp target/release/qiskit_cext.dll dist/c/lib/qiskit_cext.dll
-            cp target/release/qiskit_cext.dll.lib dist/c/lib/qiskit_cext.dll.lib
-          fi
-          pip install -c constraints.txt -r requirements.txt
-          SETUPTOOLS_RUST_CARGO_PROFILE=release pip install -c constraints.txt -e .
-          cd qiskit/
-          if [[ "$RUNNER_OS" == "macOS" ]]; then
-            ln -s $(realpath _accelerate.*.so) libqiskit.dylib
-          elif [[ "$RUNNER_OS" == "Windows" ]]; then
-            ln -s $(realpath _accelerate.*.pyd) qiskit.pyd
-          else
-            ln -s $(realpath _accelerate.*.so) libqiskit.so
-          fi
-          cd ../../..
-          if [[ "$RUNNER_OS" != "Windows" ]]; then
-            pip install setuptools setuptools_rust
-            DEPS=coverage make pyinstall
-          fi
+          # if [[ "$RUNNER_OS" == "Windows" ]]; then
+          #   # NOTE: we manually need to copy the `.dll.lib` file for now
+          #   cp target/release/qiskit_cext.dll.lib dist/c/lib/qiskit.dll.lib
+          #   # NOTE: for lack of a better solution, we also need to copy thr
+          #   # `_cext` files
+          #   cp target/release/qiskit_cext.dll dist/c/lib/qiskit_cext.dll
+          #   cp target/release/qiskit_cext.dll.lib dist/c/lib/qiskit_cext.dll.lib
+          # fi
 
       - name: Rust tests
         shell: bash
         run: |
+          export QISKIT_LIB=$(find $(pwd)/build/qiskit/dist/c/lib -name "libqiskit.*")
+          export QISKIT_INCLUDE=$(pwd)/build/qiskit/dist/c/include
           make testrust
+
+      - name: Compile qiskit-fermions C API
+        shell: bash
+        run: |
+          export QISKIT_LIB=$(find $(pwd)/build/qiskit/dist/c/lib -name "libqiskit.*")
+          export QISKIT_INCLUDE=$(pwd)/build/qiskit/dist/c/include
+          make cext
 
       - name: C tests
         shell: bash
         run: |
+          export QISKIT_LIB=$(find $(pwd)/build/qiskit/dist/c/lib -name "libqiskit.*")
+          export QISKIT_INCLUDE=$(pwd)/build/qiskit/dist/c/include
           make testc
+
+      - name: Install Python dependencies
+        shell: bash
+        run: |
+          pip install --pre qiskit
+          pip install --group build --group coverage
+          export QISKIT_LIB=$(python -c "import qiskit; print(qiskit.capi.get_lib())")
+          export QISKIT_INCLUDE=$(python -c "import qiskit; print(qiskit.capi.get_include())")
+          SETUPTOOLS_RUST_CARGO_PROFILE=release pip install -e .
 
       - name: Python tests
         shell: bash

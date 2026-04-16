@@ -84,6 +84,7 @@ macro_rules! impl_operator_magic_methods {
 }
 
 pub mod fermion_operator;
+pub mod grouping;
 pub mod library;
 pub mod majorana_operator;
 
@@ -94,6 +95,9 @@ pub mod operators {
 
     #[pymodule_export]
     use super::majorana_operator::majorana_operator;
+
+    #[pymodule_export]
+    use super::grouping::operators_grouping;
 
     #[pymodule_export]
     use super::library::operators_library;

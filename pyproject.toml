@@ -3,6 +3,7 @@
 requires = [
     "setuptools>=77.0",
     "setuptools-rust",
+    "qiskit==2.4.0rc3",
 ]
 build-backend = "setuptools.build_meta"
 
@@ -37,14 +38,15 @@ dependencies = [
 build = [
     "setuptools>=77.0",
     "setuptools-rust",
+    "qiskit==2.4.0rc3",
 ]
 style = [
-    "ruff==0.15.4",
+    "ruff==0.15.8",
     "typos>=1.20.0",
 ]
 lint = [
     {include-group = "style"},
-    "mypy==1.19.1",
+    "mypy==1.20.0",
     "reno>=4.1",
     "toml>=0.9.6",
 ]
@@ -54,6 +56,7 @@ basetest = [
 ]
 doctest = [
     {include-group = "basetest"},
+    "rustworkx[mpl]",
     "sybil>=9.3.0",
 ]
 test = [
@@ -75,7 +78,6 @@ docs = [
     "nbsphinx>=0.9.4",
     "reno>=4.1",
     "breathe>=4.35.0",
-    "matplotlib",
 ]
 dev = [
     {include-group = "docs"},

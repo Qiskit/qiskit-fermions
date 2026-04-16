@@ -69,6 +69,7 @@ License
 
    Documentation Home <self>
    Installation Instructions <install>
+   Explanations <explanations/index>
    Tutorials <tutorials/index>
    Python API Reference <pydoc/index>
    C API Reference <cdoc/index>

@@ -11,5 +11,6 @@
 // that they have been altered from the originals.
 
 pub mod fermion_operator;
+pub mod grouping;
 pub mod library;
 pub mod majorana_operator;

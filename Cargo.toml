@@ -14,6 +14,7 @@ license = "Apache-2.0"
 #
 # Each crate can add on specific features freely as it inherits.
 [workspace.dependencies]
+nalgebra = { version = "0.34", features = ["rand"] }
 ndarray = "0.17"
 num-complex = "0.4"
 num-traits = "0.2"
@@ -25,7 +26,7 @@ paste = "1.0"
 # it disabled for Rust-only tests to avoid linker errors with it not being loaded.  See
 # https://pyo3.rs/main/features#extension-module for more.
 pyo3 = { version = "0.27", features = ["abi3-py310", "multiple-pymethods", "num-complex"] }
-pyo3-stub-gen = "0.19"
+pyo3-stub-gen = "0.22"
 rayon = "1.11"
 regex = "1.12"
 thiserror = "2.0"

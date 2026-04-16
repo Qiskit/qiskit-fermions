@@ -2,8 +2,10 @@ Installation Instructions
 =========================
 
 .. caution::
-   The installation process of this package has not been ironed out yet.
-   Thus, for now it is important that you follow these instructions carefully.
+   If you are running into issues with the installation, please consult `this
+   issue <https://github.com/Qiskit/qiskit-fermions/issues/4>`_. If that does
+   not resolve your problem, feel free to comment there with a description of
+   your system and problem or leave any general feedback.
 
 Requirements
 ------------
@@ -19,68 +21,17 @@ dependencies:
 Preparation
 -----------
 
-Currently, the build process assumes a locally compiled version of Qiskit to be
-located at ``build/qiskit``. Thus, the following steps are required:
+The minimum Qiskit version we require is 2.4.
+At the time of writing, this can be installed from a pre-release via PyPI:
 
-1. activate your Python environment
+.. code:: console
 
-2. (only the first time) clone this repository:
+   $ pip install --pre qiskit
 
-   .. code:: console
+If you are interested in compiling the C API of ``qiskit-fermions`` you must
+compile Qiskit's C API from source, first.
 
-      $ git clone git@github.com:Qiskit/qiskit-fermions.git
-
-3. change into the correct directory:
-
-   .. code:: console
-
-      $ cd qiskit-fermions
-
-4. (only the first time) clone Qiskit into the desired location:
-
-   .. code:: console
-
-      $ git clone git@github.com:Qiskit/qiskit.git build/qiskit
-
-5. compile Qiskit locally (first the C API, then the Python package):
-
-   .. code:: console
-
-      $ cd build/qiskit
-      $ make c
-      $ pip install -r requirements.txt -c constraints.txt
-      $ SETUPTOOLS_RUST_CARGO_PROFILE=release pip install -e .
-
-6. symlink the compiled library (replace ``*`` to match your local filename and
-   update the ``.so`` suffix if it differs on your platform):
-
-   .. tab-set::
-
-     .. tab-item:: Linux
-        :sync: linux
-
-        .. code:: console
-
-           $ cd qiskit/
-           $ ln -s $(realpath _accelerate.*.so) libqiskit.so
-
-     .. tab-item:: MacOS
-        :sync: macos
-
-        .. code:: console
-
-           $ cd qiskit/
-           $ ln -s $(realpath _accelerate.*.so) libqiskit.dylib
-
-7. verify that everything worked by running the ``qiskit-fermions`` Rust tests:
-
-   .. code:: console
-
-      $ cd ../../..
-      $ make testrust
-
-Assuming everything above worked, you can now proceed with installing the C and
-Python APIs for this package!
+Please consult the language-specific guide linked below.
 
 .. toctree::
   :hidden:
