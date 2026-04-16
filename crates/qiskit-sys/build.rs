@@ -39,11 +39,11 @@ fn generate_bindings_c() {
     let qiskit_lib_dir = qiskit_lib_path.parent().unwrap().to_str().unwrap();
 
     println!("cargo:rustc-link-search={}", qiskit_lib_dir);
-    // if std::env::var_os("CARGO_CFG_TARGET_OS").unwrap() == "windows" {
-    //     println!("cargo:rustc-link-lib=qiskit_cext.dll");
-    // } else {
-    println!("cargo:rustc-link-lib=qiskit");
-    // }
+    if std::env::var_os("CARGO_CFG_TARGET_OS").unwrap() == "windows" {
+        println!("cargo:rustc-link-lib=qiskit_cext.dll");
+    } else {
+        println!("cargo:rustc-link-lib=qiskit");
+    }
 
     let bindings: bindgen::Bindings = bindgen::Builder::default()
         .clang_arg(format!("-I{}", qiskit_include))

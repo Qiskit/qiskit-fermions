@@ -59,20 +59,20 @@ jobs:
           git clone https://github.com/Qiskit/qiskit build/qiskit
           cd build/qiskit
           make c
-          # if [[ "$RUNNER_OS" == "Windows" ]]; then
-          #   # NOTE: we manually need to copy the `.dll.lib` file for now
-          #   cp target/release/qiskit_cext.dll.lib dist/c/lib/qiskit.dll.lib
-          #   # NOTE: for lack of a better solution, we also need to copy thr
-          #   # `_cext` files
-          #   cp target/release/qiskit_cext.dll dist/c/lib/qiskit_cext.dll
-          #   cp target/release/qiskit_cext.dll.lib dist/c/lib/qiskit_cext.dll.lib
-          # fi
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            # NOTE: we manually need to copy the `.dll.lib` file for now
+            cp target/release/qiskit_cext.dll.lib dist/c/lib/qiskit.dll.lib
+            # NOTE: for lack of a better solution, we also need to copy thr
+            # `_cext` files
+            cp target/release/qiskit_cext.dll dist/c/lib/qiskit_cext.dll
+            cp target/release/qiskit_cext.dll.lib dist/c/lib/qiskit_cext.dll.lib
+          fi
 
       - name: Rust tests
         shell: bash
         run: |
           if [[ "$RUNNER_OS" == "Windows" ]]; then
-            export QISKIT_LIB=$(find $(pwd)/build/qiskit/dist/c/lib -name "qiskit*.dll")
+            export QISKIT_LIB=$(find $(pwd)/build/qiskit/dist/c/lib -name "qiskit_cext.dll.lib")
           else
             export QISKIT_LIB=$(find $(pwd)/build/qiskit/dist/c/lib -name "libqiskit.*")
           fi
@@ -83,7 +83,7 @@ jobs:
         shell: bash
         run: |
           if [[ "$RUNNER_OS" == "Windows" ]]; then
-            export QISKIT_LIB=$(find $(pwd)/build/qiskit/dist/c/lib -name "qiskit*.dll")
+            export QISKIT_LIB=$(find $(pwd)/build/qiskit/dist/c/lib -name "qiskit_cext.dll.lib")
           else
             export QISKIT_LIB=$(find $(pwd)/build/qiskit/dist/c/lib -name "libqiskit.*")
           fi
@@ -94,7 +94,7 @@ jobs:
         shell: bash
         run: |
           if [[ "$RUNNER_OS" == "Windows" ]]; then
-            export QISKIT_LIB=$(find $(pwd)/build/qiskit/dist/c/lib -name "qiskit*.dll")
+            export QISKIT_LIB=$(find $(pwd)/build/qiskit/dist/c/lib -name "qiskit_cext.dll.lib")
           else
             export QISKIT_LIB=$(find $(pwd)/build/qiskit/dist/c/lib -name "libqiskit.*")
           fi
