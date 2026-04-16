@@ -71,21 +71,33 @@ jobs:
       - name: Rust tests
         shell: bash
         run: |
-          export QISKIT_LIB=$(find $(pwd)/build/qiskit/dist/c/lib -name "libqiskit.*")
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            export QISKIT_LIB=$(find $(pwd)/build/qiskit/dist/c/lib -name "qiskit*.dll")
+          else
+            export QISKIT_LIB=$(find $(pwd)/build/qiskit/dist/c/lib -name "libqiskit.*")
+          fi
           export QISKIT_INCLUDE=$(pwd)/build/qiskit/dist/c/include
           make testrust
 
       - name: Compile qiskit-fermions C API
         shell: bash
         run: |
-          export QISKIT_LIB=$(find $(pwd)/build/qiskit/dist/c/lib -name "libqiskit.*")
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            export QISKIT_LIB=$(find $(pwd)/build/qiskit/dist/c/lib -name "qiskit*.dll")
+          else
+            export QISKIT_LIB=$(find $(pwd)/build/qiskit/dist/c/lib -name "libqiskit.*")
+          fi
           export QISKIT_INCLUDE=$(pwd)/build/qiskit/dist/c/include
           make cext
 
       - name: C tests
         shell: bash
         run: |
-          export QISKIT_LIB=$(find $(pwd)/build/qiskit/dist/c/lib -name "libqiskit.*")
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            export QISKIT_LIB=$(find $(pwd)/build/qiskit/dist/c/lib -name "qiskit*.dll")
+          else
+            export QISKIT_LIB=$(find $(pwd)/build/qiskit/dist/c/lib -name "libqiskit.*")
+          fi
           export QISKIT_INCLUDE=$(pwd)/build/qiskit/dist/c/include
           make testc
 
