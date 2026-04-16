@@ -77,6 +77,9 @@ jobs:
             export QISKIT_LIB=$(find $(pwd)/build/qiskit/dist/c/lib -name "libqiskit.*")
           fi
           export QISKIT_INCLUDE=$(pwd)/build/qiskit/dist/c/include
+          ls -la build/qiskit/target/release/
+          make buildrust
+          ls -la target/debug/
           make testrust
 
       - name: Compile qiskit-fermions C API
