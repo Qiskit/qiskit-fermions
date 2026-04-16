@@ -521,7 +521,7 @@ static int test_groups(void) {
     bool correct_group1 = qf_ferm_op_equiv(group_ops[1], group1, 1e-10);
 
     uint32_t *groups_out;
-    uint32_t groups_len;
+    uint64_t groups_len;
 
     qf_ferm_op_get_groups(op, &groups_out, &groups_len);
 

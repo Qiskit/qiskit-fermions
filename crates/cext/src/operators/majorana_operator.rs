@@ -258,7 +258,7 @@ pub unsafe extern "C" fn qf_maj_op_num_groups(op: *const MajoranaOperator) -> u3
 pub unsafe extern "C" fn qf_maj_op_get_groups(
     op: *const MajoranaOperator,
     groups_out: *mut *mut u32,
-    groups_len: *mut u32,
+    groups_len: *mut u64,
 ) {
     let op = unsafe { const_ptr_as_ref(op) };
     let groups = &op.groups.as_ref().expect(
@@ -299,7 +299,7 @@ pub unsafe extern "C" fn qf_maj_op_get_groups(
 pub unsafe extern "C" fn qf_maj_op_set_groups(
     op: *mut MajoranaOperator,
     groups_in: *const u32,
-    groups_len: u32,
+    groups_len: u64,
 ) {
     let op = unsafe { mut_ptr_as_ref(op) };
     let groups_in = unsafe { const_ptr_as_ref(groups_in) };
