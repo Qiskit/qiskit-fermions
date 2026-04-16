@@ -83,7 +83,7 @@ jobs:
           ls -la target/debug/
           ls -la target/debug/deps/
           if [[ "$RUNNER_OS" == "Windows" ]]; then
-            export PATH=$(PATH):$(dirname $QISKIT_LIB)
+            export PATH=$PATH:$(dirname $QISKIT_LIB)
           fi
           make testrust
 
