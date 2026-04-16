@@ -228,7 +228,7 @@ static int test_simplify(void) {
 static int test_simplify_vs_ichop(void) {
     uint64_t num_terms = 100000;
     uint64_t num_modes = 0;
-    QkComplex64* coeffs = (QkComplex64*) malloc(100000 * sizeof(QkComplex64));
+    QkComplex64 *coeffs = (QkComplex64 *)malloc(100000 * sizeof(QkComplex64));
     uint32_t boundaries[100001];
     for (int i = 0; i < 100000; i++) {
         coeffs[i].re = 1e-5;
