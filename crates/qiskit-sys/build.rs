@@ -61,7 +61,6 @@ fn generate_bindings_c() {
 fn generate_bindings_py() {
     let qiskit_lib = env::var("QISKIT_LIB").unwrap();
     let qiskit_include = env::var("QISKIT_INCLUDE").unwrap();
-    let python_include = env::var("PYTHON_INCLUDE").unwrap();
 
     let qiskit_lib_path = Path::new(&qiskit_lib);
 
@@ -80,7 +79,9 @@ fn generate_bindings_py() {
     println!("cargo:rustc-link-arg={}", qiskit_lib);
 
     let bindings: bindgen::Bindings = bindgen::Builder::default()
-        .clang_arg(format!("-I{}", python_include))
+        // NOTE: somehow on Windows the BINDGEN_EXTRA_CLANG_ARGS don't appear to work, resulting in
+        // the Python.h file not being found unless we manually insert it below.
+        // .clang_arg(format!("-I{}", python_include))
         .clang_arg(format!("-I{}", qiskit_include))
         .clang_arg("-DQISKIT_C_PYTHON_INTERFACE=1")
         .raw_line("use pyo3::ffi::PyObject;")
