@@ -1,4 +1,4 @@
-name: Development version tests
+name: Latest version tests
 
 on:
   push:
@@ -21,7 +21,7 @@ concurrency:
 jobs:
   tests:
     if: github.repository_owner == 'Qiskit'
-    name: Development version tests (${{ matrix.os }}, ${{ matrix.python-version }})
+    name: latest version tests (${{ matrix.os }}, ${{ matrix.python-version }})
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
     strategy:
@@ -29,6 +29,11 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         python-version: ["3.10", "3.13"]
+        include:
+          - os: macos-latest
+            python-version: "3.13"
+          - os: windows-latest
+            python-version: "3.13"
     steps:
       - uses: actions/checkout@v6
         with:
@@ -46,50 +51,76 @@ jobs:
 
       - name: Install dependencies
         run: |
-          python -m pip install -U pip build
+          python -m pip install -U pip
 
-      - name: Compile Qiskit from source
+      - name: Compile Qiskit C API
         shell: bash
+        env:
+          GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
         run: |
           git clone https://github.com/Qiskit/qiskit build/qiskit
           cd build/qiskit
-          git rev-parse HEAD
+          # checkout the latest (i.e. stable) release tag
+          git checkout $(gh release -R Qiskit/qiskit view --json tagName --jq ".tagName")
           make c
-          python -m build --wheel
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            # NOTE: we manually need to copy the `.dll.lib` file for now
+            cp target/release/qiskit_cext.dll.lib dist/c/lib/qiskit.dll.lib
+            # NOTE: for lack of a better solution, we also need to copy the
+            # `_cext` files
+            cp target/release/qiskit_cext.dll dist/c/lib/qiskit_cext.dll
+            cp target/release/qiskit_cext.dll.lib dist/c/lib/qiskit_cext.dll.lib
+          fi
 
       - name: Rust tests
         shell: bash
         run: |
-          export QISKIT_LIB=$(find $(pwd)/build/qiskit/dist/c/lib -name "libqiskit.*")
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            export QISKIT_LIB=$(find $(pwd)/build/qiskit/dist/c/lib -name "qiskit_cext.dll.lib")
+            export PATH=$PATH:$(dirname $QISKIT_LIB)
+          else
+            export QISKIT_LIB=$(find $(pwd)/build/qiskit/dist/c/lib -name "libqiskit.*")
+          fi
           export QISKIT_INCLUDE=$(pwd)/build/qiskit/dist/c/include
           make testrust
 
       - name: Compile qiskit-fermions C API
         shell: bash
         run: |
-          export QISKIT_LIB=$(find $(pwd)/build/qiskit/dist/c/lib -name "libqiskit.*")
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            export QISKIT_LIB=$(find $(pwd)/build/qiskit/dist/c/lib -name "qiskit_cext.dll.lib")
+          else
+            export QISKIT_LIB=$(find $(pwd)/build/qiskit/dist/c/lib -name "libqiskit.*")
+          fi
           export QISKIT_INCLUDE=$(pwd)/build/qiskit/dist/c/include
           make cext
 
       - name: C tests
         shell: bash
         run: |
-          export QISKIT_LIB=$(find $(pwd)/build/qiskit/dist/c/lib -name "libqiskit.*")
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            export QISKIT_LIB=$(find $(pwd)/build/qiskit/dist/c/lib -name "qiskit_cext.dll.lib")
+          else
+            export QISKIT_LIB=$(find $(pwd)/build/qiskit/dist/c/lib -name "libqiskit.*")
+          fi
           export QISKIT_INCLUDE=$(pwd)/build/qiskit/dist/c/include
           make testc
 
       - name: Install Python package
+        if: ${{ matrix.os != 'windows-latest' }}
         shell: bash
         run: |
-          pip install --group build --group coverage "qiskit @ file:$(echo build/qiskit/dist/*.whl)"
+          pip install --group build --group test qiskit
           SETUPTOOLS_RUST_CARGO_PROFILE=release pip install --no-build-isolation -e .
 
       - name: Python tests
+        if: ${{ matrix.os != 'windows-latest' }}
         shell: bash
         run: |
           make testpython
 
       - name: Documentation tests
+        if: ${{ matrix.os != 'windows-latest' }}
         shell: bash
         run: |
           make doctest

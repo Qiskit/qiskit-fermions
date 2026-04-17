@@ -1,4 +1,4 @@
-name: Development version tests
+name: Minimum version tests
 
 on:
   push:
@@ -21,14 +21,14 @@ concurrency:
 jobs:
   tests:
     if: github.repository_owner == 'Qiskit'
-    name: Development version tests (${{ matrix.os }}, ${{ matrix.python-version }})
+    name: minimum version tests (${{ matrix.os }}, ${{ matrix.python-version }})
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
     strategy:
       max-parallel: 4
       matrix:
         os: [ubuntu-latest]
-        python-version: ["3.10", "3.13"]
+        python-version: ["3.10"]
     steps:
       - uses: actions/checkout@v6
         with:
@@ -46,16 +46,18 @@ jobs:
 
       - name: Install dependencies
         run: |
-          python -m pip install -U pip build
+          python -m pip install -U pip
 
-      - name: Compile Qiskit from source
+      - name: Compile Qiskit C API (minimum version)
         shell: bash
+        env:
+          GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
         run: |
           git clone https://github.com/Qiskit/qiskit build/qiskit
           cd build/qiskit
-          git rev-parse HEAD
+          # checkout the minimum release tag
+          git checkout 2.4.0
           make c
-          python -m build --wheel
 
       - name: Rust tests
         shell: bash
@@ -78,10 +80,14 @@ jobs:
           export QISKIT_INCLUDE=$(pwd)/build/qiskit/dist/c/include
           make testc
 
+      - name: Install Python dependencies (minimum versions)
+        run: |
+          pip install --group build --group test qiskit uv
+          uv sync --active --resolution lowest-direct
+
       - name: Install Python package
         shell: bash
         run: |
-          pip install --group build --group coverage "qiskit @ file:$(echo build/qiskit/dist/*.whl)"
           SETUPTOOLS_RUST_CARGO_PROFILE=release pip install --no-build-isolation -e .
 
       - name: Python tests

@@ -45,9 +45,13 @@ jobs:
 
       - name: Compile Qiskit C API
         shell: bash
+        env:
+          GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
         run: |
           git clone https://github.com/Qiskit/qiskit build/qiskit
           cd build/qiskit
+          # checkout the latest (i.e. stable) release tag
+          git checkout $(gh release -R Qiskit/qiskit view --json tagName --jq ".tagName")
           make c
 
       - name: Rust coverage
@@ -71,11 +75,10 @@ jobs:
           export QISKIT_INCLUDE=$(pwd)/build/qiskit/dist/c/include
           make ccoverage
 
-      - name: Install Python dependencies
+      - name: Install Python package
         shell: bash
         run: |
-          pip install --pre qiskit
-          pip install --group build --group coverage
+          pip install --group build --group coverage qiskit
           SETUPTOOLS_RUST_CARGO_PROFILE=release pip install --no-build-isolation -e .
 
       - name: Python coverage

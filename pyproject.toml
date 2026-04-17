@@ -1,7 +1,7 @@
 [build-system]
 # This is duplicated as `dependency-groups.build` for convenience.
 requires = [
-    "setuptools>=77.0",
+    "setuptools>=77.0.1",
     "setuptools-rust",
 ]
 build-backend = "setuptools.build_meta"
@@ -29,13 +29,13 @@ classifiers = [
 requires-python = ">=3.10"
 
 dependencies = [
-    "qiskit>=2.3",
+    "qiskit>=2.4, <3",
     "typing-extensions",
 ]
 
 [dependency-groups]
 build = [
-    "setuptools>=77.0",
+    "setuptools>=77.0.1",
     "setuptools-rust",
 ]
 style = [
@@ -147,3 +147,8 @@ convention = "google"
 arange = "arange"
 ba = "ba"
 thr = "thr"
+
+# While we don't mandate the use of uv, we use it during CI for handling package
+# resolution and thus are configuring components of it below.
+[tool.uv.extra-build-dependencies]
+qiskit-fermions = ["qiskit"]

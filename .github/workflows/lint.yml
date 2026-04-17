@@ -44,8 +44,7 @@ jobs:
       - name: Install Package
         shell: bash
         run: |
-          pip install --pre qiskit
-          pip install --group build --group lint
+          pip install --group build --group lint qiskit
           SETUPTOOLS_RUST_CARGO_PROFILE=release pip install --no-build-isolation -e .
 
       - name: Run lint check
