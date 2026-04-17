@@ -54,7 +54,7 @@ Steps
 
    .. tab-set::
      .. tab-item:: UNIX
-        :sync: windows
+        :sync: unix
 
         .. code:: console
 
