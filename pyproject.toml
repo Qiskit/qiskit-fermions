@@ -3,7 +3,6 @@
 requires = [
     "setuptools>=77.0",
     "setuptools-rust",
-    "qiskit==2.4.0rc3",
 ]
 build-backend = "setuptools.build_meta"
 
@@ -38,7 +37,6 @@ dependencies = [
 build = [
     "setuptools>=77.0",
     "setuptools-rust",
-    "qiskit==2.4.0rc3",
 ]
 style = [
     "ruff==0.15.8",
