@@ -1,7 +1,7 @@
 [build-system]
 # This is duplicated as `dependency-groups.build` for convenience.
 requires = [
-    "setuptools>=77.0",
+    "setuptools>=77.0.1",
     "setuptools-rust",
 ]
 build-backend = "setuptools.build_meta"
@@ -35,7 +35,7 @@ dependencies = [
 
 [dependency-groups]
 build = [
-    "setuptools>=77.0",
+    "setuptools>=77.0.1",
     "setuptools-rust",
 ]
 ci = [
