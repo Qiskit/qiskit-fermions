@@ -76,9 +76,7 @@ jobs:
         run: |
           pip install --pre qiskit
           pip install --group build --group coverage
-          export QISKIT_LIB=$(python -c "import qiskit; print(qiskit.capi.get_lib())")
-          export QISKIT_INCLUDE=$(python -c "import qiskit; print(qiskit.capi.get_include())")
-          SETUPTOOLS_RUST_CARGO_PROFILE=release pip install -e .
+          SETUPTOOLS_RUST_CARGO_PROFILE=release pip install --no-build-isolation -e .
 
       - name: Python coverage
         shell: bash
