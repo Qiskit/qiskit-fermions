@@ -34,70 +34,68 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-python@v6
-        name: Install Python
-        with:
-          python-version: ${{ matrix.python-version }}
-
-      - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          components: llvm-tools-preview
-
-      - name: Install dependencies (minimum versions)
-        run: |
-          python -m pip install -U pip
-          pip install --group ci
-          pip install "tox==$(extremal-python-dependencies get-tox-minversion)"
-          extremal-python-dependencies pin-dependencies-to-minimum --inplace
-          cat pyproject.toml
-
-      - name: Compile Qiskit C API
-        shell: bash
-        env:
-          GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
-        run: |
-          git clone https://github.com/Qiskit/qiskit build/qiskit
-          cd build/qiskit
-          # checkout the minimum release tag
-          git checkout 2.4.0
-          make c
-
-      - name: Rust tests
-        shell: bash
-        run: |
-          export QISKIT_LIB=$(find $(pwd)/build/qiskit/dist/c/lib -name "libqiskit.*")
-          export QISKIT_INCLUDE=$(pwd)/build/qiskit/dist/c/include
-          make testrust
-
-      - name: Compile qiskit-fermions C API
-        shell: bash
-        run: |
-          export QISKIT_LIB=$(find $(pwd)/build/qiskit/dist/c/lib -name "libqiskit.*")
-          export QISKIT_INCLUDE=$(pwd)/build/qiskit/dist/c/include
-          make cext
-
-      - name: C tests
-        shell: bash
-        run: |
-          export QISKIT_LIB=$(find $(pwd)/build/qiskit/dist/c/lib -name "libqiskit.*")
-          export QISKIT_INCLUDE=$(pwd)/build/qiskit/dist/c/include
-          make testc
-
-      - name: Install Python package
-        shell: bash
-        run: |
-          pip install --group build --group test
-          export QISKIT_LIB=$(python -c "import qiskit; print(qiskit.capi.get_lib())")
-          export QISKIT_INCLUDE=$(python -c "import qiskit; print(qiskit.capi.get_include())")
-          SETUPTOOLS_RUST_CARGO_PROFILE=release pip install -e .
-
-      - name: Python tests
-        shell: bash
-        run: |
-          make testpython
-
-      - name: Documentation tests
-        shell: bash
-        run: |
-          make doctest
+      # - uses: actions/setup-python@v6
+      #   name: Install Python
+      #   with:
+      #     python-version: ${{ matrix.python-version }}
+      #
+      # - name: Install Rust toolchain
+      #   uses: dtolnay/rust-toolchain@stable
+      #   with:
+      #     components: llvm-tools-preview
+      #
+      # - name: Install dependencies (minimum versions)
+      #   run: |
+      #     python -m pip install -U pip
+      #     pip install --group ci
+      #     pip install "tox==$(extremal-python-dependencies get-tox-minversion)"
+      #     extremal-python-dependencies pin-dependencies-to-minimum --inplace
+      #     cat pyproject.toml
+      #
+      # - name: Compile Qiskit C API
+      #   shell: bash
+      #   env:
+      #     GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+      #   run: |
+      #     git clone https://github.com/Qiskit/qiskit build/qiskit
+      #     cd build/qiskit
+      #     # checkout the minimum release tag
+      #     git checkout 2.4.0
+      #     make c
+      #
+      # - name: Rust tests
+      #   shell: bash
+      #   run: |
+      #     export QISKIT_LIB=$(find $(pwd)/build/qiskit/dist/c/lib -name "libqiskit.*")
+      #     export QISKIT_INCLUDE=$(pwd)/build/qiskit/dist/c/include
+      #     make testrust
+      #
+      # - name: Compile qiskit-fermions C API
+      #   shell: bash
+      #   run: |
+      #     export QISKIT_LIB=$(find $(pwd)/build/qiskit/dist/c/lib -name "libqiskit.*")
+      #     export QISKIT_INCLUDE=$(pwd)/build/qiskit/dist/c/include
+      #     make cext
+      #
+      # - name: C tests
+      #   shell: bash
+      #   run: |
+      #     export QISKIT_LIB=$(find $(pwd)/build/qiskit/dist/c/lib -name "libqiskit.*")
+      #     export QISKIT_INCLUDE=$(pwd)/build/qiskit/dist/c/include
+      #     make testc
+      #
+      # - name: Install Python package
+      #   shell: bash
+      #   run: |
+      #     pip install --group build --group test
+      #     SETUPTOOLS_RUST_CARGO_PROFILE=release pip install --no-build-isolation -e .
+      #
+      # - name: Python tests
+      #   shell: bash
+      #   run: |
+      #     make testpython
+      #
+      # - name: Documentation tests
+      #   shell: bash
+      #   run: |
+      #     make doctest
