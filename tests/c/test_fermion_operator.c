@@ -232,7 +232,7 @@ static int test_simplify(void) {
 static int test_simplify_vs_ichop(void) {
     uint64_t num_terms = 100000;
     uint64_t num_actions = 0;
-    QkComplex64 coeffs[100000];
+    QkComplex64 *coeffs = (QkComplex64 *)malloc(100000 * sizeof(QkComplex64));
     uint32_t boundaries[100001];
     for (int i = 0; i < 100000; i++) {
         coeffs[i].re = 1e-5;
@@ -252,6 +252,7 @@ static int test_simplify_vs_ichop(void) {
     QfFermionOperator *zero = qf_ferm_op_zero();
     bool ichop_is_equal = qf_ferm_op_equiv(op, zero, 1e-6);
 
+    free(coeffs);
     qf_ferm_op_free(op);
     qf_ferm_op_free(canon);
     qf_ferm_op_free(one);
@@ -520,7 +521,7 @@ static int test_groups(void) {
     bool correct_group1 = qf_ferm_op_equiv(group_ops[1], group1, 1e-10);
 
     uint32_t *groups_out;
-    uint32_t groups_len;
+    uint64_t groups_len;
 
     qf_ferm_op_get_groups(op, &groups_out, &groups_len);
 

@@ -15,6 +15,19 @@ steps can get you started quickly:
    $ cd build/qiskit
    $ make c
 
+.. hint::
+   On **Windows** only, you will need to copy additional library files:
+
+   .. tab-set::
+     .. tab-item:: Windows
+        :sync: windows
+
+        .. code:: console
+
+           $ cp target/release/qiskit_cext.dll dist/c/lib/qiskit_cext.dll
+           $ cp target/release/qiskit_cext.dll.lib dist/c/lib/qiskit_cext.dll.lib
+           $ cp target/release/qiskit_cext.dll.lib dist/c/lib/qiskit.dll.lib
+
 At this point, you should have successfully compiled Qiskit's C API. You can now
 move on to the steps of compiling ``qiskit-fermions`` C API below.
 
@@ -39,10 +52,22 @@ Steps
       Here we assume the ``build/qiskit`` path from the quickstart example at
       the top, you need to adjust the paths according to your setup.
 
-   .. code:: console
+   .. tab-set::
+     .. tab-item:: UNIX
+        :sync: unix
 
-      $ export QISKIT_LIB=$(find $(pwd)/build/qiskit/dist/c/lib -name "libqiskit.*")
-      $ export QISKIT_INCLUDE=$(pwd)/build/qiskit/dist/c/include
+        .. code:: console
+
+          $ export QISKIT_LIB=$(find $(pwd)/build/qiskit/dist/c/lib -name "libqiskit.*")
+          $ export QISKIT_INCLUDE=$(pwd)/build/qiskit/dist/c/include
+
+     .. tab-item:: Windows
+        :sync: windows
+
+        .. code:: console
+
+          $ export QISKIT_LIB=$(find $(pwd)/build/qiskit/dist/c/lib -name "qiskit_cext.dll.lib")
+          $ export QISKIT_INCLUDE=$(pwd)/build/qiskit/dist/c/include
 
 3. Compile the C API of ``qiskit-fermions``:
 

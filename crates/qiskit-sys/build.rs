@@ -39,7 +39,11 @@ fn generate_bindings_c() {
     let qiskit_lib_dir = qiskit_lib_path.parent().unwrap().to_str().unwrap();
 
     println!("cargo:rustc-link-search={}", qiskit_lib_dir);
-    println!("cargo:rustc-link-lib=qiskit");
+    if std::env::var_os("CARGO_CFG_TARGET_OS").unwrap() == "windows" {
+        println!("cargo:rustc-link-lib=qiskit_cext.dll");
+    } else {
+        println!("cargo:rustc-link-lib=qiskit");
+    }
 
     let bindings: bindgen::Bindings = bindgen::Builder::default()
         .clang_arg(format!("-I{}", qiskit_include))
@@ -75,6 +79,9 @@ fn generate_bindings_py() {
     println!("cargo:rustc-link-arg={}", qiskit_lib);
 
     let bindings: bindgen::Bindings = bindgen::Builder::default()
+        // NOTE: somehow on Windows the BINDGEN_EXTRA_CLANG_ARGS don't appear to work, resulting in
+        // the Python.h file not being found unless we manually insert it below.
+        // .clang_arg(format!("-I{}", python_include))
         .clang_arg(format!("-I{}", qiskit_include))
         .clang_arg("-DQISKIT_C_PYTHON_INTERFACE=1")
         .raw_line("use pyo3::ffi::PyObject;")
