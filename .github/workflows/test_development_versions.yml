@@ -109,7 +109,7 @@ jobs:
           pip install --group build --group coverage
           export QISKIT_LIB=$(python -c "import qiskit; print(qiskit.capi.get_lib())")
           export QISKIT_INCLUDE=$(python -c "import qiskit; print(qiskit.capi.get_include())")
-          ls -la $(python -c "import sysconfig; print(sysconfig.get_path('include'))")
+          export BINDGEN_EXTRA_CLANG_ARGS=-I$(python -c "import sysconfig; print(sysconfig.get_path('include'))")
           SETUPTOOLS_RUST_CARGO_PROFILE=release pip install -e .
 
       - name: Python tests
