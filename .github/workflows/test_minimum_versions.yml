@@ -19,7 +19,7 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
-  coverage:
+  tests:
     if: github.repository_owner == 'Qiskit'
     name: minimum version tests (${{ matrix.os }}, ${{ matrix.python-version }})
     runs-on: ${{ matrix.os }}
@@ -50,6 +50,7 @@ jobs:
           pip install --group ci
           pip install "tox==$(extremal-python-dependencies get-tox-minversion)"
           extremal-python-dependencies pin-dependencies-to-minimum --inplace
+          cat pyproject.toml
 
       - name: Compile Qiskit C API
         shell: bash
@@ -86,7 +87,7 @@ jobs:
       - name: Install Python package
         shell: bash
         run: |
-          pip install --group build --group coverage
+          pip install --group build --group test
           export QISKIT_LIB=$(python -c "import qiskit; print(qiskit.capi.get_lib())")
           export QISKIT_INCLUDE=$(python -c "import qiskit; print(qiskit.capi.get_include())")
           SETUPTOOLS_RUST_CARGO_PROFILE=release pip install -e .

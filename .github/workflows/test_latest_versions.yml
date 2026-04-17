@@ -19,7 +19,7 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
-  coverage:
+  tests:
     if: github.repository_owner == 'Qiskit'
     name: latest version tests (${{ matrix.os }}, ${{ matrix.python-version }})
     runs-on: ${{ matrix.os }}
@@ -110,7 +110,7 @@ jobs:
         if: ${{ matrix.os != 'windows-latest' }}
         shell: bash
         run: |
-          pip install --group build --group coverage
+          pip install --group build --group test
           SETUPTOOLS_RUST_CARGO_PROFILE=release pip install --no-build-isolation -e .
 
       - name: Python tests
