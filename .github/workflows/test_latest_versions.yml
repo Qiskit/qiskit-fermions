@@ -110,7 +110,7 @@ jobs:
         if: ${{ matrix.os != 'windows-latest' }}
         shell: bash
         run: |
-          pip install --group build --group test
+          pip install --group build --group test qiskit
           SETUPTOOLS_RUST_CARGO_PROFILE=release pip install --no-build-isolation -e .
 
       - name: Python tests

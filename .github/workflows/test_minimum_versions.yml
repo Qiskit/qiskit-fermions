@@ -44,12 +44,11 @@ jobs:
         with:
           components: llvm-tools-preview
 
-      - name: Install dependencies (minimum versions)
+      - name: Install dependencies
         run: |
-          python -m pip install -U pip uv
-          uv sync --active --resolution lowest-direct
+          python -m pip install -U pip
 
-      - name: Compile Qiskit C API
+      - name: Compile Qiskit C API (minimum version)
         shell: bash
         env:
           GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
@@ -80,6 +79,11 @@ jobs:
           export QISKIT_LIB=$(find $(pwd)/build/qiskit/dist/c/lib -name "libqiskit.*")
           export QISKIT_INCLUDE=$(pwd)/build/qiskit/dist/c/include
           make testc
+
+      - name: Install Python dependencies (minimum versions)
+        run: |
+          pip install uv
+          uv sync --active --resolution lowest-direct
 
       - name: Install Python package
         shell: bash
