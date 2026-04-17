@@ -62,7 +62,7 @@ jobs:
           if [[ "$RUNNER_OS" == "Windows" ]]; then
             # NOTE: we manually need to copy the `.dll.lib` file for now
             cp target/release/qiskit_cext.dll.lib dist/c/lib/qiskit.dll.lib
-            # NOTE: for lack of a better solution, we also need to copy thr
+            # NOTE: for lack of a better solution, we also need to copy the
             # `_cext` files
             cp target/release/qiskit_cext.dll dist/c/lib/qiskit_cext.dll
             cp target/release/qiskit_cext.dll.lib dist/c/lib/qiskit_cext.dll.lib

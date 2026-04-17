@@ -1,6 +1,10 @@
 Python Installation Instructions
 ================================
 
+.. warning::
+   Windows is not yet fully supported by the Python API of ``qiskit-fermions``.
+   We are actively working on resolving this. Stay tuned for updates!
+
 Assuming that you have already installed Qiskit into your Python environment
 (see `here <install.rst>`_), the remaining installation process is fairly
 simple:
