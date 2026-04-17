@@ -82,7 +82,7 @@ jobs:
 
       - name: Install Python dependencies (minimum versions)
         run: |
-          pip install uv
+          pip install --group build --group test qiskit uv
           uv sync --active --resolution lowest-direct
 
       - name: Install Python package
