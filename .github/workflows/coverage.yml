@@ -71,10 +71,9 @@ jobs:
           export QISKIT_INCLUDE=$(pwd)/build/qiskit/dist/c/include
           make ccoverage
 
-      - name: Install Python dependencies
+      - name: Install Python package
         shell: bash
         run: |
-          pip install --pre qiskit
           pip install --group build --group coverage
           SETUPTOOLS_RUST_CARGO_PROFILE=release pip install --no-build-isolation -e .
 

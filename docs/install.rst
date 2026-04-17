@@ -18,20 +18,10 @@ dependencies:
 - `The Rust toolchain <https://rust-lang.org/tools/install/>`_
 - `clang <https://clang.llvm.org/>`_
 
-Preparation
------------
+Installation
+------------
 
-The minimum Qiskit version we require is 2.4.
-At the time of writing, this can be installed from a pre-release via PyPI:
-
-.. code:: console
-
-   $ pip install --pre qiskit
-
-If you are interested in compiling the C API of ``qiskit-fermions`` you must
-compile Qiskit's C API from source, first.
-
-Please consult the language-specific guide linked below.
+Please consult the specific guide for the language bindings you intend to use:
 
 .. toctree::
   :hidden:
