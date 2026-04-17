@@ -78,7 +78,7 @@ jobs:
       - name: Install Python package
         shell: bash
         run: |
-          pip install --group build --group coverage
+          pip install --group build --group coverage qiskit
           SETUPTOOLS_RUST_CARGO_PROFILE=release pip install --no-build-isolation -e .
 
       - name: Python coverage

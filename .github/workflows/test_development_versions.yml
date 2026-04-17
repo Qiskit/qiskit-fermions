@@ -46,7 +46,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          python -m pip install -U pip
+          python -m pip install -U pip build
 
       - name: Compile Qiskit from source
         shell: bash
