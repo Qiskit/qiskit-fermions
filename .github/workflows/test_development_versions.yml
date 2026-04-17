@@ -47,7 +47,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install -U pip
-          pip install --group ci
+          pip install build --group ci
 
       - name: Compile Qiskit from source
         shell: bash
