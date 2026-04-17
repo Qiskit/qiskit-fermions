@@ -38,6 +38,9 @@ build = [
     "setuptools>=77.0",
     "setuptools-rust",
 ]
+ci = [
+    "extremal-python-dependencies==0.1.0",
+]
 style = [
     "ruff==0.15.8",
     "typos>=1.20.0",
