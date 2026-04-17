@@ -103,7 +103,7 @@ jobs:
           make testc
 
       - name: Install Python dependencies
-        if: ${{ matrix.os != "windows-latest" }}
+        if: ${{ matrix.os != 'windows-latest' }}
         shell: bash
         run: |
           pip install --pre qiskit
@@ -113,13 +113,13 @@ jobs:
           SETUPTOOLS_RUST_CARGO_PROFILE=release pip install -e .
 
       - name: Python tests
-        if: ${{ matrix.os != "windows-latest" }}
+        if: ${{ matrix.os != 'windows-latest' }}
         shell: bash
         run: |
           make testpython
 
       - name: Documentation tests
-        if: ${{ matrix.os != "windows-latest" }}
+        if: ${{ matrix.os != 'windows-latest' }}
         shell: bash
         run: |
           make doctest
