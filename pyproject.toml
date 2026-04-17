@@ -38,9 +38,6 @@ build = [
     "setuptools>=77.0.1",
     "setuptools-rust",
 ]
-ci = [
-    "extremal-python-dependencies==0.1.0",
-]
 style = [
     "ruff==0.15.8",
     "typos>=1.20.0",
@@ -150,3 +147,8 @@ convention = "google"
 arange = "arange"
 ba = "ba"
 thr = "thr"
+
+# While we don't mandate the use of uv, we use it during CI for handling package
+# resolution and thus are configuring components of it below.
+[tool.uv.extra-build-dependencies]
+qiskit-fermions = ["qiskit"]
