@@ -23,17 +23,17 @@ jobs:
     if: github.repository_owner == 'Qiskit'
     name: Development version tests (${{ matrix.os }}, ${{ matrix.python-version }})
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 60
+    timeout-minutes: 30
     strategy:
       max-parallel: 4
       matrix:
-        os: [windows-latest]
-        python-version: ["3.13"] #["3.10", "3.13"]
-        # include:
-        #   - os: macos-latest
-        #     python-version: "3.13"
-        #   - os: windows-latest
-        #     python-version: "3.13"
+        os: [ubuntu-latest]
+        python-version: ["3.10", "3.13"]
+        include:
+          - os: macos-latest
+            python-version: "3.13"
+          - os: windows-latest
+            python-version: "3.13"
     steps:
       - uses: actions/checkout@v6
         with:
