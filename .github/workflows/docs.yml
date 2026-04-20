@@ -62,7 +62,7 @@ jobs:
           make docs
 
       - name: Upload docs artifact for GitHub Pages
-        uses: actions/upload-pages-artifact@v4
+        uses: actions/upload-pages-artifact@v5
         with:
           path: docs/_build/html
 
