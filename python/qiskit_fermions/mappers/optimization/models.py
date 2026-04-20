@@ -25,19 +25,18 @@ from pyomo.environ import (
     Var,
     minimize,
 )
-
 from qiskit_fermions.utils.optionals import HAS_PYOMO
 
 
 @HAS_PYOMO.require_in_call
-def build_fermionic_ordering_model(
+def build_excitation_span_optimization_model(
     excitations: list[tuple[int, int] | tuple[int, int, int, int]],
     num_modes: int,
     *,
     objective: Literal["minmax", "multi", "avg"] = "multi",
     mix_delta: float = 0.1,
-) -> tuple[dict[int, int], object]:
-    """Build a Pyomo model optimizing a 1D ordering of fermionic modes to minimize excitation spans.
+) -> ConcreteModel:
+    """Build a Pyomo model for ordering fermionic modes to minimize excitation spans.
 
     The model constructs a permutation where each original mode index is assigned to
     exactly one position in a linear ordering. For every 2-mode and 4-mode
@@ -45,15 +44,15 @@ def build_fermionic_ordering_model(
     chosen objective.
 
     Notes:
-        - Input tuples are preprocessed to cancel repeated indices (e.g., terms where
-        an index appears twice are removed from the tuple); tuples reducing to
-        length 0 or 1 are ignored.
+        - Input tuples are preprocessed by canceling indices that occur twice
+          within the same excitation under the function's pair-cancellation
+          logic; tuples reducing to length 0 or 1 are ignored.
         - Supported (post-cancellation) tuple lengths are 2 and 4.
 
     Args:
         excitations (list[tuple[int, int] | tuple[int, int, int, int]]):
-            Sequence of excitation index tuples over fermionic mode indices. Supported
-            tuple lengths are 2 and 4 after cancellation of repeated indices.
+            Sequence of excitation index tuples over fermionic mode indices. After the
+            function's pair-cancellation preprocessing, supported tuple lengths are 2 and 4.
         num_modes (int):
             Total number of fermionic modes/orbitals to be ordered (size of the register).
         objective (Literal["minmax", "multi", "avg"]):
@@ -86,7 +85,10 @@ def build_fermionic_ordering_model(
                 deduplicated.append(i)
         if len(deduplicated) <= 1:
             continue
-        assert len(deduplicated) != 3
+        if len(deduplicated) == 3:
+            raise ValueError(
+                f"Unsupported excitation after cancellation: {ind} -> {tuple(deduplicated)}"
+            )
         if len(deduplicated) == 2:
             i2 += [tuple(deduplicated)]
         elif len(deduplicated) == 4:
@@ -106,7 +108,7 @@ def build_fermionic_ordering_model(
     # Variables
     model.x = Var(
         model.I, model.J, within=Binary
-    )  # x[i,j] == 1 if qubit i placed at position j
+    )  # x[i,j] == 1 if mode i placed at position j
     model.y = Var(model.I, within=Reals)
 
     model.s = Var(model.P2, within=Reals)
