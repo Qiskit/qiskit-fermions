@@ -46,10 +46,14 @@ pub fn fermion_to_majorana(fer_op: &FermionOperator) -> MajoranaOperator {
 
 fn map_majorana_action(mode: MajoranaAction) -> FermionOperator {
     let idx = mode / 2;
-    let im = if mode.is_multiple_of(2) { 1.0 } else { -1.0 };
+    let coeffs = if mode.is_multiple_of(2) {
+        vec![Complex64::new(1.0, 0.0), Complex64::new(1.0, 0.0)]
+    } else {
+        vec![Complex64::new(0.0, 1.0), Complex64::new(0.0, -1.0)]
+    };
 
     FermionOperator {
-        coeffs: vec![Complex64::new(1.0, 0.0), Complex64::new(0.0, im)],
+        coeffs,
         actions: vec![true, false],
         modes: vec![idx, idx],
         boundaries: vec![0, 1, 2],
@@ -182,7 +186,7 @@ mod tests {
         let fer_op = majorana_to_fermion(&maj_op);
 
         let expected = FermionOperator {
-            coeffs: vec![Complex64::new(1.0, 0.0), Complex64::new(0.0, 1.0)],
+            coeffs: vec![Complex64::new(1.0, 0.0), Complex64::new(1.0, 0.0)],
             actions: vec![true, false],
             modes: vec![0, 0],
             boundaries: vec![0, 1, 2],
@@ -204,7 +208,7 @@ mod tests {
         let fer_op = majorana_to_fermion(&maj_op);
 
         let expected = FermionOperator {
-            coeffs: vec![Complex64::new(1.0, 0.0), Complex64::new(0.0, -1.0)],
+            coeffs: vec![Complex64::new(0.0, 1.0), Complex64::new(0.0, -1.0)],
             actions: vec![true, false],
             modes: vec![0, 0],
             boundaries: vec![0, 1, 2],
