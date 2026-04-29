@@ -12,7 +12,7 @@
 
 use num_complex::Complex64;
 
-use crate::operators::OperatorTrait;
+use crate::operators::{OperatorMacro, OperatorTrait};
 use crate::operators::fermion_operator::{FermionAction, FermionOperator};
 use crate::operators::majorana_operator::{MajoranaAction, MajoranaOperator};
 
@@ -34,7 +34,7 @@ pub fn fermion_to_majorana(fer_op: &FermionOperator) -> MajoranaOperator {
         let mut mapped_term = MajoranaOperator::one();
 
         term.iter()
-            .for_each(|action| mapped_term.__iand__(&map_fermion_action(action)));
+            .for_each(|action| mapped_term = map_fermion_action(action).__and__(&mapped_term));
 
         mapped_term.__imul__(term.coeff);
 
@@ -68,7 +68,7 @@ pub fn majorana_to_fermion(maj_op: &MajoranaOperator) -> FermionOperator {
         let mut mapped_term = FermionOperator::one();
 
         term.iter()
-            .for_each(|action| mapped_term.__iand__(&map_majorana_action(action)));
+            .for_each(|action| mapped_term = map_majorana_action(action).__and__(&mapped_term));
 
         mapped_term.__imul__(term.coeff);
 
@@ -141,7 +141,7 @@ mod tests {
         let canon = normal.simplify(1e-8);
 
         let expected = MajoranaOperator {
-            coeffs: vec![Complex64::new(0.5, 0.0), Complex64::new(0.0, 0.5)],
+            coeffs: vec![Complex64::new(0.5, 0.0), Complex64::new(0.0, -0.5)],
             modes: vec![1, 0],
             boundaries: vec![0, 0, 2],
             groups: None,
@@ -165,7 +165,7 @@ mod tests {
         let canon = normal.simplify(1e-8);
 
         let expected = MajoranaOperator {
-            coeffs: vec![Complex64::new(0.0, 0.5), Complex64::new(0.0, -0.5)],
+            coeffs: vec![Complex64::new(0.0, -0.5), Complex64::new(0.0, 0.5)],
             modes: vec![3, 0, 2, 1],
             boundaries: vec![0, 2, 4],
             groups: None,
@@ -232,7 +232,7 @@ mod tests {
         let canon = normal.simplify(1e-8);
 
         let expected = FermionOperator {
-            coeffs: vec![Complex64::new(0.0, -1.0), Complex64::new(0.0, 2.0)],
+            coeffs: vec![Complex64::new(0.0, 1.0), Complex64::new(0.0, -2.0)],
             actions: vec![true, false],
             modes: vec![0, 0],
             boundaries: vec![0, 0, 2],
@@ -256,7 +256,7 @@ mod tests {
         let canon = normal.simplify(1e-8);
 
         let expected = FermionOperator {
-            coeffs: vec![Complex64::new(0.0, 2.0), Complex64::new(0.0, 2.0)],
+            coeffs: vec![Complex64::new(0.0, -2.0), Complex64::new(0.0, -2.0)],
             actions: vec![true, false, true, false],
             modes: vec![0, 1, 1, 0],
             boundaries: vec![0, 2, 4],
