@@ -231,6 +231,45 @@ class FermionOperatorTests(ABC):
             expected = cls.from_dict({(): 1, ((True, 0), (False, 0)): -1})
             assert op.normal_ordered().equiv(expected)
 
+    def test_normal_ordered_sandwich(self, subtests):
+        cls = self.get_class()
+
+        with subtests.test("sandwich=none"):
+            op = cls.from_dict({((False, 0), (False, 1), (True, 0), (True, 1)): 1})
+            expected = cls.from_dict(
+                {
+                    ((True, 1), (True, 0), (False, 1), (False, 0)): 1,
+                    ((True, 0), (False, 0)): 1,
+                    ((True, 1), (False, 1)): 1,
+                    (): -1,
+                }
+            )
+            assert op.normal_ordered(sandwich=None).equiv(expected)
+
+        with subtests.test("sandwich=True"):
+            op = cls.from_dict({((False, 1), (False, 0), (True, 0), (True, 1)): 1})
+            expected = cls.from_dict(
+                {
+                    ((True, 0), (True, 1), (False, 1), (False, 0)): 1,
+                    ((True, 0), (False, 0)): -1,
+                    ((True, 1), (False, 1)): -1,
+                    (): 1,
+                }
+            )
+            assert op.normal_ordered(sandwich=True).equiv(expected)
+
+        with subtests.test("sandwich=False"):
+            op = cls.from_dict({((False, 0), (False, 1), (True, 1), (True, 0)): 1})
+            expected = cls.from_dict(
+                {
+                    ((True, 1), (True, 0), (False, 0), (False, 1)): 1,
+                    ((True, 0), (False, 0)): -1,
+                    ((True, 1), (False, 1)): -1,
+                    (): 1,
+                }
+            )
+            assert op.normal_ordered(sandwich=False).equiv(expected)
+
     def test_is_hermitian(self):
         cls = self.get_class()
 

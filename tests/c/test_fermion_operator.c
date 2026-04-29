@@ -291,19 +291,19 @@ static int test_adjoint(void) {
 
 static int test_normal_ordered(void) {
     QfFermionOperator *op = qf_ferm_op_zero();
-    bool action[4] = {false, true, false, true};
-    uint32_t modes[4] = {1, 1, 0, 0};
+    bool action[4] = {false, false, true, true};
+    uint32_t modes[4] = {0, 1, 0, 1};
     QkComplex64 coeff = {1.0, 0.0};
     qf_ferm_op_add_term(op, 4, action, modes, &coeff);
 
-    QfFermionOperator *normal_ordered = qf_ferm_op_normal_ordered(op);
+    QfFermionOperator *normal_ordered = qf_ferm_op_normal_ordered(op, NULL);
 
     uint64_t num_terms = 4;
     uint64_t num_actions = 8;
-    bool actions_exp[8] = {true, false, true, false, true, true, false, false};
-    uint32_t modes_exp[8] = {0, 0, 1, 1, 1, 0, 1, 0};
-    QkComplex64 coeffs_exp[4] = {{1.0, 0.0}, {-1.0, 0.0}, {-1.0, 0.0}, {-1.0, 0.0}};
-    uint32_t boundaries_exp[5] = {0, 0, 2, 4, 8};
+    bool actions_exp[8] = {true, true, false, false, true, false, true, false};
+    uint32_t modes_exp[8] = {1, 0, 1, 0, 0, 0, 1, 1};
+    QkComplex64 coeffs_exp[4] = {{1.0, 0.0}, {1.0, 0.0}, {1.0, 0.0}, {-1.0, 0.0}};
+    uint32_t boundaries_exp[5] = {0, 4, 6, 8, 8};
     QfFermionOperator *expected =
         qf_ferm_op_new(num_terms, num_actions, coeffs_exp, actions_exp, modes_exp, boundaries_exp);
 
@@ -311,6 +311,68 @@ static int test_normal_ordered(void) {
 
     qf_ferm_op_free(op);
     qf_ferm_op_free(normal_ordered);
+    qf_ferm_op_free(expected);
+
+    if (!is_equal) {
+        return EqualityError;
+    }
+    return Ok;
+}
+
+static int test_sandwich_ordered_true(void) {
+    QfFermionOperator *op = qf_ferm_op_zero();
+    bool action[4] = {false, false, true, true};
+    uint32_t modes[4] = {1, 0, 0, 1};
+    QkComplex64 coeff = {1.0, 0.0};
+    qf_ferm_op_add_term(op, 4, action, modes, &coeff);
+
+    bool sandwich = true;
+    QfFermionOperator *sandwich_ordered = qf_ferm_op_normal_ordered(op, &sandwich);
+
+    uint64_t num_terms = 4;
+    uint64_t num_actions = 8;
+    bool actions_exp[8] = {true, true, false, false, true, false, true, false};
+    uint32_t modes_exp[8] = {0, 1, 1, 0, 0, 0, 1, 1};
+    QkComplex64 coeffs_exp[4] = {{1.0, 0.0}, {-1.0, 0.0}, {-1.0, 0.0}, {1.0, 0.0}};
+    uint32_t boundaries_exp[5] = {0, 4, 6, 8, 8};
+    QfFermionOperator *expected =
+        qf_ferm_op_new(num_terms, num_actions, coeffs_exp, actions_exp, modes_exp, boundaries_exp);
+
+    bool is_equal = qf_ferm_op_equiv(sandwich_ordered, expected, 1e-10);
+
+    qf_ferm_op_free(op);
+    qf_ferm_op_free(sandwich_ordered);
+    qf_ferm_op_free(expected);
+
+    if (!is_equal) {
+        return EqualityError;
+    }
+    return Ok;
+}
+
+static int test_sandwich_ordered_false(void) {
+    QfFermionOperator *op = qf_ferm_op_zero();
+    bool action[4] = {false, false, true, true};
+    uint32_t modes[4] = {0, 1, 1, 0};
+    QkComplex64 coeff = {1.0, 0.0};
+    qf_ferm_op_add_term(op, 4, action, modes, &coeff);
+
+    bool sandwich = false;
+    QfFermionOperator *sandwich_ordered = qf_ferm_op_normal_ordered(op, &sandwich);
+
+    uint64_t num_terms = 4;
+    uint64_t num_actions = 8;
+    bool actions_exp[8] = {true, true, false, false, true, false, true, false};
+    uint32_t modes_exp[8] = {1, 0, 0, 1, 1, 1, 0, 0};
+    QkComplex64 coeffs_exp[4] = {{1.0, 0.0}, {-1.0, 0.0}, {-1.0, 0.0}, {1.0, 0.0}};
+    uint32_t boundaries_exp[5] = {0, 4, 6, 8, 8};
+    QfFermionOperator *expected =
+        qf_ferm_op_new(num_terms, num_actions, coeffs_exp, actions_exp, modes_exp, boundaries_exp);
+
+    bool is_equal = qf_ferm_op_equiv(sandwich_ordered, expected, 1e-10);
+
+    qf_ferm_op_free(op);
+    qf_ferm_op_free(sandwich_ordered);
     qf_ferm_op_free(expected);
 
     if (!is_equal) {
@@ -566,6 +628,8 @@ int test_fermion_operator(void) {
     num_failed += RUN_TEST(test_simplify_vs_ichop);
     num_failed += RUN_TEST(test_adjoint);
     num_failed += RUN_TEST(test_normal_ordered);
+    num_failed += RUN_TEST(test_sandwich_ordered_true);
+    num_failed += RUN_TEST(test_sandwich_ordered_false);
     num_failed += RUN_TEST(test_is_hermitian);
     num_failed += RUN_TEST(test_many_body_order);
     num_failed += RUN_TEST(test_conserves_particle_number);

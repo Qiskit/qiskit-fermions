@@ -102,15 +102,15 @@ impl FermionOperator {
         Some(groups)
     }
 
-    pub fn normal_ordered(&self) -> Self {
+    pub fn normal_ordered(&self, sandwich: Option<bool>) -> Self {
         let mut result = Self::zero();
         self.iter()
-            .for_each(|term| result.__iadd__(&_normal_ordered_term(term)));
+            .for_each(|term| result.__iadd__(&_normal_ordered_term(term, sandwich)));
         result
     }
 
     pub fn is_hermitian(&self, atol: f64) -> bool {
-        let mut diff = (self.__sub__(&self.adjoint())).normal_ordered();
+        let mut diff = (self.__sub__(&self.adjoint())).normal_ordered(None);
         diff.ichop(atol);
         diff.equiv(&Self::zero(), atol)
     }
@@ -167,7 +167,10 @@ impl FermionOperator {
     }
 }
 
-fn _normal_ordered_term(term_view: FermionOperatorTermView) -> FermionOperator {
+fn _normal_ordered_term(
+    term_view: FermionOperatorTermView,
+    sandwich: Option<bool>,
+) -> FermionOperator {
     let mut coeffs = vec![];
     let mut actions = vec![];
     let mut modes = vec![];
@@ -184,18 +187,26 @@ fn _normal_ordered_term(term_view: FermionOperatorTermView) -> FermionOperator {
                 let (action_left, index_left) = term[j - 1];
                 if *action_right == *action_left {
                     // both create or both destroy
-                    match (index_right).cmp(index_left) {
-                        Ordering::Equal => {
+                    match ((index_right).cmp(index_left), sandwich, *action_left) {
+                        (Ordering::Equal, _, _) => {
                             // operators are the same, so product is zero
                             zero = true;
                             break;
                         }
-                        Ordering::Greater => {
+                        (Ordering::Greater, None, _)
+                        | (Ordering::Less, Some(true), true)
+                        | (Ordering::Less, Some(false), false)
+                        | (Ordering::Greater, Some(true), false)
+                        | (Ordering::Greater, Some(false), true) => {
                             // swap operators and update sign
                             term.swap(j - 1, j);
                             parity = !parity;
                         }
-                        Ordering::Less => {}
+                        (Ordering::Less, None, _)
+                        | (Ordering::Greater, Some(true), true)
+                        | (Ordering::Greater, Some(false), false)
+                        | (Ordering::Less, Some(true), false)
+                        | (Ordering::Less, Some(false), true) => {}
                     }
                 } else if *action_right && !*action_left {
                     // create on right and destroy on left
@@ -832,7 +843,7 @@ mod tests {
             groups: None,
         };
 
-        assert_eq!(op.normal_ordered(), op);
+        assert_eq!(op.normal_ordered(None), op);
     }
 
     #[test]
@@ -853,7 +864,7 @@ mod tests {
             groups: None,
         };
 
-        assert_eq!(op.normal_ordered(), expected);
+        assert_eq!(op.normal_ordered(None), expected);
     }
 
     #[test]
@@ -874,7 +885,85 @@ mod tests {
             groups: None,
         };
 
-        assert_eq!(op.normal_ordered(), expected);
+        assert_eq!(op.normal_ordered(None), expected);
+    }
+
+    #[test]
+    fn test_normal_ordered_sandwich_none() {
+        let op = FermionOperator {
+            coeffs: vec![Complex64::new(1.0, 0.0)],
+            actions: vec![false, false, true, true],
+            modes: vec![0, 1, 0, 1],
+            boundaries: vec![0, 4],
+            groups: None,
+        };
+
+        let expected = FermionOperator {
+            coeffs: vec![
+                Complex64::new(1.0, 0.0),
+                Complex64::new(1.0, 0.0),
+                Complex64::new(1.0, 0.0),
+                Complex64::new(-1.0, 0.0),
+            ],
+            actions: vec![true, true, false, false, true, false, true, false],
+            modes: vec![1, 0, 1, 0, 0, 0, 1, 1],
+            boundaries: vec![0, 4, 6, 8, 8],
+            groups: None,
+        };
+
+        assert_eq!(op.normal_ordered(None), expected);
+    }
+
+    #[test]
+    fn test_normal_ordered_sandwich_true() {
+        let op = FermionOperator {
+            coeffs: vec![Complex64::new(1.0, 0.0)],
+            actions: vec![false, false, true, true],
+            modes: vec![1, 0, 0, 1],
+            boundaries: vec![0, 4],
+            groups: None,
+        };
+
+        let expected = FermionOperator {
+            coeffs: vec![
+                Complex64::new(1.0, 0.0),
+                Complex64::new(-1.0, 0.0),
+                Complex64::new(-1.0, 0.0),
+                Complex64::new(1.0, 0.0),
+            ],
+            actions: vec![true, true, false, false, true, false, true, false],
+            modes: vec![0, 1, 1, 0, 0, 0, 1, 1],
+            boundaries: vec![0, 4, 6, 8, 8],
+            groups: None,
+        };
+
+        assert_eq!(op.normal_ordered(Some(true)), expected);
+    }
+
+    #[test]
+    fn test_normal_ordered_sandwich_false() {
+        let op = FermionOperator {
+            coeffs: vec![Complex64::new(1.0, 0.0)],
+            actions: vec![false, false, true, true],
+            modes: vec![0, 1, 1, 0],
+            boundaries: vec![0, 4],
+            groups: None,
+        };
+
+        let expected = FermionOperator {
+            coeffs: vec![
+                Complex64::new(1.0, 0.0),
+                Complex64::new(-1.0, 0.0),
+                Complex64::new(-1.0, 0.0),
+                Complex64::new(1.0, 0.0),
+            ],
+            actions: vec![true, true, false, false, true, false, true, false],
+            modes: vec![1, 0, 0, 1, 1, 1, 0, 0],
+            boundaries: vec![0, 4, 6, 8, 8],
+            groups: None,
+        };
+
+        assert_eq!(op.normal_ordered(Some(false)), expected);
     }
 
     #[test]

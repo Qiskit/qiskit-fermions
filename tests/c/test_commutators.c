@@ -30,7 +30,7 @@ static int test_ferm_op_commutator(void) {
 
     QfFermionOperator *comm = qf_ferm_op_commutator(op1, op2);
 
-    QfFermionOperator *normal = qf_ferm_op_normal_ordered(comm);
+    QfFermionOperator *normal = qf_ferm_op_normal_ordered(comm, NULL);
     QfFermionOperator *canon = qf_ferm_op_simplify(normal, 1e-8);
 
     qf_ferm_op_ichop(canon, 1e-8);
@@ -62,7 +62,7 @@ static int test_ferm_op_anti_commutator(void) {
 
     QfFermionOperator *anti_comm = qf_ferm_op_anti_commutator(op1, op2);
 
-    QfFermionOperator *normal = qf_ferm_op_normal_ordered(anti_comm);
+    QfFermionOperator *normal = qf_ferm_op_normal_ordered(anti_comm, NULL);
     QfFermionOperator *canon = qf_ferm_op_simplify(normal, 1e-8);
 
     qf_ferm_op_ichop(canon, 1e-8);
@@ -98,7 +98,7 @@ static int test_ferm_op_double_commutator(void) {
 
     QfFermionOperator *double_comm = qf_ferm_op_double_commutator(op1, op2, op3, false);
 
-    QfFermionOperator *normal = qf_ferm_op_normal_ordered(double_comm);
+    QfFermionOperator *normal = qf_ferm_op_normal_ordered(double_comm, NULL);
     QfFermionOperator *canon = qf_ferm_op_simplify(normal, 1e-8);
 
     qf_ferm_op_ichop(canon, 1e-8);

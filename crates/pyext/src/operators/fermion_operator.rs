@@ -719,9 +719,10 @@ impl PyFermionOperator {
     ///
     /// Returns:
     ///     An equivalent but normal-ordered operator.
-    fn normal_ordered(&self) -> Self {
+    #[pyo3(signature = (sandwich=None))]
+    fn normal_ordered(&self, sandwich: Option<bool>) -> Self {
         Self {
-            inner: self.inner.normal_ordered(),
+            inner: self.inner.normal_ordered(sandwich),
         }
     }
 

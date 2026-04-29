@@ -164,7 +164,7 @@ mod tests {
             groups: None,
         };
         let comm = double_commutator(&op1, &op2, &op3, false);
-        let normal_ordered = comm.normal_ordered();
+        let normal_ordered = comm.normal_ordered(None);
         let canon = normal_ordered.simplify(1e-8);
         assert_eq!(canon, FermionOperator::zero());
     }

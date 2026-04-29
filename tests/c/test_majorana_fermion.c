@@ -54,7 +54,7 @@ static int test_majorana_to_fermion(void) {
     qf_maj_op_add_term(maj_op, 2, modes_maj, &coeff);
 
     QfFermionOperator *result = qf_majorana_to_fermion(maj_op);
-    QfFermionOperator *canon = qf_ferm_op_normal_ordered(result);
+    QfFermionOperator *canon = qf_ferm_op_normal_ordered(result, NULL);
 
     uint64_t num_terms = 2;
     uint64_t num_actions = 2;

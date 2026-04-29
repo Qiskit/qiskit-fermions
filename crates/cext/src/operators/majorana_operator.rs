@@ -728,7 +728,7 @@ pub unsafe extern "C" fn qf_maj_op_simplify(
 ///     QkComplex64 coeff = {1.0, 0.0};
 ///     qf_maj_op_add_term(op, 4, modes, &coeff);
 ///
-///     QfMajoranaOperator *normal_ordered = qf_maj_op_normal_ordered(op);
+///     QfMajoranaOperator *normal_ordered = qf_maj_op_normal_ordered(op, true);
 ///
 ///     QkComplex64 coeff_minus = {-1.0, 0.0};
 ///     QfMajoranaOperator *expected = qf_maj_op_zero();

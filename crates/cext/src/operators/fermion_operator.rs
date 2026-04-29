@@ -756,7 +756,7 @@ pub unsafe extern "C" fn qf_ferm_op_simplify(
 ///     QkComplex64 coeff = {1.0, 0.0};
 ///     qf_ferm_op_add_term(op, 4, actions, modes, &coeff);
 ///
-///     QfFermionOperator *normal_ordered = qf_ferm_op_normal_ordered(op);
+///     QfFermionOperator *normal_ordered = qf_ferm_op_normal_ordered(op, NULL);
 ///
 ///     uint64_t num_terms = 4;
 ///     uint64_t num_actions = 8;
@@ -775,11 +775,18 @@ pub unsafe extern "C" fn qf_ferm_op_simplify(
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn qf_ferm_op_normal_ordered(
     op: *const FermionOperator,
+    sandwich: *const bool,
 ) -> *mut FermionOperator {
     // SAFETY: Per documentation, the pointers are non-null and aligned.
     let op = unsafe { const_ptr_as_ref(op) };
 
-    let result = op.normal_ordered();
+    let sandwich = if sandwich.is_null() {
+        None
+    } else {
+        unsafe { Some(sandwich.as_ref().unwrap()) }
+    };
+
+    let result = op.normal_ordered(sandwich.copied());
     Box::into_raw(Box::new(result))
 }
 

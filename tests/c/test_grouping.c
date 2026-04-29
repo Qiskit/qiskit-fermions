@@ -40,7 +40,7 @@ static int test_group_terms_by_electronic_structure(void) {
     QfFermionOperator *op = qf_ferm_op_from_fcidump(fcidump);
     qf_fcidump_free(fcidump);
 
-    QfFermionOperator *normal = qf_ferm_op_normal_ordered(op);
+    QfFermionOperator *normal = qf_ferm_op_normal_ordered(op, NULL);
     qf_ferm_op_free(op);
 
     QfExitCode exit = qf_group_terms_by_electronic_structure(normal, 4, false);
