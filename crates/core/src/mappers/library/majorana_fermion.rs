@@ -12,7 +12,7 @@
 
 use num_complex::Complex64;
 
-use crate::operators::{OperatorMacro, OperatorTrait};
+use crate::operators::OperatorTrait;
 use crate::operators::fermion_operator::{FermionAction, FermionOperator};
 use crate::operators::majorana_operator::{MajoranaAction, MajoranaOperator};
 
@@ -34,7 +34,7 @@ pub fn fermion_to_majorana(fer_op: &FermionOperator) -> MajoranaOperator {
         let mut mapped_term = MajoranaOperator::one();
 
         term.iter()
-            .for_each(|action| mapped_term = map_fermion_action(action).__and__(&mapped_term));
+            .for_each(|action| mapped_term.__imatmul__(&map_fermion_action(action)));
 
         mapped_term.__imul__(term.coeff);
 
@@ -68,7 +68,7 @@ pub fn majorana_to_fermion(maj_op: &MajoranaOperator) -> FermionOperator {
         let mut mapped_term = FermionOperator::one();
 
         term.iter()
-            .for_each(|action| mapped_term = map_majorana_action(action).__and__(&mapped_term));
+            .for_each(|action| mapped_term.__imatmul__(&map_majorana_action(action)));
 
         mapped_term.__imul__(term.coeff);
 
