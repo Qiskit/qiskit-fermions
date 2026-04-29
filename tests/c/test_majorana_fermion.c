@@ -29,7 +29,7 @@ static int test_fermion_to_majorana(void) {
     uint64_t num_terms = 2;
     uint64_t num_modes = 2;
     uint32_t modes[2] = {1, 0};
-    QkComplex64 exp_coeffs[2] = {{0.5, 0.0}, {0.0, 0.5}};
+    QkComplex64 exp_coeffs[2] = {{0.5, 0.0}, {0.0, -0.5}};
     uint32_t boundaries[3] = {0, 0, 2};
     QfMajoranaOperator *expected =
         qf_maj_op_new(num_terms, num_modes, exp_coeffs, modes, boundaries);
@@ -60,7 +60,7 @@ static int test_majorana_to_fermion(void) {
     uint64_t num_actions = 2;
     bool actions[2] = {true, false};
     uint32_t modes[2] = {0, 0};
-    QkComplex64 exp_coeffs[2] = {{0.0, -1.0}, {0.0, 2.0}};
+    QkComplex64 exp_coeffs[2] = {{0.0, 1.0}, {0.0, -2.0}};
     uint32_t boundaries[3] = {0, 0, 2};
     QfFermionOperator *expected =
         qf_ferm_op_new(num_terms, num_actions, exp_coeffs, actions, modes, boundaries);

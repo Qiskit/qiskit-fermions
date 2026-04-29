@@ -18,7 +18,7 @@ def test_fermion_to_majorana():
     fer_op = FermionOperator.from_dict({((True, 0), (False, 0)): 1})
     maj_op = fermion_to_majorana(fer_op)
     canon = maj_op.normal_ordered()
-    expected = MajoranaOperator.from_dict({(): 0.5, (1, 0): 0.5j})
+    expected = MajoranaOperator.from_dict({(): 0.5, (1, 0): -0.5j})
     assert canon.equiv(expected)
 
 
@@ -26,5 +26,5 @@ def test_majorana_to_fermion():
     maj_op = MajoranaOperator.from_dict({(0, 1): 1})
     fer_op = majorana_to_fermion(maj_op)
     canon = fer_op.normal_ordered()
-    expected = FermionOperator.from_dict({(): -1j, ((True, 0), (False, 0)): 2j})
+    expected = FermionOperator.from_dict({(): 1j, ((True, 0), (False, 0)): -2j})
     assert canon.equiv(expected)
