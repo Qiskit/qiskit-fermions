@@ -233,6 +233,28 @@ fn _normal_ordered_term(term_view: FermionOperatorTermView) -> FermionOperator {
     }
 }
 
+fn _compose(
+    a: &FermionOperator,
+    b: &FermionOperator,
+) -> (Vec<Complex64>, Vec<bool>, Vec<u32>, Vec<usize>) {
+    let mut coeffs = vec![];
+    let mut actions = vec![];
+    let mut modes = vec![];
+    let mut boundaries = vec![0];
+
+    for left in a.iter() {
+        for right in b.iter() {
+            coeffs.push(left.coeff * right.coeff);
+            actions.extend_from_slice(right.actions);
+            actions.extend_from_slice(left.actions);
+            modes.extend_from_slice(right.modes);
+            modes.extend_from_slice(left.modes);
+            boundaries.push(modes.len());
+        }
+    }
+    (coeffs, actions, modes, boundaries)
+}
+
 impl OperatorTrait for FermionOperator {
     fn zero() -> Self {
         Self {
@@ -300,26 +322,12 @@ impl OperatorTrait for FermionOperator {
     }
 
     fn __iand__(&mut self, other: &Self) {
-        let mut coeffs = vec![];
-        let mut actions = vec![];
-        let mut modes = vec![];
-        let mut boundaries = vec![0];
+        (self.coeffs, self.actions, self.modes, self.boundaries) = _compose(self, other);
+        self.groups = None;
+    }
 
-        for left in self.iter() {
-            for right in other.iter() {
-                coeffs.push(left.coeff * right.coeff);
-                actions.extend_from_slice(right.actions);
-                actions.extend_from_slice(left.actions);
-                modes.extend_from_slice(right.modes);
-                modes.extend_from_slice(left.modes);
-                boundaries.push(modes.len());
-            }
-        }
-
-        self.coeffs = coeffs;
-        self.actions = actions;
-        self.modes = modes;
-        self.boundaries = boundaries;
+    fn __imatmul__(&mut self, other: &Self) {
+        (self.coeffs, self.actions, self.modes, self.boundaries) = _compose(other, self);
         self.groups = None;
     }
 
@@ -632,6 +640,74 @@ mod tests {
         op1 &= op2;
         assert_eq!(
             op1,
+            FermionOperator {
+                coeffs: vec![
+                    Complex64::new(3.0, 0.0),
+                    Complex64::new(8.0, 0.0),
+                    Complex64::new(4.5, 0.0),
+                    Complex64::new(12.0, 0.0),
+                ],
+                actions: vec![true, false, true, false, true, false, true, false],
+                modes: vec![1, 0, 0, 1, 1, 0, 0, 1],
+                boundaries: vec![0, 0, 2, 4, 8],
+                groups: None,
+            }
+        );
+    }
+
+    #[test]
+    fn test_matmul() {
+        let op1 = FermionOperator {
+            coeffs: vec![Complex64::new(2.0, 0.0), Complex64::new(3.0, 0.0)],
+            actions: vec![true, false],
+            modes: vec![0, 1],
+            boundaries: vec![0, 0, 2],
+            groups: None,
+        };
+        let op2 = FermionOperator {
+            coeffs: vec![Complex64::new(1.5, 0.0), Complex64::new(4.0, 0.0)],
+            actions: vec![true, false],
+            modes: vec![1, 0],
+            boundaries: vec![0, 0, 2],
+            groups: None,
+        };
+        let result = op2.__matmul__(&op1);
+        assert_eq!(
+            result,
+            FermionOperator {
+                coeffs: vec![
+                    Complex64::new(3.0, 0.0),
+                    Complex64::new(8.0, 0.0),
+                    Complex64::new(4.5, 0.0),
+                    Complex64::new(12.0, 0.0),
+                ],
+                actions: vec![true, false, true, false, true, false, true, false],
+                modes: vec![1, 0, 0, 1, 1, 0, 0, 1],
+                boundaries: vec![0, 0, 2, 4, 8],
+                groups: None,
+            }
+        );
+    }
+
+    #[test]
+    fn test_matmul_assign() {
+        let op1 = FermionOperator {
+            coeffs: vec![Complex64::new(2.0, 0.0), Complex64::new(3.0, 0.0)],
+            actions: vec![true, false],
+            modes: vec![0, 1],
+            boundaries: vec![0, 0, 2],
+            groups: None,
+        };
+        let mut op2 = FermionOperator {
+            coeffs: vec![Complex64::new(1.5, 0.0), Complex64::new(4.0, 0.0)],
+            actions: vec![true, false],
+            modes: vec![1, 0],
+            boundaries: vec![0, 0, 2],
+            groups: None,
+        };
+        op2.__imatmul__(&op1);
+        assert_eq!(
+            op2,
             FermionOperator {
                 coeffs: vec![
                     Complex64::new(3.0, 0.0),

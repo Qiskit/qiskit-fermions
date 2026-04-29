@@ -252,6 +252,25 @@ fn reduce_pairs(tpl: &[u32]) -> Vec<u32> {
     reduced
 }
 
+fn _compose(
+    a: &MajoranaOperator,
+    b: &MajoranaOperator,
+) -> (Vec<Complex64>, Vec<u32>, Vec<usize>) {
+    let mut coeffs = vec![];
+    let mut modes = vec![];
+    let mut boundaries = vec![0];
+
+    for left in a.iter() {
+        for right in b.iter() {
+            coeffs.push(left.coeff * right.coeff);
+            modes.extend_from_slice(right.modes);
+            modes.extend_from_slice(left.modes);
+            boundaries.push(modes.len());
+        }
+    }
+    (coeffs, modes, boundaries)
+}
+
 impl OperatorTrait for MajoranaOperator {
     fn zero() -> Self {
         Self {
@@ -313,22 +332,12 @@ impl OperatorTrait for MajoranaOperator {
     }
 
     fn __iand__(&mut self, other: &Self) {
-        let mut coeffs = vec![];
-        let mut modes = vec![];
-        let mut boundaries = vec![0];
+        (self.coeffs, self.modes, self.boundaries) = _compose(self, other);
+        self.groups = None;
+    }
 
-        for left in self.iter() {
-            for right in other.iter() {
-                coeffs.push(left.coeff * right.coeff);
-                modes.extend_from_slice(right.modes);
-                modes.extend_from_slice(left.modes);
-                boundaries.push(modes.len());
-            }
-        }
-
-        self.coeffs = coeffs;
-        self.modes = modes;
-        self.boundaries = boundaries;
+    fn __imatmul__(&mut self, other: &Self) {
+        (self.coeffs, self.modes, self.boundaries) = _compose(other, self);
         self.groups = None;
     }
 
@@ -615,6 +624,68 @@ mod tests {
         op1 &= op2;
         assert_eq!(
             op1,
+            MajoranaOperator {
+                coeffs: vec![
+                    Complex64::new(3.0, 0.0),
+                    Complex64::new(8.0, 0.0),
+                    Complex64::new(4.5, 0.0),
+                    Complex64::new(12.0, 0.0),
+                ],
+                modes: vec![1, 0, 0, 1, 1, 0, 0, 1],
+                boundaries: vec![0, 0, 2, 4, 8],
+                groups: None,
+            }
+        );
+    }
+
+    #[test]
+    fn test_matmul() {
+        let op1 = MajoranaOperator {
+            coeffs: vec![Complex64::new(2.0, 0.0), Complex64::new(3.0, 0.0)],
+            modes: vec![0, 1],
+            boundaries: vec![0, 0, 2],
+            groups: None,
+        };
+        let op2 = MajoranaOperator {
+            coeffs: vec![Complex64::new(1.5, 0.0), Complex64::new(4.0, 0.0)],
+            modes: vec![1, 0],
+            boundaries: vec![0, 0, 2],
+            groups: None,
+        };
+        let result = op2.__matmul__(&op1);
+        assert_eq!(
+            result,
+            MajoranaOperator {
+                coeffs: vec![
+                    Complex64::new(3.0, 0.0),
+                    Complex64::new(8.0, 0.0),
+                    Complex64::new(4.5, 0.0),
+                    Complex64::new(12.0, 0.0),
+                ],
+                modes: vec![1, 0, 0, 1, 1, 0, 0, 1],
+                boundaries: vec![0, 0, 2, 4, 8],
+                groups: None,
+            }
+        );
+    }
+
+    #[test]
+    fn test_matmul_assign() {
+        let op1 = MajoranaOperator {
+            coeffs: vec![Complex64::new(2.0, 0.0), Complex64::new(3.0, 0.0)],
+            modes: vec![0, 1],
+            boundaries: vec![0, 0, 2],
+            groups: None,
+        };
+        let mut op2 = MajoranaOperator {
+            coeffs: vec![Complex64::new(1.5, 0.0), Complex64::new(4.0, 0.0)],
+            modes: vec![1, 0],
+            boundaries: vec![0, 0, 2],
+            groups: None,
+        };
+        op2.__imatmul__(&op1);
+        assert_eq!(
+            op2,
             MajoranaOperator {
                 coeffs: vec![
                     Complex64::new(3.0, 0.0),

@@ -23,6 +23,7 @@ pub trait OperatorTrait {
     fn __iadd__(&mut self, other: &Self);
     fn __imul__(&mut self, other: Complex64);
     fn __iand__(&mut self, other: &Self);
+    fn __imatmul__(&mut self, other: &Self);
     fn ichop(&mut self, atol: f64);
 }
 
@@ -33,6 +34,7 @@ pub trait OperatorMacro {
     fn __div__(&self, other: Complex64) -> Self;
     fn __neg__(&self) -> Self;
     fn __and__(&self, other: &Self) -> Self;
+    fn __matmul__(&self, other: &Self) -> Self;
     fn __pow__(&self, exponent: usize) -> Self;
 
     // more in-place operations
@@ -107,6 +109,15 @@ macro_rules! impl_operator_macro {
             {
                 let mut result = self.clone();
                 result.__iand__(other);
+                result
+            }
+
+            fn __matmul__(&self, other: &Self) -> Self
+            where
+                Self: OperatorTrait,
+            {
+                let mut result = self.clone();
+                result.__imatmul__(other);
                 result
             }
 

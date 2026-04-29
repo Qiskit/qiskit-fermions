@@ -251,6 +251,15 @@ impl MajoranaOperatorDataIter {
 ///       1.200000e1 +0.000000e0j * (0)
 ///       9.000000e0 +0.000000e0j * (0 0)
 ///
+/// .. note::
+///    For convenience, the right-multiplication is implemented by ``c = a @ b`` (resulting in
+///    :math:`C = A B`).
+///
+/// .. doctest::
+///
+///     >>> (op1 @ op2).equiv(op2 & op1)
+///     True
+///
 /// Other Operations
 /// ^^^^^^^^^^^^^^^^
 ///
