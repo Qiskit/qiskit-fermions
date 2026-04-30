@@ -13,10 +13,12 @@
 """Synthesis passes."""
 
 from .evolution import EvolutionSynthesis
+from .initialize_modes import InitializeModesSynthesis
 from .synthesis import F2QSynthesis, F2QSynthesisPlugin
 
 __all__ = [
     "EvolutionSynthesis",
     "F2QSynthesis",
     "F2QSynthesisPlugin",
+    "InitializeModesSynthesis",
 ]

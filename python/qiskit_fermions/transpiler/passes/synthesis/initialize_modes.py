@@ -10,59 +10,40 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
-"""Fermion-operator evolution gate synthesis."""
+"""Mode initialization synthesis."""
 
 from __future__ import annotations
 
-from collections.abc import Callable
-from typing import TYPE_CHECKING
-
+import numpy as np
 from qiskit.circuit import QuantumCircuit
-from qiskit.circuit.library import PauliEvolutionGate
 from qiskit.converters import circuit_to_dag
 from qiskit.dagcircuit import DAGCircuit, DAGOpNode
-from qiskit.quantum_info import SparseObservable
 
 from ... import F2QLayout
 from ..utils import _parse_node_indices
 
-if TYPE_CHECKING:
-    from qiskit_fermions._lib.operators.fermion_operator import FermionOperator
-    from qiskit_fermions._lib.operators.majorana_operator import MajoranaOperator
-else:
-    from qiskit_fermions.operators import FermionOperator, MajoranaOperator
 
+class InitializeModesSynthesis:
+    """A :class:`.F2QSynthesisPlugin` for transpiling a :class:`.InitializeModes`.
 
-# TODO: add an OperatorProtocol to avoid hard-coding this list of types from our package
-MapperFunction = Callable[[FermionOperator | MajoranaOperator], SparseObservable]
-"""The function signature for :attr:`mapper_fn`."""
+    .. caution::
+       This is an early development prototype. Beware of changes to its interface without warning
+       during the pre-release development of this package.
 
+    .. warning::
+       This transpilation pass plugin is known to have certain limitations, including:
 
-class EvolutionSynthesis:
-    """A :class:`.F2QSynthesisPlugin` for transpiling a :class:`.Evolution`."""
-
-    def __init__(self, mapper_fn: MapperFunction) -> None:
-        """Initializes the transpilation plugin.
-
-        Args:
-            mapper_fn: the fermion-to-qubit operator mapping function.
-        """
-        super().__init__()
-
-        self.mapper_fn: MapperFunction = mapper_fn
-        """The fermion-to-qubit operator mapping function.
-
-        .. note::
-           It is the user's responsibility to ensure that this function is in-sync with the global
-           transpilation :class:`~qiskit_fermions.transpiler.F2QLayout` setting.
-        """
+       - assuming an occupation-basis encoding (like Jordan-Wigner)
+       - assuming a trivial fermion-to-qubit layout (i.e. no change in their register lengths)
+       - assuming a 1-to-1 mapping of fermionic mode indices to qubit indices
+    """
 
     def run(self, in_node: DAGOpNode, out_dag: DAGCircuit, *, f2q_layout: F2QLayout):
         """Runs this transpilation plugin.
 
         Args:
             in_node: the input fermion-based circuit instruction. When this plugin gets called, the
-                ``in_node.op`` attribute `must` be of type :class:`.Evolution`.
+                ``in_node.op`` attribute `must` be of type :class:`.InitializeModes`.
             out_dag: the output qubit-based circuit.
             f2q_layout: the global transpilation :class:`~qiskit_fermions.transpiler.F2QLayout`
                 setting.
@@ -81,19 +62,19 @@ class EvolutionSynthesis:
 
         if len(encountered_fermion_registers) > 1:
             raise NotImplementedError(
-                "Cannot map an Evolution gate acting on fermionic modes that are spread across "
-                "multiple FermionRegister instances."
+                "Cannot map an InitializeModes gate acting on fermionic modes that are spread "
+                "across multiple FermionRegister instances."
             )
 
         freg = encountered_fermion_registers.pop()
         qreg = f2q_layout[freg]
 
-        local_op = in_node.op.operator
-        global_op = local_op.relabel_modes(global_fermion_indices)
-        pauli_op = self.mapper_fn(global_op).simplify()
-
         circ = QuantumCircuit(qreg)
-        circ.append(PauliEvolutionGate(pauli_op, time=in_node.op.params[0]), qreg)
+
+        local_occupation = in_node.op.occupation
+        global_occupied_indices = np.asarray(global_fermion_indices)[np.nonzero(local_occupation)]
+        circ.x(global_occupied_indices.tolist())
+
         new_dag = circuit_to_dag(circ)
 
         out_dag.compose(new_dag, qubits=list(qreg), front=False, inplace=True)

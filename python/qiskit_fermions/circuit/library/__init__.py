@@ -26,10 +26,13 @@ This module provides a library of :class:`.FermionGate` implementations.
    :template: autosummary/class_without_inheritance.rst
 
    Evolution
+   InitializeModes
 """
 
 from .evolution import Evolution
+from .initialize_modes import InitializeModes
 
 __all__ = [
     "Evolution",
+    "InitializeModes",
 ]
