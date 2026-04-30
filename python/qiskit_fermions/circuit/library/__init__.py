@@ -27,12 +27,15 @@ This module provides a library of :class:`.FermionGate` implementations.
 
    Evolution
    InitializeModes
+   OrbitalRotation
 """
 
 from .evolution import Evolution
 from .initialize_modes import InitializeModes
+from .orbital_rotation import OrbitalRotation
 
 __all__ = [
     "Evolution",
     "InitializeModes",
+    "OrbitalRotation",
 ]
