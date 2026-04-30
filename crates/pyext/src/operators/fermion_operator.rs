@@ -706,9 +706,11 @@ impl PyFermionOperator {
     /// - ``None`` (default): both groups are ordered lexicographically descending (e.g.
     ///   ``+_1 +_0 -_1 -_0``)
     /// - ``True``: larger indices appear towards the middle, i.e. creation actions are
-    ///   lexicographically ascending while annihilation are descending (e.g. ``+_0 +_1 -_1 -_0``)
+    ///   lexicographically ascending while annihilation ones are descending (e.g.
+    ///   ``+_0 +_1 -_1 -_0``)
     /// - ``False``: smaller indices appear towards the middle, i.e. creation actions are
-    ///   lexicographically descending while annihilation are ascending (e.g. ``+_1 +_0 -_0 -_1``)
+    ///   lexicographically descending while annihilation ones are ascending (e.g.
+    ///   ``+_1 +_0 -_0 -_1``)
     ///
     /// .. note::
     ///    When a term is being reordered, the anti-commutation relations have to be taken into
