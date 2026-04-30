@@ -79,15 +79,22 @@ provides builtin plugins:
    :toctree: ../stubs/
 
    EvolutionSynthesis
+   InitializeModesSynthesis
 """
 
 from .layout import CustomF2QLayout, TrivialF2QLayout
-from .synthesis import EvolutionSynthesis, F2QSynthesis, F2QSynthesisPlugin
+from .synthesis import (
+    EvolutionSynthesis,
+    F2QSynthesis,
+    F2QSynthesisPlugin,
+    InitializeModesSynthesis,
+)
 
 __all__ = [
     "CustomF2QLayout",
     "EvolutionSynthesis",
     "F2QSynthesis",
     "F2QSynthesisPlugin",
+    "InitializeModesSynthesis",
     "TrivialF2QLayout",
 ]
