@@ -698,9 +698,17 @@ impl PyFermionOperator {
 
     /// Returns an equivalent operator with normal ordered terms.
     ///
-    /// The normal order of an operator term is defined such that all creation actions before all
-    /// annihilation actions and the modes of actions within each group descend lexicographically
-    /// (e.g. ``+_1 +_0 -_1 -_0``).
+    /// The normal order of an operator term is defined such that all creation actions appear
+    /// before all annihilation actions.
+    /// Within each group, the acted-upon modes are ordered lexicographically. Whether their order
+    /// is ascending or descending depends upon the value of the ``sandwich`` argument:
+    ///
+    /// - ``None`` (default): both groups are ordered lexicographically descending (e.g.
+    ///   ``+_1 +_0 -_1 -_0``)
+    /// - ``True``: larger indices appear towards the middle, i.e. creation actions are
+    ///   lexicographically ascending while annihilation are descending (e.g. ``+_0 +_1 -_1 -_0``)
+    /// - ``False``: smaller indices appear towards the middle, i.e. creation actions are
+    ///   lexicographically descending while annihilation are ascending (e.g. ``+_1 +_0 -_0 -_1``)
     ///
     /// .. note::
     ///    When a term is being reordered, the anti-commutation relations have to be taken into
@@ -716,6 +724,16 @@ impl PyFermionOperator {
     ///      -1.000000e0 +0.000000e0j * (+_0 -_0)
     ///      -1.000000e0 +0.000000e0j * (+_1 -_1)
     ///      -1.000000e0 +0.000000e0j * (+_1 +_0 -_1 -_0)
+    ///     >>> print(op.normal_ordered(sandwich=True).simplify())
+    ///       1.000000e0 +0.000000e0j * ()
+    ///      -1.000000e0 +0.000000e0j * (+_0 -_0)
+    ///       1.000000e0 +0.000000e0j * (+_0 +_1 -_1 -_0)
+    ///      -1.000000e0 +0.000000e0j * (+_1 -_1)
+    ///     >>> print(op.normal_ordered(sandwich=False).simplify())
+    ///       1.000000e0 +0.000000e0j * ()
+    ///      -1.000000e0 +0.000000e0j * (+_0 -_0)
+    ///      -1.000000e0 +0.000000e0j * (+_1 -_1)
+    ///       1.000000e0 +0.000000e0j * (+_1 +_0 -_0 -_1)
     ///
     /// Returns:
     ///     An equivalent but normal-ordered operator.

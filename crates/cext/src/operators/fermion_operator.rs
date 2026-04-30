@@ -729,11 +729,19 @@ pub unsafe extern "C" fn qf_ferm_op_simplify(
 ///
 /// @brief Returns an equivalent operator with normal ordered terms.
 ///
-/// The normal order of an operator term is defined such that all creation actions before all
-/// annihilation actions and the modes of actions within each group descend lexicographically
-/// (e.g. ``+_1 +_0 -_1 -_0``).
+/// The normal order of an operator term is defined such that all creation actions appear before
+/// all annihilation actions.
+/// Within each group, the acted-upon modes are ordered lexicographically. Whether their order
+/// is ascending or descending depends upon the value of the ``sandwich`` argument:
+///
+/// - ``NULL``: both groups are ordered lexicographically descending (e.g. ``+_1 +_0 -_1 -_0``)
+/// - ``True``: larger indices appear towards the middle, i.e. creation actions are
+///   lexicographically ascending while annihilation are descending (e.g. ``+_0 +_1 -_1 -_0``)
+/// - ``False``: smaller indices appear towards the middle, i.e. creation actions are
+///   lexicographically descending while annihilation are ascending (e.g. ``+_1 +_0 -_0 -_1``)
 ///
 /// @param op A pointer to the operator.
+/// @param sandwich A pointer to a boolean value. This pointer may be ``NULL``.
 ///
 /// @return A pointer to the created operator.
 ///
