@@ -729,11 +729,19 @@ pub unsafe extern "C" fn qf_ferm_op_simplify(
 ///
 /// @brief Returns an equivalent operator with normal ordered terms.
 ///
-/// The normal order of an operator term is defined such that all creation actions before all
-/// annihilation actions and the modes of actions within each group descend lexicographically
-/// (e.g. ``+_1 +_0 -_1 -_0``).
+/// The normal order of an operator term is defined such that all creation actions appear before
+/// all annihilation actions.
+/// Within each group, the acted-upon modes are ordered lexicographically. Whether their order
+/// is ascending or descending depends upon the value of the ``sandwich`` argument:
+///
+/// - ``NULL``: both groups are ordered lexicographically descending (e.g. ``+_1 +_0 -_1 -_0``)
+/// - ``True``: larger indices appear towards the middle, i.e. creation actions are
+///   lexicographically ascending while annihilation ones are descending (e.g. ``+_0 +_1 -_1 -_0``)
+/// - ``False``: smaller indices appear towards the middle, i.e. creation actions are
+///   lexicographically descending while annihilation ones are ascending (e.g. ``+_1 +_0 -_0 -_1``)
 ///
 /// @param op A pointer to the operator.
+/// @param sandwich A pointer to a boolean value. This pointer may be ``NULL``.
 ///
 /// @return A pointer to the created operator.
 ///
@@ -756,7 +764,7 @@ pub unsafe extern "C" fn qf_ferm_op_simplify(
 ///     QkComplex64 coeff = {1.0, 0.0};
 ///     qf_ferm_op_add_term(op, 4, actions, modes, &coeff);
 ///
-///     QfFermionOperator *normal_ordered = qf_ferm_op_normal_ordered(op);
+///     QfFermionOperator *normal_ordered = qf_ferm_op_normal_ordered(op, NULL);
 ///
 ///     uint64_t num_terms = 4;
 ///     uint64_t num_actions = 8;
@@ -775,11 +783,18 @@ pub unsafe extern "C" fn qf_ferm_op_simplify(
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn qf_ferm_op_normal_ordered(
     op: *const FermionOperator,
+    sandwich: *const bool,
 ) -> *mut FermionOperator {
     // SAFETY: Per documentation, the pointers are non-null and aligned.
     let op = unsafe { const_ptr_as_ref(op) };
 
-    let result = op.normal_ordered();
+    let sandwich = if sandwich.is_null() {
+        None
+    } else {
+        unsafe { Some(sandwich.as_ref().unwrap()) }
+    };
+
+    let result = op.normal_ordered(sandwich.copied());
     Box::into_raw(Box::new(result))
 }
 

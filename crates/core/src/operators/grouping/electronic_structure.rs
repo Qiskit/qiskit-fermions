@@ -235,7 +235,7 @@ mod tests {
             "We should not have any group indices yet!"
         );
 
-        let mut normal = op.normal_ordered().simplify(1e-16);
+        let mut normal = op.normal_ordered(None).simplify(1e-16);
 
         let res = group_terms_by_electronic_structure(&mut normal, 2 * fcidump.norb, false);
         assert!(res.is_ok(), "We should not have a GroupingError here!");
@@ -287,7 +287,7 @@ mod tests {
             "We should not have any group indices yet!"
         );
 
-        let mut normal = op.normal_ordered().simplify(1e-16);
+        let mut normal = op.normal_ordered(None).simplify(1e-16);
         // NOTE: we know that the normal-ordered operator here is in chemist's integral order
         // because it was generated from an FCIDump. Thus, we can convert it to physicist's
         // integral order by manually manipulating the acted-upon mode indices of the two-body
