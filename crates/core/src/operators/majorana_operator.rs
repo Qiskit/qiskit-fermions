@@ -252,10 +252,7 @@ fn reduce_pairs(tpl: &[u32]) -> Vec<u32> {
     reduced
 }
 
-fn _compose(
-    a: &MajoranaOperator,
-    b: &MajoranaOperator,
-) -> (Vec<Complex64>, Vec<u32>, Vec<usize>) {
+fn _compose(a: &MajoranaOperator, b: &MajoranaOperator) -> (Vec<Complex64>, Vec<u32>, Vec<usize>) {
     let mut coeffs = vec![];
     let mut modes = vec![];
     let mut boundaries = vec![0];
