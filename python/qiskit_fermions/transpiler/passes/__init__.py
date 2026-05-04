@@ -80,6 +80,7 @@ provides builtin plugins:
 
    EvolutionSynthesis
    InitializeModesSynthesis
+   OrbitalRotationSynthesis
 """
 
 from .layout import CustomF2QLayout, TrivialF2QLayout
@@ -88,6 +89,7 @@ from .synthesis import (
     F2QSynthesis,
     F2QSynthesisPlugin,
     InitializeModesSynthesis,
+    OrbitalRotationSynthesis,
 )
 
 __all__ = [
@@ -96,5 +98,6 @@ __all__ = [
     "F2QSynthesis",
     "F2QSynthesisPlugin",
     "InitializeModesSynthesis",
+    "OrbitalRotationSynthesis",
     "TrivialF2QLayout",
 ]

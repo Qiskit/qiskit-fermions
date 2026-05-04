@@ -10,17 +10,15 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
-"""Synthesis passes."""
+"""Testing utilities."""
 
-from .evolution import EvolutionSynthesis
-from .initialize_modes import InitializeModesSynthesis
-from .orbital_rotation import OrbitalRotationSynthesis
-from .synthesis import F2QSynthesis, F2QSynthesisPlugin
+import numpy as np
 
-__all__ = [
-    "EvolutionSynthesis",
-    "F2QSynthesis",
-    "F2QSynthesisPlugin",
-    "InitializeModesSynthesis",
-    "OrbitalRotationSynthesis",
-]
+
+def random_unitary(dim: int, *, seed=None, dtype=complex) -> np.ndarray:
+    rng = np.random.default_rng(seed)
+    z = rng.standard_normal((dim, dim)).astype(dtype, copy=False)
+    z += 1j * rng.standard_normal((dim, dim)).astype(dtype, copy=False)
+    q, r = np.linalg.qr(z)
+    d = np.diagonal(r)
+    return q * (d / np.abs(d))

@@ -16,14 +16,7 @@ import numpy as np
 import pytest
 from qiskit_fermions.linalg import givens_decomposition
 
-
-def random_unitary(dim: int, *, seed=None, dtype=complex) -> np.ndarray:
-    rng = np.random.default_rng(seed)
-    z = rng.standard_normal((dim, dim)).astype(dtype, copy=False)
-    z += 1j * rng.standard_normal((dim, dim)).astype(dtype, copy=False)
-    q, r = np.linalg.qr(z)
-    d = np.diagonal(r)
-    return q * (d / np.abs(d))
+from ..utils import random_unitary
 
 
 @pytest.mark.parametrize("dim", range(1, 11))

@@ -39,6 +39,5 @@ class InitializeModes(FermionGate):
         self.occupation = np.asarray(occupation, dtype=bool)
         """The sequence of booleans indicating the occupation for each mode in the
         :class:`~.FermionRegister` being initialized by this gate."""
-        """The operator under which to time-evolve the acted-upon fermionic modes."""
 
         super().__init__("InitializeModes", len(self.occupation), [])
