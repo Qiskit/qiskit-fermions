@@ -1,0 +1,99 @@
+# This code is a Qiskit project.
+#
+# (C) Copyright IBM 2026.
+#
+# This code is licensed under the Apache License, Version 2.0. You may
+# obtain a copy of this license in the LICENSE.txt file in the root directory
+# of this source tree or at https://www.apache.org/licenses/LICENSE-2.0.
+#
+# Any modifications or derivative works of this code must retain this
+# copyright notice, and modified files need to carry a notice indicating
+# that they have been altered from the originals.
+
+"""A protocol for operator types."""
+
+from __future__ import annotations
+
+import sys
+from typing import Protocol
+
+if sys.version_info >= (3, 11):
+    from typing import Self
+else:
+    from typing_extensions import Self
+
+
+class OperatorTrait(Protocol):
+    """A protocol indicating all methods implemented by operator classes."""
+
+    @classmethod
+    def zero(cls) -> Self:
+        """Constructs the additive identity operator."""
+
+    @classmethod
+    def one(cls) -> Self:
+        """Constructs the multiplicative identity operator."""
+
+    def __iadd__(self, other: Self):
+        """Adds another operator to this one."""
+
+    def __add__(self, other: Self) -> Self:
+        """Adds two operators."""
+
+    def __isub__(self, other: Self):
+        """Subtracts another operator from this one."""
+
+    def __sub__(self, other: Self) -> Self:
+        """Subtracts two operators."""
+
+    def __imul__(self, other: complex):
+        """Multiplies this operator by a scalar."""
+
+    def __mul__(self, other: complex) -> Self:
+        """Multiplies an operator by a scalar."""
+
+    def __idiv__(self, other: complex):
+        """Divides this operator by a scalar."""
+
+    def __div__(self, other: complex) -> Self:
+        """Divides an operator by a scalar."""
+
+    def __neg__(self) -> Self:
+        """Negates this operator."""
+
+    def __iand__(self, other: Self):
+        """Composes (left-multiplies) another operator onto this one."""
+
+    def __and__(self, other: Self) -> Self:
+        """Composes (left-multiplies) two operators."""
+
+    def __imatmul__(self, other: Self):
+        """Takes the dot-product (right-multiplication) of another operator onto this one."""
+
+    def __matmul__(self, other: Self) -> Self:
+        """Takes the dot-product (right-multiplication) two operators."""
+
+    def __pow__(self, exponent: int, modulo: int | None) -> Self:
+        """Exponentiates this operator by the integer exponent."""
+
+    def __len__(self) -> int:
+        """Returns the length of this operator."""
+
+    def equiv(self, other: Self, atol: float) -> bool:
+        """Checks this operator with another for equivalence up to the specified absolute tolerance."""
+
+    def ichop(self, atol: float):
+        """Trims coefficients below the absolute tolerance from this operator."""
+
+    def simplify(self, atol: float) -> Self:
+        """Simplifies the terms of this operator, discarding those below the absolute tolerance."""
+
+    def adjoint(self) -> Self:
+        """Returns the adjoint of this operator."""
+
+    def normal_ordered(self, *args, **kwargs) -> Self:
+        """Returns the normal-ordered form of this operator.
+
+        .. note::
+           A specific implementation of this method may take additional arguments.
+        """

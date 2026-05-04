@@ -19,6 +19,7 @@ pub trait OperatorTrait {
     fn equiv(&self, other: &Self, atol: f64) -> bool;
 
     fn adjoint(&self) -> Self;
+    fn simplify(&self, atol: f64) -> Self;
 
     fn __iadd__(&mut self, other: &Self);
     fn __imul__(&mut self, other: Complex64);

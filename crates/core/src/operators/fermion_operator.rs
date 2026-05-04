@@ -64,22 +64,6 @@ impl FermionOperator {
         self.boundaries.push(self.modes.len());
     }
 
-    pub fn simplify(&self, atol: f64) -> Self {
-        let mut terms = HashMap::new();
-        for term in self.iter() {
-            terms
-                .entry((term.modes, term.actions))
-                .and_modify(|c| *c += term.coeff)
-                .or_insert(term.coeff);
-        }
-        let mut out = Self::zero();
-        terms
-            .iter()
-            .filter(|((_, _), coeff)| coeff.abs() > atol)
-            .for_each(|((modes, actions), coeff)| out._append_term(*coeff, actions, modes));
-        out
-    }
-
     pub fn iter(&'_ self) -> impl ExactSizeIterator<Item = FermionOperatorTermView<'_>> + '_ {
         self.coeffs.iter().enumerate().map(|(i, coeff)| {
             let start = self.boundaries[i];
@@ -296,6 +280,22 @@ impl OperatorTrait for FermionOperator {
             }
         }
         true
+    }
+
+    fn simplify(&self, atol: f64) -> Self {
+        let mut terms = HashMap::new();
+        for term in self.iter() {
+            terms
+                .entry((term.modes, term.actions))
+                .and_modify(|c| *c += term.coeff)
+                .or_insert(term.coeff);
+        }
+        let mut out = Self::zero();
+        terms
+            .iter()
+            .filter(|((_, _), coeff)| coeff.abs() > atol)
+            .for_each(|((modes, actions), coeff)| out._append_term(*coeff, actions, modes));
+        out
     }
 
     fn adjoint(&self) -> Self {
