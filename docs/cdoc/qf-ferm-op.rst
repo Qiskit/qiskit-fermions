@@ -40,6 +40,8 @@ and the number of fermionic modes acted upon by the operator minus 1.
 
 ----
 
+.. _qf_ferm_op-implementation:
+
 Implementation
 ==============
 
@@ -59,6 +61,14 @@ commonly used for sparse matrices. More concretely, a single operator contains 4
 
 Entries in ``actions`` indicate creation (annihilation) operators by ``True`` (``False``).
 Fermionic modes indexed by ``modes`` are considered spinless.
+
+.. note::
+   You may access **read-only copies** of these internal arrays via their respective functions:
+
+   - :c:func:`qf_ferm_op_get_coeffs`
+   - :c:func:`qf_ferm_op_get_actions`
+   - :c:func:`qf_ferm_op_get_modes`
+   - :c:func:`qf_ferm_op_get_boundaries`
 
 This data structure allows for very efficient construction and manipulation of operators.
 However, it implies that duplicate terms may be contained in an operator at any moment.

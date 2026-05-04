@@ -108,6 +108,152 @@ pub unsafe extern "C" fn qf_maj_op_free(op: *mut MajoranaOperator) {
 
 /// @ingroup qf_maj_op
 ///
+/// @brief Provides read-only access to the operator's coefficients.
+///
+/// @param op A pointer to the majorana operator whose coefficients to access.
+/// @param coeffs_out A pointer to the array of complex values into which to write the coefficients.
+/// @param coeffs_len A pointer to the integer into which to write the length of the output array.
+///
+/// @rst
+///
+/// .. note::
+///    This function returns a **copy** of the internal data.
+///
+/// .. seealso::
+///    The explanation of the internal data structure, :ref:`here <qf_maj_op-implementation>`.
+///
+/// Example
+/// -------
+///
+/// .. code-block:: c
+///     :linenos:
+///
+///     uint64_t num_terms = 2;
+///     uint64_t num_modes = 0;
+///     QkComplex64 coeffs[2] = {{1.0, 0.0}, {0.0, -1.0}};
+///     uint32_t boundaries[3] = {0, 0, 0};
+///     QfMajoranaOperator *op =
+///         qf_maj_op_new(num_terms, num_modes, coeffs, NULL, boundaries);
+///
+///     QkComplex64 *coeffs_out;
+///     uint64_t *coeffs_len;
+///
+///     qf_maj_op_get_coeffs(op, &coeffs_out, &coeffs_len);
+///
+///     assert(coeffs_len == 2);
+///
+/// @endrst
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn qf_maj_op_get_coeffs(
+    op: *const MajoranaOperator,
+    coeffs_out: *mut *mut Complex64,
+    coeffs_len: *mut u64,
+) {
+    let op = unsafe { const_ptr_as_ref(op) };
+    unsafe { coeffs_out.write(op.coeffs.as_ptr().cast_mut()) };
+    unsafe { coeffs_len.write(op.coeffs.len().try_into().unwrap()) };
+}
+
+/// @ingroup qf_maj_op
+///
+/// @brief Provides read-only access to the operator's acted-upon mode indices.
+///
+/// @param op A pointer to the majorana operator whose modes to access.
+/// @param modes_out A pointer to the array of boolean values into which to write the modes.
+/// @param modes_len A pointer to the integer into which to write the length of the output array.
+///
+/// @rst
+///
+/// .. note::
+///    This function returns a **copy** of the internal data.
+///
+/// .. seealso::
+///    The explanation of the internal data structure, :ref:`here <qf_maj_op-implementation>`.
+///
+/// Example
+/// -------
+///
+/// .. code-block:: c
+///     :linenos:
+///
+///     uint64_t num_terms = 2;
+///     bool actions[2] = {true, false};
+///     uint32_t modes[2] = {0, 1};
+///     QkComplex64 coeffs[2] = {{1.0, 0.0}, {0.0, -1.0}};
+///     uint32_t boundaries[3] = {0, 0, 2};
+///     QfMajoranaOperator *op =
+///         qf_maj_op_new(num_terms, num_actions, coeffs, modes, boundaries);
+///
+///     QkComplex64 *modes_out;
+///     uint64_t *modes_len;
+///
+///     qf_maj_op_get_modes(op, &modes_out, &modes_len);
+///
+///     assert(modes_len == 2);
+///
+/// @endrst
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn qf_maj_op_get_modes(
+    op: *const MajoranaOperator,
+    modes_out: *mut *mut u32,
+    modes_len: *mut u64,
+) {
+    let op = unsafe { const_ptr_as_ref(op) };
+    unsafe { modes_out.write(op.modes.as_ptr().cast_mut()) };
+    unsafe { modes_len.write(op.modes.len().try_into().unwrap()) };
+}
+
+/// @ingroup qf_maj_op
+///
+/// @brief Provides read-only access to the indices indicating the boundaries between operator terms.
+///
+/// @param op A pointer to the majorana operator whose boundaries to access.
+/// @param boundaries_out A pointer to the array of boolean values into which to write the boundaries.
+/// @param boundaries_len A pointer to the integer into which to write the length of the output array.
+///
+/// @rst
+///
+/// .. note::
+///    This function returns a **copy** of the internal data.
+///
+/// .. seealso::
+///    The explanation of the internal data structure, :ref:`here <qf_maj_op-implementation>`.
+///
+/// Example
+/// -------
+///
+/// .. code-block:: c
+///     :linenos:
+///
+///     uint64_t num_terms = 2;
+///     uint64_t num_modes = 2;
+///     uint32_t modes[2] = {0, 1};
+///     QkComplex64 coeffs[2] = {{1.0, 0.0}, {0.0, -1.0}};
+///     uint32_t boundaries[3] = {0, 0, 2};
+///     QfMajoranaOperator *op =
+///         qf_maj_op_new(num_terms, num_modes, coeffs, modes, boundaries);
+///
+///     QkComplex64 *boundaries_out;
+///     uint64_t *boundaries_len;
+///
+///     qf_maj_op_get_boundaries(op, &boundaries_out, &boundaries_len);
+///
+///     assert(boundaries_len == 3);
+///
+/// @endrst
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn qf_maj_op_get_boundaries(
+    op: *const MajoranaOperator,
+    boundaries_out: *mut *mut usize,
+    boundaries_len: *mut u64,
+) {
+    let op = unsafe { const_ptr_as_ref(op) };
+    unsafe { boundaries_out.write(op.boundaries.as_ptr().cast_mut()) };
+    unsafe { boundaries_len.write(op.boundaries.len().try_into().unwrap()) };
+}
+
+/// @ingroup qf_maj_op
+///
 /// @brief Constructs the additive identity operator.
 ///
 /// @return A pointer to the created operator.

@@ -50,6 +50,60 @@ static int test_new(void) {
     return Ok;
 }
 
+static int test_getters(void) {
+    uint64_t num_terms = 3;
+    uint64_t num_actions = 4;
+    bool actions[4] = {true, false, true, false};
+    uint32_t modes[4] = {0, 1, 2, 3};
+    QkComplex64 coeffs[3] = {{1.0, 0.0}, {-1.0, 0.0}, {0.0, -1.0}};
+    uint32_t boundaries[4] = {0, 0, 2, 4};
+    QfFermionOperator *op =
+        qf_ferm_op_new(num_terms, num_actions, coeffs, actions, modes, boundaries);
+
+    bool passed_all = true;
+
+    QkComplex64 *coeffs_out;
+    uint64_t coeffs_len;
+    qf_ferm_op_get_coeffs(op, &coeffs_out, &coeffs_len);
+    passed_all = passed_all && (coeffs_len == num_terms);
+
+    for (uint64_t i = 0; i < num_terms; i++) {
+        passed_all = passed_all && (coeffs_out[i].re == coeffs[i].re);
+        passed_all = passed_all && (coeffs_out[i].im == coeffs[i].im);
+    }
+
+    bool *actions_out;
+    uint64_t actions_len;
+    qf_ferm_op_get_actions(op, &actions_out, &actions_len);
+    passed_all = passed_all && (actions_len == num_actions);
+
+    uint32_t *modes_out;
+    uint64_t modes_len;
+    qf_ferm_op_get_modes(op, &modes_out, &modes_len);
+    passed_all = passed_all && (modes_len == num_actions);
+
+    for (uint64_t i = 0; i < num_actions; i++) {
+        passed_all = passed_all && (actions_out[i] == actions[i]);
+        passed_all = passed_all && (modes_out[i] == modes[i]);
+    }
+
+    size_t *boundaries_out;
+    uint64_t boundaries_len;
+    qf_ferm_op_get_boundaries(op, &boundaries_out, &boundaries_len);
+    passed_all = passed_all && (boundaries_len == 4);
+
+    for (uint64_t i = 0; i < 4; i++) {
+        passed_all = passed_all && (boundaries_out[i] == boundaries[i]);
+    }
+
+    qf_ferm_op_free(op);
+
+    if (!passed_all) {
+        return EqualityError;
+    }
+    return Ok;
+}
+
 static int test_add(void) {
     QfFermionOperator *zero = qf_ferm_op_zero();
     QfFermionOperator *one = qf_ferm_op_one();
@@ -617,6 +671,7 @@ static int test_groups(void) {
 int test_fermion_operator(void) {
     int num_failed = 0;
     num_failed += RUN_TEST(test_new);
+    num_failed += RUN_TEST(test_getters);
     num_failed += RUN_TEST(test_add);
     num_failed += RUN_TEST(test_add_term);
     num_failed += RUN_TEST(test_equiv_pos);
