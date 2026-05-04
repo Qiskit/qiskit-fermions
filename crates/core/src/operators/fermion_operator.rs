@@ -56,6 +56,26 @@ pub struct FermionOperator {
 crate::impl_operator_macro!(FermionOperator);
 
 impl FermionOperator {
+    #[inline]
+    pub fn coeffs(&self) -> &[Complex64] {
+        &self.coeffs
+    }
+
+    #[inline]
+    pub fn actions(&self) -> &[bool] {
+        &self.actions
+    }
+
+    #[inline]
+    pub fn modes(&self) -> &[u32] {
+        &self.modes
+    }
+
+    #[inline]
+    pub fn boundaries(&self) -> &[usize] {
+        &self.boundaries
+    }
+
     fn _append_term(&mut self, coeff: Complex64, actions: &[bool], modes: &[u32]) {
         // WARNING: this does not handle `groups` by design!
         self.coeffs.push(coeff);

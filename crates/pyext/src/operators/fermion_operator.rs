@@ -76,6 +76,8 @@ impl FermionOperatorDataIter {
 ///
 /// ----
 ///
+/// .. _FermionOperator-implementation:
+///
 /// Implementation
 /// ==============
 ///
@@ -95,6 +97,10 @@ impl FermionOperatorDataIter {
 ///
 /// Entries in ``actions`` indicate creation (annihilation) operators by ``True`` (``False``).
 /// Fermionic modes indexed by ``modes`` are considered spinless.
+///
+/// .. note::
+///    You may access **read-only copies** of these internal arrays via their respective methods:
+///    :meth:`.get_coeffs`, :meth:`.get_actions`, :meth:`.get_modes`, and :meth:`.get_boundaries`.
 ///
 /// This data structure allows for very efficient construction and manipulation of operators.
 /// However, it implies that duplicate terms may be contained in an operator at any moment.
@@ -367,6 +373,98 @@ impl PyFermionOperator {
                 groups: None,
             },
         }
+    }
+
+    /// Returns a read-only list of the operator's coefficients.
+    ///
+    /// .. note::
+    ///    This method returns a **copy** of the internal data.
+    ///
+    /// .. seealso::
+    ///    The explanation of the internal data structure,
+    ///    :ref:`here <FermionOperator-implementation>`.
+    ///
+    /// .. doctest::
+    ///
+    ///     >>> from qiskit_fermions.operators import FermionOperator
+    ///     >>> op = FermionOperator.one()
+    ///     >>> op += -1j * FermionOperator.one()
+    ///     >>> op.get_coeffs()
+    ///     [(1+0j), -1j]
+    ///
+    /// Returns:
+    ///     A list of the operator's coefficients.
+    fn get_coeffs(&self) -> Vec<Complex64> {
+        self.inner.coeffs().to_vec()
+    }
+
+    /// Returns a read-only list of the operator's actions.
+    ///
+    /// .. note::
+    ///    This method returns a **copy** of the internal data.
+    ///
+    /// .. seealso::
+    ///    The explanation of the internal data structure,
+    ///    :ref:`here <FermionOperator-implementation>`.
+    ///
+    /// .. doctest::
+    ///
+    ///     >>> from qiskit_fermions.operators import FermionOperator
+    ///     >>> op = FermionOperator.one()
+    ///     >>> op += FermionOperator.from_dict({((True, 0), (False, 1)): 1.0})
+    ///     >>> op.get_actions()
+    ///     [True, False]
+    ///
+    /// Returns:
+    ///     A list of the operator's actions.
+    fn get_actions(&self) -> Vec<bool> {
+        self.inner.actions().to_vec()
+    }
+
+    /// Returns a read-only list of the operator's acted-upon mode indices.
+    ///
+    /// .. note::
+    ///    This method returns a **copy** of the internal data.
+    ///
+    /// .. seealso::
+    ///    The explanation of the internal data structure,
+    ///    :ref:`here <FermionOperator-implementation>`.
+    ///
+    /// .. doctest::
+    ///
+    ///     >>> from qiskit_fermions.operators import FermionOperator
+    ///     >>> op = FermionOperator.one()
+    ///     >>> op += FermionOperator.from_dict({((True, 0), (False, 1)): 1.0})
+    ///     >>> op.get_modes()
+    ///     [0, 1]
+    ///
+    /// Returns:
+    ///     A list of the operator's modes.
+    fn get_modes(&self) -> Vec<u32> {
+        self.inner.modes().to_vec()
+    }
+
+    /// Returns a read-only list of the indices indicating the boundaries between operator terms.
+    ///
+    /// .. note::
+    ///    This method returns a **copy** of the internal data.
+    ///
+    /// .. seealso::
+    ///    The explanation of the internal data structure,
+    ///    :ref:`here <FermionOperator-implementation>`.
+    ///
+    /// .. doctest::
+    ///
+    ///     >>> from qiskit_fermions.operators import FermionOperator
+    ///     >>> op = FermionOperator.one()
+    ///     >>> op += FermionOperator.from_dict({((True, 0), (False, 1)): 1.0})
+    ///     >>> op.get_boundaries()
+    ///     [0, 0, 2]
+    ///
+    /// Returns:
+    ///     A list of the operator's terms boundaries.
+    fn get_boundaries(&self) -> Vec<usize> {
+        self.inner.boundaries().to_vec()
     }
 
     fn __richcmp__(&self, other: &Self, op: CompareOp, _py: Python<'_>) -> PyResult<bool> {

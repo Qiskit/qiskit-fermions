@@ -12,6 +12,7 @@
 
 from abc import ABC, abstractmethod
 
+import numpy as np
 import pytest
 from qiskit_fermions.operators import FermionOperator, ann, cre
 from qiskit_fermions.operators.library import anti_commutator, commutator
@@ -21,6 +22,25 @@ class FermionOperatorTests(ABC):
     @staticmethod
     @abstractmethod
     def get_class() -> type[FermionOperator]: ...
+
+    def test_getters(self, subtests):
+        cls = self.get_class()
+
+        coeffs = [1e-10, 2, 3, 4, -4]
+        actions = [True, True, False, False]
+        modes = [0, 0, 1, 1]
+        boundaries = [0, 0, 1, 2, 3, 4]
+
+        op = cls(coeffs, actions, modes, boundaries)
+
+        with subtests.test("coeffs"):
+            assert np.allclose(op.get_coeffs(), coeffs)
+        with subtests.test("actions"):
+            assert np.all(op.get_actions() == actions)
+        with subtests.test("modes"):
+            assert np.all(op.get_modes() == modes)
+        with subtests.test("boundaries"):
+            assert np.all(op.get_boundaries() == boundaries)
 
     def test_zero(self):
         cls = self.get_class()
