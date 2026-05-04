@@ -515,7 +515,7 @@ impl PyMajoranaOperator {
     /// Returns:
     ///     An equivalent but simplified operator.
     #[pyo3(signature = (atol=1e-8))]
-    fn simplify(&mut self, atol: f64) -> Self {
+    fn simplify(&self, atol: f64) -> Self {
         Self {
             inner: self.inner.simplify(atol),
         }

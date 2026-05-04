@@ -15,7 +15,6 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import TYPE_CHECKING
 
 from qiskit.circuit import QuantumCircuit
 from qiskit.circuit.library import PauliEvolutionGate
@@ -23,18 +22,12 @@ from qiskit.converters import circuit_to_dag
 from qiskit.dagcircuit import DAGCircuit, DAGOpNode
 from qiskit.quantum_info import SparseObservable
 
+from qiskit_fermions.operators.protocol import OperatorTrait
+
 from ... import F2QLayout
 from ..utils import _parse_node_indices
 
-if TYPE_CHECKING:
-    from qiskit_fermions._lib.operators.fermion_operator import FermionOperator
-    from qiskit_fermions._lib.operators.majorana_operator import MajoranaOperator
-else:
-    from qiskit_fermions.operators import FermionOperator, MajoranaOperator
-
-
-# TODO: add an OperatorProtocol to avoid hard-coding this list of types from our package
-MapperFunction = Callable[[FermionOperator | MajoranaOperator], SparseObservable]
+MapperFunction = Callable[[OperatorTrait], SparseObservable]
 """The function signature for :attr:`mapper_fn`."""
 
 

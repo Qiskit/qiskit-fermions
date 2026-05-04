@@ -14,21 +14,15 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from qiskit_fermions.operators.protocol import OperatorTrait
 
 from .. import FermionGate
-
-if TYPE_CHECKING:
-    from qiskit_fermions._lib.operators.fermion_operator import FermionOperator
-    from qiskit_fermions._lib.operators.majorana_operator import MajoranaOperator
 
 
 class Evolution(FermionGate):
     """Implements the time-evolution of an operator."""
 
-    def __init__(
-        self, num_fermions: int, operator: FermionOperator | MajoranaOperator, time: float = 1.0
-    ) -> None:
+    def __init__(self, num_fermions: int, operator: OperatorTrait, time: float = 1.0) -> None:
         """Initializes an Evolution gate.
 
         Args:
