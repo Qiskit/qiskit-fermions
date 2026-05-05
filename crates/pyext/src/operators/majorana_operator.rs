@@ -159,6 +159,7 @@ impl MajoranaOperatorDataIter {
 ///
 ///    zero
 ///    one
+///    from_terms
 ///
 /// Iteration
 /// ---------

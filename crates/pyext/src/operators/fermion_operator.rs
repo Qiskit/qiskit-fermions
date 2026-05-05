@@ -158,6 +158,7 @@ impl FermionOperatorDataIter {
 ///
 ///    zero
 ///    one
+///    from_terms
 ///
 /// Iteration
 /// ---------
