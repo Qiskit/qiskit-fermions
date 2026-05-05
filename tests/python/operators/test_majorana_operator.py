@@ -242,14 +242,17 @@ class MajoranaOperatorTests(ABC):
     def test_normal_ordered(self, subtests):
         cls = self.get_class()
 
-        with subtests.test("no change"):
+        with subtests.test("descending order"):
             op = cls.from_dict({(gamma(0, True), gamma(0, False)): 1})
-            assert op.normal_ordered().equiv(op)
+            assert op.normal_ordered(ascending=False).equiv(op)
+            expected = cls.from_dict({(gamma(0, False), gamma(0, True)): -1})
+            assert op.normal_ordered(ascending=True).equiv(expected)
 
-        with subtests.test("simple reorder"):
+        with subtests.test("ascending order"):
             op = cls.from_dict({(gamma(0, False), gamma(0, True)): 1})
+            assert op.normal_ordered(ascending=True).equiv(op)
             expected = cls.from_dict({(gamma(0, True), gamma(0, False)): -1})
-            assert op.normal_ordered().equiv(expected)
+            assert op.normal_ordered(ascending=False).equiv(expected)
 
         with subtests.test("reorder with reduction"):
             op = cls.from_dict({(gamma(0, True), gamma(0, False), gamma(0, True)): 1})

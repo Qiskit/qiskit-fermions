@@ -96,13 +96,13 @@ impl MajoranaOperator {
         Some(groups)
     }
 
-    pub fn normal_ordered(&self, reduce: bool) -> Self {
+    pub fn normal_ordered(&self, ascending: bool, reduce: bool) -> Self {
         let mut coeffs = vec![];
         let mut modes = vec![];
         let mut boundaries = vec![0];
 
         for term in self.iter() {
-            let (mut sorted_term, sign) = sort_and_parity(term.modes);
+            let (mut sorted_term, sign) = sort_and_parity(term.modes, ascending);
             if reduce {
                 sorted_term = reduce_pairs(&sorted_term);
             }
@@ -119,7 +119,7 @@ impl MajoranaOperator {
     }
 
     pub fn is_hermitian(&self, atol: f64) -> bool {
-        let mut diff = (self.__sub__(&self.adjoint())).normal_ordered(true);
+        let mut diff = (self.__sub__(&self.adjoint())).normal_ordered(false, true);
         diff.ichop(atol);
         diff.equiv(&Self::zero(), atol)
     }
@@ -207,15 +207,17 @@ fn permutation_parity(perm: &[usize]) -> i32 {
 ///
 /// Args:
 ///     tpl: tuple of integers to be sorted.
+///     ascending: whether indices should ascend or descend.
 ///
 /// Returns:
 ///     A tuple (sorted_tpl, sign):
 ///     - sorted_tpl: tuple containing the sorted integers.
 ///     - sign: +1 if the sorting permutation is even, -1 if it is odd.
-fn sort_and_parity(tpl: &[u32]) -> (Vec<u32>, i32) {
+fn sort_and_parity(tpl: &[u32], ascending: bool) -> (Vec<u32>, i32) {
     let mut indexed: Vec<(usize, u32)> = tpl.iter().cloned().enumerate().collect();
     // we need stable sort to ensure that the parity is correctly computed
-    indexed.sort_by_key(|&(_, val)| -(val as i32));
+    let sign = if ascending { 1 } else { -1 };
+    indexed.sort_by_key(|&(_, val)| sign * (val as i32));
 
     let perm: Vec<usize> = indexed.iter().map(|&(i, _)| i).collect();
     let sorted_tpl: Vec<u32> = indexed.iter().map(|&(_, val)| val).collect();
@@ -818,7 +820,16 @@ mod tests {
             groups: None,
         };
 
-        assert_eq!(op.normal_ordered(false), op);
+        assert_eq!(op.normal_ordered(false, false), op);
+
+        let expected = MajoranaOperator {
+            coeffs: vec![Complex64::new(-1.0, 0.0)],
+            modes: vec![0, 1],
+            boundaries: vec![0, 2],
+            groups: None,
+        };
+
+        assert_eq!(op.normal_ordered(true, false), expected);
     }
 
     #[test]
@@ -830,6 +841,8 @@ mod tests {
             groups: None,
         };
 
+        assert_eq!(op.normal_ordered(true, false), op);
+
         let expected = MajoranaOperator {
             coeffs: vec![Complex64::new(-1.0, 0.0)],
             modes: vec![1, 0],
@@ -837,7 +850,7 @@ mod tests {
             groups: None,
         };
 
-        assert_eq!(op.normal_ordered(false), expected);
+        assert_eq!(op.normal_ordered(false, false), expected);
     }
 
     #[test]
@@ -856,7 +869,7 @@ mod tests {
             groups: None,
         };
 
-        assert_eq!(op.normal_ordered(true), expected);
+        assert_eq!(op.normal_ordered(false, true), expected);
     }
 
     #[test]

@@ -102,7 +102,7 @@ impl MajoranaOperatorDataIter {
 ///    ============== =================================================================================
 ///
 /// The integers in ``modes`` index the Majorana modes, :math:`j`. When using the convenience
-/// function :py:func:`.gamma`, even (odd) indices are used for :math`\gamma` (:math:`\gamma'`).
+/// function :py:func:`.gamma`, even (odd) indices are used for :math:`\gamma` (:math:`\gamma'`).
 ///
 /// .. note::
 ///    You may access **read-only copies** of these internal arrays via their respective methods:
@@ -755,9 +755,10 @@ impl PyMajoranaOperator {
     /// Returns an equivalent operator with normal ordered terms.
     ///
     /// The normal order of an operator term is defined such that all actions are ordered by
-    /// lexicographically descending indices. With the convention set forth by :py:func:`.gamma` to
-    /// place :math:`\gamma` (:math:`\gamma'`) on even (odd) indices, this results in the following
-    /// example:
+    /// lexicographically. Whether they ascend or descend depends on the value of the ``ascending``
+    /// parameter. With the convention set forth by :py:func:`.gamma` to place :math:`\gamma`
+    /// (:math:`\gamma'`) on even (odd) indices, this results in the following example (for the
+    /// default, ``ascending=False``):
     /// ``[\gamma(1, True), \gamma(1, False), \gamma(0, True), \gamma(0, False)] = [3, 2, 1, 0]``.
     ///
     /// .. doctest::
@@ -770,15 +771,16 @@ impl PyMajoranaOperator {
     ///      -1.000000e0 +0.000000e0j * (1)
     ///
     /// Args:
+    ///     ascending: whether indices should ascend or descend.
     ///     reduce: whether to reduce each term to its minimal form by removing actions that square
     ///         to the identity. See also the example above.
     ///
     /// Returns:
     ///     An equivalent but normal-ordered operator.
-    #[pyo3(signature = (reduce=true))]
-    fn normal_ordered(&self, reduce: bool) -> Self {
+    #[pyo3(signature = (ascending=false, reduce=true))]
+    fn normal_ordered(&self, ascending: bool, reduce: bool) -> Self {
         Self {
-            inner: self.inner.normal_ordered(reduce),
+            inner: self.inner.normal_ordered(ascending, reduce),
         }
     }
 

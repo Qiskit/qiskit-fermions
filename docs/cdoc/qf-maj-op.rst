@@ -66,7 +66,7 @@ commonly used for sparse matrices. More concretely, a single operator contains 4
    ============== =================================================================================
 
 The integers in ``modes`` index the Majorana modes, :math:`j`. When using the convenience
-function :py:func:`.gamma`, even (odd) indices are used for :math`\gamma` (:math:`\gamma'`).
+function :py:func:`.gamma`, even (odd) indices are used for :math:`\gamma` (:math:`\gamma'`).
 
 .. note::
    You may access **read-only copies** of these internal arrays via their respective functions:

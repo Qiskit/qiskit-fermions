@@ -137,7 +137,7 @@ mod tests {
         };
 
         let maj_op = fermion_to_majorana(&fer_op);
-        let normal = maj_op.normal_ordered(true);
+        let normal = maj_op.normal_ordered(false, true);
         let canon = normal.simplify(1e-8);
 
         let expected = MajoranaOperator {
@@ -161,7 +161,7 @@ mod tests {
         };
 
         let maj_op = fermion_to_majorana(&fer_op);
-        let normal = maj_op.normal_ordered(true);
+        let normal = maj_op.normal_ordered(false, true);
         let canon = normal.simplify(1e-8);
 
         let expected = MajoranaOperator {
