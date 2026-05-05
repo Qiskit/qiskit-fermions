@@ -373,6 +373,10 @@ impl OperatorTrait for MajoranaOperator {
         self.boundaries = boundaries;
         self.groups = None;
     }
+
+    fn get_support(&self) -> HashSet<u32> {
+        HashSet::from_iter(self.modes.clone())
+    }
 }
 
 #[cfg(test)]
@@ -933,6 +937,18 @@ mod tests {
             }
             .is_even()
         );
+    }
+
+    #[test]
+    fn test_get_support() {
+        let op = MajoranaOperator {
+            coeffs: vec![Complex64::new(1.0, 0.0), Complex64::new(1.0, 0.0)],
+            modes: vec![0, 4, 1, 3, 4, 7],
+            boundaries: vec![0, 2, 4],
+            groups: None,
+        };
+
+        assert_eq!(op.get_support(), HashSet::from([0, 1, 3, 4, 7]));
     }
 
     #[test]

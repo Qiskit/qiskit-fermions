@@ -99,6 +99,9 @@ class OperatorTrait(Protocol):
     def adjoint(self) -> Self:
         """Returns the adjoint of this operator."""
 
+    def get_support(self) -> frozenset[int]:
+        """Returns the set of mode indices which this operator acts upon."""
+
     def normal_ordered(self, *args, **kwargs) -> Self:
         """Returns the normal-ordered form of this operator.
 

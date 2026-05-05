@@ -10,6 +10,8 @@
 // copyright notice, and modified files need to carry a notice indicating
 // that they have been altered from the originals.
 
+use std::collections::HashSet;
+
 use num_complex::Complex64;
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
@@ -435,6 +437,25 @@ impl PyMajoranaOperator {
     ///     A list of the operator's terms boundaries.
     fn get_boundaries(&self) -> Vec<usize> {
         self.inner.boundaries().to_vec()
+    }
+
+    /// Returns the set of mode indices which this operator acts upon.
+    ///
+    /// .. doctest::
+    ///
+    ///     >>> from qiskit_fermions.operators import MajoranaOperator
+    ///     >>> op = MajoranaOperator.from_dict(
+    ///     ...     {
+    ///     ...         (0, 4): 1,
+    ///     ...         (1, 3, 4, 7): 1,
+    ///     ...     }
+    ///     ... )
+    ///     >>> assert op.get_support() == {0, 1, 3, 4, 7}
+    ///
+    /// Returns:
+    ///     The set of mode indices which this operator acts upon.
+    fn get_support(&self) -> HashSet<u32> {
+        self.inner.get_support()
     }
 
     fn __richcmp__(&self, other: &Self, op: CompareOp, _py: Python<'_>) -> PyResult<bool> {

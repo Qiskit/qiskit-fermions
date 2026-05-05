@@ -383,6 +383,10 @@ impl OperatorTrait for FermionOperator {
         self.boundaries = boundaries;
         self.groups = None;
     }
+
+    fn get_support(&self) -> HashSet<u32> {
+        HashSet::from_iter(self.modes.clone())
+    }
 }
 
 #[cfg(test)]
@@ -1049,6 +1053,19 @@ mod tests {
         };
 
         assert!(!op2.conserves_particle_number());
+    }
+
+    #[test]
+    fn test_get_support() {
+        let op = FermionOperator {
+            coeffs: vec![Complex64::new(1.0, 0.0), Complex64::new(1.0, 0.0)],
+            actions: vec![true, false, true, true, false, false],
+            modes: vec![0, 4, 1, 3, 4, 7],
+            boundaries: vec![0, 2, 4],
+            groups: None,
+        };
+
+        assert_eq!(op.get_support(), HashSet::from([0, 1, 3, 4, 7]));
     }
 
     #[test]

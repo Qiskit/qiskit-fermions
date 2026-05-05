@@ -10,6 +10,8 @@
 // copyright notice, and modified files need to carry a notice indicating
 // that they have been altered from the originals.
 
+use std::collections::HashSet;
+
 use num_complex::Complex64;
 use thiserror::Error;
 
@@ -26,6 +28,8 @@ pub trait OperatorTrait {
     fn __iand__(&mut self, other: &Self);
     fn __imatmul__(&mut self, other: &Self);
     fn ichop(&mut self, atol: f64);
+
+    fn get_support(&self) -> HashSet<u32>;
 }
 
 pub trait OperatorMacro {

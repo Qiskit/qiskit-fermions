@@ -42,6 +42,13 @@ class FermionOperatorTests(ABC):
         with subtests.test("boundaries"):
             assert np.all(op.get_boundaries() == boundaries)
 
+    def test_get_support(self):
+        cls = self.get_class()
+        op = cls.from_dict(
+            {((True, 0), (False, 4)): 1, ((True, 1), (True, 3), (False, 4), (False, 7)): 1}
+        )
+        assert op.get_support() == {0, 1, 3, 4, 7}
+
     def test_zero(self):
         cls = self.get_class()
         op = cls.zero()
