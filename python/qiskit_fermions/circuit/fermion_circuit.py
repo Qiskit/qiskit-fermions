@@ -14,9 +14,10 @@
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from typing import TYPE_CHECKING, Any, cast
 
-from qiskit.circuit import QuantumCircuit, QuantumRegister
+from qiskit.circuit import Instruction, QuantumCircuit, QuantumRegister
 
 from . import Fermion, FermionSpecifier
 from .fermion_gate import FermionGate
@@ -76,6 +77,20 @@ class FermionCircuit:
             raise ValueError("Unsupported instruction type: %s", type(gate))
 
         self._inner.append(gate, fargs, cargs, copy=copy)
+
+    def decompose(
+        self,
+        gates_to_decompose: (
+            str | type[Instruction] | Sequence[str | type[Instruction]] | None
+        ) = None,
+        reps: int = 1,
+    ) -> FermionCircuit:
+        """Re-exposes :external:meth:`~qiskit.circuit.QuantumCircuit.decompose`."""
+        inner_decomposed = self._inner.decompose(gates_to_decompose=gates_to_decompose, reps=reps)
+        out = FermionCircuit(len(self.register))
+        out.register = self.register
+        out._inner = inner_decomposed
+        return out
 
     def draw(self, *args, **kwargs) -> Any:
         """Directly exposes the inner circuit's :meth:`~qiskit.circuit.QuantumCircuit.draw` method."""

@@ -33,4 +33,42 @@ class Evolution(FermionGate):
         self.operator = operator
         """The operator under which to time-evolve the acted-upon fermionic modes."""
 
-        super().__init__("Evolution", num_fermions, [time])
+        super().__init__(
+            "Evolution", num_fermions, [time], label=f"evolve({' '.join(str(operator).split())})"
+        )
+
+    def _define(self) -> None:
+        from qiskit_fermions.circuit import FermionCircuit
+
+        definition = FermionCircuit(self.num_fermions)
+
+        # when the operator being evolved has groups use those for the decomposition, otherwise
+        # decompose into all individual terms
+        iterator = (
+            self.operator.iter_terms
+            if self.operator.groups is None
+            else self.operator.split_out_groups
+        )
+
+        for item in iterator():
+            if isinstance(item, tuple):
+                # iterating over terms rather than operator groups
+                item = self.operator.__class__.from_terms([item])
+
+            # reduce each operator to act only on the non-idle part of the register
+            active = item.get_support()
+            num_active = len(active)
+            active_idx = iter(range(num_active))
+            idle_idx = iter(range(num_active, self.num_fermions))
+            permutation = [
+                next(active_idx) if idx in active else next(idle_idx)
+                for idx in range(self.num_fermions)
+            ]
+            relabeled = item.relabel_modes(permutation)
+
+            definition.append(
+                Evolution(num_active, relabeled, time=self.params[0]),
+                [definition.fermions[idx] for idx in sorted(active)],
+            )
+
+        self._definition = definition._inner
