@@ -102,6 +102,9 @@ class OperatorTrait(Protocol):
     def get_support(self) -> frozenset[int]:
         """Returns the set of mode indices which this operator acts upon."""
 
+    def relabel_modes(self, permutation: list[int]) -> Self:
+        """Relabels the modes of the operator."""
+
     def normal_ordered(self, *args, **kwargs) -> Self:
         """Returns the normal-ordered form of this operator.
 

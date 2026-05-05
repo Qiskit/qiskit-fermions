@@ -148,25 +148,6 @@ impl MajoranaOperator {
         }
         true
     }
-
-    pub fn relabel_modes(&self, permutation: Vec<u32>) -> Result<Self, CoherenceError> {
-        if permutation.iter().collect::<HashSet<_>>().len() != permutation.len() {
-            return Err(CoherenceError::DuplicateIndices);
-        }
-        let mut out = self.clone();
-        let new_modes: Result<Vec<u32>, CoherenceError> = self
-            .modes
-            .iter()
-            .map(|&idx| {
-                permutation
-                    .get(idx as usize)
-                    .cloned()
-                    .ok_or(CoherenceError::IndexMapTooSmall)
-            })
-            .collect();
-        out.modes = new_modes?;
-        Ok(out)
-    }
 }
 
 /// FIXME: follow rustdoc standards
@@ -376,6 +357,25 @@ impl OperatorTrait for MajoranaOperator {
 
     fn get_support(&self) -> HashSet<u32> {
         HashSet::from_iter(self.modes.clone())
+    }
+
+    fn relabel_modes(&self, permutation: Vec<u32>) -> Result<Self, CoherenceError> {
+        if permutation.iter().collect::<HashSet<_>>().len() != permutation.len() {
+            return Err(CoherenceError::DuplicateIndices);
+        }
+        let mut out = self.clone();
+        let new_modes: Result<Vec<u32>, CoherenceError> = self
+            .modes
+            .iter()
+            .map(|&idx| {
+                permutation
+                    .get(idx as usize)
+                    .cloned()
+                    .ok_or(CoherenceError::IndexMapTooSmall)
+            })
+            .collect();
+        out.modes = new_modes?;
+        Ok(out)
     }
 }
 

@@ -15,6 +15,16 @@ use std::collections::HashSet;
 use num_complex::Complex64;
 use thiserror::Error;
 
+/// Error cases stemming from data coherence at the point of entry into `OperatorTrait` from
+/// user-provided arrays.
+#[derive(Error, Debug)]
+pub enum CoherenceError {
+    #[error("the input contains duplicate indices")]
+    DuplicateIndices,
+    #[error("the provided index mapping does not account for the entire length of the operator")]
+    IndexMapTooSmall,
+}
+
 pub trait OperatorTrait {
     fn zero() -> Self;
     fn one() -> Self;
@@ -30,6 +40,9 @@ pub trait OperatorTrait {
     fn ichop(&mut self, atol: f64);
 
     fn get_support(&self) -> HashSet<u32>;
+    fn relabel_modes(&self, permutation: Vec<u32>) -> Result<Self, CoherenceError>
+    where
+        Self: Sized;
 }
 
 pub trait OperatorMacro {
@@ -224,16 +237,6 @@ macro_rules! impl_operator_macro {
             }
         }
     };
-}
-
-/// Error cases stemming from data coherence at the point of entry into `OperatorTrait` from
-/// user-provided arrays.
-#[derive(Error, Debug)]
-pub enum CoherenceError {
-    #[error("the input contains duplicate indices")]
-    DuplicateIndices,
-    #[error("the provided index mapping does not account for the entire length of the operator")]
-    IndexMapTooSmall,
 }
 
 pub mod fermion_operator;
