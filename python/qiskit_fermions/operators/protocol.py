@@ -111,3 +111,14 @@ class OperatorTrait(Protocol):
         .. note::
            A specific implementation of this method may take additional arguments.
         """
+
+    @property
+    def groups(self) -> list[int] | None:
+        """Returns the groups indices."""
+
+    @groups.setter
+    def groups(self, groups: list[int] | None) -> None:
+        """Sets the groups indices."""
+
+    def split_out_groups(self) -> list[Self]:
+        """Splits this operator into an optional list of new operators based on its :attr:`.groups`."""
