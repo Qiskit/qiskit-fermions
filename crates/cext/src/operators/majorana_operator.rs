@@ -854,10 +854,14 @@ pub unsafe extern "C" fn qf_maj_op_simplify(
 ///
 /// @brief Returns an equivalent operator with normal ordered terms.
 ///
-/// The normal order of an operator term is defined such that all actions are ordered by
-/// lexicographically descending indices.
+/// The normal order of an operator term is defined such that all actions are ordered
+/// lexicographically. Whether they ascend or descend depends on the value of the ``ascending``
+/// parameter.
 ///
 /// @param op A pointer to the operator.
+/// @param ascending Whether indices should ascend or descend.
+/// @param reduce Whether to reduce each term to its minimal form by removing actions that square
+/// to the identity.
 ///
 /// @return A pointer to the created operator.
 ///
@@ -874,7 +878,7 @@ pub unsafe extern "C" fn qf_maj_op_simplify(
 ///     QkComplex64 coeff = {1.0, 0.0};
 ///     qf_maj_op_add_term(op, 4, modes, &coeff);
 ///
-///     QfMajoranaOperator *normal_ordered = qf_maj_op_normal_ordered(op, true);
+///     QfMajoranaOperator *normal_ordered = qf_maj_op_normal_ordered(op, false, true);
 ///
 ///     QkComplex64 coeff_minus = {-1.0, 0.0};
 ///     QfMajoranaOperator *expected = qf_maj_op_zero();
@@ -887,12 +891,13 @@ pub unsafe extern "C" fn qf_maj_op_simplify(
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn qf_maj_op_normal_ordered(
     op: *const MajoranaOperator,
+    ascending: bool,
     reduce: bool,
 ) -> *mut MajoranaOperator {
     // SAFETY: Per documentation, the pointers are non-null and aligned.
     let op = unsafe { const_ptr_as_ref(op) };
 
-    let result = op.normal_ordered(reduce);
+    let result = op.normal_ordered(ascending, reduce);
     Box::into_raw(Box::new(result))
 }
 

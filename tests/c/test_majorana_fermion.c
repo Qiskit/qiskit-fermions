@@ -24,7 +24,7 @@ static int test_fermion_to_majorana(void) {
     qf_ferm_op_add_term(fer_op, 2, action_fer, indices_fer, &coeff);
 
     QfMajoranaOperator *result = qf_fermion_to_majorana(fer_op);
-    QfMajoranaOperator *canon = qf_maj_op_normal_ordered(result, true);
+    QfMajoranaOperator *canon = qf_maj_op_normal_ordered(result, false, true);
 
     uint64_t num_terms = 2;
     uint64_t num_modes = 2;
