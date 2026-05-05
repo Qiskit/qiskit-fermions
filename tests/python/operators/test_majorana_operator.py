@@ -80,6 +80,22 @@ class MajoranaOperatorTests(ABC):
         op = cls.one()
         assert list(op.iter_terms()) == [([], 1)]
 
+    def test_from_terms(self, subtests):
+        cls = self.get_class()
+        op = cls.from_dict(
+            {
+                (): 2,
+                (gamma(0, False),): 1,
+                (gamma(0, False), gamma(0, True)): 0.5,
+                (gamma(1, False), gamma(0, True)): -0.5j,
+                (gamma(1, True), gamma(1, False)): 1 - 0.5j,
+            }
+        )
+        with subtests.test("iterator"):
+            assert op.equiv(cls.from_terms(op.iter_terms()))
+        with subtests.test("list"):
+            assert op.equiv(cls.from_terms(list(op.iter_terms())))
+
     def test_ichop(self):
         cls = self.get_class()
         op = cls.from_dict({(): 1e-4, (0,): 1e-6, (1,): 1e-10})

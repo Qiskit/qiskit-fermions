@@ -691,6 +691,36 @@ impl PyFermionOperator {
         Py::new(slf.py(), iter)
     }
 
+    /// Constructs a new operator from an iterator of terms (see also :meth:`.iter_terms`).
+    ///
+    /// .. doctest::
+    ///
+    ///     >>> from qiskit_fermions.operators import FermionOperator
+    ///     >>> op = FermionOperator.from_dict({(): 2.0, ((True, 0),): 1.0, ((False, 1),): -1.0j})
+    ///     >>> op.equiv(FermionOperator.from_terms(op.iter_terms()))
+    ///     True
+    ///
+    /// Args:
+    ///     terms: an iterator of terms as produced by :meth:`.iter_terms`.
+    ///
+    /// Returns:
+    ///     A new operator.
+    #[classmethod]
+    fn from_terms(_cls: &Bound<'_, PyType>, terms: &Bound<'_, PyAny>) -> PyResult<Self> {
+        let mut inner = FermionOperator::zero();
+        terms.try_iter()?.try_for_each(|item| -> PyResult<()> {
+            let (term, coeff) = item?.extract::<(Vec<PyFermionAction>, Complex64)>()?;
+            inner.coeffs.push(coeff);
+            term.iter().for_each(|(a, m)| {
+                inner.actions.push(*a);
+                inner.modes.push(*m);
+            });
+            inner.boundaries.push(inner.modes.len());
+            Ok(())
+        })?;
+        Ok(Self { inner })
+    }
+
     /// An optional vector of `group indices` for each term.
     ///
     /// For more information refer to the :mod:`~qiskit_fermions.operators.grouping` module.

@@ -15,6 +15,7 @@
 from __future__ import annotations
 
 import sys
+from collections.abc import Iterable, Iterator
 from typing import Protocol
 
 if sys.version_info >= (3, 11):
@@ -78,6 +79,13 @@ class OperatorTrait(Protocol):
 
     def __len__(self) -> int:
         """Returns the length of this operator."""
+
+    def iter_terms(self) -> Iterator:
+        """Iterates over the terms of this operator."""
+
+    @classmethod
+    def from_terms(cls, terms: Iterable) -> Self:
+        """Constructs a new operator from an iterator (see also :meth:`.iter_terms`)."""
 
     def equiv(self, other: Self, atol: float) -> bool:
         """Checks this operator with another for equivalence up to the specified absolute tolerance."""

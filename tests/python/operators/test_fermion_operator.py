@@ -83,6 +83,22 @@ class FermionOperatorTests(ABC):
         op = cls.one()
         assert list(op.iter_terms()) == [([], 1)]
 
+    def test_from_terms(self, subtests):
+        cls = self.get_class()
+        op = cls.from_dict(
+            {
+                (): 2,
+                (cre(1), ann(2)): 1,
+                (cre(2), ann(1)): 0.5,
+                (cre(3), ann(4)): -0.5j,
+                (cre(4), ann(3)): 1 - 0.5j,
+            }
+        )
+        with subtests.test("iterator"):
+            assert op.equiv(cls.from_terms(op.iter_terms()))
+        with subtests.test("list"):
+            assert op.equiv(cls.from_terms(list(op.iter_terms())))
+
     def test_ichop(self):
         cls = self.get_class()
         op = cls.from_dict({(): 1e-4, ((True, 0),): 1e-6, ((False, 0),): 1e-10})
