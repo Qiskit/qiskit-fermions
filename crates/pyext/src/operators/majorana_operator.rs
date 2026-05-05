@@ -10,6 +10,8 @@
 // copyright notice, and modified files need to carry a notice indicating
 // that they have been altered from the originals.
 
+use std::collections::HashSet;
+
 use num_complex::Complex64;
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
@@ -157,6 +159,7 @@ impl MajoranaOperatorDataIter {
 ///
 ///    zero
 ///    one
+///    from_terms
 ///
 /// Iteration
 /// ---------
@@ -437,6 +440,25 @@ impl PyMajoranaOperator {
         self.inner.boundaries().to_vec()
     }
 
+    /// Returns the set of mode indices which this operator acts upon.
+    ///
+    /// .. doctest::
+    ///
+    ///     >>> from qiskit_fermions.operators import MajoranaOperator
+    ///     >>> op = MajoranaOperator.from_dict(
+    ///     ...     {
+    ///     ...         (0, 4): 1,
+    ///     ...         (1, 3, 4, 7): 1,
+    ///     ...     }
+    ///     ... )
+    ///     >>> assert op.get_support() == {0, 1, 3, 4, 7}
+    ///
+    /// Returns:
+    ///     The set of mode indices which this operator acts upon.
+    fn get_support(&self) -> HashSet<u32> {
+        self.inner.get_support()
+    }
+
     fn __richcmp__(&self, other: &Self, op: CompareOp, _py: Python<'_>) -> PyResult<bool> {
         match op {
             CompareOp::Eq => {
@@ -648,6 +670,33 @@ impl PyMajoranaOperator {
             inner: vectorized.into_iter(),
         };
         Py::new(slf.py(), iter)
+    }
+
+    /// Constructs a new operator from an iterator of terms (see also :meth:`.iter_terms`).
+    ///
+    /// .. doctest::
+    ///
+    ///     >>> from qiskit_fermions.operators import MajoranaOperator
+    ///     >>> op = MajoranaOperator.from_dict({(): 2.0, (0,): 1.0, (1,): -1.0j})
+    ///     >>> op.equiv(MajoranaOperator.from_terms(op.iter_terms()))
+    ///     True
+    ///
+    /// Args:
+    ///     terms: an iterator of terms as produced by :meth:`.iter_terms`.
+    ///
+    /// Returns:
+    ///     A new operator.
+    #[classmethod]
+    fn from_terms(_cls: &Bound<'_, PyType>, terms: &Bound<'_, PyAny>) -> PyResult<Self> {
+        let mut inner = MajoranaOperator::zero();
+        terms.try_iter()?.try_for_each(|item| -> PyResult<()> {
+            let (term, coeff) = item?.extract::<(Vec<PyMajoranaAction>, Complex64)>()?;
+            inner.coeffs.push(coeff);
+            inner.modes.extend_from_slice(&term);
+            inner.boundaries.push(inner.modes.len());
+            Ok(())
+        })?;
+        Ok(Self { inner })
     }
 
     /// An optional vector of `group indices` for each term.

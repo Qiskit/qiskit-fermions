@@ -42,6 +42,13 @@ class FermionOperatorTests(ABC):
         with subtests.test("boundaries"):
             assert np.all(op.get_boundaries() == boundaries)
 
+    def test_get_support(self):
+        cls = self.get_class()
+        op = cls.from_dict(
+            {((True, 0), (False, 4)): 1, ((True, 1), (True, 3), (False, 4), (False, 7)): 1}
+        )
+        assert op.get_support() == {0, 1, 3, 4, 7}
+
     def test_zero(self):
         cls = self.get_class()
         op = cls.zero()
@@ -82,6 +89,22 @@ class FermionOperatorTests(ABC):
         cls = self.get_class()
         op = cls.one()
         assert list(op.iter_terms()) == [([], 1)]
+
+    def test_from_terms(self, subtests):
+        cls = self.get_class()
+        op = cls.from_dict(
+            {
+                (): 2,
+                (cre(1), ann(2)): 1,
+                (cre(2), ann(1)): 0.5,
+                (cre(3), ann(4)): -0.5j,
+                (cre(4), ann(3)): 1 - 0.5j,
+            }
+        )
+        with subtests.test("iterator"):
+            assert op.equiv(cls.from_terms(op.iter_terms()))
+        with subtests.test("list"):
+            assert op.equiv(cls.from_terms(list(op.iter_terms())))
 
     def test_ichop(self):
         cls = self.get_class()

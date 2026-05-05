@@ -15,6 +15,7 @@
 from __future__ import annotations
 
 import sys
+from collections.abc import Iterable, Iterator
 from typing import Protocol
 
 if sys.version_info >= (3, 11):
@@ -79,6 +80,13 @@ class OperatorTrait(Protocol):
     def __len__(self) -> int:
         """Returns the length of this operator."""
 
+    def iter_terms(self) -> Iterator:
+        """Iterates over the terms of this operator."""
+
+    @classmethod
+    def from_terms(cls, terms: Iterable) -> Self:
+        """Constructs a new operator from an iterator (see also :meth:`.iter_terms`)."""
+
     def equiv(self, other: Self, atol: float) -> bool:
         """Checks this operator with another for equivalence up to the specified absolute tolerance."""
 
@@ -91,9 +99,26 @@ class OperatorTrait(Protocol):
     def adjoint(self) -> Self:
         """Returns the adjoint of this operator."""
 
+    def get_support(self) -> frozenset[int]:
+        """Returns the set of mode indices which this operator acts upon."""
+
+    def relabel_modes(self, permutation: list[int]) -> Self:
+        """Relabels the modes of the operator."""
+
     def normal_ordered(self, *args, **kwargs) -> Self:
         """Returns the normal-ordered form of this operator.
 
         .. note::
            A specific implementation of this method may take additional arguments.
         """
+
+    @property
+    def groups(self) -> list[int] | None:
+        """Returns the groups indices."""
+
+    @groups.setter
+    def groups(self, groups: list[int] | None) -> None:
+        """Sets the groups indices."""
+
+    def split_out_groups(self) -> list[Self]:
+        """Splits this operator into an optional list of new operators based on its :attr:`.groups`."""

@@ -150,25 +150,6 @@ impl FermionOperator {
         }
         true
     }
-
-    pub fn relabel_modes(&self, permutation: Vec<u32>) -> Result<Self, CoherenceError> {
-        if permutation.iter().collect::<HashSet<_>>().len() != permutation.len() {
-            return Err(CoherenceError::DuplicateIndices);
-        }
-        let mut out = self.clone();
-        let new_modes: Result<Vec<u32>, CoherenceError> = self
-            .modes
-            .iter()
-            .map(|&idx| {
-                permutation
-                    .get(idx as usize)
-                    .cloned()
-                    .ok_or(CoherenceError::IndexMapTooSmall)
-            })
-            .collect();
-        out.modes = new_modes?;
-        Ok(out)
-    }
 }
 
 fn _normal_ordered_term(
@@ -382,6 +363,29 @@ impl OperatorTrait for FermionOperator {
         self.modes = modes;
         self.boundaries = boundaries;
         self.groups = None;
+    }
+
+    fn get_support(&self) -> HashSet<u32> {
+        HashSet::from_iter(self.modes.clone())
+    }
+
+    fn relabel_modes(&self, permutation: Vec<u32>) -> Result<Self, CoherenceError> {
+        if permutation.iter().collect::<HashSet<_>>().len() != permutation.len() {
+            return Err(CoherenceError::DuplicateIndices);
+        }
+        let mut out = self.clone();
+        let new_modes: Result<Vec<u32>, CoherenceError> = self
+            .modes
+            .iter()
+            .map(|&idx| {
+                permutation
+                    .get(idx as usize)
+                    .cloned()
+                    .ok_or(CoherenceError::IndexMapTooSmall)
+            })
+            .collect();
+        out.modes = new_modes?;
+        Ok(out)
     }
 }
 
@@ -1049,6 +1053,19 @@ mod tests {
         };
 
         assert!(!op2.conserves_particle_number());
+    }
+
+    #[test]
+    fn test_get_support() {
+        let op = FermionOperator {
+            coeffs: vec![Complex64::new(1.0, 0.0), Complex64::new(1.0, 0.0)],
+            actions: vec![true, false, true, true, false, false],
+            modes: vec![0, 4, 1, 3, 4, 7],
+            boundaries: vec![0, 2, 4],
+            groups: None,
+        };
+
+        assert_eq!(op.get_support(), HashSet::from([0, 1, 3, 4, 7]));
     }
 
     #[test]
