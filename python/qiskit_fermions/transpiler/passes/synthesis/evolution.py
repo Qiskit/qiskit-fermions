@@ -27,7 +27,7 @@ from qiskit_fermions.operators.protocol import OperatorTrait
 from ... import F2QLayout
 from ..utils import _parse_node_indices
 
-MapperFunction = Callable[[OperatorTrait], SparseObservable]
+MapperFunction = Callable[[OperatorTrait, int], SparseObservable]
 """The function signature for :attr:`mapper_fn`."""
 
 
@@ -44,6 +44,11 @@ class EvolutionSynthesis:
 
         self.mapper_fn: MapperFunction = mapper_fn
         """The fermion-to-qubit operator mapping function.
+
+        The two input arguments should be the following:
+
+        1. the operator to be mapped.
+        2. the number of qubits that the resulting operator should be defined on.
 
         .. note::
            It is the user's responsibility to ensure that this function is in-sync with the global
@@ -83,7 +88,7 @@ class EvolutionSynthesis:
 
         local_op = in_node.op.operator
         global_op = local_op.relabel_modes(global_fermion_indices)
-        pauli_op = self.mapper_fn(global_op).simplify()
+        pauli_op = self.mapper_fn(global_op, len(qreg)).simplify()
 
         circ = QuantumCircuit(qreg)
         circ.append(PauliEvolutionGate(pauli_op, time=in_node.op.params[0]), qreg)
