@@ -25,13 +25,8 @@ def _test_initialize_modes(occupation):
     circ = FermionCircuit(num_fermions)
     circ.append(init, circ.fermions)
 
-    # TODO: perform a better assertion instead of accessing an internal attribute here
-    gates = circ._inner.data
-
-    assert len(gates) == 1
-    assert isinstance(gates[0].operation, InitializeModes)
-    assert gates[0].operation.occupation.shape == (num_fermions,)
-    assert np.allclose(gates[0].operation.occupation, occupation)
+    ops = circ.count_ops()
+    assert ops == {"InitializeModes": 1}
 
 
 def test_initialize_modes_gate(subtests):

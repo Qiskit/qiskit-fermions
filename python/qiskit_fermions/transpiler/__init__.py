@@ -112,9 +112,28 @@ Qiskit's transpilation process is orchestrated by a :class:`~qiskit.transpiler.P
 In particular, a :class:`~qiskit.transpiler.StagedPassManager` can be used to orchestrate the
 transpilation into stages as explained above.
 
-.. important::
-   The ``qiskit_fermions`` package does not (yet) provide transpilation presets. These will be added
-   in the future and this section will be expanded upon then.
+Here, we are dealing with a change of circuit representation converting :class:`.FermionCircuit`
+instances to :external:class:`~qiskit.circuit.QuantumCircuit` ones. As such, this module provides
+its own interfaces of these transpiler pass managers listed below.
+
+.. note::
+   Qiskit is currently working on native support of transpiler pipelines involving more than a
+   single intermediate representation. Once that gets more formalized, the implementation here
+   will be aligned with the resulting interfaces. See also `this tracking issue
+   <https://github.com/Qiskit/qiskit/issues/16115>`_.
+
+.. autosummary::
+   :toctree: ../stubs/
+
+   FermionPassManager
+   FermionStagedPassManager
+   FermionToQubitConverter
+
+Presets
+^^^^^^^
+
+For user convenience, the :mod:`qiskit_fermions.transpiler.presets` module provides a number of
+functions for quickly building pre-defined transpilation pipelines.
 """
 
 from __future__ import annotations
@@ -124,6 +143,8 @@ from typing import TypeAlias
 from qiskit.circuit import QuantumRegister
 
 from qiskit_fermions.circuit import FermionRegister
+
+from .passmanager import FermionPassManager, FermionStagedPassManager, FermionToQubitConverter
 
 F2QLayout: TypeAlias = dict[FermionRegister, QuantumRegister]
 """A mapping of fermionic mode registers to quantum registers.
@@ -137,4 +158,7 @@ size of the registers on either side of this mapping may differ.
 
 __all__ = [
     "F2QLayout",
+    "FermionPassManager",
+    "FermionStagedPassManager",
+    "FermionToQubitConverter",
 ]

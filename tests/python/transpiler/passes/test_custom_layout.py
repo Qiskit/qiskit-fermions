@@ -19,11 +19,12 @@ from functools import partial
 
 from qiskit.circuit import QuantumRegister
 from qiskit.quantum_info import SparseObservable
-from qiskit.transpiler import PassManager
 from qiskit_fermions.circuit import FermionCircuit
 from qiskit_fermions.circuit.library import Evolution
 from qiskit_fermions.operators import MajoranaOperator
+from qiskit_fermions.transpiler import FermionStagedPassManager
 from qiskit_fermions.transpiler.passes import CustomF2QLayout, EvolutionSynthesis, F2QSynthesis
+from qiskit_fermions.transpiler.passmanager import FermionPassManager, FermionToQubitConverter
 
 
 # NOTE: this is a very specific implementation of the Fermi-Hubbard model on a square lattice. It is
@@ -330,8 +331,10 @@ def test_custom_layout():
     synth = F2QSynthesis()
     synth.plugins[Evolution] = EvolutionSynthesis(mapper_fn)
 
-    pm = PassManager([layout, synth])
+    pm = FermionStagedPassManager()
+    pm.layout = FermionPassManager(layout)
+    pm.synthesis = FermionToQubitConverter(synth)
 
-    qu_circ = pm.run(circ._inner)
+    qu_circ = pm.run(circ)
     qu_circ_decomp = qu_circ.decompose()
     assert qu_circ_decomp.depth(lambda instr: len(instr.qubits) == 2) == 93
