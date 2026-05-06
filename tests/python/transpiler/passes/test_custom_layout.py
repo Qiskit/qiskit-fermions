@@ -15,6 +15,7 @@
 from __future__ import annotations
 
 from collections import defaultdict
+from functools import partial
 
 from qiskit.circuit import QuantumRegister
 from qiskit.quantum_info import SparseObservable
@@ -88,17 +89,17 @@ def build_fermi_hubbard_square_lattice(
 # general and only implemented for the purposes of this test.
 def derby_klassen(
     op: MajoranaOperator,
+    num_qubits: int,
     initial_state: list[bool],
     edge_face_map: dict[tuple[int, int], int],
-    num_qubits: int,
 ) -> SparseObservable:
     """Implements the Derby-Klassen fermion-to-qubit encoding. [1]_
 
     Args:
         op: the operator to encode.
+        num_qubits: the total number of qubits in the resulting operator.
         initial_state: the initial occupation state of the fermionic modes.
         edge_face_map: a mapping of fermionic lattice edges to auxiliary qubit indices.
-        num_qubits: the total number of qubits in the resulting operator.
 
     Returns:
         The mapped operator.
@@ -186,7 +187,7 @@ def test_derby_klassen():
         (14, 10): 19,
         (14, 13): 19,
     }
-    qop = derby_klassen(hamil, initial_state, edge_face_map, num_qubits)
+    qop = derby_klassen(hamil, num_qubits, initial_state, edge_face_map)
 
     expected = SparseObservable.from_list(
         [
@@ -300,27 +301,26 @@ def test_custom_layout():
     num_qubits = 20
     hamil = build_fermi_hubbard_square_lattice(4, 4, 5.0, 5.0)
 
-    def mapper_fn(op):
-        initial_state = [bool(int(c)) for c in "1010010110100101"]
-        edge_face_map = {
-            (1, 2): 16,
-            (1, 5): 16,
-            (6, 2): 16,
-            (6, 5): 16,
-            (6, 7): 18,
-            (6, 10): 18,
-            (11, 7): 18,
-            (11, 10): 18,
-            (4, 5): 17,
-            (4, 8): 17,
-            (9, 5): 17,
-            (9, 8): 17,
-            (9, 10): 19,
-            (9, 13): 19,
-            (14, 10): 19,
-            (14, 13): 19,
-        }
-        return derby_klassen(op, initial_state, edge_face_map, num_qubits)
+    initial_state = [bool(int(c)) for c in "1010010110100101"]
+    edge_face_map = {
+        (1, 2): 16,
+        (1, 5): 16,
+        (6, 2): 16,
+        (6, 5): 16,
+        (6, 7): 18,
+        (6, 10): 18,
+        (11, 7): 18,
+        (11, 10): 18,
+        (4, 5): 17,
+        (4, 8): 17,
+        (9, 5): 17,
+        (9, 8): 17,
+        (9, 10): 19,
+        (9, 13): 19,
+        (14, 10): 19,
+        (14, 13): 19,
+    }
+    mapper_fn = partial(derby_klassen, initial_state=initial_state, edge_face_map=edge_face_map)
 
     circ = FermionCircuit(num_fermions)
     circ.append(Evolution(num_fermions, hamil), circ.fermions)

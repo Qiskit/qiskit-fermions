@@ -14,8 +14,6 @@
 
 from __future__ import annotations
 
-from functools import partial
-
 from qiskit.circuit.library import PauliEvolutionGate
 from qiskit.transpiler import PassManager
 from qiskit_fermions.circuit import FermionCircuit
@@ -41,10 +39,8 @@ def test_evolution_gate_synthesis():
     evo = Evolution(num_fermions, hamil, time=time)
     circ.append(evo, circ.fermions)
 
-    mapper_fn = partial(jordan_wigner, num_qubits=num_fermions)
-
     synth = F2QSynthesis()
-    synth.plugins[Evolution] = EvolutionSynthesis(mapper_fn)
+    synth.plugins[Evolution] = EvolutionSynthesis(jordan_wigner)
 
     pm = PassManager([TrivialF2QLayout(), synth])
 
@@ -76,9 +72,9 @@ def test_custom_qubit_ordering():
 
     custom_qubit_ordering = [0, 2, 1, 3]
 
-    def custom_qubit_ordering_mapper_fn(op):
+    def custom_qubit_ordering_mapper_fn(op, num_qubits):
         relabeled = op.relabel_modes(custom_qubit_ordering)
-        return jordan_wigner(relabeled, num_fermions)
+        return jordan_wigner(relabeled, num_qubits)
 
     synth = F2QSynthesis()
     synth.plugins[Evolution] = EvolutionSynthesis(custom_qubit_ordering_mapper_fn)
