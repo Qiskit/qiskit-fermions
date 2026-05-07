@@ -20,8 +20,12 @@ from qiskit.transpiler import PassManager
 from qiskit_fermions.circuit import FermionCircuit
 from qiskit_fermions.circuit.library import Evolution
 from qiskit_fermions.operators import FermionOperator
-from qiskit_fermions.transpiler.passes.layout import TrivialF2QLayout
-from qiskit_fermions.transpiler.passes.synthesis import F2QSynthesis
+from qiskit_fermions.transpiler.passes import F2QSynthesis, TrivialF2QLayout
+from qiskit_fermions.transpiler.passmanager import (
+    FermionPassManager,
+    FermionStagedPassManager,
+    FermionToQubitConverter,
+)
 
 
 def test_missing_plugin():
@@ -40,11 +44,12 @@ def test_missing_plugin():
     evo = Evolution(num_fermions, hamil, time=time)
     circ.append(evo, circ.fermions)
 
-    pm = PassManager([TrivialF2QLayout(), F2QSynthesis()])
+    pm = FermionStagedPassManager()
+    pm.layout = FermionPassManager(TrivialF2QLayout())
+    pm.synthesis = FermionToQubitConverter(F2QSynthesis())
 
     with pytest.raises(TypeError, match="No plugin registered"):
-        # TODO: update API of FermionCircuit to not require access to `_inner` QuantumCircuit here
-        _ = pm.run(circ._inner)
+        _ = pm.run(circ)
 
 
 def test_unsupported_gate():

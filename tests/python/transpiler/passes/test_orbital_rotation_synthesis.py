@@ -14,11 +14,15 @@
 
 from __future__ import annotations
 
-from qiskit.transpiler import PassManager
 from qiskit_fermions.circuit import FermionCircuit
 from qiskit_fermions.circuit.library import OrbitalRotation
-from qiskit_fermions.transpiler.passes.layout import TrivialF2QLayout
-from qiskit_fermions.transpiler.passes.synthesis import F2QSynthesis, OrbitalRotationSynthesis
+from qiskit_fermions.transpiler import FermionPassManager, FermionStagedPassManager
+from qiskit_fermions.transpiler.passes import (
+    F2QSynthesis,
+    OrbitalRotationSynthesis,
+    TrivialF2QLayout,
+)
+from qiskit_fermions.transpiler.passmanager import FermionToQubitConverter
 
 from ...utils import random_unitary
 
@@ -33,10 +37,11 @@ def test_orbital_rotation_global_gate_synthesis():
     synth = F2QSynthesis()
     synth.plugins[OrbitalRotation] = OrbitalRotationSynthesis()
 
-    pm = PassManager([TrivialF2QLayout(), synth])
+    pm = FermionStagedPassManager()
+    pm.layout = FermionPassManager(TrivialF2QLayout())
+    pm.synthesis = FermionToQubitConverter(synth)
 
-    # TODO: update API of FermionCircuit to not require access to `_inner` QuantumCircuit here
-    qu_circ = pm.run(circ._inner)
+    qu_circ = pm.run(circ)
 
     ops = qu_circ.count_ops()
     assert ops == {"xx_plus_yy": 15, "p": 6}
@@ -55,10 +60,11 @@ def test_initialize_modes_local_gate_synthesis():
     synth = F2QSynthesis()
     synth.plugins[OrbitalRotation] = OrbitalRotationSynthesis()
 
-    pm = PassManager([TrivialF2QLayout(), synth])
+    pm = FermionStagedPassManager()
+    pm.layout = FermionPassManager(TrivialF2QLayout())
+    pm.synthesis = FermionToQubitConverter(synth)
 
-    # TODO: update API of FermionCircuit to not require access to `_inner` QuantumCircuit here
-    qu_circ = pm.run(circ._inner)
+    qu_circ = pm.run(circ)
 
     ops = qu_circ.count_ops()
     assert ops == {"xx_plus_yy": 6, "p": 6}

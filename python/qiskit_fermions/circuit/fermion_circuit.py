@@ -14,6 +14,7 @@
 
 from __future__ import annotations
 
+from collections import OrderedDict
 from collections.abc import Sequence
 from typing import TYPE_CHECKING, Any, cast
 
@@ -75,8 +76,11 @@ class FermionCircuit:
         """
         if not isinstance(gate, FermionGate):
             raise ValueError("Unsupported instruction type: %s", type(gate))
-
         self._inner.append(gate, fargs, cargs, copy=copy)
+
+    def count_ops(self) -> OrderedDict[str, int]:
+        """Re-exposes :external:meth:`~qiskit.circuit.QuantumCircuit.count_ops`."""
+        return cast(OrderedDict[str, int], self._inner.count_ops())
 
     def decompose(
         self,

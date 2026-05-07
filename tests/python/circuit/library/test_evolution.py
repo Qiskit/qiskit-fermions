@@ -34,14 +34,8 @@ def test_evolution_gate():
     evo = Evolution(num_fermions, hamil, time=time)
     circ.append(evo, circ.fermions)
 
-    # TODO: perform a better assertion instead of accessing an internal attribute here
-    # NOTE: for example, we should be able to perform a statevector-like check that the evolution is
-    # implemented physically correct
-    gates = circ._inner.data
-
-    assert len(gates) == 1
-    assert isinstance(gates[0].operation, Evolution)
-    assert gates[0].operation.operator == hamil
+    ops = circ.count_ops()
+    assert ops == {"Evolution": 1}
 
 
 def test_evolution_gate_decompose():
@@ -61,14 +55,8 @@ def test_evolution_gate_decompose():
 
     decomposed = circ.decompose()
 
-    # TODO: perform a better assertion instead of accessing an internal attribute here
-    # NOTE: for example, we should be able to perform a statevector-like check that the evolution is
-    # implemented physically correct
-    gates = decomposed._inner.data
-
-    expected_num_gates = 4
-    assert len(gates) == expected_num_gates
-    assert all(isinstance(gates[i].operation, Evolution) for i in range(expected_num_gates))
+    ops = decomposed.count_ops()
+    assert ops == {"Evolution": 4}
 
 
 def test_evolution_gate_decompose_with_groups():
@@ -94,11 +82,5 @@ def test_evolution_gate_decompose_with_groups():
 
     decomposed = circ.decompose()
 
-    # TODO: perform a better assertion instead of accessing an internal attribute here
-    # NOTE: for example, we should be able to perform a statevector-like check that the evolution is
-    # implemented physically correct
-    gates = decomposed._inner.data
-
-    expected_num_gates = 2
-    assert len(gates) == expected_num_gates
-    assert all(isinstance(gates[i].operation, Evolution) for i in range(expected_num_gates))
+    ops = decomposed.count_ops()
+    assert ops == {"Evolution": 2}
