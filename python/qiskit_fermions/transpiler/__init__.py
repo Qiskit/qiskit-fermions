@@ -50,8 +50,9 @@ Stage                                                Description
 Optimization
 ^^^^^^^^^^^^
 
-.. hint::
-   Coming soon!
+This stage of the transpilation pipeline can implement circuit optimizations while preserving the
+type of circuit to be an instance of :class:`.FermionCircuit`. As such, no qubit information is
+required (or necessarily available) at this point in the transpilation pipeline.
 
 .. _qiskit_fermions-transpiler-stage-layout:
 
