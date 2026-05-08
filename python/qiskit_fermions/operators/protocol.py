@@ -112,6 +112,9 @@ class OperatorTrait(Protocol):
            A specific implementation of this method may take additional arguments.
         """
 
+    def get_coeffs(self) -> list[complex]:
+        """Returns the term coefficients."""
+
     @property
     def groups(self) -> list[int] | None:
         """Returns the groups indices."""

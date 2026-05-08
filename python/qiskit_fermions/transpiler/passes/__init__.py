@@ -26,8 +26,12 @@ This module provides various transpiler passes for the stages explained in
 Optimization Passes
 -------------------
 
-.. hint::
-   Coming soon!
+These passes provide different kinds of optimization of :class:`.FermionCircuit` instances.
+
+.. autosummary::
+   :toctree: ../stubs/
+
+   QDriftTrotterization
 
 .. _qiskit_fermions-transpiler-passes-layout:
 
@@ -84,6 +88,7 @@ provides builtin plugins:
 """
 
 from .layout import CustomF2QLayout, TrivialF2QLayout
+from .optimization import QDriftTrotterization
 from .synthesis import (
     EvolutionSynthesis,
     F2QSynthesis,
@@ -99,5 +104,6 @@ __all__ = [
     "F2QSynthesisPlugin",
     "InitializeModesSynthesis",
     "OrbitalRotationSynthesis",
+    "QDriftTrotterization",
     "TrivialF2QLayout",
 ]

@@ -39,7 +39,7 @@ class FermionPassManager(BasePassManager):
     def _passmanager_backend(
         self, passmanager_ir: DAGCircuit, in_program: FermionCircuit, **kwargs
     ) -> FermionCircuit:
-        out = FermionCircuit(passmanager_ir.num_qubits)
+        out = FermionCircuit(passmanager_ir.num_qubits())
         out._inner = dag_to_circuit(passmanager_ir, copy_operations=False)
         return out
 
