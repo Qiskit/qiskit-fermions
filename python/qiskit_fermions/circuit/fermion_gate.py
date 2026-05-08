@@ -37,7 +37,7 @@ class FermionGate(Gate):
     def __init__(
         self,
         name: str,
-        num_fermions: int,
+        num_modes: int,
         /,
         params: list | None = None,
         *,
@@ -46,9 +46,9 @@ class FermionGate(Gate):
         """Initializes a FermionGate instance."""
         if params is None:
             params = []
-        super().__init__(name, num_fermions, params, label)
+        super().__init__(name, num_modes, params, label)
 
     @property
-    def num_fermions(self) -> int:
+    def num_modes(self) -> int:
         """The number of fermionic modes that this gate acts upon."""
         return cast(int, self._num_qubits)

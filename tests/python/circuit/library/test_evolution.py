@@ -29,9 +29,9 @@ def test_evolution_gate():
         }
     )
     time = 1.5
-    num_fermions = 4
-    circ = FermionCircuit(num_fermions)
-    evo = Evolution(num_fermions, hamil, time=time)
+    num_modes = 4
+    circ = FermionCircuit(num_modes)
+    evo = Evolution(num_modes, hamil, time=time)
     circ.append(evo, circ.fermions)
 
     ops = circ.count_ops()
@@ -48,9 +48,9 @@ def test_evolution_gate_decompose():
         }
     )
     time = 1.5
-    num_fermions = 4
-    circ = FermionCircuit(num_fermions)
-    evo = Evolution(num_fermions, hamil, time=time)
+    num_modes = 4
+    circ = FermionCircuit(num_modes)
+    evo = Evolution(num_modes, hamil, time=time)
     circ.append(evo, circ.fermions)
 
     decomposed = circ.decompose()
@@ -75,9 +75,9 @@ def test_evolution_gate_decompose_with_groups():
     )
     hamil.groups = [0, 0, 1, 1]
     time = 1.5
-    num_fermions = 4
-    circ = FermionCircuit(num_fermions)
-    evo = Evolution(num_fermions, hamil, time=time)
+    num_modes = 4
+    circ = FermionCircuit(num_modes)
+    evo = Evolution(num_modes, hamil, time=time)
     circ.append(evo, circ.fermions)
 
     decomposed = circ.decompose()

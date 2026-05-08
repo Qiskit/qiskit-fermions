@@ -20,9 +20,9 @@ from qiskit_fermions.circuit.library import InitializeModes
 
 
 def _test_initialize_modes(occupation):
-    num_fermions = len(occupation)
+    num_modes = len(occupation)
     init = InitializeModes(occupation)
-    circ = FermionCircuit(num_fermions)
+    circ = FermionCircuit(num_modes)
     circ.append(init, circ.fermions)
 
     ops = circ.count_ops()

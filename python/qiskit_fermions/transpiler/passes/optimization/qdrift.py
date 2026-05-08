@@ -58,7 +58,7 @@ class QDriftTrotterization(TransformationPass):
 
             hamil = node.op.operator
             time = node.op.params[0]
-            num_fermions = len(node.qargs)
+            num_modes = len(node.qargs)
 
             if hamil.groups is not None:
                 terms = hamil.split_out_groups()
@@ -79,7 +79,7 @@ class QDriftTrotterization(TransformationPass):
             for ind in sampled_indices:
                 term = terms[ind]
                 op = hamil.__class__.from_terms([term]) if isinstance(term, tuple) else term
-                evo = Evolution(num_fermions, op, time=delta)
+                evo = Evolution(num_modes, op, time=delta)
                 out_dag.apply_operation_back(evo, qargs=out_dag.qubits)
 
         return out_dag

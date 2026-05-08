@@ -26,9 +26,9 @@ The following objects are simple type aliases to make this re-interpretation mor
 .. autosummary::
    :toctree: ../stubs/
 
-   Fermion
-   FermionRegister
-   FermionSpecifier
+   Mode
+   ModeRegister
+   ModeSpecifier
 
 For actually expressing your circuits, you should use the :class:`.FermionCircuit` class along with
 the :mod:`~qiskit_fermions.circuit.library` of :class:`.FermionGate` implementations.
@@ -45,11 +45,11 @@ from typing import TypeAlias
 
 from qiskit.circuit import QuantumRegister, Qubit
 
-Fermion: TypeAlias = Qubit
+Mode: TypeAlias = Qubit
 
-FermionRegister: TypeAlias = QuantumRegister
+ModeRegister: TypeAlias = QuantumRegister
 
-FermionSpecifier: TypeAlias = Fermion | FermionRegister | int | slice | Sequence[Fermion | int]
+ModeSpecifier: TypeAlias = Mode | ModeRegister | int | slice | Sequence[Mode | int]
 """A type alias equivalent to Qiskit's ``QubitSpecifier`` but for fermionic modes."""
 
 # NOTE: we must explicitly define the type aliases _before_ the following imports to ensure that
@@ -59,9 +59,9 @@ from .fermion_circuit import FermionCircuit
 from .fermion_gate import FermionGate
 
 __all__ = [
-    "Fermion",
     "FermionCircuit",
     "FermionGate",
-    "FermionRegister",
-    "FermionSpecifier",
+    "Mode",
+    "ModeRegister",
+    "ModeSpecifier",
 ]

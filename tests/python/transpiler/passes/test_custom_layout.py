@@ -298,7 +298,7 @@ def test_custom_layout():
            Phys. Rev. B 104, 035118 (2021),
            `doi:10.1103/PhysRevB.104.035118 <http://dx.doi.org/10.1103/PhysRevB.104.035118>`_.
     """
-    num_fermions = 16
+    num_modes = 16
     num_qubits = 20
     hamil = build_fermi_hubbard_square_lattice(4, 4, 5.0, 5.0)
 
@@ -323,8 +323,8 @@ def test_custom_layout():
     }
     mapper_fn = partial(derby_klassen, initial_state=initial_state, edge_face_map=edge_face_map)
 
-    circ = FermionCircuit(num_fermions)
-    circ.append(Evolution(num_fermions, hamil), circ.fermions)
+    circ = FermionCircuit(num_modes)
+    circ.append(Evolution(num_modes, hamil), circ.fermions)
 
     layout = CustomF2QLayout({circ.register: QuantumRegister(num_qubits)})
 

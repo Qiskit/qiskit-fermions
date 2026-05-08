@@ -39,9 +39,9 @@ def test_missing_plugin():
         }
     )
     time = 1.5
-    num_fermions = 4
-    circ = FermionCircuit(num_fermions)
-    evo = Evolution(num_fermions, hamil, time=time)
+    num_modes = 4
+    circ = FermionCircuit(num_modes)
+    evo = Evolution(num_modes, hamil, time=time)
     circ.append(evo, circ.fermions)
 
     pm = FermionStagedPassManager()

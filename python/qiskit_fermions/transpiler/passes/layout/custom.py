@@ -41,7 +41,7 @@ class CustomF2QLayout(AnalysisPass):
         super().__init__()
 
         self.layout: F2QLayout = layout
-        """The user-provided mapping of :type:`~qiskit_fermions.circuit.FermionRegister` to
+        """The user-provided mapping of :type:`~qiskit_fermions.circuit.ModeRegister` to
         :class:`~qiskit.circuit.QuantumRegister`."""
 
     def run(self, dag: DAGCircuit) -> None:

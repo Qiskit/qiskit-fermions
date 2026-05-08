@@ -28,9 +28,9 @@ from ...utils import random_unitary
 
 
 def test_orbital_rotation_global_gate_synthesis():
-    num_fermions = 6
-    rotation_unitary = random_unitary(num_fermions, seed=42)
-    circ = FermionCircuit(num_fermions)
+    num_modes = 6
+    rotation_unitary = random_unitary(num_modes, seed=42)
+    circ = FermionCircuit(num_modes)
     rot = OrbitalRotation(rotation_unitary)
     circ.append(rot, circ.fermions)
 
@@ -48,10 +48,10 @@ def test_orbital_rotation_global_gate_synthesis():
 
 
 def test_initialize_modes_local_gate_synthesis():
-    num_fermions = 6
-    rotation_unitary_a = random_unitary(num_fermions // 2, seed=42)
-    rotation_unitary_b = random_unitary(num_fermions // 2, seed=43)
-    circ = FermionCircuit(num_fermions)
+    num_modes = 6
+    rotation_unitary_a = random_unitary(num_modes // 2, seed=42)
+    rotation_unitary_b = random_unitary(num_modes // 2, seed=43)
+    circ = FermionCircuit(num_modes)
     rot_a = OrbitalRotation(rotation_unitary_a)
     circ.append(rot_a, circ.fermions[:3])
     rot_b = OrbitalRotation(rotation_unitary_b)

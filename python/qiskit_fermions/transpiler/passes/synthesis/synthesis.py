@@ -38,7 +38,7 @@ class F2QSynthesisPlugin(Protocol):
                 must insert the translated circuit instruction.
             f2q_layout: the :type:`~qiskit_fermions.transpiler.F2QLayout` setting that is global to
                 the transpilation process. It is the plugin's responsibility to respect this mapping
-                of :type:`~qiskit_fermions.circuit.FermionRegister` to
+                of :type:`~qiskit_fermions.circuit.ModeRegister` to
                 :class:`~qiskit.circuit.QuantumRegister`.
         """
         ...
@@ -93,10 +93,10 @@ class F2QSynthesis(TransformationPass):
 
         out_dag = dag.copy_empty_like()
 
-        for freg, qreg in f2q_layout.items():
+        for mreg, qreg in f2q_layout.items():
             out_dag.add_qreg(qreg)
-            out_dag.remove_qregs(freg)
-            out_dag.remove_qubits(*freg)
+            out_dag.remove_qregs(mreg)
+            out_dag.remove_qubits(*mreg)
 
         for node in dag.op_nodes():
             op_type = type(node.op)

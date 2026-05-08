@@ -26,7 +26,7 @@ class TrivialF2QLayout(AnalysisPass):
 
     This pass simply populates the ``f2q_layout`` field of the
     :attr:`~qiskit.passmanager.PassManagerState.property_set`, with a dictionary associating each
-    :type:`~qiskit_fermions.circuit.FermionRegister` with an equally sized
+    :type:`~qiskit_fermions.circuit.ModeRegister` with an equally sized
     :class:`~qiskit.circuit.QuantumRegister`.
     """
 

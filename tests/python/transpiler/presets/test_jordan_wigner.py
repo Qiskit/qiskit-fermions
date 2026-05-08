@@ -35,19 +35,19 @@ def test_preset_jordan_wigner():
         }
     )
     time = 1.5
-    num_fermions = 4
-    evo = Evolution(num_fermions, hamil, time=time)
+    num_modes = 4
+    evo = Evolution(num_modes, hamil, time=time)
 
     init = InitializeModes([True, False, True, False])
 
-    rot_mat = np.zeros((num_fermions, num_fermions), dtype=complex)
+    rot_mat = np.zeros((num_modes, num_modes), dtype=complex)
     rot_mat[0, 1] = 1
     rot_mat[1, 0] = 1
     rot_mat[2, 3] = 1
     rot_mat[3, 2] = 1
     orb_rot = OrbitalRotation(rot_mat)
 
-    circ = FermionCircuit(num_fermions)
+    circ = FermionCircuit(num_modes)
     circ.append(init, circ.fermions)
     circ.append(orb_rot, circ.fermions)
     circ.append(evo, circ.fermions)
@@ -56,14 +56,14 @@ def test_preset_jordan_wigner():
 
     qu_circ = pm.run(circ)
 
-    expected = QuantumCircuit(num_fermions)
+    expected = QuantumCircuit(num_modes)
     expected.x((0, 2))
     expected.append(XXPlusYYGate(np.pi, -np.pi / 2), (0, 1))
     expected.append(XXPlusYYGate(np.pi, -np.pi / 2), (2, 3))
     expected.p(np.pi, 0)
     expected.p(np.pi, 2)
     expected.append(
-        PauliEvolutionGate(jordan_wigner(hamil, num_qubits=num_fermions).simplify(), time=time),
+        PauliEvolutionGate(jordan_wigner(hamil, num_qubits=num_modes).simplify(), time=time),
         expected.qubits,
     )
 

@@ -37,9 +37,9 @@ def test_evolution_gate_synthesis():
         }
     )
     time = 1.5
-    num_fermions = 4
-    circ = FermionCircuit(num_fermions)
-    evo = Evolution(num_fermions, hamil, time=time)
+    num_modes = 4
+    circ = FermionCircuit(num_modes)
+    evo = Evolution(num_modes, hamil, time=time)
     circ.append(evo, circ.fermions)
 
     synth = F2QSynthesis()
@@ -69,9 +69,9 @@ def test_custom_qubit_ordering():
         }
     )
     time = 1.5
-    num_fermions = 4
-    circ = FermionCircuit(num_fermions)
-    evo = Evolution(num_fermions, hamil, time=time)
+    num_modes = 4
+    circ = FermionCircuit(num_modes)
+    evo = Evolution(num_modes, hamil, time=time)
     circ.append(evo, circ.fermions)
 
     custom_qubit_ordering = [0, 2, 1, 3]
