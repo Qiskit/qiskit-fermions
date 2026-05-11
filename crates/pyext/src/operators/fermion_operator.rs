@@ -123,10 +123,10 @@ impl FermionOperatorDataIter {
 ///     >>> op = FermionOperator(coeffs, actions, modes, boundaries)
 ///     >>> print(op)
 ///       1.000000e0 +0.000000e0j * ()
-///      -3.000000e0 +0.000000e0j * (-_0)
-///       0.000000e0 +4.000000e0j * (-_0 +_1)
-///       2.000000e0 +0.000000e0j * (+_0)
-///      -0.000000e0-5.000000e-1j * (+_0 +_1 -_2 -_3)
+///      -3.000000e0 +0.000000e0j * (-0)
+///       0.000000e0 +4.000000e0j * (-0 +1)
+///       2.000000e0 +0.000000e0j * (+0)
+///      -0.000000e0-5.000000e-1j * (+0 +1 -2 -3)
 ///
 /// For convenience, it is possible to construct an operator from a Python dictionary like so:
 ///
@@ -144,10 +144,10 @@ impl FermionOperatorDataIter {
 ///     ... )
 ///     >>> print(op)
 ///       1.000000e0 +0.000000e0j * ()
-///      -3.000000e0 +0.000000e0j * (-_0)
-///       0.000000e0 +4.000000e0j * (-_0 +_1)
-///       2.000000e0 +0.000000e0j * (+_0)
-///      -0.000000e0-5.000000e-1j * (+_0 +_1 -_2 -_3)
+///      -3.000000e0 +0.000000e0j * (-0)
+///       0.000000e0 +4.000000e0j * (-0 +1)
+///       2.000000e0 +0.000000e0j * (+0)
+///      -0.000000e0-5.000000e-1j * (+0 +1 -2 -3)
 ///
 /// In this example, we have leveraged :func:`.cre` and :func:`.ann` for creating the creation and
 /// annihilation operators at the specified modes.
@@ -244,20 +244,20 @@ impl FermionOperatorDataIter {
 ///     >>> comp = (op1 & op2).simplify()
 ///     >>> print(comp)
 ///       3.000000e0 +0.000000e0j * ()
-///       8.000000e0 +0.000000e0j * (-_1)
-///       1.200000e1 +0.000000e0j * (-_1 +_0)
-///       4.500000e0 +0.000000e0j * (+_0)
+///       8.000000e0 +0.000000e0j * (-1)
+///       1.200000e1 +0.000000e0j * (-1 +0)
+///       4.500000e0 +0.000000e0j * (+0)
 ///     >>> op2 &= op1
 ///     >>> print(op2.simplify())
 ///       3.000000e0 +0.000000e0j * ()
-///       8.000000e0 +0.000000e0j * (-_1)
-///       4.500000e0 +0.000000e0j * (+_0)
-///       1.200000e1 +0.000000e0j * (+_0 -_1)
+///       8.000000e0 +0.000000e0j * (-1)
+///       4.500000e0 +0.000000e0j * (+0)
+///       1.200000e1 +0.000000e0j * (+0 -1)
 ///     >>> squared = (op1 ** 2).simplify()
 ///     >>> print(squared)
 ///       4.000000e0 +0.000000e0j * ()
-///       1.200000e1 +0.000000e0j * (+_0)
-///       9.000000e0 +0.000000e0j * (+_0 +_0)
+///       1.200000e1 +0.000000e0j * (+0)
+///       9.000000e0 +0.000000e0j * (+0 +0)
 ///
 /// .. note::
 ///    For convenience, the right-multiplication is implemented by ``c = a @ b`` (resulting in
@@ -342,7 +342,7 @@ impl PyFermionOperator {
     ///     ... )
     ///     >>> print(op)
     ///       1.000000e0 -1.000000e0j * ()
-    ///       2.000000e0 +0.000000e0j * (+_0 -_1)
+    ///       2.000000e0 +0.000000e0j * (+0 -1)
     ///
     /// Args:
     ///     data: a dictionary mapping tuples of terms to complex coefficients. Each key is a tuple
@@ -559,7 +559,7 @@ impl PyFermionOperator {
         for term in sorted {
             let key_parts: Vec<String> = term
                 .iter()
-                .map(|(action, orb)| format!("{}_{}", if *action { "+" } else { "-" }, orb))
+                .map(|(action, orb)| format!("{}{}", if *action { "+" } else { "-" }, orb))
                 .collect();
             let key_str = format!("({})", key_parts.join(" "));
             let val_str = format!("{:12.6e}{:+12.6e}j", term.coeff.re, term.coeff.im);
@@ -671,12 +671,12 @@ impl PyFermionOperator {
     ///     >>> op = FermionOperator.from_dict({(): 1e-4, ((True, 0),): 1e-6, ((False, 0),): 1e-10})
     ///     >>> print(op)
     ///       1.000000e-4 +0.000000e0j * ()
-    ///      1.000000e-10 +0.000000e0j * (-_0)
-    ///       1.000000e-6 +0.000000e0j * (+_0)
+    ///      1.000000e-10 +0.000000e0j * (-0)
+    ///       1.000000e-6 +0.000000e0j * (+0)
     ///     >>> op.ichop()
     ///     >>> print(op)
     ///       1.000000e-4 +0.000000e0j * ()
-    ///       1.000000e-6 +0.000000e0j * (+_0)
+    ///       1.000000e-6 +0.000000e0j * (+0)
     ///     >>> op.ichop(1e-5)
     ///     >>> print(op)
     ///       1.000000e-4 +0.000000e0j * ()
@@ -810,7 +810,7 @@ impl PyFermionOperator {
     ///     >>> adj = op.adjoint()
     ///     >>> print(adj)
     ///      -0.000000e0 +1.000000e0j * ()
-    ///       1.000000e0 -0.000000e0j * (+_1 -_0)
+    ///       1.000000e0 -0.000000e0j * (+1 -0)
     ///
     /// ..
     fn adjoint(&self) -> Self {
@@ -854,13 +854,13 @@ impl PyFermionOperator {
     /// is ascending or descending depends upon the value of the ``sandwich`` argument:
     ///
     /// - ``None`` (default): both groups are ordered lexicographically descending (e.g.
-    ///   ``+_1 +_0 -_1 -_0``)
+    ///   ``+1 +0 -1 -0``)
     /// - ``True``: larger indices appear towards the middle, i.e. creation actions are
     ///   lexicographically ascending while annihilation ones are descending (e.g.
-    ///   ``+_0 +_1 -_1 -_0``)
+    ///   ``+0 +1 -1 -0``)
     /// - ``False``: smaller indices appear towards the middle, i.e. creation actions are
     ///   lexicographically descending while annihilation ones are ascending (e.g.
-    ///   ``+_1 +_0 -_0 -_1``)
+    ///   ``+1 +0 -0 -1``)
     ///
     /// .. note::
     ///    When a term is being reordered, the anti-commutation relations have to be taken into
@@ -873,19 +873,19 @@ impl PyFermionOperator {
     ///     >>> op = FermionOperator.from_dict({((False, 1), (True, 1), (False, 0), (True, 0)): 1})
     ///     >>> print(op.normal_ordered().simplify())
     ///       1.000000e0 +0.000000e0j * ()
-    ///      -1.000000e0 +0.000000e0j * (+_0 -_0)
-    ///      -1.000000e0 +0.000000e0j * (+_1 -_1)
-    ///      -1.000000e0 +0.000000e0j * (+_1 +_0 -_1 -_0)
+    ///      -1.000000e0 +0.000000e0j * (+0 -0)
+    ///      -1.000000e0 +0.000000e0j * (+1 -1)
+    ///      -1.000000e0 +0.000000e0j * (+1 +0 -1 -0)
     ///     >>> print(op.normal_ordered(sandwich=True).simplify())
     ///       1.000000e0 +0.000000e0j * ()
-    ///      -1.000000e0 +0.000000e0j * (+_0 -_0)
-    ///       1.000000e0 +0.000000e0j * (+_0 +_1 -_1 -_0)
-    ///      -1.000000e0 +0.000000e0j * (+_1 -_1)
+    ///      -1.000000e0 +0.000000e0j * (+0 -0)
+    ///       1.000000e0 +0.000000e0j * (+0 +1 -1 -0)
+    ///      -1.000000e0 +0.000000e0j * (+1 -1)
     ///     >>> print(op.normal_ordered(sandwich=False).simplify())
     ///       1.000000e0 +0.000000e0j * ()
-    ///      -1.000000e0 +0.000000e0j * (+_0 -_0)
-    ///      -1.000000e0 +0.000000e0j * (+_1 -_1)
-    ///       1.000000e0 +0.000000e0j * (+_1 +_0 -_0 -_1)
+    ///      -1.000000e0 +0.000000e0j * (+0 -0)
+    ///      -1.000000e0 +0.000000e0j * (+1 -1)
+    ///       1.000000e0 +0.000000e0j * (+1 +0 -0 -1)
     ///
     /// Returns:
     ///     An equivalent but normal-ordered operator.
@@ -975,8 +975,8 @@ impl PyFermionOperator {
     ///     >>> permutation = [5, 6, 4, 3]
     ///     >>> relabeled = op.relabel_modes(permutation)
     ///     >>> print(relabeled)
-    ///       1.000000e0 +0.000000e0j * (+_5 -_6)
-    ///       1.000000e0 +0.000000e0j * (+_5 -_6 +_4 -_3)
+    ///       1.000000e0 +0.000000e0j * (+5 -6)
+    ///       1.000000e0 +0.000000e0j * (+5 -6 +4 -3)
     ///
     /// Args:
     ///     permutation: the index permutation list.
