@@ -12,15 +12,11 @@
 
 """The MajoranaAction type."""
 
-from typing import cast
+from typing import NewType, cast
 
+MajoranaAction = NewType("MajoranaAction", int)
 
-class MajoranaAction(int):
-    """The MajoranaAction type. See :func:`.gamma` for more details."""
-
-    def __str__(self):
-        """String representation."""
-        return f"MajoranaAction(mode: {self // 2}, is_prime: {self % 2 == 1})"
+MajoranaAction.__doc__ = """The MajoranaAction type. See :func:`.gamma` for more details."""
 
 
 def gamma(mode: int, is_prime: bool) -> MajoranaAction:
