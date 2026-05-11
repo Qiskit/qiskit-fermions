@@ -519,7 +519,10 @@ impl PyMajoranaOperator {
         sorted.sort_by_key(|&term| term.into_vec());
         let mut items_str = Vec::new();
         for term in sorted {
-            let key_parts: Vec<String> = term.iter().map(|mode| format!("{mode}")).collect();
+            let key_parts: Vec<String> = term
+                .iter()
+                .map(|mode| format!("γ{}{}", if mode % 2 == 1 { "'" } else { "" }, mode / 2))
+                .collect();
             let key_str = format!("({})", key_parts.join(" "));
             let val_str = format!("{:12.6e}{:+12.6e}j", term.coeff.re, term.coeff.im);
             items_str.push(format!("{val_str} * {key_str}"));
