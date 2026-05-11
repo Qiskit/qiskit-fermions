@@ -54,7 +54,7 @@ use qiskit_fermions_core::mappers::library::majorana_fermion::{
 ///     >>> maj_op = fermion_to_majorana(fer_op)
 ///     >>> print(maj_op.normal_ordered().simplify())
 ///      5.000000e-1 +0.000000e0j * ()
-///      0.000000e0-5.000000e-1j * (1 0)
+///      0.000000e0-5.000000e-1j * (γ'0 γ0)
 ///
 /// ..
 #[gen_stub_pyfunction(module = "qiskit_fermions.mappers.library.majorana")]
