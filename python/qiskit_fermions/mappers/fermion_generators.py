@@ -14,16 +14,18 @@
 
 from collections.abc import Callable
 from operator import and_
-from typing import TypeVar
+from typing import TYPE_CHECKING, TypeVar
 
-from ..operators import FermionAction, FermionOperator
+if TYPE_CHECKING:
+    from qiskit_fermions._lib.operators.fermion_operator import FermionOperator
+    from qiskit_fermions.operators.fermion_action import FermionAction
 
 T = TypeVar("T")
 
 
 def map_fermion_action_generators(
-    operator: FermionOperator,
-    map_action: Callable[[FermionAction], T],
+    operator: "FermionOperator",
+    map_action: Callable[["FermionAction"], T],
     identity: Callable[[], T],
     compose: Callable[[T, T], T] | None = None,
 ) -> T:
@@ -40,6 +42,7 @@ def map_fermion_action_generators(
        If ``compose=None`` it must also support composition of two instances via ``__and__``.
 
     .. doctest::
+
         >>> from qiskit_fermions.mappers import map_fermion_action_generators
         >>> from qiskit_fermions.operators import FermionAction, FermionOperator, ann, cre
         >>> from qiskit.quantum_info import SparsePauliOp

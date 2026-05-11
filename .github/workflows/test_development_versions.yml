@@ -19,7 +19,7 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
-  coverage:
+  tests:
     if: github.repository_owner == 'Qiskit'
     name: Development version tests (${{ matrix.os }}, ${{ matrix.python-version }})
     runs-on: ${{ matrix.os }}
@@ -29,11 +29,6 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         python-version: ["3.10", "3.13"]
-        # include:
-        #   - os: macos-latest
-        #     python-version: "3.13"
-        #   - os: windows-latest
-        #     python-version: "3.13"
     steps:
       - uses: actions/checkout@v6
         with:
@@ -42,7 +37,7 @@ jobs:
       - uses: actions/setup-python@v6
         name: Install Python
         with:
-          python-version: '3.11'
+          python-version: ${{ matrix.python-version }}
 
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
@@ -51,31 +46,43 @@ jobs:
 
       - name: Install dependencies
         run: |
-            python -m pip install -U pip
+          python -m pip install -U pip build
 
-      - name: Install Package
+      - name: Compile Qiskit from source
         shell: bash
         run: |
           git clone https://github.com/Qiskit/qiskit build/qiskit
           cd build/qiskit
+          git rev-parse HEAD
           make c
-          pip install -c constraints.txt -r requirements.txt
-          SETUPTOOLS_RUST_CARGO_PROFILE=release pip install -c constraints.txt -e .
-          cd qiskit/
-          ln -s _accelerate.*.so libqiskit.so
-          cd ../../..
-          pip install setuptools setuptools_rust
-          DEPS=coverage make pyinstall
+          python -m build --wheel
 
       - name: Rust tests
         shell: bash
         run: |
+          export QISKIT_LIB=$(find $(pwd)/build/qiskit/dist/c/lib -name "libqiskit.*")
+          export QISKIT_INCLUDE=$(pwd)/build/qiskit/dist/c/include
           make testrust
+
+      - name: Compile qiskit-fermions C API
+        shell: bash
+        run: |
+          export QISKIT_LIB=$(find $(pwd)/build/qiskit/dist/c/lib -name "libqiskit.*")
+          export QISKIT_INCLUDE=$(pwd)/build/qiskit/dist/c/include
+          make cext
 
       - name: C tests
         shell: bash
         run: |
+          export QISKIT_LIB=$(find $(pwd)/build/qiskit/dist/c/lib -name "libqiskit.*")
+          export QISKIT_INCLUDE=$(pwd)/build/qiskit/dist/c/include
           make testc
+
+      - name: Install Python package
+        shell: bash
+        run: |
+          pip install --group build --group coverage "qiskit @ file:$(echo build/qiskit/dist/*.whl)"
+          SETUPTOOLS_RUST_CARGO_PROFILE=release pip install --no-build-isolation -e .
 
       - name: Python tests
         shell: bash

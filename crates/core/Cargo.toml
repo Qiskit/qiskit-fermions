@@ -9,9 +9,11 @@ license.workspace = true
 name = "qiskit_fermions_core"
 
 [dependencies]
+nalgebra.workspace = true
 ndarray.workspace = true
 num-complex.workspace = true
 num-traits.workspace = true
 qiskit-sys.workspace = true
 rayon.workspace = true
 regex.workspace = true
+thiserror.workspace = true

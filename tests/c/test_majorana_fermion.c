@@ -24,12 +24,12 @@ static int test_fermion_to_majorana(void) {
     qf_ferm_op_add_term(fer_op, 2, action_fer, indices_fer, &coeff);
 
     QfMajoranaOperator *result = qf_fermion_to_majorana(fer_op);
-    QfMajoranaOperator *canon = qf_maj_op_normal_ordered(result, true);
+    QfMajoranaOperator *canon = qf_maj_op_normal_ordered(result, false, true);
 
     uint64_t num_terms = 2;
     uint64_t num_modes = 2;
     uint32_t modes[2] = {1, 0};
-    QkComplex64 exp_coeffs[2] = {{0.5, 0.0}, {0.0, 0.5}};
+    QkComplex64 exp_coeffs[2] = {{0.5, 0.0}, {0.0, -0.5}};
     uint32_t boundaries[3] = {0, 0, 2};
     QfMajoranaOperator *expected =
         qf_maj_op_new(num_terms, num_modes, exp_coeffs, modes, boundaries);
@@ -54,13 +54,13 @@ static int test_majorana_to_fermion(void) {
     qf_maj_op_add_term(maj_op, 2, modes_maj, &coeff);
 
     QfFermionOperator *result = qf_majorana_to_fermion(maj_op);
-    QfFermionOperator *canon = qf_ferm_op_normal_ordered(result);
+    QfFermionOperator *canon = qf_ferm_op_normal_ordered(result, NULL);
 
     uint64_t num_terms = 2;
     uint64_t num_actions = 2;
     bool actions[2] = {true, false};
     uint32_t modes[2] = {0, 0};
-    QkComplex64 exp_coeffs[2] = {{0.0, -1.0}, {0.0, 2.0}};
+    QkComplex64 exp_coeffs[2] = {{0.0, 1.0}, {0.0, -2.0}};
     uint32_t boundaries[3] = {0, 0, 2};
     QfFermionOperator *expected =
         qf_ferm_op_new(num_terms, num_actions, exp_coeffs, actions, modes, boundaries);

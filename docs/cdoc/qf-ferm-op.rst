@@ -40,6 +40,8 @@ and the number of fermionic modes acted upon by the operator minus 1.
 
 ----
 
+.. _qf_ferm_op-implementation:
+
 Implementation
 ==============
 
@@ -53,12 +55,20 @@ commonly used for sparse matrices. More concretely, a single operator contains 4
    ============== =================================================================================
    ``coeffs``     A vector of complex coefficients consisting of two 64-bit floating point numbers.
    ``actions``    A vector of booleans storing the nature of the second-quantization actions.
-   ``indices``    A vector of 32-bit integers storing the fermionic mode indices acted upon.
-   ``boundaries`` A vector of integers indicating the boundaries in ``actions`` and ``indices``.
+   ``modes``      A vector of 32-bit integers storing the fermionic mode indices acted upon.
+   ``boundaries`` A vector of integers indicating the boundaries in ``actions`` and ``modes``.
    ============== =================================================================================
 
 Entries in ``actions`` indicate creation (annihilation) operators by ``True`` (``False``).
-Fermionic modes indexed by ``indices`` are considered spinless.
+Fermionic modes indexed by ``modes`` are considered spinless.
+
+.. note::
+   You may access **read-only copies** of these internal arrays via their respective functions:
+
+   - :c:func:`qf_ferm_op_get_coeffs`
+   - :c:func:`qf_ferm_op_get_actions`
+   - :c:func:`qf_ferm_op_get_modes`
+   - :c:func:`qf_ferm_op_get_boundaries`
 
 This data structure allows for very efficient construction and manipulation of operators.
 However, it implies that duplicate terms may be contained in an operator at any moment.
@@ -110,11 +120,12 @@ The following functions provide operator manipulation logic:
 
 .. table::
 
-  ===================================  =========================================================
-  :c:func:`qf_ferm_op_ichop`           Removes terms with small coefficient magnitudes.
-  :c:func:`qf_ferm_op_simplify`        Returns an equivalent but simplified operator.
-  :c:func:`qf_ferm_op_normal_ordered`  Returns an equivalent operator with normal ordered terms.
-  ===================================  =========================================================
+  ====================================  =========================================================
+  :c:func:`qf_ferm_op_ichop`            Removes terms with small coefficient magnitudes.
+  :c:func:`qf_ferm_op_simplify`         Returns an equivalent but simplified operator.
+  :c:func:`qf_ferm_op_normal_ordered`   Returns an equivalent operator with normal ordered terms.
+  :c:func:`qf_ferm_op_relabel_modes`    Relabels the modes of an operator.
+  ====================================  =========================================================
 
 Properties
 ----------

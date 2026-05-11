@@ -39,6 +39,11 @@ pub enum ExitCode {
     AlignmentError = 102,
     /// `103`: Index out of bounds.
     IndexError = 103,
+    /// `104`: Duplicate index.
+    DuplicateIndexError = 104,
+    /// `200`: Error related to some in- or output value. Refer to the function documentation for
+    /// more details.
+    ValueError = 200,
 }
 
 impl From<CInputError> for ExitCode {

@@ -10,7 +10,10 @@
 // copyright notice, and modified files need to carry a notice indicating
 // that they have been altered from the originals.
 
+use std::collections::HashSet;
+
 use num_complex::Complex64;
+use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
 use pyo3::types::PyType;
 use pyo3::{class::basic::CompareOp, exceptions::PyNotImplementedError};
@@ -82,6 +85,8 @@ impl MajoranaOperatorDataIter {
 ///
 /// ----
 ///
+/// .. _MajoranaOperator-implementation:
+///
 /// Implementation
 /// ==============
 ///
@@ -99,7 +104,11 @@ impl MajoranaOperatorDataIter {
 ///    ============== =================================================================================
 ///
 /// The integers in ``modes`` index the Majorana modes, :math:`j`. When using the convenience
-/// function :py:func:`.gamma`, even (odd) indices are used for :math`\gamma` (:math:`\gamma'`).
+/// function :py:func:`.gamma`, even (odd) indices are used for :math:`\gamma` (:math:`\gamma'`).
+///
+/// .. note::
+///    You may access **read-only copies** of these internal arrays via their respective methods:
+///    :meth:`.get_coeffs`, :meth:`.get_modes`, and :meth:`.get_boundaries`.
 ///
 /// This data structure allows for very efficient construction and manipulation of operators.
 /// However, it implies that duplicate terms may be contained in an operator at any moment.
@@ -111,6 +120,7 @@ impl MajoranaOperatorDataIter {
 /// An operator can be constructed directly by providing the arrays outlined above:
 ///
 /// .. doctest::
+///
 ///     >>> from qiskit_fermions.operators import MajoranaOperator
 ///     >>> coeffs = [1.0, -2.0, 3.0j, -0.5j]
 ///     >>> modes = [0, 1, 0, 2, 0, 1, 2, 3]
@@ -118,13 +128,14 @@ impl MajoranaOperatorDataIter {
 ///     >>> op = MajoranaOperator(coeffs, modes, boundaries)
 ///     >>> print(op)
 ///       1.000000e0 +0.000000e0j * ()
-///      -2.000000e0 +0.000000e0j * (0 1)
-///      -0.000000e0-5.000000e-1j * (0 1 2 3)
-///       0.000000e0 +3.000000e0j * (0 2)
+///      -2.000000e0 +0.000000e0j * (γ0 γ'0)
+///      -0.000000e0-5.000000e-1j * (γ0 γ'0 γ1 γ'1)
+///       0.000000e0 +3.000000e0j * (γ0 γ1)
 ///
 /// For convenience, it is possible to construct an operator from a Python dictionary like so:
 ///
 /// .. doctest::
+///
 ///     >>> from qiskit_fermions.operators import gamma
 ///     >>> op = MajoranaOperator.from_dict(
 ///     ...     {
@@ -136,9 +147,9 @@ impl MajoranaOperatorDataIter {
 ///     ... )
 ///     >>> print(op)
 ///       1.000000e0 +0.000000e0j * ()
-///      -2.000000e0 +0.000000e0j * (0 1)
-///      -0.000000e0-5.000000e-1j * (0 1 2 3)
-///       0.000000e0 +3.000000e0j * (0 2)
+///      -2.000000e0 +0.000000e0j * (γ0 γ'0)
+///      -0.000000e0-5.000000e-1j * (γ0 γ'0 γ1 γ'1)
+///       0.000000e0 +3.000000e0j * (γ0 γ1)
 ///
 /// In this example, we have leveraged :func:`.gamma` for creating the Majorana operators.
 ///
@@ -148,6 +159,7 @@ impl MajoranaOperatorDataIter {
 ///
 ///    zero
 ///    one
+///    from_terms
 ///
 /// Iteration
 /// ---------
@@ -156,6 +168,7 @@ impl MajoranaOperatorDataIter {
 /// cannot be iterated over directly:
 ///
 /// .. doctest::
+///
 ///     >>> list(iter(op))
 ///     Traceback (most recent call last):
 ///       ...
@@ -164,6 +177,7 @@ impl MajoranaOperatorDataIter {
 /// Instead, this class provides custom iterators to fulfill this purpose:
 ///
 /// .. doctest::
+///
 ///     >>> list(sorted(op.iter_terms()))
 ///     [([], (1+0j)), ([0, 1], (-2+0j)), ([0, 1, 2, 3], (-0-0.5j)), ([0, 2], 3j)]
 ///
@@ -186,6 +200,7 @@ impl MajoranaOperatorDataIter {
 /// ^^^^^^^^^^^^^^^^^^^^
 ///
 /// .. doctest::
+///
 ///     >>> op = MajoranaOperator.one()
 ///     >>> (op + op).simplify()
 ///     MajoranaOperator.from_dict({(): 2+0j})
@@ -202,6 +217,7 @@ impl MajoranaOperatorDataIter {
 /// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ///
 /// .. doctest::
+///
 ///     >>> op = MajoranaOperator.one()
 ///     >>> (2 * op).simplify()
 ///     MajoranaOperator.from_dict({(): 2+0j})
@@ -223,25 +239,35 @@ impl MajoranaOperatorDataIter {
 ///    operator that performs "first ``a`` and then ``b``".
 ///
 /// .. doctest::
+///
 ///     >>> op1 = MajoranaOperator.from_dict({(): 2.0, (gamma(0, False),): 3.0})
 ///     >>> op2 = MajoranaOperator.from_dict({(): 1.5, (gamma(0, True),): 4.0})
 ///     >>> comp = (op1 & op2).simplify()
 ///     >>> print(comp)
 ///       3.000000e0 +0.000000e0j * ()
-///       4.500000e0 +0.000000e0j * (0)
-///       8.000000e0 +0.000000e0j * (1)
-///       1.200000e1 +0.000000e0j * (1 0)
+///       4.500000e0 +0.000000e0j * (γ0)
+///       8.000000e0 +0.000000e0j * (γ'0)
+///       1.200000e1 +0.000000e0j * (γ'0 γ0)
 ///     >>> op2 &= op1
 ///     >>> print(op2.simplify())
 ///       3.000000e0 +0.000000e0j * ()
-///       4.500000e0 +0.000000e0j * (0)
-///       1.200000e1 +0.000000e0j * (0 1)
-///       8.000000e0 +0.000000e0j * (1)
+///       4.500000e0 +0.000000e0j * (γ0)
+///       1.200000e1 +0.000000e0j * (γ0 γ'0)
+///       8.000000e0 +0.000000e0j * (γ'0)
 ///     >>> squared = (op1 ** 2).simplify()
 ///     >>> print(squared)
 ///       4.000000e0 +0.000000e0j * ()
-///       1.200000e1 +0.000000e0j * (0)
-///       9.000000e0 +0.000000e0j * (0 0)
+///       1.200000e1 +0.000000e0j * (γ0)
+///       9.000000e0 +0.000000e0j * (γ0 γ0)
+///
+/// .. note::
+///    For convenience, the right-multiplication is implemented by ``c = a @ b`` (resulting in
+///    :math:`C = A B`).
+///
+/// .. doctest::
+///
+///     >>> (op1 @ op2).equiv(op2 & op1)
+///     True
 ///
 /// Other Operations
 /// ^^^^^^^^^^^^^^^^
@@ -255,6 +281,7 @@ impl MajoranaOperatorDataIter {
 ///    ichop
 ///    simplify
 ///    normal_ordered
+///    relabel_modes
 ///
 /// Properties
 /// ^^^^^^^^^^
@@ -293,6 +320,7 @@ impl PyMajoranaOperator {
                 coeffs,
                 modes,
                 boundaries,
+                groups: None,
             },
         }
     }
@@ -300,6 +328,7 @@ impl PyMajoranaOperator {
     /// Constructs a new operator from a dictionary.
     ///
     /// .. doctest::
+    ///
     ///     >>> from qiskit_fermions.operators import MajoranaOperator
     ///     >>> op = MajoranaOperator.from_dict(
     ///     ...     {
@@ -309,7 +338,7 @@ impl PyMajoranaOperator {
     ///     ... )
     ///     >>> print(op)
     ///       1.000000e0 -1.000000e0j * ()
-    ///       2.000000e0 +0.000000e0j * (0 1)
+    ///       2.000000e0 +0.000000e0j * (γ0 γ'0)
     ///
     /// Args:
     ///     data: a dictionary mapping tuples of terms to complex coefficients. Each key is a tuple
@@ -337,8 +366,97 @@ impl PyMajoranaOperator {
                 coeffs,
                 modes,
                 boundaries,
+                groups: None,
             },
         }
+    }
+
+    /// Returns a read-only list of the operator's coefficients.
+    ///
+    /// .. note::
+    ///    This method returns a *copy* of the internal data.
+    ///
+    /// .. seealso::
+    ///    The explanation of the internal data structure,
+    ///    :ref:`here <MajoranaOperator-implementation>`.
+    ///
+    /// .. doctest::
+    ///
+    ///     >>> from qiskit_fermions.operators import MajoranaOperator
+    ///     >>> op = MajoranaOperator.one()
+    ///     >>> op += -1j * MajoranaOperator.one()
+    ///     >>> op.get_coeffs()
+    ///     [(1+0j), -1j]
+    ///
+    /// Returns:
+    ///     A list of the operator's coefficients.
+    fn get_coeffs(&self) -> Vec<Complex64> {
+        self.inner.coeffs().to_vec()
+    }
+
+    /// Returns a read-only list of the operator's acted-upon mode indices.
+    ///
+    /// .. note::
+    ///    This method returns a **copy** of the internal data.
+    ///
+    /// .. seealso::
+    ///    The explanation of the internal data structure,
+    ///    :ref:`here <MajoranaOperator-implementation>`.
+    ///
+    /// .. doctest::
+    ///
+    ///     >>> from qiskit_fermions.operators import MajoranaOperator
+    ///     >>> op = MajoranaOperator.one()
+    ///     >>> op += MajoranaOperator.from_dict({(0, 1): 1.0})
+    ///     >>> op.get_modes()
+    ///     [0, 1]
+    ///
+    /// Returns:
+    ///     A list of the operator's modes.
+    fn get_modes(&self) -> Vec<u32> {
+        self.inner.modes().to_vec()
+    }
+
+    /// Returns a read-only list of the indices indicating the boundaries between operator terms.
+    ///
+    /// .. note::
+    ///    This method returns a **copy** of the internal data.
+    ///
+    /// .. seealso::
+    ///    The explanation of the internal data structure,
+    ///    :ref:`here <MajoranaOperator-implementation>`.
+    ///
+    /// .. doctest::
+    ///
+    ///     >>> from qiskit_fermions.operators import MajoranaOperator
+    ///     >>> op = MajoranaOperator.one()
+    ///     >>> op += MajoranaOperator.from_dict({(0, 1): 1.0})
+    ///     >>> op.get_boundaries()
+    ///     [0, 0, 2]
+    ///
+    /// Returns:
+    ///     A list of the operator's terms boundaries.
+    fn get_boundaries(&self) -> Vec<usize> {
+        self.inner.boundaries().to_vec()
+    }
+
+    /// Returns the set of mode indices which this operator acts upon.
+    ///
+    /// .. doctest::
+    ///
+    ///     >>> from qiskit_fermions.operators import MajoranaOperator
+    ///     >>> op = MajoranaOperator.from_dict(
+    ///     ...     {
+    ///     ...         (0, 4): 1,
+    ///     ...         (1, 3, 4, 7): 1,
+    ///     ...     }
+    ///     ... )
+    ///     >>> assert op.get_support() == {0, 1, 3, 4, 7}
+    ///
+    /// Returns:
+    ///     The set of mode indices which this operator acts upon.
+    fn get_support(&self) -> HashSet<u32> {
+        self.inner.get_support()
     }
 
     fn __richcmp__(&self, other: &Self, op: CompareOp, _py: Python<'_>) -> PyResult<bool> {
@@ -401,7 +519,10 @@ impl PyMajoranaOperator {
         sorted.sort_by_key(|&term| term.into_vec());
         let mut items_str = Vec::new();
         for term in sorted {
-            let key_parts: Vec<String> = term.iter().map(|mode| format!("{mode}")).collect();
+            let key_parts: Vec<String> = term
+                .iter()
+                .map(|mode| format!("γ{}{}", if mode % 2 == 1 { "'" } else { "" }, mode / 2))
+                .collect();
             let key_str = format!("({})", key_parts.join(" "));
             let val_str = format!("{:12.6e}{:+12.6e}j", term.coeff.re, term.coeff.im);
             items_str.push(format!("{val_str} * {key_str}"));
@@ -414,6 +535,7 @@ impl PyMajoranaOperator {
     /// Adding the operator that is constructed by this method to another one has no effect.
     ///
     /// .. doctest::
+    ///
     ///     >>> from qiskit_fermions.operators import MajoranaOperator
     ///     >>> op = MajoranaOperator.from_dict({(): 2.0})
     ///     >>> zero = MajoranaOperator.zero()
@@ -433,6 +555,7 @@ impl PyMajoranaOperator {
     /// Composing the operator that is constructed by this method with another one has no effect.
     ///
     /// .. doctest::
+    ///
     ///     >>> from qiskit_fermions.operators import MajoranaOperator
     ///     >>> op = MajoranaOperator.from_dict({(): 2.0})
     ///     >>> one = MajoranaOperator.one()
@@ -476,6 +599,7 @@ impl PyMajoranaOperator {
     /// magnitude which should not be truncated:
     ///
     /// .. doctest::
+    ///
     ///     >>> from qiskit_fermions.operators import MajoranaOperator
     ///     >>> coeffs = [1e-5] * int(1e5)
     ///     >>> boundaries = [0] + [0] * int(1e5)
@@ -491,7 +615,7 @@ impl PyMajoranaOperator {
     /// Returns:
     ///     An equivalent but simplified operator.
     #[pyo3(signature = (atol=1e-8))]
-    fn simplify(&mut self, atol: f64) -> Self {
+    fn simplify(&self, atol: f64) -> Self {
         Self {
             inner: self.inner.simplify(atol),
         }
@@ -504,18 +628,19 @@ impl PyMajoranaOperator {
     ///    separate coefficients for duplicate terms consider calling :meth:`.simplify` instead!
     ///
     /// .. doctest::
+    ///
     ///     >>> from qiskit_fermions.operators import MajoranaOperator
     ///     >>> op = MajoranaOperator.from_dict({(): 1e-4, (0,): 1e-6, (1,): 1e-10})
-    ///     >>> print(op)  # doctest: +FLOAT_CMP
+    ///     >>> print(op)
     ///       1.000000e-4 +0.000000e0j * ()
-    ///       1.000000e-6 +0.000000e0j * (0)
-    ///      1.000000e-10 +0.000000e0j * (1)
+    ///       1.000000e-6 +0.000000e0j * (γ0)
+    ///      1.000000e-10 +0.000000e0j * (γ'0)
     ///     >>> op.ichop()
-    ///     >>> print(op)  # doctest: +FLOAT_CMP
+    ///     >>> print(op)
     ///       1.000000e-4 +0.000000e0j * ()
-    ///       1.000000e-6 +0.000000e0j * (0)
+    ///       1.000000e-6 +0.000000e0j * (γ0)
     ///     >>> op.ichop(1e-5)
-    ///     >>> print(op)  # doctest: +FLOAT_CMP
+    ///     >>> print(op)
     ///       1.000000e-4 +0.000000e0j * ()
     ///
     /// Args:
@@ -531,6 +656,7 @@ impl PyMajoranaOperator {
     ///    Mutating the iteration items does **not** affect the underlying operator data.
     ///
     /// .. doctest::
+    ///
     ///     >>> from qiskit_fermions.operators import MajoranaOperator
     ///     >>> op = MajoranaOperator.from_dict({(): 2.0, (0,): 1.0, (1,): -1.0j})
     ///     >>> list(sorted(op.iter_terms()))
@@ -549,6 +675,85 @@ impl PyMajoranaOperator {
         Py::new(slf.py(), iter)
     }
 
+    /// Constructs a new operator from an iterator of terms (see also :meth:`.iter_terms`).
+    ///
+    /// .. doctest::
+    ///
+    ///     >>> from qiskit_fermions.operators import MajoranaOperator
+    ///     >>> op = MajoranaOperator.from_dict({(): 2.0, (0,): 1.0, (1,): -1.0j})
+    ///     >>> op.equiv(MajoranaOperator.from_terms(op.iter_terms()))
+    ///     True
+    ///
+    /// Args:
+    ///     terms: an iterator of terms as produced by :meth:`.iter_terms`.
+    ///
+    /// Returns:
+    ///     A new operator.
+    #[classmethod]
+    fn from_terms(_cls: &Bound<'_, PyType>, terms: &Bound<'_, PyAny>) -> PyResult<Self> {
+        let mut inner = MajoranaOperator::zero();
+        terms.try_iter()?.try_for_each(|item| -> PyResult<()> {
+            let (term, coeff) = item?.extract::<(Vec<PyMajoranaAction>, Complex64)>()?;
+            inner.coeffs.push(coeff);
+            inner.modes.extend_from_slice(&term);
+            inner.boundaries.push(inner.modes.len());
+            Ok(())
+        })?;
+        Ok(Self { inner })
+    }
+
+    /// An optional vector of `group indices` for each term.
+    ///
+    /// For more information refer to the :mod:`~qiskit_fermions.operators.grouping` module.
+    #[getter]
+    pub fn get_groups(&self) -> Option<Vec<u32>> {
+        self.inner.groups.clone()
+    }
+
+    /// Sets the :attr:`groups` attribute.
+    #[setter]
+    pub fn set_groups(&mut self, groups: Option<Vec<u32>>) {
+        self.inner.groups = groups;
+    }
+
+    /// Splits this operator into an optional list of new operators based on :attr:`groups`.
+    ///
+    /// If :attr:`groups` is ``None``, this function also returns ``None``. Otherwise, it will
+    /// return a list of new operators that contain those terms of this operator with the
+    /// corresponding `group` index.
+    ///
+    /// .. doctest::
+    ///
+    ///     >>> from qiskit_fermions.operators import MajoranaOperator
+    ///     >>> op = MajoranaOperator(
+    ///     ...     [1.0, 2.0, -1.0, -2.0],
+    ///     ...     [0, 1, 2, 3, 1, 0, 3, 2],
+    ///     ...     [0, 2, 4, 6, 8],
+    ///     ... )
+    ///     >>> print(op.split_out_groups())
+    ///     None
+    ///     >>> op.groups = [0, 1, 0, 1]
+    ///     >>> groups = op.split_out_groups()
+    ///     >>> for g in groups:
+    ///     ...     print(list(sorted(g.iter_terms())))
+    ///     [([0, 1], (1+0j)), ([1, 0], (-1+0j))]
+    ///     [([2, 3], (2+0j)), ([3, 2], (-2+0j))]
+    ///
+    /// Returns:
+    ///     An optional vector of one new operator for each group index in :attr:`groups`.
+    fn split_out_groups(slf: PyRef<'_, Self>) -> Option<Vec<Self>> {
+        let groups = slf.inner.split_out_groups();
+        match groups {
+            None => None,
+            Some(g) => {
+                let mut out = Vec::with_capacity(g.len());
+                g.into_iter()
+                    .for_each(|group_op| out.push(Self { inner: group_op }));
+                Some(out)
+            }
+        }
+    }
+
     /// Returns the Hermitian conjugate (or adjoint) of this operator.
     ///
     /// This affects the terms and coefficients as follows:
@@ -557,12 +762,13 @@ impl PyMajoranaOperator {
     /// - the coefficients are complex conjugated
     ///
     /// .. doctest::
+    ///
     ///     >>> from qiskit_fermions.operators import MajoranaOperator
     ///     >>> op = MajoranaOperator.from_dict({(): -1.0j, (gamma(0, False), gamma(0, True)): 1.0})
     ///     >>> adj = op.adjoint()
-    ///     >>> print(adj)  # doctest: +FLOAT_CMP
+    ///     >>> print(adj)
     ///      -0.000000e0 +1.000000e0j * ()
-    ///       1.000000e0 -0.000000e0j * (1 0)
+    ///       1.000000e0 -0.000000e0j * (γ'0 γ0)
     ///
     /// ..
     fn adjoint(&self) -> Self {
@@ -579,6 +785,7 @@ impl PyMajoranaOperator {
     /// ``atol``.
     ///
     /// .. doctest::
+    ///
     ///     >>> from qiskit_fermions.operators import MajoranaOperator
     ///     >>> op = MajoranaOperator.from_dict({(): 1e-7})
     ///     >>> zero = MajoranaOperator.zero()
@@ -600,29 +807,32 @@ impl PyMajoranaOperator {
     /// Returns an equivalent operator with normal ordered terms.
     ///
     /// The normal order of an operator term is defined such that all actions are ordered by
-    /// lexicographically descending indices. With the convention set forth by :py:func:`.gamma` to
-    /// place :math:`\gamma` (:math:`\gamma'`) on even (odd) indices, this results in the following
-    /// example:
+    /// lexicographically. Whether they ascend or descend depends on the value of the ``ascending``
+    /// parameter. With the convention set forth by :py:func:`.gamma` to place :math:`\gamma`
+    /// (:math:`\gamma'`) on even (odd) indices, this results in the following example (for the
+    /// default, ``ascending=False``):
     /// ``[\gamma(1, True), \gamma(1, False), \gamma(0, True), \gamma(0, False)] = [3, 2, 1, 0]``.
     ///
     /// .. doctest::
+    ///
     ///     >>> from qiskit_fermions.operators import MajoranaOperator
     ///     >>> op = MajoranaOperator.from_dict({(gamma(0, False), gamma(0, True), gamma(0, False)): 1})
     ///     >>> print(op.normal_ordered(reduce=False))
-    ///      -1.000000e0 +0.000000e0j * (1 0 0)
+    ///      -1.000000e0 +0.000000e0j * (γ'0 γ0 γ0)
     ///     >>> print(op.normal_ordered(reduce=True))
-    ///      -1.000000e0 +0.000000e0j * (1)
+    ///      -1.000000e0 +0.000000e0j * (γ'0)
     ///
     /// Args:
+    ///     ascending: whether indices should ascend or descend.
     ///     reduce: whether to reduce each term to its minimal form by removing actions that square
     ///         to the identity. See also the example above.
     ///
     /// Returns:
     ///     An equivalent but normal-ordered operator.
-    #[pyo3(signature = (reduce=true))]
-    fn normal_ordered(&self, reduce: bool) -> Self {
+    #[pyo3(signature = (ascending=false, reduce=true))]
+    fn normal_ordered(&self, ascending: bool, reduce: bool) -> Self {
         Self {
-            inner: self.inner.normal_ordered(reduce),
+            inner: self.inner.normal_ordered(ascending, reduce),
         }
     }
 
@@ -633,6 +843,7 @@ impl PyMajoranaOperator {
     ///    of ``self`` and its :meth:`.adjoint` and :meth:`.zero`.
     ///
     /// .. doctest::
+    ///
     ///     >>> from qiskit_fermions.operators import MajoranaOperator
     ///     >>> op = MajoranaOperator.from_dict({
     ///     ...     (0, 1, 2, 3): 1.00001j,
@@ -661,6 +872,7 @@ impl PyMajoranaOperator {
     ///    operator.
     ///
     /// .. doctest::
+    ///
     ///     >>> from qiskit_fermions.operators import MajoranaOperator
     ///     >>> op = MajoranaOperator.from_dict({(0, 1, 2, 3): 1})
     ///     >>> op.many_body_order()
@@ -678,6 +890,7 @@ impl PyMajoranaOperator {
     ///    An operator is considered even when all of its terms contain an even number of actions.
     ///
     /// .. doctest::
+    ///
     ///     >>> from qiskit_fermions.operators import MajoranaOperator
     ///     >>> op = MajoranaOperator.from_dict({(0, 1): 1})
     ///     >>> op.is_even()
@@ -690,6 +903,33 @@ impl PyMajoranaOperator {
     ///     Whether this operator is even.
     fn is_even(&self) -> bool {
         self.inner.is_even()
+    }
+
+    /// Returns a new operator with relabeled modes.
+    ///
+    /// .. doctest::
+    ///     >>> from qiskit_fermions.operators import MajoranaOperator
+    ///     >>> op = MajoranaOperator.from_dict({
+    ///     ...     (0, 1): 1,
+    ///     ...     (0, 1, 2, 3): 1,
+    ///     ... })
+    ///     >>> permutation = [5, 6, 4, 3]
+    ///     >>> relabeled = op.relabel_modes(permutation)
+    ///     >>> print(relabeled)
+    ///       1.000000e0 +0.000000e0j * (γ'2 γ3)
+    ///       1.000000e0 +0.000000e0j * (γ'2 γ3 γ2 γ'1)
+    ///
+    /// Args:
+    ///     permutation: the index permutation list.
+    ///
+    /// Returns:
+    ///     A new operator with its modes relabeled.
+    fn relabel_modes(&self, permutation: Vec<u32>) -> PyResult<Self> {
+        let out = self.inner.relabel_modes(permutation);
+        match out {
+            Ok(op) => Ok(Self { inner: op }),
+            Err(e) => Err(PyValueError::new_err(e.to_string())),
+        }
     }
 }
 

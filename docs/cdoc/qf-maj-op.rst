@@ -47,6 +47,8 @@ fermionic modes acted upon by the operator minus 1.
 
 ----
 
+.. _qf_maj_op-implementation:
+
 Implementation
 ==============
 
@@ -64,7 +66,14 @@ commonly used for sparse matrices. More concretely, a single operator contains 4
    ============== =================================================================================
 
 The integers in ``modes`` index the Majorana modes, :math:`j`. When using the convenience
-function :py:func:`.gamma`, even (odd) indices are used for :math`\gamma` (:math:`\gamma'`).
+function :py:func:`.gamma`, even (odd) indices are used for :math:`\gamma` (:math:`\gamma'`).
+
+.. note::
+   You may access **read-only copies** of these internal arrays via their respective functions:
+
+   - :c:func:`qf_maj_op_get_coeffs`
+   - :c:func:`qf_maj_op_get_modes`
+   - :c:func:`qf_maj_op_get_boundaries`
 
 This data structure allows for very efficient construction and manipulation of operators.
 However, it implies that duplicate terms may be contained in an operator at any moment.
@@ -120,6 +129,7 @@ The following functions provide operator manipulation logic:
   :c:func:`qf_maj_op_ichop`           Removes terms with small coefficient magnitudes.
   :c:func:`qf_maj_op_simplify`        Returns an equivalent but simplified operator.
   :c:func:`qf_maj_op_normal_ordered`  Returns an equivalent operator with normal ordered terms.
+  :c:func:`qf_maj_op_relabel_modes`   Relabels the modes of an operator.
   ==================================  =========================================================
 
 Properties

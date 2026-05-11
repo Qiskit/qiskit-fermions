@@ -14,16 +14,18 @@
 
 from collections.abc import Callable
 from operator import and_
-from typing import TypeVar
+from typing import TYPE_CHECKING, TypeVar
 
-from ..operators import MajoranaAction, MajoranaOperator
+if TYPE_CHECKING:
+    from qiskit_fermions._lib.operators.majorana_operator import MajoranaOperator
+    from qiskit_fermions.operators.majorana_action import MajoranaAction
 
 T = TypeVar("T")
 
 
 def map_majorana_action_generators(
-    operator: MajoranaOperator,
-    map_action: Callable[[MajoranaAction], T],
+    operator: "MajoranaOperator",
+    map_action: Callable[["MajoranaAction"], T],
     identity: Callable[[], T],
     compose: Callable[[T, T], T] | None = None,
 ) -> T:
@@ -40,6 +42,7 @@ def map_majorana_action_generators(
        If ``compose=None`` it must also support composition of two instances via ``__and__``.
 
     .. doctest::
+
         >>> from qiskit_fermions.mappers import map_majorana_action_generators
         >>> from qiskit_fermions.operators import MajoranaAction, MajoranaOperator, gamma
         >>> from qiskit.quantum_info import SparsePauliOp

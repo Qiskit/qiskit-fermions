@@ -1,48 +1,59 @@
 Python Installation Instructions
 ================================
 
-Assuming you have already completed the `base installation Instructions
-<install.rst>`_, the rest of the Python installation instructions is fairly
+.. warning::
+   Windows is not yet fully supported by the Python API of ``qiskit-fermions``.
+   We are actively working on resolving this. Stay tuned for updates!
+
+Requirements
+------------
+
+You need to have installed Qiskit in the same Python environment as the one you
+intend to install ``qiskit-fermions`` in. The simplest way of doing so is from
+PyPI, but you are free to install Qiskit from source if you wish to.
+
+.. code:: console
+
+   $ pip install qiskit
+
+Steps
+-----
+
+Assuming that you have already installed Qiskit into your Python environment
+(see `here <install.rst>`_), the remaining installation process is fairly
 simple:
 
-1. change into the correct directory:
+1. Ensure that you are in the right directory:
 
    .. code:: console
 
       $ cd path/to/qiskit-fermions
 
-2. install the Python installation tooling
+2. Install the Python installation tooling:
 
    .. code:: console
 
       $ pip install --group build
 
-3. compile the `pyext` crate:
+3. Install the ``qiskit-fermions`` Python package into your environment with
+   ``--no-build-isolation`` to ensure that ``qiskit`` is available correctly:
 
    .. code:: console
 
-      $ make pyext
+      $ pip install --no-build-isolation .
 
-4. install the Python package:
+   .. hint::
 
-   .. code:: console
+      You can also perform an editable install while still compiling the
+      underlying Rust crate in ``release`` mode like so:
 
-      $ make pyinstall
+      .. code:: console
 
-5. get the correct ``LD_LIBRARY_PATH``:
+         $ SETUPTOOLS_RUST_CARGO_PROFILE=release pip install --no-build-isolation -e .
 
-   .. code:: console
-
-      $ make echo_ld_lib_path
-
-6. ensure that you copy and run the output above
-
-7. verify that everything worked by running the Python API tests:
+5. (optional) Verify the installation by running the Python unittests:
 
    .. code:: console
 
+      $ pip install --group test
       $ make testpython
-
-
-From now on, you need to ensure that you always export the ``LD_LIBRARY_PATH``
-as before when you want to use this Python package.

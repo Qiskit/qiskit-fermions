@@ -15,7 +15,7 @@ use crate::pointers::{const_ptr_as_ref, mut_ptr_as_ref, slice_from_ptr};
 
 use num_complex::Complex64;
 use qiskit_fermions_core::operators::majorana_operator::MajoranaOperator;
-use qiskit_fermions_core::operators::{OperatorMacro, OperatorTrait};
+use qiskit_fermions_core::operators::{CoherenceError, OperatorMacro, OperatorTrait};
 
 /// @ingroup qf_maj_op
 ///
@@ -65,10 +65,11 @@ pub unsafe extern "C" fn qf_maj_op_new(
         modes: unsafe { slice_from_ptr(modes, num_modes).to_vec() },
         boundaries: unsafe {
             slice_from_ptr(boundaries, num_terms + 1)
-                .into_iter()
+                .iter()
                 .map(|b| *b as usize)
                 .collect()
         },
+        groups: None,
     };
     Box::into_raw(Box::new(op))
 }
@@ -103,6 +104,152 @@ pub unsafe extern "C" fn qf_maj_op_free(op: *mut MajoranaOperator) {
             let _ = Box::from_raw(op);
         }
     }
+}
+
+/// @ingroup qf_maj_op
+///
+/// @brief Provides read-only access to the operator's coefficients.
+///
+/// @param op A pointer to the majorana operator whose coefficients to access.
+/// @param coeffs_out A pointer to the array of complex values into which to write the coefficients.
+/// @param coeffs_len A pointer to the integer into which to write the length of the output array.
+///
+/// @rst
+///
+/// .. note::
+///    This function returns a **copy** of the internal data.
+///
+/// .. seealso::
+///    The explanation of the internal data structure, :ref:`here <qf_maj_op-implementation>`.
+///
+/// Example
+/// -------
+///
+/// .. code-block:: c
+///     :linenos:
+///
+///     uint64_t num_terms = 2;
+///     uint64_t num_modes = 0;
+///     QkComplex64 coeffs[2] = {{1.0, 0.0}, {0.0, -1.0}};
+///     uint32_t boundaries[3] = {0, 0, 0};
+///     QfMajoranaOperator *op =
+///         qf_maj_op_new(num_terms, num_modes, coeffs, NULL, boundaries);
+///
+///     QkComplex64 *coeffs_out;
+///     uint64_t *coeffs_len;
+///
+///     qf_maj_op_get_coeffs(op, &coeffs_out, &coeffs_len);
+///
+///     assert(coeffs_len == 2);
+///
+/// @endrst
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn qf_maj_op_get_coeffs(
+    op: *const MajoranaOperator,
+    coeffs_out: *mut *mut Complex64,
+    coeffs_len: *mut u64,
+) {
+    let op = unsafe { const_ptr_as_ref(op) };
+    unsafe { coeffs_out.write(op.coeffs.as_ptr().cast_mut()) };
+    unsafe { coeffs_len.write(op.coeffs.len().try_into().unwrap()) };
+}
+
+/// @ingroup qf_maj_op
+///
+/// @brief Provides read-only access to the operator's acted-upon mode indices.
+///
+/// @param op A pointer to the majorana operator whose modes to access.
+/// @param modes_out A pointer to the array of boolean values into which to write the modes.
+/// @param modes_len A pointer to the integer into which to write the length of the output array.
+///
+/// @rst
+///
+/// .. note::
+///    This function returns a **copy** of the internal data.
+///
+/// .. seealso::
+///    The explanation of the internal data structure, :ref:`here <qf_maj_op-implementation>`.
+///
+/// Example
+/// -------
+///
+/// .. code-block:: c
+///     :linenos:
+///
+///     uint64_t num_terms = 2;
+///     bool actions[2] = {true, false};
+///     uint32_t modes[2] = {0, 1};
+///     QkComplex64 coeffs[2] = {{1.0, 0.0}, {0.0, -1.0}};
+///     uint32_t boundaries[3] = {0, 0, 2};
+///     QfMajoranaOperator *op =
+///         qf_maj_op_new(num_terms, num_actions, coeffs, modes, boundaries);
+///
+///     QkComplex64 *modes_out;
+///     uint64_t *modes_len;
+///
+///     qf_maj_op_get_modes(op, &modes_out, &modes_len);
+///
+///     assert(modes_len == 2);
+///
+/// @endrst
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn qf_maj_op_get_modes(
+    op: *const MajoranaOperator,
+    modes_out: *mut *mut u32,
+    modes_len: *mut u64,
+) {
+    let op = unsafe { const_ptr_as_ref(op) };
+    unsafe { modes_out.write(op.modes.as_ptr().cast_mut()) };
+    unsafe { modes_len.write(op.modes.len().try_into().unwrap()) };
+}
+
+/// @ingroup qf_maj_op
+///
+/// @brief Provides read-only access to the indices indicating the boundaries between operator terms.
+///
+/// @param op A pointer to the majorana operator whose boundaries to access.
+/// @param boundaries_out A pointer to the array of boolean values into which to write the boundaries.
+/// @param boundaries_len A pointer to the integer into which to write the length of the output array.
+///
+/// @rst
+///
+/// .. note::
+///    This function returns a **copy** of the internal data.
+///
+/// .. seealso::
+///    The explanation of the internal data structure, :ref:`here <qf_maj_op-implementation>`.
+///
+/// Example
+/// -------
+///
+/// .. code-block:: c
+///     :linenos:
+///
+///     uint64_t num_terms = 2;
+///     uint64_t num_modes = 2;
+///     uint32_t modes[2] = {0, 1};
+///     QkComplex64 coeffs[2] = {{1.0, 0.0}, {0.0, -1.0}};
+///     uint32_t boundaries[3] = {0, 0, 2};
+///     QfMajoranaOperator *op =
+///         qf_maj_op_new(num_terms, num_modes, coeffs, modes, boundaries);
+///
+///     QkComplex64 *boundaries_out;
+///     uint64_t *boundaries_len;
+///
+///     qf_maj_op_get_boundaries(op, &boundaries_out, &boundaries_len);
+///
+///     assert(boundaries_len == 3);
+///
+/// @endrst
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn qf_maj_op_get_boundaries(
+    op: *const MajoranaOperator,
+    boundaries_out: *mut *mut usize,
+    boundaries_len: *mut u64,
+) {
+    let op = unsafe { const_ptr_as_ref(op) };
+    unsafe { boundaries_out.write(op.boundaries.as_ptr().cast_mut()) };
+    unsafe { boundaries_len.write(op.boundaries.len().try_into().unwrap()) };
 }
 
 /// @ingroup qf_maj_op
@@ -165,6 +312,230 @@ pub unsafe extern "C" fn qf_maj_op_one() -> *mut MajoranaOperator {
 
 /// @ingroup qf_maj_op
 ///
+/// @brief Checks whether this operator has a ``groups`` attribute that is not empty.
+///
+/// @param op A pointer to the majorana operator to be checked.
+///
+/// @return Whether the provided operator has a non-empty ``groups`` attribute.
+///
+/// @rst
+///
+/// .. seealso::
+///    The explanation on :ref:`grouping_explanation`.
+///
+/// Example
+/// -------
+///
+/// .. code-block:: c
+///     :linenos:
+///
+///     QfMajoranaOperator *op = ...;
+///
+///     bool has_groups = qf_maj_op_has_groups(op);
+///
+/// @endrst
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn qf_maj_op_has_groups(op: *const MajoranaOperator) -> bool {
+    let op = unsafe { const_ptr_as_ref(op) };
+    op.groups.is_some()
+}
+
+/// @ingroup qf_maj_op
+///
+/// @brief Gets the number of unique group indices from an operator.
+///
+/// @param op A pointer to the majorana operator whose number of group indices to get.
+///
+/// @return The number of unique group indices from the operator's ``groups`` attribute.
+///
+/// @rst
+///
+/// .. seealso::
+///    The explanation on :ref:`grouping_explanation`.
+///
+/// Example
+/// -------
+///
+/// .. code-block:: c
+///     :linenos:
+///
+///     QfMajoranaOperator *op = ...;
+///
+///     uint32_t num_groups = qf_maj_op_num_groups(op);
+///
+/// @endrst
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn qf_maj_op_num_groups(op: *const MajoranaOperator) -> u32 {
+    let op = unsafe { const_ptr_as_ref(op) };
+    let groups = &op.groups.as_ref().expect(
+        "Expected groups to be present. It is the user's responsibility to check this via \
+        qf_maj_op_has_groups before calling this function.",
+    );
+    groups.iter().max().unwrap() + 1
+}
+
+/// @ingroup qf_maj_op
+///
+/// @brief Gets the group indices for all operator terms.
+///
+/// @param op A pointer to the majorana operator whose group indices to get.
+/// @param groups_out A pointer to the integer array into which to write the group indices.
+/// @param groups_len A pointer to the integer into which to write the length of the output array.
+///
+/// @rst
+///
+/// .. seealso::
+///    The explanation on :ref:`grouping_explanation`.
+///
+/// Example
+/// -------
+///
+/// .. code-block:: c
+///     :linenos:
+///
+///     QfMajoranaOperator *op = ...;
+///     uint32_t *groups_out;
+///     uint32_t groups_len;
+///
+///     qf_maj_op_get_groups(op, &groups_out, &groups_len);
+///
+/// @endrst
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn qf_maj_op_get_groups(
+    op: *const MajoranaOperator,
+    groups_out: *mut *mut u32,
+    groups_len: *mut u64,
+) {
+    let op = unsafe { const_ptr_as_ref(op) };
+    let groups = &op.groups.as_ref().expect(
+        "Expected groups to be present. It is the user's responsibility to check this via \
+        qf_maj_op_has_groups before calling this function.",
+    );
+    unsafe { groups_out.write(groups.as_ptr().cast_mut()) };
+    unsafe { groups_len.write(groups.len().try_into().unwrap()) };
+}
+
+/// @ingroup qf_maj_op
+///
+/// @brief Sets the ``groups`` attribute of the provided operator.
+///
+/// @param op A pointer to the majorana operator whose ``groups`` attribute to write.
+/// @param groups_in A pointer to the ``groups`` integer array to write into the operator.
+/// @param groups_len The number of terms in the ``groups_in`` array.
+///
+/// @rst
+///
+/// .. seealso::
+///    The explanation on :ref:`grouping_explanation`.
+///
+/// Example
+/// -------
+///
+/// .. code-block:: c
+///     :linenos:
+///
+///     QfMajoranaOperator *op = ...;
+///
+///     uint32_t num_terms = 4;
+///     uint32_t groups_in[4] = {0, 1, 0, 1};
+///     qf_maj_op_set_groups(op, groups_in, num_terms);
+///
+/// @endrst
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn qf_maj_op_set_groups(
+    op: *mut MajoranaOperator,
+    groups_in: *const u32,
+    groups_len: u64,
+) {
+    let op = unsafe { mut_ptr_as_ref(op) };
+    let groups_in = unsafe { const_ptr_as_ref(groups_in) };
+    let mut groups = vec![0; groups_len as usize];
+    groups.copy_from_slice(unsafe { slice_from_ptr(groups_in, groups_len as usize) });
+    op.groups = Some(groups);
+}
+
+/// @ingroup qf_maj_op
+///
+/// @brief Deletes the ``groups`` attribute from the provided operator.
+///
+/// @param op A pointer to the majorana operator whose ``groups`` attribute to delete.
+///
+/// @rst
+///
+/// .. seealso::
+///    The explanation on :ref:`grouping_explanation`.
+///
+/// Example
+/// -------
+///
+/// .. code-block:: c
+///     :linenos:
+///
+///     QfMajoranaOperator *op = ...;
+///
+///     qf_maj_op_del_groups(op);
+///
+/// @endrst
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn qf_maj_op_del_groups(op: *mut MajoranaOperator) {
+    let op = unsafe { mut_ptr_as_ref(op) };
+    op.groups = None;
+}
+
+/// @ingroup qf_maj_op
+///
+/// @brief Splits this operator into a list of new operators based on its ``groups`` attribute.
+///
+/// @param op A pointer to the majorana operator whose ``groups`` to split out.
+/// @param group_ops_out A pointer to the array of :c:struct:`QfMajoranaOperator` into which to
+///     write the operators for each group.
+///
+/// @rst
+///
+/// .. seealso::
+///    The explanation on :ref:`grouping_explanation`.
+///
+/// Example
+/// -------
+///
+/// .. code-block:: c
+///     :linenos:
+///
+///     uint64_t num_terms = 4;
+///     uint64_t num_modes = 8;
+///     uint32_t modes[8] = {0, 1, 2, 3, 1, 0, 3, 2};
+///     QkComplex64 coeffs[4] = {{1.0, 0.0}, {1.0, 0.0}, {1.0, 0.0}, {1.0, 0.0}};
+///     uint32_t boundaries[5] = {0, 2, 4, 6, 8};
+///     QfMajoranaOperator *op = qf_maj_op_new(num_terms, num_modes, coeffs, modes, boundaries);
+///
+///     uint32_t groups_in[4] = {0, 1, 0, 1};
+///     qf_maj_op_set_groups(op, groups_in, num_terms);
+///
+///     QfMajoranaOperator *group_ops[2];
+///     qf_maj_op_split_out_groups(op, group_ops);
+///
+/// @endrst
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn qf_maj_op_split_out_groups(
+    op: *const MajoranaOperator,
+    group_ops_out: *mut *mut MajoranaOperator,
+) {
+    let op = unsafe { const_ptr_as_ref(op) };
+    let groups = op.split_out_groups().expect(
+        "Expected groups to be present. It is the user's responsibility to check this via \
+        qf_maj_op_has_groups before calling this function.",
+    );
+    let cgroups: Vec<*mut MajoranaOperator> = groups
+        .into_iter()
+        .map(|g| Box::into_raw(Box::new(g)))
+        .collect();
+    for (i, ptr) in cgroups.iter().enumerate() {
+        unsafe { group_ops_out.add(i).write(*ptr) };
+    }
+}
+
+/// @ingroup qf_maj_op
+///
 /// @brief Adds a term to an existing operator.
 ///
 /// @param op A pointer to the Majorana operator to be modified.
@@ -173,11 +544,12 @@ pub unsafe extern "C" fn qf_maj_op_one() -> *mut MajoranaOperator {
 ///     ``num_modes``.
 /// @param coeff A pointer to the complex coefficient.
 ///
-/// @return An exit code.
-///
 /// @rst
 ///
 /// Any of the pointer arguments may be ``NULL`` if and only if their corresponding length is zero.
+///
+/// .. caution::
+///    This function resets the operator's ``groups`` attribute to ``NULL``.
 ///
 /// Example
 /// -------
@@ -202,7 +574,7 @@ pub unsafe extern "C" fn qf_maj_op_add_term(
     num_modes: u64,
     modes: *const u32,
     coeff: *const Complex64,
-) -> ExitCode {
+) {
     // SAFETY: Per documentation, the pointers are non-null and aligned.
     let op = unsafe { mut_ptr_as_ref(op) };
     let coeff = unsafe { const_ptr_as_ref(coeff) };
@@ -214,7 +586,7 @@ pub unsafe extern "C" fn qf_maj_op_add_term(
         .extend_from_slice(unsafe { slice_from_ptr(modes, num_modes) });
     op.boundaries.push(op.modes.len());
 
-    ExitCode::Success
+    op.groups = None;
 }
 
 /// @ingroup qf_maj_op
@@ -403,7 +775,7 @@ pub unsafe extern "C" fn qf_maj_op_adjoint(op: *const MajoranaOperator) -> *mut 
 ///     QkComplex64 coeff = {1e-8};
 ///     qf_maj_op_add_term(op, 0, modes, &coeff);
 ///
-///     QfExitCode result = qf_maj_op_ichop(op, 1e-6);
+///     qf_maj_op_ichop(op, 1e-6);
 ///
 ///     QfMajoranaOperator *expected = qf_maj_op_zero();
 ///
@@ -411,13 +783,11 @@ pub unsafe extern "C" fn qf_maj_op_adjoint(op: *const MajoranaOperator) -> *mut 
 ///
 /// @endrst
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn qf_maj_op_ichop(op: *mut MajoranaOperator, atol: f64) -> ExitCode {
+pub unsafe extern "C" fn qf_maj_op_ichop(op: *mut MajoranaOperator, atol: f64) {
     // SAFETY: Per documentation, the pointers are non-null and aligned.
     let op = unsafe { mut_ptr_as_ref(op) };
 
     op.ichop(atol);
-
-    ExitCode::Success
 }
 
 /// @ingroup qf_maj_op
@@ -484,10 +854,14 @@ pub unsafe extern "C" fn qf_maj_op_simplify(
 ///
 /// @brief Returns an equivalent operator with normal ordered terms.
 ///
-/// The normal order of an operator term is defined such that all actions are ordered by
-/// lexicographically descending indices.
+/// The normal order of an operator term is defined such that all actions are ordered
+/// lexicographically. Whether they ascend or descend depends on the value of the ``ascending``
+/// parameter.
 ///
 /// @param op A pointer to the operator.
+/// @param ascending Whether indices should ascend or descend.
+/// @param reduce Whether to reduce each term to its minimal form by removing actions that square
+/// to the identity.
 ///
 /// @return A pointer to the created operator.
 ///
@@ -504,7 +878,7 @@ pub unsafe extern "C" fn qf_maj_op_simplify(
 ///     QkComplex64 coeff = {1.0, 0.0};
 ///     qf_maj_op_add_term(op, 4, modes, &coeff);
 ///
-///     QfMajoranaOperator *normal_ordered = qf_maj_op_normal_ordered(op);
+///     QfMajoranaOperator *normal_ordered = qf_maj_op_normal_ordered(op, false, true);
 ///
 ///     QkComplex64 coeff_minus = {-1.0, 0.0};
 ///     QfMajoranaOperator *expected = qf_maj_op_zero();
@@ -517,12 +891,13 @@ pub unsafe extern "C" fn qf_maj_op_simplify(
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn qf_maj_op_normal_ordered(
     op: *const MajoranaOperator,
+    ascending: bool,
     reduce: bool,
 ) -> *mut MajoranaOperator {
     // SAFETY: Per documentation, the pointers are non-null and aligned.
     let op = unsafe { const_ptr_as_ref(op) };
 
-    let result = op.normal_ordered(reduce);
+    let result = op.normal_ordered(ascending, reduce);
     Box::into_raw(Box::new(result))
 }
 
@@ -755,4 +1130,62 @@ pub unsafe extern "C" fn qf_maj_op_len(op: *const MajoranaOperator) -> usize {
     let op = unsafe { const_ptr_as_ref(op) };
 
     op.boundaries.len() - 1
+}
+
+/// @ingroup qf_maj_op
+///
+/// @brief Relabels the modes of the provided operator.
+///
+/// @param op A pointer to the Majorana operator.
+/// @param num_modes The number of mode indices in the provided permutation list.
+/// @param permutation The index permutation list.
+///
+/// @return An exit code.
+/// * ``QfExitCode_Success`` upon success
+/// * ``QfExitCode_DuplicateIndexError`` if duplicate indices were found in the permutation
+/// * ``QfExitCode_IndexError`` for any other index errors, such as invalid indices.
+///
+/// @rst
+///
+/// Example
+/// -------
+///
+/// .. code-block:: c
+///     :linenos:
+///
+///     QfMajoranaOperator *op = qf_maj_op_zero();
+///     uint32_t modes[4] = {0, 1, 2, 3};
+///     QkComplex64 coeff = {1.0, 0.0};
+///     qf_maj_op_add_term(op, 4, modes, &coeff);
+///
+///     uint32_t permutation[4] = {3, 2, 1, 0};
+///
+///     QfExitCode exit = qf_maj_op_relabel_modes(op, 4, permutation);
+///
+///     assert(exit == QfExitCode_Success);
+///
+/// @endrst
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn qf_maj_op_relabel_modes(
+    op: *mut MajoranaOperator,
+    num_modes: u64,
+    permutation: *const u32,
+) -> ExitCode {
+    // SAFETY: Per documentation, the pointers are non-null and aligned.
+    let op = unsafe { mut_ptr_as_ref(op) };
+
+    let permutation = unsafe { slice_from_ptr(permutation, num_modes as usize).to_vec() };
+
+    let relabeled_op = match op.relabel_modes(permutation) {
+        Ok(relabeled) => relabeled,
+        Err(e) => {
+            return match e {
+                CoherenceError::DuplicateIndices => ExitCode::DuplicateIndexError,
+                _ => ExitCode::IndexError,
+            };
+        }
+    };
+
+    *op = relabeled_op;
+    ExitCode::Success
 }

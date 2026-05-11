@@ -12,6 +12,8 @@
 
 from abc import ABC, abstractmethod
 
+import numpy as np
+import pytest
 from qiskit_fermions.operators import FermionOperator, ann, cre
 from qiskit_fermions.operators.library import anti_commutator, commutator
 
@@ -20,6 +22,32 @@ class FermionOperatorTests(ABC):
     @staticmethod
     @abstractmethod
     def get_class() -> type[FermionOperator]: ...
+
+    def test_getters(self, subtests):
+        cls = self.get_class()
+
+        coeffs = [1e-10, 2, 3, 4, -4]
+        actions = [True, True, False, False]
+        modes = [0, 0, 1, 1]
+        boundaries = [0, 0, 1, 2, 3, 4]
+
+        op = cls(coeffs, actions, modes, boundaries)
+
+        with subtests.test("coeffs"):
+            assert np.allclose(op.get_coeffs(), coeffs)
+        with subtests.test("actions"):
+            assert np.all(op.get_actions() == actions)
+        with subtests.test("modes"):
+            assert np.all(op.get_modes() == modes)
+        with subtests.test("boundaries"):
+            assert np.all(op.get_boundaries() == boundaries)
+
+    def test_get_support(self):
+        cls = self.get_class()
+        op = cls.from_dict(
+            {((True, 0), (False, 4)): 1, ((True, 1), (True, 3), (False, 4), (False, 7)): 1}
+        )
+        assert op.get_support() == {0, 1, 3, 4, 7}
 
     def test_zero(self):
         cls = self.get_class()
@@ -62,6 +90,22 @@ class FermionOperatorTests(ABC):
         op = cls.one()
         assert list(op.iter_terms()) == [([], 1)]
 
+    def test_from_terms(self, subtests):
+        cls = self.get_class()
+        op = cls.from_dict(
+            {
+                (): 2,
+                (cre(1), ann(2)): 1,
+                (cre(2), ann(1)): 0.5,
+                (cre(3), ann(4)): -0.5j,
+                (cre(4), ann(3)): 1 - 0.5j,
+            }
+        )
+        with subtests.test("iterator"):
+            assert op.equiv(cls.from_terms(op.iter_terms()))
+        with subtests.test("list"):
+            assert op.equiv(cls.from_terms(list(op.iter_terms())))
+
     def test_ichop(self):
         cls = self.get_class()
         op = cls.from_dict({(): 1e-4, ((True, 0),): 1e-6, ((False, 0),): 1e-10})
@@ -74,9 +118,9 @@ class FermionOperatorTests(ABC):
         cls = self.get_class()
         coeffs = [1e-10, 2, 3, 4, -4]
         actions = [True, True, False, False]
-        indices = [0, 0, 1, 1]
+        modes = [0, 0, 1, 1]
         boundaries = [0, 0, 1, 2, 3, 4]
-        op = cls(coeffs, actions, indices, boundaries)
+        op = cls(coeffs, actions, modes, boundaries)
         canon = op.simplify()
         assert canon.equiv(cls.from_dict({((True, 0),): 5}), 1e-12)
 
@@ -84,9 +128,9 @@ class FermionOperatorTests(ABC):
         cls = self.get_class()
         coeffs = [1e-5] * int(1e5)
         actions = []
-        indices = []
+        modes = []
         boundaries = [0] + [0] * int(1e5)
-        op = cls(coeffs, actions, indices, boundaries)
+        op = cls(coeffs, actions, modes, boundaries)
         canon = op.simplify(1e-4)
         assert canon.equiv(op.one(), 1e-6)
         op.ichop(1e-4)
@@ -230,6 +274,45 @@ class FermionOperatorTests(ABC):
             expected = cls.from_dict({(): 1, ((True, 0), (False, 0)): -1})
             assert op.normal_ordered().equiv(expected)
 
+    def test_normal_ordered_sandwich(self, subtests):
+        cls = self.get_class()
+
+        with subtests.test("sandwich=none"):
+            op = cls.from_dict({((False, 0), (False, 1), (True, 0), (True, 1)): 1})
+            expected = cls.from_dict(
+                {
+                    ((True, 1), (True, 0), (False, 1), (False, 0)): 1,
+                    ((True, 0), (False, 0)): 1,
+                    ((True, 1), (False, 1)): 1,
+                    (): -1,
+                }
+            )
+            assert op.normal_ordered(sandwich=None).equiv(expected)
+
+        with subtests.test("sandwich=True"):
+            op = cls.from_dict({((False, 1), (False, 0), (True, 0), (True, 1)): 1})
+            expected = cls.from_dict(
+                {
+                    ((True, 0), (True, 1), (False, 1), (False, 0)): 1,
+                    ((True, 0), (False, 0)): -1,
+                    ((True, 1), (False, 1)): -1,
+                    (): 1,
+                }
+            )
+            assert op.normal_ordered(sandwich=True).equiv(expected)
+
+        with subtests.test("sandwich=False"):
+            op = cls.from_dict({((False, 0), (False, 1), (True, 1), (True, 0)): 1})
+            expected = cls.from_dict(
+                {
+                    ((True, 1), (True, 0), (False, 0), (False, 1)): 1,
+                    ((True, 0), (False, 0)): -1,
+                    ((True, 1), (False, 1)): -1,
+                    (): 1,
+                }
+            )
+            assert op.normal_ordered(sandwich=False).equiv(expected)
+
     def test_is_hermitian(self):
         cls = self.get_class()
 
@@ -291,6 +374,56 @@ class FermionOperatorTests(ABC):
         comm = comm.normal_ordered()
         comm.ichop()
         assert comm.equiv(cls.one())
+
+    def test_relabel_modes(self, subtests):
+        cls = self.get_class()
+
+        op = cls.from_dict({(cre(0), ann(1)): 1, (cre(0), ann(0), cre(2), ann(3)): 1})
+
+        with subtests.test("valid"):
+            permutation = [4, 2, 5, 3]
+            relabeled = op.relabel_modes(permutation)
+            expected = cls.from_dict({(cre(4), ann(2)): 1, (cre(4), ann(4), cre(5), ann(3)): 1})
+            assert relabeled.equiv(expected)
+
+        with (
+            subtests.test("duplicate indices"),
+            pytest.raises(ValueError, match="duplicate indices"),
+        ):
+            permutation = [4, 4, 5, 3]
+            op.relabel_modes(permutation)
+
+        with (
+            subtests.test("index map too small"),
+            pytest.raises(ValueError, match="does not account for the entire length"),
+        ):
+            permutation = [4, 2, 5]
+            op.relabel_modes(permutation)
+
+    def test_split_out_groups(self):
+        cls = self.get_class()
+
+        # NOTE: we rely on Python dict's insertion order to guarantee the correct order of terms in
+        # the expected outcome groups
+        group0 = {}
+        group0[(cre(0), ann(1))] = 1
+        group0[(cre(1), ann(0))] = 1
+        op = cls.from_dict(group0)
+        group1 = {(cre(0), cre(0), ann(1), ann(1)): 2}
+        op += cls.from_dict(group1)
+        op.groups = [0, 0, 1]
+
+        groups = op.split_out_groups()
+        expected = [cls.from_dict(group0), cls.from_dict(group1)]
+        assert all([a.equiv(b) for a, b in zip(groups, expected, strict=True)])
+
+    def test_split_out_groups_err(self):
+        cls = self.get_class()
+
+        op = cls.from_dict(
+            {(cre(0), ann(1)): 1, (cre(1), ann(0)): 1, (cre(0), cre(0), ann(1), ann(1)): 2}
+        )
+        assert op.split_out_groups() is None
 
 
 class TestFermionOperator(FermionOperatorTests):

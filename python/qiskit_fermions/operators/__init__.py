@@ -46,6 +46,21 @@ This operator represents fermionic operators in terms of Majorana fermions.
    MajoranaAction
    MajoranaOperator
    gamma
+
+Protocol
+--------
+
+All operator classes provides by this submodule implement at least those methods specified by the
+protocol below:
+
+.. autoclass:: OperatorTrait
+   :member-order: bysource
+   :show-inheritance:
+   :members:
+   :exclude-members: __init__, __subclasshook__, __weakref__
+   :no-inherited-members:
+   :special-members:
+
 """
 
 from qiskit_fermions._lib.operators.fermion_operator import FermionOperator
@@ -53,12 +68,14 @@ from qiskit_fermions._lib.operators.majorana_operator import MajoranaOperator
 
 from .fermion_action import FermionAction, ann, cre
 from .majorana_action import MajoranaAction, gamma
+from .protocol import OperatorTrait
 
 __all__ = [
     "FermionAction",
     "FermionOperator",
     "MajoranaAction",
     "MajoranaOperator",
+    "OperatorTrait",
     "ann",
     "cre",
     "gamma",

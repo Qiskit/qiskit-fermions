@@ -44,16 +44,8 @@ jobs:
       - name: Install Package
         shell: bash
         run: |
-          git clone https://github.com/Qiskit/qiskit build/qiskit
-          cd build/qiskit
-          make c
-          pip install -c constraints.txt -r requirements.txt
-          SETUPTOOLS_RUST_CARGO_PROFILE=release pip install -c constraints.txt -e .
-          cd qiskit/
-          ln -s _accelerate.*.so libqiskit.so
-          cd ../../..
-          pip install setuptools setuptools_rust
-          DEPS=lint make pyinstall
+          pip install --group build --group lint qiskit
+          SETUPTOOLS_RUST_CARGO_PROFILE=release pip install --no-build-isolation -e .
 
       - name: Run lint check
         shell: bash

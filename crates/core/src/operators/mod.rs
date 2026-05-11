@@ -10,7 +10,20 @@
 // copyright notice, and modified files need to carry a notice indicating
 // that they have been altered from the originals.
 
+use std::collections::HashSet;
+
 use num_complex::Complex64;
+use thiserror::Error;
+
+/// Error cases stemming from data coherence at the point of entry into `OperatorTrait` from
+/// user-provided arrays.
+#[derive(Error, Debug)]
+pub enum CoherenceError {
+    #[error("the input contains duplicate indices")]
+    DuplicateIndices,
+    #[error("the provided index mapping does not account for the entire length of the operator")]
+    IndexMapTooSmall,
+}
 
 pub trait OperatorTrait {
     fn zero() -> Self;
@@ -18,11 +31,18 @@ pub trait OperatorTrait {
     fn equiv(&self, other: &Self, atol: f64) -> bool;
 
     fn adjoint(&self) -> Self;
+    fn simplify(&self, atol: f64) -> Self;
 
     fn __iadd__(&mut self, other: &Self);
     fn __imul__(&mut self, other: Complex64);
     fn __iand__(&mut self, other: &Self);
+    fn __imatmul__(&mut self, other: &Self);
     fn ichop(&mut self, atol: f64);
+
+    fn get_support(&self) -> HashSet<u32>;
+    fn relabel_modes(&self, permutation: Vec<u32>) -> Result<Self, CoherenceError>
+    where
+        Self: Sized;
 }
 
 pub trait OperatorMacro {
@@ -32,6 +52,7 @@ pub trait OperatorMacro {
     fn __div__(&self, other: Complex64) -> Self;
     fn __neg__(&self) -> Self;
     fn __and__(&self, other: &Self) -> Self;
+    fn __matmul__(&self, other: &Self) -> Self;
     fn __pow__(&self, exponent: usize) -> Self;
 
     // more in-place operations
@@ -106,6 +127,15 @@ macro_rules! impl_operator_macro {
             {
                 let mut result = self.clone();
                 result.__iand__(other);
+                result
+            }
+
+            fn __matmul__(&self, other: &Self) -> Self
+            where
+                Self: OperatorTrait,
+            {
+                let mut result = self.clone();
+                result.__imatmul__(other);
                 result
             }
 
@@ -210,5 +240,6 @@ macro_rules! impl_operator_macro {
 }
 
 pub mod fermion_operator;
+pub mod grouping;
 pub mod library;
 pub mod majorana_operator;

@@ -1,3 +1,5 @@
+.. _sqdrift_tutorial:
+
 Generate SqDRIFT Circuits
 =========================
 
@@ -26,6 +28,7 @@ documentation as well as :mod:`qiskit_fermions.operators.library`.
        >>> from qiskit_fermions.operators import FermionOperator
        >>>
        >>> fcidump = FCIDump.from_file("docs/tutorials/n2.fcidump")
+       >>> num_modes = 2 * fcidump.norb
        >>> hamil = FermionOperator.from_fcidump(fcidump)
 
     .. code-block:: c
@@ -34,6 +37,7 @@ documentation as well as :mod:`qiskit_fermions.operators.library`.
 
        QfFCIDump* fcidump = qf_fcidump_from_file("docs/tutorials/n2.fcidump");
        QfFermionOperator* hamil = qf_ferm_op_from_fcidump(fcidump);
+       uint32_t num_modes = 2 * qf_fcidump_norb(fcidump);
 
 
 2. Group Hamiltonian terms
@@ -47,181 +51,122 @@ Crucially, the grouping of terms related by symmetry results in a favorable
 cancellation of Pauli terms resulting in an overall shorter circuit depth, when
 time-evolving a state under their action.
 
-The grouping of terms is straight forward for single excitations (terms of
-length 2), while it is less straight forward in the case of double excitations
-(terms of length 4). In the loop below, we exploit the fact that we know the
-order of operations in our Hamiltonian,
-:math:`a^\dagger_{i,\sigma} a^\dagger_{j,\tau} a_{k,\tau} a_{l,\sigma}`,
-where :math:`\sigma` and :math:`\tau` indicate the spin species of the fermionic
-modes. We can group terms with permuted indices within either species but
-(generally speaking) not while mixing the indices across these species.
+The :mod:`qiskit_fermions.operators.grouping` module provides convenience
+functions for grouping the terms of an operator. This is explained in more
+detail in :ref:`this guide <grouping_explanation>`.
 
 .. tab-set-code::
 
     .. code-block:: python
 
-       >>> from collections import defaultdict
+       >>> from qiskit_fermions.operators.grouping import group_terms_by_electronic_structure
        >>>
-       >>> groups = defaultdict(FermionOperator.zero)
-       >>> ordered_keys = []
-       >>> ordered_coeffs = []
-       >>>
-       >>> for term, coeff in hamil.iter_terms():
-       ...     indices = tuple(i for (_, i) in term)
-       ...     if len(term) == 2:
-       ...         i, j = min(indices), max(indices)
-       ...         group_idx = (i, j)
-       ...     elif len(term) == 4:
-       ...         il, jk = (indices[0], indices[3]), (indices[1], indices[2])
-       ...         i, l = min(il), max(il)
-       ...         j, k = min(jk), max(jk)
-       ...         group_idx = (i, j, k, l)
-       ...     elif len(term) == 0:
-       ...         # we ignore the identity term
-       ...         continue
-       ...
-       ...     if group_idx not in groups:
-       ...         ordered_keys.append(group_idx)
-       ...         ordered_coeffs.append(coeff.real)
-       ...
-       ...     groups[group_idx] += FermionOperator.from_dict({tuple(term): coeff.real})
-       >>>
-       >>> len(ordered_keys) == len(groups)
-       True
+       >>> exit_code = group_terms_by_electronic_structure(hamil, num_modes)
+       >>> assert exit_code is None
 
     .. code-block:: c
 
-       // TODO!
+       QfExitCode exit = qf_group_terms_by_electronic_structure(hamil, num_modes, false);
 
-3. Subsample the Hamiltonian groups
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+3. Prepare the Time-Evolution Circuit
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-This step actually performs the `qDRIFT`_ randomization by subsampling the
-Hamiltonian groups to produce smaller operators. This step sets `SqDRIFT`_ apart
-from `SKQD`_ by ensuring that the time-evolution circuits can still be
-implemented efficiently on hardware with limited qubit connectivity, even when
-the investigated Hamiltonian is not that of a regular fermionic lattice but
-(like here) contains long-range connections and more than quadratic interaction
-terms.
+In this step, we prepare the time evolution circuit of our Hamiltonian as the
+base circuit from which to draw samples. The
+:mod:`qiskit_fermions.circuit.library` provides us will all the required
+components to do so, in a way that fits naturally with Qiskit's conventions.
+
+.. tab-set-code::
+
+    .. code-block:: python
+
+       >>> from qiskit_fermions.circuit import FermionicCircuit
+       >>> from qiskit_fermions.circuit.library import Evolution
+       >>>
+       >>> time = 1.0  # you can choose a desired scaling factor here
+       >>> evo_gate = Evolution(num_modes, hamil, time)
+       >>>
+       >>> circ = FermionicCircuit(num_modes)
+       >>> circ.append(evo_gate, circ.modes)
+
+    .. code-block:: c
+
+       // WARNING: Qiskit's C API does not yet allow us to implement circuits
+       // with custom gate definitions.
+
+.. note::
+   In this example, we neither initialize the fermionic modes with particles,
+   nor measure their final state.
+
+4. Transpile the circuit with QDrift Trotterization
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The :mod:`qiskit_fermions.transpiler` module integrates directly with Qiskit's
+transpilation pipeline, allowing the :class:`.FermionicCircuit` constructed above
+to be directly transpiled to a :external:class:`~qiskit.circuit.QuantumCircuit`.
+
+Here, we are using the :func:`.jordan_wigner` fermion-to-qubit mapping to
+convert the Hamiltonian expressed in terms of fermions to Pauli strings. This
+can be done directly as part of the transpilation process through the use of the
+:class:`.EvolutionSynthesis` transpilation pass plugin. Here, we are using
+:func:`.generate_preset_jw_pass_manager` as a short-hand for building a
+:class:`.FermionicStagedPassManager` which ensures the consistent use of the
+Jordan-Wigner encoding for all circuit instructions.
+
+Crucially, we add the :class:`.QDriftTrotterization` transpilation pass to the
+``optimization`` stage of the transpilation pipeline. This ensures that we do
+not use the time evolution of the entire Hamiltonian, a circuit whose depth
+would exceed the capabilities of currently available quantum computing hardware.
+
+Instead, it will subsample a fixed number of ``groups`` of Hamiltonian terms for
+each circuit, every time we transpile the circuit. Through this, we can generate
+multiple circuit randomizations as required by the `SqDRIFT`_ algorithm by
+repeatedly running the transpilation pipeline.
 
 This step also introduces the few parameters with which one can tweak the
 ensemble of circuits to generate:
 
-* the number of circuits to generate: ``num_circuits``
-* the length of each circuit in terms of excitation groups: ``num_exc``
-* the factor for the evolution time: ``time``
+* the number of circuits to generate: ``num_sqdrift_randomizations``
+* the length of each circuit in terms of excitation groups: ``num_groups``
 
 .. tab-set-code::
 
     .. code-block:: python
 
-       >>> import numpy as np
+       >>> from qiskit_fermions.transpiler import FermionicPassManager
+       >>> from qiskit_fermions.transpiler.presets import generate_preset_jw_pass_manager
+       >>> from qiskit_fermions.transpiler.passes import QDriftTrotterization
        >>>
-       >>> time = 1.0
-       >>> num_exc = 10
-       >>> num_circuits = 100
+       >>> num_groups = 10
+       >>> qdrift = QDriftTrotterization(num_groups, rng=42)
        >>>
-       >>> weights = np.abs(ordered_coeffs)
-       >>> lambd = np.sum(weights)
-       >>> delta = (lambd * time) / num_exc
+       >>> pm = generate_preset_jw_pass_manager()
+       >>> pm.optimization = FermionicPassManager([qdrift])
        >>>
-       >>> rng = np.random.default_rng(42)
-       >>> sampled_indices = rng.choice(
-       ...     np.arange(len(ordered_coeffs)),
-       ...     size=(num_circuits, num_exc),
-       ...     p=weights / lambd,
-       ... )
-       >>>
-       >>> subsampled_ops = []
-       >>> for sample in sampled_indices:
-       ...     op = FermionOperator.zero()
-       ...     for idx in sample:
-       ...         op += groups[ordered_keys[idx]]
-       ...
-       ...     subsampled_ops.append(op)
-
-    .. code-block:: c
-
-       // TODO!
-
-4. Map the Operators
-^^^^^^^^^^^^^^^^^^^^
-
-In order to implement the time-evolution circuits, we must map the
-:class:`.FermionOperator` instances to
-:class:`~qiskit.quantum_info.SparseObservable` instances.
-
-In the original proposal of `SqDRIFT`_ the authors performed an additional
-optimization to reduce the time-evolution circuit depth by layouting the
-fermions on the qubits in different patterns dictated by the excitations
-included in each subsampled operator. The effectiveness of this layout
-optimization depends on the overlap of the subsampled excitation groups but can
-yield drastic improvements.
-
-We do not implement this optimization in this simple example below.
-
-.. tab-set-code::
-
-    .. code-block:: python
-
-       >>> from qiskit_fermions.mappers.library import jordan_wigner
-       >>>
-       >>> norb = fcidump.norb
-       >>> num_qubits = 2 * norb
-       >>> mapped_ops = [
-       ...     jordan_wigner(op, num_qubits).simplify()
-       ...     for op in subsampled_ops
+       >>> num_sqdrift_randomizations = 10
+       >>> sqdrift_circuits = [
+       ...     pm.run(circ) for _ in range(num_sqdrift_randomizations)
        ... ]
 
     .. code-block:: c
 
-       // TODO!
+       // WARNING: Qiskit's C API does not yet allow us to implement circuits
+       // with custom gate definitions, which we therefore also cannot transpile
+       // via this API.
 
-5. Generate the SqDRIFT circuits
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Finally, we can generate the time-evolution circuits simply with Qiskit's
-:class:`~qiskit.circuit.library.PauliEvolutionGate`.
-
-Here, we also prepend each time-evolution with the Hartree Fock bitstring as the
-initial state to be evolved. Of course, other initial states may be chosen, too.
-
-.. tab-set-code::
-
-    .. code-block:: python
-
-       >>> from qiskit.circuit import QuantumCircuit
-       >>> from qiskit.circuit.library import PauliEvolutionGate
-       >>>
-       >>> nelec, ms2 = fcidump.nelec, fcidump.ms2
-       >>> nelec_a = nelec // 2 + ms2
-       >>> nelec_b = nelec - nelec_a
-       >>> occupied_a = [1] * nelec_a + [0] * (norb - nelec_a)
-       >>> occupied_b = [1] * nelec_b + [0] * (norb - nelec_b)
-       >>> initial_state = occupied_a + occupied_b
-       >>>
-       >>> circuits = []
-       >>> for op in mapped_ops:
-       ...     circ = QuantumCircuit(num_qubits)
-       ...     _ = circ.x(initial_state)
-       ...     _ = circ.append(PauliEvolutionGate(op, delta), circ.qubits)
-       ...
-       ...     circuits.append(circ)
-
-    .. code-block:: c
-
-       // WARNING: Qiskit's C API does not yet support the PauliEvolutionGate.
-       // This feature is planned to be released in Qiskit 2.4
+.. note::
+   In the example above we have fixed the ``seed`` for the random number
+   generator used inside of the :class:`.QDriftTrotterization` transpilation
+   pass.
 
 Next steps
 ^^^^^^^^^^
 
 Now that we have successfully generated an ensemble of circuits, we must sample
-bitstrings from them. To do so, the circuits must be transpiled and subsequently
-sent to hardware for execution. We will not cover this here, and instead refer
-to the `Qiskit documentation
-<https://quantum.cloud.ibm.com/docs/en/guides/intro-to-patterns>`_ for detailed
-guides on the various steps involved.
+bitstrings from them. To do so, the circuits must be sent to hardware for
+execution. We will not cover this here, and instead refer to the `Qiskit
+documentation <https://quantum.cloud.ibm.com/docs/en/guides/intro-to-patterns>`_
+for detailed guides on the various steps involved.
 
 Once the bitstring samples have been obtained, these can be used in combination
 with the Hamiltonian coefficients to perform the SQD post-processing, a great

@@ -11,13 +11,17 @@
 // that they have been altered from the originals.
 
 use pyo3::prelude::*;
-use pyo3_stub_gen::{Result, StubInfo};
+use pyo3_stub_gen::{Result, StubGenConfig, StubInfo};
 
+pub mod linalg;
 pub mod mappers;
 pub mod operators;
 
 #[pymodule]
 mod _lib {
+    #[pymodule_export]
+    use super::linalg::linalg;
+
     #[pymodule_export]
     use super::operators::operators;
 
@@ -26,9 +30,15 @@ mod _lib {
 }
 
 pub fn stub_info() -> Result<StubInfo> {
+    let mut config = StubGenConfig::default();
+    config.use_type_statement = false;
+    config.doc_gen = None;
+
     let manifest_dir: &::std::path::Path = env!("CARGO_MANIFEST_DIR").as_ref();
     StubInfo::from_project_root(
-        "qiskit_fermions._lib".to_string(),
+        "qiskit_fermions".to_string(),
         manifest_dir.join("../../python"),
+        true,
+        config,
     )
 }

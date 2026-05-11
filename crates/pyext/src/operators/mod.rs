@@ -79,11 +79,22 @@ macro_rules! impl_operator_magic_methods {
             fn __iand__(&mut self, other: &Self) {
                 self.inner.__iand__(&other.inner);
             }
+
+            fn __matmul__(&self, other: &Self) -> Self {
+                Self {
+                    inner: self.inner.__matmul__(&other.inner),
+                }
+            }
+
+            fn __imatmul__(&mut self, other: &Self) {
+                self.inner.__imatmul__(&other.inner);
+            }
         }
     };
 }
 
 pub mod fermion_operator;
+pub mod grouping;
 pub mod library;
 pub mod majorana_operator;
 
@@ -94,6 +105,9 @@ pub mod operators {
 
     #[pymodule_export]
     use super::majorana_operator::majorana_operator;
+
+    #[pymodule_export]
+    use super::grouping::operators_grouping;
 
     #[pymodule_export]
     use super::library::operators_library;

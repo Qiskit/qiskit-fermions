@@ -335,7 +335,7 @@ mod tests {
                 false, false, true, true, false, false, true, true, false, false, true, true,
                 false, false, true, true, false, false, true, true, false, false,
             ],
-            indices: vec![
+            modes: vec![
                 0, 0, 2, 2, 1, 0, 0, 1, 3, 2, 2, 3, 1, 1, 3, 3, 0, 0, 0, 0, 2, 0, 0, 2, 0, 2, 2, 0,
                 2, 2, 2, 2, 1, 1, 0, 0, 3, 1, 0, 2, 1, 3, 2, 0, 3, 3, 2, 2, 0, 1, 0, 1, 2, 1, 0, 3,
                 0, 3, 2, 1, 2, 3, 2, 3, 1, 0, 1, 0, 3, 0, 1, 2, 1, 2, 3, 0, 3, 2, 3, 2, 0, 0, 1, 1,
@@ -348,6 +348,7 @@ mod tests {
                 72, 76, 80, 84, 88, 92, 96, 100, 104, 108, 112, 116, 120, 124, 128, 132, 136, 140,
                 144,
             ],
+            groups: None,
         };
 
         assert!(op.equiv(&expected, 1e-10));
@@ -556,7 +557,7 @@ mod tests {
                 false, false, true, true, false, false, true, true, false, false, true, true,
                 false, false, true, true, false, false,
             ],
-            indices: vec![
+            modes: vec![
                 0, 0, 1, 0, 0, 1, 1, 1, 2, 2, 3, 2, 2, 3, 3, 3, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1,
                 0, 1, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 1, 1, 1, 0, 0, 1,
                 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 2, 2, 0,
@@ -575,6 +576,7 @@ mod tests {
                 208, 212, 216, 220, 224, 228, 232, 236, 240, 244, 248, 252, 256, 260, 264, 268,
                 272,
             ],
+            groups: None,
         };
 
         println!("{op:#?}");

@@ -1,7 +1,7 @@
 [build-system]
 # This is duplicated as `dependency-groups.build` for convenience.
 requires = [
-    "setuptools>=77.0",
+    "setuptools>=77.0.1",
     "setuptools-rust",
 ]
 build-backend = "setuptools.build_meta"
@@ -29,7 +29,7 @@ classifiers = [
 requires-python = ">=3.10"
 
 dependencies = [
-    "qiskit>=2.3",
+    "qiskit>=2.4, <3",
     "typing-extensions",
 ]
 
@@ -40,18 +40,18 @@ pyomo = [
 
 [dependency-groups]
 build = [
-    "setuptools>=77.0",
+    "setuptools>=77.0.1",
     "setuptools-rust",
 ]
 style = [
-    "ruff==0.14.14",
+    "ruff==0.15.8",
     "typos>=1.20.0",
 ]
 lint = [
     {include-group = "style"},
-    "mypy==1.19.1",
+    "mypy==1.20.0",
     "reno>=4.1",
-    "toml>=0.9.6",
+    "toml>=0.10.2",
 ]
 basetest = [
     "pytest>=8.0",
@@ -59,7 +59,8 @@ basetest = [
 ]
 doctest = [
     {include-group = "basetest"},
-    "pytest-doctestplus>=1.2.1",
+    "rustworkx[mpl]",
+    "sybil>=9.3.0",
 ]
 test = [
     {include-group = "basetest"},
@@ -80,8 +81,7 @@ docs = [
     "sphinxcontrib-katex",
     "nbsphinx>=0.9.4",
     "reno>=4.1",
-    "breathe>=4.35.0",
-    "matplotlib",
+    "breathe>=4.36.0",
 ]
 dev = [
     {include-group = "docs"},
@@ -153,3 +153,8 @@ convention = "google"
 arange = "arange"
 ba = "ba"
 thr = "thr"
+
+# While we don't mandate the use of uv, we use it during CI for handling package
+# resolution and thus are configuring components of it below.
+[tool.uv.extra-build-dependencies]
+qiskit-fermions = ["qiskit"]

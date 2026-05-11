@@ -45,6 +45,52 @@ static int test_new(void) {
     return Ok;
 }
 
+static int test_getters(void) {
+    uint64_t num_terms = 3;
+    uint64_t num_modes = 4;
+    uint32_t modes[4] = {0, 1, 2, 3};
+    QkComplex64 coeffs[3] = {{1.0, 0.0}, {-1.0, 0.0}, {0.0, -1.0}};
+    uint32_t boundaries[4] = {0, 0, 2, 4};
+    QfMajoranaOperator *op = qf_maj_op_new(num_terms, num_modes, coeffs, modes, boundaries);
+
+    bool passed_all = true;
+
+    QkComplex64 *coeffs_out;
+    uint64_t coeffs_len;
+    qf_maj_op_get_coeffs(op, &coeffs_out, &coeffs_len);
+    passed_all = passed_all && (coeffs_len == num_terms);
+
+    for (uint64_t i = 0; i < num_terms; i++) {
+        passed_all = passed_all && (coeffs_out[i].re == coeffs[i].re);
+        passed_all = passed_all && (coeffs_out[i].im == coeffs[i].im);
+    }
+
+    uint32_t *modes_out;
+    uint64_t modes_len;
+    qf_maj_op_get_modes(op, &modes_out, &modes_len);
+    passed_all = passed_all && (modes_len == num_modes);
+
+    for (uint64_t i = 0; i < num_modes; i++) {
+        passed_all = passed_all && (modes_out[i] == modes[i]);
+    }
+
+    size_t *boundaries_out;
+    uint64_t boundaries_len;
+    qf_maj_op_get_boundaries(op, &boundaries_out, &boundaries_len);
+    passed_all = passed_all && (boundaries_len == 4);
+
+    for (uint64_t i = 0; i < 4; i++) {
+        passed_all = passed_all && (boundaries_out[i] == boundaries[i]);
+    }
+
+    qf_maj_op_free(op);
+
+    if (!passed_all) {
+        return EqualityError;
+    }
+    return Ok;
+}
+
 static int test_add(void) {
     QfMajoranaOperator *zero = qf_maj_op_zero();
     QfMajoranaOperator *one = qf_maj_op_one();
@@ -228,7 +274,7 @@ static int test_simplify(void) {
 static int test_simplify_vs_ichop(void) {
     uint64_t num_terms = 100000;
     uint64_t num_modes = 0;
-    QkComplex64 coeffs[100000];
+    QkComplex64 *coeffs = (QkComplex64 *)malloc(100000 * sizeof(QkComplex64));
     uint32_t boundaries[100001];
     for (int i = 0; i < 100000; i++) {
         coeffs[i].re = 1e-5;
@@ -248,6 +294,7 @@ static int test_simplify_vs_ichop(void) {
     QfMajoranaOperator *zero = qf_maj_op_zero();
     bool ichop_is_equal = qf_maj_op_equiv(op, zero, 1e-6);
 
+    free(coeffs);
     qf_maj_op_free(op);
     qf_maj_op_free(canon);
     qf_maj_op_free(one);
@@ -290,7 +337,7 @@ static int test_normal_ordered(void) {
     QkComplex64 coeff = {1.0, 0.0};
     qf_maj_op_add_term(op, 4, modes, &coeff);
 
-    QfMajoranaOperator *normal_ordered = qf_maj_op_normal_ordered(op, false);
+    QfMajoranaOperator *normal_ordered = qf_maj_op_normal_ordered(op, false, false);
 
     QkComplex64 coeff_minus = {-1.0, 0.0};
     QfMajoranaOperator *expected = qf_maj_op_zero();
@@ -393,9 +440,142 @@ static int test_len(void) {
     return Ok;
 }
 
+static int test_relabel_modes(void) {
+    QfMajoranaOperator *op = qf_maj_op_zero();
+    QkComplex64 coeff = {1.0, 0.0};
+    uint32_t modes1[2] = {0, 1};
+    qf_maj_op_add_term(op, 2, modes1, &coeff);
+    uint32_t modes2[4] = {0, 0, 2, 3};
+    qf_maj_op_add_term(op, 4, modes2, &coeff);
+
+    uint32_t permutation[4] = {4, 2, 5, 3};
+
+    QfExitCode exit = qf_maj_op_relabel_modes(op, 4, permutation);
+
+    if (exit != QfExitCode_Success) {
+        qf_maj_op_free(op);
+        return RuntimeError;
+    }
+
+    uint64_t num_terms = 2;
+    uint64_t num_modes = 6;
+    uint32_t modes_exp[6] = {4, 2, 4, 4, 5, 3};
+    QkComplex64 coeffs_exp[2] = {{1.0, 0.0}, {1.0, 0.0}};
+    uint32_t boundaries_exp[3] = {0, 2, 6};
+    QfMajoranaOperator *expected =
+        qf_maj_op_new(num_terms, num_modes, coeffs_exp, modes_exp, boundaries_exp);
+
+    bool is_equal = qf_maj_op_equal(op, expected);
+
+    qf_maj_op_free(op);
+    qf_maj_op_free(expected);
+
+    if (!is_equal) {
+        return EqualityError;
+    }
+    return Ok;
+}
+
+static int test_relabel_modes_duplicate_err(void) {
+    QfMajoranaOperator *op = qf_maj_op_zero();
+    QkComplex64 coeff = {1.0, 0.0};
+    uint32_t modes1[2] = {0, 1};
+    qf_maj_op_add_term(op, 2, modes1, &coeff);
+    uint32_t modes2[4] = {0, 0, 2, 3};
+    qf_maj_op_add_term(op, 4, modes2, &coeff);
+
+    uint32_t permutation[4] = {4, 4, 5, 3};
+
+    QfExitCode exit = qf_maj_op_relabel_modes(op, 4, permutation);
+
+    return exit == QfExitCode_DuplicateIndexError ? Ok : EqualityError;
+}
+
+static int test_relabel_modes_too_small_err(void) {
+    QfMajoranaOperator *op = qf_maj_op_zero();
+    QkComplex64 coeff = {1.0, 0.0};
+    uint32_t modes1[2] = {0, 1};
+    qf_maj_op_add_term(op, 2, modes1, &coeff);
+    uint32_t modes2[4] = {0, 0, 2, 3};
+    qf_maj_op_add_term(op, 4, modes2, &coeff);
+
+    uint32_t permutation[4] = {4, 2, 5};
+
+    QfExitCode exit = qf_maj_op_relabel_modes(op, 3, permutation);
+
+    return exit == QfExitCode_IndexError ? Ok : EqualityError;
+}
+
+static int test_groups(void) {
+    uint64_t num_terms = 4;
+    uint64_t num_modes = 8;
+    uint32_t modes[8] = {0, 1, 2, 3, 1, 0, 3, 2};
+    QkComplex64 coeffs[4] = {{1.0, 0.0}, {1.0, 0.0}, {1.0, 0.0}, {1.0, 0.0}};
+    uint32_t boundaries[5] = {0, 2, 4, 6, 8};
+    QfMajoranaOperator *op = qf_maj_op_new(num_terms, num_modes, coeffs, modes, boundaries);
+
+    bool has_no_groups = !qf_maj_op_has_groups(op);
+
+    uint32_t groups_in[4] = {0, 1, 0, 1};
+
+    qf_maj_op_set_groups(op, groups_in, num_terms);
+
+    bool has_some_groups = qf_maj_op_has_groups(op);
+
+    uint32_t num_groups = qf_maj_op_num_groups(op);
+
+    bool correct_num_groups = num_groups == 2;
+
+    QfMajoranaOperator *group_ops[2];
+
+    qf_maj_op_split_out_groups(op, group_ops);
+
+    uint32_t boundaries_group[3] = {0, 2, 4};
+    QkComplex64 coeffs_group[2] = {{1.0, 0.0}, {1.0, 0.0}};
+    uint32_t modes_g0[4] = {0, 1, 1, 0};
+    QfMajoranaOperator *group0 = qf_maj_op_new(2, 4, coeffs_group, modes_g0, boundaries_group);
+    uint32_t modes_g1[4] = {2, 3, 3, 2};
+    QfMajoranaOperator *group1 = qf_maj_op_new(2, 4, coeffs_group, modes_g1, boundaries_group);
+
+    bool correct_group0 = qf_maj_op_equiv(group_ops[0], group0, 1e-10);
+    bool correct_group1 = qf_maj_op_equiv(group_ops[1], group1, 1e-10);
+
+    uint32_t *groups_out;
+    uint64_t groups_len;
+
+    qf_maj_op_get_groups(op, &groups_out, &groups_len);
+
+    bool correct_groups_len = groups_len == num_terms;
+    bool correct_groups_out0 = groups_out[0] == 0;
+    bool correct_groups_out1 = groups_out[1] == 1;
+    bool correct_groups_out2 = groups_out[2] == 0;
+    bool correct_groups_out3 = groups_out[3] == 1;
+
+    qf_maj_op_del_groups(op);
+
+    bool deleted_groups = !qf_maj_op_has_groups(op);
+
+    bool passed_all = has_no_groups && has_some_groups && correct_num_groups && correct_group0 &&
+                      correct_group1 && correct_groups_len && correct_groups_out0 &&
+                      correct_groups_out1 && correct_groups_out2 && correct_groups_out3 &&
+                      deleted_groups;
+
+    qf_maj_op_free(op);
+    qf_maj_op_free(group0);
+    qf_maj_op_free(group1);
+    qf_maj_op_free(group_ops[0]);
+    qf_maj_op_free(group_ops[1]);
+
+    if (!passed_all) {
+        return EqualityError;
+    }
+    return Ok;
+}
+
 int test_majorana_operator(void) {
     int num_failed = 0;
     num_failed += RUN_TEST(test_new);
+    num_failed += RUN_TEST(test_getters);
     num_failed += RUN_TEST(test_add);
     num_failed += RUN_TEST(test_add_term);
     num_failed += RUN_TEST(test_equiv_pos);
@@ -411,6 +591,10 @@ int test_majorana_operator(void) {
     num_failed += RUN_TEST(test_many_body_order);
     num_failed += RUN_TEST(test_is_even);
     num_failed += RUN_TEST(test_len);
+    num_failed += RUN_TEST(test_relabel_modes);
+    num_failed += RUN_TEST(test_relabel_modes_duplicate_err);
+    num_failed += RUN_TEST(test_relabel_modes_too_small_err);
+    num_failed += RUN_TEST(test_groups);
 
     fflush(stderr);
     fprintf(stderr, "=== Number of failed subtests: %i\n", num_failed);

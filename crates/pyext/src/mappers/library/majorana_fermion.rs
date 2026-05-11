@@ -47,13 +47,14 @@ use qiskit_fermions_core::mappers::library::majorana_fermion::{
 /// =====
 ///
 /// .. doctest::
+///
 ///     >>> from qiskit_fermions.mappers.library import fermion_to_majorana
 ///     >>> from qiskit_fermions.operators import FermionOperator
 ///     >>> fer_op = FermionOperator.from_dict({((True, 0), (False, 0)): 1})
 ///     >>> maj_op = fermion_to_majorana(fer_op)
 ///     >>> print(maj_op.normal_ordered().simplify())
 ///      5.000000e-1 +0.000000e0j * ()
-///      0.000000e0+5.000000e-1j * (1 0)
+///      0.000000e0-5.000000e-1j * (γ'0 γ0)
 ///
 /// ..
 #[gen_stub_pyfunction(module = "qiskit_fermions.mappers.library.majorana")]
@@ -92,13 +93,14 @@ pub fn py_fermion_to_majorana(fer_op: PyFermionOperator) -> PyMajoranaOperator {
 /// =====
 ///
 /// .. doctest::
+///
 ///     >>> from qiskit_fermions.mappers.library import majorana_to_fermion
 ///     >>> from qiskit_fermions.operators import MajoranaOperator
 ///     >>> maj_op = MajoranaOperator.from_dict({(0, 1): 1})
 ///     >>> fer_op = majorana_to_fermion(maj_op)
 ///     >>> print(fer_op.normal_ordered().simplify())
-///      0.000000e0 -1.000000e0j * ()
-///      0.000000e0 +2.000000e0j * (+_0 -_0)
+///      0.000000e0 +1.000000e0j * ()
+///      0.000000e0 -2.000000e0j * (+_0 -_0)
 ///
 /// ..
 #[gen_stub_pyfunction(module = "qiskit_fermions.mappers.library.majorana")]
