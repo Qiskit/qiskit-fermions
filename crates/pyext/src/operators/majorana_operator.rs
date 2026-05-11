@@ -128,9 +128,9 @@ impl MajoranaOperatorDataIter {
 ///     >>> op = MajoranaOperator(coeffs, modes, boundaries)
 ///     >>> print(op)
 ///       1.000000e0 +0.000000e0j * ()
-///      -2.000000e0 +0.000000e0j * (0 1)
-///      -0.000000e0-5.000000e-1j * (0 1 2 3)
-///       0.000000e0 +3.000000e0j * (0 2)
+///      -2.000000e0 +0.000000e0j * (γ0 γ'0)
+///      -0.000000e0-5.000000e-1j * (γ0 γ'0 γ1 γ'1)
+///       0.000000e0 +3.000000e0j * (γ0 γ1)
 ///
 /// For convenience, it is possible to construct an operator from a Python dictionary like so:
 ///
@@ -147,9 +147,9 @@ impl MajoranaOperatorDataIter {
 ///     ... )
 ///     >>> print(op)
 ///       1.000000e0 +0.000000e0j * ()
-///      -2.000000e0 +0.000000e0j * (0 1)
-///      -0.000000e0-5.000000e-1j * (0 1 2 3)
-///       0.000000e0 +3.000000e0j * (0 2)
+///      -2.000000e0 +0.000000e0j * (γ0 γ'0)
+///      -0.000000e0-5.000000e-1j * (γ0 γ'0 γ1 γ'1)
+///       0.000000e0 +3.000000e0j * (γ0 γ1)
 ///
 /// In this example, we have leveraged :func:`.gamma` for creating the Majorana operators.
 ///
@@ -245,20 +245,20 @@ impl MajoranaOperatorDataIter {
 ///     >>> comp = (op1 & op2).simplify()
 ///     >>> print(comp)
 ///       3.000000e0 +0.000000e0j * ()
-///       4.500000e0 +0.000000e0j * (0)
-///       8.000000e0 +0.000000e0j * (1)
-///       1.200000e1 +0.000000e0j * (1 0)
+///       4.500000e0 +0.000000e0j * (γ0)
+///       8.000000e0 +0.000000e0j * (γ'0)
+///       1.200000e1 +0.000000e0j * (γ'0 γ0)
 ///     >>> op2 &= op1
 ///     >>> print(op2.simplify())
 ///       3.000000e0 +0.000000e0j * ()
-///       4.500000e0 +0.000000e0j * (0)
-///       1.200000e1 +0.000000e0j * (0 1)
-///       8.000000e0 +0.000000e0j * (1)
+///       4.500000e0 +0.000000e0j * (γ0)
+///       1.200000e1 +0.000000e0j * (γ0 γ'0)
+///       8.000000e0 +0.000000e0j * (γ'0)
 ///     >>> squared = (op1 ** 2).simplify()
 ///     >>> print(squared)
 ///       4.000000e0 +0.000000e0j * ()
-///       1.200000e1 +0.000000e0j * (0)
-///       9.000000e0 +0.000000e0j * (0 0)
+///       1.200000e1 +0.000000e0j * (γ0)
+///       9.000000e0 +0.000000e0j * (γ0 γ0)
 ///
 /// .. note::
 ///    For convenience, the right-multiplication is implemented by ``c = a @ b`` (resulting in
@@ -338,7 +338,7 @@ impl PyMajoranaOperator {
     ///     ... )
     ///     >>> print(op)
     ///       1.000000e0 -1.000000e0j * ()
-    ///       2.000000e0 +0.000000e0j * (0 1)
+    ///       2.000000e0 +0.000000e0j * (γ0 γ'0)
     ///
     /// Args:
     ///     data: a dictionary mapping tuples of terms to complex coefficients. Each key is a tuple
@@ -519,7 +519,10 @@ impl PyMajoranaOperator {
         sorted.sort_by_key(|&term| term.into_vec());
         let mut items_str = Vec::new();
         for term in sorted {
-            let key_parts: Vec<String> = term.iter().map(|mode| format!("{mode}")).collect();
+            let key_parts: Vec<String> = term
+                .iter()
+                .map(|mode| format!("γ{}{}", if mode % 2 == 1 { "'" } else { "" }, mode / 2))
+                .collect();
             let key_str = format!("({})", key_parts.join(" "));
             let val_str = format!("{:12.6e}{:+12.6e}j", term.coeff.re, term.coeff.im);
             items_str.push(format!("{val_str} * {key_str}"));
@@ -630,12 +633,12 @@ impl PyMajoranaOperator {
     ///     >>> op = MajoranaOperator.from_dict({(): 1e-4, (0,): 1e-6, (1,): 1e-10})
     ///     >>> print(op)
     ///       1.000000e-4 +0.000000e0j * ()
-    ///       1.000000e-6 +0.000000e0j * (0)
-    ///      1.000000e-10 +0.000000e0j * (1)
+    ///       1.000000e-6 +0.000000e0j * (γ0)
+    ///      1.000000e-10 +0.000000e0j * (γ'0)
     ///     >>> op.ichop()
     ///     >>> print(op)
     ///       1.000000e-4 +0.000000e0j * ()
-    ///       1.000000e-6 +0.000000e0j * (0)
+    ///       1.000000e-6 +0.000000e0j * (γ0)
     ///     >>> op.ichop(1e-5)
     ///     >>> print(op)
     ///       1.000000e-4 +0.000000e0j * ()
@@ -765,7 +768,7 @@ impl PyMajoranaOperator {
     ///     >>> adj = op.adjoint()
     ///     >>> print(adj)
     ///      -0.000000e0 +1.000000e0j * ()
-    ///       1.000000e0 -0.000000e0j * (1 0)
+    ///       1.000000e0 -0.000000e0j * (γ'0 γ0)
     ///
     /// ..
     fn adjoint(&self) -> Self {
@@ -815,9 +818,9 @@ impl PyMajoranaOperator {
     ///     >>> from qiskit_fermions.operators import MajoranaOperator
     ///     >>> op = MajoranaOperator.from_dict({(gamma(0, False), gamma(0, True), gamma(0, False)): 1})
     ///     >>> print(op.normal_ordered(reduce=False))
-    ///      -1.000000e0 +0.000000e0j * (1 0 0)
+    ///      -1.000000e0 +0.000000e0j * (γ'0 γ0 γ0)
     ///     >>> print(op.normal_ordered(reduce=True))
-    ///      -1.000000e0 +0.000000e0j * (1)
+    ///      -1.000000e0 +0.000000e0j * (γ'0)
     ///
     /// Args:
     ///     ascending: whether indices should ascend or descend.
@@ -913,8 +916,8 @@ impl PyMajoranaOperator {
     ///     >>> permutation = [5, 6, 4, 3]
     ///     >>> relabeled = op.relabel_modes(permutation)
     ///     >>> print(relabeled)
-    ///       1.000000e0 +0.000000e0j * (5 6)
-    ///       1.000000e0 +0.000000e0j * (5 6 4 3)
+    ///       1.000000e0 +0.000000e0j * (γ'2 γ3)
+    ///       1.000000e0 +0.000000e0j * (γ'2 γ3 γ2 γ'1)
     ///
     /// Args:
     ///     permutation: the index permutation list.
