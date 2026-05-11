@@ -18,13 +18,13 @@ from qiskit.circuit import QuantumCircuit
 from qiskit.quantum_info import Statevector
 from qiskit_fermions.circuit import FermionicCircuit
 from qiskit_fermions.circuit.library import InitializeModes
-from qiskit_fermions.transpiler import FermionPassManager, FermionStagedPassManager
+from qiskit_fermions.transpiler import FermionicPassManager, FermionicStagedPassManager
 from qiskit_fermions.transpiler.passes import (
     F2QSynthesis,
     InitializeModesSynthesis,
     TrivialF2QLayout,
 )
-from qiskit_fermions.transpiler.passmanager import FermionToQubitConverter
+from qiskit_fermions.transpiler.passmanager import FermionicToQubitConverter
 
 
 def test_initialize_modes_global_gate_synthesis():
@@ -37,9 +37,9 @@ def test_initialize_modes_global_gate_synthesis():
     synth = F2QSynthesis()
     synth.plugins[InitializeModes] = InitializeModesSynthesis()
 
-    pm = FermionStagedPassManager()
-    pm.layout = FermionPassManager(TrivialF2QLayout())
-    pm.synthesis = FermionToQubitConverter(synth)
+    pm = FermionicStagedPassManager()
+    pm.layout = FermionicPassManager(TrivialF2QLayout())
+    pm.synthesis = FermionicToQubitConverter(synth)
 
     qu_circ = pm.run(circ)
 
@@ -60,9 +60,9 @@ def test_initialize_modes_local_gate_synthesis():
     synth = F2QSynthesis()
     synth.plugins[InitializeModes] = InitializeModesSynthesis()
 
-    pm = FermionStagedPassManager()
-    pm.layout = FermionPassManager(TrivialF2QLayout())
-    pm.synthesis = FermionToQubitConverter(synth)
+    pm = FermionicStagedPassManager()
+    pm.layout = FermionicPassManager(TrivialF2QLayout())
+    pm.synthesis = FermionicToQubitConverter(synth)
 
     qu_circ = pm.run(circ)
 

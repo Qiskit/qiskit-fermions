@@ -126,9 +126,9 @@ its own interfaces of these transpiler pass managers listed below.
 .. autosummary::
    :toctree: ../stubs/
 
-   FermionPassManager
-   FermionStagedPassManager
-   FermionToQubitConverter
+   FermionicPassManager
+   FermionicStagedPassManager
+   FermionicToQubitConverter
 
 Presets
 ^^^^^^^
@@ -145,7 +145,7 @@ from qiskit.circuit import QuantumRegister
 
 from qiskit_fermions.circuit import FermionicRegister
 
-from .passmanager import FermionPassManager, FermionStagedPassManager, FermionToQubitConverter
+from .passmanager import FermionicPassManager, FermionicStagedPassManager, FermionicToQubitConverter
 
 F2QLayout: TypeAlias = dict[FermionicRegister, QuantumRegister]
 """A mapping of fermionic mode registers to quantum registers.
@@ -159,7 +159,7 @@ size of the registers on either side of this mapping may differ.
 
 __all__ = [
     "F2QLayout",
-    "FermionPassManager",
-    "FermionStagedPassManager",
-    "FermionToQubitConverter",
+    "FermionicPassManager",
+    "FermionicStagedPassManager",
+    "FermionicToQubitConverter",
 ]

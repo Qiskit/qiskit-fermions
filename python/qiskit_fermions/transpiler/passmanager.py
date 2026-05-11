@@ -23,7 +23,7 @@ from qiskit.transpiler import StagedPassManager
 from qiskit_fermions.circuit import FermionicCircuit
 
 
-class FermionPassManager(BasePassManager):
+class FermionicPassManager(BasePassManager):
     """A transpiler pass manager converting one :class:`.FermionicCircuit` to another.
 
     .. note::
@@ -44,7 +44,7 @@ class FermionPassManager(BasePassManager):
         return out
 
 
-class FermionToQubitConverter(BasePassManager):
+class FermionicToQubitConverter(BasePassManager):
     """A transpiler pass manager converting a :class:`.FermionicCircuit` to a :class:`~qiskit.circuit.QuantumCircuit`.
 
     .. note::
@@ -63,7 +63,7 @@ class FermionToQubitConverter(BasePassManager):
         return dag_to_circuit(passmanager_ir, copy_operations=False)
 
 
-class FermionStagedPassManager(StagedPassManager):
+class FermionicStagedPassManager(StagedPassManager):
     """The staged fermion-to-qubit transpilation pipeline.
 
     This

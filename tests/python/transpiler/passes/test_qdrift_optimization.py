@@ -23,7 +23,7 @@ from qiskit_fermions.operators import FermionOperator
 from qiskit_fermions.operators.grouping import group_terms_by_electronic_structure
 from qiskit_fermions.operators.library import FCIDump
 from qiskit_fermions.transpiler.passes import QDriftTrotterization
-from qiskit_fermions.transpiler.passmanager import FermionPassManager
+from qiskit_fermions.transpiler.passmanager import FermionicPassManager
 
 
 def test_qdrift_optimization_no_groups(subtests):
@@ -39,7 +39,7 @@ def test_qdrift_optimization_no_groups(subtests):
     with subtests.test("num_terms=4"):
         num_terms = 4
         qdrift = QDriftTrotterization(num_terms)
-        pm = FermionPassManager(qdrift)
+        pm = FermionicPassManager(qdrift)
 
         qdrift_circ = pm.run(circ)
         assert qdrift_circ.count_ops() == {"Evolution": num_terms}
@@ -47,7 +47,7 @@ def test_qdrift_optimization_no_groups(subtests):
     with subtests.test("num_terms=6"):
         num_terms = 6
         qdrift = QDriftTrotterization(num_terms)
-        pm = FermionPassManager(qdrift)
+        pm = FermionicPassManager(qdrift)
 
         qdrift_circ = pm.run(circ)
         assert qdrift_circ.count_ops() == {"Evolution": num_terms}
@@ -55,7 +55,7 @@ def test_qdrift_optimization_no_groups(subtests):
     with subtests.test("rng seed"):
         num_terms = 2
         qdrift = QDriftTrotterization(num_terms, rng=42)
-        pm = FermionPassManager(qdrift)
+        pm = FermionicPassManager(qdrift)
 
         qdrift_circ = pm.run(circ)
         assert qdrift_circ.count_ops() == {"Evolution": num_terms}
@@ -84,7 +84,7 @@ def test_qdrift_optimization_no_groups(subtests):
     with subtests.test("rng seed"):
         num_terms = 2
         qdrift = QDriftTrotterization(num_terms, rng=np.random.default_rng(43))
-        pm = FermionPassManager(qdrift)
+        pm = FermionicPassManager(qdrift)
 
         qdrift_circ = pm.run(circ)
         assert qdrift_circ.count_ops() == {"Evolution": num_terms}
@@ -122,7 +122,7 @@ def test_qdrift_optimization_with_groups():
 
     num_terms = 2
     qdrift = QDriftTrotterization(num_terms, rng=42)
-    pm = FermionPassManager(qdrift)
+    pm = FermionicPassManager(qdrift)
 
     qdrift_circ = pm.run(circ)
     assert qdrift_circ.count_ops() == {"Evolution": num_terms}
