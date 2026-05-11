@@ -67,7 +67,7 @@ qubits, the configured layout must account for that).
 In the general case, fermionic modes are not always encoded with an occupation-basis into the qubit
 register. Consequently, we cannot associate a single fermionic mode with a single qubit.
 Therefore, the user-provided fermion-to-qubit layout (:type:`F2QLayout`) associates
-:type:`~qiskit_fermions.circuit.ModeRegister` instances with
+:type:`~qiskit_fermions.circuit.FermionicRegister` instances with
 :class:`~qiskit.circuit.QuantumRegister` ones.
 
 .. autosummary::
@@ -143,11 +143,11 @@ from typing import TypeAlias
 
 from qiskit.circuit import QuantumRegister
 
-from qiskit_fermions.circuit import ModeRegister
+from qiskit_fermions.circuit import FermionicRegister
 
 from .passmanager import FermionPassManager, FermionStagedPassManager, FermionToQubitConverter
 
-F2QLayout: TypeAlias = dict[ModeRegister, QuantumRegister]
+F2QLayout: TypeAlias = dict[FermionicRegister, QuantumRegister]
 """A mapping of fermionic mode registers to quantum registers.
 
 Users must provide a data structure of this type to the circuit transpiler. In a trivial case, (such

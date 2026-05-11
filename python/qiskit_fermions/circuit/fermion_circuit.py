@@ -20,11 +20,11 @@ from typing import TYPE_CHECKING, Any, cast
 
 from qiskit.circuit import Instruction, QuantumCircuit, QuantumRegister
 
-from . import Mode, ModeSpecifier
+from . import FermionicMode, FermionicSpecifier
 from .fermion_gate import FermionGate
 
 if TYPE_CHECKING:
-    from . import ModeRegister
+    from . import FermionicRegister
 
 
 class FermionCircuit:
@@ -42,19 +42,19 @@ class FermionCircuit:
         Args:
             num_modes: the number of fermionic modes on which this circuit acts.
         """
-        self.register: ModeRegister = QuantumRegister(num_modes, "f")
-        """The inner circuit's :type:`~qiskit_fermions.circuit.ModeRegister`."""
+        self.register: FermionicRegister = QuantumRegister(num_modes, "f")
+        """The inner circuit's :type:`~qiskit_fermions.circuit.FermionicRegister`."""
         self._inner = QuantumCircuit(self.register)
 
     @property
-    def fermions(self) -> list[Mode]:
+    def fermions(self) -> list[FermionicMode]:
         """The fermionic mode `bits` that this circuit acts upon."""
-        return cast(list[Mode], self._inner.qubits)
+        return cast(list[FermionicMode], self._inner.qubits)
 
     def append(
         self,
         gate: FermionGate,
-        fargs: ModeSpecifier,
+        fargs: FermionicSpecifier,
         cargs: None = None,
         *,
         copy: bool = True,

@@ -54,14 +54,14 @@ class InitializeModesSynthesis:
 
         Raises:
             NotImplementedError: when ``in_node`` acts on fermionic modes that are spread across
-                multiple :type:`~qiskit_fermions.circuit.ModeRegister` instances.
+                multiple :type:`~qiskit_fermions.circuit.FermionicRegister` instances.
         """
         encountered_mode_registers, global_mode_indices = _parse_node_indices(in_node, f2q_layout)
 
         if len(encountered_mode_registers) > 1:
             raise NotImplementedError(
                 "Cannot map an InitializeModes gate acting on fermionic modes that are spread "
-                "across multiple ModeRegister instances."
+                "across multiple FermionicRegister instances."
             )
 
         mreg = encountered_mode_registers.pop()

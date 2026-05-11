@@ -38,7 +38,7 @@ class F2QSynthesisPlugin(Protocol):
                 must insert the translated circuit instruction.
             f2q_layout: the :type:`~qiskit_fermions.transpiler.F2QLayout` setting that is global to
                 the transpilation process. It is the plugin's responsibility to respect this mapping
-                of :type:`~qiskit_fermions.circuit.ModeRegister` to
+                of :type:`~qiskit_fermions.circuit.FermionicRegister` to
                 :class:`~qiskit.circuit.QuantumRegister`.
         """
         ...
