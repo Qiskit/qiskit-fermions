@@ -28,7 +28,7 @@ documentation as well as :mod:`qiskit_fermions.operators.library`.
        >>> from qiskit_fermions.operators import FermionOperator
        >>>
        >>> fcidump = FCIDump.from_file("docs/tutorials/n2.fcidump")
-       >>> num_fermions = 2 * fcidump.norb
+       >>> num_modes = 2 * fcidump.norb
        >>> hamil = FermionOperator.from_fcidump(fcidump)
 
     .. code-block:: c
@@ -37,7 +37,7 @@ documentation as well as :mod:`qiskit_fermions.operators.library`.
 
        QfFCIDump* fcidump = qf_fcidump_from_file("docs/tutorials/n2.fcidump");
        QfFermionOperator* hamil = qf_ferm_op_from_fcidump(fcidump);
-       uint32_t num_fermions = 2 * qf_fcidump_norb(fcidump);
+       uint32_t num_modes = 2 * qf_fcidump_norb(fcidump);
 
 
 2. Group Hamiltonian terms
@@ -61,12 +61,12 @@ detail in :ref:`this guide <grouping_explanation>`.
 
        >>> from qiskit_fermions.operators.grouping import group_terms_by_electronic_structure
        >>>
-       >>> exit_code = group_terms_by_electronic_structure(hamil, num_fermions)
+       >>> exit_code = group_terms_by_electronic_structure(hamil, num_modes)
        >>> assert exit_code is None
 
     .. code-block:: c
 
-       QfExitCode exit = qf_group_terms_by_electronic_structure(hamil, num_fermions, false);
+       QfExitCode exit = qf_group_terms_by_electronic_structure(hamil, num_modes, false);
 
 3. Prepare the Time-Evolution Circuit
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -80,13 +80,13 @@ components to do so, in a way that fits naturally with Qiskit's conventions.
 
     .. code-block:: python
 
-       >>> from qiskit_fermions.circuit import FermionCircuit
+       >>> from qiskit_fermions.circuit import FermionicCircuit
        >>> from qiskit_fermions.circuit.library import Evolution
        >>>
        >>> time = 1.0  # you can choose a desired scaling factor here
-       >>> evo_gate = Evolution(num_fermions, hamil, time)
+       >>> evo_gate = Evolution(num_modes, hamil, time)
        >>>
-       >>> circ = FermionCircuit(num_fermions)
+       >>> circ = FermionicCircuit(num_modes)
        >>> circ.append(evo_gate, circ.fermions)
 
     .. code-block:: c
@@ -102,7 +102,7 @@ components to do so, in a way that fits naturally with Qiskit's conventions.
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The :mod:`qiskit_fermions.transpiler` module integrates directly with Qiskit's
-transpilation pipeline, allowing the :class:`.FermionCircuit` constructed above
+transpilation pipeline, allowing the :class:`.FermionicCircuit` constructed above
 to be directly transpiled to a :external:class:`~qiskit.circuit.QuantumCircuit`.
 
 Here, we are using the :func:`.jordan_wigner` fermion-to-qubit mapping to
@@ -110,7 +110,7 @@ convert the Hamiltonian expressed in terms of fermions to Pauli strings. This
 can be done directly as part of the transpilation process through the use of the
 :class:`.EvolutionSynthesis` transpilation pass plugin. Here, we are using
 :func:`.generate_preset_jw_pass_manager` as a short-hand for building a
-:class:`.FermionStagedPassManager` which ensures the consistent use of the
+:class:`.FermionicStagedPassManager` which ensures the consistent use of the
 Jordan-Wigner encoding for all circuit instructions.
 
 Crucially, we add the :class:`.QDriftTrotterization` transpilation pass to the
@@ -133,7 +133,7 @@ ensemble of circuits to generate:
 
     .. code-block:: python
 
-       >>> from qiskit_fermions.transpiler import FermionPassManager
+       >>> from qiskit_fermions.transpiler import FermionicPassManager
        >>> from qiskit_fermions.transpiler.presets import generate_preset_jw_pass_manager
        >>> from qiskit_fermions.transpiler.passes import QDriftTrotterization
        >>>
@@ -141,7 +141,7 @@ ensemble of circuits to generate:
        >>> qdrift = QDriftTrotterization(num_groups, rng=42)
        >>>
        >>> pm = generate_preset_jw_pass_manager()
-       >>> pm.optimization = FermionPassManager([qdrift])
+       >>> pm.optimization = FermionicPassManager([qdrift])
        >>>
        >>> num_sqdrift_randomizations = 10
        >>> sqdrift_circuits = [
