@@ -93,10 +93,10 @@ class F2QSynthesis(TransformationPass):
 
         out_dag = dag.copy_empty_like()
 
-        for mreg, qreg in f2q_layout.items():
+        for freg, qreg in f2q_layout.items():
             out_dag.add_qreg(qreg)
-            out_dag.remove_qregs(mreg)
-            out_dag.remove_qubits(*mreg)
+            out_dag.remove_qregs(freg)
+            out_dag.remove_qubits(*freg)
 
         for node in dag.op_nodes():
             op_type = type(node.op)

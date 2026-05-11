@@ -36,13 +36,13 @@ def _parse_node_indices(
     Returns:
         The set of fermionic mode registers and global mode indices acted upon by ``in_node``.
     """
-    encountered_mode_registers: set[QuantumRegister] = set()
+    encountered_fermionic_registers: set[QuantumRegister] = set()
     global_mode_indices = []
     for fermion in in_node.qargs:
-        for mreg in f2q_layout:
-            if fermion in mreg:
-                encountered_mode_registers.add(mreg)
-                global_mode_indices.append(mreg.index(fermion))
+        for freg in f2q_layout:
+            if fermion in freg:
+                encountered_fermionic_registers.add(freg)
+                global_mode_indices.append(freg.index(fermion))
                 break
 
-    return encountered_mode_registers, global_mode_indices
+    return encountered_fermionic_registers, global_mode_indices

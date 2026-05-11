@@ -73,16 +73,18 @@ class EvolutionSynthesis:
             NotImplementedError: when ``in_node`` acts on fermionic modes that are spread across
                 multiple :type:`~qiskit_fermions.circuit.FermionicRegister` instances.
         """
-        encountered_mode_registers, global_mode_indices = _parse_node_indices(in_node, f2q_layout)
+        encountered_fermionic_registers, global_mode_indices = _parse_node_indices(
+            in_node, f2q_layout
+        )
 
-        if len(encountered_mode_registers) > 1:
+        if len(encountered_fermionic_registers) > 1:
             raise NotImplementedError(
                 "Cannot map an Evolution gate acting on fermionic modes that are spread across "
                 "multiple FermionicRegister instances."
             )
 
-        mreg = encountered_mode_registers.pop()
-        qreg = f2q_layout[mreg]
+        freg = encountered_fermionic_registers.pop()
+        qreg = f2q_layout[freg]
 
         local_op = in_node.op.operator
         global_op = local_op.relabel_modes(global_mode_indices)
