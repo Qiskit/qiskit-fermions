@@ -58,3 +58,13 @@ Linear Algebra
    :maxdepth: 1
 
    qiskit_fermions.linalg
+
+
+*********
+Utilities
+*********
+
+.. toctree::
+   :maxdepth: 1
+
+   qiskit_fermions.utils.optionals

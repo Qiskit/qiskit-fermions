@@ -10,22 +10,27 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
-"""Optional dependency testers.
+# ruff: noqa: D205,D212,D415
+"""
+=====================
+Optional Dependencies
+=====================
 
-This module defines lazy availability checks for optional third-party
-dependencies. The checkers are instances of :class:`qiskit.utils.LazyImportTester`
-and can be used as Booleans (evaluated lazily), or to raise a
-:class:`qiskit.exceptions.MissingOptionalLibraryError` when a dependency is
-required.
+.. currentmodule:: qiskit_fermions.utils.optionals
 
+This module defines lazy availability testers for optional third-party dependencies. The checkers
+are instances of :external:class:`~qiskit.utils.LazyImportTester` and can be used as booleans
+(evaluated lazily), or to raise a :external:class:`~qiskit.exceptions.MissingOptionalLibraryError`
+when a dependency is required.
+
+-----------------
 Available Testers
-=================
+-----------------
 
 .. py:data:: HAS_PYOMO
 
-   `Pyomo <https://www.pyomo.org/>`__ is a Python-based optimization modeling
-   language used to build linear and mixed-integer programs (LP/MILP) for
-   classical solvers.
+   `Pyomo <https://www.pyomo.org/>`__ is a Python-based optimization modeling language used to build
+   linear and mixed-integer programs (LP/MILP) for classical solvers.
 """
 
 from qiskit.utils import LazyImportTester
