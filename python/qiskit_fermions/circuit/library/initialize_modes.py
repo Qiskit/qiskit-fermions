@@ -18,10 +18,10 @@ from collections.abc import Sequence
 
 import numpy as np
 
-from .. import FermionGate
+from .. import FermionicGate
 
 
-class InitializeModes(FermionGate):
+class InitializeModes(FermionicGate):
     """Implements the fermionic mode initialization.
 
     .. caution::
@@ -30,14 +30,14 @@ class InitializeModes(FermionGate):
     """
 
     def __init__(self, occupation: Sequence[bool]) -> None:
-        """Initializes the modes of a :class:`.FermionRegister` with the provided occupation.
+        """Initializes the modes of a :class:`.FermionicRegister` with the provided occupation.
 
         Args:
             occupation: a sequence of booleans indicating the occupation for each mode in the
-                :class:`.FermionRegister` being initialized by this gate.
+                :class:`.FermionicRegister` being initialized by this gate.
         """
         self.occupation = np.asarray(occupation, dtype=bool)
         """The sequence of booleans indicating the occupation for each mode in the
-        :class:`~.FermionRegister` being initialized by this gate."""
+        :class:`~.FermionicRegister` being initialized by this gate."""
 
         super().__init__("InitializeModes", len(self.occupation), [])

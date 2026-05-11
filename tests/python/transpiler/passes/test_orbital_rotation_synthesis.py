@@ -14,32 +14,32 @@
 
 from __future__ import annotations
 
-from qiskit_fermions.circuit import FermionCircuit
+from qiskit_fermions.circuit import FermionicCircuit
 from qiskit_fermions.circuit.library import OrbitalRotation
-from qiskit_fermions.transpiler import FermionPassManager, FermionStagedPassManager
+from qiskit_fermions.transpiler import FermionicPassManager, FermionicStagedPassManager
 from qiskit_fermions.transpiler.passes import (
     F2QSynthesis,
     OrbitalRotationSynthesis,
     TrivialF2QLayout,
 )
-from qiskit_fermions.transpiler.passmanager import FermionToQubitConverter
+from qiskit_fermions.transpiler.passmanager import FermionicToQubitConverter
 
 from ...utils import random_unitary
 
 
 def test_orbital_rotation_global_gate_synthesis():
-    num_fermions = 6
-    rotation_unitary = random_unitary(num_fermions, seed=42)
-    circ = FermionCircuit(num_fermions)
+    num_modes = 6
+    rotation_unitary = random_unitary(num_modes, seed=42)
+    circ = FermionicCircuit(num_modes)
     rot = OrbitalRotation(rotation_unitary)
-    circ.append(rot, circ.fermions)
+    circ.append(rot, circ.modes)
 
     synth = F2QSynthesis()
     synth.plugins[OrbitalRotation] = OrbitalRotationSynthesis()
 
-    pm = FermionStagedPassManager()
-    pm.layout = FermionPassManager(TrivialF2QLayout())
-    pm.synthesis = FermionToQubitConverter(synth)
+    pm = FermionicStagedPassManager()
+    pm.layout = FermionicPassManager(TrivialF2QLayout())
+    pm.synthesis = FermionicToQubitConverter(synth)
 
     qu_circ = pm.run(circ)
 
@@ -48,21 +48,21 @@ def test_orbital_rotation_global_gate_synthesis():
 
 
 def test_initialize_modes_local_gate_synthesis():
-    num_fermions = 6
-    rotation_unitary_a = random_unitary(num_fermions // 2, seed=42)
-    rotation_unitary_b = random_unitary(num_fermions // 2, seed=43)
-    circ = FermionCircuit(num_fermions)
+    num_modes = 6
+    rotation_unitary_a = random_unitary(num_modes // 2, seed=42)
+    rotation_unitary_b = random_unitary(num_modes // 2, seed=43)
+    circ = FermionicCircuit(num_modes)
     rot_a = OrbitalRotation(rotation_unitary_a)
-    circ.append(rot_a, circ.fermions[:3])
+    circ.append(rot_a, circ.modes[:3])
     rot_b = OrbitalRotation(rotation_unitary_b)
-    circ.append(rot_b, circ.fermions[3:])
+    circ.append(rot_b, circ.modes[3:])
 
     synth = F2QSynthesis()
     synth.plugins[OrbitalRotation] = OrbitalRotationSynthesis()
 
-    pm = FermionStagedPassManager()
-    pm.layout = FermionPassManager(TrivialF2QLayout())
-    pm.synthesis = FermionToQubitConverter(synth)
+    pm = FermionicStagedPassManager()
+    pm.layout = FermionicPassManager(TrivialF2QLayout())
+    pm.synthesis = FermionicToQubitConverter(synth)
 
     qu_circ = pm.run(circ)
 

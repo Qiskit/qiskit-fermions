@@ -16,10 +16,10 @@ from __future__ import annotations
 
 import numpy as np
 
-from .. import FermionGate
+from .. import FermionicGate
 
 
-class OrbitalRotation(FermionGate):
+class OrbitalRotation(FermionicGate):
     """Implements an orbital rotation."""
 
     def __init__(self, rotation_unitary: np.ndarray) -> None:

@@ -26,18 +26,18 @@ The following objects are simple type aliases to make this re-interpretation mor
 .. autosummary::
    :toctree: ../stubs/
 
-   Fermion
-   FermionRegister
-   FermionSpecifier
+   FermionicMode
+   FermionicRegister
+   FermionicSpecifier
 
-For actually expressing your circuits, you should use the :class:`.FermionCircuit` class along with
-the :mod:`~qiskit_fermions.circuit.library` of :class:`.FermionGate` implementations.
+For actually expressing your circuits, you should use the :class:`.FermionicCircuit` class along with
+the :mod:`~qiskit_fermions.circuit.library` of :class:`.FermionicGate` implementations.
 
 .. autosummary::
    :toctree: ../stubs/
 
-   FermionCircuit
-   FermionGate
+   FermionicCircuit
+   FermionicGate
 """
 
 from collections.abc import Sequence
@@ -45,23 +45,25 @@ from typing import TypeAlias
 
 from qiskit.circuit import QuantumRegister, Qubit
 
-Fermion: TypeAlias = Qubit
+FermionicMode: TypeAlias = Qubit
 
-FermionRegister: TypeAlias = QuantumRegister
+FermionicRegister: TypeAlias = QuantumRegister
 
-FermionSpecifier: TypeAlias = Fermion | FermionRegister | int | slice | Sequence[Fermion | int]
+FermionicSpecifier: TypeAlias = (
+    FermionicMode | FermionicRegister | int | slice | Sequence[FermionicMode | int]
+)
 """A type alias equivalent to Qiskit's ``QubitSpecifier`` but for fermionic modes."""
 
 # NOTE: we must explicitly define the type aliases _before_ the following imports to ensure that
 # they can actually use those type aliases themselves.
 # ruff: noqa: E402
-from .fermion_circuit import FermionCircuit
-from .fermion_gate import FermionGate
+from .fermionic_circuit import FermionicCircuit
+from .fermionic_gate import FermionicGate
 
 __all__ = [
-    "Fermion",
-    "FermionCircuit",
-    "FermionGate",
-    "FermionRegister",
-    "FermionSpecifier",
+    "FermionicCircuit",
+    "FermionicGate",
+    "FermionicMode",
+    "FermionicRegister",
+    "FermionicSpecifier",
 ]

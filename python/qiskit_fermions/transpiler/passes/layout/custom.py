@@ -41,13 +41,13 @@ class CustomF2QLayout(AnalysisPass):
         super().__init__()
 
         self.layout: F2QLayout = layout
-        """The user-provided mapping of :type:`~qiskit_fermions.circuit.FermionRegister` to
+        """The user-provided mapping of :type:`~qiskit_fermions.circuit.FermionicRegister` to
         :class:`~qiskit.circuit.QuantumRegister`."""
 
     def run(self, dag: DAGCircuit) -> None:
         """Runs this analysis pass.
 
         Args:
-            dag: the DAG circuit representation of a :class:`.FermionCircuit`.
+            dag: the DAG circuit representation of a :class:`.FermionicCircuit`.
         """
         self.property_set["f2q_layout"] = self.layout

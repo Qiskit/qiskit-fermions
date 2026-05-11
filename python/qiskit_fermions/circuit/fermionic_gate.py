@@ -10,7 +10,7 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
-"""FermionGate."""
+"""FermionicGate."""
 
 from __future__ import annotations
 
@@ -19,11 +19,11 @@ from typing import cast
 from qiskit.circuit import Gate
 
 
-class FermionGate(Gate):
+class FermionicGate(Gate):
     """The base class for all fermionic gates.
 
     To ensure consistency only subclasses of this gate class can be added to instances of
-    :class:`.FermionCircuit`. As such, this class (mostly) serves as a type (for the time being).
+    :class:`.FermionicCircuit`. As such, this class (mostly) serves as a type (for the time being).
 
     .. caution::
        Since this is a subclass of :class:`~qiskit.circuit.Gate` the documentation of its methods
@@ -37,18 +37,18 @@ class FermionGate(Gate):
     def __init__(
         self,
         name: str,
-        num_fermions: int,
+        num_modes: int,
         /,
         params: list | None = None,
         *,
         label: str | None = None,
     ) -> None:
-        """Initializes a FermionGate instance."""
+        """Initializes a FermionicGate instance."""
         if params is None:
             params = []
-        super().__init__(name, num_fermions, params, label)
+        super().__init__(name, num_modes, params, label)
 
     @property
-    def num_fermions(self) -> int:
+    def num_modes(self) -> int:
         """The number of fermionic modes that this gate acts upon."""
         return cast(int, self._num_qubits)

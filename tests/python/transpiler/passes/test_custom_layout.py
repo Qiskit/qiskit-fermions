@@ -19,12 +19,12 @@ from functools import partial
 
 from qiskit.circuit import QuantumRegister
 from qiskit.quantum_info import SparseObservable
-from qiskit_fermions.circuit import FermionCircuit
+from qiskit_fermions.circuit import FermionicCircuit
 from qiskit_fermions.circuit.library import Evolution
 from qiskit_fermions.operators import MajoranaOperator
-from qiskit_fermions.transpiler import FermionStagedPassManager
+from qiskit_fermions.transpiler import FermionicStagedPassManager
 from qiskit_fermions.transpiler.passes import CustomF2QLayout, EvolutionSynthesis, F2QSynthesis
-from qiskit_fermions.transpiler.passmanager import FermionPassManager, FermionToQubitConverter
+from qiskit_fermions.transpiler.passmanager import FermionicPassManager, FermionicToQubitConverter
 
 
 # NOTE: this is a very specific implementation of the Fermi-Hubbard model on a square lattice. It is
@@ -298,7 +298,7 @@ def test_custom_layout():
            Phys. Rev. B 104, 035118 (2021),
            `doi:10.1103/PhysRevB.104.035118 <http://dx.doi.org/10.1103/PhysRevB.104.035118>`_.
     """
-    num_fermions = 16
+    num_modes = 16
     num_qubits = 20
     hamil = build_fermi_hubbard_square_lattice(4, 4, 5.0, 5.0)
 
@@ -323,17 +323,17 @@ def test_custom_layout():
     }
     mapper_fn = partial(derby_klassen, initial_state=initial_state, edge_face_map=edge_face_map)
 
-    circ = FermionCircuit(num_fermions)
-    circ.append(Evolution(num_fermions, hamil), circ.fermions)
+    circ = FermionicCircuit(num_modes)
+    circ.append(Evolution(num_modes, hamil), circ.modes)
 
     layout = CustomF2QLayout({circ.register: QuantumRegister(num_qubits)})
 
     synth = F2QSynthesis()
     synth.plugins[Evolution] = EvolutionSynthesis(mapper_fn)
 
-    pm = FermionStagedPassManager()
-    pm.layout = FermionPassManager(layout)
-    pm.synthesis = FermionToQubitConverter(synth)
+    pm = FermionicStagedPassManager()
+    pm.layout = FermionicPassManager(layout)
+    pm.synthesis = FermionicToQubitConverter(synth)
 
     qu_circ = pm.run(circ)
     qu_circ_decomp = qu_circ.decompose()

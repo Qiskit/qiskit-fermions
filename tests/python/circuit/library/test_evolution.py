@@ -14,7 +14,7 @@
 
 from __future__ import annotations
 
-from qiskit_fermions.circuit import FermionCircuit
+from qiskit_fermions.circuit import FermionicCircuit
 from qiskit_fermions.circuit.library import Evolution
 from qiskit_fermions.operators import FermionOperator
 
@@ -29,10 +29,10 @@ def test_evolution_gate():
         }
     )
     time = 1.5
-    num_fermions = 4
-    circ = FermionCircuit(num_fermions)
-    evo = Evolution(num_fermions, hamil, time=time)
-    circ.append(evo, circ.fermions)
+    num_modes = 4
+    circ = FermionicCircuit(num_modes)
+    evo = Evolution(num_modes, hamil, time=time)
+    circ.append(evo, circ.modes)
 
     ops = circ.count_ops()
     assert ops == {"Evolution": 1}
@@ -48,10 +48,10 @@ def test_evolution_gate_decompose():
         }
     )
     time = 1.5
-    num_fermions = 4
-    circ = FermionCircuit(num_fermions)
-    evo = Evolution(num_fermions, hamil, time=time)
-    circ.append(evo, circ.fermions)
+    num_modes = 4
+    circ = FermionicCircuit(num_modes)
+    evo = Evolution(num_modes, hamil, time=time)
+    circ.append(evo, circ.modes)
 
     decomposed = circ.decompose()
 
@@ -75,10 +75,10 @@ def test_evolution_gate_decompose_with_groups():
     )
     hamil.groups = [0, 0, 1, 1]
     time = 1.5
-    num_fermions = 4
-    circ = FermionCircuit(num_fermions)
-    evo = Evolution(num_fermions, hamil, time=time)
-    circ.append(evo, circ.fermions)
+    num_modes = 4
+    circ = FermionicCircuit(num_modes)
+    evo = Evolution(num_modes, hamil, time=time)
+    circ.append(evo, circ.modes)
 
     decomposed = circ.decompose()
 

@@ -26,7 +26,7 @@ class TrivialF2QLayout(AnalysisPass):
 
     This pass simply populates the ``f2q_layout`` field of the
     :attr:`~qiskit.passmanager.PassManagerState.property_set`, with a dictionary associating each
-    :type:`~qiskit_fermions.circuit.FermionRegister` with an equally sized
+    :type:`~qiskit_fermions.circuit.FermionicRegister` with an equally sized
     :class:`~qiskit.circuit.QuantumRegister`.
     """
 
@@ -34,7 +34,7 @@ class TrivialF2QLayout(AnalysisPass):
         """Runs this analysis pass.
 
         Args:
-            dag: the DAG circuit representation of a :class:`.FermionCircuit`.
+            dag: the DAG circuit representation of a :class:`.FermionicCircuit`.
         """
         layout: F2QLayout = {}
         for qreg in dag.qregs.values():

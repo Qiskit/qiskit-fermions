@@ -15,15 +15,15 @@
 from __future__ import annotations
 
 from qiskit.circuit.library import PauliEvolutionGate
-from qiskit_fermions.circuit import FermionCircuit
+from qiskit_fermions.circuit import FermionicCircuit
 from qiskit_fermions.circuit.library import Evolution
 from qiskit_fermions.mappers.library import jordan_wigner
 from qiskit_fermions.operators import FermionOperator
 from qiskit_fermions.transpiler.passes import EvolutionSynthesis, F2QSynthesis, TrivialF2QLayout
 from qiskit_fermions.transpiler.passmanager import (
-    FermionPassManager,
-    FermionStagedPassManager,
-    FermionToQubitConverter,
+    FermionicPassManager,
+    FermionicStagedPassManager,
+    FermionicToQubitConverter,
 )
 
 
@@ -37,17 +37,17 @@ def test_evolution_gate_synthesis():
         }
     )
     time = 1.5
-    num_fermions = 4
-    circ = FermionCircuit(num_fermions)
-    evo = Evolution(num_fermions, hamil, time=time)
-    circ.append(evo, circ.fermions)
+    num_modes = 4
+    circ = FermionicCircuit(num_modes)
+    evo = Evolution(num_modes, hamil, time=time)
+    circ.append(evo, circ.modes)
 
     synth = F2QSynthesis()
     synth.plugins[Evolution] = EvolutionSynthesis(jordan_wigner)
 
-    pm = FermionStagedPassManager()
-    pm.layout = FermionPassManager(TrivialF2QLayout())
-    pm.synthesis = FermionToQubitConverter(synth)
+    pm = FermionicStagedPassManager()
+    pm.layout = FermionicPassManager(TrivialF2QLayout())
+    pm.synthesis = FermionicToQubitConverter(synth)
 
     qu_circ = pm.run(circ)
 
@@ -69,10 +69,10 @@ def test_custom_qubit_ordering():
         }
     )
     time = 1.5
-    num_fermions = 4
-    circ = FermionCircuit(num_fermions)
-    evo = Evolution(num_fermions, hamil, time=time)
-    circ.append(evo, circ.fermions)
+    num_modes = 4
+    circ = FermionicCircuit(num_modes)
+    evo = Evolution(num_modes, hamil, time=time)
+    circ.append(evo, circ.modes)
 
     custom_qubit_ordering = [0, 2, 1, 3]
 
@@ -83,9 +83,9 @@ def test_custom_qubit_ordering():
     synth = F2QSynthesis()
     synth.plugins[Evolution] = EvolutionSynthesis(custom_qubit_ordering_mapper_fn)
 
-    pm = FermionStagedPassManager()
-    pm.layout = FermionPassManager(TrivialF2QLayout())
-    pm.synthesis = FermionToQubitConverter(synth)
+    pm = FermionicStagedPassManager()
+    pm.layout = FermionicPassManager(TrivialF2QLayout())
+    pm.synthesis = FermionicToQubitConverter(synth)
 
     qu_circ = pm.run(circ)
 

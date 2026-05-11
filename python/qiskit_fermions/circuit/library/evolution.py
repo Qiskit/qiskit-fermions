@@ -16,17 +16,17 @@ from __future__ import annotations
 
 from qiskit_fermions.operators.protocol import OperatorTrait
 
-from .. import FermionGate
+from .. import FermionicGate
 
 
-class Evolution(FermionGate):
+class Evolution(FermionicGate):
     """Implements the time-evolution of an operator."""
 
-    def __init__(self, num_fermions: int, operator: OperatorTrait, time: float = 1.0) -> None:
+    def __init__(self, num_modes: int, operator: OperatorTrait, time: float = 1.0) -> None:
         """Initializes an Evolution gate.
 
         Args:
-            num_fermions: the number of fermionic modes on which this gate acts.
+            num_modes: the number of fermionic modes on which this gate acts.
             operator: the operator under which to time-evolve the acted-upon fermionic modes.
             time: the evolution time.
         """
@@ -34,13 +34,13 @@ class Evolution(FermionGate):
         """The operator under which to time-evolve the acted-upon fermionic modes."""
 
         super().__init__(
-            "Evolution", num_fermions, [time], label=f"evolve({' '.join(str(operator).split())})"
+            "Evolution", num_modes, [time], label=f"evolve({' '.join(str(operator).split())})"
         )
 
     def _define(self) -> None:
-        from qiskit_fermions.circuit import FermionCircuit
+        from qiskit_fermions.circuit import FermionicCircuit
 
-        definition = FermionCircuit(self.num_fermions)
+        definition = FermionicCircuit(self.num_modes)
 
         # when the operator being evolved has groups use those for the decomposition, otherwise
         # decompose into all individual terms
@@ -59,16 +59,16 @@ class Evolution(FermionGate):
             active = item.get_support()
             num_active = len(active)
             active_idx = iter(range(num_active))
-            idle_idx = iter(range(num_active, self.num_fermions))
+            idle_idx = iter(range(num_active, self.num_modes))
             permutation = [
                 next(active_idx) if idx in active else next(idle_idx)
-                for idx in range(self.num_fermions)
+                for idx in range(self.num_modes)
             ]
             relabeled = item.relabel_modes(permutation)
 
             definition.append(
                 Evolution(num_active, relabeled, time=self.params[0]),
-                [definition.fermions[idx] for idx in sorted(active)],
+                [definition.modes[idx] for idx in sorted(active)],
             )
 
         self._definition = definition._inner

@@ -17,14 +17,14 @@ from __future__ import annotations
 import pytest
 from qiskit.circuit import QuantumCircuit
 from qiskit.transpiler import PassManager
-from qiskit_fermions.circuit import FermionCircuit
+from qiskit_fermions.circuit import FermionicCircuit
 from qiskit_fermions.circuit.library import Evolution
 from qiskit_fermions.operators import FermionOperator
 from qiskit_fermions.transpiler.passes import F2QSynthesis, TrivialF2QLayout
 from qiskit_fermions.transpiler.passmanager import (
-    FermionPassManager,
-    FermionStagedPassManager,
-    FermionToQubitConverter,
+    FermionicPassManager,
+    FermionicStagedPassManager,
+    FermionicToQubitConverter,
 )
 
 
@@ -39,14 +39,14 @@ def test_missing_plugin():
         }
     )
     time = 1.5
-    num_fermions = 4
-    circ = FermionCircuit(num_fermions)
-    evo = Evolution(num_fermions, hamil, time=time)
-    circ.append(evo, circ.fermions)
+    num_modes = 4
+    circ = FermionicCircuit(num_modes)
+    evo = Evolution(num_modes, hamil, time=time)
+    circ.append(evo, circ.modes)
 
-    pm = FermionStagedPassManager()
-    pm.layout = FermionPassManager(TrivialF2QLayout())
-    pm.synthesis = FermionToQubitConverter(F2QSynthesis())
+    pm = FermionicStagedPassManager()
+    pm.layout = FermionicPassManager(TrivialF2QLayout())
+    pm.synthesis = FermionicToQubitConverter(F2QSynthesis())
 
     with pytest.raises(TypeError, match="No plugin registered"):
         _ = pm.run(circ)

@@ -10,16 +10,16 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
-"""FermionCircuit tests."""
+"""FermionicCircuit tests."""
 
 from __future__ import annotations
 
 import pytest
 from qiskit.circuit.library import XGate
-from qiskit_fermions.circuit import FermionCircuit
+from qiskit_fermions.circuit import FermionicCircuit
 
 
 def test_invalid_gate():
-    circ = FermionCircuit(1)
+    circ = FermionicCircuit(1)
     with pytest.raises(ValueError):
-        circ.append(XGate(), circ.fermions)
+        circ.append(XGate(), circ.modes)

@@ -19,7 +19,7 @@ from typing import Protocol, cast
 from qiskit.dagcircuit import DAGCircuit, DAGOpNode
 from qiskit.transpiler import TransformationPass
 
-from qiskit_fermions.circuit import FermionGate
+from qiskit_fermions.circuit import FermionicGate
 
 from ... import F2QLayout
 
@@ -33,12 +33,12 @@ class F2QSynthesisPlugin(Protocol):
         Args:
             in_node: a fermion-based circuit instruction stored in a
                 :class:`~qiskit.dagcircuit.DAGOpNode`. Specifically, this guarantees that
-                :attr:`~qiskit.dagcircuit.DAGOpNode.op` is of type :class:`.FermionGate`.
+                :attr:`~qiskit.dagcircuit.DAGOpNode.op` is of type :class:`.FermionicGate`.
             out_dag: the qubit-based :class:`~qiskit.dagcircuit.DAGCircuit` into which this plugin
                 must insert the translated circuit instruction.
             f2q_layout: the :type:`~qiskit_fermions.transpiler.F2QLayout` setting that is global to
                 the transpilation process. It is the plugin's responsibility to respect this mapping
-                of :type:`~qiskit_fermions.circuit.FermionRegister` to
+                of :type:`~qiskit_fermions.circuit.FermionicRegister` to
                 :class:`~qiskit.circuit.QuantumRegister`.
         """
         ...
@@ -49,7 +49,7 @@ class F2QSynthesis(TransformationPass):
 
     This transpilation pass works similarly to Qiskit's
     :class:`~qiskit.transpiler.passes.HighLevelSynthesis` pass; given an input
-    :class:`~qiskit.dagcircuit.DAGCircuit` with :class:`.FermionGate` instructions, it iterates them
+    :class:`~qiskit.dagcircuit.DAGCircuit` with :class:`.FermionicGate` instructions, it iterates them
     and delegates the translation to qubit-based instructions to matching :attr:`plugins`.
     The insertion of the qubit-based circuit instructions into the output
     :class:`~qiskit.dagcircuit.DAGCircuit` is also left to the plugin. This pass will merely have
@@ -77,7 +77,7 @@ class F2QSynthesis(TransformationPass):
 
         Args:
             dag: the input circuit with fermion-based instructions. Only
-                :class:`~qiskit.dagcircuit.DAGOpNode` with :class:`.FermionGate` instances as their
+                :class:`~qiskit.dagcircuit.DAGOpNode` with :class:`.FermionicGate` instances as their
                 :attr:`~qiskit.dagcircuit.DAGOpNode.op` are supported.
 
         Returns:
@@ -85,8 +85,8 @@ class F2QSynthesis(TransformationPass):
 
         Raises:
             ValueError: when a :class:`~qiskit.dagcircuit.DAGOpNode` is encountered whose
-                :attr:`~qiskit.dagcircuit.DAGOpNode.op` is not of type :class:`.FermionGate`.
-            TypeError: when a :class:`.FermionGate` type is encountered for which no translation
+                :attr:`~qiskit.dagcircuit.DAGOpNode.op` is not of type :class:`.FermionicGate`.
+            TypeError: when a :class:`.FermionicGate` type is encountered for which no translation
                 plugin is present in :attr:`plugins`.
         """
         f2q_layout = cast(F2QLayout, self.property_set["f2q_layout"])
@@ -100,7 +100,7 @@ class F2QSynthesis(TransformationPass):
 
         for node in dag.op_nodes():
             op_type = type(node.op)
-            if not isinstance(node.op, FermionGate):
+            if not isinstance(node.op, FermionicGate):
                 raise ValueError("Encountered an unsupported circuit instruction type: {}", op_type)
 
             plugin = self.plugins.get(op_type, None)

@@ -27,7 +27,7 @@ such as topological and operational constraints of the hardware used to execute 
 We are not going to explain this in more detail here, and instead refer to Qiskit's documentation of
 the :mod:`qiskit.transpiler` module.
 
-The focus here lies on explaining how we achieve the transpilation of a :class:`.FermionCircuit` to
+The focus here lies on explaining how we achieve the transpilation of a :class:`.FermionicCircuit` to
 a :class:`~qiskit.circuit.QuantumCircuit`.
 
 ------
@@ -51,7 +51,7 @@ Optimization
 ^^^^^^^^^^^^
 
 This stage of the transpilation pipeline can implement circuit optimizations while preserving the
-type of circuit to be an instance of :class:`.FermionCircuit`. As such, no qubit information is
+type of circuit to be an instance of :class:`.FermionicCircuit`. As such, no qubit information is
 required (or necessarily available) at this point in the transpilation pipeline.
 
 .. _qiskit_fermions-transpiler-stage-layout:
@@ -67,7 +67,7 @@ qubits, the configured layout must account for that).
 In the general case, fermionic modes are not always encoded with an occupation-basis into the qubit
 register. Consequently, we cannot associate a single fermionic mode with a single qubit.
 Therefore, the user-provided fermion-to-qubit layout (:type:`F2QLayout`) associates
-:type:`~qiskit_fermions.circuit.FermionRegister` instances with
+:type:`~qiskit_fermions.circuit.FermionicRegister` instances with
 :class:`~qiskit.circuit.QuantumRegister` ones.
 
 .. autosummary::
@@ -89,7 +89,7 @@ conceptually similar to Qiskit's :class:`~qiskit.transpiler.passes.HighLevelSynt
 uses various `plugins` for transpiling high-level circuit instructions. For more details, refer to
 the documentation of :class:`.F2QSynthesis` directly.
 
-How a given :class:`.FermionGate` can be synthesized in terms of qubit-based operations will depend
+How a given :class:`.FermionicGate` can be synthesized in terms of qubit-based operations will depend
 on the particular gate type as well as the user-chosen fermion-to-qubit mapping. For more details,
 refer to :ref:`qiskit_fermions-transpiler-passes-synthesis-plugins`.
 
@@ -103,7 +103,7 @@ instance and can continue to use Qiskit's transpilation pipeline as one would us
 
 .. hint::
    Additional transpiler passes for optimizations on the qubit-level that take into account the
-   knowledge of a circuit originating from a :class:`.FermionCircuit` may be added in the future!
+   knowledge of a circuit originating from a :class:`.FermionicCircuit` may be added in the future!
 
 -------------
 Pass Managers
@@ -113,7 +113,7 @@ Qiskit's transpilation process is orchestrated by a :class:`~qiskit.transpiler.P
 In particular, a :class:`~qiskit.transpiler.StagedPassManager` can be used to orchestrate the
 transpilation into stages as explained above.
 
-Here, we are dealing with a change of circuit representation converting :class:`.FermionCircuit`
+Here, we are dealing with a change of circuit representation converting :class:`.FermionicCircuit`
 instances to :external:class:`~qiskit.circuit.QuantumCircuit` ones. As such, this module provides
 its own interfaces of these transpiler pass managers listed below.
 
@@ -126,9 +126,9 @@ its own interfaces of these transpiler pass managers listed below.
 .. autosummary::
    :toctree: ../stubs/
 
-   FermionPassManager
-   FermionStagedPassManager
-   FermionToQubitConverter
+   FermionicPassManager
+   FermionicStagedPassManager
+   FermionicToQubitConverter
 
 Presets
 ^^^^^^^
@@ -143,11 +143,11 @@ from typing import TypeAlias
 
 from qiskit.circuit import QuantumRegister
 
-from qiskit_fermions.circuit import FermionRegister
+from qiskit_fermions.circuit import FermionicRegister
 
-from .passmanager import FermionPassManager, FermionStagedPassManager, FermionToQubitConverter
+from .passmanager import FermionicPassManager, FermionicStagedPassManager, FermionicToQubitConverter
 
-F2QLayout: TypeAlias = dict[FermionRegister, QuantumRegister]
+F2QLayout: TypeAlias = dict[FermionicRegister, QuantumRegister]
 """A mapping of fermionic mode registers to quantum registers.
 
 Users must provide a data structure of this type to the circuit transpiler. In a trivial case, (such
@@ -159,7 +159,7 @@ size of the registers on either side of this mapping may differ.
 
 __all__ = [
     "F2QLayout",
-    "FermionPassManager",
-    "FermionStagedPassManager",
-    "FermionToQubitConverter",
+    "FermionicPassManager",
+    "FermionicStagedPassManager",
+    "FermionicToQubitConverter",
 ]

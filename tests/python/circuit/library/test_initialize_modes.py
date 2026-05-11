@@ -15,15 +15,15 @@
 from __future__ import annotations
 
 import numpy as np
-from qiskit_fermions.circuit import FermionCircuit
+from qiskit_fermions.circuit import FermionicCircuit
 from qiskit_fermions.circuit.library import InitializeModes
 
 
 def _test_initialize_modes(occupation):
-    num_fermions = len(occupation)
+    num_modes = len(occupation)
     init = InitializeModes(occupation)
-    circ = FermionCircuit(num_fermions)
-    circ.append(init, circ.fermions)
+    circ = FermionicCircuit(num_modes)
+    circ.append(init, circ.modes)
 
     ops = circ.count_ops()
     assert ops == {"InitializeModes": 1}

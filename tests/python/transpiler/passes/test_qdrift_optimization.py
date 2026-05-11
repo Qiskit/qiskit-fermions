@@ -17,29 +17,29 @@ from __future__ import annotations
 from pathlib import Path
 
 import numpy as np
-from qiskit_fermions.circuit import FermionCircuit
+from qiskit_fermions.circuit import FermionicCircuit
 from qiskit_fermions.circuit.library import Evolution
 from qiskit_fermions.operators import FermionOperator
 from qiskit_fermions.operators.grouping import group_terms_by_electronic_structure
 from qiskit_fermions.operators.library import FCIDump
 from qiskit_fermions.transpiler.passes import QDriftTrotterization
-from qiskit_fermions.transpiler.passmanager import FermionPassManager
+from qiskit_fermions.transpiler.passmanager import FermionicPassManager
 
 
 def test_qdrift_optimization_no_groups(subtests):
     file_path = Path(__file__).parent / "../../../h2.fcidump"
     fcidump = FCIDump.from_file(str(file_path))
-    num_fermions = 2 * fcidump.norb
+    num_modes = 2 * fcidump.norb
     hamil = FermionOperator.from_fcidump(fcidump)
     time = 1.5
-    circ = FermionCircuit(num_fermions)
-    evo = Evolution(num_fermions, hamil, time=time)
-    circ.append(evo, circ.fermions)
+    circ = FermionicCircuit(num_modes)
+    evo = Evolution(num_modes, hamil, time=time)
+    circ.append(evo, circ.modes)
 
     with subtests.test("num_terms=4"):
         num_terms = 4
         qdrift = QDriftTrotterization(num_terms)
-        pm = FermionPassManager(qdrift)
+        pm = FermionicPassManager(qdrift)
 
         qdrift_circ = pm.run(circ)
         assert qdrift_circ.count_ops() == {"Evolution": num_terms}
@@ -47,7 +47,7 @@ def test_qdrift_optimization_no_groups(subtests):
     with subtests.test("num_terms=6"):
         num_terms = 6
         qdrift = QDriftTrotterization(num_terms)
-        pm = FermionPassManager(qdrift)
+        pm = FermionicPassManager(qdrift)
 
         qdrift_circ = pm.run(circ)
         assert qdrift_circ.count_ops() == {"Evolution": num_terms}
@@ -55,21 +55,21 @@ def test_qdrift_optimization_no_groups(subtests):
     with subtests.test("rng seed"):
         num_terms = 2
         qdrift = QDriftTrotterization(num_terms, rng=42)
-        pm = FermionPassManager(qdrift)
+        pm = FermionicPassManager(qdrift)
 
         qdrift_circ = pm.run(circ)
         assert qdrift_circ.count_ops() == {"Evolution": num_terms}
 
         expected_gates = [
             Evolution(
-                num_fermions,
+                num_modes,
                 FermionOperator.from_terms(
                     [(((True, 0), (True, 1), (False, 1), (False, 0)), 0.3322908651276483)]
                 ),
                 time=8.273087572037902,
             ),
             Evolution(
-                num_fermions,
+                num_modes,
                 FermionOperator.from_terms(
                     [(((True, 2), (True, 0), (False, 0), (False, 2)), 0.33785507740175824)]
                 ),
@@ -84,21 +84,21 @@ def test_qdrift_optimization_no_groups(subtests):
     with subtests.test("rng seed"):
         num_terms = 2
         qdrift = QDriftTrotterization(num_terms, rng=np.random.default_rng(43))
-        pm = FermionPassManager(qdrift)
+        pm = FermionicPassManager(qdrift)
 
         qdrift_circ = pm.run(circ)
         assert qdrift_circ.count_ops() == {"Evolution": num_terms}
 
         expected_gates = [
             Evolution(
-                num_fermions,
+                num_modes,
                 FermionOperator.from_terms(
                     [(((True, 1), (True, 0), (False, 0), (False, 1)), 0.3322908651276483)]
                 ),
                 time=8.273087572037902,
             ),
             Evolution(
-                num_fermions,
+                num_modes,
                 FermionOperator.from_terms([((), 0.7199689944489797)]),
                 time=8.273087572037902,
             ),
@@ -112,24 +112,24 @@ def test_qdrift_optimization_no_groups(subtests):
 def test_qdrift_optimization_with_groups():
     file_path = Path(__file__).parent / "../../../h2.fcidump"
     fcidump = FCIDump.from_file(str(file_path))
-    num_fermions = 2 * fcidump.norb
+    num_modes = 2 * fcidump.norb
     hamil = FermionOperator.from_fcidump(fcidump)
-    group_terms_by_electronic_structure(hamil, num_fermions)
+    group_terms_by_electronic_structure(hamil, num_modes)
     time = 1.5
-    circ = FermionCircuit(num_fermions)
-    evo = Evolution(num_fermions, hamil, time=time)
-    circ.append(evo, circ.fermions)
+    circ = FermionicCircuit(num_modes)
+    evo = Evolution(num_modes, hamil, time=time)
+    circ.append(evo, circ.modes)
 
     num_terms = 2
     qdrift = QDriftTrotterization(num_terms, rng=42)
-    pm = FermionPassManager(qdrift)
+    pm = FermionicPassManager(qdrift)
 
     qdrift_circ = pm.run(circ)
     assert qdrift_circ.count_ops() == {"Evolution": num_terms}
 
     expected_gates = [
         Evolution(
-            num_fermions,
+            num_modes,
             FermionOperator.from_terms(
                 [
                     (((True, 1), (True, 2), (False, 3), (False, 0)), 0.09046559989211567),
@@ -139,7 +139,7 @@ def test_qdrift_optimization_with_groups():
             time=6.036695974299787,
         ),
         Evolution(
-            num_fermions,
+            num_modes,
             FermionOperator.from_terms([(((True, 1), (False, 1)), -0.4718960072811406)]),
             time=6.036695974299787,
         ),

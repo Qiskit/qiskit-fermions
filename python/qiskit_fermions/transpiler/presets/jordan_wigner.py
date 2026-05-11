@@ -17,7 +17,7 @@ from qiskit.transpiler import generate_preset_pass_manager
 from qiskit_fermions.circuit.library import Evolution, InitializeModes, OrbitalRotation
 from qiskit_fermions.mappers.library import jordan_wigner
 
-from .. import FermionPassManager, FermionStagedPassManager, FermionToQubitConverter
+from .. import FermionicPassManager, FermionicStagedPassManager, FermionicToQubitConverter
 from ..passes import (
     EvolutionSynthesis,
     F2QSynthesis,
@@ -27,29 +27,29 @@ from ..passes import (
 )
 
 
-def generate_preset_jw_pass_manager(**kwargs) -> FermionStagedPassManager:
+def generate_preset_jw_pass_manager(**kwargs) -> FermionicStagedPassManager:
     """Generates a preset transpiler pipeline based on the :func:`.jordan_wigner` mapping.
 
     Args:
         kwargs: any additional keyword arguments are forwarded to
             :external:func:`~qiskit.transpiler.generate_preset_pass_manager` whose output is used
-            for the ``quantum`` stage of the resulting :class:`.FermionStagedPassManager`.
+            for the ``quantum`` stage of the resulting :class:`.FermionicStagedPassManager`.
 
     Returns:
         The preset staged fermion-to-qubit transpiler pipeline.
     """
-    optimization = FermionPassManager()
+    optimization = FermionicPassManager()
 
-    layout = FermionPassManager(TrivialF2QLayout())
+    layout = FermionicPassManager(TrivialF2QLayout())
 
     synth = F2QSynthesis()
     synth.plugins[Evolution] = EvolutionSynthesis(jordan_wigner)  # type: ignore[arg-type]
     synth.plugins[InitializeModes] = InitializeModesSynthesis()
     synth.plugins[OrbitalRotation] = OrbitalRotationSynthesis()
 
-    synthesis = FermionToQubitConverter(synth)
+    synthesis = FermionicToQubitConverter(synth)
 
-    pm = FermionStagedPassManager()
+    pm = FermionicStagedPassManager()
     pm.optimization = optimization
     pm.layout = layout
     pm.synthesis = synthesis

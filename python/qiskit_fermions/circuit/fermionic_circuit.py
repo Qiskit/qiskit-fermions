@@ -10,7 +10,7 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
-"""FermionCircuit."""
+"""FermionicCircuit."""
 
 from __future__ import annotations
 
@@ -20,14 +20,14 @@ from typing import TYPE_CHECKING, Any, cast
 
 from qiskit.circuit import Instruction, QuantumCircuit, QuantumRegister
 
-from . import Fermion, FermionSpecifier
-from .fermion_gate import FermionGate
+from . import FermionicMode, FermionicSpecifier
+from .fermionic_gate import FermionicGate
 
 if TYPE_CHECKING:
-    from . import FermionRegister
+    from . import FermionicRegister
 
 
-class FermionCircuit:
+class FermionicCircuit:
     """A wrapper around :class:`~qiskit.circuit.QuantumCircuit` for expressing fermionic circuits.
 
     This class maintains a reduced API compared to the full API of the underlying
@@ -36,30 +36,30 @@ class FermionCircuit:
     well-defined operation in the general case.
     """
 
-    def __init__(self, num_fermions: int) -> None:
-        """Initializes a FermionCircuit instance.
+    def __init__(self, num_modes: int) -> None:
+        """Initializes a FermionicCircuit instance.
 
         Args:
-            num_fermions: the number of fermionic modes on which this circuit acts.
+            num_modes: the number of fermionic modes on which this circuit acts.
         """
-        self.register: FermionRegister = QuantumRegister(num_fermions, "f")
-        """The inner circuit's :type:`~qiskit_fermions.circuit.FermionRegister`."""
+        self.register: FermionicRegister = QuantumRegister(num_modes, "f")
+        """The inner circuit's :type:`~qiskit_fermions.circuit.FermionicRegister`."""
         self._inner = QuantumCircuit(self.register)
 
     @property
-    def fermions(self) -> list[Fermion]:
-        """The fermionic mode `bits` that this circuit acts upon."""
-        return cast(list[Fermion], self._inner.qubits)
+    def modes(self) -> list[FermionicMode]:
+        """The fermionic mode ``bits`` that this circuit acts upon."""
+        return cast(list[FermionicMode], self._inner.qubits)
 
     def append(
         self,
-        gate: FermionGate,
-        fargs: FermionSpecifier,
+        gate: FermionicGate,
+        fargs: FermionicSpecifier,
         cargs: None = None,
         *,
         copy: bool = True,
     ) -> None:
-        """Appends a :class:`.FermionGate` to this circuit.
+        """Appends a :class:`.FermionicGate` to this circuit.
 
         Args:
             gate: the fermionic gate to apply.
@@ -72,9 +72,9 @@ class FermionCircuit:
             copy: forwarded to :meth:`~qiskit.circuit.QuantumCircuit.append`.
 
         Raises:
-            ValueError: if the provided ``gate`` is not an instance of :class:`.FermionGate`.
+            ValueError: if the provided ``gate`` is not an instance of :class:`.FermionicGate`.
         """
-        if not isinstance(gate, FermionGate):
+        if not isinstance(gate, FermionicGate):
             raise ValueError("Unsupported instruction type: %s", type(gate))
         self._inner.append(gate, fargs, cargs, copy=copy)
 
@@ -88,10 +88,10 @@ class FermionCircuit:
             str | type[Instruction] | Sequence[str | type[Instruction]] | None
         ) = None,
         reps: int = 1,
-    ) -> FermionCircuit:
+    ) -> FermionicCircuit:
         """Re-exposes :external:meth:`~qiskit.circuit.QuantumCircuit.decompose`."""
         inner_decomposed = self._inner.decompose(gates_to_decompose=gates_to_decompose, reps=reps)
-        out = FermionCircuit(len(self.register))
+        out = FermionicCircuit(len(self.register))
         out.register = self.register
         out._inner = inner_decomposed
         return out
