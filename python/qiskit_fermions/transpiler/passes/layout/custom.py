@@ -48,6 +48,6 @@ class CustomF2QLayout(AnalysisPass):
         """Runs this analysis pass.
 
         Args:
-            dag: the DAG circuit representation of a :class:`.FermionCircuit`.
+            dag: the DAG circuit representation of a :class:`.FermionicCircuit`.
         """
         self.property_set["f2q_layout"] = self.layout

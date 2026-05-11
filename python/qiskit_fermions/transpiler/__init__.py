@@ -27,7 +27,7 @@ such as topological and operational constraints of the hardware used to execute 
 We are not going to explain this in more detail here, and instead refer to Qiskit's documentation of
 the :mod:`qiskit.transpiler` module.
 
-The focus here lies on explaining how we achieve the transpilation of a :class:`.FermionCircuit` to
+The focus here lies on explaining how we achieve the transpilation of a :class:`.FermionicCircuit` to
 a :class:`~qiskit.circuit.QuantumCircuit`.
 
 ------
@@ -51,7 +51,7 @@ Optimization
 ^^^^^^^^^^^^
 
 This stage of the transpilation pipeline can implement circuit optimizations while preserving the
-type of circuit to be an instance of :class:`.FermionCircuit`. As such, no qubit information is
+type of circuit to be an instance of :class:`.FermionicCircuit`. As such, no qubit information is
 required (or necessarily available) at this point in the transpilation pipeline.
 
 .. _qiskit_fermions-transpiler-stage-layout:
@@ -103,7 +103,7 @@ instance and can continue to use Qiskit's transpilation pipeline as one would us
 
 .. hint::
    Additional transpiler passes for optimizations on the qubit-level that take into account the
-   knowledge of a circuit originating from a :class:`.FermionCircuit` may be added in the future!
+   knowledge of a circuit originating from a :class:`.FermionicCircuit` may be added in the future!
 
 -------------
 Pass Managers
@@ -113,7 +113,7 @@ Qiskit's transpilation process is orchestrated by a :class:`~qiskit.transpiler.P
 In particular, a :class:`~qiskit.transpiler.StagedPassManager` can be used to orchestrate the
 transpilation into stages as explained above.
 
-Here, we are dealing with a change of circuit representation converting :class:`.FermionCircuit`
+Here, we are dealing with a change of circuit representation converting :class:`.FermionicCircuit`
 instances to :external:class:`~qiskit.circuit.QuantumCircuit` ones. As such, this module provides
 its own interfaces of these transpiler pass managers listed below.
 

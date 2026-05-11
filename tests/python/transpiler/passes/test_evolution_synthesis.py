@@ -15,7 +15,7 @@
 from __future__ import annotations
 
 from qiskit.circuit.library import PauliEvolutionGate
-from qiskit_fermions.circuit import FermionCircuit
+from qiskit_fermions.circuit import FermionicCircuit
 from qiskit_fermions.circuit.library import Evolution
 from qiskit_fermions.mappers.library import jordan_wigner
 from qiskit_fermions.operators import FermionOperator
@@ -38,7 +38,7 @@ def test_evolution_gate_synthesis():
     )
     time = 1.5
     num_modes = 4
-    circ = FermionCircuit(num_modes)
+    circ = FermionicCircuit(num_modes)
     evo = Evolution(num_modes, hamil, time=time)
     circ.append(evo, circ.fermions)
 
@@ -70,7 +70,7 @@ def test_custom_qubit_ordering():
     )
     time = 1.5
     num_modes = 4
-    circ = FermionCircuit(num_modes)
+    circ = FermionicCircuit(num_modes)
     evo = Evolution(num_modes, hamil, time=time)
     circ.append(evo, circ.fermions)
 

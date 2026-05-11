@@ -16,7 +16,7 @@ from __future__ import annotations
 
 from qiskit.circuit import QuantumCircuit
 from qiskit.quantum_info import Statevector
-from qiskit_fermions.circuit import FermionCircuit
+from qiskit_fermions.circuit import FermionicCircuit
 from qiskit_fermions.circuit.library import InitializeModes
 from qiskit_fermions.transpiler import FermionPassManager, FermionStagedPassManager
 from qiskit_fermions.transpiler.passes import (
@@ -30,7 +30,7 @@ from qiskit_fermions.transpiler.passmanager import FermionToQubitConverter
 def test_initialize_modes_global_gate_synthesis():
     occupation = [True, False, True, False]
     num_modes = len(occupation)
-    circ = FermionCircuit(num_modes)
+    circ = FermionicCircuit(num_modes)
     init = InitializeModes(occupation)
     circ.append(init, circ.fermions)
 
@@ -53,7 +53,7 @@ def test_initialize_modes_global_gate_synthesis():
 def test_initialize_modes_local_gate_synthesis():
     occupation = [True, False]
     num_modes = 4
-    circ = FermionCircuit(num_modes)
+    circ = FermionicCircuit(num_modes)
     init = InitializeModes(occupation)
     circ.append(init, circ.fermions[1:3])
 

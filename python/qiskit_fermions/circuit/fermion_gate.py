@@ -23,7 +23,7 @@ class FermionGate(Gate):
     """The base class for all fermionic gates.
 
     To ensure consistency only subclasses of this gate class can be added to instances of
-    :class:`.FermionCircuit`. As such, this class (mostly) serves as a type (for the time being).
+    :class:`.FermionicCircuit`. As such, this class (mostly) serves as a type (for the time being).
 
     .. caution::
        Since this is a subclass of :class:`~qiskit.circuit.Gate` the documentation of its methods

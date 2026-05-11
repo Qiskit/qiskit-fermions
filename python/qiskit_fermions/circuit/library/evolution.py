@@ -38,9 +38,9 @@ class Evolution(FermionGate):
         )
 
     def _define(self) -> None:
-        from qiskit_fermions.circuit import FermionCircuit
+        from qiskit_fermions.circuit import FermionicCircuit
 
-        definition = FermionCircuit(self.num_modes)
+        definition = FermionicCircuit(self.num_modes)
 
         # when the operator being evolved has groups use those for the decomposition, otherwise
         # decompose into all individual terms

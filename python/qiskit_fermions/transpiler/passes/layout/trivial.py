@@ -34,7 +34,7 @@ class TrivialF2QLayout(AnalysisPass):
         """Runs this analysis pass.
 
         Args:
-            dag: the DAG circuit representation of a :class:`.FermionCircuit`.
+            dag: the DAG circuit representation of a :class:`.FermionicCircuit`.
         """
         layout: F2QLayout = {}
         for qreg in dag.qregs.values():

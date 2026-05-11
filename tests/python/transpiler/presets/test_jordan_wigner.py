@@ -18,7 +18,7 @@ import numpy as np
 from qiskit import QuantumCircuit
 from qiskit.circuit.library import PauliEvolutionGate, XXPlusYYGate
 from qiskit.quantum_info import Statevector
-from qiskit_fermions.circuit import FermionCircuit
+from qiskit_fermions.circuit import FermionicCircuit
 from qiskit_fermions.circuit.library import Evolution, InitializeModes, OrbitalRotation
 from qiskit_fermions.mappers.library import jordan_wigner
 from qiskit_fermions.operators import FermionOperator
@@ -47,7 +47,7 @@ def test_preset_jordan_wigner():
     rot_mat[3, 2] = 1
     orb_rot = OrbitalRotation(rot_mat)
 
-    circ = FermionCircuit(num_modes)
+    circ = FermionicCircuit(num_modes)
     circ.append(init, circ.fermions)
     circ.append(orb_rot, circ.fermions)
     circ.append(evo, circ.fermions)

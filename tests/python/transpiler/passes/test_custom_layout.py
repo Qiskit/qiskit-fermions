@@ -19,7 +19,7 @@ from functools import partial
 
 from qiskit.circuit import QuantumRegister
 from qiskit.quantum_info import SparseObservable
-from qiskit_fermions.circuit import FermionCircuit
+from qiskit_fermions.circuit import FermionicCircuit
 from qiskit_fermions.circuit.library import Evolution
 from qiskit_fermions.operators import MajoranaOperator
 from qiskit_fermions.transpiler import FermionStagedPassManager
@@ -323,7 +323,7 @@ def test_custom_layout():
     }
     mapper_fn = partial(derby_klassen, initial_state=initial_state, edge_face_map=edge_face_map)
 
-    circ = FermionCircuit(num_modes)
+    circ = FermionicCircuit(num_modes)
     circ.append(Evolution(num_modes, hamil), circ.fermions)
 
     layout = CustomF2QLayout({circ.register: QuantumRegister(num_qubits)})

@@ -10,7 +10,7 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
-"""FermionCircuit."""
+"""FermionicCircuit."""
 
 from __future__ import annotations
 
@@ -27,7 +27,7 @@ if TYPE_CHECKING:
     from . import FermionicRegister
 
 
-class FermionCircuit:
+class FermionicCircuit:
     """A wrapper around :class:`~qiskit.circuit.QuantumCircuit` for expressing fermionic circuits.
 
     This class maintains a reduced API compared to the full API of the underlying
@@ -37,7 +37,7 @@ class FermionCircuit:
     """
 
     def __init__(self, num_modes: int) -> None:
-        """Initializes a FermionCircuit instance.
+        """Initializes a FermionicCircuit instance.
 
         Args:
             num_modes: the number of fermionic modes on which this circuit acts.
@@ -88,10 +88,10 @@ class FermionCircuit:
             str | type[Instruction] | Sequence[str | type[Instruction]] | None
         ) = None,
         reps: int = 1,
-    ) -> FermionCircuit:
+    ) -> FermionicCircuit:
         """Re-exposes :external:meth:`~qiskit.circuit.QuantumCircuit.decompose`."""
         inner_decomposed = self._inner.decompose(gates_to_decompose=gates_to_decompose, reps=reps)
-        out = FermionCircuit(len(self.register))
+        out = FermionicCircuit(len(self.register))
         out.register = self.register
         out._inner = inner_decomposed
         return out

@@ -17,7 +17,7 @@ from __future__ import annotations
 import pytest
 from qiskit.circuit import QuantumCircuit
 from qiskit.transpiler import PassManager
-from qiskit_fermions.circuit import FermionCircuit
+from qiskit_fermions.circuit import FermionicCircuit
 from qiskit_fermions.circuit.library import Evolution
 from qiskit_fermions.operators import FermionOperator
 from qiskit_fermions.transpiler.passes import F2QSynthesis, TrivialF2QLayout
@@ -40,7 +40,7 @@ def test_missing_plugin():
     )
     time = 1.5
     num_modes = 4
-    circ = FermionCircuit(num_modes)
+    circ = FermionicCircuit(num_modes)
     evo = Evolution(num_modes, hamil, time=time)
     circ.append(evo, circ.fermions)
 

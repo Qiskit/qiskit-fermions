@@ -17,7 +17,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import numpy as np
-from qiskit_fermions.circuit import FermionCircuit
+from qiskit_fermions.circuit import FermionicCircuit
 from qiskit_fermions.circuit.library import Evolution
 from qiskit_fermions.operators import FermionOperator
 from qiskit_fermions.operators.grouping import group_terms_by_electronic_structure
@@ -32,7 +32,7 @@ def test_qdrift_optimization_no_groups(subtests):
     num_modes = 2 * fcidump.norb
     hamil = FermionOperator.from_fcidump(fcidump)
     time = 1.5
-    circ = FermionCircuit(num_modes)
+    circ = FermionicCircuit(num_modes)
     evo = Evolution(num_modes, hamil, time=time)
     circ.append(evo, circ.fermions)
 
@@ -116,7 +116,7 @@ def test_qdrift_optimization_with_groups():
     hamil = FermionOperator.from_fcidump(fcidump)
     group_terms_by_electronic_structure(hamil, num_modes)
     time = 1.5
-    circ = FermionCircuit(num_modes)
+    circ = FermionicCircuit(num_modes)
     evo = Evolution(num_modes, hamil, time=time)
     circ.append(evo, circ.fermions)
 
