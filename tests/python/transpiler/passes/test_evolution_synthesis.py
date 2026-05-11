@@ -40,7 +40,7 @@ def test_evolution_gate_synthesis():
     num_modes = 4
     circ = FermionicCircuit(num_modes)
     evo = Evolution(num_modes, hamil, time=time)
-    circ.append(evo, circ.fermions)
+    circ.append(evo, circ.modes)
 
     synth = F2QSynthesis()
     synth.plugins[Evolution] = EvolutionSynthesis(jordan_wigner)
@@ -72,7 +72,7 @@ def test_custom_qubit_ordering():
     num_modes = 4
     circ = FermionicCircuit(num_modes)
     evo = Evolution(num_modes, hamil, time=time)
-    circ.append(evo, circ.fermions)
+    circ.append(evo, circ.modes)
 
     custom_qubit_ordering = [0, 2, 1, 3]
 

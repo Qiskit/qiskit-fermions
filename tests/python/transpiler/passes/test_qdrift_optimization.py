@@ -34,7 +34,7 @@ def test_qdrift_optimization_no_groups(subtests):
     time = 1.5
     circ = FermionicCircuit(num_modes)
     evo = Evolution(num_modes, hamil, time=time)
-    circ.append(evo, circ.fermions)
+    circ.append(evo, circ.modes)
 
     with subtests.test("num_terms=4"):
         num_terms = 4
@@ -118,7 +118,7 @@ def test_qdrift_optimization_with_groups():
     time = 1.5
     circ = FermionicCircuit(num_modes)
     evo = Evolution(num_modes, hamil, time=time)
-    circ.append(evo, circ.fermions)
+    circ.append(evo, circ.modes)
 
     num_terms = 2
     qdrift = QDriftTrotterization(num_terms, rng=42)

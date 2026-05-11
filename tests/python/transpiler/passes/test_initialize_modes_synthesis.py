@@ -32,7 +32,7 @@ def test_initialize_modes_global_gate_synthesis():
     num_modes = len(occupation)
     circ = FermionicCircuit(num_modes)
     init = InitializeModes(occupation)
-    circ.append(init, circ.fermions)
+    circ.append(init, circ.modes)
 
     synth = F2QSynthesis()
     synth.plugins[InitializeModes] = InitializeModesSynthesis()
@@ -55,7 +55,7 @@ def test_initialize_modes_local_gate_synthesis():
     num_modes = 4
     circ = FermionicCircuit(num_modes)
     init = InitializeModes(occupation)
-    circ.append(init, circ.fermions[1:3])
+    circ.append(init, circ.modes[1:3])
 
     synth = F2QSynthesis()
     synth.plugins[InitializeModes] = InitializeModesSynthesis()

@@ -32,7 +32,7 @@ def test_orbital_rotation_global_gate_synthesis():
     rotation_unitary = random_unitary(num_modes, seed=42)
     circ = FermionicCircuit(num_modes)
     rot = OrbitalRotation(rotation_unitary)
-    circ.append(rot, circ.fermions)
+    circ.append(rot, circ.modes)
 
     synth = F2QSynthesis()
     synth.plugins[OrbitalRotation] = OrbitalRotationSynthesis()
@@ -53,9 +53,9 @@ def test_initialize_modes_local_gate_synthesis():
     rotation_unitary_b = random_unitary(num_modes // 2, seed=43)
     circ = FermionicCircuit(num_modes)
     rot_a = OrbitalRotation(rotation_unitary_a)
-    circ.append(rot_a, circ.fermions[:3])
+    circ.append(rot_a, circ.modes[:3])
     rot_b = OrbitalRotation(rotation_unitary_b)
-    circ.append(rot_b, circ.fermions[3:])
+    circ.append(rot_b, circ.modes[3:])
 
     synth = F2QSynthesis()
     synth.plugins[OrbitalRotation] = OrbitalRotationSynthesis()

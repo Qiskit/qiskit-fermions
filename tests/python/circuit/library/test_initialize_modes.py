@@ -23,7 +23,7 @@ def _test_initialize_modes(occupation):
     num_modes = len(occupation)
     init = InitializeModes(occupation)
     circ = FermionicCircuit(num_modes)
-    circ.append(init, circ.fermions)
+    circ.append(init, circ.modes)
 
     ops = circ.count_ops()
     assert ops == {"InitializeModes": 1}

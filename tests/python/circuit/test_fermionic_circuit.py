@@ -22,4 +22,4 @@ from qiskit_fermions.circuit import FermionicCircuit
 def test_invalid_gate():
     circ = FermionicCircuit(1)
     with pytest.raises(ValueError):
-        circ.append(XGate(), circ.fermions)
+        circ.append(XGate(), circ.modes)

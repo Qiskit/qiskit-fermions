@@ -324,7 +324,7 @@ def test_custom_layout():
     mapper_fn = partial(derby_klassen, initial_state=initial_state, edge_face_map=edge_face_map)
 
     circ = FermionicCircuit(num_modes)
-    circ.append(Evolution(num_modes, hamil), circ.fermions)
+    circ.append(Evolution(num_modes, hamil), circ.modes)
 
     layout = CustomF2QLayout({circ.register: QuantumRegister(num_qubits)})
 

@@ -48,9 +48,9 @@ def test_preset_jordan_wigner():
     orb_rot = OrbitalRotation(rot_mat)
 
     circ = FermionicCircuit(num_modes)
-    circ.append(init, circ.fermions)
-    circ.append(orb_rot, circ.fermions)
-    circ.append(evo, circ.fermions)
+    circ.append(init, circ.modes)
+    circ.append(orb_rot, circ.modes)
+    circ.append(evo, circ.modes)
 
     pm = generate_preset_jw_pass_manager()
 

@@ -32,7 +32,7 @@ def test_evolution_gate():
     num_modes = 4
     circ = FermionicCircuit(num_modes)
     evo = Evolution(num_modes, hamil, time=time)
-    circ.append(evo, circ.fermions)
+    circ.append(evo, circ.modes)
 
     ops = circ.count_ops()
     assert ops == {"Evolution": 1}
@@ -51,7 +51,7 @@ def test_evolution_gate_decompose():
     num_modes = 4
     circ = FermionicCircuit(num_modes)
     evo = Evolution(num_modes, hamil, time=time)
-    circ.append(evo, circ.fermions)
+    circ.append(evo, circ.modes)
 
     decomposed = circ.decompose()
 
@@ -78,7 +78,7 @@ def test_evolution_gate_decompose_with_groups():
     num_modes = 4
     circ = FermionicCircuit(num_modes)
     evo = Evolution(num_modes, hamil, time=time)
-    circ.append(evo, circ.fermions)
+    circ.append(evo, circ.modes)
 
     decomposed = circ.decompose()
 

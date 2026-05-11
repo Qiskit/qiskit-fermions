@@ -87,7 +87,7 @@ components to do so, in a way that fits naturally with Qiskit's conventions.
        >>> evo_gate = Evolution(num_modes, hamil, time)
        >>>
        >>> circ = FermionicCircuit(num_modes)
-       >>> circ.append(evo_gate, circ.fermions)
+       >>> circ.append(evo_gate, circ.modes)
 
     .. code-block:: c
 

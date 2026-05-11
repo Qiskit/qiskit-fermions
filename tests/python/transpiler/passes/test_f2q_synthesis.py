@@ -42,7 +42,7 @@ def test_missing_plugin():
     num_modes = 4
     circ = FermionicCircuit(num_modes)
     evo = Evolution(num_modes, hamil, time=time)
-    circ.append(evo, circ.fermions)
+    circ.append(evo, circ.modes)
 
     pm = FermionicStagedPassManager()
     pm.layout = FermionicPassManager(TrivialF2QLayout())

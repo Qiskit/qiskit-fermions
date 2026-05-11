@@ -68,7 +68,7 @@ class Evolution(FermionicGate):
 
             definition.append(
                 Evolution(num_active, relabeled, time=self.params[0]),
-                [definition.fermions[idx] for idx in sorted(active)],
+                [definition.modes[idx] for idx in sorted(active)],
             )
 
         self._definition = definition._inner

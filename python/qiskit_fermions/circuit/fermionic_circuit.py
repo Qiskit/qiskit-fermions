@@ -47,8 +47,8 @@ class FermionicCircuit:
         self._inner = QuantumCircuit(self.register)
 
     @property
-    def fermions(self) -> list[FermionicMode]:
-        """The fermionic mode `bits` that this circuit acts upon."""
+    def modes(self) -> list[FermionicMode]:
+        """The fermionic mode ``bits`` that this circuit acts upon."""
         return cast(list[FermionicMode], self._inner.qubits)
 
     def append(
