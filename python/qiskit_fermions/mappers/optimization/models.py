@@ -1,3 +1,15 @@
+# This code is a Qiskit project.
+#
+# (C) Copyright IBM 2026.
+#
+# This code is licensed under the Apache License, Version 2.0. You may
+# obtain a copy of this license in the LICENSE.txt file in the root directory
+# of this source tree or at https://www.apache.org/licenses/LICENSE-2.0.
+#
+# Any modifications or derivative works of this code must retain this
+# copyright notice, and modified files need to carry a notice indicating
+# that they have been altered from the originals.
+
 """Fermionic mode ordering optimization utilities.
 
 This module provides a mixed-integer optimization routine that computes an index
@@ -73,7 +85,7 @@ def build_excitation_span_optimization_model(
     i2 = []
     i4 = []
     for ind in excitations:
-        deduplicated = []
+        deduplicated: list[int] = []
         ignore = set()
         for i in ind:
             if i in ignore:
@@ -106,9 +118,7 @@ def build_excitation_span_optimization_model(
     model.P4 = Set(initialize=i4)
 
     # Variables
-    model.x = Var(
-        model.I, model.J, within=Binary
-    )  # x[i,j] == 1 if mode i placed at position j
+    model.x = Var(model.I, model.J, within=Binary)  # x[i,j] == 1 if mode i placed at position j
     model.y = Var(model.I, within=Reals)
 
     model.s = Var(model.P2, within=Reals)
@@ -137,18 +147,10 @@ def build_excitation_span_optimization_model(
 
     # Constraints for P2
     for i, j in i2:
-        model.add_component(
-            f"s_le_y_{i}_{j}_1", Constraint(expr=model.s[(i, j)] <= model.y[i])
-        )
-        model.add_component(
-            f"s_le_y_{i}_{j}_2", Constraint(expr=model.s[(i, j)] <= model.y[j])
-        )
-        model.add_component(
-            f"t_ge_y_{i}_{j}_1", Constraint(expr=model.t[(i, j)] >= model.y[i])
-        )
-        model.add_component(
-            f"t_ge_y_{i}_{j}_2", Constraint(expr=model.t[(i, j)] >= model.y[j])
-        )
+        model.add_component(f"s_le_y_{i}_{j}_1", Constraint(expr=model.s[(i, j)] <= model.y[i]))
+        model.add_component(f"s_le_y_{i}_{j}_2", Constraint(expr=model.s[(i, j)] <= model.y[j]))
+        model.add_component(f"t_ge_y_{i}_{j}_1", Constraint(expr=model.t[(i, j)] >= model.y[i]))
+        model.add_component(f"t_ge_y_{i}_{j}_2", Constraint(expr=model.t[(i, j)] >= model.y[j]))
         if hasattr(model, "max_obj"):
             model.add_component(
                 f"max_ge_span_{i}_{j}",
@@ -156,7 +158,7 @@ def build_excitation_span_optimization_model(
             )
 
     # Constraints for P4
-    for i, j, k, l in i4:
+    for i, j, k, l in i4:  # noqa: E741
         model.add_component(
             f"u_le_y_{i}_{j}_{k}_{l}_1",
             Constraint(expr=model.u[(i, j, k, l)] <= model.y[i]),
@@ -192,10 +194,7 @@ def build_excitation_span_optimization_model(
         if hasattr(model, "max_obj"):
             model.add_component(
                 f"max_ge_span_{i}_{j}_{k}_{l}",
-                Constraint(
-                    expr=model.max_obj
-                    >= model.v[(i, j, k, l)] - model.u[(i, j, k, l)] + 1
-                ),
+                Constraint(expr=model.max_obj >= model.v[(i, j, k, l)] - model.u[(i, j, k, l)] + 1),
             )
 
     # Average objective expression

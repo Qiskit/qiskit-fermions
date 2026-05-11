@@ -29,7 +29,7 @@ from __future__ import annotations
 
 import pytest
 from pyomo.environ import Constraint, Objective
-from qiskit_fermions.mappers.models import build_excitation_span_optimization_model
+from qiskit_fermions.mappers.optimization.models import build_excitation_span_optimization_model
 
 
 def _set_members(pyomo_set):
