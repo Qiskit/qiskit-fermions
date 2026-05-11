@@ -12,22 +12,24 @@
 
 """Fermionic mode ordering optimization utilities.
 
-This module provides a mixed-integer optimization routine that computes an index
-permutation minimizing excitation spans for fermionic operators when embedded
-into a 1D ordered register. The objective can target:
+This module provides a mixed-integer optimization routine that computes an index permutation
+minimizing excitation spans for fermionic operators when embedded into a 1D ordered register.
+The objective can target:
 - worst-case span ("minmax"),
 - average span ("avg"), or
 - a weighted combination of both ("multi").
 
-The implementation uses Pyomo and is compatible with multiple MILP backends
-(e.g. HiGHS, CPLEX, Gurobi, GLPK, CBC).
+The implementation uses Pyomo and is compatible with multiple MILP backends (e.g. HiGHS, CPLEX,
+Gurobi, GLPK, CBC).
 """
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from typing import TYPE_CHECKING, Literal
 
 import numpy as np
+
 from qiskit_fermions.utils.optionals import HAS_PYOMO
 
 if TYPE_CHECKING:
@@ -35,8 +37,8 @@ if TYPE_CHECKING:
 
 
 @HAS_PYOMO.require_in_call
-def build_excitation_span_optimization_model(
-    excitations: list[tuple[int, int] | tuple[int, int, int, int]],
+def build_excitation_span_minimization_model(
+    excitations: Sequence[tuple[int, int] | tuple[int, int, int, int]],
     num_modes: int,
     *,
     objective: Literal["minmax", "multi", "avg"] = "multi",
@@ -44,36 +46,33 @@ def build_excitation_span_optimization_model(
 ) -> ConcreteModel:
     """Build a Pyomo model for ordering fermionic modes to minimize excitation spans.
 
-    The model constructs a permutation where each original mode index is assigned to
-    exactly one position in a linear ordering. For every 2-mode and 4-mode
-    excitation tuple, the span of occupied positions is minimized according to the
-    chosen objective.
+    The model constructs a permutation where each original mode index is assigned to exactly one
+    position in a linear ordering. For every 2-mode and 4-mode excitation tuple, the span of
+    occupied positions is minimized according to the chosen objective.
 
-    Notes:
-        - Input tuples are preprocessed by canceling indices that occur twice
-          within the same excitation under the function's pair-cancellation
-          logic; tuples reducing to length 0 or 1 are ignored.
-        - Supported (post-cancellation) tuple lengths are 2 and 4.
+    .. note::
+       The ``excitations`` list is pre-processed as follows:
+
+       - indices that occur twice within the same tuple get cancelled
+       - resulting tuples of length 0 or 1 are ignored, therefore not imposing a distance constraint
+         in the resulting minimization model
+       - consequently, only post-processed tuples of length 2 or 4 are expected
 
     Args:
-        excitations (list[tuple[int, int] | tuple[int, int, int, int]]):
-            Sequence of excitation index tuples over fermionic mode indices. After the
-            function's pair-cancellation preprocessing, supported tuple lengths are 2 and 4.
-        num_modes (int):
-            Total number of fermionic modes/orbitals to be ordered (size of the register).
-        objective (Literal["minmax", "multi", "avg"]):
-            Objective mode:
-            - ``"minmax"`` minimizes the maximum excitation span.
-            - ``"avg"`` minimizes the average excitation span.
-            - ``"multi"`` minimizes ``max_span + mix_delta * average_span``.
-        mix_delta (float):
-            Weight used only when ``objective="multi"``.
+        excitations: a sequence of excitation index tuples over fermionic mode indices.
+        num_modes: the total number of fermionic modes to be ordered.
+        objective: the chosen objective mode. This may be one of the following literals:
+            - ``minmax`` minimizes the maximum excitation span.
+            - ``avg`` minimizes the average excitation span.
+            - ``multi`` minimizes ``max_span + mix_delta * average_span``.
+        mix_delta: the mixing weight used by the ``multi`` objective.
 
     Returns:
-        ConcreteModel:
-            A Pyomo ``ConcreteModel`` encoding the permutation variables, span variables,
-            constraints, and objective. Solve this model with a Pyomo solver to obtain an
-            optimized ordering.
+        A Pyomo optimization model encoding the permutation variables, span variables, constraints,
+        and objective. Solve this model with a Pyomo solver to obtain an optimized ordering.
+
+    Raises:
+        ValueError: if a post-processed excitation tuple has length unequal to 2 or 4.
     """
     from pyomo.environ import (
         Binary,
@@ -101,16 +100,18 @@ def build_excitation_span_optimization_model(
                 deduplicated.remove(i)
             else:
                 deduplicated.append(i)
-        if len(deduplicated) <= 1:
-            continue
-        if len(deduplicated) == 3:
-            raise ValueError(
-                f"Unsupported excitation after cancellation: {ind} -> {tuple(deduplicated)}"
-            )
-        if len(deduplicated) == 2:
-            i2 += [tuple(deduplicated)]
-        elif len(deduplicated) == 4:
-            i4 += [tuple(deduplicated)]
+
+        match len(deduplicated):
+            case 0 | 1:
+                continue
+            case 2:
+                i2 += [tuple(deduplicated)]
+            case 4:
+                i4 += [tuple(deduplicated)]
+            case _:
+                raise ValueError(
+                    f"Unsupported excitation after cancellation: {ind} -> {tuple(deduplicated)}"
+                )
 
     i2 = [tuple(a) for a in np.unique(i2, axis=0)]
     i4 = [tuple(a) for a in np.unique(i4, axis=0)]

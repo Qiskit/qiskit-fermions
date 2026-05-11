@@ -25,6 +25,7 @@ Mappers
 
    qiskit_fermions.mappers
    qiskit_fermions.mappers.library
+   qiskit_fermions.mappers.optimization
 
 
 ********

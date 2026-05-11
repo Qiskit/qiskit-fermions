@@ -10,25 +10,25 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
-"""Tests for build_excitation_span_optimization_model.
+"""Tests for build_excitation_span_minimization_model.
 
 These tests focus on deterministic model-construction behavior:
 
-- excitation preprocessing and cancellation of repeated indices
+- excitation pre-processing and cancellation of repeated indices
 - partitioning into 2-body and 4-body excitation sets
 - deduplication of processed excitations
 - creation of index sets, variables, and constraints
 - objective-dependent creation of ``max_obj``
 - edge cases such as empty or fully-ignored excitation input
 
-They intentionally do not test solver output or optimality, since the function
-only constructs a Pyomo model and does not solve it.
+They intentionally do not test solver output or optimality since the function only constructs a
+Pyomo model and does not solve it.
 """
 
 from __future__ import annotations
 
 import pytest
-from qiskit_fermions.mappers.optimization.models import build_excitation_span_optimization_model
+from qiskit_fermions.mappers.optimization import build_excitation_span_minimization_model
 from qiskit_fermions.utils.optionals import HAS_PYOMO
 
 if HAS_PYOMO:
@@ -43,7 +43,7 @@ class TestExcitationSpanOptimizationModel:
         This verifies the denominator fallback path and confirms that the model
         can still be constructed even when both processed excitation sets are empty.
         """
-        model = build_excitation_span_optimization_model([], num_modes=4, objective="avg")
+        model = build_excitation_span_minimization_model([], num_modes=4, objective="avg")
 
         assert list(model.I) == [0, 1, 2, 3]
         assert list(model.J) == [0, 1, 2, 3]
@@ -61,7 +61,7 @@ class TestExcitationSpanOptimizationModel:
         - (1, 1) -> length 0
         - (2, 2, 2) -> length 1 after the implemented cancellation logic
         """
-        model = build_excitation_span_optimization_model(
+        model = build_excitation_span_minimization_model(
             excitations=[(1, 1), (2, 2, 2)],
             num_modes=4,
             objective="avg",
@@ -76,7 +76,7 @@ class TestExcitationSpanOptimizationModel:
         The implementation removes an index if it appears twice, so
         (1, 2, 2, 3) becomes (1, 3).
         """
-        model = build_excitation_span_optimization_model(
+        model = build_excitation_span_minimization_model(
             excitations=[(1, 2, 2, 3)],
             num_modes=4,
             objective="avg",
@@ -87,7 +87,7 @@ class TestExcitationSpanOptimizationModel:
 
     def test_processed_pairs_and_quads_are_partitioned_correctly(self):
         """Place processed 2-body and 4-body terms into the expected sets."""
-        model = build_excitation_span_optimization_model(
+        model = build_excitation_span_minimization_model(
             excitations=[
                 (0, 2),  # stays a pair
                 (0, 1, 2, 3),  # stays a quad
@@ -105,7 +105,7 @@ class TestExcitationSpanOptimizationModel:
         This includes duplicates arising both from identical raw tuples and from
         distinct raw tuples that reduce to the same processed pair.
         """
-        model = build_excitation_span_optimization_model(
+        model = build_excitation_span_minimization_model(
             excitations=[
                 (1, 3),
                 (1, 3),
@@ -120,7 +120,7 @@ class TestExcitationSpanOptimizationModel:
 
     def test_duplicate_processed_quads_are_deduplicated(self):
         """Store each processed 4-body excitation only once."""
-        model = build_excitation_span_optimization_model(
+        model = build_excitation_span_minimization_model(
             excitations=[
                 (0, 1, 2, 3),
                 (0, 1, 2, 3),
@@ -139,7 +139,7 @@ class TestExcitationSpanOptimizationModel:
         length 3 are unsupported.
         """
         with pytest.raises(ValueError):
-            build_excitation_span_optimization_model(
+            build_excitation_span_minimization_model(
                 excitations=[(0, 1, 2)],
                 num_modes=4,
                 objective="avg",
@@ -148,7 +148,7 @@ class TestExcitationSpanOptimizationModel:
     def test_permutation_constraint_blocks_have_expected_size(self):
         """Create one row-sum and one column-sum constraint per mode."""
         num_modes = 5
-        model = build_excitation_span_optimization_model(
+        model = build_excitation_span_minimization_model(
             excitations=[(0, 1)],
             num_modes=num_modes,
             objective="avg",
@@ -160,7 +160,7 @@ class TestExcitationSpanOptimizationModel:
 
     def test_x_and_y_variables_are_indexed_over_expected_sets(self):
         """Index assignment variables consistently with the mode sets."""
-        model = build_excitation_span_optimization_model(
+        model = build_excitation_span_minimization_model(
             excitations=[(0, 1)],
             num_modes=3,
             objective="avg",
@@ -175,7 +175,7 @@ class TestExcitationSpanOptimizationModel:
 
     def test_pair_span_variables_are_created_for_processed_pairs(self):
         """Create s and t variables indexed by the processed pair set."""
-        model = build_excitation_span_optimization_model(
+        model = build_excitation_span_minimization_model(
             excitations=[(0, 2)],
             num_modes=3,
             objective="avg",
@@ -186,7 +186,7 @@ class TestExcitationSpanOptimizationModel:
 
     def test_quad_span_variables_are_created_for_processed_quads(self):
         """Create u and v variables indexed by the processed 4-body set."""
-        model = build_excitation_span_optimization_model(
+        model = build_excitation_span_minimization_model(
             excitations=[(0, 1, 2, 3)],
             num_modes=4,
             objective="avg",
@@ -201,7 +201,7 @@ class TestExcitationSpanOptimizationModel:
         For objective='minmax', the pair-specific span constraints and the
         max-span linking constraint should all be present.
         """
-        model = build_excitation_span_optimization_model(
+        model = build_excitation_span_minimization_model(
             excitations=[(0, 2)],
             num_modes=3,
             objective="minmax",
@@ -215,7 +215,7 @@ class TestExcitationSpanOptimizationModel:
 
     def test_named_constraints_exist_for_quad_when_max_objective_is_used(self):
         """Add all expected named constraints for a processed 4-body term."""
-        model = build_excitation_span_optimization_model(
+        model = build_excitation_span_minimization_model(
             excitations=[(0, 1, 2, 3)],
             num_modes=4,
             objective="minmax",
@@ -229,7 +229,7 @@ class TestExcitationSpanOptimizationModel:
 
     def test_max_obj_exists_for_minmax(self):
         """Create max_obj for the minmax objective."""
-        model = build_excitation_span_optimization_model(
+        model = build_excitation_span_minimization_model(
             excitations=[(0, 1)],
             num_modes=2,
             objective="minmax",
@@ -239,7 +239,7 @@ class TestExcitationSpanOptimizationModel:
 
     def test_max_obj_exists_for_multi(self):
         """Create max_obj for the multi objective."""
-        model = build_excitation_span_optimization_model(
+        model = build_excitation_span_minimization_model(
             excitations=[(0, 1)],
             num_modes=2,
             objective="multi",
@@ -249,7 +249,7 @@ class TestExcitationSpanOptimizationModel:
 
     def test_max_obj_not_created_for_avg(self):
         """Do not create max_obj for the avg objective."""
-        model = build_excitation_span_optimization_model(
+        model = build_excitation_span_minimization_model(
             excitations=[(0, 1)],
             num_modes=2,
             objective="avg",
@@ -260,7 +260,7 @@ class TestExcitationSpanOptimizationModel:
     def test_invalid_objective_raises_value_error(self):
         """Reject unsupported objective values."""
         with pytest.raises(ValueError, match="Unknown objective"):
-            build_excitation_span_optimization_model(
+            build_excitation_span_minimization_model(
                 excitations=[(0, 1)],
                 num_modes=2,
                 objective="not-a-valid-objective",
