@@ -89,7 +89,7 @@ conceptually similar to Qiskit's :class:`~qiskit.transpiler.passes.HighLevelSynt
 uses various `plugins` for transpiling high-level circuit instructions. For more details, refer to
 the documentation of :class:`.F2QSynthesis` directly.
 
-How a given :class:`.FermionGate` can be synthesized in terms of qubit-based operations will depend
+How a given :class:`.FermionicGate` can be synthesized in terms of qubit-based operations will depend
 on the particular gate type as well as the user-chosen fermion-to-qubit mapping. For more details,
 refer to :ref:`qiskit_fermions-transpiler-passes-synthesis-plugins`.
 

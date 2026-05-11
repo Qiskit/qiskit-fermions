@@ -21,7 +21,7 @@ from typing import TYPE_CHECKING, Any, cast
 from qiskit.circuit import Instruction, QuantumCircuit, QuantumRegister
 
 from . import FermionicMode, FermionicSpecifier
-from .fermion_gate import FermionGate
+from .fermionic_gate import FermionicGate
 
 if TYPE_CHECKING:
     from . import FermionicRegister
@@ -53,13 +53,13 @@ class FermionicCircuit:
 
     def append(
         self,
-        gate: FermionGate,
+        gate: FermionicGate,
         fargs: FermionicSpecifier,
         cargs: None = None,
         *,
         copy: bool = True,
     ) -> None:
-        """Appends a :class:`.FermionGate` to this circuit.
+        """Appends a :class:`.FermionicGate` to this circuit.
 
         Args:
             gate: the fermionic gate to apply.
@@ -72,9 +72,9 @@ class FermionicCircuit:
             copy: forwarded to :meth:`~qiskit.circuit.QuantumCircuit.append`.
 
         Raises:
-            ValueError: if the provided ``gate`` is not an instance of :class:`.FermionGate`.
+            ValueError: if the provided ``gate`` is not an instance of :class:`.FermionicGate`.
         """
-        if not isinstance(gate, FermionGate):
+        if not isinstance(gate, FermionicGate):
             raise ValueError("Unsupported instruction type: %s", type(gate))
         self._inner.append(gate, fargs, cargs, copy=copy)
 

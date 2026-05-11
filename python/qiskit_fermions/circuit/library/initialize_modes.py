@@ -18,10 +18,10 @@ from collections.abc import Sequence
 
 import numpy as np
 
-from .. import FermionGate
+from .. import FermionicGate
 
 
-class InitializeModes(FermionGate):
+class InitializeModes(FermionicGate):
     """Implements the fermionic mode initialization.
 
     .. caution::

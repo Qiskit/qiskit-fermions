@@ -16,10 +16,10 @@ from __future__ import annotations
 
 from qiskit_fermions.operators.protocol import OperatorTrait
 
-from .. import FermionGate
+from .. import FermionicGate
 
 
-class Evolution(FermionGate):
+class Evolution(FermionicGate):
     """Implements the time-evolution of an operator."""
 
     def __init__(self, num_modes: int, operator: OperatorTrait, time: float = 1.0) -> None:

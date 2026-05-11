@@ -10,7 +10,7 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
-"""FermionGate."""
+"""FermionicGate."""
 
 from __future__ import annotations
 
@@ -19,7 +19,7 @@ from typing import cast
 from qiskit.circuit import Gate
 
 
-class FermionGate(Gate):
+class FermionicGate(Gate):
     """The base class for all fermionic gates.
 
     To ensure consistency only subclasses of this gate class can be added to instances of
@@ -43,7 +43,7 @@ class FermionGate(Gate):
         *,
         label: str | None = None,
     ) -> None:
-        """Initializes a FermionGate instance."""
+        """Initializes a FermionicGate instance."""
         if params is None:
             params = []
         super().__init__(name, num_modes, params, label)

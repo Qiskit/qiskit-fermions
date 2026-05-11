@@ -60,7 +60,7 @@ is implemented by a single synthesis pass, namely the :class:`.F2QSynthesis`. It
 similar to Qiskit's :class:`~qiskit.transpiler.passes.HighLevelSynthesis` because it simply iterates
 over the :class:`.FermionicCircuit` instructions and delegates the mapping to qubit-based instructions
 to :ref:`qiskit_fermions-transpiler-passes-synthesis-plugins` for each of the encountered types of
-:class:`.FermionGate`.
+:class:`.FermionicGate`.
 
 .. autosummary::
    :toctree: ../stubs/

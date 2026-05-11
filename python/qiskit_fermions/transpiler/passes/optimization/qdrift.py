@@ -44,7 +44,7 @@ class QDriftTrotterization(TransformationPass):
 
         Args:
             dag: the input circuit with fermion-based instructions. Only
-                :class:`~qiskit.dagcircuit.DAGOpNode` with :class:`.FermionGate` instances as their
+                :class:`~qiskit.dagcircuit.DAGOpNode` with :class:`.FermionicGate` instances as their
                 :attr:`~qiskit.dagcircuit.DAGOpNode.op` are supported.
 
         Returns:

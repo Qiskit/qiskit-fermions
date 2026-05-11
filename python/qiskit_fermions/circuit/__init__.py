@@ -31,13 +31,13 @@ The following objects are simple type aliases to make this re-interpretation mor
    FermionicSpecifier
 
 For actually expressing your circuits, you should use the :class:`.FermionicCircuit` class along with
-the :mod:`~qiskit_fermions.circuit.library` of :class:`.FermionGate` implementations.
+the :mod:`~qiskit_fermions.circuit.library` of :class:`.FermionicGate` implementations.
 
 .. autosummary::
    :toctree: ../stubs/
 
    FermionicCircuit
-   FermionGate
+   FermionicGate
 """
 
 from collections.abc import Sequence
@@ -58,11 +58,11 @@ FermionicSpecifier: TypeAlias = (
 # they can actually use those type aliases themselves.
 # ruff: noqa: E402
 from .fermionic_circuit import FermionicCircuit
-from .fermion_gate import FermionGate
+from .fermionic_gate import FermionicGate
 
 __all__ = [
-    "FermionGate",
     "FermionicCircuit",
+    "FermionicGate",
     "FermionicMode",
     "FermionicRegister",
     "FermionicSpecifier",

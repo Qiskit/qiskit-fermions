@@ -18,7 +18,7 @@ Circuit Library
 
 .. currentmodule:: qiskit_fermions.circuit.library
 
-This module provides a library of :class:`.FermionGate` implementations.
+This module provides a library of :class:`.FermionicGate` implementations.
 
 
 .. autosummary::
