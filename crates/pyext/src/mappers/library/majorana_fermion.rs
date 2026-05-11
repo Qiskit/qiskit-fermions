@@ -100,7 +100,7 @@ pub fn py_fermion_to_majorana(fer_op: PyFermionOperator) -> PyMajoranaOperator {
 ///     >>> fer_op = majorana_to_fermion(maj_op)
 ///     >>> print(fer_op.normal_ordered().simplify())
 ///      0.000000e0 +1.000000e0j * ()
-///      0.000000e0 -2.000000e0j * (+_0 -_0)
+///      0.000000e0 -2.000000e0j * (+0 -0)
 ///
 /// ..
 #[gen_stub_pyfunction(module = "qiskit_fermions.mappers.library.majorana")]
