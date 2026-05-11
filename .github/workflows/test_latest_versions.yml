@@ -119,6 +119,13 @@ jobs:
         run: |
           make testpython
 
+      - name: Optional tests
+        if: ${{ matrix.os != 'windows-latest' }}
+        shell: bash
+        run: |
+          SETUPTOOLS_RUST_CARGO_PROFILE=release pip install --no-build-isolation -e ".[all]"
+          make testoptional
+
       - name: Documentation tests
         if: ${{ matrix.os != 'windows-latest' }}
         shell: bash

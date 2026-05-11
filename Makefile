@@ -82,6 +82,10 @@ pyext-dev: pystubs-dev
 testpython:
 	python -m pytest -s -p no:doctest
 
+.PHONY: testoptional
+testoptional:
+	python -m pytest -s -p no:doctest -m skipif
+
 .PHONY: pycoverage
 pycoverage:
 	python -m pytest -s -p no:doctest --cov=python/qiskit_fermions/

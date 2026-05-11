@@ -81,13 +81,19 @@ jobs:
       - name: Install Python package
         shell: bash
         run: |
-          pip install --group build --group coverage "qiskit @ file:$(echo build/qiskit/dist/*.whl)"
+          pip install --group build --group test "qiskit @ file:$(echo build/qiskit/dist/*.whl)"
           SETUPTOOLS_RUST_CARGO_PROFILE=release pip install --no-build-isolation -e .
 
       - name: Python tests
         shell: bash
         run: |
           make testpython
+
+      - name: Optional tests
+        shell: bash
+        run: |
+          SETUPTOOLS_RUST_CARGO_PROFILE=release pip install --no-build-isolation -e ".[all]"
+          make testoptional
 
       - name: Documentation tests
         shell: bash
