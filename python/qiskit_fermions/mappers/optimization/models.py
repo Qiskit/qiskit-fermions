@@ -23,21 +23,15 @@ The implementation uses Pyomo and is compatible with multiple MILP backends
 (e.g. HiGHS, CPLEX, Gurobi, GLPK, CBC).
 """
 
-from typing import Literal
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Literal
 
 import numpy as np
-from pyomo.environ import (
-    Binary,
-    ConcreteModel,
-    Constraint,
-    Objective,
-    RangeSet,
-    Reals,
-    Set,
-    Var,
-    minimize,
-)
 from qiskit_fermions.utils.optionals import HAS_PYOMO
+
+if TYPE_CHECKING:
+    from pyomo.environ import ConcreteModel
 
 
 @HAS_PYOMO.require_in_call
@@ -81,6 +75,18 @@ def build_excitation_span_optimization_model(
             constraints, and objective. Solve this model with a Pyomo solver to obtain an
             optimized ordering.
     """
+    from pyomo.environ import (
+        Binary,
+        ConcreteModel,
+        Constraint,
+        Objective,
+        RangeSet,
+        Reals,
+        Set,
+        Var,
+        minimize,
+    )
+
     # Preprocess excitations
     i2 = []
     i4 = []

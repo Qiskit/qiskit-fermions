@@ -34,7 +34,10 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-pyomo = [
+all = [
+    "qiskit-fermions[optimization]",
+]
+optimization = [
     "pyomo",
 ]
 
