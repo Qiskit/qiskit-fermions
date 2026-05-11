@@ -68,7 +68,6 @@ doctest = [
 test = [
     {include-group = "basetest"},
     {include-group = "doctest"},
-    "pyomo",
 ]
 coverage = [
     {include-group = "test"},
