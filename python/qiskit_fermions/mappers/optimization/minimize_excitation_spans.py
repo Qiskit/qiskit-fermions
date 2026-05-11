@@ -33,7 +33,7 @@ import numpy as np
 from qiskit_fermions.utils.optionals import HAS_PYOMO
 
 if TYPE_CHECKING:
-    from pyomo.environ import ConcreteModel
+    import pyomo
 
 
 @HAS_PYOMO.require_in_call
@@ -43,7 +43,7 @@ def build_excitation_span_minimization_model(
     *,
     objective: Literal["minmax", "multi", "avg"] = "multi",
     mix_delta: float = 0.1,
-) -> ConcreteModel:
+) -> pyomo.core.base.PyomoModel.ConcreteModel:
     """Build a Pyomo model for ordering fermionic modes to minimize excitation spans.
 
     The model constructs a permutation where each original mode index is assigned to exactly one
@@ -62,6 +62,7 @@ def build_excitation_span_minimization_model(
         excitations: a sequence of excitation index tuples over fermionic mode indices.
         num_modes: the total number of fermionic modes to be ordered.
         objective: the chosen objective mode. This may be one of the following literals:
+
             - ``minmax`` minimizes the maximum excitation span.
             - ``avg`` minimizes the average excitation span.
             - ``multi`` minimizes ``max_span + mix_delta * average_span``.
@@ -73,6 +74,7 @@ def build_excitation_span_minimization_model(
 
     Raises:
         ValueError: if a post-processed excitation tuple has length unequal to 2 or 4.
+        ValueError: if an unknown ``objective`` is chosen.
     """
     from pyomo.environ import (
         Binary,
