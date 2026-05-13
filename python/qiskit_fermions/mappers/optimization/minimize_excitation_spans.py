@@ -58,15 +58,20 @@ def build_excitation_span_minimization_model(
          in the resulting minimization model
        - consequently, only post-processed tuples of length 2 or 4 are expected
 
+    .. seealso::
+
+       For a more detailed discussion and explanation of the reasoning behind this pre-processing,
+       refer to section III.B of `this paper <https://arxiv.org/abs/2508.02578v2>`_.
+
     Args:
         excitations: a sequence of excitation index tuples over fermionic mode indices.
         num_modes: the total number of fermionic modes to be ordered.
         objective: the chosen objective mode. This may be one of the following literals:
 
-            - ``minmax`` minimizes the maximum excitation span.
-            - ``avg`` minimizes the average excitation span.
-            - ``multi`` minimizes ``max_span + mix_delta * average_span``.
-        mix_delta: the mixing weight used by the ``multi`` objective.
+            - ``minmax``: minimizes the maximum excitation span.
+            - ``avg``: minimizes the average excitation span.
+            - ``multi``: minimizes ``max_span + mix_delta * average_span``.
+        mix_delta: the mixing weight used in the case of ``objective="multi"``.
 
     Returns:
         A Pyomo optimization model encoding the permutation variables, span variables, constraints,

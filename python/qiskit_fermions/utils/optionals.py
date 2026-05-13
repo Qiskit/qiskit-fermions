@@ -27,12 +27,16 @@ when a dependency is required.
 Available Testers
 -----------------
 
-.. py:data:: HAS_PYOMO
-
-   `Pyomo <https://www.pyomo.org/>`__ is a Python-based optimization modeling language used to build
-   linear and mixed-integer programs (LP/MILP) for classical solvers.
+.. autodata:: HAS_PYOMO
 """
 
 from qiskit.utils import LazyImportTester
 
 HAS_PYOMO = LazyImportTester("pyomo", name="Pyomo", install="pip install pyomo")
+"""`Pyomo <https://www.pyomo.org/>`__ is a Python-based optimization modeling language used to build
+linear and mixed-integer programs (LP/MILP) for classical solvers.
+
+.. seealso::
+   :external:class:`~qiskit.utils.LazyDependencyManager` for usage examples and the available
+   methods of this object.
+"""
