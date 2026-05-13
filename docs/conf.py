@@ -112,6 +112,7 @@ intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),
     "qiskit": ("https://quantum.cloud.ibm.com/docs/api/qiskit/", None),
     "cqiskit": ("https://quantum.cloud.ibm.com/docs/api/qiskit-c/", None),
+    "pyomo": ("https://pyomo.readthedocs.io/en/stable/", None),
 }
 
 plot_working_directory = "."

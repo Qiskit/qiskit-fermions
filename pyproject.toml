@@ -33,6 +33,14 @@ dependencies = [
     "typing-extensions",
 ]
 
+[project.optional-dependencies]
+all = [
+    "qiskit-fermions[optimization]",
+]
+optimization = [
+    "pyomo",
+]
+
 [dependency-groups]
 build = [
     "setuptools>=77.0.1",
