@@ -1,5 +1,5 @@
-C Installation Instructions
-===========================
+Install the C API
+==================
 
 Requirements
 ------------
@@ -8,8 +8,8 @@ Before compiling the ``qiskit-fermions`` C API, you need to compile the Qiskit C
 API. You can do this in any location, but to get started quickly, follow these
 steps:
 
-Compile the Qiskit C API
---------------------------
+Before you begin
+-----------------
 
 First, compile the Qiskit C API by following these steps:
 
@@ -40,8 +40,8 @@ dependencies:
 
 - `CMake <https://cmake.org/>`_
 
-Steps
------
+Install steps
+--------------
 
 1. Ensure that you are in the right directory:
 
@@ -86,7 +86,7 @@ Steps
       $ make testc
 
 
-You should find these relevant files:
+Verify that you see these relevant files:
 
 - ``dist/c/lib/libqiskit_fermions.so`` (The suffix might vary depending on your operating system)
 - ``dist/c/include/qiskit_fermions.h``
