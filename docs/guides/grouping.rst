@@ -1,6 +1,6 @@
 .. _grouping_explanation:
 
-Grouping Operator Terms: Exploiting Operator Structure
+Grouping operator terms: exploiting operator structure
 ======================================================
 
 As described in the :ref:`operators guide <term_grouping>`, operators can store a
@@ -15,7 +15,7 @@ or problem-specific symmetries), you can unlock several benefits:
   quantum circuits, reducing circuit depth and gate count.
 
 - **Physical structure preservation**: Groups encode meaningful structure from the
-  original problem (e.g., interaction patterns, symmetries), which can be exploited
+  original problem (e.g., interaction patterns, symmetries), that can be exploited
   for more physically meaningful decompositions.
 
 - **Flow set selection**: Grouping can naturally encode flow sets and other graph-theoretic
@@ -29,9 +29,9 @@ or problem-specific symmetries), you can unlock several benefits:
 Usage
 -----
 
-The simplest way of defining an operator grouping is by setting the ``groups``
-attribute of the target operator. Below we give a simple example for grouping
-terms according to the `line flow sets` as shown in Fig. 1c of [1]_.
+The simplest way to define an operator grouping is by setting the target
+operator's ``groups`` attribute. Below is an example for grouping terms
+according to the `line flow sets` as shown in Fig. 1c of [1]_.
 
 .. plot::
    :alt: A simple directed graph on which we define our MajoranaOperator.
@@ -54,11 +54,11 @@ terms according to the `line flow sets` as shown in Fig. 1c of [1]_.
     ... )
     <Figure size 640x480 with 1 Axes>
 
-Here, we have a simple 2 by 3 lattice of Majorana modes connected by directed edges.
-Each edge represents a term in our operator acting on the two connected modes. We want to
-group these terms according to their edge labels (shown on the graph): terms connected by
-edges with the same label are placed in the same group. The code below shows how that can
-be done:
+Here, we have a simple two by three lattice of Majorana modes connected by
+directed edges. Each edge represents a term in our operator acting on the two
+connected modes. We want to group these terms according to their edge labels
+(shown on the graph): terms connected by edges with the same label are placed in
+the same group. The following code shows how that can be done:
 
 .. tab-set-code::
 
