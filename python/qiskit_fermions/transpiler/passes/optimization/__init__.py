@@ -13,7 +13,9 @@
 """Optimization passes."""
 
 from .qdrift import QDriftTrotterization
+from .relabel_modes import RelabelModes
 
 __all__ = [
     "QDriftTrotterization",
+    "RelabelModes",
 ]

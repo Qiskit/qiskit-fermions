@@ -159,6 +159,51 @@ ensemble of circuits to generate:
    generator used inside of the :class:`.QDriftTrotterization` transpilation
    pass.
 
+(Optional) Optimize the fermionic mode indexing
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+One can add an additional optimization step to the transpilation pipeline which
+minimizes the distance of the fermionic excitation spans by relabeling the
+fermionic mode indices. This optimization was introduced in the `SqDRIFT`_ paper
+and is implemented by :func:`.build_excitation_span_minimization_model`. It can
+be easily inserted into the transpiler pipeline via the :class:`.RelabelModes`
+pass:
+
+.. invisible-code-block: python
+
+   >>> from qiskit_fermions.utils.optionals import HAS_PYOMO
+
+.. skip: start if(not HAS_PYOMO)
+
+.. tab-set-code::
+
+    .. code-block:: python
+
+       >>> from pyomo.environ import SolverFactory
+       >>> from qiskit_fermions.transpiler.passes import RelabelModes
+       >>>
+       >>> solver = SolverFactory("appsi_highs")
+       >>> solver.options["time_limit"] = 60
+       >>>
+       >>> qdrift = QDriftTrotterization(5, rng=42)
+       >>> relabel = RelabelModes(solver=solver)
+       >>>
+       >>> pm.optimization = FermionicPassManager([qdrift, relabel])
+       >>>
+       >>> relabeled_circ = pm.run(circ)
+       >>> assert "permutation" in relabeled_circ.metadata
+
+    .. code-block:: c
+
+       // WARNING: This feature is not available via the C API.
+
+.. skip: end
+
+.. note::
+   Using the automatic optimization inside :class:`.RelabelModes` (which
+   leverages :func:`.build_excitation_span_minimization_model`) requires the
+   optional dependency managed by :data:`.HAS_PYOMO`.
+
 Next steps
 ^^^^^^^^^^
 
