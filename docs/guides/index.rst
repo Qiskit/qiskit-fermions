@@ -10,6 +10,12 @@ workflows. Examples of such end-to-end workflows can be found in the tutorials
 hosted on the `IBM Quantum Platform
 <https://quantum.cloud.ibm.com/docs/en/tutorials>`_.
 
+.. note::
+   As a general rule, these guides may refer to specific Python modules when
+   explaining core concepts. In general, the C API provides matching
+   functionality although it is not structured into modules, the function names
+   will correspond naturally and should be easy to navigate.
+
 Getting Started
 ===============
 
@@ -32,4 +38,5 @@ this package:
    :maxdepth: 1
    :glob:
 
+   operators
    grouping

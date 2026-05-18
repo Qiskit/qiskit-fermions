@@ -1,0 +1,480 @@
+.. _operators_explanation:
+
+Design Principles of Operator Representations
+==============================================
+
+This guide explains the common design principles and core concepts shared across
+all operator representations in the :mod:`~qiskit_fermions.operators` module.
+
+Overview
+--------
+
+The operator representations provided by this module share several fundamental
+design principles:
+
+- **Sparse Data Structure** (`read more <sparse_term_representation_>`_):
+  Operators encode only non-identity operations. The internal data layout is
+  generally inspired by sparse matrix data formats, enabling efficient storage
+  and computation for systems with many modes but relatively few significant
+  contributions.
+
+- **Term Iteration and Reconstruction** (`read more <term_iteration_and_reconstruction_>`_):
+  Despite internal sparse storage, operators provide a consistent iteration interface
+  that lets you inspect, filter, and transform terms without understanding the
+  underlying data structure, then reconstruct new operators from modified terms.
+
+- **Mode-based Indexing** (`read more <mode_based_indexing_>`_):
+  Operators use abstract mode indices to label fermionic degrees of freedom,
+  enabling flexible mapping from physical systems to the operator representation.
+
+- **Built-in Term Grouping** (`read more <term_grouping_>`_):
+  Operators natively support grouping information that associates terms with
+  group indices. This enables optimizations and physical structure preservation
+  without requiring separate data structures. See :ref:`the grouping explanation
+  guide <grouping_explanation>` for practical usage.
+
+- **Rich Arithmetic Interface** (`read more <arithmetic_and_mathematical_operations_>`_):
+  All operators implement a consistent set of arithmetic operations (addition,
+  multiplication, composition) and mathematical functions via the
+  :class:`.OperatorTrait` protocol, enabling uniform code across different
+  operator types.
+
+- **Term Ordering and Normal Forms** (`read more <operator_term_ordering_>`_):
+  Mathematically equivalent operators can have very different representations and
+  behavior in quantum algorithms. All operator representations support various
+  normal forms (based on algebra-specific commutation relations) to achieve
+  canonical, predictable, and optimizable operator representations.
+
+
+.. _sparse_term_representation:
+
+Sparse Data Structure
+---------------------
+
+All operators use a **sparse representation** where only non-identity operations
+are tracked. Each non-identity operation consists of a **coefficient** (complex
+number) and a **sequence of actions** on specific modes.
+
+This approach dramatically reduces memory usage and computation time, especially for
+systems with many modes but relatively few significant contributions. By encoding only
+non-identity operations, operations focus only on what matters, enabling work with large
+systems that would be infeasible with dense representations. Additionally, operators
+naturally scale to any number of modes—an operator acting on modes ``{0, 1}`` works
+unchanged in systems with many more modes since unaffected modes are implicitly identity.
+
+Note that identical terms are preserved separately during arithmetic operations
+and must be explicitly combined if needed.
+
+Internal Storage Format
+~~~~~~~~~~~~~~~~~~~~~~~
+
+Internally, operators are stored using arrays inspired by sparse matrix data formats:
+
+- **Coefficients array**: The complex coefficient for each term
+- **Mode indices array**: The fermionic modes that each action acts upon
+- **Boundaries array**: Indices marking where each term's modes begin and end in the modes array
+
+.. important::
+
+   Additional arrays may be present depending on the operator type. For example,
+   :class:`.FermionOperator` instances include an **actions array** of booleans
+   that specifies the type of fermionic action acting on the respective mode
+   index. Majorana operators do not require this distinction. See the API
+   documentation for your specific operator type to understand the full storage
+   format.
+
+The following examples show how these arrays are organized. First, here's a direct
+construction using the sparse arrays:
+
+.. tab-set-code::
+
+    .. code-block:: python
+
+       >>> from qiskit_fermions.operators import FermionOperator
+       >>>
+       >>> # Construct operators directly using sparse arrays
+       >>> # First operator: 1.0 * c_0 a_1
+       >>> # Actions: True=creation, False=annihilation
+       >>> op1 = FermionOperator(
+       ...     coeffs=[1.0],
+       ...     actions=[True, False],
+       ...     modes=[0, 1],
+       ...     boundaries=[0, 2],
+       ... )
+       >>>
+       >>> # Second operator: 1.0 * c_2 a_3
+       >>> op2 = FermionOperator(
+       ...     coeffs=[1.0],
+       ...     actions=[True, False],
+       ...     modes=[2, 3],
+       ...     boundaries=[0, 2],
+       ... )
+       >>>
+       >>> # Combine the sparse operators
+       >>> op1 += op2
+       >>> print(op1)
+         1.000000e0 +0.000000e0j * (+0 -1)
+         1.000000e0 +0.000000e0j * (+2 -3)
+
+    .. code-block:: c
+
+       #include <qiskit_fermions.h>
+
+       // Construct first operator: 1.0 * c_0 a_1
+       QkComplex67 coeff1[1] = {{1.0, 0.0}};
+       uint32_t modes1[2] = {0, 1};
+       uint32_t boundaries1[2] = {0, 2};
+       QfFermionOperator *op1 = qf_ferm_op_new(1, 2, coeff1, modes1, boundaries1);
+
+       // Construct second operator: 1.0 * c_2 a_3
+       QkComplex67 coeff2[1] = {{1.0, 0.0}};
+       uint32_t modes2[2] = {2, 3};
+       uint32_t boundaries2[2] = {0, 2};
+       QfFermionOperator *op2 = qf_ferm_op_new(1, 2, coeff2, modes2, boundaries2);
+
+       // Add operators
+       qf_ferm_op_add_assign(op1, op2);
+
+       qf_ferm_op_free(op1);
+       qf_ferm_op_free(op2);
+
+Convenient Construction Methods
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+For Python developers, several convenient construction methods are available that
+abstract away the sparse storage details. These make it easier to build operators
+without worrying about managing coefficient, mode, and boundary arrays:
+
+.. hint::
+
+   Individual operator implementations may support additional construction methods
+   suited to their specific use case. Check the API documentation for your operator
+   type to see all available construction options.
+
+.. tab-set-code::
+
+    .. code-block:: python
+
+       >>> from qiskit_fermions.operators import FermionOperator, cre, ann
+       >>>
+       >>> # Construct operators using operator algebra notation
+       >>> op1 = FermionOperator.from_dict({(cre(0), ann(1)): 1.0})
+       >>> op2 = FermionOperator.from_dict({(cre(2), ann(3)): 1.0})
+       >>>
+       >>> # The result is sparse even when combining them
+       >>> op1 += op2
+       >>> print(op1)
+       1.000000e0 +0.000000e0j * (+0 -1)
+       1.000000e0 +0.000000e0j * (+2 -3)
+
+    .. code-block:: c
+
+       // The C API uses direct array construction; convenience methods are not available.
+
+
+.. _term_iteration_and_reconstruction:
+
+Term Iteration and Reconstruction
+----------------------------------
+
+Operators provide a consistent iteration interface via :meth:`.OperatorTrait.iter_terms`
+despite their internal sparse representation. This allows you to inspect, filter,
+or transform terms without needing to understand the underlying data structure.
+You can then reconstruct a new operator from the transformed terms using
+:meth:`.OperatorTrait.from_terms`.
+
+.. tab-set-code::
+
+    .. code-block:: python
+
+       >>> from qiskit_fermions.operators import FermionOperator, cre, ann
+       >>>
+       >>> # Construct an operator with terms of different orders
+       >>> op = FermionOperator.from_dict({
+       ...     (): 0.5,  # constant term (order 0)
+       ...     (cre(0), ann(1)): 1.0,  # two-body term (order 2)
+       ...     (cre(0), cre(1), ann(1), ann(0)): 0.25  # four-body term (order 4)
+       ... })
+       >>>
+       >>> # Filter to keep only terms of order 2
+       >>> order_two_terms = [
+       ...     (term, coeff) for term, coeff in op.iter_terms()
+       ...     if len(term) == 2
+       ... ]
+       >>>
+       >>> # Reconstruct operator from filtered terms
+       >>> filtered_op = FermionOperator.from_terms(order_two_terms)
+       >>> print(f"Original operator has {len(op)} terms")
+       Original operator has 3 terms
+       >>> print(f"Filtered operator has {len(filtered_op)} term")
+       Filtered operator has 1 term
+
+    .. code-block:: c
+
+       // WARNING: Term iteration and filtering are not yet available in the C API.
+       // See the Python API documentation for :meth:`.OperatorTrait.iter_terms` and
+       // :meth:`.OperatorTrait.from_terms` for equivalent functionality.
+
+
+.. _mode_based_indexing:
+
+Mode-based Indexing
+-------------------
+
+All operator representations refer to the indices that their terms act upon as
+**modes**. A mode is simply an index identifying a fermionic degree of freedom
+in your system. The mapping from physical degrees of freedom (such as spatial
+orbitals, spin states, or other quantum numbers) to mode indices is left to the
+user, enabling maximum flexibility.
+
+This abstraction is also present in the :mod:`qiskit_fermions.circuit` module,
+where the :class:`.FermionicCircuit` operates on a register of fermionic modes.
+In both the operator and circuit representations, modes provide a consistent,
+algebra-independent way to specify which degrees of freedom participate in a
+given operation.
+
+.. important::
+
+   **Current implementations use spinless modes**: All operator representations
+   currently provided by this module treat modes as spinless fermionic degrees
+   of freedom. This means if your system has both spin-up and spin-down electrons
+   or fermions, you must explicitly map them to distinct modes (e.g., modes 0-3
+   for spin-up of 4 spatial orbitals, modes 4-7 for spin-down, or any other
+   convention you choose).
+
+   This design keeps the core representations simple and general while avoiding
+   imposing a specific spin-ordering convention. Utility modules like
+   :mod:`qiskit_fermions.operators.library` provide convenience functions
+   (e.g., :meth:`.FCIDump.from_file`) that handle such mappings for you when
+   loading electronic structure data.
+
+.. hint::
+
+   As the package evolves, spinful operator representations may be added that
+   natively support spin degrees of freedom in their data model. These will be
+   clearly distinguished from the current spinless implementations and will
+   coexist with them in the module.
+
+
+.. _term_grouping:
+
+Term Grouping and Commutation Relationships
+-------------------------------------------
+
+Like the coefficients and mode indices, operators can optionally store a **groups array**
+that associates each term with a group index. By integrating grouping directly into the
+operator representation as part of the sparse data structure, grouping information
+naturally travels with the operator through transformations. This enables systematic
+exploitation of structure—whether from physical properties, algebraic relationships, or
+problem-specific symmetries. The structured information can then be used in downstream
+operations like circuit synthesis and decomposition, via methods like
+:meth:`.OperatorTrait.split_out_groups`.
+
+For detailed guidance on how to group operator terms in your workflows, see
+:ref:`the grouping explanation guide <grouping_explanation>`.
+
+.. tab-set-code::
+
+    .. code-block:: python
+
+       >>> from qiskit_fermions.operators import MajoranaOperator, gamma
+       >>> op = MajoranaOperator.from_dict({
+       ...     (gamma(0, False),): 1.0,
+       ...     (gamma(1, False),): 1.0,
+       ...     (gamma(2, False), gamma(3, False)): 1.0
+       ... })
+       >>> # Assign group indices to terms
+       >>> op.groups = [0, 0, 1]
+       >>> # Partition operator by groups
+       >>> grouped_ops = op.split_out_groups()
+
+    .. code-block:: c
+
+       #include <qiskit_fermions.h>
+
+       // Create operator with 3 terms
+       QkComplex67 coeffs[3] = {{1.0, 0.0}, {1.0, 0.0}, {1.0, 0.0}};
+       uint32_t modes[4] = {0, 1, 2, 3};
+       uint32_t boundaries[4] = {0, 1, 2, 4};
+       QfMajoranaOperator *op = qf_maj_op_new(3, 4, coeffs, modes, boundaries);
+
+       // Assign grouping information
+       uint32_t groups[3] = {0, 0, 1};
+       qf_maj_op_set_groups(op, groups, 3);
+
+       // Partition operator by groups
+       QfMajoranaOperator **grouped_ops = qf_maj_op_split_out_groups(op, &num_groups);
+
+
+.. _arithmetic_and_mathematical_operations:
+
+Arithmetic and Mathematical Operations
+---------------------------------------
+
+All operators implement the :class:`.OperatorTrait` protocol, which provides
+a unified set of operations across different operator types. This ensures code
+written for one operator representation works uniformly with others.
+
+The protocol includes arithmetic operations (addition, multiplication,
+composition), structural operations (term iteration, mode support analysis,
+relabeling), mathematical functions (normal ordering, simplification, equivalence
+checking), and more. See the :class:`.OperatorTrait` documentation for a complete
+reference of all available operations.
+
+.. tab-set-code::
+
+    .. code-block:: python
+
+       >>> from qiskit_fermions.operators import FermionOperator, cre, ann
+       >>>
+       >>> # Construct a Hermitian operator: H = c_0^† c_1 + c_1^† c_0
+       >>> op = FermionOperator.from_dict({
+       ...     (cre(0), ann(1)): 1.0,
+       ...     (cre(1), ann(0)): 1.0
+       ... })
+       >>>
+       >>> # Check if the operator is Hermitian by verifying H - H† = 0
+       >>> adjoint = op.adjoint()
+       >>> difference = op - adjoint
+       >>> difference = difference.normal_ordered()
+       >>> difference = difference.simplify(atol=1e-10)
+       >>> is_hermitian = difference.equiv(FermionOperator.zero(), atol=1e-10)
+       >>> print(f"Operator is Hermitian: {is_hermitian}")
+       Operator is Hermitian: True
+
+    .. code-block:: c
+
+       #include <qiskit_fermions.h>
+
+       // Construct a Hermitian operator: H = c_0^† c_1 + c_1^† c_0
+       QkComplex67 coeffs[2] = {{1.0, 0.0}, {1.0, 0.0}};
+       uint32_t modes[4] = {0, 1, 1, 0};
+       uint32_t boundaries[3] = {0, 2, 4};
+       QfFermionOperator *op = qf_ferm_op_new(2, 4, coeffs, modes, boundaries);
+
+       // Check if Hermitian: compute H - H†, normal-order, and simplify
+       QfFermionOperator *adjoint = qf_ferm_op_adjoint(op);
+       QfFermionOperator *difference = qf_ferm_op_sub(op, adjoint);
+       QfFermionOperator *normal_ordered = qf_ferm_op_normal_ordered(difference);
+       qf_ferm_op_ichop(normal_ordered, 1e-10);
+
+       QfFermionOperator *zero = qf_ferm_op_zero();
+       bool is_hermitian = qf_ferm_op_equiv(normal_ordered, zero, 1e-10);
+       printf("Operator is Hermitian: %s\n", is_hermitian ? "true" : "false");
+
+       // Clean up
+       qf_ferm_op_free(op);
+       qf_ferm_op_free(adjoint);
+       qf_ferm_op_free(difference);
+       qf_ferm_op_free(normal_ordered);
+       qf_ferm_op_free(zero);
+
+.. important::
+
+   The example uses ``atol=1e-10`` in both ``simplify()`` and ``equiv()``.
+   The ``atol`` (absolute tolerance) parameter specifies a threshold: coefficients
+   with magnitude smaller than ``atol`` are treated as zero and discarded. This is
+   essential for numerical stability when comparing operators, since floating-point
+   arithmetic can introduce small rounding errors that would otherwise prevent
+   equivalent operators from being recognized as such.
+
+.. hint::
+
+   While the :class:`.OperatorTrait` protocol provides a common interface,
+   individual operator implementations may offer additional convenience methods
+   not part of the protocol. For example, some operators provide an
+   ``is_hermitian()`` method that implements exactly this check. Always consult
+   the API documentation for your specific operator type to discover all
+   available functionality.
+
+
+.. _operator_term_ordering:
+
+Operator Term Ordering and Normal Forms
+---------------------------------------
+
+A fundamental challenge in quantum operator algebra is that mathematically
+equivalent operators can be represented in many different ways, each with
+different implications for quantum algorithms. The same operator can be written
+in algebraically equivalent forms - for example, :math:`a^\dagger b` can be
+expressed as :math:`ab + [a^\dagger,b]` - yet these representations lead to
+different behavior in circuit synthesis, simplification, and numerical
+algorithms.
+
+The operator representations support **normal ordering** operations that
+transform operators into algebra-specific canonical forms using commutation
+relations. This enables reliable comparisons (two equivalent operators have
+identical normal-ordered forms), reveals simplifications (commutation relations
+cause terms to cancel or combine), and supports algorithms that require specific
+operator forms for correctness and efficiency.
+
+.. important::
+
+   Different operator representations may implement normal ordering based on
+   different commutation relations appropriate to their algebra. For example,
+   fermionic normal ordering uses anticommutation relations (:math:`\{c_i, c_j^\dagger\} = \delta_{ij}`),
+   while Majorana normal ordering uses different algebra conventions
+   (:math:`\{\gamma_i, \gamma_j\} = 2\delta_{ij}`). Always consult the
+   documentation for your specific operator type to understand how normal
+   ordering is implemented.
+
+.. tab-set-code::
+
+    .. code-block:: python
+
+       >>> from qiskit_fermions.operators import FermionOperator, cre, ann
+       >>>
+       >>> # Two different representations of the same operator
+       >>> op1 = FermionOperator.from_dict({(ann(0), cre(0)): 1.0})
+       >>> op2 = FermionOperator.from_dict({(): 1.0, (cre(0), ann(0)): -1.0})
+       >>>
+       >>> # Direct comparison fails due to different forms
+       >>> op1.equiv(op2, atol=1e-10)
+       False
+       >>>
+       >>> # Normal-order both and compare again
+       >>> op1_normal = op1.normal_ordered()
+       >>> op2_normal = op2.normal_ordered()
+       >>> op1_normal.equiv(op2_normal, atol=1e-10)
+       True
+
+    .. code-block:: c
+
+       #include <qiskit_fermions.h>
+       #include <stdbool.h>
+
+       // Two different representations of the same operator
+       QkComplex67 coeff1[1] = {{1.0, 0.0}};
+       uint32_t modes1[2] = {0, 0};
+       uint32_t boundaries1[3] = {0, 2};
+       QfFermionOperator *op1 = qf_ferm_op_new(1, 2, coeff1, modes1, boundaries1);
+
+       QkComplex67 coeff2[2] = {{1.0, 0.0}, {-1.0, 0.0}};
+       uint32_t modes2[2] = {0, 0};
+       uint32_t boundaries2[3] = {0, 0, 2};
+       QfFermionOperator *op2 = qf_ferm_op_new(2, 2, coeff2, modes2, boundaries2);
+
+       // Direct comparison fails due to different forms
+       bool equiv_before = qf_ferm_op_equiv(op1, op2, 1e-10);
+       printf("Equivalent before normal ordering: %s\n", equiv_before ? "true" : "false");
+
+       // Normal-order both and compare again
+       QfFermionOperator *op1_normal = qf_ferm_op_normal_ordered(op1);
+       QfFermionOperator *op2_normal = qf_ferm_op_normal_ordered(op2);
+       bool equiv_after = qf_ferm_op_equiv(op1_normal, op2_normal, 1e-10);
+       printf("Equivalent after normal ordering: %s\n", equiv_after ? "true" : "false");
+
+       // Clean up
+       qf_ferm_op_free(op1);
+       qf_ferm_op_free(op2);
+       qf_ferm_op_free(op1_normal);
+       qf_ferm_op_free(op2_normal);
+
+.. hint::
+
+   The :meth:`.OperatorTrait.normal_ordered` protocol method leaves its positional
+   and keyword arguments deliberately unspecified, allowing concrete operator
+   implementations to define adjustable parameters that control the exact canonical
+   form produced. This enables operator-specific optimizations and normal form
+   variants tailored to their algebra or use case. Check the API documentation for
+   your operator type to see what parameters are available.
