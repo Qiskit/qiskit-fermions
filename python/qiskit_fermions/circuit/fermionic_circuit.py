@@ -47,6 +47,15 @@ class FermionicCircuit:
         self._inner = QuantumCircuit(self.register)
 
     @property
+    def metadata(self) -> dict:
+        """Re-exposes :external:attr:`~qiskit.circuit.QuantumCircuit.metadata`."""
+        return cast(dict, self._inner.metadata)
+
+    @metadata.setter
+    def metadata(self, metadata: dict) -> None:
+        self._inner.metadata = metadata
+
+    @property
     def modes(self) -> list[FermionicMode]:
         """The fermionic mode ``bits`` that this circuit acts upon."""
         return cast(list[FermionicMode], self._inner.qubits)

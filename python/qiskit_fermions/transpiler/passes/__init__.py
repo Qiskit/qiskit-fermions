@@ -32,6 +32,7 @@ These passes provide different kinds of optimization of :class:`.FermionicCircui
    :toctree: ../stubs/
 
    QDriftTrotterization
+   RelabelModes
 
 .. _qiskit_fermions-transpiler-passes-layout:
 
@@ -88,7 +89,7 @@ provides builtin plugins:
 """
 
 from .layout import CustomF2QLayout, TrivialF2QLayout
-from .optimization import QDriftTrotterization
+from .optimization import QDriftTrotterization, RelabelModes
 from .synthesis import (
     EvolutionSynthesis,
     F2QSynthesis,
@@ -105,5 +106,6 @@ __all__ = [
     "InitializeModesSynthesis",
     "OrbitalRotationSynthesis",
     "QDriftTrotterization",
+    "RelabelModes",
     "TrivialF2QLayout",
 ]
