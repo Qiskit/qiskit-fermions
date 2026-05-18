@@ -1,4 +1,4 @@
-.. _sqdrift_tutorial:
+.. _sqdrift_getting_started:
 
 Generate SqDRIFT Circuits
 =========================
@@ -10,12 +10,13 @@ This is achieved by subsampling smaller time-evolution operators from said
 Hamiltonian based on its coefficients, which is known as the `qDRIFT`_
 Trotterization method.
 
-This tutorial shows how to generate an ensemble of such randomized circuits.
+This getting-started guide shows how to generate an ensemble of such randomized
+circuits.
 
 1. Hamiltonian Setup
 ^^^^^^^^^^^^^^^^^^^^
 
-For the purposes of this tutorial, we load the electronic structure Hamiltonian
+For the purposes of this guide, we load the electronic structure Hamiltonian
 of N2 from an FCIDUMP file. Of course, there are also other means of
 constructing the :class:`.FermionOperator`. Be sure to check out its
 documentation as well as :mod:`qiskit_fermions.operators.library`.
@@ -27,7 +28,7 @@ documentation as well as :mod:`qiskit_fermions.operators.library`.
        >>> from qiskit_fermions.operators.library import FCIDump
        >>> from qiskit_fermions.operators import FermionOperator
        >>>
-       >>> fcidump = FCIDump.from_file("docs/tutorials/n2.fcidump")
+       >>> fcidump = FCIDump.from_file("docs/guides/n2.fcidump")
        >>> num_modes = 2 * fcidump.norb
        >>> hamil = FermionOperator.from_fcidump(fcidump)
 
@@ -35,7 +36,7 @@ documentation as well as :mod:`qiskit_fermions.operators.library`.
 
        #include <qiskit_fermions.h>
 
-       QfFCIDump* fcidump = qf_fcidump_from_file("docs/tutorials/n2.fcidump");
+       QfFCIDump* fcidump = qf_fcidump_from_file("docs/guides/n2.fcidump");
        QfFermionOperator* hamil = qf_ferm_op_from_fcidump(fcidump);
        uint32_t num_modes = 2 * qf_fcidump_norb(fcidump);
 

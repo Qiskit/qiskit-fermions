@@ -69,8 +69,7 @@ License
 
    Documentation Home <self>
    Installation Instructions <install>
-   Explanations <explanations/index>
-   Tutorials <tutorials/index>
+   Guides <guides/index>
    Python API Reference <pydoc/index>
    C API Reference <cdoc/index>
    GitHub <https://github.com/Qiskit/qiskit-fermions>
