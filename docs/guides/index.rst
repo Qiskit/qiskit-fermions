@@ -40,3 +40,4 @@ this package:
 
    operators
    grouping
+   mappers

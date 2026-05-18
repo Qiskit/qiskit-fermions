@@ -156,6 +156,7 @@ convention = "google"
 arange = "arange"
 ba = "ba"
 thr = "thr"
+iz = "iz"
 
 # While we don't mandate the use of uv, we use it during CI for handling package
 # resolution and thus are configuring components of it below.
