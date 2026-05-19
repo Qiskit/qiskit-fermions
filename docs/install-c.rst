@@ -8,11 +8,6 @@ Before compiling the ``qiskit-fermions`` C API, you need to compile the Qiskit C
 API. You can do this in any location, but to get started quickly, follow these
 steps:
 
-Before you begin
------------------
-
-First, compile the Qiskit C API by following these steps:
-
 .. code:: console
 
    $ cd path/to/qiskit-fermions

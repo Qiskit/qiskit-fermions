@@ -1,11 +1,11 @@
-Install Fermionic mapper
-=========================
+Install ``qiskit-fermions``
+===========================
 
-.. caution::
-   If you have problems with the install, consult `this
-   issue <https://github.com/Qiskit/qiskit-fermions/issues/4>`_. If that does
-   not resolve your problem, comment on that issue with a description of
-   your system and problem, or leave any general feedback.
+.. hint::
+   Support for Windows is still a work-in-progress. Compiling the C API should
+   be possible, but the Python API is still not fully functional. We are working
+   on improving this situation. In the meantime, we suggest that you use the
+   Linux subsystem on Windows.
 
 Requirements
 ------------

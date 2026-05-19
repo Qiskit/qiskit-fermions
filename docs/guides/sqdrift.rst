@@ -3,7 +3,7 @@
 Generate SqDRIFT circuits
 =========================
 
-With `SQD`_, you must choose an ansatz from which to sample bitstrings.  
+With `SQD`_, you must choose an ansatz from which to sample bitstrings.
 The `SqDRIFT`_ variant uses an ensemble of time-evolution circuits
 constructed directly from the target Hamiltonian instead.
 This is achieved by subsampling smaller time-evolution operators from the
@@ -72,7 +72,7 @@ detail in :ref:`this guide <grouping_explanation>`.
 3. Prepare the time evolution circuit
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-In this step, we prepare the Hamiltonian's time evolution circuit and the 
+In this step, we prepare the Hamiltonian's time evolution circuit and the
 base circuit from which to draw samples. The
 :mod:`qiskit_fermions.circuit.library` contains all the required
 components to do so, in compliance with Qiskit conventions.
@@ -110,8 +110,8 @@ Here, we are using the :func:`.jordan_wigner` fermion-to-qubit mapping to
 convert the Hamiltonian expressed in terms of fermions to be expressed in Pauli strings instead. This
 can be done directly as part of the transpilation process by using the
 :class:`.EvolutionSynthesis` transpilation pass plugin. Here, we are using
-:func:`.generate_preset_jw_pass_manager` to build 
-:class:`.FermionicStagedPassManager`, which ensures that 
+:func:`.generate_preset_jw_pass_manager` to build
+:class:`.FermionicStagedPassManager`, which ensures that the
 Jordan-Wigner encoding is uses consistently for all circuit instructions.
 
 Crucially, we add the :class:`.QDriftTrotterization` transpilation pass to the
@@ -209,7 +209,7 @@ Next steps
 ^^^^^^^^^^
 
 Now that we have successfully generated an ensemble of circuits, we can sample
-bitstrings from them. To do so, the circuits must be executed on hardware. 
+bitstrings from them. To do so, the circuits must be executed on hardware.
 Refer to the `Qiskit
 documentation <https://quantum.cloud.ibm.com/docs/guides/intro-to-patterns>`_
 for detailed instructions.
