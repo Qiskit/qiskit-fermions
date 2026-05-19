@@ -41,3 +41,5 @@ this package:
    operators
    grouping
    mappers
+   circuit
+   transpilation

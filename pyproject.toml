@@ -63,6 +63,7 @@ basetest = [
 doctest = [
     {include-group = "basetest"},
     "rustworkx[mpl]",
+    "pylatexenc",
     "sybil>=9.3.0",
 ]
 test = [

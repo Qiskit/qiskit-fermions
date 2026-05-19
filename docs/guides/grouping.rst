@@ -52,7 +52,7 @@ according to the `line flow sets` as shown in Figure 1c of [1]_.
     ...     edge_labels=str,
     ...     with_labels=True,
     ... )
-    <Figure size 640x480 with 1 Axes>
+    <Figure size ... with 1 Axes>
 
 Here, we have a simple two by three lattice of Majorana modes connected by
 directed edges. Each edge represents a term in our operator acting on the two
