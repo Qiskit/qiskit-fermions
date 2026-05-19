@@ -48,7 +48,7 @@ design principles:
 
 .. _sparse_term_representation:
 
-Sparse Data Structure
+Sparse data structure
 ---------------------
 
 All operators use a **sparse representation** where only non-identity operations
@@ -65,7 +65,7 @@ unchanged in systems with many more modes since unaffected modes are implicitly 
 Note that identical terms are preserved separately during arithmetic operations
 and must be explicitly combined if needed.
 
-Internal Storage Format
+Internal storage format
 ~~~~~~~~~~~~~~~~~~~~~~~
 
 Internally, operators are stored using arrays inspired by sparse matrix data formats:
@@ -138,7 +138,7 @@ construction using the sparse arrays:
        qf_ferm_op_free(op1);
        qf_ferm_op_free(op2);
 
-Convenient Construction Methods
+Convenient construction methods
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 For Python developers, several convenient construction methods are available that
@@ -174,7 +174,7 @@ without worrying about managing coefficient, mode, and boundary arrays:
 
 .. _term_iteration_and_reconstruction:
 
-Term Iteration and Reconstruction
+Term iteration and reconstruction
 ----------------------------------
 
 Operators provide a consistent iteration interface via :meth:`.OperatorTrait.iter_terms`
@@ -218,7 +218,7 @@ You can then reconstruct a new operator from the transformed terms using
 
 .. _mode_based_indexing:
 
-Mode-based Indexing
+Mode-based indexing
 -------------------
 
 All operator representations refer to the indices that their terms act upon as
@@ -258,7 +258,7 @@ given operation.
 
 .. _term_grouping:
 
-Term Grouping and Commutation Relationships
+Term grouping and commutation relationships
 -------------------------------------------
 
 Like the coefficients and mode indices, operators can optionally store a **groups array**
@@ -308,7 +308,7 @@ For detailed guidance on how to group operator terms in your workflows, see
 
 .. _arithmetic_and_mathematical_operations:
 
-Arithmetic and Mathematical Operations
+Arithmetic and mathematical operations
 ---------------------------------------
 
 All operators implement the :class:`.OperatorTrait` protocol, which provides
@@ -390,7 +390,7 @@ reference of all available operations.
 
 .. _operator_term_ordering:
 
-Operator Term Ordering and Normal Forms
+Operator term ordering and normal forms
 ---------------------------------------
 
 A fundamental challenge in quantum operator algebra is that mathematically

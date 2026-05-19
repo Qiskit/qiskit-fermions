@@ -1,14 +1,14 @@
 .. _mappers_explanation:
 
-Mapping Operator Representations
+Mapping operator representations
 ================================
 
 **Mappers** are routines that transform operators from one representation to another
 while preserving mathematical equivalence. They enable you to work flexibly across
 different operator algebras and prepare operators for quantum circuit execution.
 
-Implementing Custom Mappers
-----------------------------
+Implementing custom mappers
+---------------------------
 
 The mappers module is designed to make it straightforward to implement custom
 mappings. The key insight is that mappers work by transforming the fundamental
@@ -66,7 +66,8 @@ The key steps in any custom mapper are:
 2. **Use one of the provided mapping function**: the :mod:`~qiskit_fermions.mappers`
    module provides utility functions to handle iteration over the operator terms and
    subsequent application of the custom action map for the various operator
-   representations provided by the :mod:`~qiskit_fermions.operators` module.
+   representations provided by the :mod:`~qiskit_fermions.operators` module. For example,
+   :func:`.map_majorana_action_generators` works with Majorana operators.
 
 3. **Get the result**: The mapping function returns an operator in the target
    representation with the transformation applied consistently across all terms.
@@ -80,7 +81,7 @@ term in the operator while preserving mathematical equivalence.
    Of course, you may also iterate the terms of an operator manually rather than
    use one of the provided iterator functions.
 
-Library Implementations
+Library implementations
 -----------------------
 
 The :mod:`~qiskit_fermions.mappers.library` module provides efficient, thoroughly

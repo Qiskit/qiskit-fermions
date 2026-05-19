@@ -163,7 +163,7 @@ ensemble of circuits to generate:
 (Optional) Optimize the fermionic mode indexing
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-One can add an additional optimization step to the transpilation pipeline which
+You can add an additional optimization step to the transpilation pipeline that
 minimizes the distance of the fermionic excitation spans by relabeling the
 fermionic mode indices. This optimization was introduced in the `SqDRIFT`_ paper
 and is implemented by :func:`.build_excitation_span_minimization_model`. It can

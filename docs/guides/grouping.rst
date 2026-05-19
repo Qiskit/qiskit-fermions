@@ -31,7 +31,7 @@ Usage
 
 The simplest way to define an operator grouping is by setting the target
 operator's ``groups`` attribute. Below is an example for grouping terms
-according to the `line flow sets` as shown in Fig. 1c of [1]_.
+according to the `line flow sets` as shown in Figure 1c of [1]_.
 
 .. plot::
    :alt: A simple directed graph on which we define our MajoranaOperator.
