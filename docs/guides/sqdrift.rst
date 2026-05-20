@@ -64,6 +64,8 @@ detail in :ref:`this guide <grouping_explanation>`.
        >>>
        >>> exit_code = group_terms_by_electronic_structure(hamil, num_modes)
        >>> assert exit_code is None
+       >>> print(hamil.groups)  # the groups attribute now contains some list of group indices
+       [0, ...]
 
     .. code-block:: c
 
@@ -204,6 +206,12 @@ pass:
    Using the automatic optimization inside :class:`.RelabelModes` (which
    leverages :func:`.build_excitation_span_minimization_model`) requires the
    optional dependency managed by :data:`.HAS_PYOMO`.
+
+.. important::
+   In order to perform the correct subspace diagonalization, the bitstrings
+   sampled from circuits that were transpiled with the :class:`.RelabelModes`
+   optimization pass must be post-processed based on the ``permutation``
+   information contained in the circuits' metadata!
 
 Next steps
 ^^^^^^^^^^
