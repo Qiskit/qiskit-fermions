@@ -1,10 +1,10 @@
 .. _grouping_explanation:
 
-Grouping operator terms: exploiting operator structure
+Group operator terms: exploit the operator structure
 ======================================================
 
 As described in the :ref:`operators guide <term_grouping>`, operators can store a
-**groups array**—an optional part of the sparse data structure that associates each
+**groups array** - an optional part of the sparse data structure that associates each
 term with a group index. Terms sharing the same group index form a group, enabling
 systematic exploitation of structure in downstream processing.
 
@@ -15,7 +15,7 @@ or problem-specific symmetries), you can unlock several benefits:
   quantum circuits, reducing circuit depth and gate count.
 
 - **Physical structure preservation**: Groups encode meaningful structure from the
-  original problem (e.g., interaction patterns, symmetries), that can be exploited
+  original problem (for example, interaction patterns or symmetries), that can be exploited
   for more physically meaningful decompositions.
 
 - **Flow set selection**: Grouping can naturally encode flow sets and other graph-theoretic
@@ -31,7 +31,7 @@ Usage
 
 The simplest way to define an operator grouping is by setting the target
 operator's ``groups`` attribute. Below is an example for grouping terms
-according to the `line flow sets` as shown in Figure 1c of [1]_.
+according to the *line flow sets* as shown in Figure 1c of [1]_.
 
 .. plot::
    :alt: A simple directed graph on which we define our MajoranaOperator.

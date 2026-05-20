@@ -12,11 +12,11 @@ Implementing custom mappers
 
 The mappers module is designed to make it straightforward to implement custom
 mappings. The key insight is that mappers work by transforming the fundamental
-actions (creation, annihilation, Majorana, etc.) that compose an operator, then
+actions (creation, annihilation, Majorana, and so on) that compose an operator, then
 combining these transformed actions according to the target representation's rules.
 
-Here's a concrete example: implementing a Jordan-Wigner transformation that maps
-a :class:`.MajoranaOperator` to a qubit operator using :func:`.map_majorana_action_generators`:
+Implementing a Jordan-Wigner transformation that maps
+a :class:`.MajoranaOperator` to a qubit operator using :func:`.map_majorana_action_generators` is a concrete example:
 
 .. tab-set-code::
 
@@ -57,15 +57,15 @@ a :class:`.MajoranaOperator` to a qubit operator using :func:`.map_majorana_acti
        // For custom mappings in C, you will need to perform the iteration and
        // conversion logic entirely by yourself.
 
-The key steps in any custom mapper are:
+The key steps to implement any custom mapper are:
 
 1. **Define action transformation**: Specify how each action (indexed by mode) maps
    to the target representation. In the example above, Majorana actions map to Pauli
    strings according to Jordan-Wigner rules.
 
-2. **Use one of the provided mapping function**: the :mod:`~qiskit_fermions.mappers`
-   module provides utility functions to handle iteration over the operator terms and
-   subsequent application of the custom action map for the various operator
+2. **Use one of the provided mapping functions**: the :mod:`~qiskit_fermions.mappers`
+   module provides utility functions to handle iterating over the operator terms and
+   subsequent applications of the custom action map for the operator
    representations provided by the :mod:`~qiskit_fermions.operators` module. For example,
    :func:`.map_majorana_action_generators` works with Majorana operators.
 
@@ -78,18 +78,18 @@ term in the operator while preserving mathematical equivalence.
 
 .. hint::
 
-   Of course, you may also iterate the terms of an operator manually rather than
-   use one of the provided iterator functions.
+   Of course, you can also iterate the terms of an operator manually rather than
+   using one of the provided iterator functions.
 
 Library implementations
 -----------------------
 
 The :mod:`~qiskit_fermions.mappers.library` module provides efficient, thoroughly
 tested implementations of common mappings. These follow the same underlying pattern
-as custom mappers but are optimized for production use and available in both - the
-Python and C API.
+as custom mappers but are optimized for production use and available in both the
+Python and C APIs.
 
-Here's an example showing a library mapper applied to the same :class:`.MajoranaOperator`
+Following is an example showing a library mapper applied to the same :class:`.MajoranaOperator`
 from the custom mapper section, demonstrating equivalent results:
 
 .. tab-set-code::

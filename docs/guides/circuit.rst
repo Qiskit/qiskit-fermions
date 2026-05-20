@@ -6,7 +6,7 @@ Working with fermionic circuits
 .. important::
 
    The concepts in this guide are currently available only in the Python API.
-   Equivalent functionality will be made available via the C API in a future
+   Equivalent functionality will be made available through the C API in a future
    release.
 
 This guide explains how to use the :class:`.FermionicCircuit` to implement
@@ -21,14 +21,14 @@ fermionic Hamiltonian on a qubit-based architecture:
 
 1. Define the fermionic Hamiltonian (for example, :math:`H = \sum_{pq} h_{pq}
    c^\dagger_p c_q`).
-2. Map it to a qubit operator (for example, using the Jordan-Wigner mapping).
+2. Map it to a qubit operator (for example, by using the Jordan-Wigner mapping).
 3. Implement the time evolution in qubit space (using Trotterization or other
    methods).
 
 This approach has a fundamental limitation: early mapping to qubits discards
 problem-aware knowledge about the fermionic structure. Standard optimization
 passes cannot exploit fermionic symmetries or allowed term reorderings,
-resulting in suboptimal circuits with unnecessary depth and gate count.
+resulting in suboptimal circuits with unnecessary depths and gate counts.
 
 The :class:`.FermionicCircuit` enables a better workflow:
 
@@ -47,13 +47,13 @@ qubits, providing a cleaner separation of concerns.
 Build a fermionic circuit
 -------------------------
 
-Now let's implement the time-evolution example from the previous section.
+The example below implements the time-evolution discussed in the previous section.
 Construct a :class:`.FermionicCircuit` by specifying the number of fermionic
 modes, then add fermionic gates from the :mod:`~qiskit_fermions.circuit.library`
 to build your computation.
 
-The example below demonstrates how to incorporate domain knowledge into your
-operators using :ref:`operator term grouping <grouping_explanation>`. By
+The example also demonstrates how to incorporate domain knowledge into your
+operators by using :ref:`operator term grouping <grouping_explanation>`. By
 assigning group indices to your Hamiltonian terms, you preserve structural
 information that optimization passes can exploit throughout the transpilation
 stack.
@@ -111,9 +111,9 @@ stack.
    <Figure size ... with 1 Axes>
 
 Notice how the operator term grouping is preserved even in simple operations
-like decomposition. While a separate guide will cover full transpilation to
-qubits, this demonstrates how structural information flows through the circuit
-stack.
+like decomposition. This demonstrates how structural information flows through the circuit
+stack. To understand the full transpilation to
+qubits, refer to the `Transpiling fermionic circuits <transpilation>`__  guide.
 
 Generic mode indexing
 ---------------------
@@ -126,13 +126,13 @@ choice mirrors the operators module and ensures maximum flexibility.
 For example, you can implement time-evolution for any operator implementing the
 :class:`.OperatorTrait` protocol, regardless of its mathematical representation.
 
-Transpiling fermionic circuits
+Transpile fermionic circuits
 ------------------------------
 
-In order to actually implement your quantum algorithm represented by your
+To implement the quantum algorithm represented by your
 :class:`.FermionicCircuit` it must be transpiled to a
-:class:`~qiskit.circuit.QuantumCircuit`. You can learn how to do this in
-:ref:`this guide <transpilation_explanation>`.
+:class:`~qiskit.circuit.QuantumCircuit`. You can learn how to do this in the
+:ref:`Transpile fermionic circuits <transpilation_explanation>` guide.
 
 Next steps
 ----------

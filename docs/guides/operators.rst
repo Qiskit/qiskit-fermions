@@ -12,34 +12,34 @@ Overview
 The operator representations provided by this module share several fundamental
 design principles:
 
-- **Sparse Data Structure** (`read more <sparse_term_representation_>`_):
+- **`Sparse data structure <sparse_term_representation_>`_**:
   Operators encode only non-identity operations. The internal data layout is
   generally inspired by sparse matrix data formats, enabling efficient storage
   and computation for systems with many modes but relatively few significant
   contributions.
 
-- **Term Iteration and Reconstruction** (`read more <term_iteration_and_reconstruction_>`_):
+- **`Term iteration and reconstruction <term_iteration_and_reconstruction_>`_**:
   Despite internal sparse storage, operators provide a consistent iteration interface
   that lets you inspect, filter, and transform terms without understanding the
   underlying data structure, then reconstruct new operators from modified terms.
 
-- **Mode-based Indexing** (`read more <mode_based_indexing_>`_):
+- **`Mode-based indexing <mode_based_indexing_>`_**:
   Operators use abstract mode indices to label fermionic degrees of freedom,
   enabling flexible mapping from physical systems to the operator representation.
 
-- **Built-in Term Grouping** (`read more <term_grouping_>`_):
+- **`Built-in term grouping <term_grouping_>`_**:
   Operators natively support grouping information that associates terms with
   group indices. This enables optimizations and physical structure preservation
-  without requiring separate data structures. See :ref:`the grouping explanation
+  without requiring separate data structures. See the :ref:`grouping 
   guide <grouping_explanation>` for practical usage.
 
-- **Rich Arithmetic Interface** (`read more <arithmetic_and_mathematical_operations_>`_):
+- **`Rich arithmetic interface <arithmetic_and_mathematical_operations_>`_**:
   All operators implement a consistent set of arithmetic operations (addition,
-  multiplication, composition) and mathematical functions via the
+  multiplication, and composition) and mathematical functions by using the
   :class:`.OperatorTrait` protocol, enabling uniform code across different
   operator types.
 
-- **Term Ordering and Normal Forms** (`read more <operator_term_ordering_>`_):
+- **`Term ordering and normal Formse <operator_term_ordering_>`_**:
   Mathematically equivalent operators can have very different representations and
   behavior in quantum algorithms. All operator representations support various
   normal forms (based on algebra-specific commutation relations) to achieve
@@ -59,7 +59,7 @@ This approach dramatically reduces memory usage and computation time, especially
 systems with many modes but relatively few significant contributions. By encoding only
 non-identity operations, operations focus only on what matters, enabling work with large
 systems that would be infeasible with dense representations. Additionally, operators
-naturally scale to any number of modes—an operator acting on modes ``{0, 1}`` works
+naturally scale to any number of modes - an operator acting on modes ``{0, 1}`` works
 unchanged in systems with many more modes since unaffected modes are implicitly identity.
 
 Note that identical terms are preserved separately during arithmetic operations
@@ -68,22 +68,22 @@ and must be explicitly combined if needed.
 Internal storage format
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-Internally, operators are stored using arrays inspired by sparse matrix data formats:
+Internally, operators are stored in arrays inspired by sparse matrix data formats:
 
 - **Coefficients array**: The complex coefficient for each term
 - **Mode indices array**: The fermionic modes that each action acts upon
-- **Boundaries array**: Indices marking where each term's modes begin and end in the modes array
+- **Boundaries array**: Indices marking where each term's modes begin and end in the mode array
 
 .. important::
 
-   Additional arrays may be present depending on the operator type. For example,
+   Additional arrays might be present depending on the operator type. For example,
    :class:`.FermionOperator` instances include an **actions array** of booleans
    that specifies the type of fermionic action acting on the respective mode
    index. Majorana operators do not require this distinction. See the API
    documentation for your specific operator type to understand the full storage
    format.
 
-The following examples show how these arrays are organized. First, here's a direct
+The following examples show how these arrays are organized. First is a direct
 construction using the sparse arrays:
 
 .. tab-set-code::
@@ -147,7 +147,7 @@ without worrying about managing coefficient, mode, and boundary arrays:
 
 .. hint::
 
-   Individual operator implementations may support additional construction methods
+   Individual operator implementations might support additional construction methods
    suited to their specific use case. Check the API documentation for your operator
    type to see all available construction options.
 
