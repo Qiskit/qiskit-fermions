@@ -112,7 +112,7 @@ can be done directly as part of the transpilation process by using the
 :class:`.EvolutionSynthesis` transpilation pass plugin. Here, we are using
 :func:`.generate_preset_jw_pass_manager` to build
 :class:`.FermionicStagedPassManager`, which ensures that the
-Jordan-Wigner encoding is uses consistently for all circuit instructions.
+Jordan-Wigner encoding is used consistently for all circuit instructions.
 
 Crucially, we add the :class:`.QDriftTrotterization` transpilation pass to the
 ``optimization`` stage of the transpilation pipeline. This ensures that we do

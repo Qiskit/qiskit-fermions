@@ -29,7 +29,7 @@ The :class:`.FermionicStagedPassManager` splits transpilation into four stages:
    from the number of fermionic modes.
 
 **Synthesis**
-   Converts fermionic gates to qubit operations using the chosen fermion-to-qubit
+   Converts fermionic gates to qubit operations by using the chosen fermion-to-qubit
    mapping. :class:`.FermionicGate` instances are transformed into sequences of
    standard quantum gates.
 
@@ -98,7 +98,7 @@ Jordan-Wigner fermion-to-qubit mapping:
 Compare with the traditional workflow
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The :ref:`fermionic circuits guide <fermionic_circuit_explanation>` describes
+The :ref:`fermionic circuits <fermionic_circuit_explanation>` guide describes
 how the traditional workflow performs fermion-to-qubit encoding *before*
 building the :class:`~qiskit.circuit.QuantumCircuit`. Compare the two
 approaches:

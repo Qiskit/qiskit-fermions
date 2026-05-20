@@ -177,10 +177,10 @@ without worrying about managing coefficient, mode, and boundary arrays:
 Term iteration and reconstruction
 ----------------------------------
 
-Operators provide a consistent iteration interface via :meth:`.OperatorTrait.iter_terms`
+Operators provide a consistent iteration interface by using :meth:`.OperatorTrait.iter_terms`
 despite their internal sparse representation. This allows you to inspect, filter,
 or transform terms without needing to understand the underlying data structure.
-You can then reconstruct a new operator from the transformed terms using
+You can then reconstruct a new operator from the transformed terms by using
 :meth:`.OperatorTrait.from_terms`.
 
 .. tab-set-code::
@@ -238,19 +238,19 @@ given operation.
    **Current implementations use spinless modes**: All operator representations
    currently provided by this module treat modes as spinless fermionic degrees
    of freedom. This means if your system has both spin-up and spin-down electrons
-   or fermions, you must explicitly map them to distinct modes (e.g., modes 0-3
+   or fermions, you must explicitly map them to distinct modes (for example, modes 0-3
    for spin-up of 4 spatial orbitals, modes 4-7 for spin-down, or any other
    convention you choose).
 
    This design keeps the core representations simple and general while avoiding
    imposing a specific spin-ordering convention. Utility modules like
    :mod:`qiskit_fermions.operators.library` provide convenience functions
-   (e.g., :meth:`.FCIDump.from_file`) that handle such mappings for you when
+   (for example, :meth:`.FCIDump.from_file`) that handle such mappings for you when
    loading electronic structure data.
 
 .. hint::
 
-   As the package evolves, spinful operator representations may be added that
+   As the package evolves, spinful operator representations might be added that
    natively support spin degrees of freedom in their data model. These will be
    clearly distinguished from the current spinless implementations and will
    coexist with them in the module.
@@ -265,13 +265,13 @@ Like the coefficients and mode indices, operators can optionally store a **group
 that associates each term with a group index. By integrating grouping directly into the
 operator representation as part of the sparse data structure, grouping information
 naturally travels with the operator through transformations. This enables systematic
-exploitation of structure—whether from physical properties, algebraic relationships, or
+exploitation of structure - whether from physical properties, algebraic relationships, or
 problem-specific symmetries. The structured information can then be used in downstream
-operations like circuit synthesis and decomposition, via methods like
+operations like circuit synthesis and decomposition by using methods like
 :meth:`.OperatorTrait.split_out_groups`.
 
 For detailed guidance on how to group operator terms in your workflows, see
-:ref:`the grouping explanation guide <grouping_explanation>`.
+the :ref:`grouping <grouping_explanation>` guide.
 
 .. tab-set-code::
 
@@ -312,7 +312,7 @@ Arithmetic and mathematical operations
 ---------------------------------------
 
 All operators implement the :class:`.OperatorTrait` protocol, which provides
-a unified set of operations across different operator types. This ensures code
+a unified set of operations across different operator types. This ensures that code
 written for one operator representation works uniformly with others.
 
 The protocol includes arithmetic operations (addition, multiplication,
@@ -381,7 +381,7 @@ reference of all available operations.
 .. hint::
 
    While the :class:`.OperatorTrait` protocol provides a common interface,
-   individual operator implementations may offer additional convenience methods
+   individual operator implementations might offer additional convenience methods
    not part of the protocol. For example, some operators provide an
    ``is_hermitian()`` method that implements exactly this check. Always consult
    the API documentation for your specific operator type to discover all
@@ -410,7 +410,7 @@ operator forms for correctness and efficiency.
 
 .. important::
 
-   Different operator representations may implement normal ordering based on
+   Different operator representations might implement normal ordering based on
    different commutation relations appropriate to their algebra. For example,
    fermionic normal ordering uses anticommutation relations (:math:`\{c_i, c_j^\dagger\} = \delta_{ij}`),
    while Majorana normal ordering uses different algebra conventions
