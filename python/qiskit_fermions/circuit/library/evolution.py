@@ -20,18 +20,18 @@ from .. import FermionicGate
 
 
 class Evolution(FermionicGate):
-    """Implements the time-evolution of an operator."""
+    """Implements the time evolution of an operator."""
 
     def __init__(self, num_modes: int, operator: OperatorTrait, time: float = 1.0) -> None:
         """Initializes an Evolution gate.
 
         Args:
             num_modes: the number of fermionic modes on which this gate acts.
-            operator: the operator under which to time-evolve the acted-upon fermionic modes.
+            operator: the operator under which to time evolve the acted-upon fermionic modes.
             time: the evolution time.
         """
         self.operator = operator
-        """The operator under which to time-evolve the acted-upon fermionic modes."""
+        """The operator under which to time evolve the acted-upon fermionic modes."""
 
         super().__init__(
             "Evolution", num_modes, [time], label=f"evolve({' '.join(str(operator).split())})"

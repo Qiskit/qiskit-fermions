@@ -47,15 +47,15 @@ qubits, providing a cleaner separation of concerns.
 Build a fermionic circuit
 -------------------------
 
-The example below implements the time-evolution discussed in the previous section.
-Construct a :class:`.FermionicCircuit` by specifying the number of fermionic
-modes, then add fermionic gates from the :mod:`~qiskit_fermions.circuit.library`
-to build your computation.
+The example below implements the time evolution discussed in the previous section.
+It constructs a :class:`.FermionicCircuit` by specifying the number of fermionic
+modes, then adds fermionic gates from the :mod:`qiskit_fermions.circuit.library`
+to implement the time evolution.
 
-The example also demonstrates how to incorporate domain knowledge into your
-operators by using :ref:`operator term grouping <grouping_explanation>`. By
-assigning group indices to your Hamiltonian terms, you preserve structural
-information that optimization passes can exploit throughout the transpilation
+The example also demonstrates how to incorporate domain knowledge into an
+operator by using :ref:`operator term grouping <grouping_explanation>`. By
+assigning group indices to the Hamiltonian terms, structural information gets
+preserved that optimization passes can exploit throughout the transpilation
 stack.
 
 .. tab-set::
@@ -97,14 +97,14 @@ stack.
          // The C API for FermionicCircuit is not available yet.
 
 .. plot::
-   :alt: A simple FermionicCircuit with a single time-evolution gate.
+   :alt: A simple FermionicCircuit with a single time evolution gate.
    :context: close-figs
 
    >>> circuit.draw("mpl", fold=-1)
    <Figure size ... with 1 Axes>
 
 .. plot::
-   :alt: A decomposed FermionicCircuit with several time-evolution gates.
+   :alt: A decomposed FermionicCircuit with several time evolution gates.
    :context: close-figs
 
    >>> circuit.decompose().draw("mpl", fold=-1)
@@ -123,11 +123,11 @@ Both the :mod:`~qiskit_fermions.operators` module and the
 assumptions about the nature of the modes. A mode is simply an abstract index
 labeling a fermionic degree of freedom, with no inherent semantics. This design
 choice mirrors the operators module and ensures maximum flexibility.
-For example, you can implement time-evolution for any operator implementing the
+For example, you can implement time evolution for any operator implementing the
 :class:`.OperatorTrait` protocol, regardless of its mathematical representation.
 
 Transpile fermionic circuits
-------------------------------
+----------------------------
 
 To implement the quantum algorithm represented by your
 :class:`.FermionicCircuit` it must be transpiled to a
@@ -137,7 +137,7 @@ To implement the quantum algorithm represented by your
 Next steps
 ----------
 
-- Learn about available fermionic gates in the :mod:`~qiskit_fermions.circuit.library`
+- Learn about available fermionic gates in the :mod:`qiskit_fermions.circuit.library`
   documentation.
 - Explore the :ref:`operators explanation guide <operators_explanation>` to understand
   how to construct fermionic Hamiltonians that you can use with fermionic circuits.

@@ -4,9 +4,9 @@ Generate SqDRIFT circuits
 =========================
 
 With `SQD`_, you must choose an ansatz from which to sample bitstrings.
-The `SqDRIFT`_ variant uses an ensemble of time-evolution circuits
+The `SqDRIFT`_ variant uses an ensemble of time evolution circuits
 constructed directly from the target Hamiltonian instead.
-This is achieved by subsampling smaller time-evolution operators from the
+This is achieved by subsampling smaller time evolution operators from the
 Hamiltonian based on its coefficients, which is known as the `qDRIFT`_
 Trotterization method.
 
@@ -50,7 +50,7 @@ This action changes the operator coefficient distribution that the qDRIFT
 protocol samples from, but it does not affect its convergence guarantees.
 Crucially, grouping terms that are related by symmetry results in a favorable
 cancellation of Pauli terms, resulting in an overall shorter circuit depth when
-time-evolving a state under their action.
+time evolving a state under their action.
 
 The :mod:`qiskit_fermions.operators.grouping` module provides convenience
 functions for grouping an operator's terms. This is explained in more

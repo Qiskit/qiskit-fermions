@@ -9,7 +9,7 @@ Transpiling fermionic circuits
    Equivalent functionality will be made available via the C API in a future release.
 
 This guide explains how to transpile a :class:`.FermionicCircuit` to a standard
-:class:`~qiskit.circuit.QuantumCircuit`. We continue with the same time-evolution
+:class:`~qiskit.circuit.QuantumCircuit`. We continue with the same time evolution
 example from the :ref:`fermionic circuits guide <fermionic_circuit_explanation>`.
 
 Transpilation stages
@@ -88,7 +88,7 @@ Jordan-Wigner fermion-to-qubit mapping:
          // The C API for transpilation will be made available in a future release.
 
 .. plot::
-   :alt: The transpiled QuantumCircuit of the fermionic time-evolution.
+   :alt: The transpiled QuantumCircuit of the fermionic time evolution.
    :context: close-figs
 
    >>> # Draw the transpiled circuit
@@ -122,7 +122,7 @@ approaches:
    <qiskit.circuit.instructionset.InstructionSet object at ...>
 
 .. plot::
-   :alt: The directly constructed QuantumCircuit of the fermionic time-evolution.
+   :alt: The directly constructed QuantumCircuit of the fermionic time evolution.
    :context: close-figs
 
    >>> quantum_circuit.decompose().draw("mpl", fold=-1)
@@ -143,5 +143,3 @@ use cases, you can:
 - Implement custom fermion-to-qubit mappings by creating synthesis plugins (see
   :class:`.F2QSynthesisPlugin`).
 - Build custom transpiler passes.
-
-These advanced topics will be covered in future guides.
