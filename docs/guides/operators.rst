@@ -12,40 +12,41 @@ Overview
 The operator representations provided by this module share several fundamental
 design principles:
 
-- **`Sparse data structure <sparse_term_representation_>`_**:
+- |sparse_term_representation|_:
   Operators encode only non-identity operations. The internal data layout is
   generally inspired by sparse matrix data formats, enabling efficient storage
   and computation for systems with many modes but relatively few significant
   contributions.
 
-- **`Term iteration and reconstruction <term_iteration_and_reconstruction_>`_**:
+- |term_iteration_and_reconstruction|_:
   Despite internal sparse storage, operators provide a consistent iteration interface
   that lets you inspect, filter, and transform terms without understanding the
   underlying data structure, then reconstruct new operators from modified terms.
 
-- **`Mode-based indexing <mode_based_indexing_>`_**:
+- |mode_based_indexing|_:
   Operators use abstract mode indices to label fermionic degrees of freedom,
   enabling flexible mapping from physical systems to the operator representation.
 
-- **`Built-in term grouping <term_grouping_>`_**:
+- |term_grouping|_:
   Operators natively support grouping information that associates terms with
   group indices. This enables optimizations and physical structure preservation
   without requiring separate data structures. See the :ref:`grouping 
   guide <grouping_explanation>` for practical usage.
 
-- **`Rich arithmetic interface <arithmetic_and_mathematical_operations_>`_**:
+- |arithmetic_and_mathematical_operations|_:
   All operators implement a consistent set of arithmetic operations (addition,
   multiplication, and composition) and mathematical functions by using the
   :class:`.OperatorTrait` protocol, enabling uniform code across different
   operator types.
 
-- **`Term ordering and normal Formse <operator_term_ordering_>`_**:
+- |operator_term_ordering|_:
   Mathematically equivalent operators can have very different representations and
   behavior in quantum algorithms. All operator representations support various
   normal forms (based on algebra-specific commutation relations) to achieve
   canonical, predictable, and optimizable operator representations.
 
 
+.. |sparse_term_representation| replace:: **Sparse data structure**
 .. _sparse_term_representation:
 
 Sparse data structure
@@ -172,6 +173,7 @@ without worrying about managing coefficient, mode, and boundary arrays:
        // The C API uses direct array construction; convenience methods are not available.
 
 
+.. |term_iteration_and_reconstruction| replace:: **Term iteration and reconstruction**
 .. _term_iteration_and_reconstruction:
 
 Term iteration and reconstruction
@@ -216,6 +218,7 @@ You can then reconstruct a new operator from the transformed terms by using
        // :meth:`.OperatorTrait.from_terms` for equivalent functionality.
 
 
+.. |mode_based_indexing| replace:: **Mode-based indexing**
 .. _mode_based_indexing:
 
 Mode-based indexing
@@ -256,6 +259,7 @@ given operation.
    coexist with them in the module.
 
 
+.. |term_grouping| replace:: **Term grouping and commutation relationships**
 .. _term_grouping:
 
 Term grouping and commutation relationships
@@ -306,6 +310,7 @@ the :ref:`grouping <grouping_explanation>` guide.
        QfMajoranaOperator **grouped_ops = qf_maj_op_split_out_groups(op, &num_groups);
 
 
+.. |arithmetic_and_mathematical_operations| replace:: **Arithmetic and mathematical operations**
 .. _arithmetic_and_mathematical_operations:
 
 Arithmetic and mathematical operations
@@ -388,6 +393,7 @@ reference of all available operations.
    available functionality.
 
 
+.. |operator_term_ordering| replace:: **Operator term ordering and normal forms**
 .. _operator_term_ordering:
 
 Operator term ordering and normal forms
