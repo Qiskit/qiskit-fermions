@@ -1,7 +1,7 @@
 .. _grouping_explanation:
 
 Group operator terms: exploit the operator structure
-======================================================
+====================================================
 
 As described in the :ref:`operators guide <term_grouping>`, operators can store a
 **groups array** - an optional part of the sparse data structure that associates each
@@ -11,8 +11,9 @@ systematic exploitation of structure in downstream processing.
 By grouping related terms (whether by physical properties, algebraic relationships,
 or problem-specific symmetries), you can unlock several benefits:
 
-- **Optimized circuit synthesis**: Grouped terms can be more efficiently converted to
-  quantum circuits, reducing circuit depth and gate count.
+- **Optimized circuit synthesis**: Grouped terms carry problem-specific
+  information through the stack, enabling simpler optimization of the
+  synthesized circuits, resulting in reduced circuit depth and gate count.
 
 - **Physical structure preservation**: Groups encode meaningful structure from the
   original problem (for example, interaction patterns or symmetries), that can be exploited
@@ -32,6 +33,11 @@ Usage
 The simplest way to define an operator grouping is by setting the target
 operator's ``groups`` attribute. Below is an example for grouping terms
 according to the *line flow sets* as shown in Figure 1c of [1]_.
+
+.. hint::
+   The :mod:`qiskit_fermions.operators.grouping` module provides convenience
+   methods for automatically identifying structure in an operator and assigning
+   group indices accordingly.
 
 .. plot::
    :alt: A simple directed graph on which we define our MajoranaOperator.

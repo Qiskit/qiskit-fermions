@@ -59,11 +59,11 @@ impl FermionOperatorDataIter {
 ///
 /// .. math::
 ///
-///     \left\{a^\dagger_\alpha, a^\dagger_\beta\right\} =
-///     \left\{a_\alpha, a_\beta\right\} = 0,~~\text{and}~~
-///     \left\{a_\alpha, a^\dagger_\beta\right\} = \delta_{\alpha\beta} \, ,
+///     \left\{a^\dagger_i, a^\dagger_j\right\} =
+///     \left\{a_i, a_j\right\} = 0,~~\text{and}~~
+///     \left\{a_i, a^\dagger_j\right\} = \delta_{ij} \, ,
 ///
-/// where :math:`\alpha` and :math:`\beta` do not distinguish the spin species of the fermionic
+/// where :math:`i` and :math:`j` do not distinguish the spin species of the fermionic
 /// modes they are indexing.
 ///
 /// This makes the definition of the entire operator the following:

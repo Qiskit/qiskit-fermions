@@ -19,9 +19,10 @@ design principles:
   contributions.
 
 - |term_iteration_and_reconstruction|_:
-  Despite internal sparse storage, operators provide a consistent iteration interface
-  that lets you inspect, filter, and transform terms without understanding the
-  underlying data structure, then reconstruct new operators from modified terms.
+  Irrespective of the internal sparse storage, operators provide a consistent
+  iteration interface that lets you inspect, filter, and transform terms without
+  understanding the underlying data structure, then reconstruct new operators
+  from modified terms.
 
 - |mode_based_indexing|_:
   Operators use abstract mode indices to label fermionic degrees of freedom,
@@ -30,13 +31,13 @@ design principles:
 - |term_grouping|_:
   Operators natively support grouping information that associates terms with
   group indices. This enables optimizations and physical structure preservation
-  without requiring separate data structures. See the :ref:`grouping 
+  without requiring separate data structures. See the :ref:`grouping
   guide <grouping_explanation>` for practical usage.
 
 - |arithmetic_and_mathematical_operations|_:
-  All operators implement a consistent set of arithmetic operations (addition,
-  multiplication, and composition) and mathematical functions by using the
-  :class:`.OperatorTrait` protocol, enabling uniform code across different
+  All operators implement a consistent set of arithmetic operations (such as
+  addition, multiplication, and composition) and mathematical functions by using
+  the :class:`.OperatorTrait` protocol, enabling uniform code across different
   operator types.
 
 - |operator_term_ordering|_:
@@ -71,18 +72,19 @@ Internal storage format
 
 Internally, operators are stored in arrays inspired by sparse matrix data formats:
 
-- **Coefficients array**: The complex coefficient for each term
-- **Mode indices array**: The fermionic modes that each action acts upon
-- **Boundaries array**: Indices marking where each term's modes begin and end in the mode array
+- **Coefficients array**: The complex coefficient for each term.
+- **Mode indices array**: The fermionic modes that each action acts upon.
+- **Boundaries array**: Indices marking where each term's modes begin and end in the mode array.
 
 .. important::
 
    Additional arrays might be present depending on the operator type. For example,
    :class:`.FermionOperator` instances include an **actions array** of booleans
    that specifies the type of fermionic action acting on the respective mode
-   index. Majorana operators do not require this distinction. See the API
-   documentation for your specific operator type to understand the full storage
-   format.
+   index. In contrast, the :class:`MajoranaOperator` class doses not require
+   this distinction since it encodes that information in the parity of the mode
+   index. See the API documentation for your specific operator type to
+   understand the full storage format.
 
 The following examples show how these arrays are organized. First is a direct
 construction using the sparse arrays:
@@ -94,8 +96,7 @@ construction using the sparse arrays:
        >>> from qiskit_fermions.operators import FermionOperator
        >>>
        >>> # Construct operators directly using sparse arrays
-       >>> # First operator: 1.0 * c_0 a_1
-       >>> # Actions: True=creation, False=annihilation
+       >>> # First operator: 1.0 * +0 -1
        >>> op1 = FermionOperator(
        ...     coeffs=[1.0],
        ...     actions=[True, False],
@@ -103,7 +104,7 @@ construction using the sparse arrays:
        ...     boundaries=[0, 2],
        ... )
        >>>
-       >>> # Second operator: 1.0 * c_2 a_3
+       >>> # Second operator: 1.0 * +2 -3
        >>> op2 = FermionOperator(
        ...     coeffs=[1.0],
        ...     actions=[True, False],
@@ -146,12 +147,6 @@ For Python developers, several convenient construction methods are available tha
 abstract away the sparse storage details. These make it easier to build operators
 without worrying about managing coefficient, mode, and boundary arrays:
 
-.. hint::
-
-   Individual operator implementations might support additional construction methods
-   suited to their specific use case. Check the API documentation for your operator
-   type to see all available construction options.
-
 .. tab-set-code::
 
     .. code-block:: python
@@ -172,15 +167,21 @@ without worrying about managing coefficient, mode, and boundary arrays:
 
        // The C API uses direct array construction; convenience methods are not available.
 
+.. hint::
+
+   Individual operator implementations might support additional construction methods
+   suited to their specific use case. Check the API documentation for your operator
+   type to see all available construction options.
+
 
 .. |term_iteration_and_reconstruction| replace:: **Term iteration and reconstruction**
 .. _term_iteration_and_reconstruction:
 
 Term iteration and reconstruction
-----------------------------------
+---------------------------------
 
 Operators provide a consistent iteration interface by using :meth:`.OperatorTrait.iter_terms`
-despite their internal sparse representation. This allows you to inspect, filter,
+irrespective of their internal sparse representation. This allows you to inspect, filter,
 or transform terms without needing to understand the underlying data structure.
 You can then reconstruct a new operator from the transformed terms by using
 :meth:`.OperatorTrait.from_terms`.
@@ -214,8 +215,6 @@ You can then reconstruct a new operator from the transformed terms by using
     .. code-block:: c
 
        // WARNING: Term iteration and filtering are not yet available in the C API.
-       // See the Python API documentation for :meth:`.OperatorTrait.iter_terms` and
-       // :meth:`.OperatorTrait.from_terms` for equivalent functionality.
 
 
 .. |mode_based_indexing| replace:: **Mode-based indexing**
@@ -314,14 +313,14 @@ the :ref:`grouping <grouping_explanation>` guide.
 .. _arithmetic_and_mathematical_operations:
 
 Arithmetic and mathematical operations
----------------------------------------
+--------------------------------------
 
 All operators implement the :class:`.OperatorTrait` protocol, which provides
 a unified set of operations across different operator types. This ensures that code
 written for one operator representation works uniformly with others.
 
-The protocol includes arithmetic operations (addition, multiplication,
-composition), structural operations (term iteration, mode support analysis,
+The protocol includes arithmetic operations (such as addition, multiplication,
+and composition), structural operations (term iteration, mode support analysis,
 relabeling), mathematical functions (normal ordering, simplification, equivalence
 checking), and more. See the :class:`.OperatorTrait` documentation for a complete
 reference of all available operations.
@@ -332,7 +331,7 @@ reference of all available operations.
 
        >>> from qiskit_fermions.operators import FermionOperator, cre, ann
        >>>
-       >>> # Construct a Hermitian operator: H = c_0^† c_1 + c_1^† c_0
+       >>> # Construct a Hermitian operator: H = +0 -1 + +1 -0
        >>> op = FermionOperator.from_dict({
        ...     (cre(0), ann(1)): 1.0,
        ...     (cre(1), ann(0)): 1.0
@@ -351,7 +350,7 @@ reference of all available operations.
 
        #include <qiskit_fermions.h>
 
-       // Construct a Hermitian operator: H = c_0^† c_1 + c_1^† c_0
+       // Construct a Hermitian operator: H = +0 -1 + +1 -0
        QkComplex67 coeffs[2] = {{1.0, 0.0}, {1.0, 0.0}};
        uint32_t modes[4] = {0, 1, 1, 0};
        uint32_t boundaries[3] = {0, 2, 4};
@@ -403,8 +402,8 @@ A fundamental challenge in quantum operator algebra is that mathematically
 equivalent operators can be represented in many different ways, each with
 different implications for quantum algorithms. The same operator can be written
 in algebraically equivalent forms - for example, :math:`a^\dagger b` can be
-expressed as :math:`ab + [a^\dagger,b]` - yet these representations lead to
-different behavior in circuit synthesis, simplification, and numerical
+expressed as :math:`ba^\dagger + [a^\dagger,b]` - yet these representations lead
+to different behavior in circuit synthesis, simplification, and numerical
 algorithms.
 
 The operator representations support **normal ordering** operations that
