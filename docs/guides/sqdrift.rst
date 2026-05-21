@@ -1,24 +1,25 @@
-.. _sqdrift_tutorial:
+.. _sqdrift_getting_started:
 
-Generate SqDRIFT Circuits
+Generate SqDRIFT circuits
 =========================
 
-`SqDRIFT`_ is a variant of `SQD`_ that replaces the need to choose an ansatz
-from which to sample bitstrings with an ensemble of time-evolution circuits
-constructed directly from the target Hamiltonian.
-This is achieved by subsampling smaller time-evolution operators from said
+With `SQD`_, you must choose an ansatz from which to sample bitstrings.
+The `SqDRIFT`_ variant uses an ensemble of time evolution circuits
+constructed directly from the target Hamiltonian instead.
+This is achieved by subsampling smaller time evolution operators from the
 Hamiltonian based on its coefficients, which is known as the `qDRIFT`_
 Trotterization method.
 
-This tutorial shows how to generate an ensemble of such randomized circuits.
+This getting-started guide shows how to generate an ensemble of such randomized
+circuits.
 
-1. Hamiltonian Setup
+1. Hamiltonian setup
 ^^^^^^^^^^^^^^^^^^^^
 
-For the purposes of this tutorial, we load the electronic structure Hamiltonian
-of N2 from an FCIDUMP file. Of course, there are also other means of
+For the purposes of this guide, we load the electronic structure Hamiltonian
+of N2 from an FCIDUMP file. Of course, there are other means of
 constructing the :class:`.FermionOperator`. Be sure to check out its
-documentation as well as :mod:`qiskit_fermions.operators.library`.
+documentation, as well as the :mod:`qiskit_fermions.operators.library`.
 
 .. tab-set-code::
 
@@ -27,7 +28,7 @@ documentation as well as :mod:`qiskit_fermions.operators.library`.
        >>> from qiskit_fermions.operators.library import FCIDump
        >>> from qiskit_fermions.operators import FermionOperator
        >>>
-       >>> fcidump = FCIDump.from_file("docs/tutorials/n2.fcidump")
+       >>> fcidump = FCIDump.from_file("docs/guides/n2.fcidump")
        >>> num_modes = 2 * fcidump.norb
        >>> hamil = FermionOperator.from_fcidump(fcidump)
 
@@ -35,7 +36,7 @@ documentation as well as :mod:`qiskit_fermions.operators.library`.
 
        #include <qiskit_fermions.h>
 
-       QfFCIDump* fcidump = qf_fcidump_from_file("docs/tutorials/n2.fcidump");
+       QfFCIDump* fcidump = qf_fcidump_from_file("docs/guides/n2.fcidump");
        QfFermionOperator* hamil = qf_ferm_op_from_fcidump(fcidump);
        uint32_t num_modes = 2 * qf_fcidump_norb(fcidump);
 
@@ -44,15 +45,15 @@ documentation as well as :mod:`qiskit_fermions.operators.library`.
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 In this step, we exploit the many symmetries that are present in the electronic
-structure Hamiltonian by grouping related terms with identical coefficients.
-While doing so changes the operator coefficient distribution which the qDRIFT
-protocol samples from, this does not affect its convergence guarantees.
-Crucially, the grouping of terms related by symmetry results in a favorable
-cancellation of Pauli terms resulting in an overall shorter circuit depth, when
-time-evolving a state under their action.
+structure Hamiltonian by grouping related terms that have identical coefficients.
+This action changes the operator coefficient distribution that the qDRIFT
+protocol samples from, but it does not affect its convergence guarantees.
+Crucially, grouping terms that are related by symmetry results in a favorable
+cancellation of Pauli terms, resulting in an overall shorter circuit depth when
+time evolving a state under their action.
 
 The :mod:`qiskit_fermions.operators.grouping` module provides convenience
-functions for grouping the terms of an operator. This is explained in more
+functions for grouping an operator's terms. This is explained in more
 detail in :ref:`this guide <grouping_explanation>`.
 
 .. tab-set-code::
@@ -63,18 +64,20 @@ detail in :ref:`this guide <grouping_explanation>`.
        >>>
        >>> exit_code = group_terms_by_electronic_structure(hamil, num_modes)
        >>> assert exit_code is None
+       >>> print(hamil.groups)  # the groups attribute now contains some list of group indices
+       [0, ...]
 
     .. code-block:: c
 
        QfExitCode exit = qf_group_terms_by_electronic_structure(hamil, num_modes, false);
 
-3. Prepare the Time-Evolution Circuit
+3. Prepare the time evolution circuit
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-In this step, we prepare the time evolution circuit of our Hamiltonian as the
+In this step, we prepare the Hamiltonian's time evolution circuit and the
 base circuit from which to draw samples. The
-:mod:`qiskit_fermions.circuit.library` provides us will all the required
-components to do so, in a way that fits naturally with Qiskit's conventions.
+:mod:`qiskit_fermions.circuit.library` contains all the required
+components to do so, in compliance with Qiskit conventions.
 
 .. tab-set-code::
 
@@ -106,12 +109,12 @@ transpilation pipeline, allowing the :class:`.FermionicCircuit` constructed abov
 to be directly transpiled to a :external:class:`~qiskit.circuit.QuantumCircuit`.
 
 Here, we are using the :func:`.jordan_wigner` fermion-to-qubit mapping to
-convert the Hamiltonian expressed in terms of fermions to Pauli strings. This
-can be done directly as part of the transpilation process through the use of the
+convert the Hamiltonian expressed in terms of fermions to be expressed in Pauli strings instead. This
+can be done directly as part of the transpilation process by using the
 :class:`.EvolutionSynthesis` transpilation pass plugin. Here, we are using
-:func:`.generate_preset_jw_pass_manager` as a short-hand for building a
-:class:`.FermionicStagedPassManager` which ensures the consistent use of the
-Jordan-Wigner encoding for all circuit instructions.
+:func:`.generate_preset_jw_pass_manager` to build
+:class:`.FermionicStagedPassManager`, which ensures that the
+Jordan-Wigner encoding is used consistently for all circuit instructions.
 
 Crucially, we add the :class:`.QDriftTrotterization` transpilation pass to the
 ``optimization`` stage of the transpilation pipeline. This ensures that we do
@@ -162,7 +165,7 @@ ensemble of circuits to generate:
 (Optional) Optimize the fermionic mode indexing
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-One can add an additional optimization step to the transpilation pipeline which
+You can add an additional optimization step to the transpilation pipeline that
 minimizes the distance of the fermionic excitation spans by relabeling the
 fermionic mode indices. This optimization was introduced in the `SqDRIFT`_ paper
 and is implemented by :func:`.build_excitation_span_minimization_model`. It can
@@ -204,19 +207,24 @@ pass:
    leverages :func:`.build_excitation_span_minimization_model`) requires the
    optional dependency managed by :data:`.HAS_PYOMO`.
 
+.. important::
+   In order to perform the correct subspace diagonalization, the bitstrings
+   sampled from circuits that were transpiled with the :class:`.RelabelModes`
+   optimization pass must be post-processed based on the ``permutation``
+   information contained in the circuits' metadata!
+
 Next steps
 ^^^^^^^^^^
 
-Now that we have successfully generated an ensemble of circuits, we must sample
-bitstrings from them. To do so, the circuits must be sent to hardware for
-execution. We will not cover this here, and instead refer to the `Qiskit
-documentation <https://quantum.cloud.ibm.com/docs/en/guides/intro-to-patterns>`_
-for detailed guides on the various steps involved.
+Now that we have successfully generated an ensemble of circuits, we can sample
+bitstrings from them. To do so, the circuits must be executed on hardware.
+Refer to the `Qiskit
+documentation <https://quantum.cloud.ibm.com/docs/guides/intro-to-patterns>`_
+for detailed instructions.
 
 Once the bitstring samples have been obtained, these can be used in combination
-with the Hamiltonian coefficients to perform the SQD post-processing, a great
-guide for which is written up in the `SQD addon tutorials
-<https://qiskit.github.io/qiskit-addon-sqd/tutorials/index.html>`_.
+with the Hamiltonian coefficients to perform SQD post-processing, as explained in the `SQD addon tutorials
+<https://qiskit.github.io/qiskit-addon-sqd/tutorials/index.html>`_ tutorial.
 
 
 .. _qDRIFT: https://arxiv.org/abs/1811.08017

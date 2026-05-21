@@ -7,19 +7,19 @@ Qiskit Fermions
    If you have feedback, please `open an issue <https://github.com/Qiskit/qiskit-fermions/issues/new/choose>`_.
 
 This package extends Qiskit with tools for working on fermionic systems.
-It follows a similar design philosophy as Qiskit itself:
+It follows a similar design philosophy as Qiskit:
 
-- the core functionality is written in Rust
-- first-party language bindings are provided for both, Python and C
-- the APIs are designed to "feel" similar to Qiskit
+- The core functionality is written in Rust.
+- First-party language bindings are provided for both Python and C.
+- The APIs are designed to "feel" similar to Qiskit.
 
 The scope of this package includes the following functionality:
 
-- several operator data structures
-- a framework to develop operator conversion methods
-- a library of common operator converters
-- a framework to develop quantum circuit synthesis methods
-- a library of common quantum circuit synthesizers
+- Several operator data structures
+- A framework to develop operator conversion methods
+- A library of common operator converters
+- A framework to develop quantum circuit synthesis methods
+- A library of common quantum circuit synthesizers
 
 
 Documentation
@@ -31,7 +31,7 @@ All documentation is available `here <https://qiskit.github.io/qiskit-fermions/>
 Installation
 ------------
 
-Please refer to the `installation instructions <install.rst>`_.
+Refer to the `installation instructions <install.rst>`_.
 
 
 Deprecation Policy
@@ -51,8 +51,7 @@ Contributing
 
 The source code is available `on GitHub <https://github.com/Qiskit/qiskit-fermions>`_.
 
-The developer guide is located at `CONTRIBUTING.md <https://github.com/Qiskit/qiskit-fermions/blob/main/CONTRIBUTING.md>`_
-in the root of this project's repository.
+Follow the instructions in the `Developer guide <https://github.com/Qiskit/qiskit-fermions/blob/main/CONTRIBUTING.md>`_.
 By participating, you are expected to uphold Qiskit's `code of conduct <https://github.com/Qiskit/qiskit/blob/main/CODE_OF_CONDUCT.md>`_.
 
 We use `GitHub issues <https://github.com/Qiskit/qiskit-fermions/issues/new/choose>`_ for tracking requests and bugs.
@@ -69,8 +68,7 @@ License
 
    Documentation Home <self>
    Installation Instructions <install>
-   Explanations <explanations/index>
-   Tutorials <tutorials/index>
+   Guides <guides/index>
    Python API Reference <pydoc/index>
    C API Reference <cdoc/index>
    GitHub <https://github.com/Qiskit/qiskit-fermions>

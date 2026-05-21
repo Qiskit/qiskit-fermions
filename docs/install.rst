@@ -1,11 +1,11 @@
-Installation Instructions
-=========================
+Install ``qiskit-fermions``
+===========================
 
-.. caution::
-   If you are running into issues with the installation, please consult `this
-   issue <https://github.com/Qiskit/qiskit-fermions/issues/4>`_. If that does
-   not resolve your problem, feel free to comment there with a description of
-   your system and problem or leave any general feedback.
+.. hint::
+   Support for Windows is still a work-in-progress. Compiling the C API should
+   be possible, but the Python API is still not fully functional. We are working
+   on improving this situation. In the meantime, we suggest that you use the
+   Linux subsystem on Windows.
 
 Requirements
 ------------
@@ -13,7 +13,7 @@ Requirements
 To compile and install this package, you need to install the following
 dependencies:
 
-- a Python (`>=3.10`) virtual environment
+- A Python (`>=3.10`) virtual environment
 - `pip>=25.1`
 - `The Rust toolchain <https://rust-lang.org/tools/install/>`_
 - `clang <https://clang.llvm.org/>`_
@@ -21,7 +21,7 @@ dependencies:
 Installation
 ------------
 
-Please consult the specific guide for the language bindings you intend to use:
+Consult the appropriate guide for the language bindings you intend to use:
 
 .. toctree::
   :hidden:

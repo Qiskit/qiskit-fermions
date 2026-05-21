@@ -1,16 +1,16 @@
-Python Installation Instructions
-================================
+Install the Python API
+=======================
 
 .. warning::
-   Windows is not yet fully supported by the Python API of ``qiskit-fermions``.
+   Windows is not yet fully supported by the ``qiskit-fermions`` Python API.
    We are actively working on resolving this. Stay tuned for updates!
 
 Requirements
 ------------
 
-You need to have installed Qiskit in the same Python environment as the one you
-intend to install ``qiskit-fermions`` in. The simplest way of doing so is from
-PyPI, but you are free to install Qiskit from source if you wish to.
+Qiskit must be installed in the same Python environment that you
+install ``qiskit-fermions`` in. The simplest way to do this is from
+PyPI, but you can install Qiskit from source if you want to.
 
 .. code:: console
 
@@ -36,7 +36,7 @@ simple:
       $ pip install --group build
 
 3. Install the ``qiskit-fermions`` Python package into your environment with
-   ``--no-build-isolation`` to ensure that ``qiskit`` is available correctly:
+   ``--no-build-isolation`` to ensure that ``qiskit`` is available:
 
    .. code:: console
 
@@ -45,13 +45,13 @@ simple:
    .. hint::
 
       You can also perform an editable install while still compiling the
-      underlying Rust crate in ``release`` mode like so:
+      underlying Rust crate in ``release`` mode:
 
       .. code:: console
 
          $ SETUPTOOLS_RUST_CARGO_PROFILE=release pip install --no-build-isolation -e .
 
-5. (optional) Verify the installation by running the Python unittests:
+5. (optional) Verify the installation by running the Python unit tests:
 
    .. code:: console
 

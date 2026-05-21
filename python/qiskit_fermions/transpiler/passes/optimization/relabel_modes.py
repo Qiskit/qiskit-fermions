@@ -93,7 +93,7 @@ class RelabelModes(TransformationPass):
         occurring fermionic excitations.
 
         .. note::
-           The use of this optimization model is only implemented for time-evolution gates
+           The use of this optimization model is only implemented for time evolution gates
            containing a :class:`.FermionOperator` instance.
         """
 
@@ -166,7 +166,7 @@ class RelabelModes(TransformationPass):
                 raise NotImplementedError(
                     "The optimization model defined by build_excitation_span_minimization_model "
                     "assumes fermionic mode excitations defined in terms of `FermionOperator` "
-                    "instances. Handling time-evolution gates of operators of type {} is not "
+                    "instances. Handling time evolution gates of operators of type {} is not "
                     "implemented.",
                     type(hamil),
                 )
