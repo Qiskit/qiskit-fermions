@@ -15,12 +15,9 @@
 from __future__ import annotations
 
 import numpy as np
-from qiskit.circuit import QuantumCircuit
+from qiskit.circuit import QuantumCircuit, QuantumRegister
 from qiskit.converters import circuit_to_dag
 from qiskit.dagcircuit import DAGCircuit, DAGOpNode
-
-from ... import F2QLayout
-from ..utils import _parse_node_indices
 
 
 class InitializeModesSynthesis:
@@ -38,15 +35,21 @@ class InitializeModesSynthesis:
        - assuming a 1-to-1 mapping of fermionic mode indices to qubit indices
     """
 
-    def run(self, in_node: DAGOpNode, out_dag: DAGCircuit, *, f2q_layout: F2QLayout):
+    def run(
+        self,
+        in_node: DAGOpNode,
+        freg_indices: list[int],
+        out_dag: DAGCircuit,
+        qreg: QuantumRegister,
+    ):
         """Runs this transpilation plugin.
 
         Args:
             in_node: the input fermion-based circuit instruction. When this plugin gets called, the
                 ``in_node.op`` attribute `must` be of type :class:`.InitializeModes`.
+            freg_indices: TODO.
             out_dag: the output qubit-based circuit.
-            f2q_layout: the global transpilation :class:`~qiskit_fermions.transpiler.F2QLayout`
-                setting.
+            qreg: TODO.
 
         .. seealso::
            The documentation of :class:`.F2QSynthesisPlugin` for more detailed explanations of the
@@ -56,25 +59,12 @@ class InitializeModesSynthesis:
             NotImplementedError: when ``in_node`` acts on fermionic modes that are spread across
                 multiple :type:`~qiskit_fermions.circuit.FermionicRegister` instances.
         """
-        encountered_fermionic_registers, global_mode_indices = _parse_node_indices(
-            in_node, f2q_layout
-        )
-
-        if len(encountered_fermionic_registers) > 1:
-            raise NotImplementedError(
-                "Cannot map an InitializeModes gate acting on fermionic modes that are spread "
-                "across multiple FermionicRegister instances."
-            )
-
-        freg = encountered_fermionic_registers.pop()
-        qreg = f2q_layout[freg]
-
         circ = QuantumCircuit(qreg)
 
         local_occupation = in_node.op.occupation
-        global_occupied_indices = np.asarray(global_mode_indices)[np.nonzero(local_occupation)]
+        global_occupied_indices = np.asarray(freg_indices)[np.nonzero(local_occupation)]
         circ.x(global_occupied_indices.tolist())
 
         new_dag = circuit_to_dag(circ)
 
-        out_dag.compose(new_dag, qubits=list(qreg), front=False, inplace=True)
+        out_dag.compose(new_dag, front=False, inplace=True)
