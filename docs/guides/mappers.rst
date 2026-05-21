@@ -44,7 +44,7 @@ a :class:`.MajoranaOperator` to a qubit operator using :func:`.map_majorana_acti
        >>> sparse_pauli_op = map_majorana_action_generators(
        ...     maj_op,
        ...     map_action,
-       ...     lambda: SparsePauliOp.from_sparse_list([("", [], 1)], num_qubits=num_qubits),
+       ...     identity=lambda: SparsePauliOp.from_sparse_list([("", [], 1)], num_qubits=num_qubits),
        ... )
        >>> print(sparse_pauli_op.sort())
        SparsePauliOp(['II', 'IZ', 'XZ'],
@@ -79,12 +79,13 @@ term in the operator while preserving mathematical equivalence.
 .. hint::
 
    Of course, you can also iterate the terms of an operator manually rather than
-   using one of the provided iterator functions.
+   using one of the provided iterator functions. See the section on `term iteration
+   <term_iteration_and_reconstruction>`_ in the operators guide for more details on that.
 
 Library implementations
 -----------------------
 
-The :mod:`~qiskit_fermions.mappers.library` module provides efficient, thoroughly
+The :mod:`qiskit_fermions.mappers.library` module provides efficient, thoroughly
 tested implementations of common mappings. These follow the same underlying pattern
 as custom mappers but are optimized for production use and available in both the
 Python and C APIs.
