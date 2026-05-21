@@ -16,9 +16,8 @@ from __future__ import annotations
 
 from collections.abc import Callable
 
-from qiskit.circuit import QuantumCircuit, QuantumRegister
+from qiskit.circuit import QuantumRegister
 from qiskit.circuit.library import PauliEvolutionGate
-from qiskit.converters import circuit_to_dag
 from qiskit.dagcircuit import DAGCircuit, DAGOpNode
 from qiskit.quantum_info import SparseObservable
 
@@ -79,9 +78,4 @@ class EvolutionSynthesis:
         local_op = in_node.op.operator
         global_op = local_op.relabel_modes(freg_indices)
         pauli_op = self.mapper_fn(global_op, len(qreg)).simplify()
-
-        circ = QuantumCircuit(qreg)
-        circ.append(PauliEvolutionGate(pauli_op, time=in_node.op.params[0]), qreg)
-        new_dag = circuit_to_dag(circ)
-
-        out_dag.compose(new_dag, front=False, inplace=True)
+        out_dag.apply_operation_back(PauliEvolutionGate(pauli_op, time=in_node.op.params[0]), qreg)

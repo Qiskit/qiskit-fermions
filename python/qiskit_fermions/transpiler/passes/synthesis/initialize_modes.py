@@ -15,8 +15,8 @@
 from __future__ import annotations
 
 import numpy as np
-from qiskit.circuit import QuantumCircuit, QuantumRegister
-from qiskit.converters import circuit_to_dag
+from qiskit.circuit import QuantumRegister
+from qiskit.circuit.library import XGate
 from qiskit.dagcircuit import DAGCircuit, DAGOpNode
 
 
@@ -59,12 +59,7 @@ class InitializeModesSynthesis:
             NotImplementedError: when ``in_node`` acts on fermionic modes that are spread across
                 multiple :type:`~qiskit_fermions.circuit.FermionicRegister` instances.
         """
-        circ = QuantumCircuit(qreg)
-
         local_occupation = in_node.op.occupation
         global_occupied_indices = np.asarray(freg_indices)[np.nonzero(local_occupation)]
-        circ.x(global_occupied_indices.tolist())
-
-        new_dag = circuit_to_dag(circ)
-
-        out_dag.compose(new_dag, front=False, inplace=True)
+        for idx in global_occupied_indices:
+            out_dag.apply_operation_back(XGate(), (qreg[idx],))

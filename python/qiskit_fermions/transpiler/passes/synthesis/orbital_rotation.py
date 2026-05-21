@@ -17,9 +17,8 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import numpy as np
-from qiskit.circuit import QuantumCircuit, QuantumRegister
+from qiskit.circuit import QuantumRegister
 from qiskit.circuit.library import PhaseGate, XXPlusYYGate
-from qiskit.converters import circuit_to_dag
 from qiskit.dagcircuit import DAGCircuit, DAGOpNode
 
 if TYPE_CHECKING:
@@ -63,21 +62,15 @@ class OrbitalRotationSynthesis:
             NotImplementedError: when ``in_node`` acts on fermionic modes that are spread across
                 multiple :type:`~qiskit_fermions.circuit.FermionicRegister` instances.
         """
-        circ = QuantumCircuit(qreg)
-
         givens_rotations, phase_shifts = givens_decomposition(in_node.op.rotation_unitary)
         for c, s, i, j in givens_rotations:
             c_angle = np.acos(c)
             if not np.isclose(c_angle, 0.0):
-                circ.append(
+                out_dag.apply_operation_back(
                     XXPlusYYGate(2 * c_angle, np.angle(s) - 0.5 * np.pi),
-                    (freg_indices[i], freg_indices[j]),
+                    (qreg[freg_indices[i]], qreg[freg_indices[j]]),
                 )
         for i, p in enumerate(phase_shifts):
             p_angle = np.angle(p)
             if not np.isclose(p_angle, 0.0):
-                circ.append(PhaseGate(p_angle), (freg_indices[i],))
-
-        new_dag = circuit_to_dag(circ)
-
-        out_dag.compose(new_dag, front=False, inplace=True)
+                out_dag.apply_operation_back(PhaseGate(p_angle), (qreg[freg_indices[i]],))
