@@ -21,12 +21,6 @@ The scope of this package includes the following functionality:
 - A framework to develop quantum circuit synthesis methods
 - A library of common quantum circuit synthesizers
 
-Installation
-------------
-
-Refer to the `installation instructions <install.rst>`_.
-
-
 Deprecation policy
 ------------------
 
@@ -52,3 +46,4 @@ License
 -------
 
 `Apache License 2.0 <https://github.com/Qiskit/qiskit-fermions/blob/main/LICENSE.txt>`_
+
