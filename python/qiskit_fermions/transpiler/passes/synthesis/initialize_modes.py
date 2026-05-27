@@ -15,9 +15,11 @@
 from __future__ import annotations
 
 import numpy as np
-from qiskit.circuit import QuantumRegister
 from qiskit.circuit.library import XGate
 from qiskit.dagcircuit import DAGCircuit, DAGOpNode
+
+from ... import F2QLayout
+from ..utils import map_node_single_register
 
 
 class InitializeModesSynthesis:
@@ -35,21 +37,15 @@ class InitializeModesSynthesis:
        - assuming a 1-to-1 mapping of fermionic mode indices to qubit indices
     """
 
-    def run(
-        self,
-        in_node: DAGOpNode,
-        freg_indices: list[int],
-        out_dag: DAGCircuit,
-        qreg: QuantumRegister,
-    ):
+    def run(self, in_node: DAGOpNode, out_dag: DAGCircuit, *, f2q_layout: F2QLayout) -> None:
         """Runs this transpilation plugin.
 
         Args:
             in_node: the input fermion-based circuit instruction. When this plugin gets called, the
                 ``in_node.op`` attribute `must` be of type :class:`.InitializeModes`.
-            freg_indices: TODO.
             out_dag: the output qubit-based circuit.
-            qreg: TODO.
+            f2q_layout: the global transpilation :class:`~qiskit_fermions.transpiler.F2QLayout`
+                setting.
 
         .. seealso::
            The documentation of :class:`.F2QSynthesisPlugin` for more detailed explanations of the
@@ -59,6 +55,7 @@ class InitializeModesSynthesis:
             NotImplementedError: when ``in_node`` acts on fermionic modes that are spread across
                 multiple :type:`~qiskit_fermions.circuit.FermionicRegister` instances.
         """
+        freg_indices, qreg = map_node_single_register(in_node, f2q_layout)
         local_occupation = in_node.op.occupation
         global_occupied_indices = np.asarray(freg_indices)[np.nonzero(local_occupation)]
         for idx in global_occupied_indices:

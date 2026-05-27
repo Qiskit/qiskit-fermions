@@ -17,7 +17,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import numpy as np
-from qiskit.circuit import QuantumRegister
 from qiskit.circuit.library import PhaseGate, XXPlusYYGate
 from qiskit.dagcircuit import DAGCircuit, DAGOpNode
 
@@ -25,6 +24,9 @@ if TYPE_CHECKING:
     from qiskit_fermions._lib.linalg.givens import givens_decomposition
 else:
     from qiskit_fermions.linalg import givens_decomposition
+
+from ... import F2QLayout
+from ..utils import map_node_single_register
 
 
 class OrbitalRotationSynthesis:
@@ -38,21 +40,15 @@ class OrbitalRotationSynthesis:
        - assuming a 1-to-1 mapping of fermionic mode indices to qubit indices
     """
 
-    def run(
-        self,
-        in_node: DAGOpNode,
-        freg_indices: list[int],
-        out_dag: DAGCircuit,
-        qreg: QuantumRegister,
-    ):
+    def run(self, in_node: DAGOpNode, out_dag: DAGCircuit, *, f2q_layout: F2QLayout) -> None:
         """Runs this transpilation plugin.
 
         Args:
             in_node: the input fermion-based circuit instruction. When this plugin gets called, the
                 ``in_node.op`` attribute `must` be of type :class:`.OrbitalRotation`.
-            freg_indices: TODO.
             out_dag: the output qubit-based circuit.
-            qreg: TODO.
+            f2q_layout: the global transpilation :class:`~qiskit_fermions.transpiler.F2QLayout`
+                setting.
 
         .. seealso::
            The documentation of :class:`.F2QSynthesisPlugin` for more detailed explanations of the
@@ -62,6 +58,7 @@ class OrbitalRotationSynthesis:
             NotImplementedError: when ``in_node`` acts on fermionic modes that are spread across
                 multiple :type:`~qiskit_fermions.circuit.FermionicRegister` instances.
         """
+        freg_indices, qreg = map_node_single_register(in_node, f2q_layout)
         givens_rotations, phase_shifts = givens_decomposition(in_node.op.rotation_unitary)
         for c, s, i, j in givens_rotations:
             c_angle = np.acos(c)

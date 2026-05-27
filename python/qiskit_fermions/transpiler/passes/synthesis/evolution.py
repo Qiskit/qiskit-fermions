@@ -16,12 +16,14 @@ from __future__ import annotations
 
 from collections.abc import Callable
 
-from qiskit.circuit import QuantumRegister
 from qiskit.circuit.library import PauliEvolutionGate
 from qiskit.dagcircuit import DAGCircuit, DAGOpNode
 from qiskit.quantum_info import SparseObservable
 
 from qiskit_fermions.operators.protocol import OperatorTrait
+
+from ... import F2QLayout
+from ..utils import map_node_single_register
 
 MapperFunction = Callable[[OperatorTrait, int], SparseObservable]
 """The function signature for :attr:`mapper_fn`."""
@@ -51,21 +53,15 @@ class EvolutionSynthesis:
            transpilation :class:`~qiskit_fermions.transpiler.F2QLayout` setting.
         """
 
-    def run(
-        self,
-        in_node: DAGOpNode,
-        freg_indices: list[int],
-        out_dag: DAGCircuit,
-        qreg: QuantumRegister,
-    ):
+    def run(self, in_node: DAGOpNode, out_dag: DAGCircuit, *, f2q_layout: F2QLayout) -> None:
         """Runs this transpilation plugin.
 
         Args:
             in_node: the input fermion-based circuit instruction. When this plugin gets called, the
                 ``in_node.op`` attribute `must` be of type :class:`.Evolution`.
-            freg_indices: TODO.
             out_dag: the output qubit-based circuit.
-            qreg: TODO.
+            f2q_layout: the global transpilation :class:`~qiskit_fermions.transpiler.F2QLayout`
+                setting.
 
         .. seealso::
            The documentation of :class:`.F2QSynthesisPlugin` for more detailed explanations of the
@@ -75,6 +71,7 @@ class EvolutionSynthesis:
             NotImplementedError: when ``in_node`` acts on fermionic modes that are spread across
                 multiple :type:`~qiskit_fermions.circuit.FermionicRegister` instances.
         """
+        freg_indices, qreg = map_node_single_register(in_node, f2q_layout)
         local_op = in_node.op.operator
         global_op = local_op.relabel_modes(freg_indices)
         pauli_op = self.mapper_fn(global_op, len(qreg)).simplify()

@@ -16,7 +16,6 @@ from __future__ import annotations
 
 from typing import Protocol, cast
 
-from qiskit import QuantumRegister
 from qiskit.dagcircuit import DAGCircuit, DAGOpNode
 from qiskit.transpiler import TransformationPass
 
@@ -28,23 +27,19 @@ from ... import F2QLayout
 class F2QSynthesisPlugin(Protocol):
     """The protocol for plugins to the :class:`.F2QSynthesis` transpiler pass."""
 
-    def run(
-        self,
-        in_node: DAGOpNode,
-        freg_indices: list[int],
-        out_dag: DAGCircuit,
-        qreg: QuantumRegister,
-    ) -> None:
+    def run(self, in_node: DAGOpNode, out_dag: DAGCircuit, *, f2q_layout: F2QLayout) -> None:
         """Translates the provided fermion-based circuit instruction to a qubit-based one.
 
         Args:
             in_node: a fermion-based circuit instruction stored in a
                 :class:`~qiskit.dagcircuit.DAGOpNode`. Specifically, this guarantees that
                 :attr:`~qiskit.dagcircuit.DAGOpNode.op` is of type :class:`.FermionicGate`.
-            freg_indices: TODO.
             out_dag: the qubit-based :class:`~qiskit.dagcircuit.DAGCircuit` into which this plugin
                 must insert the translated circuit instruction.
-            qreg: TODO.
+            f2q_layout: the :type:`~qiskit_fermions.transpiler.F2QLayout` setting that is global to
+                the transpilation process. It is the plugin's responsibility to respect this mapping
+                of :type:`~qiskit_fermions.circuit.FermionicRegister` to
+                :class:`~qiskit.circuit.QuantumRegister`.
         """
         ...
 
@@ -76,30 +71,6 @@ class F2QSynthesis(TransformationPass):
            :no-inherited-members:
            :no-special-members:
         """
-
-    def map_register(self, in_node: DAGOpNode) -> tuple[list[int], QuantumRegister]:
-        """TODO."""
-        f2q_layout = cast(F2QLayout, self.property_set["f2q_layout"])
-
-        encountered_fermionic_registers: set[QuantumRegister] = set()
-        freg_indices = []
-        for fermion in in_node.qargs:
-            for freg in f2q_layout:
-                if fermion in freg:
-                    encountered_fermionic_registers.add(freg)
-                    freg_indices.append(freg.index(fermion))
-                    break
-
-        if len(encountered_fermionic_registers) > 1:
-            raise NotImplementedError(
-                "Cannot map a FermionicGate acting on fermionic modes that are spread across "
-                "multiple FermionicRegister instances."
-            )
-
-        freg = encountered_fermionic_registers.pop()
-        qreg = f2q_layout[freg]
-
-        return freg_indices, qreg
 
     def run(self, dag: DAGCircuit) -> DAGCircuit:
         """Runs this transpilation pass.
@@ -139,8 +110,6 @@ class F2QSynthesis(TransformationPass):
                     op_type,
                 )
 
-            freg_indices, qreg = self.map_register(node)
-
-            plugin.run(node, freg_indices, out_dag, qreg)
+            plugin.run(node, out_dag, f2q_layout=f2q_layout)
 
         return out_dag
