@@ -47,3 +47,14 @@ License
 
 `Apache License 2.0 <https://github.com/Qiskit/qiskit-fermions/blob/main/LICENSE.txt>`_
 
+
+.. toctree::
+  :hidden:
+
+   Documentation Home <self>
+   Installation Instructions <install>
+   Guides <guides/index>
+   Python API Reference <pydoc/index>
+   C API Reference <cdoc/index>
+   GitHub <https://github.com/Qiskit/qiskit-fermions>
+   Release Notes <release-notes>
