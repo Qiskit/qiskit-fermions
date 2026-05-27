@@ -47,6 +47,12 @@ def map_node_single_register(
     2. map the node's indices to their global indices with respect to said fermionic mode register
     3. map this fermionic mode register to the corresponding qubit register
 
+    .. caution::
+       The returned global fermionic mode register indices are knowingly dependent on the order of
+       the fermionic modes during the construction of their original
+       :type:`~qiskit_fermions.circuit.FermionicRegister`. This is unlikely to cause any issues but
+       makes the usage of :class:`.RelabelModes` possibly more generally.
+
     Args:
         in_node: the node whose indices to parse.
         f2q_layout: the mapping of fermionic to qubit registers.
@@ -64,7 +70,10 @@ def map_node_single_register(
         for freg in f2q_layout:
             if fermion in freg:
                 encountered_fermionic_registers.add(freg)
-                freg_indices.append(freg.index(fermion))
+                # HACK: we explicitly use the private _index attribute here to enable the general
+                # usage of the RelabelModes pass. This _should_ have no adversarial effect on other
+                # scenarios unless the user tampered with the FermionicRegister themselves, too.
+                freg_indices.append(fermion._index)
                 break
 
     if len(encountered_fermionic_registers) > 1:
