@@ -15,4 +15,3 @@ python_binding = ["dep:pyo3"]
 
 [build-dependencies]
 bindgen = "0.72.0"
-git2 = "0.20"
