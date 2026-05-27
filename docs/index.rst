@@ -21,20 +21,7 @@ The scope of this package includes the following functionality:
 - A framework to develop quantum circuit synthesis methods
 - A library of common quantum circuit synthesizers
 
-
-Documentation
--------------
-
-All documentation is available `here <https://qiskit.github.io/qiskit-fermions/>`_.
-
-
-Installation
-------------
-
-Refer to the `installation instructions <install.rst>`_.
-
-
-Deprecation Policy
+Deprecation policy
 ------------------
 
 We follow `semantic versioning <https://semver.org/>`_ and are guided by the principles in
@@ -48,8 +35,6 @@ Each substantial improvement, breaking change, or deprecation will be documented
 
 Contributing
 ------------
-
-The source code is available `on GitHub <https://github.com/Qiskit/qiskit-fermions>`_.
 
 Follow the instructions in the `Developer guide <https://github.com/Qiskit/qiskit-fermions/blob/main/CONTRIBUTING.md>`_.
 By participating, you are expected to uphold Qiskit's `code of conduct <https://github.com/Qiskit/qiskit/blob/main/CODE_OF_CONDUCT.md>`_.
