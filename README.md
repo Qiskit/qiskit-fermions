@@ -3,7 +3,7 @@
 
   [![License](https://img.shields.io/github/license/Qiskit/qiskit-fermions?label=License)](LICENSE.txt)
   [![Docs](https://img.shields.io/badge/%F0%9F%93%84%20Docs-stable-blue.svg)](https://qiskit.github.io/qiskit-fermions/)
-  [![Qiskit Ecosystem](https://qisk.it/e-487b5ec4)](https://qisk.it/e)
+  [![Qiskit Ecosystem](https://qisk.it/e-487b5ec4)](https://qisk.it/ecosystem)
   [![Python](https://img.shields.io/badge/python-3.10%7C3.11%7C3.12%7C3.13-blue.svg)](https://www.python.org/)
   [![rustc](https://img.shields.io/badge/rustc-1.91+-blue.svg)](https://rust-lang.github.io/rfcs/2495-min-rust-version.html)
   ![Platform](https://img.shields.io/badge/%F0%9F%92%BB%20Platform-Linux%20%7C%20macOS%20%7C%20Windows-informational)
