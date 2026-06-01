@@ -15,12 +15,11 @@
 from __future__ import annotations
 
 import numpy as np
-from qiskit.circuit import QuantumCircuit
-from qiskit.converters import circuit_to_dag
+from qiskit.circuit.library import XGate
 from qiskit.dagcircuit import DAGCircuit, DAGOpNode
 
 from ... import F2QLayout
-from ..utils import _parse_node_indices
+from ..utils import map_node_single_register
 
 
 class InitializeModesSynthesis:
@@ -38,7 +37,7 @@ class InitializeModesSynthesis:
        - assuming a 1-to-1 mapping of fermionic mode indices to qubit indices
     """
 
-    def run(self, in_node: DAGOpNode, out_dag: DAGCircuit, *, f2q_layout: F2QLayout):
+    def run(self, in_node: DAGOpNode, out_dag: DAGCircuit, *, f2q_layout: F2QLayout) -> None:
         """Runs this transpilation plugin.
 
         Args:
@@ -56,25 +55,8 @@ class InitializeModesSynthesis:
             NotImplementedError: when ``in_node`` acts on fermionic modes that are spread across
                 multiple :type:`~qiskit_fermions.circuit.FermionicRegister` instances.
         """
-        encountered_fermionic_registers, global_mode_indices = _parse_node_indices(
-            in_node, f2q_layout
-        )
-
-        if len(encountered_fermionic_registers) > 1:
-            raise NotImplementedError(
-                "Cannot map an InitializeModes gate acting on fermionic modes that are spread "
-                "across multiple FermionicRegister instances."
-            )
-
-        freg = encountered_fermionic_registers.pop()
-        qreg = f2q_layout[freg]
-
-        circ = QuantumCircuit(qreg)
-
+        freg_indices, qreg = map_node_single_register(in_node, f2q_layout)
         local_occupation = in_node.op.occupation
-        global_occupied_indices = np.asarray(global_mode_indices)[np.nonzero(local_occupation)]
-        circ.x(global_occupied_indices.tolist())
-
-        new_dag = circuit_to_dag(circ)
-
-        out_dag.compose(new_dag, qubits=list(qreg), front=False, inplace=True)
+        global_occupied_indices = np.asarray(freg_indices)[np.nonzero(local_occupation)]
+        for idx in global_occupied_indices:
+            out_dag.apply_operation_back(XGate(), (qreg[idx],))

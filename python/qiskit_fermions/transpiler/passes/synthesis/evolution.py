@@ -16,16 +16,14 @@ from __future__ import annotations
 
 from collections.abc import Callable
 
-from qiskit.circuit import QuantumCircuit
 from qiskit.circuit.library import PauliEvolutionGate
-from qiskit.converters import circuit_to_dag
 from qiskit.dagcircuit import DAGCircuit, DAGOpNode
 from qiskit.quantum_info import SparseObservable
 
 from qiskit_fermions.operators.protocol import OperatorTrait
 
 from ... import F2QLayout
-from ..utils import _parse_node_indices
+from ..utils import map_node_single_register
 
 MapperFunction = Callable[[OperatorTrait, int], SparseObservable]
 """The function signature for :attr:`mapper_fn`."""
@@ -55,7 +53,7 @@ class EvolutionSynthesis:
            transpilation :class:`~qiskit_fermions.transpiler.F2QLayout` setting.
         """
 
-    def run(self, in_node: DAGOpNode, out_dag: DAGCircuit, *, f2q_layout: F2QLayout):
+    def run(self, in_node: DAGOpNode, out_dag: DAGCircuit, *, f2q_layout: F2QLayout) -> None:
         """Runs this transpilation plugin.
 
         Args:
@@ -73,25 +71,8 @@ class EvolutionSynthesis:
             NotImplementedError: when ``in_node`` acts on fermionic modes that are spread across
                 multiple :type:`~qiskit_fermions.circuit.FermionicRegister` instances.
         """
-        encountered_fermionic_registers, global_mode_indices = _parse_node_indices(
-            in_node, f2q_layout
-        )
-
-        if len(encountered_fermionic_registers) > 1:
-            raise NotImplementedError(
-                "Cannot map an Evolution gate acting on fermionic modes that are spread across "
-                "multiple FermionicRegister instances."
-            )
-
-        freg = encountered_fermionic_registers.pop()
-        qreg = f2q_layout[freg]
-
+        freg_indices, qreg = map_node_single_register(in_node, f2q_layout)
         local_op = in_node.op.operator
-        global_op = local_op.relabel_modes(global_mode_indices)
+        global_op = local_op.relabel_modes(freg_indices)
         pauli_op = self.mapper_fn(global_op, len(qreg)).simplify()
-
-        circ = QuantumCircuit(qreg)
-        circ.append(PauliEvolutionGate(pauli_op, time=in_node.op.params[0]), qreg)
-        new_dag = circuit_to_dag(circ)
-
-        out_dag.compose(new_dag, qubits=list(qreg), front=False, inplace=True)
+        out_dag.apply_operation_back(PauliEvolutionGate(pauli_op, time=in_node.op.params[0]), qreg)

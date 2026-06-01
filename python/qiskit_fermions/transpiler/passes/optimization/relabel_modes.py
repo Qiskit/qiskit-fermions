@@ -20,10 +20,12 @@ from collections.abc import Generator, Iterable
 from itertools import islice
 from typing import TYPE_CHECKING, Any
 
+from qiskit import QuantumRegister
 from qiskit.dagcircuit import DAGCircuit
 from qiskit.transpiler import TransformationPass
 
 from qiskit_fermions._lib.operators.fermion_operator import FermionOperator
+from qiskit_fermions.circuit import FermionicRegister
 from qiskit_fermions.circuit.library import Evolution
 from qiskit_fermions.mappers.optimization import build_excitation_span_minimization_model
 from qiskit_fermions.utils.optionals import HAS_PYOMO
@@ -198,7 +200,15 @@ class RelabelModes(TransformationPass):
 
         Returns:
             The output circuit which is still acting on a fermionic register.
+
+        Raises:
+            NotImplementedError: when the provided input circuit has more than a single register.
         """
+        if len(dag.qregs) > 1:
+            raise NotImplementedError(
+                "Cannot apply the RelabelModes pass to a circuit with more than a single register."
+            )
+
         permutation, opt_result = (
             self.find_permutation(dag) if self.permutation is None else (self.permutation, None)
         )
@@ -211,16 +221,18 @@ class RelabelModes(TransformationPass):
         if opt_result is not None:
             out_dag.metadata["permutation.opt_result"] = opt_result
 
+        # NOTE: we already know out_dag.qregs to contain only a single entry
+        for orig_name, orig_register in out_dag.qregs.items():
+            out_dag.remove_qregs(orig_register)
+            relabeled_register: FermionicRegister = QuantumRegister(
+                name=f"{orig_name}'", bits=[orig_register[idx] for idx in permutation]
+            )
+            out_dag.add_qreg(relabeled_register)
+
         for node in dag.op_nodes():
-            if not isinstance(node.op, Evolution):
-                continue
-
-            hamil = node.op.operator
-            time = node.op.params[0]
-            num_modes = len(node.qargs)
-
-            relabeled = hamil.relabel_modes(permutation)
-            evo = Evolution(num_modes, relabeled, time=time)
-            out_dag.apply_operation_back(evo, qargs=out_dag.qubits)
+            orig_indices = [orig_register.index(mode) for mode in node.qargs]
+            out_dag.apply_operation_back(
+                node.op, qargs=[relabeled_register[idx] for idx in orig_indices]
+            )
 
         return out_dag

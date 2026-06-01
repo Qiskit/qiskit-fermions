@@ -17,12 +17,13 @@ from __future__ import annotations
 import pytest
 from qiskit.circuit.library import PauliEvolutionGate
 from qiskit_fermions.circuit import FermionicCircuit
-from qiskit_fermions.circuit.library import Evolution
+from qiskit_fermions.circuit.library import Evolution, InitializeModes
 from qiskit_fermions.mappers.library import jordan_wigner
 from qiskit_fermions.operators import FermionOperator
 from qiskit_fermions.transpiler.passes import (
     EvolutionSynthesis,
     F2QSynthesis,
+    InitializeModesSynthesis,
     RelabelModes,
     TrivialF2QLayout,
 )
@@ -49,11 +50,16 @@ def test_relabel_modes_fixed_permutation():
     time = 1.5
     num_modes = 4
     circ = FermionicCircuit(num_modes)
+
+    init = InitializeModes([1, 0, 1, 0])
+    circ.append(init, circ.modes)
+
     evo = Evolution(num_modes, hamil, time=time)
     circ.append(evo, circ.modes)
 
     synth = F2QSynthesis()
     synth.plugins[Evolution] = EvolutionSynthesis(jordan_wigner)
+    synth.plugins[InitializeModes] = InitializeModesSynthesis()
 
     permutation = [0, 2, 1, 3]
     relabel = RelabelModes(permutation)
@@ -66,11 +72,48 @@ def test_relabel_modes_fixed_permutation():
     qu_circ = pm.run(circ)
 
     gates = qu_circ.data
-    assert len(gates) == 1
-    assert isinstance(gates[0].operation, PauliEvolutionGate)
+    assert len(gates) == 3
+    assert isinstance(gates[-1].operation, PauliEvolutionGate)
 
     qu_circ_decomp = qu_circ.decompose(reps=2)
     assert qu_circ_decomp.depth(lambda instr: len(instr.qubits) == 2) == 4
+
+
+def test_relabel_modes_local_indices():
+    hamil = FermionOperator.from_dict(
+        {
+            ((True, 0), (False, 2)): 2.0,
+            ((True, 2), (False, 0)): 2.0,
+            ((True, 1), (False, 3)): -2.0,
+            ((True, 3), (False, 1)): -2.0,
+        }
+    )
+    time = 1.5
+    num_modes = 4
+    circ = FermionicCircuit(2 * num_modes)
+
+    init = InitializeModes([1, 0, 1, 0])
+    circ.append(init, circ.modes[:num_modes])
+
+    evo = Evolution(num_modes, hamil, time=time)
+    circ.append(evo, circ.modes[:num_modes])
+
+    synth = F2QSynthesis()
+    synth.plugins[Evolution] = EvolutionSynthesis(jordan_wigner)
+    synth.plugins[InitializeModes] = InitializeModesSynthesis()
+
+    permutation = [0, 2, 1, 3, 4, 5, 6, 7]
+    relabel = RelabelModes(permutation)
+
+    pm = FermionicStagedPassManager()
+    pm.optimization = FermionicPassManager(relabel)
+    pm.layout = FermionicPassManager(TrivialF2QLayout())
+    pm.synthesis = FermionicToQubitConverter(synth)
+
+    qu_circ = pm.run(circ)
+
+    qu_circ_decomp = qu_circ.decompose(gates_to_decompose=["PauliEvolution"])
+    assert qu_circ_decomp.count_ops() == {"x": 2, "rxx": 2, "ryy": 2}
 
 
 @pytest.mark.skipif(not HAS_PYOMO, reason="Pyomo is required")

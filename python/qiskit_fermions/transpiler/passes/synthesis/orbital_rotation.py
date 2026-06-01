@@ -17,9 +17,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import numpy as np
-from qiskit.circuit import QuantumCircuit
 from qiskit.circuit.library import PhaseGate, XXPlusYYGate
-from qiskit.converters import circuit_to_dag
 from qiskit.dagcircuit import DAGCircuit, DAGOpNode
 
 if TYPE_CHECKING:
@@ -28,7 +26,7 @@ else:
     from qiskit_fermions.linalg import givens_decomposition
 
 from ... import F2QLayout
-from ..utils import _parse_node_indices
+from ..utils import map_node_single_register
 
 
 class OrbitalRotationSynthesis:
@@ -42,7 +40,7 @@ class OrbitalRotationSynthesis:
        - assuming a 1-to-1 mapping of fermionic mode indices to qubit indices
     """
 
-    def run(self, in_node: DAGOpNode, out_dag: DAGCircuit, *, f2q_layout: F2QLayout):
+    def run(self, in_node: DAGOpNode, out_dag: DAGCircuit, *, f2q_layout: F2QLayout) -> None:
         """Runs this transpilation plugin.
 
         Args:
@@ -60,34 +58,16 @@ class OrbitalRotationSynthesis:
             NotImplementedError: when ``in_node`` acts on fermionic modes that are spread across
                 multiple :type:`~qiskit_fermions.circuit.FermionicRegister` instances.
         """
-        encountered_fermionic_registers, global_mode_indices = _parse_node_indices(
-            in_node, f2q_layout
-        )
-
-        if len(encountered_fermionic_registers) > 1:
-            raise NotImplementedError(
-                "Cannot map an OrbitalRotation gate acting on fermionic modes that are spread "
-                "across multiple FermionicRegister instances."
-            )
-
-        freg = encountered_fermionic_registers.pop()
-        qreg = f2q_layout[freg]
-
-        circ = QuantumCircuit(qreg)
-
+        freg_indices, qreg = map_node_single_register(in_node, f2q_layout)
         givens_rotations, phase_shifts = givens_decomposition(in_node.op.rotation_unitary)
         for c, s, i, j in givens_rotations:
             c_angle = np.acos(c)
             if not np.isclose(c_angle, 0.0):
-                circ.append(
+                out_dag.apply_operation_back(
                     XXPlusYYGate(2 * c_angle, np.angle(s) - 0.5 * np.pi),
-                    (global_mode_indices[i], global_mode_indices[j]),
+                    (qreg[freg_indices[i]], qreg[freg_indices[j]]),
                 )
         for i, p in enumerate(phase_shifts):
             p_angle = np.angle(p)
             if not np.isclose(p_angle, 0.0):
-                circ.append(PhaseGate(p_angle), (global_mode_indices[i],))
-
-        new_dag = circuit_to_dag(circ)
-
-        out_dag.compose(new_dag, qubits=list(qreg), front=False, inplace=True)
+                out_dag.apply_operation_back(PhaseGate(p_angle), (qreg[freg_indices[i]],))
