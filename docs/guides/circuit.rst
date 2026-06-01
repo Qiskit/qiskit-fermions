@@ -44,6 +44,17 @@ commutation relations to reduce circuit depth. The fermionic circuit describes
 *what* computation to perform, while transpilation handles *how* to map it to
 qubits, providing a cleaner separation of concerns.
 
+Generic mode indexing
+---------------------
+
+Both the :mod:`~qiskit_fermions.operators` module and the
+:class:`.FermionicCircuit` use generic mode-based indexing that makes no
+assumptions about the nature of the modes. A mode is simply an abstract index
+labeling a fermionic degree of freedom, with no inherent semantics. This design
+choice mirrors the operators module and ensures maximum flexibility.
+For example, you can implement time evolution for any operator implementing the
+:class:`.OperatorTrait` protocol, regardless of its mathematical representation.
+
 Build a fermionic circuit
 -------------------------
 
@@ -114,17 +125,6 @@ Notice how the operator term grouping is preserved even in simple operations
 like decomposition. This demonstrates how structural information flows through the circuit
 stack. To understand the full transpilation to
 qubits, refer to the `Transpiling fermionic circuits <transpilation>`__  guide.
-
-Generic mode indexing
----------------------
-
-Both the :mod:`~qiskit_fermions.operators` module and the
-:class:`.FermionicCircuit` use generic mode-based indexing that makes no
-assumptions about the nature of the modes. A mode is simply an abstract index
-labeling a fermionic degree of freedom, with no inherent semantics. This design
-choice mirrors the operators module and ensures maximum flexibility.
-For example, you can implement time evolution for any operator implementing the
-:class:`.OperatorTrait` protocol, regardless of its mathematical representation.
 
 Transpile fermionic circuits
 ----------------------------
