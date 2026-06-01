@@ -200,8 +200,14 @@ class RelabelModes(TransformationPass):
 
         Returns:
             The output circuit which is still acting on a fermionic register.
+
+        Raises:
+            NotImplementedError: when the provided input circuit has more than a single register.
         """
-        # TODO: assert dag.qregs is length 1
+        if len(dag.qregs) > 1:
+            raise NotImplementedError(
+                "Cannot apply the RelabelModes pass to a circuit with more than a single register."
+            )
 
         permutation, opt_result = (
             self.find_permutation(dag) if self.permutation is None else (self.permutation, None)
