@@ -73,6 +73,38 @@ def test_relabel_modes_fixed_permutation():
     assert qu_circ_decomp.depth(lambda instr: len(instr.qubits) == 2) == 4
 
 
+def test_relabel_modes_local_indices():
+    hamil = FermionOperator.from_dict(
+        {
+            ((True, 0), (False, 2)): 2.0,
+            ((True, 2), (False, 0)): 2.0,
+            ((True, 1), (False, 3)): -2.0,
+            ((True, 3), (False, 1)): -2.0,
+        }
+    )
+    time = 1.5
+    num_modes = 4
+    circ = FermionicCircuit(2 * num_modes)
+    evo = Evolution(num_modes, hamil, time=time)
+    circ.append(evo, circ.modes[:num_modes])
+
+    synth = F2QSynthesis()
+    synth.plugins[Evolution] = EvolutionSynthesis(jordan_wigner)
+
+    permutation = [0, 2, 1, 3, 4, 5, 6, 7]
+    relabel = RelabelModes(permutation)
+
+    pm = FermionicStagedPassManager()
+    pm.optimization = FermionicPassManager(relabel)
+    pm.layout = FermionicPassManager(TrivialF2QLayout())
+    pm.synthesis = FermionicToQubitConverter(synth)
+
+    qu_circ = pm.run(circ)
+
+    qu_circ_decomp = qu_circ.decompose()
+    assert qu_circ_decomp.count_ops() == {"rxx": 2, "ryy": 2}
+
+
 @pytest.mark.skipif(not HAS_PYOMO, reason="Pyomo is required")
 def test_relabel_modes_pyomo_optimization():
     hamil = FermionOperator.from_dict(
