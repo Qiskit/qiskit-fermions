@@ -69,7 +69,7 @@ doctest = [
 test = [
     {include-group = "basetest"},
     {include-group = "doctest"},
-    "highspy>=1.7.1",
+    "highspy>=1.14.0",
 ]
 coverage = [
     {include-group = "test"},
