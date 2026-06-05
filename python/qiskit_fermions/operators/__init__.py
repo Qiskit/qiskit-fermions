@@ -63,19 +63,25 @@ protocol below:
 
 """
 
+from qiskit_fermions._lib.operators.directed_interaction_operator import DirectedInteractionOperator
 from qiskit_fermions._lib.operators.fermion_operator import FermionOperator
 from qiskit_fermions._lib.operators.majorana_operator import MajoranaOperator
+from qiskit_fermions._lib.operators.undirected_interaction_operator import (
+    UndirectedInteractionOperator,
+)
 
 from .fermion_action import FermionAction, ann, cre
 from .majorana_action import MajoranaAction, gamma
 from .protocol import OperatorTrait
 
 __all__ = [
+    "DirectedInteractionOperator",
     "FermionAction",
     "FermionOperator",
     "MajoranaAction",
     "MajoranaOperator",
     "OperatorTrait",
+    "UndirectedInteractionOperator",
     "ann",
     "cre",
     "gamma",
