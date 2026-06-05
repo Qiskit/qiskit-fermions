@@ -243,3 +243,4 @@ pub mod fermion_operator;
 pub mod grouping;
 pub mod library;
 pub mod majorana_operator;
+pub mod undirected_interaction_operator;
