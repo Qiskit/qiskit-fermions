@@ -12,3 +12,4 @@
 
 pub mod jordan_wigner;
 pub mod majorana_fermion;
+pub mod undirected_interaction;
