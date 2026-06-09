@@ -10,6 +10,7 @@
 // copyright notice, and modified files need to carry a notice indicating
 // that they have been altered from the originals.
 
+use crate::operators::directed_interaction_operator::PyDirectedInteractionOperator;
 use crate::operators::fermion_operator::PyFermionOperator;
 use crate::operators::majorana_operator::PyMajoranaOperator;
 use crate::operators::undirected_interaction_operator::PyUndirectedInteractionOperator;
@@ -48,6 +49,7 @@ macro_rules! impl_commutators {
     };
 }
 
+impl_commutators!(PyDirectedInteractionOperator);
 impl_commutators!(PyFermionOperator);
 impl_commutators!(PyMajoranaOperator);
 impl_commutators!(PyUndirectedInteractionOperator);
