@@ -50,7 +50,61 @@ impl UndirectedInteractionOperatorDataIter {
 ///
 /// ----
 ///
-/// .. [1] Gandon et al., arXiv:2512.11418; https://arxiv.org/abs/2512.11418v2.
+/// Definition
+/// ==========
+///
+/// This operator is defined in terms of the edge-vertex (:math:`E_{jk}`, :math:`V_j`) operators:
+///
+/// .. math::
+///
+///     \begin{align}
+///     V_j    &= -i \gamma_{2j-1} \gamma_{2j}
+///             = -(a_j a_j - a_j a^\dagger_j + a^\dagger_j a_j - a^\dagger_j a^\dagger_j)
+///             = 1 - 2 a^\dagger_j a_j \, , \nonumber \\
+///     E_{jk} &= -i \gamma_{2j-1} \gamma_{2k-1}
+///             = -i (a_j a_k + a_j a^\dagger_k + a^\dagger_j a_k + a^\dagger_j a^\dagger_k)
+///             = -E_{kj} \nonumber
+///     \end{align}
+///
+/// which fulfill the following mixed fermionic-bosonic commutation relations for :math:`j \neq k
+/// \neq l \neq m`: [1]_
+///
+/// .. math::
+///
+///     \begin{align}
+///     \left\{ E_{jk}, V_k \right\} &= 0 \nonumber \\
+///     \left\{ E_{jk}, E_{kl} \right\} &= 0 \nonumber \\
+///     \left[ V_k, V_l \right] &= 0 \nonumber \\
+///     \left[ E_{jk}, V_l \right] &= 0 \nonumber \\
+///     \left[ E_{jk}, E_{lm} \right] &= 0 \nonumber \, .
+///     \end{align}
+///
+/// In summary, edge and vertex operators commute, unless they share an index, in which case they
+/// anticommute. A simple example can be represented visually like so:
+///
+/// .. plot::
+///    :alt: A visual depication of an undirected interaction operator.
+///    :context: close-figs
+///
+///    >>> import rustworkx as rx
+///    >>> N = 4
+///    >>> graph = rx.PyGraph()
+///    >>> _ = graph.add_nodes_from(range(N))
+///    >>> _ = graph.add_edges_from([(i, i+1, i) for i in range(N-1)])
+///    >>> from rustworkx.visualization import mpl_draw
+///    >>> mpl_draw(
+///    ...     graph,
+///    ...     pos={i: (i, 0) for i in range(N)},
+///    ...     labels=lambda v: f"$V_{v}$",
+///    ...     edge_labels=lambda e: f"$E_{{{e}{e+1}}}$",
+///    ...     with_labels=True,
+///    ...     node_color="orange",
+///    ... )
+///    <Figure size ... with 1 Axes>
+///
+/// ----
+///
+/// .. [1] Gandon et al., `arXiv:2512.11418 <https://arxiv.org/abs/2512.11418v2>`_.
 #[gen_stub_pyclass]
 #[pyclass(
     module = "qiskit_fermions.operators.undirected_interaction_operator",

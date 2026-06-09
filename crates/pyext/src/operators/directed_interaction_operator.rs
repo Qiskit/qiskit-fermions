@@ -50,7 +50,66 @@ impl DirectedInteractionOperatorDataIter {
 ///
 /// ----
 ///
-/// .. [1] Gandon et al., arXiv:2512.11418; https://arxiv.org/abs/2512.11418v2.
+/// Definition
+/// ==========
+///
+/// This operator is defined in terms of the transfer-vertex (:math:`T_{jk}`, :math:`V_j`)
+/// operators:
+///
+/// .. math::
+///
+///     \begin{align}
+///     V_j    &= -i \gamma_{2j-1} \gamma_{2j}
+///             = -(a_j a_j - a_j a^\dagger_j + a^\dagger_j a_j - a^\dagger_j a^\dagger_j)
+///             = 1 - 2 a^\dagger_j a_j \, , \nonumber \\
+///     T_{jk} &= \frac{i}{2} V_j E_{jk}
+///             = \frac{1}{2} \gamma_{2j} \gamma_{2k-1} \, , \nonumber \\
+///     T_{kj} &= \frac{i}{2} E_{jk} V_k
+///             = -\frac{1}{2} \gamma_{2j-1} \gamma_{2k} \nonumber
+///     \end{align}
+///
+/// where :math:`E_{jk}` is an edge operator of the :class:`.UndirectedInteractionOperator` and
+/// these individual terms fulfill the following mixed fermionic-bosonic commutation relations for
+/// :math:`j \lt k \lt l \lt m`: [1]_
+///
+/// .. math::
+///
+///     \begin{align}
+///     \left\{ T_{jk}, V_k \right\} &= 0 \nonumber \\
+///     \left\{ T_{jk}, T_{lk} \right\} &= 0 \nonumber \\
+///     \left[ V_k, V_l \right] &= 0 \nonumber \\
+///     \left[ T_{jk}, V_l \right] &= 0 \nonumber \\
+///     \left[ T_{jk}, T_{lm} \right] &= 0 \nonumber \\
+///     \left[ T_{jk}, T_{kj} \right] &= 0 \nonumber \\
+///     \left[ T_{jk}, T_{km} \right] &= 0 \nonumber \, .
+///     \end{align}
+///
+/// A simple example can be represented visually like so:
+///
+/// .. plot::
+///    :alt: A visual depication of a directed interaction operator.
+///    :context: close-figs
+///
+///    >>> import rustworkx as rx
+///    >>> N = 4
+///    >>> graph = rx.PyDiGraph()
+///    >>> _ = graph.add_nodes_from(range(N))
+///    >>> _ = graph.add_edges_from([(i, i+1, i) for i in range(N-1)])
+///    >>> _ = graph.add_edges_from([(i, i-1, -i) for i in range(1, N)])
+///    >>> from rustworkx.visualization import mpl_draw
+///    >>> mpl_draw(
+///    ...     graph,
+///    ...     pos={i: (i, -0.1*i) for i in range(4)},
+///    ...     labels=lambda v: f"$V_{v}$",
+///    ...     edge_labels=lambda e: f"$T_{{{e}{e+1}}}$" if e >= 0 else f"$T_{{{-e}{-e-1}}}$",
+///    ...     with_labels=True,
+///    ...     node_color="orange",
+///    ... )
+///    <Figure size ... with 1 Axes>
+///
+/// ----
+///
+/// .. [1] Gandon et al., `arXiv:2512.11418 <https://arxiv.org/abs/2512.11418v2>`_.
 #[gen_stub_pyclass]
 #[pyclass(
     module = "qiskit_fermions.operators.directed_interaction_operator",
