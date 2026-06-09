@@ -182,7 +182,14 @@ impl PyUndirectedInteractionOperator {
                 .iter()
                 .map(|(lidx, ridx)| format!("({}, {})", lidx, ridx))
                 .collect();
-            let key_str = format!("({})", key_parts.join(", "));
+            let key_str = if key_parts.is_empty() {
+                // NOTE: we explicitly handle the zero-length case
+                "()".to_string()
+            } else {
+                // NOTE: we explicitly enforce a final comma inside the tuple to ensure that a
+                // tuple of tuples of length 1 still works as intended
+                format!("({},)", key_parts.join(", "))
+            };
             let val_str = format!("{}{:+}j", term.coeff.re, term.coeff.im);
             items_str.push(format!("{key_str}: {val_str}"));
         }
