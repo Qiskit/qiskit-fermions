@@ -87,7 +87,7 @@ jobs:
       - name: Python tests
         shell: bash
         run: |
-          make testpython
+          make pystubs testpython
 
       - name: Optional tests
         shell: bash
