@@ -186,31 +186,22 @@ mod tests {
             groups: None,
         };
 
-        let fer_op = directed_interaction_to_fermion(&inter_op);
+        let fer_op = directed_interaction_to_fermion(&inter_op).simplify(1e-10);
 
         let expected = FermionOperator {
             coeffs: vec![
                 Complex64::new(1.0, 0.0),
                 Complex64::new(-2.0, 0.0),
-                Complex64::new(1.0, 0.0),
-                Complex64::new(1.0, 0.0),
-                Complex64::new(-1.0, 0.0),
-                Complex64::new(-1.0, 0.0),
-                Complex64::new(1.0, 0.0),
-                Complex64::new(-1.0, 0.0),
-                Complex64::new(1.0, 0.0),
-                Complex64::new(-1.0, 0.0),
+                Complex64::new(2.0, 0.0),
+                Complex64::new(-2.0, 0.0),
             ],
-            actions: vec![
-                true, false, false, false, false, true, true, false, true, true, false, false,
-                false, true, true, false, true, true,
-            ],
-            modes: vec![0, 0, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2],
-            boundaries: vec![0, 0, 2, 4, 6, 8, 10, 12, 14, 16, 18],
+            actions: vec![true, false, false, false, true, true],
+            modes: vec![0, 0, 1, 2, 1, 2],
+            boundaries: vec![0, 0, 2, 4, 6],
             groups: None,
         };
 
-        assert_eq!(fer_op, expected);
+        assert!(fer_op.equiv(&expected, 1e-10));
     }
 
     #[test]
