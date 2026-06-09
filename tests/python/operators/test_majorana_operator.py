@@ -10,18 +10,16 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
-from abc import ABC, abstractmethod
-
 import numpy as np
 import pytest
 from qiskit_fermions.operators import MajoranaOperator, gamma
 from qiskit_fermions.operators.library import anti_commutator, commutator
 
 
-class MajoranaOperatorTests(ABC):
+class TestMajoranaOperator:
     @staticmethod
-    @abstractmethod
-    def get_class() -> type[MajoranaOperator]: ...
+    def get_class() -> type[MajoranaOperator]:
+        return MajoranaOperator
 
     def test_getters(self, subtests):
         cls = self.get_class()
@@ -396,9 +394,3 @@ class MajoranaOperatorTests(ABC):
 
         op = cls.from_dict({(0, 1): 1, (1, 0): 1, (0, 0, 1, 1): 2})
         assert op.split_out_groups() is None
-
-
-class TestMajoranaOperator(MajoranaOperatorTests):
-    @staticmethod
-    def get_class() -> type[MajoranaOperator]:
-        return MajoranaOperator
