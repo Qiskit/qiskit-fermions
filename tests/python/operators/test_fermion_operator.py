@@ -10,18 +10,16 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
-from abc import ABC, abstractmethod
-
 import numpy as np
 import pytest
 from qiskit_fermions.operators import FermionOperator, ann, cre
 from qiskit_fermions.operators.library import anti_commutator, commutator
 
 
-class FermionOperatorTests(ABC):
+class TestFermionOperator:
     @staticmethod
-    @abstractmethod
-    def get_class() -> type[FermionOperator]: ...
+    def get_class() -> type[FermionOperator]:
+        return FermionOperator
 
     def test_getters(self, subtests):
         cls = self.get_class()
@@ -424,9 +422,3 @@ class FermionOperatorTests(ABC):
             {(cre(0), ann(1)): 1, (cre(1), ann(0)): 1, (cre(0), cre(0), ann(1), ann(1)): 2}
         )
         assert op.split_out_groups() is None
-
-
-class TestFermionOperator(FermionOperatorTests):
-    @staticmethod
-    def get_class() -> type[FermionOperator]:
-        return FermionOperator
