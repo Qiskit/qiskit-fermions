@@ -908,6 +908,7 @@ impl PyMajoranaOperator {
     /// Returns a new operator with relabeled modes.
     ///
     /// .. doctest::
+    ///
     ///     >>> from qiskit_fermions.operators import MajoranaOperator
     ///     >>> op = MajoranaOperator.from_dict({
     ///     ...     (0, 1): 1,

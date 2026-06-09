@@ -967,6 +967,7 @@ impl PyFermionOperator {
     /// Returns a new operator with relabeled modes.
     ///
     /// .. doctest::
+    ///
     ///     >>> from qiskit_fermions.operators import FermionOperator
     ///     >>> op = FermionOperator.from_dict({
     ///     ...     ((True, 0), (False, 1)): 1,
