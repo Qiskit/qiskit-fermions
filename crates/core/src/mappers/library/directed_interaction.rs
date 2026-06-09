@@ -170,7 +170,6 @@ pub fn directed_interaction_to_undirected(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::mappers::library::majorana_fermion::majorana_to_fermion;
 
     #[test]
     fn test_directed_to_fermion() {
