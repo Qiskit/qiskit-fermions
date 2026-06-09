@@ -102,6 +102,226 @@ impl UndirectedInteractionOperatorDataIter {
 ///    ... )
 ///    <Figure size ... with 1 Axes>
 ///
+/// We can abuse the notation a little bit and define :math:`V_j = E_{jj}` which reflects how the
+/// internal data structure of this operator works. This makes the definition of the entire
+/// operator the following:
+///
+/// .. math::
+///
+///    \text{\texttt{UndirectedInteractionOperator}} = \sum_i c_i \bigotimes_{lr} E_{lr} \, ,
+///
+/// where :math:`lr` indexing the involved operator terms and :math:`c_i` is the (complex)
+/// coefficient making up the linear combination of products. The indices :math:`l` and :math:`r`
+/// can take any value between 0 and the number of fermionic modes acted upon by the operator minus
+/// 1.
+///
+/// ----
+///
+/// .. _UndirectedInteractionOperator-implementation:
+///
+/// Implementation
+/// ==============
+///
+/// This class stores the terms and coefficients in multiple sparse vectors, akin to the
+/// `compressed sparse row format
+/// <https://en.wikipedia.org/wiki/Sparse_matrix#Compressed_sparse_row_(CSR,_CRS_or_Yale_format)>`_
+/// commonly used for sparse matrices. More concretely, a single operator contains 4 arrays:
+///
+/// .. table::
+///
+///    ================= ========================================================================================
+///    ``coeffs``        A vector of complex coefficients consisting of two 64-bit floating point numbers.
+///    ``left_indices``  A vector of 32-bit integers storing the `left` fermionic mode indices (:math:`l` above).
+///    ``right_indices`` A vector of 32-bit integers storing the `right` fermionic mode indices (:math:`r` above).
+///    ``boundaries``    A vector of integers indicating the boundaries in ``actions`` and ``modes``.
+///    ================= ========================================================================================
+///
+/// Fermionic modes indexed by ``left_indices`` and ``right_indices`` are considered spinless.
+///
+/// .. note::
+///    You may access **read-only copies** of these internal arrays via their respective methods:
+///    :meth:`.get_coeffs`, :meth:`.get_left_indices`, :meth:`.get_right_indices`, and
+///    :meth:`.get_boundaries`.
+///
+/// This data structure allows for very efficient construction and manipulation of operators.
+/// However, it implies that duplicate terms may be contained in an operator at any moment.
+/// These must be resolved manually through the use of :meth:`.simplify`.
+///
+/// Construction
+/// ------------
+///
+/// An operator can be constructed directly by providing the arrays outlined above:
+///
+/// .. doctest::
+///
+///     >>> from qiskit_fermions.operators import UndirectedInteractionOperator
+///     >>> coeffs = [1.0, 2.0, -3.0, 4.0j, -0.5j]
+///     >>> left_indices = [0, 3, 0, 2, 3, 0]
+///     >>> right_indices = [1, 4, 1, 2, 3, 1]
+///     >>> boundaries = [0, 0, 1, 2, 4, 6]
+///     >>> op = UndirectedInteractionOperator(coeffs, left_indices, right_indices, boundaries)
+///     >>> print(op)
+///       1.000000e0 +0.000000e0j * ()
+///       2.000000e0 +0.000000e0j * (E(0,1))
+///       0.000000e0 +4.000000e0j * (E(0,1) V(2))
+///      -0.000000e0-5.000000e-1j * (V(3) E(0,1))
+///      -3.000000e0 +0.000000e0j * (E(3,4))
+///
+/// For convenience, it is possible to construct an operator from a Python dictionary like so:
+///
+/// .. doctest::
+///
+///     >>> op = UndirectedInteractionOperator.from_dict(
+///     ...     {
+///     ...         (): 1.0,
+///     ...         ((0, 1),): 2.0,
+///     ...         ((3, 4),): -3.0,
+///     ...         ((0, 1), (2, 2)): 4.0j,
+///     ...         ((3, 3), (0, 1)): -0.5j,
+///     ...     }
+///     ... )
+///     >>> print(op)
+///       1.000000e0 +0.000000e0j * ()
+///       2.000000e0 +0.000000e0j * (E(0,1))
+///       0.000000e0 +4.000000e0j * (E(0,1) V(2))
+///      -0.000000e0-5.000000e-1j * (V(3) E(0,1))
+///      -3.000000e0 +0.000000e0j * (E(3,4))
+///
+/// In addition, the following construction and quick helper methods are available:
+///
+/// .. autosummary::
+///
+///    zero
+///    one
+///    from_terms
+///
+/// Iteration
+/// ---------
+///
+/// Since the underlying data structure is implemented in Rust and has a non-trivial layout, it
+/// cannot be iterated over directly:
+///
+/// .. doctest::
+///
+///     >>> list(iter(op))
+///     Traceback (most recent call last):
+///       ...
+///     TypeError: 'qiskit_fermions.operators.undirected_interaction_operator.UndirectedInteractionOperator' object is not iterable
+///
+/// Instead, this class provides custom iterators to fulfill this purpose:
+///
+/// .. doctest::
+///
+///     >>> list(sorted(op.iter_terms()))
+///     [([], (1+0j)), ([(0, 1)], (2+0j)), ([(0, 1), (2, 2)], 4j), ([(3, 3), (0, 1)], (-0-0.5j)), ([(3, 4)], (-3+0j))]
+///
+/// See also:
+///     :meth:`iter_terms`
+///         For more relevant implementation details.
+///
+/// The table below lists all available iterators:
+///
+/// .. autosummary::
+///
+///    iter_terms
+///
+/// Arithmetics
+/// -----------
+///
+/// The following arithmetic operations are supported:
+///
+/// Addition/Subtraction
+/// ^^^^^^^^^^^^^^^^^^^^
+///
+/// .. doctest::
+///
+///     >>> op = UndirectedInteractionOperator.one()
+///     >>> (op + op).simplify()
+///     UndirectedInteractionOperator.from_dict({(): 2+0j})
+///     >>> (op - op).simplify()
+///     UndirectedInteractionOperator.from_dict({})
+///     >>> op += op
+///     >>> op.simplify()
+///     UndirectedInteractionOperator.from_dict({(): 2+0j})
+///     >>> op -= op
+///     >>> op.simplify()
+///     UndirectedInteractionOperator.from_dict({})
+///
+/// Scalar Multiplication/Divison
+/// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+///
+/// .. doctest::
+///
+///     >>> op = UndirectedInteractionOperator.one()
+///     >>> (2 * op).simplify()
+///     UndirectedInteractionOperator.from_dict({(): 2+0j})
+///     >>> (op / 2).simplify()
+///     UndirectedInteractionOperator.from_dict({(): 0.5+0j})
+///     >>> op *= 2
+///     >>> op.simplify()
+///     UndirectedInteractionOperator.from_dict({(): 2+0j})
+///     >>> op /= 2
+///     >>> op.simplify()
+///     UndirectedInteractionOperator.from_dict({(): 1+0j})
+///
+/// Operator Composition
+/// ^^^^^^^^^^^^^^^^^^^^
+///
+/// .. note::
+///    Operator composition corresponds to left-multiplication: ``c = a & b`` corresponds to
+///    :math:`C = B A`. In other words, the composition of two operators returns a resulting
+///    operator that performs "first ``a`` and then ``b``".
+///
+/// .. doctest::
+///
+///     >>> op1 = UndirectedInteractionOperator.from_dict({(): 2.0, ((0, 1),): 3.0})
+///     >>> op2 = UndirectedInteractionOperator.from_dict({(): 1.5, ((2, 2),): 4.0})
+///     >>> comp = (op1 & op2).simplify()
+///     >>> print(comp)
+///       3.000000e0 +0.000000e0j * ()
+///       4.500000e0 +0.000000e0j * (E(0,1))
+///       8.000000e0 +0.000000e0j * (V(2))
+///       1.200000e1 +0.000000e0j * (V(2) E(0,1))
+///     >>> op2 &= op1
+///     >>> print(op2.simplify())
+///       3.000000e0 +0.000000e0j * ()
+///       4.500000e0 +0.000000e0j * (E(0,1))
+///       1.200000e1 +0.000000e0j * (E(0,1) V(2))
+///       8.000000e0 +0.000000e0j * (V(2))
+///     >>> squared = (op1 ** 2).simplify()
+///     >>> print(squared)
+///       4.000000e0 +0.000000e0j * ()
+///       1.200000e1 +0.000000e0j * (E(0,1))
+///       9.000000e0 +0.000000e0j * (E(0,1) E(0,1))
+///
+/// .. note::
+///    For convenience, the right-multiplication is implemented by ``c = a @ b`` (resulting in
+///    :math:`C = A B`).
+///
+/// .. doctest::
+///
+///     >>> (op1 @ op2).equiv(op2 & op1)
+///     True
+///
+/// Other Operations
+/// ^^^^^^^^^^^^^^^^
+///
+/// In addition to the magic methods that correspond to the arithmetic operations outlined above,
+/// the following methods are available:
+///
+/// .. autosummary::
+///
+///    adjoint
+///    ichop
+///    simplify
+///    normal_ordered
+///    relabel_modes
+///
+/// Properties
+/// ^^^^^^^^^^
+///
+/// This operator does not implement any additional properties.
+///
 /// ----
 ///
 /// .. [1] Gandon et al., `arXiv:2512.11418 <https://arxiv.org/abs/2512.11418v2>`_.
