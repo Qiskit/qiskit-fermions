@@ -74,7 +74,7 @@ Install steps
 
       $ make cext
 
-3. (optional) Verify the installation by running the C unit tests:
+4. (optional) Verify the installation by running the C unit tests:
 
    .. code:: console
 

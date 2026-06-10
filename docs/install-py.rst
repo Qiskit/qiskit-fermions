@@ -51,9 +51,22 @@ simple:
 
          $ SETUPTOOLS_RUST_CARGO_PROFILE=release pip install --no-build-isolation -e .
 
-5. (optional) Verify the installation by running the Python unit tests:
+4. (optional) Verify that the installation was successful:
+   The simplest test is to try and import one of the classes provided by the
+   ``qiskit-fermions`` package, for example like so:
 
    .. code:: console
 
-      $ pip install --group test
-      $ make testpython
+      $ python -c "from qiskit_fermions.circuit import FermionicCircuit"
+
+   If this completes successfully, your installation worked.
+
+   .. hint::
+
+      If you have performed an editable install, you can also run the entire
+      Python test suite:
+
+      .. code:: console
+
+         $ pip install --group test
+         $ make testpython
