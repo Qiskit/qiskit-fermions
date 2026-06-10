@@ -243,7 +243,7 @@ class TestDirectedInteractionOperator:
     def test_adjoint(self):
         cls = self.get_class()
         op = cls.from_dict({(): 2j, ((0, 1),): 3})
-        assert op.adjoint().equiv(cls.from_dict({(): 2j, ((0, 1),): 3}))
+        assert op.adjoint().equiv(cls.from_dict({(): -2j, ((0, 1),): 3}))
 
     def test_equiv(self):
         cls = self.get_class()

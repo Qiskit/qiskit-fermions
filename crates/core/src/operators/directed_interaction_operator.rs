@@ -109,12 +109,17 @@ impl DirectedInteractionOperator {
         Some(groups)
     }
 
-    // TODO: expose an optional mode to also unify E_{jk} operators into a fixed order of j,k
     pub fn normal_ordered(&self) -> Self {
         let mut result = Self::zero();
         self.iter()
             .for_each(|term| result.__iadd__(&_normal_ordered_term(term)));
         result
+    }
+
+    pub fn is_hermitian(&self, atol: f64) -> bool {
+        let mut diff = (self.__sub__(&self.adjoint())).normal_ordered();
+        diff.ichop(atol);
+        diff.equiv(&Self::zero(), atol)
     }
 }
 
@@ -262,7 +267,13 @@ impl OperatorTrait for DirectedInteractionOperator {
     }
 
     fn adjoint(&self) -> Self {
-        self.clone()
+        Self {
+            coeffs: self.coeffs.iter().map(|c| c.conj()).collect(),
+            left_indices: self.left_indices.clone(),
+            right_indices: self.right_indices.clone(),
+            boundaries: self.boundaries.clone(),
+            groups: self.groups.clone(),
+        }
     }
 
     fn __iadd__(&mut self, other: &Self) {
@@ -806,7 +817,14 @@ mod tests {
             groups: None,
         };
         let adj = op1.adjoint();
-        assert_eq!(adj, op1);
+        let expected = DirectedInteractionOperator {
+            coeffs: vec![Complex64::new(0.0, -2.0), Complex64::new(3.0, 0.0)],
+            left_indices: vec![0],
+            right_indices: vec![1],
+            boundaries: vec![0, 0, 1],
+            groups: None,
+        };
+        assert_eq!(adj, expected);
     }
 
     #[test]
@@ -982,6 +1000,19 @@ mod tests {
         };
 
         assert_eq!(op.normal_ordered(), expected);
+    }
+
+    #[test]
+    fn test_is_hermitian() {
+        let op = DirectedInteractionOperator {
+            coeffs: vec![Complex64::new(0.0, 1.00001), Complex64::new(0.0, -1.0)],
+            left_indices: vec![0, 0],
+            right_indices: vec![1, 1],
+            boundaries: vec![0, 1, 2],
+            groups: None,
+        };
+        assert!(op.is_hermitian(1e-4));
+        assert!(!op.is_hermitian(1e-6));
     }
 
     #[test]

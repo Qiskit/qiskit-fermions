@@ -320,7 +320,11 @@ impl UndirectedInteractionOperatorDataIter {
 /// Properties
 /// ^^^^^^^^^^
 ///
-/// This operator does not implement any additional properties.
+/// Finally, various methods exist to check certain properties of an operator:
+///
+/// .. autosummary::
+///
+///    is_hermitian
 ///
 /// ----
 ///
@@ -607,6 +611,11 @@ impl PyUndirectedInteractionOperator {
         Self {
             inner: self.inner.normal_ordered(),
         }
+    }
+
+    #[pyo3(signature = (atol=1e-8))]
+    fn is_hermitian(&self, atol: f64) -> bool {
+        self.inner.is_hermitian(atol)
     }
 
     fn relabel_modes(&self, permutation: Vec<u32>) -> PyResult<Self> {
