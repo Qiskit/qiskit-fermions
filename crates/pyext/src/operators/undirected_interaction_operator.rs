@@ -50,6 +50,8 @@ impl UndirectedInteractionOperatorDataIter {
 ///
 /// ----
 ///
+/// .. _UndirectedInteractionOperator-definition:
+///
 /// Definition
 /// ==========
 ///
@@ -114,6 +116,8 @@ impl UndirectedInteractionOperatorDataIter {
 /// coefficient making up the linear combination of products. The indices :math:`l` and :math:`r`
 /// can take any value between 0 and the number of fermionic modes acted upon by the operator minus
 /// 1.
+///
+/// We will refer to :math:`E_{lr}` as `generalized` edge operators.
 ///
 /// ----
 ///
@@ -362,6 +366,31 @@ impl PyUndirectedInteractionOperator {
         }
     }
 
+    /// Constructs a new operator from a dictionary.
+    ///
+    /// .. doctest::
+    ///
+    ///     >>> from qiskit_fermions.operators import UndirectedInteractionOperator
+    ///     >>> op = UndirectedInteractionOperator.from_dict(
+    ///     ...     {
+    ///     ...         (): 1.0-1.0j,
+    ///     ...         ((0, 0),): 2.0,
+    ///     ...         ((0, 1),): 2.0j,
+    ///     ...     }
+    ///     ... )
+    ///     >>> print(op)
+    ///       1.000000e0 -1.000000e0j * ()
+    ///       2.000000e0 +0.000000e0j * (V(0))
+    ///       0.000000e0 +2.000000e0j * (E(0,1))
+    ///
+    /// Args:
+    ///     data: a dictionary mapping tuples of terms to complex coefficients. Each key is a tuple
+    ///         of ``(int, int)`` pairs indicating the indices of the generalized edge operator,
+    ///         :math:`E_{lr}` (if :math:`l = r` then this corresponds to the vertex operator
+    ///         :math:`V_l`).
+    ///
+    /// Returns:
+    ///     A new operator.
     #[classmethod]
     fn from_dict(_cls: &Bound<'_, PyType>, data: HashMap<Vec<(u32, u32)>, Complex64>) -> Self {
         let mut coeffs = vec![];
@@ -389,22 +418,113 @@ impl PyUndirectedInteractionOperator {
         }
     }
 
+    /// Returns a read-only list of the operator's coefficients.
+    ///
+    /// .. note::
+    ///    This method returns a **copy** of the internal data.
+    ///
+    /// .. seealso::
+    ///    The explanation of the internal data structure,
+    ///    :ref:`here <UndirectedInteractionOperator-implementation>`.
+    ///
+    /// .. doctest::
+    ///
+    ///     >>> from qiskit_fermions.operators import UndirectedInteractionOperator
+    ///     >>> op = UndirectedInteractionOperator.one()
+    ///     >>> op += -1j * UndirectedInteractionOperator.one()
+    ///     >>> op.get_coeffs()
+    ///     [(1+0j), -1j]
+    ///
+    /// Returns:
+    ///     A list of the operator's coefficients.
     fn get_coeffs(&self) -> Vec<Complex64> {
         self.inner.coeffs().to_vec()
     }
 
+    /// Returns a read-only list of the left indices of all generalized edge operator terms.
+    ///
+    /// .. note::
+    ///    This method returns a **copy** of the internal data.
+    ///
+    /// .. seealso::
+    ///    The explanation of the internal data structure,
+    ///    :ref:`here <UndirectedInteractionOperator-implementation>`.
+    ///
+    /// .. doctest::
+    ///
+    ///     >>> from qiskit_fermions.operators import UndirectedInteractionOperator
+    ///     >>> op = UndirectedInteractionOperator.from_dict({((0, 0),): 1.0})
+    ///     >>> op += UndirectedInteractionOperator.from_dict({((0, 1),): 1.0})
+    ///     >>> op.get_left_indices()
+    ///     [0, 0]
+    ///
+    /// Returns:
+    ///     A list of the left indices of all generalized edge operator terms.
     fn get_left_indices(&self) -> Vec<u32> {
         self.inner.left_indices().to_vec()
     }
 
+    /// Returns a read-only list of the right indices of all generalized edge operator terms.
+    ///
+    /// .. note::
+    ///    This method returns a **copy** of the internal data.
+    ///
+    /// .. seealso::
+    ///    The explanation of the internal data structure,
+    ///    :ref:`here <UndirectedInteractionOperator-implementation>`.
+    ///
+    /// .. doctest::
+    ///
+    ///     >>> from qiskit_fermions.operators import UndirectedInteractionOperator
+    ///     >>> op = UndirectedInteractionOperator.from_dict({((0, 0),): 1.0})
+    ///     >>> op += UndirectedInteractionOperator.from_dict({((0, 1),): 1.0})
+    ///     >>> op.get_right_indices()
+    ///     [0, 1]
+    ///
+    /// Returns:
+    ///     A list of the right indices of all generalized edge operator terms.
     fn get_right_indices(&self) -> Vec<u32> {
         self.inner.right_indices().to_vec()
     }
 
+    /// Returns a read-only list of the indices indicating the boundaries between operator terms.
+    ///
+    /// .. note::
+    ///    This method returns a **copy** of the internal data.
+    ///
+    /// .. seealso::
+    ///    The explanation of the internal data structure,
+    ///    :ref:`here <UndirectedInteractionOperator-implementation>`.
+    ///
+    /// .. doctest::
+    ///
+    ///     >>> from qiskit_fermions.operators import UndirectedInteractionOperator
+    ///     >>> op = UndirectedInteractionOperator.one()
+    ///     >>> op += UndirectedInteractionOperator.from_dict({((0, 1),): 1.0})
+    ///     >>> op.get_boundaries()
+    ///     [0, 0, 1]
+    ///
+    /// Returns:
+    ///     A list of the operator's terms boundaries.
     fn get_boundaries(&self) -> Vec<usize> {
         self.inner.boundaries().to_vec()
     }
 
+    /// Returns the set of mode indices which this operator acts upon.
+    ///
+    /// .. doctest::
+    ///
+    ///     >>> from qiskit_fermions.operators import UndirectedInteractionOperator
+    ///     >>> op = UndirectedInteractionOperator.from_dict(
+    ///     ...     {
+    ///     ...         ((0, 1), (3, 4)): 1,
+    ///     ...         ((7, 7),): 1,
+    ///     ...     }
+    ///     ... )
+    ///     >>> assert op.get_support() == {0, 1, 3, 4, 7}
+    ///
+    /// Returns:
+    ///     The set of mode indices which this operator acts upon.
     fn get_support(&self) -> HashSet<u32> {
         self.inner.get_support()
     }
@@ -499,6 +619,19 @@ impl PyUndirectedInteractionOperator {
         Ok(items_str.join("\n").to_string())
     }
 
+    /// Constructs the additive identity operator.
+    ///
+    /// Adding the operator that is constructed by this method to another one has no effect.
+    ///
+    /// .. doctest::
+    ///
+    ///     >>> from qiskit_fermions.operators import UndirectedInteractionOperator
+    ///     >>> op = UndirectedInteractionOperator.from_dict({(): 2.0})
+    ///     >>> zero = UndirectedInteractionOperator.zero()
+    ///     >>> op + zero == op
+    ///     True
+    ///
+    /// ..
     #[classmethod]
     fn zero(_cls: &Bound<'_, PyType>) -> Self {
         Self {
@@ -506,6 +639,19 @@ impl PyUndirectedInteractionOperator {
         }
     }
 
+    /// Constructs the multiplicative identity operator.
+    ///
+    /// Composing the operator that is constructed by this method with another one has no effect.
+    ///
+    /// .. doctest::
+    ///
+    ///     >>> from qiskit_fermions.operators import UndirectedInteractionOperator
+    ///     >>> op = UndirectedInteractionOperator.from_dict({(): 2.0})
+    ///     >>> one = UndirectedInteractionOperator.one()
+    ///     >>> op & one == op
+    ///     True
+    ///
+    /// ..
     #[classmethod]
     fn one(_cls: &Bound<'_, PyType>) -> Self {
         Self {
@@ -529,6 +675,34 @@ impl PyUndirectedInteractionOperator {
         }
     }
 
+    /// Returns an equivalent but simplified operator.
+    ///
+    /// The simplification process first sums all coefficients that belong to equal terms and then
+    /// only retains those whose total coefficient exceeds the specified tolerance (just like
+    /// :meth:`.ichop`).
+    ///
+    /// When an operator has been arithmetically manipulated or constructed in a way that does not
+    /// guarantee unique terms, this method should be called before applying any method that
+    /// filters numerically small coefficients to avoid loss of information. See the example below
+    /// which showcases how :meth:`.ichop` can truncate terms that sum to a total coefficient
+    /// magnitude which should not be truncated:
+    ///
+    /// .. doctest::
+    ///
+    ///     >>> from qiskit_fermions.operators import UndirectedInteractionOperator
+    ///     >>> coeffs = [1e-5] * int(1e5)
+    ///     >>> boundaries = [0] + [0] * int(1e5)
+    ///     >>> op = UndirectedInteractionOperator(coeffs, [], [], boundaries)
+    ///     >>> canon = op.simplify(1e-4)
+    ///     >>> assert canon.equiv(op.one(), 1e-6)
+    ///     >>> op.ichop(1e-4)
+    ///     >>> assert op.equiv(op.zero(), 1e-6)
+    ///
+    /// Args:
+    ///     atol: the absolute tolerance for the cutoff. This value defaults to ``1e-8``.
+    ///
+    /// Returns:
+    ///     An equivalent but simplified operator.
     #[pyo3(signature = (atol=1e-8))]
     fn simplify(&self, atol: f64) -> Self {
         Self {
@@ -536,11 +710,48 @@ impl PyUndirectedInteractionOperator {
         }
     }
 
+    /// Removes terms whose coefficient magnitude lies below the provided threshold.
+    ///
+    /// .. caution::
+    ///    This method truncates coefficients greedily! If the acted upon operator may contain
+    ///    separate coefficients for duplicate terms consider calling :meth:`.simplify` instead!
+    ///
+    /// .. doctest::
+    ///
+    ///     >>> from qiskit_fermions.operators import UndirectedInteractionOperator
+    ///     >>> op = UndirectedInteractionOperator.from_dict({(): 1e-4, ((1, 0),): 1e-6, ((0, 1),): 1e-10})
+    ///     >>> print(op)
+    ///       1.000000e-4 +0.000000e0j * ()
+    ///      1.000000e-10 +0.000000e0j * (E(0,1))
+    ///       1.000000e-6 +0.000000e0j * (E(1,0))
+    ///     >>> op.ichop()
+    ///     >>> print(op)
+    ///       1.000000e-4 +0.000000e0j * ()
+    ///       1.000000e-6 +0.000000e0j * (E(1,0))
+    ///     >>> op.ichop(1e-5)
+    ///     >>> print(op)
+    ///       1.000000e-4 +0.000000e0j * ()
+    ///
+    /// Args:
+    ///     atol: the absolute tolerance for the cutoff. This value defaults to ``1e-8``.
     #[pyo3(signature = (atol=1e-8))]
     fn ichop(&mut self, atol: f64) {
         self.inner.ichop(atol);
     }
 
+    /// An iterator over the operator's terms.
+    ///
+    /// .. warning::
+    ///    Mutating the iteration items does **not** affect the underlying operator data.
+    ///
+    /// .. doctest::
+    ///
+    ///     >>> from qiskit_fermions.operators import UndirectedInteractionOperator
+    ///     >>> op = UndirectedInteractionOperator.from_dict({(): 2.0, ((0, 0),): 1.0, ((0, 1),): -1.0j})
+    ///     >>> list(sorted(op.iter_terms()))
+    ///     [([], (2+0j)), ([(0, 0)], (1+0j)), ([(0, 1)], (-0-1j))]
+    ///
+    /// ..
     fn iter_terms(slf: PyRef<'_, Self>) -> PyResult<Py<UndirectedInteractionOperatorDataIter>> {
         let vectorized: Vec<(Vec<PyUndirectedInteraction>, Complex64)> = slf
             .inner
@@ -553,6 +764,20 @@ impl PyUndirectedInteractionOperator {
         Py::new(slf.py(), iter)
     }
 
+    /// Constructs a new operator from an iterator of terms (see also :meth:`.iter_terms`).
+    ///
+    /// .. doctest::
+    ///
+    ///     >>> from qiskit_fermions.operators import UndirectedInteractionOperator
+    ///     >>> op = UndirectedInteractionOperator.from_dict({(): 2.0, ((0, 0),): 1.0, ((0, 1),): -1.0j})
+    ///     >>> op.equiv(UndirectedInteractionOperator.from_terms(op.iter_terms()))
+    ///     True
+    ///
+    /// Args:
+    ///     terms: an iterator of terms as produced by :meth:`.iter_terms`.
+    ///
+    /// Returns:
+    ///     A new operator.
     #[classmethod]
     fn from_terms(_cls: &Bound<'_, PyType>, terms: &Bound<'_, PyAny>) -> PyResult<Self> {
         let mut inner = UndirectedInteractionOperator::zero();
@@ -583,6 +808,32 @@ impl PyUndirectedInteractionOperator {
         self.inner.groups = groups;
     }
 
+    /// Splits this operator into an optional list of new operators based on :attr:`groups`.
+    ///
+    /// If :attr:`groups` is ``None``, this function also returns ``None``. Otherwise, it will
+    /// return a list of new operators that contain those terms of this operator with the
+    /// corresponding `group` index.
+    ///
+    /// .. doctest::
+    ///
+    ///     >>> from qiskit_fermions.operators import UndirectedInteractionOperator
+    ///     >>> op = UndirectedInteractionOperator(
+    ///     ...     [1.0, 2.0, -1.0],
+    ///     ...     [0, 1, 2, 3],
+    ///     ...     [1, 0, 3, 2],
+    ///     ...     [0, 1, 3, 4],
+    ///     ... )
+    ///     >>> print(op.split_out_groups())
+    ///     None
+    ///     >>> op.groups = [0, 1, 0]
+    ///     >>> groups = op.split_out_groups()
+    ///     >>> for g in groups:
+    ///     ...     print(list(sorted(g.iter_terms())))
+    ///     [([(0, 1)], (1+0j)), ([(3, 2)], (-1+0j))]
+    ///     [([(1, 0), (2, 3)], (2+0j))]
+    ///
+    /// Returns:
+    ///     An optional vector of one new operator for each group index in :attr:`groups`.
     fn split_out_groups(slf: PyRef<'_, Self>) -> Option<Vec<Self>> {
         let groups = slf.inner.split_out_groups();
         match groups {
@@ -596,28 +847,124 @@ impl PyUndirectedInteractionOperator {
         }
     }
 
+    /// Returns the Hermitian conjugate (or adjoint) of this operator.
+    ///
+    /// .. note::
+    ///    All generators of this operator are themselves Hermitian, which means this entire
+    ///    operator is guaranteed to be self-adjoint. Thus, this method simply returns a copy of
+    ///    the original operator.
+    ///
+    /// This affects the terms and coefficients as follows:
+    ///
+    /// - the actions in each term reverse their order and flip between creation and annihilation
+    /// - the coefficients are complex conjugated
+    ///
+    /// .. doctest::
+    ///
+    ///     >>> from qiskit_fermions.operators import UndirectedInteractionOperator
+    ///     >>> op = UndirectedInteractionOperator.from_dict({(): -1.0j, ((0, 0), (0, 1)): 1.0})
+    ///     >>> adj = op.adjoint()
+    ///     >>> print(adj)
+    ///      -0.000000e0 +1.000000e0j * ()
+    ///       1.000000e0 -0.000000e0j * (V(0) E(0,1))
+    ///
+    /// ..
     fn adjoint(&self) -> Self {
         Self {
             inner: self.inner.adjoint(),
         }
     }
 
+    /// Checks this operator for equivalence with another operator.
+    ///
+    /// Equivalence in this context means approximate equality up to the specified absolute
+    /// tolerance. To be more precise, this method returns ``True``, when all the absolute values
+    /// of the coefficients in the difference ``other - self`` are below the specified threshold
+    /// ``atol``.
+    ///
+    /// .. doctest::
+    ///
+    ///     >>> from qiskit_fermions.operators import UndirectedInteractionOperator
+    ///     >>> op = UndirectedInteractionOperator.from_dict({(): 1e-7})
+    ///     >>> zero = UndirectedInteractionOperator.zero()
+    ///     >>> op.equiv(zero)
+    ///     False
+    ///     >>> op.equiv(zero, 1e-6)
+    ///     True
+    ///     >>> op.equiv(zero, 1e-9)
+    ///     False
+    ///
+    /// Args:
+    ///     other: the other operator to compare with.
+    ///     atol: the absolute tolerance for the comparison. This value defaults to ``1e-8``.
     #[pyo3(signature = (other, atol=1e-8))]
     fn equiv(&self, other: &Self, atol: f64) -> bool {
         self.inner.equiv(&other.inner, atol)
     }
 
+    /// Returns an equivalent operator with normal ordered terms.
+    ///
+    /// The normal order of an operator term is defined such that all vertex operators appear
+    /// before all edge operators.
+    /// Within each group, the acted-upon modes are ordered lexicographically.
+    ///
+    /// .. note::
+    ///    When a term is being reordered, the mixed commutation and anti-commutation relations
+    ///    have to be taken into account. See
+    ///    :ref:`here <UndirectedInteractionOperator-definition>` for the detailed definitions.
+    ///
+    /// .. doctest::
+    ///
+    ///     >>> from qiskit_fermions.operators import UndirectedInteractionOperator
+    ///     >>> op = UndirectedInteractionOperator.from_dict({((0, 1), (1, 0), (1, 2), (0, 0), (2, 2)): 1})
+    ///     >>> print(op.normal_ordered().simplify())
+    ///      -1.000000e0 -0.000000e0j * (V(0) V(2) E(0,1) E(1,0) E(1,2))
+    ///
+    /// Returns:
+    ///     An equivalent but normal-ordered operator.
     fn normal_ordered(&self) -> Self {
         Self {
             inner: self.inner.normal_ordered(),
         }
     }
 
+    /// Returns whether this operator is Hermitian.
+    ///
+    /// .. note::
+    ///    This check is implemented using :meth:`.equiv` on the :meth:`.normal_ordered` difference
+    ///    of ``self`` and its :meth:`.adjoint` and :meth:`.zero`.
+    ///
+    /// Args:
+    ///     atol: The numerical accuracy upto which coefficients are considered equal. This value
+    ///         defaults to ``1e-8``.
+    ///
+    /// Returns:
+    ///     Whether this operator is Hermitian.
     #[pyo3(signature = (atol=1e-8))]
     fn is_hermitian(&self, atol: f64) -> bool {
         self.inner.is_hermitian(atol)
     }
 
+    /// Returns a new operator with relabeled modes.
+    ///
+    /// .. doctest::
+    ///
+    ///     >>> from qiskit_fermions.operators import UndirectedInteractionOperator
+    ///     >>> op = UndirectedInteractionOperator.from_dict({
+    ///     ...     ((0, 1), (2, 3)): 1,
+    ///     ...     ((1, 2), (3, 0)): 1,
+    ///     ... })
+    ///     >>> permutation = [4, 2, 5, 3]
+    ///     >>> relabeled = op.relabel_modes(permutation)
+    ///     >>> print(relabeled)
+    ///       1.000000e0 +0.000000e0j * (E(2,5) E(3,4))
+    ///       1.000000e0 +0.000000e0j * (E(4,2) E(5,3))
+    ///
+    /// Args:
+    ///     permutation: the index permutation list.
+    ///
+    /// Returns:
+    ///     A new operator with its modes relabeled.
     fn relabel_modes(&self, permutation: Vec<u32>) -> PyResult<Self> {
         let out = self.inner.relabel_modes(permutation);
         match out {
