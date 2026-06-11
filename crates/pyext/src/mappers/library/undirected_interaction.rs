@@ -44,7 +44,7 @@ use qiskit_fermions_core::mappers::library::undirected_interaction::{
 ///     >>> from qiskit_fermions.operators import UndirectedInteractionOperator
 ///     >>> inter_op = UndirectedInteractionOperator.from_dict({((0, 0),): 1, ((1, 2),): 2})
 ///     >>> fer_op = undirected_interaction_to_fermion(inter_op)
-///     >>> print(fer_op.normal_ordered().simplify())
+///     >>> print(format(fer_op.normal_ordered().simplify()))
 ///       1.000000e0 +0.000000e0j * ()
 ///      -0.000000e0 +2.000000e0j * (-2 -1)
 ///      -2.000000e0 +0.000000e0j * (+0 -0)
@@ -88,7 +88,7 @@ pub fn py_undirected_interaction_to_fermion(
 ///     >>> from qiskit_fermions.operators import UndirectedInteractionOperator
 ///     >>> inter_op = UndirectedInteractionOperator.from_dict({((0, 0),): 1, ((1, 2),): 2})
 ///     >>> maj_op = undirected_interaction_to_majorana(inter_op)
-///     >>> print(maj_op.normal_ordered().simplify())
+///     >>> print(format(maj_op.normal_ordered().simplify()))
 ///       0.000000e0 +1.000000e0j * (γ'0 γ0)
 ///       0.000000e0 +2.000000e0j * (γ2 γ1)
 ///

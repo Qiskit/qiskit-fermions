@@ -46,7 +46,7 @@ use qiskit_fermions_core::mappers::library::directed_interaction::{
 ///     >>> from qiskit_fermions.operators import DirectedInteractionOperator
 ///     >>> inter_op = DirectedInteractionOperator.from_dict({((0, 0),): 1, ((1, 2),): 2, ((2, 1),): -2})
 ///     >>> fer_op = directed_interaction_to_fermion(inter_op)
-///     >>> print(fer_op.normal_ordered().simplify())
+///     >>> print(format(fer_op.normal_ordered().simplify()))
 ///       1.000000e0 +0.000000e0j * ()
 ///      -2.000000e0 +0.000000e0j * (-2 -1)
 ///      -2.000000e0 +0.000000e0j * (+0 -0)
@@ -88,7 +88,7 @@ pub fn py_directed_interaction_to_fermion(
 ///     >>> from qiskit_fermions.operators import DirectedInteractionOperator
 ///     >>> inter_op = DirectedInteractionOperator.from_dict({((0, 0),): 1, ((1, 2),): 2, ((2, 1),): -2})
 ///     >>> maj_op = directed_interaction_to_majorana(inter_op)
-///     >>> print(maj_op.normal_ordered().simplify())
+///     >>> print(format(maj_op.normal_ordered().simplify()))
 ///       0.000000e0 +1.000000e0j * (γ'0 γ0)
 ///      -0.000000e0 -1.000000e0j * (γ2 γ'1)
 ///      -0.000000e0 -1.000000e0j * (γ'2 γ1)
@@ -129,7 +129,7 @@ pub fn py_directed_interaction_to_majorana(
 ///     >>> from qiskit_fermions.operators import DirectedInteractionOperator
 ///     >>> dir_op = DirectedInteractionOperator.from_dict({((0, 0),): 1, ((1, 2),): 2, ((2, 1),): -2})
 ///     >>> undir_op = directed_interaction_to_undirected(dir_op)
-///     >>> print(undir_op.simplify())
+///     >>> print(format(undir_op.simplify()))
 ///       1.000000e0 +0.000000e0j * (V(0))
 ///       0.000000e0 +1.000000e0j * (V(1) E(1,2))
 ///      -0.000000e0 -1.000000e0j * (E(1,2) V(2))

@@ -164,7 +164,7 @@ impl UndirectedInteractionOperatorDataIter {
 ///     >>> right_indices = [1, 4, 1, 2, 3, 1]
 ///     >>> boundaries = [0, 0, 1, 2, 4, 6]
 ///     >>> op = UndirectedInteractionOperator(coeffs, left_indices, right_indices, boundaries)
-///     >>> print(op)
+///     >>> print(format(op))
 ///       1.000000e0 +0.000000e0j * ()
 ///       2.000000e0 +0.000000e0j * (E(0,1))
 ///       0.000000e0 +4.000000e0j * (E(0,1) V(2))
@@ -184,7 +184,7 @@ impl UndirectedInteractionOperatorDataIter {
 ///     ...         ((3, 3), (0, 1)): -0.5j,
 ///     ...     }
 ///     ... )
-///     >>> print(op)
+///     >>> print(format(op))
 ///       1.000000e0 +0.000000e0j * ()
 ///       2.000000e0 +0.000000e0j * (E(0,1))
 ///       0.000000e0 +4.000000e0j * (E(0,1) V(2))
@@ -198,6 +198,42 @@ impl UndirectedInteractionOperatorDataIter {
 ///    zero
 ///    one
 ///    from_terms
+///
+/// Formatting
+/// ----------
+///
+/// In the examples above, the constructed operators have been printed using the output from
+/// :py:func:`format`, which results in a human-readable form of the operator.
+///
+/// .. doctest::
+///
+///     >>> print(format(op))
+///       1.000000e0 +0.000000e0j * ()
+///       2.000000e0 +0.000000e0j * (E(0,1))
+///       0.000000e0 +4.000000e0j * (E(0,1) V(2))
+///      -0.000000e0-5.000000e-1j * (V(3) E(0,1))
+///      -3.000000e0 +0.000000e0j * (E(3,4))
+///
+/// .. note::
+///    The printing order of ``format(op)`` gets explicitly sorted before printing. As such, it
+///    does not reflect the order of the terms inside the operator.
+///
+/// An alternative form can be obtained from the :py:func:`repr` function, which results in a
+/// Python-interpretable representation. In other words, this output can readily be copied and
+/// pasted into a Python shell:
+///
+/// .. doctest::
+///
+///     >>> print(repr(op))
+///     UndirectedInteractionOperator.from_dict({...})
+///
+/// Finally, for large operators both of these outputs may be very long and undesirable. Then, a
+/// very simple form with minimal information can be obtained from the :py:func:`str` function:
+///
+/// .. doctest::
+///
+///     >>> print(str(op))
+///     <UndirectedInteractionOperator with 5 terms>
 ///
 /// Iteration
 /// ---------
@@ -281,19 +317,19 @@ impl UndirectedInteractionOperatorDataIter {
 ///     >>> op1 = UndirectedInteractionOperator.from_dict({(): 2.0, ((0, 1),): 3.0})
 ///     >>> op2 = UndirectedInteractionOperator.from_dict({(): 1.5, ((2, 2),): 4.0})
 ///     >>> comp = (op1 & op2).simplify()
-///     >>> print(comp)
+///     >>> print(format(comp))
 ///       3.000000e0 +0.000000e0j * ()
 ///       4.500000e0 +0.000000e0j * (E(0,1))
 ///       8.000000e0 +0.000000e0j * (V(2))
 ///       1.200000e1 +0.000000e0j * (V(2) E(0,1))
 ///     >>> op2 &= op1
-///     >>> print(op2.simplify())
+///     >>> print(format(op2.simplify()))
 ///       3.000000e0 +0.000000e0j * ()
 ///       4.500000e0 +0.000000e0j * (E(0,1))
 ///       1.200000e1 +0.000000e0j * (E(0,1) V(2))
 ///       8.000000e0 +0.000000e0j * (V(2))
 ///     >>> squared = (op1 ** 2).simplify()
-///     >>> print(squared)
+///     >>> print(format(squared))
 ///       4.000000e0 +0.000000e0j * ()
 ///       1.200000e1 +0.000000e0j * (E(0,1))
 ///       9.000000e0 +0.000000e0j * (E(0,1) E(0,1))
@@ -378,7 +414,7 @@ impl PyUndirectedInteractionOperator {
     ///     ...         ((0, 1),): 2.0j,
     ///     ...     }
     ///     ... )
-    ///     >>> print(op)
+    ///     >>> print(format(op))
     ///       1.000000e0 -1.000000e0j * ()
     ///       2.000000e0 +0.000000e0j * (V(0))
     ///       0.000000e0 +2.000000e0j * (E(0,1))
@@ -598,6 +634,10 @@ impl PyUndirectedInteractionOperator {
     }
 
     fn __str__(&self) -> PyResult<String> {
+        Ok(format!("<UndirectedInteractionOperator with {} terms>", self.__len__()))
+    }
+
+    fn __format__(&self, _format_spec: &str) -> PyResult<String> {
         let mut sorted: Vec<_> = self.inner.iter().collect();
         sorted.sort_by_key(|&term| term.into_vec());
         let mut items_str = Vec::new();
@@ -720,16 +760,16 @@ impl PyUndirectedInteractionOperator {
     ///
     ///     >>> from qiskit_fermions.operators import UndirectedInteractionOperator
     ///     >>> op = UndirectedInteractionOperator.from_dict({(): 1e-4, ((1, 0),): 1e-6, ((0, 1),): 1e-10})
-    ///     >>> print(op)
+    ///     >>> print(format(op))
     ///       1.000000e-4 +0.000000e0j * ()
     ///      1.000000e-10 +0.000000e0j * (E(0,1))
     ///       1.000000e-6 +0.000000e0j * (E(1,0))
     ///     >>> op.ichop()
-    ///     >>> print(op)
+    ///     >>> print(format(op))
     ///       1.000000e-4 +0.000000e0j * ()
     ///       1.000000e-6 +0.000000e0j * (E(1,0))
     ///     >>> op.ichop(1e-5)
-    ///     >>> print(op)
+    ///     >>> print(format(op))
     ///       1.000000e-4 +0.000000e0j * ()
     ///
     /// Args:
@@ -864,7 +904,7 @@ impl PyUndirectedInteractionOperator {
     ///     >>> from qiskit_fermions.operators import UndirectedInteractionOperator
     ///     >>> op = UndirectedInteractionOperator.from_dict({(): -1.0j, ((0, 0), (0, 1)): 1.0})
     ///     >>> adj = op.adjoint()
-    ///     >>> print(adj)
+    ///     >>> print(format(adj))
     ///      -0.000000e0 +1.000000e0j * ()
     ///       1.000000e0 -0.000000e0j * (V(0) E(0,1))
     ///
@@ -917,7 +957,7 @@ impl PyUndirectedInteractionOperator {
     ///
     ///     >>> from qiskit_fermions.operators import UndirectedInteractionOperator
     ///     >>> op = UndirectedInteractionOperator.from_dict({((0, 1), (1, 0), (1, 2), (0, 0), (2, 2)): 1})
-    ///     >>> print(op.normal_ordered().simplify())
+    ///     >>> print(format(op.normal_ordered().simplify()))
     ///      -1.000000e0 -0.000000e0j * (V(0) V(2) E(0,1) E(1,0) E(1,2))
     ///
     /// Returns:
@@ -956,7 +996,7 @@ impl PyUndirectedInteractionOperator {
     ///     ... })
     ///     >>> permutation = [4, 2, 5, 3]
     ///     >>> relabeled = op.relabel_modes(permutation)
-    ///     >>> print(relabeled)
+    ///     >>> print(format(relabeled))
     ///       1.000000e0 +0.000000e0j * (E(2,5) E(3,4))
     ///       1.000000e0 +0.000000e0j * (E(4,2) E(5,3))
     ///
