@@ -19,7 +19,40 @@ use qiskit_fermions_core::mappers::library::undirected_interaction::{
     undirected_interaction_to_fermion, undirected_interaction_to_majorana,
 };
 
-/// Map a :class:`.UndirectedInteractionOperator` to a :class:`.FermionOperator`.
+/// Map an :class:`.UndirectedInteractionOperator` to a :class:`.FermionOperator`.
+///
+/// Args:
+///     inter_op: the undirected interaction operator to map.
+///
+/// Returns:
+///     The mapped fermionic operator.
+///
+/// ----
+///
+/// Definition
+/// ==========
+///
+/// This function decomposes the edge-vertex operators in terms of the fermionic action operators
+/// as defined :ref:`here <UndirectedInteractionOperator-definition>`.
+///
+/// Usage
+/// =====
+///
+/// .. doctest::
+///
+///     >>> from qiskit_fermions.mappers.library import undirected_interaction_to_fermion
+///     >>> from qiskit_fermions.operators import UndirectedInteractionOperator
+///     >>> inter_op = UndirectedInteractionOperator.from_dict({((0, 0),): 1, ((1, 2),): 2})
+///     >>> fer_op = undirected_interaction_to_fermion(inter_op)
+///     >>> print(fer_op.normal_ordered().simplify())
+///       1.000000e0 +0.000000e0j * ()
+///      -0.000000e0 +2.000000e0j * (-2 -1)
+///      -2.000000e0 +0.000000e0j * (+0 -0)
+///       0.000000e0 -2.000000e0j * (+1 -2)
+///      -0.000000e0 +2.000000e0j * (+2 -1)
+///      -0.000000e0 +2.000000e0j * (+2 +1)
+///
+/// ..
 #[gen_stub_pyfunction(module = "qiskit_fermions.mappers.library.undirected_interaction")]
 #[pyfunction(name = "undirected_interaction_to_fermion")]
 pub fn py_undirected_interaction_to_fermion(
@@ -30,7 +63,36 @@ pub fn py_undirected_interaction_to_fermion(
     }
 }
 
-/// Map a :class:`.UndirectedInteractionOperator` to a :class:`.MajoranaOperator`.
+/// Map an :class:`.UndirectedInteractionOperator` to a :class:`.MajoranaOperator`.
+///
+/// Args:
+///     inter_op: the undirected interaction operator to map.
+///
+/// Returns:
+///     The mapped majorana operator.
+///
+/// ----
+///
+/// Definition
+/// ==========
+///
+/// This function decomposes the edge-vertex operators in terms of the majorana operators as
+/// defined :ref:`here <UndirectedInteractionOperator-definition>`.
+///
+/// Usage
+/// =====
+///
+/// .. doctest::
+///
+///     >>> from qiskit_fermions.mappers.library import undirected_interaction_to_majorana
+///     >>> from qiskit_fermions.operators import UndirectedInteractionOperator
+///     >>> inter_op = UndirectedInteractionOperator.from_dict({((0, 0),): 1, ((1, 2),): 2})
+///     >>> maj_op = undirected_interaction_to_majorana(inter_op)
+///     >>> print(maj_op.normal_ordered().simplify())
+///       0.000000e0 +1.000000e0j * (γ'0 γ0)
+///       0.000000e0 +2.000000e0j * (γ2 γ1)
+///
+/// ..
 #[gen_stub_pyfunction(module = "qiskit_fermions.mappers.library.undirected_interaction")]
 #[pyfunction(name = "undirected_interaction_to_majorana")]
 pub fn py_undirected_interaction_to_majorana(

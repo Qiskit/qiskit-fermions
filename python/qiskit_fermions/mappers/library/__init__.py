@@ -27,6 +27,11 @@ routines.
    jordan_wigner
    fermion_to_majorana
    majorana_to_fermion
+   undirected_interaction_to_fermion
+   undirected_interaction_to_majorana
+   directed_interaction_to_fermion
+   directed_interaction_to_majorana
+   directed_interaction_to_undirected
 """
 
 from qiskit_fermions._lib.mappers.mappers_library.directed_interaction import (

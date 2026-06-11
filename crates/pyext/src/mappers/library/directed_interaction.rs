@@ -22,6 +22,37 @@ use qiskit_fermions_core::mappers::library::directed_interaction::{
 };
 
 /// Map a :class:`.DirectedInteractionOperator` to a :class:`.FermionOperator`.
+///
+/// Args:
+///     inter_op: the directed interaction operator to map.
+///
+/// Returns:
+///     The mapped fermionic operator.
+///
+/// ----
+///
+/// Definition
+/// ==========
+///
+/// This function decomposes the transfer-vertex operators in terms of the fermionic action
+/// operators as defined :ref:`here <DirectedInteractionOperator-definition>`.
+///
+/// Usage
+/// =====
+///
+/// .. doctest::
+///
+///     >>> from qiskit_fermions.mappers.library import directed_interaction_to_fermion
+///     >>> from qiskit_fermions.operators import DirectedInteractionOperator
+///     >>> inter_op = DirectedInteractionOperator.from_dict({((0, 0),): 1, ((1, 2),): 2, ((2, 1),): -2})
+///     >>> fer_op = directed_interaction_to_fermion(inter_op)
+///     >>> print(fer_op.normal_ordered().simplify())
+///       1.000000e0 +0.000000e0j * ()
+///      -2.000000e0 +0.000000e0j * (-2 -1)
+///      -2.000000e0 +0.000000e0j * (+0 -0)
+///       2.000000e0 -0.000000e0j * (+2 +1)
+///
+/// ..
 #[gen_stub_pyfunction(module = "qiskit_fermions.mappers.library.directed_interaction")]
 #[pyfunction(name = "directed_interaction_to_fermion")]
 pub fn py_directed_interaction_to_fermion(
@@ -33,6 +64,36 @@ pub fn py_directed_interaction_to_fermion(
 }
 
 /// Map a :class:`.DirectedInteractionOperator` to a :class:`.MajoranaOperator`.
+///
+/// Args:
+///     inter_op: the directed interaction operator to map.
+///
+/// Returns:
+///     The mapped majorana operator.
+///
+/// ----
+///
+/// Definition
+/// ==========
+///
+/// This function decomposes the transfer-vertex operators in terms of the majorana operators as
+/// defined :ref:`here <DirectedInteractionOperator-definition>`.
+///
+/// Usage
+/// =====
+///
+/// .. doctest::
+///
+///     >>> from qiskit_fermions.mappers.library import directed_interaction_to_majorana
+///     >>> from qiskit_fermions.operators import DirectedInteractionOperator
+///     >>> inter_op = DirectedInteractionOperator.from_dict({((0, 0),): 1, ((1, 2),): 2, ((2, 1),): -2})
+///     >>> maj_op = directed_interaction_to_majorana(inter_op)
+///     >>> print(maj_op.normal_ordered().simplify())
+///       0.000000e0 +1.000000e0j * (γ'0 γ0)
+///      -0.000000e0 -1.000000e0j * (γ2 γ'1)
+///      -0.000000e0 -1.000000e0j * (γ'2 γ1)
+///
+/// ..
 #[gen_stub_pyfunction(module = "qiskit_fermions.mappers.library.directed_interaction")]
 #[pyfunction(name = "directed_interaction_to_majorana")]
 pub fn py_directed_interaction_to_majorana(
@@ -43,7 +104,37 @@ pub fn py_directed_interaction_to_majorana(
     }
 }
 
-/// Map a :class:`.DirectedInteractionOperator` to a :class:`.UndirectedInteractionOperator`.
+/// Map a :class:`.DirectedInteractionOperator` to an :class:`.UndirectedInteractionOperator`.
+///
+/// Args:
+///     inter_op: the directed interaction operator to map.
+///
+/// Returns:
+///     The mapped undirected interaction operator.
+///
+/// ----
+///
+/// Definition
+/// ==========
+///
+/// This function decomposes the transfer-vertex operators in terms of the edge-vertex operators as
+/// defined :ref:`here <DirectedInteractionOperator-definition>`.
+///
+/// Usage
+/// =====
+///
+/// .. doctest::
+///
+///     >>> from qiskit_fermions.mappers.library import directed_interaction_to_undirected
+///     >>> from qiskit_fermions.operators import DirectedInteractionOperator
+///     >>> dir_op = DirectedInteractionOperator.from_dict({((0, 0),): 1, ((1, 2),): 2, ((2, 1),): -2})
+///     >>> undir_op = directed_interaction_to_undirected(dir_op)
+///     >>> print(undir_op.simplify())
+///       1.000000e0 +0.000000e0j * (V(0))
+///       0.000000e0 +1.000000e0j * (V(1) E(1,2))
+///      -0.000000e0 -1.000000e0j * (E(1,2) V(2))
+///
+/// ..
 #[gen_stub_pyfunction(module = "qiskit_fermions.mappers.library.directed_interaction")]
 #[pyfunction(name = "directed_interaction_to_undirected")]
 pub fn py_directed_interaction_to_undirected(
