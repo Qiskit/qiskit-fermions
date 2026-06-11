@@ -634,7 +634,10 @@ impl PyUndirectedInteractionOperator {
     }
 
     fn __str__(&self) -> PyResult<String> {
-        Ok(format!("<UndirectedInteractionOperator with {} terms>", self.__len__()))
+        Ok(format!(
+            "<UndirectedInteractionOperator with {} terms>",
+            self.__len__()
+        ))
     }
 
     fn __format__(&self, _format_spec: &str) -> PyResult<String> {

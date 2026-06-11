@@ -639,7 +639,10 @@ impl PyDirectedInteractionOperator {
     }
 
     fn __str__(&self) -> PyResult<String> {
-        Ok(format!("<DirectedInteractionOperator with {} terms>", self.__len__()))
+        Ok(format!(
+            "<DirectedInteractionOperator with {} terms>",
+            self.__len__()
+        ))
     }
 
     fn __format__(&self, _format_spec: &str) -> PyResult<String> {
