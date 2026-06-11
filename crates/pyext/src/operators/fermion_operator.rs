@@ -121,7 +121,7 @@ impl FermionOperatorDataIter {
 ///     >>> modes = [0, 0, 0, 1, 0, 1, 2, 3]
 ///     >>> boundaries = [0, 0, 1, 2, 4, 8]
 ///     >>> op = FermionOperator(coeffs, actions, modes, boundaries)
-///     >>> print(op)
+///     >>> print(format(op))
 ///       1.000000e0 +0.000000e0j * ()
 ///      -3.000000e0 +0.000000e0j * (-0)
 ///       0.000000e0 +4.000000e0j * (-0 +1)
@@ -142,7 +142,7 @@ impl FermionOperatorDataIter {
 ///     ...         (cre(0), cre(1), ann(2), ann(3)): -0.5j,
 ///     ...     }
 ///     ... )
-///     >>> print(op)
+///     >>> print(format(op))
 ///       1.000000e0 +0.000000e0j * ()
 ///      -3.000000e0 +0.000000e0j * (-0)
 ///       0.000000e0 +4.000000e0j * (-0 +1)
@@ -159,6 +159,42 @@ impl FermionOperatorDataIter {
 ///    zero
 ///    one
 ///    from_terms
+///
+/// Formatting
+/// ----------
+///
+/// In the examples above, the constructed operators have been printed using the output from
+/// :py:func:`format`, which results in a human-readable form of the operator.
+///
+/// .. doctest::
+///
+///     >>> print(format(op))
+///       1.000000e0 +0.000000e0j * ()
+///      -3.000000e0 +0.000000e0j * (-0)
+///       0.000000e0 +4.000000e0j * (-0 +1)
+///       2.000000e0 +0.000000e0j * (+0)
+///      -0.000000e0-5.000000e-1j * (+0 +1 -2 -3)
+///
+/// .. note::
+///    The printing order of ``format(op)`` gets explicitly sorted before printing. As such, it
+///    does not reflect the order of the terms inside the operator.
+///
+/// An alternative form can be obtained from the :py:func:`repr` function, which results in a
+/// Python-interpretable representation. In other words, this output can readily be copied and
+/// pasted into a Python shell:
+///
+/// .. doctest::
+///
+///     >>> print(repr(op))
+///     FermionOperator.from_dict({...})
+///
+/// Finally, for large operators both of these outputs may be very long and undesirable. Then, a
+/// very simple form with minimal information can be obtained from the :py:func:`str` function:
+///
+/// .. doctest::
+///
+///     >>> print(str(op))
+///     <FermionOperator with 5 terms>
 ///
 /// Iteration
 /// ---------
@@ -242,19 +278,19 @@ impl FermionOperatorDataIter {
 ///     >>> op1 = FermionOperator.from_dict({(): 2.0, (cre(0),): 3.0})
 ///     >>> op2 = FermionOperator.from_dict({(): 1.5, (ann(1),): 4.0})
 ///     >>> comp = (op1 & op2).simplify()
-///     >>> print(comp)
+///     >>> print(format(comp))
 ///       3.000000e0 +0.000000e0j * ()
 ///       8.000000e0 +0.000000e0j * (-1)
 ///       1.200000e1 +0.000000e0j * (-1 +0)
 ///       4.500000e0 +0.000000e0j * (+0)
 ///     >>> op2 &= op1
-///     >>> print(op2.simplify())
+///     >>> print(format(op2.simplify()))
 ///       3.000000e0 +0.000000e0j * ()
 ///       8.000000e0 +0.000000e0j * (-1)
 ///       4.500000e0 +0.000000e0j * (+0)
 ///       1.200000e1 +0.000000e0j * (+0 -1)
 ///     >>> squared = (op1 ** 2).simplify()
-///     >>> print(squared)
+///     >>> print(format(squared))
 ///       4.000000e0 +0.000000e0j * ()
 ///       1.200000e1 +0.000000e0j * (+0)
 ///       9.000000e0 +0.000000e0j * (+0 +0)
@@ -340,7 +376,7 @@ impl PyFermionOperator {
     ///     ...         ((True, 0), (False, 1)): 2.0,
     ///     ...     }
     ///     ... )
-    ///     >>> print(op)
+    ///     >>> print(format(op))
     ///       1.000000e0 -1.000000e0j * ()
     ///       2.000000e0 +0.000000e0j * (+0 -1)
     ///
@@ -553,6 +589,10 @@ impl PyFermionOperator {
     }
 
     fn __str__(&self) -> PyResult<String> {
+        Ok(format!("<FermionOperator with {} terms>", self.__len__()))
+    }
+
+    fn __format__(&self, _format_spec: &str) -> PyResult<String> {
         let mut sorted: Vec<_> = self.inner.iter().collect();
         sorted.sort_by_key(|&term| term.into_vec());
         let mut items_str = Vec::new();
@@ -669,16 +709,16 @@ impl PyFermionOperator {
     ///
     ///     >>> from qiskit_fermions.operators import FermionOperator
     ///     >>> op = FermionOperator.from_dict({(): 1e-4, ((True, 0),): 1e-6, ((False, 0),): 1e-10})
-    ///     >>> print(op)
+    ///     >>> print(format(op))
     ///       1.000000e-4 +0.000000e0j * ()
     ///      1.000000e-10 +0.000000e0j * (-0)
     ///       1.000000e-6 +0.000000e0j * (+0)
     ///     >>> op.ichop()
-    ///     >>> print(op)
+    ///     >>> print(format(op))
     ///       1.000000e-4 +0.000000e0j * ()
     ///       1.000000e-6 +0.000000e0j * (+0)
     ///     >>> op.ichop(1e-5)
-    ///     >>> print(op)
+    ///     >>> print(format(op))
     ///       1.000000e-4 +0.000000e0j * ()
     ///
     /// Args:
@@ -808,7 +848,7 @@ impl PyFermionOperator {
     ///     >>> from qiskit_fermions.operators import FermionOperator
     ///     >>> op = FermionOperator.from_dict({(): -1.0j, ((True, 0), (False, 1)): 1.0})
     ///     >>> adj = op.adjoint()
-    ///     >>> print(adj)
+    ///     >>> print(format(adj))
     ///      -0.000000e0 +1.000000e0j * ()
     ///       1.000000e0 -0.000000e0j * (+1 -0)
     ///
@@ -871,17 +911,17 @@ impl PyFermionOperator {
     ///
     ///     >>> from qiskit_fermions.operators import FermionOperator
     ///     >>> op = FermionOperator.from_dict({((False, 1), (True, 1), (False, 0), (True, 0)): 1})
-    ///     >>> print(op.normal_ordered().simplify())
+    ///     >>> print(format(op.normal_ordered().simplify()))
     ///       1.000000e0 +0.000000e0j * ()
     ///      -1.000000e0 +0.000000e0j * (+0 -0)
     ///      -1.000000e0 +0.000000e0j * (+1 -1)
     ///      -1.000000e0 +0.000000e0j * (+1 +0 -1 -0)
-    ///     >>> print(op.normal_ordered(sandwich=True).simplify())
+    ///     >>> print(format(op.normal_ordered(sandwich=True).simplify()))
     ///       1.000000e0 +0.000000e0j * ()
     ///      -1.000000e0 +0.000000e0j * (+0 -0)
     ///       1.000000e0 +0.000000e0j * (+0 +1 -1 -0)
     ///      -1.000000e0 +0.000000e0j * (+1 -1)
-    ///     >>> print(op.normal_ordered(sandwich=False).simplify())
+    ///     >>> print(format(op.normal_ordered(sandwich=False).simplify()))
     ///       1.000000e0 +0.000000e0j * ()
     ///      -1.000000e0 +0.000000e0j * (+0 -0)
     ///      -1.000000e0 +0.000000e0j * (+1 -1)
@@ -975,7 +1015,7 @@ impl PyFermionOperator {
     ///     ... })
     ///     >>> permutation = [5, 6, 4, 3]
     ///     >>> relabeled = op.relabel_modes(permutation)
-    ///     >>> print(relabeled)
+    ///     >>> print(format(relabeled))
     ///       1.000000e0 +0.000000e0j * (+5 -6)
     ///       1.000000e0 +0.000000e0j * (+5 -6 +4 -3)
     ///

@@ -126,7 +126,7 @@ impl MajoranaOperatorDataIter {
 ///     >>> modes = [0, 1, 0, 2, 0, 1, 2, 3]
 ///     >>> boundaries = [0, 0, 2, 4, 8]
 ///     >>> op = MajoranaOperator(coeffs, modes, boundaries)
-///     >>> print(op)
+///     >>> print(format(op))
 ///       1.000000e0 +0.000000e0j * ()
 ///      -2.000000e0 +0.000000e0j * (γ0 γ'0)
 ///      -0.000000e0-5.000000e-1j * (γ0 γ'0 γ1 γ'1)
@@ -145,7 +145,7 @@ impl MajoranaOperatorDataIter {
 ///     ...         (gamma(0, False), gamma(0, True), gamma(1, False), gamma(1, True)): -0.5j,
 ///     ...     }
 ///     ... )
-///     >>> print(op)
+///     >>> print(format(op))
 ///       1.000000e0 +0.000000e0j * ()
 ///      -2.000000e0 +0.000000e0j * (γ0 γ'0)
 ///      -0.000000e0-5.000000e-1j * (γ0 γ'0 γ1 γ'1)
@@ -160,6 +160,41 @@ impl MajoranaOperatorDataIter {
 ///    zero
 ///    one
 ///    from_terms
+///
+/// Formatting
+/// ----------
+///
+/// In the examples above, the constructed operators have been printed using the output from
+/// :py:func:`format`, which results in a human-readable form of the operator.
+///
+/// .. doctest::
+///
+///     >>> print(format(op))
+///       1.000000e0 +0.000000e0j * ()
+///      -2.000000e0 +0.000000e0j * (γ0 γ'0)
+///      -0.000000e0-5.000000e-1j * (γ0 γ'0 γ1 γ'1)
+///       0.000000e0 +3.000000e0j * (γ0 γ1)
+///
+/// .. note::
+///    The printing order of ``format(op)`` gets explicitly sorted before printing. As such, it
+///    does not reflect the order of the terms inside the operator.
+///
+/// An alternative form can be obtained from the :py:func:`repr` function, which results in a
+/// Python-interpretable representation. In other words, this output can readily be copied and
+/// pasted into a Python shell:
+///
+/// .. doctest::
+///
+///     >>> print(repr(op))
+///     MajoranaOperator.from_dict({...})
+///
+/// Finally, for large operators both of these outputs may be very long and undesirable. Then, a
+/// very simple form with minimal information can be obtained from the :py:func:`str` function:
+///
+/// .. doctest::
+///
+///     >>> print(str(op))
+///     <MajoranaOperator with 4 terms>
 ///
 /// Iteration
 /// ---------
@@ -243,19 +278,19 @@ impl MajoranaOperatorDataIter {
 ///     >>> op1 = MajoranaOperator.from_dict({(): 2.0, (gamma(0, False),): 3.0})
 ///     >>> op2 = MajoranaOperator.from_dict({(): 1.5, (gamma(0, True),): 4.0})
 ///     >>> comp = (op1 & op2).simplify()
-///     >>> print(comp)
+///     >>> print(format(comp))
 ///       3.000000e0 +0.000000e0j * ()
 ///       4.500000e0 +0.000000e0j * (γ0)
 ///       8.000000e0 +0.000000e0j * (γ'0)
 ///       1.200000e1 +0.000000e0j * (γ'0 γ0)
 ///     >>> op2 &= op1
-///     >>> print(op2.simplify())
+///     >>> print(format(op2.simplify()))
 ///       3.000000e0 +0.000000e0j * ()
 ///       4.500000e0 +0.000000e0j * (γ0)
 ///       1.200000e1 +0.000000e0j * (γ0 γ'0)
 ///       8.000000e0 +0.000000e0j * (γ'0)
 ///     >>> squared = (op1 ** 2).simplify()
-///     >>> print(squared)
+///     >>> print(format(squared))
 ///       4.000000e0 +0.000000e0j * ()
 ///       1.200000e1 +0.000000e0j * (γ0)
 ///       9.000000e0 +0.000000e0j * (γ0 γ0)
@@ -336,7 +371,7 @@ impl PyMajoranaOperator {
     ///     ...         (0, 1): 2.0,
     ///     ...     }
     ///     ... )
-    ///     >>> print(op)
+    ///     >>> print(format(op))
     ///       1.000000e0 -1.000000e0j * ()
     ///       2.000000e0 +0.000000e0j * (γ0 γ'0)
     ///
@@ -515,6 +550,10 @@ impl PyMajoranaOperator {
     }
 
     fn __str__(&self) -> PyResult<String> {
+        Ok(format!("<MajoranaOperator with {} terms>", self.__len__()))
+    }
+
+    fn __format__(&self, _format_spec: &str) -> PyResult<String> {
         let mut sorted: Vec<_> = self.inner.iter().collect();
         sorted.sort_by_key(|&term| term.into_vec());
         let mut items_str = Vec::new();
@@ -631,16 +670,16 @@ impl PyMajoranaOperator {
     ///
     ///     >>> from qiskit_fermions.operators import MajoranaOperator
     ///     >>> op = MajoranaOperator.from_dict({(): 1e-4, (0,): 1e-6, (1,): 1e-10})
-    ///     >>> print(op)
+    ///     >>> print(format(op))
     ///       1.000000e-4 +0.000000e0j * ()
     ///       1.000000e-6 +0.000000e0j * (γ0)
     ///      1.000000e-10 +0.000000e0j * (γ'0)
     ///     >>> op.ichop()
-    ///     >>> print(op)
+    ///     >>> print(format(op))
     ///       1.000000e-4 +0.000000e0j * ()
     ///       1.000000e-6 +0.000000e0j * (γ0)
     ///     >>> op.ichop(1e-5)
-    ///     >>> print(op)
+    ///     >>> print(format(op))
     ///       1.000000e-4 +0.000000e0j * ()
     ///
     /// Args:
@@ -766,7 +805,7 @@ impl PyMajoranaOperator {
     ///     >>> from qiskit_fermions.operators import MajoranaOperator
     ///     >>> op = MajoranaOperator.from_dict({(): -1.0j, (gamma(0, False), gamma(0, True)): 1.0})
     ///     >>> adj = op.adjoint()
-    ///     >>> print(adj)
+    ///     >>> print(format(adj))
     ///      -0.000000e0 +1.000000e0j * ()
     ///       1.000000e0 -0.000000e0j * (γ'0 γ0)
     ///
@@ -817,9 +856,9 @@ impl PyMajoranaOperator {
     ///
     ///     >>> from qiskit_fermions.operators import MajoranaOperator
     ///     >>> op = MajoranaOperator.from_dict({(gamma(0, False), gamma(0, True), gamma(0, False)): 1})
-    ///     >>> print(op.normal_ordered(reduce=False))
+    ///     >>> print(format(op.normal_ordered(reduce=False)))
     ///      -1.000000e0 +0.000000e0j * (γ'0 γ0 γ0)
-    ///     >>> print(op.normal_ordered(reduce=True))
+    ///     >>> print(format(op.normal_ordered(reduce=True)))
     ///      -1.000000e0 +0.000000e0j * (γ'0)
     ///
     /// Args:
@@ -916,7 +955,7 @@ impl PyMajoranaOperator {
     ///     ... })
     ///     >>> permutation = [5, 6, 4, 3]
     ///     >>> relabeled = op.relabel_modes(permutation)
-    ///     >>> print(relabeled)
+    ///     >>> print(format(relabeled))
     ///       1.000000e0 +0.000000e0j * (γ'2 γ3)
     ///       1.000000e0 +0.000000e0j * (γ'2 γ3 γ2 γ'1)
     ///
