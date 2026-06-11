@@ -62,7 +62,9 @@ Hermitian generators:
 .. autosummary::
    :toctree: ../stubs/
 
+   DirectedInteraction
    DirectedInteractionOperator
+   UndirectedInteraction
    UndirectedInteractionOperator
 
 Protocol
@@ -88,17 +90,21 @@ from qiskit_fermions._lib.operators.undirected_interaction_operator import (
     UndirectedInteractionOperator,
 )
 
+from .directed_interaction import DirectedInteraction
 from .fermion_action import FermionAction, ann, cre
 from .majorana_action import MajoranaAction, gamma
 from .protocol import OperatorTrait
+from .undirected_interaction import UndirectedInteraction
 
 __all__ = [
+    "DirectedInteraction",
     "DirectedInteractionOperator",
     "FermionAction",
     "FermionOperator",
     "MajoranaAction",
     "MajoranaOperator",
     "OperatorTrait",
+    "UndirectedInteraction",
     "UndirectedInteractionOperator",
     "ann",
     "cre",
