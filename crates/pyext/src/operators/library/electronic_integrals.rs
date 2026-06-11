@@ -41,7 +41,7 @@ impl PyFermionOperator {
     ///    >>> from qiskit_fermions.operators import FermionOperator
     ///    >>> one_body_a = np.array([1.0, 2.0, 3.0])
     ///    >>> op = FermionOperator.from_1body_tril_spin_sym(one_body_a, norb=2)
-    ///    >>> print(op)
+    ///    >>> print(format(op))
     ///      1.000000e0 +0.000000e0j * (+0 -0)
     ///      2.000000e0 +0.000000e0j * (+0 -1)
     ///      2.000000e0 +0.000000e0j * (+1 -0)
@@ -93,7 +93,7 @@ impl PyFermionOperator {
     ///    >>> one_body_a = np.array([1.0, 2.0, 3.0])
     ///    >>> one_body_b = np.array([-1.0, -2.0, -3.0])
     ///    >>> op = FermionOperator.from_1body_tril_spin(one_body_a, one_body_b, norb=2)
-    ///    >>> print(op)
+    ///    >>> print(format(op))
     ///      1.000000e0 +0.000000e0j * (+0 -0)
     ///      2.000000e0 +0.000000e0j * (+0 -1)
     ///      2.000000e0 +0.000000e0j * (+1 -0)

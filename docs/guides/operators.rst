@@ -114,7 +114,7 @@ construction using the sparse arrays:
        >>>
        >>> # Combine the sparse operators
        >>> op1 += op2
-       >>> print(op1)
+       >>> print(format(op1))
          1.000000e0 +0.000000e0j * (+0 -1)
          1.000000e0 +0.000000e0j * (+2 -3)
 
@@ -159,7 +159,7 @@ without worrying about managing coefficient, mode, and boundary arrays:
        >>>
        >>> # The result is sparse even when combining them
        >>> op1 += op2
-       >>> print(op1)
+       >>> print(format(op1))
        1.000000e0 +0.000000e0j * (+0 -1)
        1.000000e0 +0.000000e0j * (+2 -3)
 
