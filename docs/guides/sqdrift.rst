@@ -62,14 +62,15 @@ detail in :ref:`this guide <grouping_explanation>`.
 
        >>> from qiskit_fermions.operators.grouping import group_terms_by_electronic_structure
        >>>
-       >>> exit_code = group_terms_by_electronic_structure(hamil, num_modes)
+       >>> normal = hamil.normal_ordered().simplify(atol=1e-16)
+       >>> exit_code = group_terms_by_electronic_structure(normal, num_modes, two_body_physicist_order=False)
        >>> assert exit_code is None
-       >>> print(hamil.groups)  # the groups attribute now contains some list of group indices
+       >>> print(normal.groups)  # the groups attribute now contains some list of group indices
        [0, ...]
 
     .. code-block:: c
 
-       QfExitCode exit = qf_group_terms_by_electronic_structure(hamil, num_modes, false);
+       QfExitCode exit = qf_group_terms_by_electronic_structure(normal, num_modes, false);
 
 3. Prepare the time evolution circuit
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -87,7 +88,7 @@ components to do so, in compliance with Qiskit conventions.
        >>> from qiskit_fermions.circuit.library import Evolution
        >>>
        >>> time = 1.0  # you can choose a desired scaling factor here
-       >>> evo_gate = Evolution(num_modes, hamil, time)
+       >>> evo_gate = Evolution(num_modes, normal, time)
        >>>
        >>> circ = FermionicCircuit(num_modes)
        >>> circ.append(evo_gate, circ.modes)
