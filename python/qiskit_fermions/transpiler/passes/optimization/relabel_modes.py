@@ -183,7 +183,15 @@ class RelabelModes(TransformationPass):
             gathered_excitations, num_modes, **self._model_kwargs
         )
 
-        result = self.solver.solve(model)
+        try:
+            result = self.solver.solve(model)
+        except RuntimeError as exc:
+            warnings.warn(
+                f"Encountered a RuntimeError while trying to optimize the permutation: {exc}",
+                category=UserWarning,
+                stacklevel=1,
+            )
+            return (None, None)
 
         from pyomo.environ import value
 

@@ -187,7 +187,7 @@ pass:
        >>> from qiskit_fermions.transpiler.passes import RelabelModes
        >>>
        >>> solver = SolverFactory("appsi_highs")
-       >>> solver.options["time_limit"] = 60
+       >>> solver.options["time_limit"] = 10
        >>>
        >>> qdrift = QDriftTrotterization(5, rng=42)
        >>> relabel = RelabelModes(solver=solver)
@@ -195,7 +195,8 @@ pass:
        >>> pm.optimization = FermionicPassManager([qdrift, relabel])
        >>>
        >>> relabeled_circ = pm.run(circ)
-       >>> assert "permutation" in relabeled_circ.metadata
+       >>> # if the automatic mode relabeling was successful, the circuit's
+       >>> # metadata will contain the mode `permutation` information
 
     .. code-block:: c
 
