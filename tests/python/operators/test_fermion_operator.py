@@ -327,9 +327,14 @@ class TestFermionOperator:
     def test_max_rank(self, subtests):
         cls = self.get_class()
 
-        op = cls.one()
+        op = cls.zero()
 
-        with subtests.test("0"):
+        with subtests.test("0 for additive identity"):
+            assert op.max_rank() == 0
+
+        op += cls.one()
+
+        with subtests.test("0 for multiplicative identity"):
             assert op.max_rank() == 0
 
         op += cls.from_dict({((True, 0), (False, 1)): 1})
