@@ -1066,7 +1066,7 @@ pub unsafe extern "C" fn qf_ferm_op_is_hermitian(op: *const FermionOperator, ato
 ///     QkComplex64 coeff = {1.0, 0.0};
 ///     qf_ferm_op_add_term(op, 4, actions, modes, &coeff);
 ///
-///     assert(qf_ferm_op_max_rank(op, 4));
+///     assert(qf_ferm_op_max_rank(op), 4);
 ///
 /// @endrst
 #[unsafe(no_mangle)]

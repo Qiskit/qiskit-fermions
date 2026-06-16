@@ -968,7 +968,7 @@ pub unsafe extern "C" fn qf_maj_op_is_hermitian(op: *const MajoranaOperator, ato
 ///     QkComplex64 coeff = {1.0, 0.0};
 ///     qf_maj_op_add_term(op, 4, modes, &coeff);
 ///
-///     assert(qf_maj_op_max_rank(op, 4));
+///     assert(qf_maj_op_max_rank(op), 4);
 ///
 /// @endrst
 #[unsafe(no_mangle)]
