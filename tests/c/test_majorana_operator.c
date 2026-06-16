@@ -379,15 +379,15 @@ static int test_is_hermitian(void) {
     return Ok;
 }
 
-static int test_many_body_order(void) {
+static int test_max_rank(void) {
     QfMajoranaOperator *op = qf_maj_op_zero();
     uint32_t modes[4] = {0, 1, 2, 3};
     QkComplex64 coeff = {1.0, 0.0};
     qf_maj_op_add_term(op, 4, modes, &coeff);
 
-    uint32_t many_body_order = qf_maj_op_many_body_order(op);
+    uint32_t max_rank = qf_maj_op_max_rank(op);
 
-    bool correct = many_body_order == 4;
+    bool correct = max_rank == 4;
 
     qf_maj_op_free(op);
 
@@ -588,7 +588,7 @@ int test_majorana_operator(void) {
     num_failed += RUN_TEST(test_adjoint);
     num_failed += RUN_TEST(test_normal_ordered);
     num_failed += RUN_TEST(test_is_hermitian);
-    num_failed += RUN_TEST(test_many_body_order);
+    num_failed += RUN_TEST(test_max_rank);
     num_failed += RUN_TEST(test_is_even);
     num_failed += RUN_TEST(test_len);
     num_failed += RUN_TEST(test_relabel_modes);

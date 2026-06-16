@@ -124,7 +124,7 @@ impl MajoranaOperator {
         diff.equiv(&Self::zero(), atol)
     }
 
-    pub fn many_body_order(&self) -> u32 {
+    pub fn max_rank(&self) -> u32 {
         let mut max = 0;
         let mut prev_b = 0;
         // TODO: refactor this
@@ -889,8 +889,8 @@ mod tests {
     }
 
     #[test]
-    fn test_many_body_order() {
-        assert_eq!(MajoranaOperator::one().many_body_order(), 0);
+    fn test_max_rank() {
+        assert_eq!(MajoranaOperator::one().max_rank(), 0);
 
         assert_eq!(
             MajoranaOperator {
@@ -899,7 +899,7 @@ mod tests {
                 boundaries: vec![0, 1],
                 groups: None,
             }
-            .many_body_order(),
+            .max_rank(),
             1
         );
 
@@ -910,7 +910,7 @@ mod tests {
                 boundaries: vec![0, 2],
                 groups: None,
             }
-            .many_body_order(),
+            .max_rank(),
             2
         );
     }

@@ -1042,16 +1042,17 @@ pub unsafe extern "C" fn qf_ferm_op_is_hermitian(op: *const FermionOperator, ato
 
 /// @ingroup qf_ferm_op
 ///
-/// @brief Checks the many-body order of an operator.
+/// @brief Checks the maximum rank of an operator.
 ///
 /// @param op A pointer to the fermionic operator to be checked.
 ///
-/// @return The many-body order of the operator.
+/// @return The maximum rank of the operator.
 ///
 /// @rst
 ///
 /// .. note::
-///    The many-body order is defined as the length of the longest term contained in the operator.
+///    The length of the longest term can depend on the operator's form which means that (for
+///    example) operator simplification or normal-ordering can result in a different maximum rank.
 ///
 /// Example
 /// -------
@@ -1065,15 +1066,15 @@ pub unsafe extern "C" fn qf_ferm_op_is_hermitian(op: *const FermionOperator, ato
 ///     QkComplex64 coeff = {1.0, 0.0};
 ///     qf_ferm_op_add_term(op, 4, actions, modes, &coeff);
 ///
-///     assert(qf_ferm_op_many_body_order(op, 4));
+///     assert(qf_ferm_op_max_rank(op, 4));
 ///
 /// @endrst
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn qf_ferm_op_many_body_order(op: *const FermionOperator) -> u32 {
+pub unsafe extern "C" fn qf_ferm_op_max_rank(op: *const FermionOperator) -> u32 {
     // SAFETY: Per documentation, the pointers are non-null and aligned.
     let op = unsafe { const_ptr_as_ref(op) };
 
-    op.many_body_order()
+    op.max_rank()
 }
 
 /// @ingroup qf_ferm_op

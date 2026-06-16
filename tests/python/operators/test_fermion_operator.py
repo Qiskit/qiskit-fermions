@@ -324,23 +324,23 @@ class TestFermionOperator:
         assert not op.is_hermitian()
         assert op.is_hermitian(1e-4)
 
-    def test_many_body_order(self, subtests):
+    def test_max_rank(self, subtests):
         cls = self.get_class()
 
         op = cls.one()
 
         with subtests.test("0"):
-            assert op.many_body_order() == 0
+            assert op.max_rank() == 0
 
         op += cls.from_dict({((True, 0), (False, 1)): 1})
 
         with subtests.test("2"):
-            assert op.many_body_order() == 2
+            assert op.max_rank() == 2
 
         op += cls.from_dict({((True, 0), (False, 1), (True, 2), (False, 3)): 1})
 
         with subtests.test("4"):
-            assert op.many_body_order() == 4
+            assert op.max_rank() == 4
 
     def test_conserves_particle_number(self, subtests):
         cls = self.get_class()
