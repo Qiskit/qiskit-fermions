@@ -68,7 +68,7 @@ class QDriftTrotterization(TransformationPass):
                 weights = np.zeros(
                     (max_group_idx + 1),
                 )
-                weights[groups] += np.abs(all_coeffs)
+                np.add.at(weights, groups, np.abs(all_coeffs))
                 weights /= np.unique(groups, return_counts=True)[1]
             else:
                 terms = list(hamil.iter_terms())
