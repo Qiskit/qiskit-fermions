@@ -14,7 +14,7 @@ export BINDGEN_EXTRA_CLANG_ARGS := "-I$(shell python -c "import sysconfig; print
 lint:
 	cargo metadata --format-version=1 --locked >/dev/null
 	cargo fmt --check
-	cargo clippy -- -D warnings
+	cargo clippy --all-targets -- -D warnings
 	tox -e lint
 	clang-format --dry-run -Werror --style="file:.clang-format" -i tests/c/*.c tests/c/*.h
 
