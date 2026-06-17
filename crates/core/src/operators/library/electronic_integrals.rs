@@ -304,16 +304,16 @@ mod tests {
     #[test]
     fn test_1body_tril_spin_sym() {
         let norb = 2;
-        let one_body_a = Array1::from_iter((1..4).map(|i| f64::from(i)));
+        let one_body_a = Array1::from_iter((1..4).map(f64::from));
 
         let op = FermionOperator::from_1body_tril_spin_sym(ArrayView1::from(&one_body_a), norb);
 
         let expected = FermionOperator {
-            coeffs: vec![1.0, 1.0, 2.0, 2.0, 2.0, 2.0, 3.0, 3.0]
+            coeffs: [1.0, 1.0, 2.0, 2.0, 2.0, 2.0, 3.0, 3.0]
                 .iter()
                 .map(|c| Complex64::new(*c, 0.0))
                 .collect(),
-            actions: vec![true, false].iter().cloned().cycle().take(16).collect(),
+            actions: [true, false].iter().cloned().cycle().take(16).collect(),
             modes: vec![0, 0, 2, 2, 1, 0, 0, 1, 3, 2, 2, 3, 1, 1, 3, 3],
             boundaries: vec![0, 2, 4, 6, 8, 10, 12, 14, 16],
             groups: None,
@@ -325,7 +325,7 @@ mod tests {
     #[test]
     fn test_1body_tril_spin() {
         let norb = 2;
-        let one_body_a = Array1::from_iter((1..4).map(|i| f64::from(i)));
+        let one_body_a = Array1::from_iter((1..4).map(f64::from));
         let one_body_b = Array1::from_iter((1..4).map(|i| f64::from(-i)));
 
         let op = FermionOperator::from_1body_tril_spin(
@@ -335,11 +335,11 @@ mod tests {
         );
 
         let expected = FermionOperator {
-            coeffs: vec![1.0, 2.0, 2.0, 3.0, -1.0, -2.0, -2.0, -3.0]
+            coeffs: [1.0, 2.0, 2.0, 3.0, -1.0, -2.0, -2.0, -3.0]
                 .iter()
                 .map(|c| Complex64::new(*c, 0.0))
                 .collect(),
-            actions: vec![true, false].iter().cloned().cycle().take(16).collect(),
+            actions: [true, false].iter().cloned().cycle().take(16).collect(),
             modes: vec![0, 0, 1, 0, 0, 1, 1, 1, 2, 2, 3, 2, 2, 3, 3, 3],
             boundaries: vec![0, 2, 4, 6, 8, 10, 12, 14, 16],
             groups: None,
@@ -351,7 +351,7 @@ mod tests {
     #[test]
     fn test_2body_tril_spin_sym() {
         let norb = 2;
-        let two_body_aa = Array1::from_iter((1..7).map(|i| f64::from(i)));
+        let two_body_aa = Array1::from_iter((1..7).map(f64::from));
 
         let op = FermionOperator::from_2body_tril_spin_sym(ArrayView1::from(&two_body_aa), norb);
 
@@ -365,7 +365,7 @@ mod tests {
             .iter()
             .map(|c| Complex64::new(*c, 0.0))
             .collect(),
-            actions: vec![true, true, false, false]
+            actions: [true, true, false, false]
                 .iter()
                 .cloned()
                 .cycle()
@@ -393,8 +393,8 @@ mod tests {
     #[test]
     fn test_2body_tril_spin() {
         let norb = 2;
-        let two_body_aa = Array1::from_iter((1..7).map(|i| f64::from(i)));
-        let two_body_ab = Array1::from_iter((11..20).map(|i| f64::from(i)));
+        let two_body_aa = Array1::from_iter((1..7).map(f64::from));
+        let two_body_ab = Array1::from_iter((11..20).map(f64::from));
         let two_body_bb = Array1::from_iter((1..7).map(|i| f64::from(-i)));
 
         let op = FermionOperator::from_2body_tril_spin(
@@ -415,7 +415,7 @@ mod tests {
             .iter()
             .map(|c| Complex64::new(*c, 0.0))
             .collect(),
-            actions: vec![true, true, false, false]
+            actions: [true, true, false, false]
                 .iter()
                 .cloned()
                 .cycle()
