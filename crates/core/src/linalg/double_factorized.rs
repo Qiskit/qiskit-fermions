@@ -286,11 +286,27 @@ pub fn double_factorized(
     }
     let max_vecs = max_vecs.unwrap_or(norb * (norb + 1) / 2);
 
-    if cholesky {
-        double_factorized_explicit_cholesky(two_body_tensor, tol, max_vecs)
+    let norb = two_body_tensor.shape()[0];
+    let reshaped = reshaped_two_body(two_body_tensor);
+
+    // Produce the outer factorization columns and their coefficients. The Cholesky path folds the
+    // scale into the vectors themselves (unit coefficients); the eigh path keeps the eigenvalues
+    // as coefficients.
+    let (outer_columns, outer_coeffs) = if cholesky {
+        let cholesky_vecs = modified_cholesky(&reshaped, tol, Some(max_vecs));
+        let n_vecs = cholesky_vecs.ncols();
+        (cholesky_vecs, vec![1.0; n_vecs])
     } else {
-        double_factorized_explicit_eigh(two_body_tensor, tol, max_vecs)
-    }
+        let (outer_eigs, outer_vecs) = truncated_eigh(&reshaped, tol, Some(max_vecs));
+        let coeffs = outer_eigs.to_vec();
+        (outer_vecs, coeffs)
+    };
+
+    // Each column reshapes to a `(norb, norb)` matrix.
+    let outer_mats: Vec<Array2<Complex64>> = (0..outer_coeffs.len())
+        .map(|t| Array2::from_shape_fn((norb, norb), |(p, q)| outer_columns[[p * norb + q, t]]))
+        .collect();
+    terms_from_outer_matrices(&outer_mats, &outer_coeffs)
 }
 
 /// Reshapes a two-body tensor `(norb, norb, norb, norb)` into a `(norb², norb²)` complex matrix.
@@ -305,6 +321,16 @@ fn reshaped_two_body(two_body_tensor: &Array4<f64>) -> Array2<Complex64> {
     })
 }
 
+/// Builds a diagonal Coulomb matrix as the scaled outer product `coeff * eigs_k[k] * eigs_l[l]`.
+///
+/// The result has shape `(eigs_k.len(), eigs_l.len())`. Passing the same slice for both arguments
+/// yields the common symmetric `coeff * eigs[k] * eigs[l]` form.
+fn diag_coulomb_outer(coeff: f64, eigs_k: &[f64], eigs_l: &[f64]) -> Array2<f64> {
+    Array2::from_shape_fn((eigs_k.len(), eigs_l.len()), |(k, l)| {
+        coeff * eigs_k[k] * eigs_l[l]
+    })
+}
+
 /// Builds the per-term `(Z, U)` factors from a set of reshaped outer matrices, scaling each
 /// diagonal Coulomb matrix by an associated outer coefficient.
 fn terms_from_outer_matrices(
@@ -316,53 +342,31 @@ fn terms_from_outer_matrices(
         .zip(outer_coeffs.iter())
         .map(|(mat, &coeff)| {
             let (eigs, rotation) = hermitian_eigh(mat);
-            let n = eigs.len();
-            let diag_coulomb = Array2::from_shape_fn((n, n), |(k, l)| coeff * eigs[k] * eigs[l]);
+            let eigs = eigs.as_slice().unwrap();
+            let diag_coulomb = diag_coulomb_outer(coeff, eigs, eigs);
             (diag_coulomb, rotation)
         })
         .collect()
 }
 
-/// Explicit double factorization via modified Cholesky.
-fn double_factorized_explicit_cholesky(
-    two_body_tensor: &Array4<f64>,
-    tol: f64,
-    max_vecs: usize,
-) -> Vec<DoubleFactorizedTerm> {
-    let norb = two_body_tensor.shape()[0];
-    let reshaped = reshaped_two_body(two_body_tensor);
-    let cholesky_vecs = modified_cholesky(&reshaped, tol, Some(max_vecs));
-    let n_vecs = cholesky_vecs.ncols();
-
-    // Each Cholesky vector (a column) reshapes to a `(norb, norb)` matrix.
-    let outer_mats: Vec<Array2<Complex64>> = (0..n_vecs)
-        .map(|t| Array2::from_shape_fn((norb, norb), |(p, q)| cholesky_vecs[[p * norb + q, t]]))
-        .collect();
-    let outer_coeffs = vec![1.0; n_vecs];
-    terms_from_outer_matrices(&outer_mats, &outer_coeffs)
-}
-
-/// Explicit double factorization via truncated eigendecomposition.
-fn double_factorized_explicit_eigh(
-    two_body_tensor: &Array4<f64>,
-    tol: f64,
-    max_vecs: usize,
-) -> Vec<DoubleFactorizedTerm> {
-    let norb = two_body_tensor.shape()[0];
-    let reshaped = reshaped_two_body(two_body_tensor);
-    let (outer_eigs, outer_vecs) = truncated_eigh(&reshaped, tol, Some(max_vecs));
-    let n_vecs = outer_eigs.len();
-
-    let outer_mats: Vec<Array2<Complex64>> = (0..n_vecs)
-        .map(|t| Array2::from_shape_fn((norb, norb), |(p, q)| outer_vecs[[p * norb + q, t]]))
-        .collect();
-    let outer_coeffs: Vec<f64> = (0..n_vecs).map(|t| outer_eigs[t]).collect();
-    terms_from_outer_matrices(&outer_mats, &outer_coeffs)
-}
-
 // ---------------------------------------------------------------------------------------------
 // t2 amplitudes (spin-restricted)
 // ---------------------------------------------------------------------------------------------
+
+/// Places a flat occupied×virtual vector into the (virtual, occupied) block of a `(norb, norb)`
+/// zero matrix. The flat index runs in `product(occupied, virtual)` order (occupied outer,
+/// virtual inner): `mat[row, col]` for `row` in `[nocc, norb)` and `col` in `[0, nocc)`.
+fn place_ov_block(norb: usize, nocc: usize, get: impl Fn(usize) -> Complex64) -> Array2<Complex64> {
+    let mut mat: Array2<Complex64> = Array2::zeros((norb, norb));
+    let mut entry = 0;
+    for col in 0..nocc {
+        for row in nocc..norb {
+            mat[[row, col]] = get(entry);
+            entry += 1;
+        }
+    }
+    mat
+}
 
 /// The "quadrature" gadget that turns a placement matrix into a Hermitian one-body tensor:
 /// `0.5 * (1 - sign*i) * (mat + sign*i*mat†)`.
@@ -404,23 +408,15 @@ pub fn double_factorized_t2(
 
     let mut terms: Vec<DoubleFactorizedTerm> = Vec::with_capacity(2 * n_vecs);
     for t in 0..n_vecs {
-        // Place the outer vector into the occupied x virtual block: mat[row, col] where row runs
-        // over the virtual range [nocc, norb) and col over the occupied range [0, nocc).
-        let mut mat: Array2<Complex64> = Array2::zeros((norb, norb));
-        let mut entry = 0;
-        for col in 0..nocc {
-            for row in nocc..norb {
-                mat[[row, col]] = outer_vecs[[entry, t]];
-                entry += 1;
-            }
-        }
+        // Place the outer vector into the occupied x virtual block.
+        let mat = place_ov_block(norb, nocc, |entry| outer_vecs[[entry, t]]);
 
         for (sign, coeff_sign) in [(1.0, 1.0), (-1.0, -1.0)] {
             let one_body = quadrature(&mat, sign);
             let (eigs, rotation) = hermitian_eigh(&one_body);
-            let n = eigs.len();
             let coeff = coeff_sign * outer_eigs[t];
-            let diag_coulomb = Array2::from_shape_fn((n, n), |(k, l)| coeff * eigs[k] * eigs[l]);
+            let eigs = eigs.as_slice().unwrap();
+            let diag_coulomb = diag_coulomb_outer(coeff, eigs, eigs);
             terms.push((diag_coulomb, rotation));
         }
     }
@@ -515,24 +511,9 @@ pub fn double_factorized_t2_alpha_beta(
 
     let mut terms: Vec<DoubleFactorizedT2AlphaBetaTerm> = Vec::with_capacity(4 * n_vecs);
     for t in 0..n_vecs {
-        // Place the left/right singular vectors into the occupied x virtual blocks. The flat
-        // index runs in `product(occupied, virtual)` order (occupied outer, virtual inner).
-        let mut left_mat: Array2<Complex64> = Array2::zeros((norb, norb));
-        let mut entry = 0;
-        for col in 0..nocc_a {
-            for row in nocc_a..norb {
-                left_mat[[row, col]] = left[[entry, t]];
-                entry += 1;
-            }
-        }
-        let mut right_mat: Array2<Complex64> = Array2::zeros((norb, norb));
-        let mut entry = 0;
-        for col in 0..nocc_b {
-            for row in nocc_b..norb {
-                right_mat[[row, col]] = right[[t, entry]];
-                entry += 1;
-            }
-        }
+        // Place the left/right singular vectors into the occupied x virtual blocks.
+        let left_mat = place_ov_block(norb, nocc_a, |entry| left[[entry, t]]);
+        let right_mat = place_ov_block(norb, nocc_b, |entry| right[[t, entry]]);
         let neg_right_mat = right_mat.mapv(|x| -x);
 
         let rows: [(f64, &Array2<Complex64>); 4] = [
@@ -550,22 +531,13 @@ pub fn double_factorized_t2_alpha_beta(
 
             let coeff = 0.5 * coeff_signs[row_idx] * singular_vals[t];
 
-            // Concatenated alpha/beta eigenvalues (length 2*norb); outer product scaled by
-            // `coeff` gives the big diagonal Coulomb matrix, sliced into the aa/ab/bb blocks.
-            let combined_eigs: Vec<f64> = eigs_a
-                .iter()
-                .copied()
-                .chain(eigs_b.iter().copied())
-                .collect();
-            let aa = Array2::from_shape_fn((norb, norb), |(k, l)| {
-                coeff * combined_eigs[k] * combined_eigs[l]
-            });
-            let ab = Array2::from_shape_fn((norb, norb), |(k, l)| {
-                coeff * combined_eigs[k] * combined_eigs[norb + l]
-            });
-            let bb = Array2::from_shape_fn((norb, norb), |(k, l)| {
-                coeff * combined_eigs[norb + k] * combined_eigs[norb + l]
-            });
+            // The big diagonal Coulomb matrix is the `coeff`-scaled outer product of the
+            // concatenated alpha/beta eigenvalues, sliced into the aa/ab/bb blocks.
+            let alpha = eigs_a.as_slice().unwrap();
+            let beta = eigs_b.as_slice().unwrap();
+            let aa = diag_coulomb_outer(coeff, alpha, alpha);
+            let ab = diag_coulomb_outer(coeff, alpha, beta);
+            let bb = diag_coulomb_outer(coeff, beta, beta);
 
             terms.push(DoubleFactorizedT2AlphaBetaTerm {
                 diag_coulomb: [aa, ab, bb],
