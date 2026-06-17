@@ -301,23 +301,28 @@ class TestMajoranaOperator:
         assert not op.is_hermitian()
         assert op.is_hermitian(1e-4)
 
-    def test_many_body_order(self, subtests):
+    def test_max_rank(self, subtests):
         cls = self.get_class()
 
-        op = cls.one()
+        op = cls.zero()
 
-        with subtests.test("0"):
-            assert op.many_body_order() == 0
+        with subtests.test("0 for additive identity"):
+            assert op.max_rank() == 0
+
+        op += cls.one()
+
+        with subtests.test("0 for multiplicative identity"):
+            assert op.max_rank() == 0
 
         op += cls.from_dict({(0, 1): 1})
 
         with subtests.test("2"):
-            assert op.many_body_order() == 2
+            assert op.max_rank() == 2
 
         op += cls.from_dict({(0, 1, 2, 3): 1})
 
         with subtests.test("4"):
-            assert op.many_body_order() == 4
+            assert op.max_rank() == 4
 
     def test_is_even(self, subtests):
         cls = self.get_class()

@@ -326,7 +326,7 @@ impl FermionOperatorDataIter {
 /// .. autosummary::
 ///
 ///    is_hermitian
-///    many_body_order
+///    max_rank
 ///    conserves_particle_number
 ///
 /// ----
@@ -965,11 +965,12 @@ impl PyFermionOperator {
         self.inner.is_hermitian(atol)
     }
 
-    /// Returns the many-body order of this operator.
+    /// Returns the maximum rank of the terms in this operator.
     ///
     /// .. note::
-    ///    The many-body order is defined as the length of the longest term contained in the
-    ///    operator.
+    ///    The length of the longest term can depend on the operator's form which means that (for
+    ///    example) operator simplification or normal-ordering can result in a different maximum
+    ///    rank.
     ///
     /// .. doctest::
     ///
@@ -977,13 +978,13 @@ impl PyFermionOperator {
     ///     >>> op = FermionOperator.from_dict({
     ///     ...     ((True, 0), (False, 1), (True, 2), (False, 3)): 1,
     ///     ... })
-    ///     >>> op.many_body_order()
+    ///     >>> op.max_rank()
     ///     4
     ///
     /// Returns:
-    ///     The many-body order of this operator.
-    fn many_body_order(&self) -> u32 {
-        self.inner.many_body_order()
+    ///     The maximum rank of this operator.
+    fn max_rank(&self) -> u32 {
+        self.inner.max_rank()
     }
 
     /// Returns whether this operator is particle-number conserving.
