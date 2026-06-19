@@ -20,12 +20,6 @@ use nalgebra::DMatrix;
 use ndarray::{Array1, Array2, Array4};
 use num_complex::Complex64;
 
-/// Accuracy threshold below which factorization terms are discarded by default.
-///
-/// Matches the default tolerance used by the original `ffsim` routines; callers can pass this
-/// for the `tol` argument of the public decomposition functions.
-pub const DEFAULT_TOL: f64 = 1e-8;
-
 /// A single term of a double-factorized decomposition: a real symmetric diagonal Coulomb
 /// matrix `Z` paired with a unitary orbital rotation `U`.
 pub type DoubleFactorizedTerm = (Array2<f64>, Array2<Complex64>);
@@ -622,13 +616,6 @@ pub fn reconstruct_t2_alpha_beta(
         }
     }
     result
-}
-
-impl DoubleFactorizedT2AlphaBetaTerm {
-    /// The number of orbitals `norb` represented by this term.
-    pub fn norb(&self) -> usize {
-        self.orbital_rotations[0].nrows()
-    }
 }
 
 #[cfg(test)]
