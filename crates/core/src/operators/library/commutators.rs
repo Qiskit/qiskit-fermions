@@ -89,11 +89,11 @@ mod tests {
         let comm = commutator(&op1, &op2);
 
         let expected = FermionOperator {
-            coeffs: vec![1.0, 2.0, 2.0, 4.0, -1.0, -2.0, -2.0, -4.0]
+            coeffs: [1.0, 2.0, 2.0, 4.0, -1.0, -2.0, -2.0, -4.0]
                 .iter()
                 .map(|c| Complex64::new(*c, 0.0))
                 .collect(),
-            actions: vec![true, false].iter().cloned().cycle().take(32).collect(),
+            actions: [true, false].iter().cloned().cycle().take(32).collect(),
             modes: vec![
                 1, 0, 0, 1, 3, 2, 0, 1, 1, 0, 2, 3, 3, 2, 2, 3, 0, 1, 1, 0, 2, 3, 1, 0, 0, 1, 3, 2,
                 2, 3, 3, 2,
@@ -124,11 +124,11 @@ mod tests {
         let comm = anti_commutator(&op1, &op2);
 
         let expected = FermionOperator {
-            coeffs: vec![1.0, 2.0, 2.0, 4.0, 1.0, 2.0, 2.0, 4.0]
+            coeffs: [1.0, 2.0, 2.0, 4.0, 1.0, 2.0, 2.0, 4.0]
                 .iter()
                 .map(|c| Complex64::new(*c, 0.0))
                 .collect(),
-            actions: vec![true, false].iter().cloned().cycle().take(32).collect(),
+            actions: [true, false].iter().cloned().cycle().take(32).collect(),
             modes: vec![
                 1, 0, 0, 1, 3, 2, 0, 1, 1, 0, 2, 3, 3, 2, 2, 3, 0, 1, 1, 0, 2, 3, 1, 0, 0, 1, 3, 2,
                 2, 3, 3, 2,

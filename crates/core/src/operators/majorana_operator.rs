@@ -124,18 +124,12 @@ impl MajoranaOperator {
         diff.equiv(&Self::zero(), atol)
     }
 
-    pub fn many_body_order(&self) -> u32 {
-        let mut max = 0;
-        let mut prev_b = 0;
-        // TODO: refactor this
-        self.boundaries[1..].iter().for_each(|b| {
-            let d = b - prev_b;
-            if d > max {
-                max = d;
-            }
-            prev_b = *b;
-        });
-        max as u32
+    pub fn max_rank(&self) -> u32 {
+        self.boundaries
+            .windows(2)
+            .map(|p| p[1] - p[0])
+            .max()
+            .unwrap_or(0) as u32
     }
 
     pub fn is_even(&self) -> bool {
@@ -889,8 +883,10 @@ mod tests {
     }
 
     #[test]
-    fn test_many_body_order() {
-        assert_eq!(MajoranaOperator::one().many_body_order(), 0);
+    fn test_max_rank() {
+        assert_eq!(MajoranaOperator::zero().max_rank(), 0);
+
+        assert_eq!(MajoranaOperator::one().max_rank(), 0);
 
         assert_eq!(
             MajoranaOperator {
@@ -899,7 +895,7 @@ mod tests {
                 boundaries: vec![0, 1],
                 groups: None,
             }
-            .many_body_order(),
+            .max_rank(),
             1
         );
 
@@ -910,7 +906,7 @@ mod tests {
                 boundaries: vec![0, 2],
                 groups: None,
             }
-            .many_body_order(),
+            .max_rank(),
             2
         );
     }

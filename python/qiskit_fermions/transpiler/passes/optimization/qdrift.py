@@ -62,7 +62,14 @@ class QDriftTrotterization(TransformationPass):
 
             if hamil.groups is not None:
                 terms = hamil.split_out_groups()
-                weights = [np.abs(np.mean(g.get_coeffs())) for g in terms]
+                all_coeffs = hamil.get_coeffs()
+                groups = hamil.groups
+                max_group_idx = max(groups)
+                weights = np.zeros(
+                    (max_group_idx + 1),
+                )
+                np.add.at(weights, groups, np.abs(all_coeffs))
+                weights /= np.unique(groups, return_counts=True)[1]
             else:
                 terms = list(hamil.iter_terms())
                 weights = np.abs(hamil.get_coeffs())

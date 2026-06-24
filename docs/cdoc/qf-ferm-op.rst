@@ -136,7 +136,7 @@ The following functions exist to check certain properties of an operator.
 
   ==============================================  ==========================================================
   :c:func:`qf_ferm_op_is_hermitian`               Returns whether an operator is Hermitian.
-  :c:func:`qf_ferm_op_many_body_order`            Returns the many-body order of an operator.
+  :c:func:`qf_ferm_op_max_rank`                   Returns the maximum rank of the terms in this operator.
   :c:func:`qf_ferm_op_conserves_particle_number`  Returns whether an operator is particle-number conserving.
   ==============================================  ==========================================================
 
