@@ -11,6 +11,6 @@
 // that they have been altered from the originals.
 
 pub mod directed_interaction;
+pub mod edge_vertex;
 pub mod jordan_wigner;
 pub mod majorana_fermion;
-pub mod undirected_interaction;

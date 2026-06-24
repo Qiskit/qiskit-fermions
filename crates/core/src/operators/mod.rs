@@ -240,8 +240,8 @@ macro_rules! impl_operator_macro {
 }
 
 pub mod directed_interaction_operator;
+pub mod edge_vertex_operator;
 pub mod fermion_operator;
 pub mod grouping;
 pub mod library;
 pub mod majorana_operator;
-pub mod undirected_interaction_operator;

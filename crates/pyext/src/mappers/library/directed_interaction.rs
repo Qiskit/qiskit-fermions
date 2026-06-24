@@ -11,14 +11,14 @@
 // that they have been altered from the originals.
 
 use crate::operators::directed_interaction_operator::PyDirectedInteractionOperator;
+use crate::operators::edge_vertex_operator::PyEdgeVertexOperator;
 use crate::operators::fermion_operator::PyFermionOperator;
 use crate::operators::majorana_operator::PyMajoranaOperator;
-use crate::operators::undirected_interaction_operator::PyUndirectedInteractionOperator;
 use pyo3::prelude::*;
 use pyo3_stub_gen::derive::*;
 use qiskit_fermions_core::mappers::library::directed_interaction::{
-    directed_interaction_to_fermion, directed_interaction_to_majorana,
-    directed_interaction_to_undirected,
+    directed_interaction_to_edge_vertex, directed_interaction_to_fermion,
+    directed_interaction_to_majorana,
 };
 
 /// Map a :class:`.DirectedInteractionOperator` to a :class:`.FermionOperator`.
@@ -104,13 +104,13 @@ pub fn py_directed_interaction_to_majorana(
     }
 }
 
-/// Map a :class:`.DirectedInteractionOperator` to an :class:`.UndirectedInteractionOperator`.
+/// Map a :class:`.DirectedInteractionOperator` to an :class:`.EdgeVertexOperator`.
 ///
 /// Args:
 ///     inter_op: the directed interaction operator to map.
 ///
 /// Returns:
-///     The mapped undirected interaction operator.
+///     The mapped edge-vertex operator.
 ///
 /// ----
 ///
@@ -125,10 +125,10 @@ pub fn py_directed_interaction_to_majorana(
 ///
 /// .. doctest::
 ///
-///     >>> from qiskit_fermions.mappers.library import directed_interaction_to_undirected
+///     >>> from qiskit_fermions.mappers.library import directed_interaction_to_edge_vertex
 ///     >>> from qiskit_fermions.operators import DirectedInteractionOperator
 ///     >>> dir_op = DirectedInteractionOperator.from_dict({((0, 0),): 1, ((1, 2),): 2, ((2, 1),): -2})
-///     >>> undir_op = directed_interaction_to_undirected(dir_op)
+///     >>> undir_op = directed_interaction_to_edge_vertex(dir_op)
 ///     >>> print(format(undir_op.simplify()))
 ///       1.000000e0 +0.000000e0j * (V(0))
 ///       0.000000e0 +1.000000e0j * (V(1) E(1,2))
@@ -136,12 +136,12 @@ pub fn py_directed_interaction_to_majorana(
 ///
 /// ..
 #[gen_stub_pyfunction(module = "qiskit_fermions.mappers.library.directed_interaction")]
-#[pyfunction(name = "directed_interaction_to_undirected")]
-pub fn py_directed_interaction_to_undirected(
+#[pyfunction(name = "directed_interaction_to_edge_vertex")]
+pub fn py_directed_interaction_to_edge_vertex(
     inter_op: PyDirectedInteractionOperator,
-) -> PyUndirectedInteractionOperator {
-    PyUndirectedInteractionOperator {
-        inner: directed_interaction_to_undirected(&inter_op.inner),
+) -> PyEdgeVertexOperator {
+    PyEdgeVertexOperator {
+        inner: directed_interaction_to_edge_vertex(&inter_op.inner),
     }
 }
 
@@ -154,5 +154,5 @@ pub mod directed_interaction {
     use super::py_directed_interaction_to_majorana;
 
     #[pymodule_export]
-    use super::py_directed_interaction_to_undirected;
+    use super::py_directed_interaction_to_edge_vertex;
 }

@@ -13,13 +13,11 @@
 use num_complex::Complex64;
 
 use crate::operators::OperatorTrait;
+use crate::operators::edge_vertex_operator::{EdgeAction, EdgeVertexOperator};
 use crate::operators::fermion_operator::FermionOperator;
 use crate::operators::majorana_operator::MajoranaOperator;
-use crate::operators::undirected_interaction_operator::{
-    UndirectedInteraction, UndirectedInteractionOperator,
-};
 
-fn map_undirected_to_fermion(action: UndirectedInteraction) -> FermionOperator {
+fn map_edge_vertex_to_fermion(action: EdgeAction) -> FermionOperator {
     if *action.0 == *action.1 {
         FermionOperator {
             coeffs: vec![Complex64::new(1.0, 0.0), Complex64::new(-2.0, 0.0)],
@@ -47,16 +45,14 @@ fn map_undirected_to_fermion(action: UndirectedInteraction) -> FermionOperator {
     }
 }
 
-pub fn undirected_interaction_to_fermion(
-    inter_op: &UndirectedInteractionOperator,
-) -> FermionOperator {
+pub fn edge_vertex_to_fermion(inter_op: &EdgeVertexOperator) -> FermionOperator {
     let mut mapped_operator = FermionOperator::zero();
 
     inter_op.iter().for_each(|term| {
         let mut mapped_term = FermionOperator::one();
 
         term.iter()
-            .for_each(|action| mapped_term.__imatmul__(&map_undirected_to_fermion(action)));
+            .for_each(|action| mapped_term.__imatmul__(&map_edge_vertex_to_fermion(action)));
 
         mapped_term.__imul__(term.coeff);
 
@@ -66,7 +62,7 @@ pub fn undirected_interaction_to_fermion(
     mapped_operator
 }
 
-fn map_undirected_to_majorana(action: UndirectedInteraction) -> MajoranaOperator {
+fn map_edge_vertex_to_majorana(action: EdgeAction) -> MajoranaOperator {
     if *action.0 == *action.1 {
         MajoranaOperator {
             coeffs: vec![Complex64::new(0.0, -1.0)],
@@ -84,16 +80,14 @@ fn map_undirected_to_majorana(action: UndirectedInteraction) -> MajoranaOperator
     }
 }
 
-pub fn undirected_interaction_to_majorana(
-    inter_op: &UndirectedInteractionOperator,
-) -> MajoranaOperator {
+pub fn edge_vertex_to_majorana(inter_op: &EdgeVertexOperator) -> MajoranaOperator {
     let mut mapped_operator = MajoranaOperator::zero();
 
     inter_op.iter().for_each(|term| {
         let mut mapped_term = MajoranaOperator::one();
 
         term.iter()
-            .for_each(|action| mapped_term.__imatmul__(&map_undirected_to_majorana(action)));
+            .for_each(|action| mapped_term.__imatmul__(&map_edge_vertex_to_majorana(action)));
 
         mapped_term.__imul__(term.coeff);
 
@@ -108,8 +102,8 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_undirected_to_fermion() {
-        let inter_op = UndirectedInteractionOperator {
+    fn test_edge_vertex_to_fermion() {
+        let inter_op = EdgeVertexOperator {
             coeffs: vec![Complex64::new(1.0, 0.0), Complex64::new(2.0, 0.0)],
             left_indices: vec![0, 1],
             right_indices: vec![0, 2],
@@ -117,7 +111,7 @@ mod tests {
             groups: None,
         };
 
-        let fer_op = undirected_interaction_to_fermion(&inter_op);
+        let fer_op = edge_vertex_to_fermion(&inter_op);
 
         let expected = FermionOperator {
             coeffs: vec![
@@ -140,8 +134,8 @@ mod tests {
     }
 
     #[test]
-    fn test_undirected_to_majorana() {
-        let inter_op = UndirectedInteractionOperator {
+    fn test_edge_vertex_to_majorana() {
+        let inter_op = EdgeVertexOperator {
             coeffs: vec![Complex64::new(1.0, 0.0), Complex64::new(2.0, 0.0)],
             left_indices: vec![0, 1],
             right_indices: vec![0, 2],
@@ -149,7 +143,7 @@ mod tests {
             groups: None,
         };
 
-        let maj_op = undirected_interaction_to_majorana(&inter_op);
+        let maj_op = edge_vertex_to_majorana(&inter_op);
 
         let expected = MajoranaOperator {
             coeffs: vec![Complex64::new(0.0, -1.0), Complex64::new(0.0, -2.0)],

@@ -11,19 +11,19 @@
 # that they have been altered from the originals.
 
 from qiskit_fermions.mappers.library import (
-    undirected_interaction_to_fermion,
-    undirected_interaction_to_majorana,
+    edge_vertex_to_fermion,
+    edge_vertex_to_majorana,
 )
 from qiskit_fermions.operators import (
+    EdgeVertexOperator,
     FermionOperator,
     MajoranaOperator,
-    UndirectedInteractionOperator,
 )
 
 
-def test_undirected_to_fermion():
-    inter_op = UndirectedInteractionOperator.from_dict({((0, 0),): 1.0, ((1, 2),): 2.0})
-    fer_op = undirected_interaction_to_fermion(inter_op)
+def test_edge_vertex_to_fermion():
+    inter_op = EdgeVertexOperator.from_dict({((0, 0),): 1.0, ((1, 2),): 2.0})
+    fer_op = edge_vertex_to_fermion(inter_op)
     expected = FermionOperator.from_dict(
         {
             (): 1,
@@ -37,8 +37,8 @@ def test_undirected_to_fermion():
     assert fer_op.equiv(expected)
 
 
-def test_undirected_to_majorana():
-    inter_op = UndirectedInteractionOperator.from_dict({((0, 0),): 1.0, ((1, 2),): 2.0})
-    maj_op = undirected_interaction_to_majorana(inter_op)
+def test_edge_vertex_to_majorana():
+    inter_op = EdgeVertexOperator.from_dict({((0, 0),): 1.0, ((1, 2),): 2.0})
+    maj_op = edge_vertex_to_majorana(inter_op)
     expected = MajoranaOperator.from_dict({(0, 1): -1j, (2, 4): -2j})
     assert maj_op.equiv(expected)

@@ -12,14 +12,14 @@
 
 import numpy as np
 import pytest
-from qiskit_fermions.operators import UndirectedInteractionOperator
+from qiskit_fermions.operators import EdgeVertexOperator
 from qiskit_fermions.operators.library import anti_commutator, commutator
 
 
-class TestUndirectedInteractionOperator:
+class TestEdgeVertexOperator:
     @staticmethod
-    def get_class() -> type[UndirectedInteractionOperator]:
-        return UndirectedInteractionOperator
+    def get_class() -> type[EdgeVertexOperator]:
+        return EdgeVertexOperator
 
     def test_getters(self, subtests):
         cls = self.get_class()

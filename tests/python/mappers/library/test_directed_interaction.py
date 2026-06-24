@@ -11,15 +11,15 @@
 # that they have been altered from the originals.
 
 from qiskit_fermions.mappers.library import (
+    directed_interaction_to_edge_vertex,
     directed_interaction_to_fermion,
     directed_interaction_to_majorana,
-    directed_interaction_to_undirected,
 )
 from qiskit_fermions.operators import (
     DirectedInteractionOperator,
+    EdgeVertexOperator,
     FermionOperator,
     MajoranaOperator,
-    UndirectedInteractionOperator,
 )
 
 
@@ -48,12 +48,12 @@ def test_directed_to_majorana():
     assert maj_op.equiv(expected)
 
 
-def test_directed_to_undirected():
+def test_directed_to_edge_vertex():
     inter_op = DirectedInteractionOperator.from_dict(
         {((0, 0),): 1.0, ((1, 2),): 2.0, ((2, 1),): -2}
     )
-    undirected_op = directed_interaction_to_undirected(inter_op)
-    expected = UndirectedInteractionOperator.from_dict(
+    edge_vertex_op = directed_interaction_to_edge_vertex(inter_op)
+    expected = EdgeVertexOperator.from_dict(
         {((0, 0),): 1, ((1, 1), (1, 2)): 1j, ((1, 2), (2, 2)): -1j}
     )
-    assert undirected_op.equiv(expected)
+    assert edge_vertex_op.equiv(expected)

@@ -70,7 +70,7 @@ impl DirectedInteractionOperatorDataIter {
 ///             = -\frac{1}{2} \gamma_{2j-1} \gamma_{2k} \nonumber
 ///     \end{align}
 ///
-/// where :math:`E_{jk}` is an edge operator of the :class:`.UndirectedInteractionOperator` and
+/// where :math:`E_{jk}` is an edge operator of the :class:`.EdgeVertexOperator` and
 /// these individual terms fulfill the following mixed fermionic-bosonic commutation relations for
 /// :math:`j \lt k \lt l \lt m`: [1]_
 ///
@@ -115,7 +115,7 @@ impl DirectedInteractionOperatorDataIter {
 ///
 /// .. math::
 ///
-///    \text{\texttt{UndirectedInteractionOperator}} = \sum_i c_i \bigotimes_{lr} T_{lr} \, ,
+///    \text{\texttt{EdgeVertexOperator}} = \sum_i c_i \bigotimes_{lr} T_{lr} \, ,
 ///
 /// where :math:`lr` indexing the involved operator terms and :math:`c_i` is the (complex)
 /// coefficient making up the linear combination of products. The indices :math:`l` and :math:`r`

@@ -10,10 +10,10 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
-"""The UndirectedInteraction type."""
+"""The EdgeAction type."""
 
 from typing import NewType
 
-UndirectedInteraction = NewType("UndirectedInteraction", tuple[int, int])
+EdgeAction = NewType("EdgeAction", tuple[int, int])
 
-UndirectedInteraction.__doc__ = """The UndirectedInteraction type."""
+EdgeAction.__doc__ = """The EdgeAction type."""

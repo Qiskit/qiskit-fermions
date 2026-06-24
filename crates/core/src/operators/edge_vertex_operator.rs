@@ -18,21 +18,21 @@ use std::ops::{
     Add, AddAssign, BitAnd, BitAndAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign,
 };
 
-pub type UndirectedInteraction<'a> = (&'a u32, &'a u32);
+pub type EdgeAction<'a> = (&'a u32, &'a u32);
 
 #[derive(Clone, Copy, Debug, PartialEq)]
-pub struct UndirectedInteractionOperatorTermView<'a> {
+pub struct EdgeVertexOperatorTermView<'a> {
     pub coeff: Complex64,
     pub left_indices: &'a [u32],
     pub right_indices: &'a [u32],
 }
 
-impl UndirectedInteractionOperatorTermView<'_> {
-    pub fn iter(&'_ self) -> impl ExactSizeIterator<Item = UndirectedInteraction<'_>> + '_ {
+impl EdgeVertexOperatorTermView<'_> {
+    pub fn iter(&'_ self) -> impl ExactSizeIterator<Item = EdgeAction<'_>> + '_ {
         zip(self.left_indices, self.right_indices)
     }
 
-    pub fn to_vec(&'_ self) -> Vec<UndirectedInteraction<'_>> {
+    pub fn to_vec(&'_ self) -> Vec<EdgeAction<'_>> {
         zip(self.left_indices, self.right_indices).collect()
     }
 
@@ -42,7 +42,7 @@ impl UndirectedInteractionOperatorTermView<'_> {
 }
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct UndirectedInteractionOperator {
+pub struct EdgeVertexOperator {
     pub coeffs: Vec<Complex64>,
     pub left_indices: Vec<u32>,
     pub right_indices: Vec<u32>,
@@ -50,9 +50,9 @@ pub struct UndirectedInteractionOperator {
     pub groups: Option<Vec<u32>>,
 }
 
-crate::impl_operator_macro!(UndirectedInteractionOperator);
+crate::impl_operator_macro!(EdgeVertexOperator);
 
-impl UndirectedInteractionOperator {
+impl EdgeVertexOperator {
     #[inline]
     pub fn coeffs(&self) -> &[Complex64] {
         &self.coeffs
@@ -81,13 +81,11 @@ impl UndirectedInteractionOperator {
         self.boundaries.push(self.left_indices.len());
     }
 
-    pub fn iter(
-        &'_ self,
-    ) -> impl ExactSizeIterator<Item = UndirectedInteractionOperatorTermView<'_>> + '_ {
+    pub fn iter(&'_ self) -> impl ExactSizeIterator<Item = EdgeVertexOperatorTermView<'_>> + '_ {
         self.coeffs.iter().enumerate().map(|(i, coeff)| {
             let start = self.boundaries[i];
             let end = self.boundaries[i + 1];
-            UndirectedInteractionOperatorTermView {
+            EdgeVertexOperatorTermView {
                 coeff: *coeff,
                 left_indices: &self.left_indices[start..end],
                 right_indices: &self.right_indices[start..end],
@@ -124,9 +122,7 @@ impl UndirectedInteractionOperator {
     }
 }
 
-fn _normal_ordered_term(
-    term_view: UndirectedInteractionOperatorTermView,
-) -> UndirectedInteractionOperator {
+fn _normal_ordered_term(term_view: EdgeVertexOperatorTermView) -> EdgeVertexOperator {
     let mut coeffs = vec![];
     let mut left_indices = vec![];
     let mut right_indices = vec![];
@@ -186,7 +182,7 @@ fn _normal_ordered_term(
         });
         boundaries.push(right_indices.len())
     }
-    UndirectedInteractionOperator {
+    EdgeVertexOperator {
         coeffs,
         left_indices,
         right_indices,
@@ -196,8 +192,8 @@ fn _normal_ordered_term(
 }
 
 fn _compose(
-    a: &UndirectedInteractionOperator,
-    b: &UndirectedInteractionOperator,
+    a: &EdgeVertexOperator,
+    b: &EdgeVertexOperator,
 ) -> (Vec<Complex64>, Vec<u32>, Vec<u32>, Vec<usize>) {
     let mut coeffs = vec![];
     let mut left_indices = vec![];
@@ -217,7 +213,7 @@ fn _compose(
     (coeffs, left_indices, right_indices, boundaries)
 }
 
-impl OperatorTrait for UndirectedInteractionOperator {
+impl OperatorTrait for EdgeVertexOperator {
     fn zero() -> Self {
         Self {
             coeffs: vec![],
@@ -376,10 +372,10 @@ mod tests {
 
     #[test]
     fn test_zero() {
-        let zero = UndirectedInteractionOperator::zero();
+        let zero = EdgeVertexOperator::zero();
         assert_eq!(
             zero,
-            UndirectedInteractionOperator {
+            EdgeVertexOperator {
                 coeffs: vec![],
                 left_indices: vec![],
                 right_indices: vec![],
@@ -391,10 +387,10 @@ mod tests {
 
     #[test]
     fn test_one() {
-        let one = UndirectedInteractionOperator::one();
+        let one = EdgeVertexOperator::one();
         assert_eq!(
             one,
-            UndirectedInteractionOperator {
+            EdgeVertexOperator {
                 coeffs: vec![Complex64::new(1.0, 0.0)],
                 left_indices: vec![],
                 right_indices: vec![],
@@ -406,8 +402,8 @@ mod tests {
 
     #[test]
     fn test_add() {
-        let one = UndirectedInteractionOperator::one();
-        let two = UndirectedInteractionOperator {
+        let one = EdgeVertexOperator::one();
+        let two = EdgeVertexOperator {
             coeffs: vec![Complex64::new(2.0, 0.0)],
             left_indices: vec![],
             right_indices: vec![],
@@ -417,7 +413,7 @@ mod tests {
         let three = one + two;
         assert_eq!(
             three,
-            UndirectedInteractionOperator {
+            EdgeVertexOperator {
                 coeffs: vec![Complex64::new(1.0, 0.0), Complex64::new(2.0, 0.0)],
                 left_indices: vec![],
                 right_indices: vec![],
@@ -429,8 +425,8 @@ mod tests {
 
     #[test]
     fn test_add_assign() {
-        let mut op = UndirectedInteractionOperator::one();
-        let two = UndirectedInteractionOperator {
+        let mut op = EdgeVertexOperator::one();
+        let two = EdgeVertexOperator {
             coeffs: vec![Complex64::new(2.0, 0.0)],
             left_indices: vec![],
             right_indices: vec![],
@@ -440,7 +436,7 @@ mod tests {
         op += two;
         assert_eq!(
             op,
-            UndirectedInteractionOperator {
+            EdgeVertexOperator {
                 coeffs: vec![Complex64::new(1.0, 0.0), Complex64::new(2.0, 0.0)],
                 left_indices: vec![],
                 right_indices: vec![],
@@ -452,8 +448,8 @@ mod tests {
 
     #[test]
     fn test_sub() {
-        let one = UndirectedInteractionOperator::one();
-        let two = UndirectedInteractionOperator {
+        let one = EdgeVertexOperator::one();
+        let two = EdgeVertexOperator {
             coeffs: vec![Complex64::new(2.0, 0.0)],
             left_indices: vec![],
             right_indices: vec![],
@@ -463,7 +459,7 @@ mod tests {
         let new_one = two - one;
         assert_eq!(
             new_one,
-            UndirectedInteractionOperator {
+            EdgeVertexOperator {
                 coeffs: vec![Complex64::new(2.0, 0.0), Complex64::new(-1.0, 0.0)],
                 left_indices: vec![],
                 right_indices: vec![],
@@ -475,8 +471,8 @@ mod tests {
 
     #[test]
     fn test_sub_assign() {
-        let mut op = UndirectedInteractionOperator::one();
-        let two = UndirectedInteractionOperator {
+        let mut op = EdgeVertexOperator::one();
+        let two = EdgeVertexOperator {
             coeffs: vec![Complex64::new(2.0, 0.0)],
             left_indices: vec![],
             right_indices: vec![],
@@ -486,7 +482,7 @@ mod tests {
         op -= two;
         assert_eq!(
             op,
-            UndirectedInteractionOperator {
+            EdgeVertexOperator {
                 coeffs: vec![Complex64::new(1.0, 0.0), Complex64::new(-2.0, 0.0)],
                 left_indices: vec![],
                 right_indices: vec![],
@@ -498,11 +494,11 @@ mod tests {
 
     #[test]
     fn test_mul() {
-        let one = UndirectedInteractionOperator::one();
+        let one = EdgeVertexOperator::one();
         let three = one * Complex64::new(3.0, 0.0);
         assert_eq!(
             three,
-            UndirectedInteractionOperator {
+            EdgeVertexOperator {
                 coeffs: vec![Complex64::new(3.0, 0.0)],
                 left_indices: vec![],
                 right_indices: vec![],
@@ -514,11 +510,11 @@ mod tests {
 
     #[test]
     fn test_rmul() {
-        let one = UndirectedInteractionOperator::one();
+        let one = EdgeVertexOperator::one();
         let three = Complex64::new(3.0, 0.0) * one;
         assert_eq!(
             three,
-            UndirectedInteractionOperator {
+            EdgeVertexOperator {
                 coeffs: vec![Complex64::new(3.0, 0.0)],
                 left_indices: vec![],
                 right_indices: vec![],
@@ -530,11 +526,11 @@ mod tests {
 
     #[test]
     fn test_mul_assign() {
-        let mut op = UndirectedInteractionOperator::one();
+        let mut op = EdgeVertexOperator::one();
         op *= Complex64::new(3.0, 0.0);
         assert_eq!(
             op,
-            UndirectedInteractionOperator {
+            EdgeVertexOperator {
                 coeffs: vec![Complex64::new(3.0, 0.0)],
                 left_indices: vec![],
                 right_indices: vec![],
@@ -546,7 +542,7 @@ mod tests {
 
     #[test]
     fn test_div() {
-        let three = UndirectedInteractionOperator {
+        let three = EdgeVertexOperator {
             coeffs: vec![Complex64::new(3.0, 0.0)],
             left_indices: vec![],
             right_indices: vec![],
@@ -556,7 +552,7 @@ mod tests {
         let one_half = three / Complex64::new(2.0, 0.0);
         assert_eq!(
             one_half,
-            UndirectedInteractionOperator {
+            EdgeVertexOperator {
                 coeffs: vec![Complex64::new(1.5, 0.0)],
                 left_indices: vec![],
                 right_indices: vec![],
@@ -568,7 +564,7 @@ mod tests {
 
     #[test]
     fn test_idiv() {
-        let mut op = UndirectedInteractionOperator {
+        let mut op = EdgeVertexOperator {
             coeffs: vec![Complex64::new(3.0, 0.0)],
             left_indices: vec![],
             right_indices: vec![],
@@ -578,7 +574,7 @@ mod tests {
         op /= Complex64::new(2.0, 0.0);
         assert_eq!(
             op,
-            UndirectedInteractionOperator {
+            EdgeVertexOperator {
                 coeffs: vec![Complex64::new(1.5, 0.0)],
                 left_indices: vec![],
                 right_indices: vec![],
@@ -590,10 +586,10 @@ mod tests {
 
     #[test]
     fn test_neg() {
-        let one = UndirectedInteractionOperator::one();
+        let one = EdgeVertexOperator::one();
         assert_eq!(
             -one,
-            UndirectedInteractionOperator {
+            EdgeVertexOperator {
                 coeffs: vec![Complex64::new(-1.0, 0.0)],
                 left_indices: vec![],
                 right_indices: vec![],
@@ -605,14 +601,14 @@ mod tests {
 
     #[test]
     fn test_and() {
-        let op1 = UndirectedInteractionOperator {
+        let op1 = EdgeVertexOperator {
             coeffs: vec![Complex64::new(2.0, 0.0), Complex64::new(3.0, 0.0)],
             left_indices: vec![0],
             right_indices: vec![1],
             boundaries: vec![0, 0, 1],
             groups: None,
         };
-        let op2 = UndirectedInteractionOperator {
+        let op2 = EdgeVertexOperator {
             coeffs: vec![Complex64::new(1.5, 0.0), Complex64::new(4.0, 0.0)],
             left_indices: vec![2],
             right_indices: vec![3],
@@ -622,7 +618,7 @@ mod tests {
         let result = op1 & op2;
         assert_eq!(
             result,
-            UndirectedInteractionOperator {
+            EdgeVertexOperator {
                 coeffs: vec![
                     Complex64::new(3.0, 0.0),
                     Complex64::new(8.0, 0.0),
@@ -639,14 +635,14 @@ mod tests {
 
     #[test]
     fn test_and_assign() {
-        let mut op1 = UndirectedInteractionOperator {
+        let mut op1 = EdgeVertexOperator {
             coeffs: vec![Complex64::new(2.0, 0.0), Complex64::new(3.0, 0.0)],
             left_indices: vec![0],
             right_indices: vec![1],
             boundaries: vec![0, 0, 1],
             groups: None,
         };
-        let op2 = UndirectedInteractionOperator {
+        let op2 = EdgeVertexOperator {
             coeffs: vec![Complex64::new(1.5, 0.0), Complex64::new(4.0, 0.0)],
             left_indices: vec![2],
             right_indices: vec![3],
@@ -656,7 +652,7 @@ mod tests {
         op1 &= op2;
         assert_eq!(
             op1,
-            UndirectedInteractionOperator {
+            EdgeVertexOperator {
                 coeffs: vec![
                     Complex64::new(3.0, 0.0),
                     Complex64::new(8.0, 0.0),
@@ -673,14 +669,14 @@ mod tests {
 
     #[test]
     fn test_matmul() {
-        let op1 = UndirectedInteractionOperator {
+        let op1 = EdgeVertexOperator {
             coeffs: vec![Complex64::new(2.0, 0.0), Complex64::new(3.0, 0.0)],
             left_indices: vec![0],
             right_indices: vec![1],
             boundaries: vec![0, 0, 1],
             groups: None,
         };
-        let op2 = UndirectedInteractionOperator {
+        let op2 = EdgeVertexOperator {
             coeffs: vec![Complex64::new(1.5, 0.0), Complex64::new(4.0, 0.0)],
             left_indices: vec![2],
             right_indices: vec![3],
@@ -690,7 +686,7 @@ mod tests {
         let result = op2.__matmul__(&op1);
         assert_eq!(
             result,
-            UndirectedInteractionOperator {
+            EdgeVertexOperator {
                 coeffs: vec![
                     Complex64::new(3.0, 0.0),
                     Complex64::new(8.0, 0.0),
@@ -707,14 +703,14 @@ mod tests {
 
     #[test]
     fn test_matmul_assign() {
-        let op1 = UndirectedInteractionOperator {
+        let op1 = EdgeVertexOperator {
             coeffs: vec![Complex64::new(2.0, 0.0), Complex64::new(3.0, 0.0)],
             left_indices: vec![0],
             right_indices: vec![1],
             boundaries: vec![0, 0, 1],
             groups: None,
         };
-        let mut op2 = UndirectedInteractionOperator {
+        let mut op2 = EdgeVertexOperator {
             coeffs: vec![Complex64::new(1.5, 0.0), Complex64::new(4.0, 0.0)],
             left_indices: vec![2],
             right_indices: vec![3],
@@ -724,7 +720,7 @@ mod tests {
         op2.__imatmul__(&op1);
         assert_eq!(
             op2,
-            UndirectedInteractionOperator {
+            EdgeVertexOperator {
                 coeffs: vec![
                     Complex64::new(3.0, 0.0),
                     Complex64::new(8.0, 0.0),
@@ -741,7 +737,7 @@ mod tests {
 
     #[test]
     fn test_pow() {
-        let op = UndirectedInteractionOperator {
+        let op = EdgeVertexOperator {
             coeffs: vec![Complex64::new(2.0, 0.0)],
             left_indices: vec![0],
             right_indices: vec![1],
@@ -749,7 +745,7 @@ mod tests {
             groups: None,
         };
         // exponent=0
-        let one = UndirectedInteractionOperator::one();
+        let one = EdgeVertexOperator::one();
         assert_eq!(op.__pow__(0), one);
 
         // exponent=1
@@ -759,7 +755,7 @@ mod tests {
         let squared = op.__pow__(2);
         assert_eq!(
             squared,
-            UndirectedInteractionOperator {
+            EdgeVertexOperator {
                 coeffs: vec![Complex64::new(4.0, 0.0)],
                 left_indices: vec![0, 0],
                 right_indices: vec![1, 1],
@@ -771,7 +767,7 @@ mod tests {
 
     #[test]
     fn test_ichop() {
-        let mut op = UndirectedInteractionOperator {
+        let mut op = EdgeVertexOperator {
             coeffs: vec![
                 Complex64::new(1e-4, 0.0),
                 Complex64::new(1e-6, 0.0),
@@ -785,7 +781,7 @@ mod tests {
 
         op.ichop(1e-7);
 
-        let expected1 = UndirectedInteractionOperator {
+        let expected1 = EdgeVertexOperator {
             coeffs: vec![Complex64::new(1e-4, 0.0), Complex64::new(1e-6, 0.0)],
             left_indices: vec![0],
             right_indices: vec![1],
@@ -797,7 +793,7 @@ mod tests {
 
         op.ichop(1e-5);
 
-        let expected2 = UndirectedInteractionOperator {
+        let expected2 = EdgeVertexOperator {
             coeffs: vec![Complex64::new(1e-4, 0.0)],
             left_indices: vec![],
             right_indices: vec![],
@@ -810,7 +806,7 @@ mod tests {
 
     #[test]
     fn test_adjoint() {
-        let op1 = UndirectedInteractionOperator {
+        let op1 = EdgeVertexOperator {
             coeffs: vec![Complex64::new(0.0, 2.0), Complex64::new(3.0, 0.0)],
             left_indices: vec![0],
             right_indices: vec![1],
@@ -818,7 +814,7 @@ mod tests {
             groups: None,
         };
         let adj = op1.adjoint();
-        let expected = UndirectedInteractionOperator {
+        let expected = EdgeVertexOperator {
             coeffs: vec![Complex64::new(0.0, -2.0), Complex64::new(3.0, 0.0)],
             left_indices: vec![0],
             right_indices: vec![1],
@@ -830,15 +826,15 @@ mod tests {
 
     #[test]
     fn test_equiv() {
-        let zero = UndirectedInteractionOperator::zero();
-        let op = Complex64::new(1e-8, 0.0) * UndirectedInteractionOperator::one();
+        let zero = EdgeVertexOperator::zero();
+        let op = Complex64::new(1e-8, 0.0) * EdgeVertexOperator::one();
         assert!(op.equiv(&zero, 1e-6));
         assert!(!op.equiv(&zero, 1e-10));
     }
 
     #[test]
     fn test_normal_ordered_noop() {
-        let op = UndirectedInteractionOperator {
+        let op = EdgeVertexOperator {
             coeffs: vec![Complex64::new(1.0, 0.0)],
             left_indices: vec![0, 1, 1, 0],
             right_indices: vec![0, 1, 1, 1],
@@ -852,7 +848,7 @@ mod tests {
     #[test]
     fn test_normal_ordered_gandon_rel1() {
         // Tests the 1. relation of Eq. (5) from arXiv:2512.11418v1: {E_{jk}, V_{k}} = 0
-        let op = UndirectedInteractionOperator {
+        let op = EdgeVertexOperator {
             coeffs: vec![Complex64::new(1.0, 0.0), Complex64::new(1.0, 0.0)],
             left_indices: vec![0, 1, 0, 0],
             right_indices: vec![1, 1, 1, 0],
@@ -860,7 +856,7 @@ mod tests {
             groups: None,
         };
 
-        let expected = UndirectedInteractionOperator {
+        let expected = EdgeVertexOperator {
             coeffs: vec![Complex64::new(-1.0, 0.0), Complex64::new(-1.0, 0.0)],
             left_indices: vec![1, 0, 0, 0],
             right_indices: vec![1, 1, 0, 1],
@@ -874,7 +870,7 @@ mod tests {
     #[test]
     fn test_normal_ordered_gandon_rel2() {
         // Tests the 2. relation of Eq. (5) from arXiv:2512.11418v1: {E_{jk}, E_{kl}} = 0
-        let op = UndirectedInteractionOperator {
+        let op = EdgeVertexOperator {
             coeffs: vec![Complex64::new(1.0, 0.0)],
             left_indices: vec![1, 0],
             right_indices: vec![0, 1],
@@ -882,7 +878,7 @@ mod tests {
             groups: None,
         };
 
-        let expected = UndirectedInteractionOperator {
+        let expected = EdgeVertexOperator {
             coeffs: vec![Complex64::new(-1.0, 0.0)],
             left_indices: vec![0, 1],
             right_indices: vec![1, 0],
@@ -896,7 +892,7 @@ mod tests {
     #[test]
     fn test_normal_ordered_gandon_rel3() {
         // Tests the 3. relation of Eq. (5) from arXiv:2512.11418v1: [V_{k}, V_{l}] = 0
-        let op = UndirectedInteractionOperator {
+        let op = EdgeVertexOperator {
             coeffs: vec![Complex64::new(1.0, 0.0)],
             left_indices: vec![1, 0],
             right_indices: vec![1, 0],
@@ -904,7 +900,7 @@ mod tests {
             groups: None,
         };
 
-        let expected = UndirectedInteractionOperator {
+        let expected = EdgeVertexOperator {
             coeffs: vec![Complex64::new(1.0, 0.0)],
             left_indices: vec![0, 1],
             right_indices: vec![0, 1],
@@ -918,7 +914,7 @@ mod tests {
     #[test]
     fn test_normal_ordered_gandon_rel4() {
         // Tests the 4. relation of Eq. (5) from arXiv:2512.11418v1: [E_{jk}, V_{l}] = 0
-        let op = UndirectedInteractionOperator {
+        let op = EdgeVertexOperator {
             coeffs: vec![Complex64::new(1.0, 0.0)],
             left_indices: vec![0, 2],
             right_indices: vec![1, 2],
@@ -926,7 +922,7 @@ mod tests {
             groups: None,
         };
 
-        let expected = UndirectedInteractionOperator {
+        let expected = EdgeVertexOperator {
             coeffs: vec![Complex64::new(1.0, 0.0)],
             left_indices: vec![2, 0],
             right_indices: vec![2, 1],
@@ -940,7 +936,7 @@ mod tests {
     #[test]
     fn test_normal_ordered_gandon_rel5() {
         // Tests the 5. relation of Eq. (5) from arXiv:2512.11418v1: [E_{jk}, E_{lm}] = 0
-        let op = UndirectedInteractionOperator {
+        let op = EdgeVertexOperator {
             coeffs: vec![Complex64::new(1.0, 0.0)],
             left_indices: vec![2, 0],
             right_indices: vec![3, 1],
@@ -948,7 +944,7 @@ mod tests {
             groups: None,
         };
 
-        let expected = UndirectedInteractionOperator {
+        let expected = EdgeVertexOperator {
             coeffs: vec![Complex64::new(1.0, 0.0)],
             left_indices: vec![0, 2],
             right_indices: vec![1, 3],
@@ -961,7 +957,7 @@ mod tests {
 
     #[test]
     fn test_is_hermitian() {
-        let op = UndirectedInteractionOperator {
+        let op = EdgeVertexOperator {
             coeffs: vec![Complex64::new(0.0, 1.00001), Complex64::new(0.0, -1.0)],
             left_indices: vec![0, 0],
             right_indices: vec![1, 1],
@@ -974,7 +970,7 @@ mod tests {
 
     #[test]
     fn test_get_support() {
-        let op = UndirectedInteractionOperator {
+        let op = EdgeVertexOperator {
             coeffs: vec![Complex64::new(1.0, 0.0), Complex64::new(1.0, 0.0)],
             left_indices: vec![0, 3, 7],
             right_indices: vec![1, 4, 7],
@@ -987,7 +983,7 @@ mod tests {
 
     #[test]
     fn test_relabel_modes() {
-        let op = UndirectedInteractionOperator {
+        let op = EdgeVertexOperator {
             coeffs: vec![Complex64::new(1.0, 0.0), Complex64::new(1.0, 0.0)],
             left_indices: vec![0, 2, 1, 3],
             right_indices: vec![1, 3, 2, 0],
@@ -999,7 +995,7 @@ mod tests {
 
         let relabeled = op.relabel_modes(permutation).ok();
 
-        let expected = UndirectedInteractionOperator {
+        let expected = EdgeVertexOperator {
             coeffs: vec![Complex64::new(1.0, 0.0), Complex64::new(1.0, 0.0)],
             left_indices: vec![4, 5, 2, 3],
             right_indices: vec![2, 3, 5, 4],
@@ -1012,7 +1008,7 @@ mod tests {
 
     #[test]
     fn test_relabel_modes_duplicate_err() {
-        let op = UndirectedInteractionOperator {
+        let op = EdgeVertexOperator {
             coeffs: vec![Complex64::new(1.0, 0.0), Complex64::new(1.0, 0.0)],
             left_indices: vec![0, 2, 1, 3],
             right_indices: vec![1, 3, 2, 0],
@@ -1029,7 +1025,7 @@ mod tests {
 
     #[test]
     fn test_relabel_modes_index_too_small_err() {
-        let op = UndirectedInteractionOperator {
+        let op = EdgeVertexOperator {
             coeffs: vec![Complex64::new(1.0, 0.0), Complex64::new(1.0, 0.0)],
             left_indices: vec![0, 2, 1, 3],
             right_indices: vec![1, 3, 2, 0],
@@ -1046,7 +1042,7 @@ mod tests {
 
     #[test]
     fn test_split_out_groups() {
-        let op = UndirectedInteractionOperator {
+        let op = EdgeVertexOperator {
             coeffs: vec![
                 Complex64::new(1.0, 0.0),
                 Complex64::new(1.0, 0.0),
@@ -1059,14 +1055,14 @@ mod tests {
         };
 
         let expected = vec![
-            UndirectedInteractionOperator {
+            EdgeVertexOperator {
                 coeffs: vec![Complex64::new(1.0, 0.0), Complex64::new(1.0, 0.0)],
                 left_indices: vec![0, 2],
                 right_indices: vec![1, 3],
                 boundaries: vec![0, 1, 2],
                 groups: None,
             },
-            UndirectedInteractionOperator {
+            EdgeVertexOperator {
                 coeffs: vec![Complex64::new(2.0, 0.0)],
                 left_indices: vec![1, 3],
                 right_indices: vec![0, 2],
@@ -1081,7 +1077,7 @@ mod tests {
 
     #[test]
     fn test_split_out_groups_err() {
-        let op = UndirectedInteractionOperator {
+        let op = EdgeVertexOperator {
             coeffs: vec![
                 Complex64::new(1.0, 0.0),
                 Complex64::new(1.0, 0.0),

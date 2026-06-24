@@ -27,35 +27,35 @@ routines.
    jordan_wigner
    fermion_to_majorana
    majorana_to_fermion
-   undirected_interaction_to_fermion
-   undirected_interaction_to_majorana
+   edge_vertex_to_fermion
+   edge_vertex_to_majorana
    directed_interaction_to_fermion
    directed_interaction_to_majorana
-   directed_interaction_to_undirected
+   directed_interaction_to_edge_vertex
 """
 
 from qiskit_fermions._lib.mappers.mappers_library.directed_interaction import (
+    directed_interaction_to_edge_vertex,
     directed_interaction_to_fermion,
     directed_interaction_to_majorana,
-    directed_interaction_to_undirected,
+)
+from qiskit_fermions._lib.mappers.mappers_library.edge_vertex import (
+    edge_vertex_to_fermion,
+    edge_vertex_to_majorana,
 )
 from qiskit_fermions._lib.mappers.mappers_library.jordan_wigner import jordan_wigner
 from qiskit_fermions._lib.mappers.mappers_library.majorana_fermion import (
     fermion_to_majorana,
     majorana_to_fermion,
 )
-from qiskit_fermions._lib.mappers.mappers_library.undirected_interaction import (
-    undirected_interaction_to_fermion,
-    undirected_interaction_to_majorana,
-)
 
 __all__ = [
+    "directed_interaction_to_edge_vertex",
     "directed_interaction_to_fermion",
     "directed_interaction_to_majorana",
-    "directed_interaction_to_undirected",
+    "edge_vertex_to_fermion",
+    "edge_vertex_to_majorana",
     "fermion_to_majorana",
     "jordan_wigner",
     "majorana_to_fermion",
-    "undirected_interaction_to_fermion",
-    "undirected_interaction_to_majorana",
 ]

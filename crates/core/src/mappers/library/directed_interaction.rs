@@ -17,9 +17,9 @@ use crate::operators::OperatorTrait;
 use crate::operators::directed_interaction_operator::{
     DirectedInteraction, DirectedInteractionOperator,
 };
+use crate::operators::edge_vertex_operator::EdgeVertexOperator;
 use crate::operators::fermion_operator::FermionOperator;
 use crate::operators::majorana_operator::MajoranaOperator;
-use crate::operators::undirected_interaction_operator::UndirectedInteractionOperator;
 
 fn map_directed_to_fermion(action: DirectedInteraction) -> FermionOperator {
     match (*action.0).cmp(action.1) {
@@ -122,23 +122,23 @@ pub fn directed_interaction_to_majorana(
     mapped_operator
 }
 
-fn map_directed_to_undirected(action: DirectedInteraction) -> UndirectedInteractionOperator {
+fn map_directed_to_edge_vertex(action: DirectedInteraction) -> EdgeVertexOperator {
     match (*action.0).cmp(action.1) {
-        Ordering::Equal => UndirectedInteractionOperator {
+        Ordering::Equal => EdgeVertexOperator {
             coeffs: vec![Complex64::new(1.0, 0.0)],
             left_indices: vec![*action.0],
             right_indices: vec![*action.1],
             boundaries: vec![0, 1],
             groups: None,
         },
-        Ordering::Less => UndirectedInteractionOperator {
+        Ordering::Less => EdgeVertexOperator {
             coeffs: vec![Complex64::new(0.0, 0.5)],
             left_indices: vec![*action.0, *action.0],
             right_indices: vec![*action.0, *action.1],
             boundaries: vec![0, 2],
             groups: None,
         },
-        Ordering::Greater => UndirectedInteractionOperator {
+        Ordering::Greater => EdgeVertexOperator {
             coeffs: vec![Complex64::new(0.0, 0.5)],
             left_indices: vec![*action.1, *action.0],
             right_indices: vec![*action.0, *action.0],
@@ -148,16 +148,16 @@ fn map_directed_to_undirected(action: DirectedInteraction) -> UndirectedInteract
     }
 }
 
-pub fn directed_interaction_to_undirected(
+pub fn directed_interaction_to_edge_vertex(
     inter_op: &DirectedInteractionOperator,
-) -> UndirectedInteractionOperator {
-    let mut mapped_operator = UndirectedInteractionOperator::zero();
+) -> EdgeVertexOperator {
+    let mut mapped_operator = EdgeVertexOperator::zero();
 
     inter_op.iter().for_each(|term| {
-        let mut mapped_term = UndirectedInteractionOperator::one();
+        let mut mapped_term = EdgeVertexOperator::one();
 
         term.iter()
-            .for_each(|action| mapped_term.__imatmul__(&map_directed_to_undirected(action)));
+            .for_each(|action| mapped_term.__imatmul__(&map_directed_to_edge_vertex(action)));
 
         mapped_term.__imul__(term.coeff);
 
@@ -234,7 +234,7 @@ mod tests {
     }
 
     #[test]
-    fn test_directed_to_undirected() {
+    fn test_directed_to_edge_vertex() {
         let inter_op = DirectedInteractionOperator {
             coeffs: vec![
                 Complex64::new(1.0, 0.0),
@@ -247,9 +247,9 @@ mod tests {
             groups: None,
         };
 
-        let undirected_op = directed_interaction_to_undirected(&inter_op);
+        let edge_vertex = directed_interaction_to_edge_vertex(&inter_op);
 
-        let expected = UndirectedInteractionOperator {
+        let expected = EdgeVertexOperator {
             coeffs: vec![
                 Complex64::new(1.0, 0.0),
                 Complex64::new(0.0, 1.0),
@@ -261,6 +261,6 @@ mod tests {
             groups: None,
         };
 
-        assert_eq!(undirected_op, expected);
+        assert_eq!(edge_vertex, expected);
     }
 }

@@ -10,32 +10,32 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
-"""UndirectedInteractionOperator mapper."""
+"""EdgeVertexOperator mapper."""
 
 from collections.abc import Callable
 from operator import and_
 from typing import TYPE_CHECKING, TypeVar
 
 if TYPE_CHECKING:
-    from qiskit_fermions._lib.operators.undirected_interaction_operator import (
-        UndirectedInteractionOperator,
+    from qiskit_fermions._lib.operators.edge_vertex_operator import (
+        EdgeVertexOperator,
     )
-    from qiskit_fermions.operators.undirected_interaction import UndirectedInteraction
+    from qiskit_fermions.operators.edge_action import EdgeAction
 
 T = TypeVar("T")
 
 
-def map_undirected_interaction_generators(
-    operator: "UndirectedInteractionOperator",
-    map_interaction: Callable[["UndirectedInteraction"], T],
+def map_edge_vertex_generators(
+    operator: "EdgeVertexOperator",
+    map_interaction: Callable[["EdgeAction"], T],
     identity: Callable[[], T],
     compose: Callable[[T, T], T] | None = None,
 ) -> T:
-    """Map a :class:`.UndirectedInteractionOperator` to another operator type.
+    """Map a :class:`.EdgeVertexOperator` to another operator type.
 
     This is a generic function to aid in implementing new mappers for
-    :class:`.UndirectedInteractionOperator` instances. At its core, it simply iterates over the
-    terms of the operator, mapping each encountered :class:`.UndirectedInteraction` with the
+    :class:`.EdgeVertexOperator` instances. At its core, it simply iterates over the
+    terms of the operator, mapping each encountered :class:`.EdgeAction` with the
     user-provided ``map_interaction`` function. In combination with the user-provided ``identity``
     generator, this allows mapping to arbitrary output types.
 
@@ -45,11 +45,11 @@ def map_undirected_interaction_generators(
 
     .. doctest::
 
-        >>> from qiskit_fermions.mappers import map_undirected_interaction_generators
-        >>> from qiskit_fermions.operators import UndirectedInteraction, UndirectedInteractionOperator
+        >>> from qiskit_fermions.mappers import map_edge_vertex_generators
+        >>> from qiskit_fermions.operators import EdgeAction, EdgeVertexOperator
         >>> from qiskit.quantum_info import SparsePauliOp
         >>>
-        >>> def jordan_wigner_nearest_neighbor(mode: UndirectedInteraction) -> SparsePauliOp:
+        >>> def jordan_wigner_nearest_neighbor(mode: EdgeAction) -> SparsePauliOp:
         ...     match abs(mode[0] - mode[1]):
         ...         case 0:
         ...             pauli = "Z"
@@ -68,18 +68,18 @@ def map_undirected_interaction_generators(
         >>> def identity() -> SparsePauliOp:
         ...     return SparsePauliOp.from_sparse_list([("", [], 1)], num_qubits)
         >>>
-        >>> op = UndirectedInteractionOperator.from_dict({
+        >>> op = EdgeVertexOperator.from_dict({
         ...     ((0, 0),): 2.0,
         ...     ((0, 1),): 0.5,
         ...     ((1, 1), (1, 2)): 1.0,
         ... })
-        >>> qop = map_undirected_interaction_generators(op, jordan_wigner_nearest_neighbor, identity)
+        >>> qop = map_edge_vertex_generators(op, jordan_wigner_nearest_neighbor, identity)
         >>> print([(label, complex(coeff)) for label, coeff in sorted(qop.label_iter())])
         [('IIII', 0j), ('IIIZ', (2+0j)), ('IIYX', (0.5+0j)), ('IYYI', 1j)]
 
     Args:
         operator: the operator to be mapped.
-        map_interaction: the function to map a single :class:`.UndirectedInteraction` to the desired
+        map_interaction: the function to map a single :class:`.EdgeAction` to the desired
             output type.
         identity: the function to generate the multiplicative identity instance of the output type.
         compose: an optional function to implement the compositiion logic of two output type

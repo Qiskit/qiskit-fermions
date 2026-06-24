@@ -20,37 +20,37 @@ use pyo3::{class::basic::CompareOp, exceptions::PyNotImplementedError};
 use pyo3_stub_gen::derive::*;
 use std::collections::HashMap;
 
-use qiskit_fermions_core::operators::undirected_interaction_operator::UndirectedInteractionOperator;
+use qiskit_fermions_core::operators::edge_vertex_operator::EdgeVertexOperator;
 use qiskit_fermions_core::operators::{OperatorMacro, OperatorTrait};
 
-pub type PyUndirectedInteraction = (u32, u32);
+pub type PyEdgeAction = (u32, u32);
 
 #[gen_stub_pyclass]
 #[pyclass(
-    module = "qiskit_fermions.operators.undirected_interaction_operator",
-    name = "UndirectedInteractionOperatorDataIter"
+    module = "qiskit_fermions.operators.edge_vertex_operator",
+    name = "EdgeVertexOperatorDataIter"
 )]
-struct UndirectedInteractionOperatorDataIter {
-    inner: std::vec::IntoIter<(Vec<PyUndirectedInteraction>, Complex64)>,
+struct EdgeVertexOperatorDataIter {
+    inner: std::vec::IntoIter<(Vec<PyEdgeAction>, Complex64)>,
 }
 
 #[gen_stub_pymethods]
 #[pymethods]
-impl UndirectedInteractionOperatorDataIter {
+impl EdgeVertexOperatorDataIter {
     fn __iter__(slf: PyRef<'_, Self>) -> PyRef<'_, Self> {
         slf
     }
 
-    fn __next__(mut slf: PyRefMut<'_, Self>) -> Option<(Vec<PyUndirectedInteraction>, Complex64)> {
+    fn __next__(mut slf: PyRefMut<'_, Self>) -> Option<(Vec<PyEdgeAction>, Complex64)> {
         slf.inner.next()
     }
 }
 
-/// An undirected interaction operator.
+/// An edge-vertex operator.
 ///
 /// ----
 ///
-/// .. _UndirectedInteractionOperator-definition:
+/// .. _EdgeVertexOperator-definition:
 ///
 /// Definition
 /// ==========
@@ -85,7 +85,7 @@ impl UndirectedInteractionOperatorDataIter {
 /// anticommute. A simple example can be represented visually like so:
 ///
 /// .. plot::
-///    :alt: A visual depication of an undirected interaction operator.
+///    :alt: A visual depication of an edge-vertex operator.
 ///    :context: close-figs
 ///
 ///    >>> import rustworkx as rx
@@ -110,7 +110,7 @@ impl UndirectedInteractionOperatorDataIter {
 ///
 /// .. math::
 ///
-///    \text{\texttt{UndirectedInteractionOperator}} = \sum_i c_i \bigotimes_{lr} E_{lr} \, ,
+///    \text{\texttt{EdgeVertexOperator}} = \sum_i c_i \bigotimes_{lr} E_{lr} \, ,
 ///
 /// where :math:`lr` indexing the involved operator terms and :math:`c_i` is the (complex)
 /// coefficient making up the linear combination of products. The indices :math:`l` and :math:`r`
@@ -121,7 +121,7 @@ impl UndirectedInteractionOperatorDataIter {
 ///
 /// ----
 ///
-/// .. _UndirectedInteractionOperator-implementation:
+/// .. _EdgeVertexOperator-implementation:
 ///
 /// Implementation
 /// ==============
@@ -158,12 +158,12 @@ impl UndirectedInteractionOperatorDataIter {
 ///
 /// .. doctest::
 ///
-///     >>> from qiskit_fermions.operators import UndirectedInteractionOperator
+///     >>> from qiskit_fermions.operators import EdgeVertexOperator
 ///     >>> coeffs = [1.0, 2.0, -3.0, 4.0j, -0.5j]
 ///     >>> left_indices = [0, 3, 0, 2, 3, 0]
 ///     >>> right_indices = [1, 4, 1, 2, 3, 1]
 ///     >>> boundaries = [0, 0, 1, 2, 4, 6]
-///     >>> op = UndirectedInteractionOperator(coeffs, left_indices, right_indices, boundaries)
+///     >>> op = EdgeVertexOperator(coeffs, left_indices, right_indices, boundaries)
 ///     >>> print(format(op))
 ///       1.000000e0 +0.000000e0j * ()
 ///       2.000000e0 +0.000000e0j * (E(0,1))
@@ -175,7 +175,7 @@ impl UndirectedInteractionOperatorDataIter {
 ///
 /// .. doctest::
 ///
-///     >>> op = UndirectedInteractionOperator.from_dict(
+///     >>> op = EdgeVertexOperator.from_dict(
 ///     ...     {
 ///     ...         (): 1.0,
 ///     ...         ((0, 1),): 2.0,
@@ -225,7 +225,7 @@ impl UndirectedInteractionOperatorDataIter {
 /// .. doctest::
 ///
 ///     >>> print(repr(op))
-///     UndirectedInteractionOperator.from_dict({...})
+///     EdgeVertexOperator.from_dict({...})
 ///
 /// Finally, for large operators both of these outputs may be very long and undesirable. Then, a
 /// very simple form with minimal information can be obtained from the :py:func:`str` function:
@@ -233,7 +233,7 @@ impl UndirectedInteractionOperatorDataIter {
 /// .. doctest::
 ///
 ///     >>> print(str(op))
-///     <UndirectedInteractionOperator with 5 terms>
+///     <EdgeVertexOperator with 5 terms>
 ///
 /// Iteration
 /// ---------
@@ -246,7 +246,7 @@ impl UndirectedInteractionOperatorDataIter {
 ///     >>> list(iter(op))
 ///     Traceback (most recent call last):
 ///       ...
-///     TypeError: 'qiskit_fermions.operators.undirected_interaction_operator.UndirectedInteractionOperator' object is not iterable
+///     TypeError: 'qiskit_fermions.operators.edge_vertex_operator.EdgeVertexOperator' object is not iterable
 ///
 /// Instead, this class provides custom iterators to fulfill this purpose:
 ///
@@ -275,34 +275,34 @@ impl UndirectedInteractionOperatorDataIter {
 ///
 /// .. doctest::
 ///
-///     >>> op = UndirectedInteractionOperator.one()
+///     >>> op = EdgeVertexOperator.one()
 ///     >>> (op + op).simplify()
-///     UndirectedInteractionOperator.from_dict({(): 2+0j})
+///     EdgeVertexOperator.from_dict({(): 2+0j})
 ///     >>> (op - op).simplify()
-///     UndirectedInteractionOperator.from_dict({})
+///     EdgeVertexOperator.from_dict({})
 ///     >>> op += op
 ///     >>> op.simplify()
-///     UndirectedInteractionOperator.from_dict({(): 2+0j})
+///     EdgeVertexOperator.from_dict({(): 2+0j})
 ///     >>> op -= op
 ///     >>> op.simplify()
-///     UndirectedInteractionOperator.from_dict({})
+///     EdgeVertexOperator.from_dict({})
 ///
 /// Scalar Multiplication/Divison
 /// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ///
 /// .. doctest::
 ///
-///     >>> op = UndirectedInteractionOperator.one()
+///     >>> op = EdgeVertexOperator.one()
 ///     >>> (2 * op).simplify()
-///     UndirectedInteractionOperator.from_dict({(): 2+0j})
+///     EdgeVertexOperator.from_dict({(): 2+0j})
 ///     >>> (op / 2).simplify()
-///     UndirectedInteractionOperator.from_dict({(): 0.5+0j})
+///     EdgeVertexOperator.from_dict({(): 0.5+0j})
 ///     >>> op *= 2
 ///     >>> op.simplify()
-///     UndirectedInteractionOperator.from_dict({(): 2+0j})
+///     EdgeVertexOperator.from_dict({(): 2+0j})
 ///     >>> op /= 2
 ///     >>> op.simplify()
-///     UndirectedInteractionOperator.from_dict({(): 1+0j})
+///     EdgeVertexOperator.from_dict({(): 1+0j})
 ///
 /// Operator Composition
 /// ^^^^^^^^^^^^^^^^^^^^
@@ -314,8 +314,8 @@ impl UndirectedInteractionOperatorDataIter {
 ///
 /// .. doctest::
 ///
-///     >>> op1 = UndirectedInteractionOperator.from_dict({(): 2.0, ((0, 1),): 3.0})
-///     >>> op2 = UndirectedInteractionOperator.from_dict({(): 1.5, ((2, 2),): 4.0})
+///     >>> op1 = EdgeVertexOperator.from_dict({(): 2.0, ((0, 1),): 3.0})
+///     >>> op2 = EdgeVertexOperator.from_dict({(): 1.5, ((2, 2),): 4.0})
 ///     >>> comp = (op1 & op2).simplify()
 ///     >>> print(format(comp))
 ///       3.000000e0 +0.000000e0j * ()
@@ -371,19 +371,19 @@ impl UndirectedInteractionOperatorDataIter {
 /// .. [1] Gandon et al., `arXiv:2512.11418 <https://arxiv.org/abs/2512.11418v2>`_.
 #[gen_stub_pyclass]
 #[pyclass(
-    module = "qiskit_fermions.operators.undirected_interaction_operator",
-    name = "UndirectedInteractionOperator"
+    module = "qiskit_fermions.operators.edge_vertex_operator",
+    name = "EdgeVertexOperator"
 )]
 #[derive(Clone)]
-pub struct PyUndirectedInteractionOperator {
-    pub inner: UndirectedInteractionOperator,
+pub struct PyEdgeVertexOperator {
+    pub inner: EdgeVertexOperator,
 }
 
-crate::impl_operator_magic_methods!(PyUndirectedInteractionOperator);
+crate::impl_operator_magic_methods!(PyEdgeVertexOperator);
 
 #[gen_stub_pymethods]
 #[pymethods]
-impl PyUndirectedInteractionOperator {
+impl PyEdgeVertexOperator {
     #[new]
     fn new(
         coeffs: Vec<Complex64>,
@@ -392,7 +392,7 @@ impl PyUndirectedInteractionOperator {
         boundaries: Vec<usize>,
     ) -> Self {
         Self {
-            inner: UndirectedInteractionOperator {
+            inner: EdgeVertexOperator {
                 coeffs,
                 left_indices,
                 right_indices,
@@ -406,8 +406,8 @@ impl PyUndirectedInteractionOperator {
     ///
     /// .. doctest::
     ///
-    ///     >>> from qiskit_fermions.operators import UndirectedInteractionOperator
-    ///     >>> op = UndirectedInteractionOperator.from_dict(
+    ///     >>> from qiskit_fermions.operators import EdgeVertexOperator
+    ///     >>> op = EdgeVertexOperator.from_dict(
     ///     ...     {
     ///     ...         (): 1.0-1.0j,
     ///     ...         ((0, 0),): 2.0,
@@ -444,7 +444,7 @@ impl PyUndirectedInteractionOperator {
         });
 
         Self {
-            inner: UndirectedInteractionOperator {
+            inner: EdgeVertexOperator {
                 coeffs,
                 left_indices,
                 right_indices,
@@ -461,13 +461,13 @@ impl PyUndirectedInteractionOperator {
     ///
     /// .. seealso::
     ///    The explanation of the internal data structure,
-    ///    :ref:`here <UndirectedInteractionOperator-implementation>`.
+    ///    :ref:`here <EdgeVertexOperator-implementation>`.
     ///
     /// .. doctest::
     ///
-    ///     >>> from qiskit_fermions.operators import UndirectedInteractionOperator
-    ///     >>> op = UndirectedInteractionOperator.one()
-    ///     >>> op += -1j * UndirectedInteractionOperator.one()
+    ///     >>> from qiskit_fermions.operators import EdgeVertexOperator
+    ///     >>> op = EdgeVertexOperator.one()
+    ///     >>> op += -1j * EdgeVertexOperator.one()
     ///     >>> op.get_coeffs()
     ///     [(1+0j), -1j]
     ///
@@ -484,13 +484,13 @@ impl PyUndirectedInteractionOperator {
     ///
     /// .. seealso::
     ///    The explanation of the internal data structure,
-    ///    :ref:`here <UndirectedInteractionOperator-implementation>`.
+    ///    :ref:`here <EdgeVertexOperator-implementation>`.
     ///
     /// .. doctest::
     ///
-    ///     >>> from qiskit_fermions.operators import UndirectedInteractionOperator
-    ///     >>> op = UndirectedInteractionOperator.from_dict({((0, 0),): 1.0})
-    ///     >>> op += UndirectedInteractionOperator.from_dict({((0, 1),): 1.0})
+    ///     >>> from qiskit_fermions.operators import EdgeVertexOperator
+    ///     >>> op = EdgeVertexOperator.from_dict({((0, 0),): 1.0})
+    ///     >>> op += EdgeVertexOperator.from_dict({((0, 1),): 1.0})
     ///     >>> op.get_left_indices()
     ///     [0, 0]
     ///
@@ -507,13 +507,13 @@ impl PyUndirectedInteractionOperator {
     ///
     /// .. seealso::
     ///    The explanation of the internal data structure,
-    ///    :ref:`here <UndirectedInteractionOperator-implementation>`.
+    ///    :ref:`here <EdgeVertexOperator-implementation>`.
     ///
     /// .. doctest::
     ///
-    ///     >>> from qiskit_fermions.operators import UndirectedInteractionOperator
-    ///     >>> op = UndirectedInteractionOperator.from_dict({((0, 0),): 1.0})
-    ///     >>> op += UndirectedInteractionOperator.from_dict({((0, 1),): 1.0})
+    ///     >>> from qiskit_fermions.operators import EdgeVertexOperator
+    ///     >>> op = EdgeVertexOperator.from_dict({((0, 0),): 1.0})
+    ///     >>> op += EdgeVertexOperator.from_dict({((0, 1),): 1.0})
     ///     >>> op.get_right_indices()
     ///     [0, 1]
     ///
@@ -530,13 +530,13 @@ impl PyUndirectedInteractionOperator {
     ///
     /// .. seealso::
     ///    The explanation of the internal data structure,
-    ///    :ref:`here <UndirectedInteractionOperator-implementation>`.
+    ///    :ref:`here <EdgeVertexOperator-implementation>`.
     ///
     /// .. doctest::
     ///
-    ///     >>> from qiskit_fermions.operators import UndirectedInteractionOperator
-    ///     >>> op = UndirectedInteractionOperator.one()
-    ///     >>> op += UndirectedInteractionOperator.from_dict({((0, 1),): 1.0})
+    ///     >>> from qiskit_fermions.operators import EdgeVertexOperator
+    ///     >>> op = EdgeVertexOperator.one()
+    ///     >>> op += EdgeVertexOperator.from_dict({((0, 1),): 1.0})
     ///     >>> op.get_boundaries()
     ///     [0, 0, 1]
     ///
@@ -550,8 +550,8 @@ impl PyUndirectedInteractionOperator {
     ///
     /// .. doctest::
     ///
-    ///     >>> from qiskit_fermions.operators import UndirectedInteractionOperator
-    ///     >>> op = UndirectedInteractionOperator.from_dict(
+    ///     >>> from qiskit_fermions.operators import EdgeVertexOperator
+    ///     >>> op = EdgeVertexOperator.from_dict(
     ///     ...     {
     ///     ...         ((0, 1), (3, 4)): 1,
     ///     ...         ((7, 7),): 1,
@@ -628,14 +628,14 @@ impl PyUndirectedInteractionOperator {
             items_str.push(format!("{key_str}: {val_str}"));
         }
         Ok(format!(
-            "UndirectedInteractionOperator.from_dict({{{}}})",
+            "EdgeVertexOperator.from_dict({{{}}})",
             items_str.join(", ")
         ))
     }
 
     fn __str__(&self) -> PyResult<String> {
         Ok(format!(
-            "<UndirectedInteractionOperator with {} terms>",
+            "<EdgeVertexOperator with {} terms>",
             self.__len__()
         ))
     }
@@ -668,9 +668,9 @@ impl PyUndirectedInteractionOperator {
     ///
     /// .. doctest::
     ///
-    ///     >>> from qiskit_fermions.operators import UndirectedInteractionOperator
-    ///     >>> op = UndirectedInteractionOperator.from_dict({(): 2.0})
-    ///     >>> zero = UndirectedInteractionOperator.zero()
+    ///     >>> from qiskit_fermions.operators import EdgeVertexOperator
+    ///     >>> op = EdgeVertexOperator.from_dict({(): 2.0})
+    ///     >>> zero = EdgeVertexOperator.zero()
     ///     >>> op + zero == op
     ///     True
     ///
@@ -678,7 +678,7 @@ impl PyUndirectedInteractionOperator {
     #[classmethod]
     fn zero(_cls: &Bound<'_, PyType>) -> Self {
         Self {
-            inner: UndirectedInteractionOperator::zero(),
+            inner: EdgeVertexOperator::zero(),
         }
     }
 
@@ -688,9 +688,9 @@ impl PyUndirectedInteractionOperator {
     ///
     /// .. doctest::
     ///
-    ///     >>> from qiskit_fermions.operators import UndirectedInteractionOperator
-    ///     >>> op = UndirectedInteractionOperator.from_dict({(): 2.0})
-    ///     >>> one = UndirectedInteractionOperator.one()
+    ///     >>> from qiskit_fermions.operators import EdgeVertexOperator
+    ///     >>> op = EdgeVertexOperator.from_dict({(): 2.0})
+    ///     >>> one = EdgeVertexOperator.one()
     ///     >>> op & one == op
     ///     True
     ///
@@ -698,7 +698,7 @@ impl PyUndirectedInteractionOperator {
     #[classmethod]
     fn one(_cls: &Bound<'_, PyType>) -> Self {
         Self {
-            inner: UndirectedInteractionOperator::one(),
+            inner: EdgeVertexOperator::one(),
         }
     }
 
@@ -732,10 +732,10 @@ impl PyUndirectedInteractionOperator {
     ///
     /// .. doctest::
     ///
-    ///     >>> from qiskit_fermions.operators import UndirectedInteractionOperator
+    ///     >>> from qiskit_fermions.operators import EdgeVertexOperator
     ///     >>> coeffs = [1e-5] * int(1e5)
     ///     >>> boundaries = [0] + [0] * int(1e5)
-    ///     >>> op = UndirectedInteractionOperator(coeffs, [], [], boundaries)
+    ///     >>> op = EdgeVertexOperator(coeffs, [], [], boundaries)
     ///     >>> canon = op.simplify(1e-4)
     ///     >>> assert canon.equiv(op.one(), 1e-6)
     ///     >>> op.ichop(1e-4)
@@ -761,8 +761,8 @@ impl PyUndirectedInteractionOperator {
     ///
     /// .. doctest::
     ///
-    ///     >>> from qiskit_fermions.operators import UndirectedInteractionOperator
-    ///     >>> op = UndirectedInteractionOperator.from_dict({(): 1e-4, ((1, 0),): 1e-6, ((0, 1),): 1e-10})
+    ///     >>> from qiskit_fermions.operators import EdgeVertexOperator
+    ///     >>> op = EdgeVertexOperator.from_dict({(): 1e-4, ((1, 0),): 1e-6, ((0, 1),): 1e-10})
     ///     >>> print(format(op))
     ///       1.000000e-4 +0.000000e0j * ()
     ///      1.000000e-10 +0.000000e0j * (E(0,1))
@@ -789,19 +789,19 @@ impl PyUndirectedInteractionOperator {
     ///
     /// .. doctest::
     ///
-    ///     >>> from qiskit_fermions.operators import UndirectedInteractionOperator
-    ///     >>> op = UndirectedInteractionOperator.from_dict({(): 2.0, ((0, 0),): 1.0, ((0, 1),): -1.0j})
+    ///     >>> from qiskit_fermions.operators import EdgeVertexOperator
+    ///     >>> op = EdgeVertexOperator.from_dict({(): 2.0, ((0, 0),): 1.0, ((0, 1),): -1.0j})
     ///     >>> list(sorted(op.iter_terms()))
     ///     [([], (2+0j)), ([(0, 0)], (1+0j)), ([(0, 1)], (-0-1j))]
     ///
     /// ..
-    fn iter_terms(slf: PyRef<'_, Self>) -> PyResult<Py<UndirectedInteractionOperatorDataIter>> {
-        let vectorized: Vec<(Vec<PyUndirectedInteraction>, Complex64)> = slf
+    fn iter_terms(slf: PyRef<'_, Self>) -> PyResult<Py<EdgeVertexOperatorDataIter>> {
+        let vectorized: Vec<(Vec<PyEdgeAction>, Complex64)> = slf
             .inner
             .iter()
             .map(|term| (term.into_vec(), term.coeff))
             .collect();
-        let iter = UndirectedInteractionOperatorDataIter {
+        let iter = EdgeVertexOperatorDataIter {
             inner: vectorized.into_iter(),
         };
         Py::new(slf.py(), iter)
@@ -811,9 +811,9 @@ impl PyUndirectedInteractionOperator {
     ///
     /// .. doctest::
     ///
-    ///     >>> from qiskit_fermions.operators import UndirectedInteractionOperator
-    ///     >>> op = UndirectedInteractionOperator.from_dict({(): 2.0, ((0, 0),): 1.0, ((0, 1),): -1.0j})
-    ///     >>> op.equiv(UndirectedInteractionOperator.from_terms(op.iter_terms()))
+    ///     >>> from qiskit_fermions.operators import EdgeVertexOperator
+    ///     >>> op = EdgeVertexOperator.from_dict({(): 2.0, ((0, 0),): 1.0, ((0, 1),): -1.0j})
+    ///     >>> op.equiv(EdgeVertexOperator.from_terms(op.iter_terms()))
     ///     True
     ///
     /// Args:
@@ -823,9 +823,9 @@ impl PyUndirectedInteractionOperator {
     ///     A new operator.
     #[classmethod]
     fn from_terms(_cls: &Bound<'_, PyType>, terms: &Bound<'_, PyAny>) -> PyResult<Self> {
-        let mut inner = UndirectedInteractionOperator::zero();
+        let mut inner = EdgeVertexOperator::zero();
         terms.try_iter()?.try_for_each(|item| -> PyResult<()> {
-            let (term, coeff) = item?.extract::<(Vec<PyUndirectedInteraction>, Complex64)>()?;
+            let (term, coeff) = item?.extract::<(Vec<PyEdgeAction>, Complex64)>()?;
             inner.coeffs.push(coeff);
             term.iter().for_each(|(l, r)| {
                 inner.left_indices.push(*l);
@@ -859,8 +859,8 @@ impl PyUndirectedInteractionOperator {
     ///
     /// .. doctest::
     ///
-    ///     >>> from qiskit_fermions.operators import UndirectedInteractionOperator
-    ///     >>> op = UndirectedInteractionOperator(
+    ///     >>> from qiskit_fermions.operators import EdgeVertexOperator
+    ///     >>> op = EdgeVertexOperator(
     ///     ...     [1.0, 2.0, -1.0],
     ///     ...     [0, 1, 2, 3],
     ///     ...     [1, 0, 3, 2],
@@ -904,8 +904,8 @@ impl PyUndirectedInteractionOperator {
     ///
     /// .. doctest::
     ///
-    ///     >>> from qiskit_fermions.operators import UndirectedInteractionOperator
-    ///     >>> op = UndirectedInteractionOperator.from_dict({(): -1.0j, ((0, 0), (0, 1)): 1.0})
+    ///     >>> from qiskit_fermions.operators import EdgeVertexOperator
+    ///     >>> op = EdgeVertexOperator.from_dict({(): -1.0j, ((0, 0), (0, 1)): 1.0})
     ///     >>> adj = op.adjoint()
     ///     >>> print(format(adj))
     ///      -0.000000e0 +1.000000e0j * ()
@@ -927,9 +927,9 @@ impl PyUndirectedInteractionOperator {
     ///
     /// .. doctest::
     ///
-    ///     >>> from qiskit_fermions.operators import UndirectedInteractionOperator
-    ///     >>> op = UndirectedInteractionOperator.from_dict({(): 1e-7})
-    ///     >>> zero = UndirectedInteractionOperator.zero()
+    ///     >>> from qiskit_fermions.operators import EdgeVertexOperator
+    ///     >>> op = EdgeVertexOperator.from_dict({(): 1e-7})
+    ///     >>> zero = EdgeVertexOperator.zero()
     ///     >>> op.equiv(zero)
     ///     False
     ///     >>> op.equiv(zero, 1e-6)
@@ -954,12 +954,12 @@ impl PyUndirectedInteractionOperator {
     /// .. note::
     ///    When a term is being reordered, the mixed commutation and anti-commutation relations
     ///    have to be taken into account. See
-    ///    :ref:`here <UndirectedInteractionOperator-definition>` for the detailed definitions.
+    ///    :ref:`here <EdgeVertexOperator-definition>` for the detailed definitions.
     ///
     /// .. doctest::
     ///
-    ///     >>> from qiskit_fermions.operators import UndirectedInteractionOperator
-    ///     >>> op = UndirectedInteractionOperator.from_dict({((0, 1), (1, 0), (1, 2), (0, 0), (2, 2)): 1})
+    ///     >>> from qiskit_fermions.operators import EdgeVertexOperator
+    ///     >>> op = EdgeVertexOperator.from_dict({((0, 1), (1, 0), (1, 2), (0, 0), (2, 2)): 1})
     ///     >>> print(format(op.normal_ordered().simplify()))
     ///      -1.000000e0 -0.000000e0j * (V(0) V(2) E(0,1) E(1,0) E(1,2))
     ///
@@ -992,8 +992,8 @@ impl PyUndirectedInteractionOperator {
     ///
     /// .. doctest::
     ///
-    ///     >>> from qiskit_fermions.operators import UndirectedInteractionOperator
-    ///     >>> op = UndirectedInteractionOperator.from_dict({
+    ///     >>> from qiskit_fermions.operators import EdgeVertexOperator
+    ///     >>> op = EdgeVertexOperator.from_dict({
     ///     ...     ((0, 1), (2, 3)): 1,
     ///     ...     ((1, 2), (3, 0)): 1,
     ///     ... })
@@ -1018,7 +1018,7 @@ impl PyUndirectedInteractionOperator {
 }
 
 #[pymodule]
-pub mod undirected_interaction_operator {
+pub mod edge_vertex_operator {
     #[pymodule_export]
-    use super::PyUndirectedInteractionOperator;
+    use super::PyEdgeVertexOperator;
 }

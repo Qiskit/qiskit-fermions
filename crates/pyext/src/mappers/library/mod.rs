@@ -13,9 +13,9 @@
 use pyo3::prelude::*;
 
 pub mod directed_interaction;
+pub mod edge_vertex;
 pub mod jordan_wigner;
 pub mod majorana_fermion;
-pub mod undirected_interaction;
 
 #[pymodule]
 pub mod mappers_library {
@@ -23,11 +23,11 @@ pub mod mappers_library {
     use super::directed_interaction::directed_interaction;
 
     #[pymodule_export]
+    use super::edge_vertex::edge_vertex;
+
+    #[pymodule_export]
     use super::jordan_wigner::jordan_wigner;
 
     #[pymodule_export]
     use super::majorana_fermion::majorana_fermion;
-
-    #[pymodule_export]
-    use super::undirected_interaction::undirected_interaction;
 }

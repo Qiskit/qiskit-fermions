@@ -94,11 +94,11 @@ macro_rules! impl_operator_magic_methods {
 }
 
 pub mod directed_interaction_operator;
+pub mod edge_vertex_operator;
 pub mod fermion_operator;
 pub mod grouping;
 pub mod library;
 pub mod majorana_operator;
-pub mod undirected_interaction_operator;
 
 #[pymodule]
 pub mod operators {
@@ -106,13 +106,13 @@ pub mod operators {
     use super::directed_interaction_operator::directed_interaction_operator;
 
     #[pymodule_export]
+    use super::edge_vertex_operator::edge_vertex_operator;
+
+    #[pymodule_export]
     use super::fermion_operator::fermion_operator;
 
     #[pymodule_export]
     use super::majorana_operator::majorana_operator;
-
-    #[pymodule_export]
-    use super::undirected_interaction_operator::undirected_interaction_operator;
 
     #[pymodule_export]
     use super::grouping::operators_grouping;

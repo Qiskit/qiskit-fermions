@@ -64,8 +64,8 @@ Hermitian generators:
 
    DirectedInteraction
    DirectedInteractionOperator
-   UndirectedInteraction
-   UndirectedInteractionOperator
+   EdgeAction
+   EdgeVertexOperator
 
 Protocol
 --------
@@ -84,28 +84,28 @@ protocol below:
 """
 
 from qiskit_fermions._lib.operators.directed_interaction_operator import DirectedInteractionOperator
+from qiskit_fermions._lib.operators.edge_vertex_operator import (
+    EdgeVertexOperator,
+)
 from qiskit_fermions._lib.operators.fermion_operator import FermionOperator
 from qiskit_fermions._lib.operators.majorana_operator import MajoranaOperator
-from qiskit_fermions._lib.operators.undirected_interaction_operator import (
-    UndirectedInteractionOperator,
-)
 
 from .directed_interaction import DirectedInteraction
+from .edge_action import EdgeAction
 from .fermion_action import FermionAction, ann, cre
 from .majorana_action import MajoranaAction, gamma
 from .protocol import OperatorTrait
-from .undirected_interaction import UndirectedInteraction
 
 __all__ = [
     "DirectedInteraction",
     "DirectedInteractionOperator",
+    "EdgeAction",
+    "EdgeVertexOperator",
     "FermionAction",
     "FermionOperator",
     "MajoranaAction",
     "MajoranaOperator",
     "OperatorTrait",
-    "UndirectedInteraction",
-    "UndirectedInteractionOperator",
     "ann",
     "cre",
     "gamma",

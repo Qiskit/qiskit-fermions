@@ -29,17 +29,17 @@ This module provides a framework for implementing custom representation mapper r
    map_directed_interaction_generators
    map_fermion_action_generators
    map_majorana_action_generators
-   map_undirected_interaction_generators
+   map_edge_vertex_generators
 """
 
 from .directed_interaction_generators import map_directed_interaction_generators
+from .edge_vertex_generators import map_edge_vertex_generators
 from .fermion_generators import map_fermion_action_generators
 from .majorana_generators import map_majorana_action_generators
-from .undirected_interaction_generators import map_undirected_interaction_generators
 
 __all__ = [
     "map_directed_interaction_generators",
+    "map_edge_vertex_generators",
     "map_fermion_action_generators",
     "map_majorana_action_generators",
-    "map_undirected_interaction_generators",
 ]
