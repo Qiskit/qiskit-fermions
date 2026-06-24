@@ -13,17 +13,15 @@
 from functools import cache
 
 from qiskit.quantum_info import SparsePauliOp
-from qiskit_fermions.mappers import map_directed_interaction_generators
-from qiskit_fermions.operators import DirectedInteraction, DirectedInteractionOperator
+from qiskit_fermions.mappers import map_transfer_vertex_generators
+from qiskit_fermions.operators import TransferAction, TransferVertexOperator
 
 
-def jordan_wigner_nearest_neighbor(
-    op: DirectedInteractionOperator, num_qubits: int
-) -> SparsePauliOp:
+def jordan_wigner_nearest_neighbor(op: TransferVertexOperator, num_qubits: int) -> SparsePauliOp:
     """Custom Jordan-Wigner transformation for nearest neighbor interactions."""
 
     @cache
-    def map_interaction(mode: DirectedInteraction) -> SparsePauliOp:
+    def map_interaction(mode: TransferAction) -> SparsePauliOp:
         match abs(mode[0] - mode[1]):
             case 0:
                 pauli = "Z"
@@ -38,7 +36,7 @@ def jordan_wigner_nearest_neighbor(
 
         return SparsePauliOp.from_sparse_list([(pauli, qubits, coeff)], num_qubits=num_qubits)
 
-    return map_directed_interaction_generators(
+    return map_transfer_vertex_generators(
         op,
         map_interaction,
         lambda: SparsePauliOp.from_sparse_list([("", [], 1)], num_qubits=num_qubits),
@@ -46,7 +44,7 @@ def jordan_wigner_nearest_neighbor(
 
 
 def test_jordan_wigner():
-    op = DirectedInteractionOperator.from_dict(
+    op = TransferVertexOperator.from_dict(
         {
             ((0, 0),): 2.0,
             ((0, 1),): 0.5,

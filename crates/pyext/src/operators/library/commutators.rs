@@ -10,10 +10,10 @@
 // copyright notice, and modified files need to carry a notice indicating
 // that they have been altered from the originals.
 
-use crate::operators::directed_interaction_operator::PyDirectedInteractionOperator;
 use crate::operators::edge_vertex_operator::PyEdgeVertexOperator;
 use crate::operators::fermion_operator::PyFermionOperator;
 use crate::operators::majorana_operator::PyMajoranaOperator;
+use crate::operators::transfer_vertex_operator::PyTransferVertexOperator;
 use pyo3::prelude::*;
 use pyo3_stub_gen::derive::*;
 use qiskit_fermions_core::operators::library::commutators::{
@@ -49,7 +49,7 @@ macro_rules! impl_commutators {
     };
 }
 
-impl_commutators!(PyDirectedInteractionOperator);
 impl_commutators!(PyEdgeVertexOperator);
 impl_commutators!(PyFermionOperator);
 impl_commutators!(PyMajoranaOperator);
+impl_commutators!(PyTransferVertexOperator);

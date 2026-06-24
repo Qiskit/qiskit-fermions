@@ -20,37 +20,37 @@ use pyo3::{class::basic::CompareOp, exceptions::PyNotImplementedError};
 use pyo3_stub_gen::derive::*;
 use std::collections::HashMap;
 
-use qiskit_fermions_core::operators::directed_interaction_operator::DirectedInteractionOperator;
+use qiskit_fermions_core::operators::transfer_vertex_operator::TransferVertexOperator;
 use qiskit_fermions_core::operators::{OperatorMacro, OperatorTrait};
 
-pub type PyDirectedInteraction = (u32, u32);
+pub type PyTransferAction = (u32, u32);
 
 #[gen_stub_pyclass]
 #[pyclass(
-    module = "qiskit_fermions.operators.directed_interaction_operator",
-    name = "DirectedInteractionOperatorDataIter"
+    module = "qiskit_fermions.operators.transfer_vertex_operator",
+    name = "TransferVertexOperatorDataIter"
 )]
-struct DirectedInteractionOperatorDataIter {
-    inner: std::vec::IntoIter<(Vec<PyDirectedInteraction>, Complex64)>,
+struct TransferVertexOperatorDataIter {
+    inner: std::vec::IntoIter<(Vec<PyTransferAction>, Complex64)>,
 }
 
 #[gen_stub_pymethods]
 #[pymethods]
-impl DirectedInteractionOperatorDataIter {
+impl TransferVertexOperatorDataIter {
     fn __iter__(slf: PyRef<'_, Self>) -> PyRef<'_, Self> {
         slf
     }
 
-    fn __next__(mut slf: PyRefMut<'_, Self>) -> Option<(Vec<PyDirectedInteraction>, Complex64)> {
+    fn __next__(mut slf: PyRefMut<'_, Self>) -> Option<(Vec<PyTransferAction>, Complex64)> {
         slf.inner.next()
     }
 }
 
-/// An directed interaction operator.
+/// An transfer-vertex operator.
 ///
 /// ----
 ///
-/// .. _DirectedInteractionOperator-definition:
+/// .. _TransferVertexOperator-definition:
 ///
 /// Definition
 /// ==========
@@ -89,7 +89,7 @@ impl DirectedInteractionOperatorDataIter {
 /// A simple example can be represented visually like so:
 ///
 /// .. plot::
-///    :alt: A visual depication of a directed interaction operator.
+///    :alt: A visual depication of a transfer-vertex operator.
 ///    :context: close-figs
 ///
 ///    >>> import rustworkx as rx
@@ -126,7 +126,7 @@ impl DirectedInteractionOperatorDataIter {
 ///
 /// ----
 ///
-/// .. _DirectedInteractionOperator-implementation:
+/// .. _TransferVertexOperator-implementation:
 ///
 /// Implementation
 /// ==============
@@ -163,12 +163,12 @@ impl DirectedInteractionOperatorDataIter {
 ///
 /// .. doctest::
 ///
-///     >>> from qiskit_fermions.operators import DirectedInteractionOperator
+///     >>> from qiskit_fermions.operators import TransferVertexOperator
 ///     >>> coeffs = [1.0, 2.0, -3.0, 4.0j, -0.5j]
 ///     >>> left_indices = [0, 3, 0, 2, 3, 0]
 ///     >>> right_indices = [1, 4, 1, 2, 3, 1]
 ///     >>> boundaries = [0, 0, 1, 2, 4, 6]
-///     >>> op = DirectedInteractionOperator(coeffs, left_indices, right_indices, boundaries)
+///     >>> op = TransferVertexOperator(coeffs, left_indices, right_indices, boundaries)
 ///     >>> print(format(op))
 ///       1.000000e0 +0.000000e0j * ()
 ///       2.000000e0 +0.000000e0j * (T(0,1))
@@ -180,7 +180,7 @@ impl DirectedInteractionOperatorDataIter {
 ///
 /// .. doctest::
 ///
-///     >>> op = DirectedInteractionOperator.from_dict(
+///     >>> op = TransferVertexOperator.from_dict(
 ///     ...     {
 ///     ...         (): 1.0,
 ///     ...         ((0, 1),): 2.0,
@@ -230,7 +230,7 @@ impl DirectedInteractionOperatorDataIter {
 /// .. doctest::
 ///
 ///     >>> print(repr(op))
-///     DirectedInteractionOperator.from_dict({...})
+///     TransferVertexOperator.from_dict({...})
 ///
 /// Finally, for large operators both of these outputs may be very long and undesirable. Then, a
 /// very simple form with minimal information can be obtained from the :py:func:`str` function:
@@ -238,7 +238,7 @@ impl DirectedInteractionOperatorDataIter {
 /// .. doctest::
 ///
 ///     >>> print(str(op))
-///     <DirectedInteractionOperator with 5 terms>
+///     <TransferVertexOperator with 5 terms>
 ///
 /// Iteration
 /// ---------
@@ -251,7 +251,7 @@ impl DirectedInteractionOperatorDataIter {
 ///     >>> list(iter(op))
 ///     Traceback (most recent call last):
 ///       ...
-///     TypeError: 'qiskit_fermions.operators.directed_interaction_operator.DirectedInteractionOperator' object is not iterable
+///     TypeError: 'qiskit_fermions.operators.transfer_vertex_operator.TransferVertexOperator' object is not iterable
 ///
 /// Instead, this class provides custom iterators to fulfill this purpose:
 ///
@@ -280,34 +280,34 @@ impl DirectedInteractionOperatorDataIter {
 ///
 /// .. doctest::
 ///
-///     >>> op = DirectedInteractionOperator.one()
+///     >>> op = TransferVertexOperator.one()
 ///     >>> (op + op).simplify()
-///     DirectedInteractionOperator.from_dict({(): 2+0j})
+///     TransferVertexOperator.from_dict({(): 2+0j})
 ///     >>> (op - op).simplify()
-///     DirectedInteractionOperator.from_dict({})
+///     TransferVertexOperator.from_dict({})
 ///     >>> op += op
 ///     >>> op.simplify()
-///     DirectedInteractionOperator.from_dict({(): 2+0j})
+///     TransferVertexOperator.from_dict({(): 2+0j})
 ///     >>> op -= op
 ///     >>> op.simplify()
-///     DirectedInteractionOperator.from_dict({})
+///     TransferVertexOperator.from_dict({})
 ///
 /// Scalar Multiplication/Divison
 /// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ///
 /// .. doctest::
 ///
-///     >>> op = DirectedInteractionOperator.one()
+///     >>> op = TransferVertexOperator.one()
 ///     >>> (2 * op).simplify()
-///     DirectedInteractionOperator.from_dict({(): 2+0j})
+///     TransferVertexOperator.from_dict({(): 2+0j})
 ///     >>> (op / 2).simplify()
-///     DirectedInteractionOperator.from_dict({(): 0.5+0j})
+///     TransferVertexOperator.from_dict({(): 0.5+0j})
 ///     >>> op *= 2
 ///     >>> op.simplify()
-///     DirectedInteractionOperator.from_dict({(): 2+0j})
+///     TransferVertexOperator.from_dict({(): 2+0j})
 ///     >>> op /= 2
 ///     >>> op.simplify()
-///     DirectedInteractionOperator.from_dict({(): 1+0j})
+///     TransferVertexOperator.from_dict({(): 1+0j})
 ///
 /// Operator Composition
 /// ^^^^^^^^^^^^^^^^^^^^
@@ -319,8 +319,8 @@ impl DirectedInteractionOperatorDataIter {
 ///
 /// .. doctest::
 ///
-///     >>> op1 = DirectedInteractionOperator.from_dict({(): 2.0, ((0, 1),): 3.0})
-///     >>> op2 = DirectedInteractionOperator.from_dict({(): 1.5, ((2, 2),): 4.0})
+///     >>> op1 = TransferVertexOperator.from_dict({(): 2.0, ((0, 1),): 3.0})
+///     >>> op2 = TransferVertexOperator.from_dict({(): 1.5, ((2, 2),): 4.0})
 ///     >>> comp = (op1 & op2).simplify()
 ///     >>> print(format(comp))
 ///       3.000000e0 +0.000000e0j * ()
@@ -376,19 +376,19 @@ impl DirectedInteractionOperatorDataIter {
 /// .. [1] Gandon et al., `arXiv:2512.11418 <https://arxiv.org/abs/2512.11418v2>`_.
 #[gen_stub_pyclass]
 #[pyclass(
-    module = "qiskit_fermions.operators.directed_interaction_operator",
-    name = "DirectedInteractionOperator"
+    module = "qiskit_fermions.operators.transfer_vertex_operator",
+    name = "TransferVertexOperator"
 )]
 #[derive(Clone)]
-pub struct PyDirectedInteractionOperator {
-    pub inner: DirectedInteractionOperator,
+pub struct PyTransferVertexOperator {
+    pub inner: TransferVertexOperator,
 }
 
-crate::impl_operator_magic_methods!(PyDirectedInteractionOperator);
+crate::impl_operator_magic_methods!(PyTransferVertexOperator);
 
 #[gen_stub_pymethods]
 #[pymethods]
-impl PyDirectedInteractionOperator {
+impl PyTransferVertexOperator {
     #[new]
     fn new(
         coeffs: Vec<Complex64>,
@@ -397,7 +397,7 @@ impl PyDirectedInteractionOperator {
         boundaries: Vec<usize>,
     ) -> Self {
         Self {
-            inner: DirectedInteractionOperator {
+            inner: TransferVertexOperator {
                 coeffs,
                 left_indices,
                 right_indices,
@@ -411,8 +411,8 @@ impl PyDirectedInteractionOperator {
     ///
     /// .. doctest::
     ///
-    ///     >>> from qiskit_fermions.operators import DirectedInteractionOperator
-    ///     >>> op = DirectedInteractionOperator.from_dict(
+    ///     >>> from qiskit_fermions.operators import TransferVertexOperator
+    ///     >>> op = TransferVertexOperator.from_dict(
     ///     ...     {
     ///     ...         (): 1.0-1.0j,
     ///     ...         ((0, 0),): 2.0,
@@ -449,7 +449,7 @@ impl PyDirectedInteractionOperator {
         });
 
         Self {
-            inner: DirectedInteractionOperator {
+            inner: TransferVertexOperator {
                 coeffs,
                 left_indices,
                 right_indices,
@@ -466,13 +466,13 @@ impl PyDirectedInteractionOperator {
     ///
     /// .. seealso::
     ///    The explanation of the internal data structure,
-    ///    :ref:`here <DirectedInteractionOperator-implementation>`.
+    ///    :ref:`here <TransferVertexOperator-implementation>`.
     ///
     /// .. doctest::
     ///
-    ///     >>> from qiskit_fermions.operators import DirectedInteractionOperator
-    ///     >>> op = DirectedInteractionOperator.one()
-    ///     >>> op += -1j * DirectedInteractionOperator.one()
+    ///     >>> from qiskit_fermions.operators import TransferVertexOperator
+    ///     >>> op = TransferVertexOperator.one()
+    ///     >>> op += -1j * TransferVertexOperator.one()
     ///     >>> op.get_coeffs()
     ///     [(1+0j), -1j]
     ///
@@ -489,13 +489,13 @@ impl PyDirectedInteractionOperator {
     ///
     /// .. seealso::
     ///    The explanation of the internal data structure,
-    ///    :ref:`here <DirectedInteractionOperator-implementation>`.
+    ///    :ref:`here <TransferVertexOperator-implementation>`.
     ///
     /// .. doctest::
     ///
-    ///     >>> from qiskit_fermions.operators import DirectedInteractionOperator
-    ///     >>> op = DirectedInteractionOperator.from_dict({((0, 0),): 1.0})
-    ///     >>> op += DirectedInteractionOperator.from_dict({((0, 1),): 1.0})
+    ///     >>> from qiskit_fermions.operators import TransferVertexOperator
+    ///     >>> op = TransferVertexOperator.from_dict({((0, 0),): 1.0})
+    ///     >>> op += TransferVertexOperator.from_dict({((0, 1),): 1.0})
     ///     >>> op.get_left_indices()
     ///     [0, 0]
     ///
@@ -512,13 +512,13 @@ impl PyDirectedInteractionOperator {
     ///
     /// .. seealso::
     ///    The explanation of the internal data structure,
-    ///    :ref:`here <DirectedInteractionOperator-implementation>`.
+    ///    :ref:`here <TransferVertexOperator-implementation>`.
     ///
     /// .. doctest::
     ///
-    ///     >>> from qiskit_fermions.operators import DirectedInteractionOperator
-    ///     >>> op = DirectedInteractionOperator.from_dict({((0, 0),): 1.0})
-    ///     >>> op += DirectedInteractionOperator.from_dict({((0, 1),): 1.0})
+    ///     >>> from qiskit_fermions.operators import TransferVertexOperator
+    ///     >>> op = TransferVertexOperator.from_dict({((0, 0),): 1.0})
+    ///     >>> op += TransferVertexOperator.from_dict({((0, 1),): 1.0})
     ///     >>> op.get_right_indices()
     ///     [0, 1]
     ///
@@ -535,13 +535,13 @@ impl PyDirectedInteractionOperator {
     ///
     /// .. seealso::
     ///    The explanation of the internal data structure,
-    ///    :ref:`here <DirectedInteractionOperator-implementation>`.
+    ///    :ref:`here <TransferVertexOperator-implementation>`.
     ///
     /// .. doctest::
     ///
-    ///     >>> from qiskit_fermions.operators import DirectedInteractionOperator
-    ///     >>> op = DirectedInteractionOperator.one()
-    ///     >>> op += DirectedInteractionOperator.from_dict({((0, 1),): 1.0})
+    ///     >>> from qiskit_fermions.operators import TransferVertexOperator
+    ///     >>> op = TransferVertexOperator.one()
+    ///     >>> op += TransferVertexOperator.from_dict({((0, 1),): 1.0})
     ///     >>> op.get_boundaries()
     ///     [0, 0, 1]
     ///
@@ -555,8 +555,8 @@ impl PyDirectedInteractionOperator {
     ///
     /// .. doctest::
     ///
-    ///     >>> from qiskit_fermions.operators import DirectedInteractionOperator
-    ///     >>> op = DirectedInteractionOperator.from_dict(
+    ///     >>> from qiskit_fermions.operators import TransferVertexOperator
+    ///     >>> op = TransferVertexOperator.from_dict(
     ///     ...     {
     ///     ...         ((0, 1), (3, 4)): 1,
     ///     ...         ((7, 7),): 1,
@@ -633,14 +633,14 @@ impl PyDirectedInteractionOperator {
             items_str.push(format!("{key_str}: {val_str}"));
         }
         Ok(format!(
-            "DirectedInteractionOperator.from_dict({{{}}})",
+            "TransferVertexOperator.from_dict({{{}}})",
             items_str.join(", ")
         ))
     }
 
     fn __str__(&self) -> PyResult<String> {
         Ok(format!(
-            "<DirectedInteractionOperator with {} terms>",
+            "<TransferVertexOperator with {} terms>",
             self.__len__()
         ))
     }
@@ -673,9 +673,9 @@ impl PyDirectedInteractionOperator {
     ///
     /// .. doctest::
     ///
-    ///     >>> from qiskit_fermions.operators import DirectedInteractionOperator
-    ///     >>> op = DirectedInteractionOperator.from_dict({(): 2.0})
-    ///     >>> zero = DirectedInteractionOperator.zero()
+    ///     >>> from qiskit_fermions.operators import TransferVertexOperator
+    ///     >>> op = TransferVertexOperator.from_dict({(): 2.0})
+    ///     >>> zero = TransferVertexOperator.zero()
     ///     >>> op + zero == op
     ///     True
     ///
@@ -683,7 +683,7 @@ impl PyDirectedInteractionOperator {
     #[classmethod]
     fn zero(_cls: &Bound<'_, PyType>) -> Self {
         Self {
-            inner: DirectedInteractionOperator::zero(),
+            inner: TransferVertexOperator::zero(),
         }
     }
 
@@ -693,9 +693,9 @@ impl PyDirectedInteractionOperator {
     ///
     /// .. doctest::
     ///
-    ///     >>> from qiskit_fermions.operators import DirectedInteractionOperator
-    ///     >>> op = DirectedInteractionOperator.from_dict({(): 2.0})
-    ///     >>> one = DirectedInteractionOperator.one()
+    ///     >>> from qiskit_fermions.operators import TransferVertexOperator
+    ///     >>> op = TransferVertexOperator.from_dict({(): 2.0})
+    ///     >>> one = TransferVertexOperator.one()
     ///     >>> op & one == op
     ///     True
     ///
@@ -703,7 +703,7 @@ impl PyDirectedInteractionOperator {
     #[classmethod]
     fn one(_cls: &Bound<'_, PyType>) -> Self {
         Self {
-            inner: DirectedInteractionOperator::one(),
+            inner: TransferVertexOperator::one(),
         }
     }
 
@@ -737,10 +737,10 @@ impl PyDirectedInteractionOperator {
     ///
     /// .. doctest::
     ///
-    ///     >>> from qiskit_fermions.operators import DirectedInteractionOperator
+    ///     >>> from qiskit_fermions.operators import TransferVertexOperator
     ///     >>> coeffs = [1e-5] * int(1e5)
     ///     >>> boundaries = [0] + [0] * int(1e5)
-    ///     >>> op = DirectedInteractionOperator(coeffs, [], [], boundaries)
+    ///     >>> op = TransferVertexOperator(coeffs, [], [], boundaries)
     ///     >>> canon = op.simplify(1e-4)
     ///     >>> assert canon.equiv(op.one(), 1e-6)
     ///     >>> op.ichop(1e-4)
@@ -766,8 +766,8 @@ impl PyDirectedInteractionOperator {
     ///
     /// .. doctest::
     ///
-    ///     >>> from qiskit_fermions.operators import DirectedInteractionOperator
-    ///     >>> op = DirectedInteractionOperator.from_dict({(): 1e-4, ((1, 0),): 1e-6, ((0, 1),): 1e-10})
+    ///     >>> from qiskit_fermions.operators import TransferVertexOperator
+    ///     >>> op = TransferVertexOperator.from_dict({(): 1e-4, ((1, 0),): 1e-6, ((0, 1),): 1e-10})
     ///     >>> print(format(op))
     ///       1.000000e-4 +0.000000e0j * ()
     ///      1.000000e-10 +0.000000e0j * (T(0,1))
@@ -794,19 +794,19 @@ impl PyDirectedInteractionOperator {
     ///
     /// .. doctest::
     ///
-    ///     >>> from qiskit_fermions.operators import DirectedInteractionOperator
-    ///     >>> op = DirectedInteractionOperator.from_dict({(): 2.0, ((0, 0),): 1.0, ((0, 1),): -1.0j})
+    ///     >>> from qiskit_fermions.operators import TransferVertexOperator
+    ///     >>> op = TransferVertexOperator.from_dict({(): 2.0, ((0, 0),): 1.0, ((0, 1),): -1.0j})
     ///     >>> list(sorted(op.iter_terms()))
     ///     [([], (2+0j)), ([(0, 0)], (1+0j)), ([(0, 1)], (-0-1j))]
     ///
     /// ..
-    fn iter_terms(slf: PyRef<'_, Self>) -> PyResult<Py<DirectedInteractionOperatorDataIter>> {
-        let vectorized: Vec<(Vec<PyDirectedInteraction>, Complex64)> = slf
+    fn iter_terms(slf: PyRef<'_, Self>) -> PyResult<Py<TransferVertexOperatorDataIter>> {
+        let vectorized: Vec<(Vec<PyTransferAction>, Complex64)> = slf
             .inner
             .iter()
             .map(|term| (term.into_vec(), term.coeff))
             .collect();
-        let iter = DirectedInteractionOperatorDataIter {
+        let iter = TransferVertexOperatorDataIter {
             inner: vectorized.into_iter(),
         };
         Py::new(slf.py(), iter)
@@ -816,9 +816,9 @@ impl PyDirectedInteractionOperator {
     ///
     /// .. doctest::
     ///
-    ///     >>> from qiskit_fermions.operators import DirectedInteractionOperator
-    ///     >>> op = DirectedInteractionOperator.from_dict({(): 2.0, ((0, 0),): 1.0, ((0, 1),): -1.0j})
-    ///     >>> op.equiv(DirectedInteractionOperator.from_terms(op.iter_terms()))
+    ///     >>> from qiskit_fermions.operators import TransferVertexOperator
+    ///     >>> op = TransferVertexOperator.from_dict({(): 2.0, ((0, 0),): 1.0, ((0, 1),): -1.0j})
+    ///     >>> op.equiv(TransferVertexOperator.from_terms(op.iter_terms()))
     ///     True
     ///
     /// Args:
@@ -828,9 +828,9 @@ impl PyDirectedInteractionOperator {
     ///     A new operator.
     #[classmethod]
     fn from_terms(_cls: &Bound<'_, PyType>, terms: &Bound<'_, PyAny>) -> PyResult<Self> {
-        let mut inner = DirectedInteractionOperator::zero();
+        let mut inner = TransferVertexOperator::zero();
         terms.try_iter()?.try_for_each(|item| -> PyResult<()> {
-            let (term, coeff) = item?.extract::<(Vec<PyDirectedInteraction>, Complex64)>()?;
+            let (term, coeff) = item?.extract::<(Vec<PyTransferAction>, Complex64)>()?;
             inner.coeffs.push(coeff);
             term.iter().for_each(|(l, r)| {
                 inner.left_indices.push(*l);
@@ -864,8 +864,8 @@ impl PyDirectedInteractionOperator {
     ///
     /// .. doctest::
     ///
-    ///     >>> from qiskit_fermions.operators import DirectedInteractionOperator
-    ///     >>> op = DirectedInteractionOperator(
+    ///     >>> from qiskit_fermions.operators import TransferVertexOperator
+    ///     >>> op = TransferVertexOperator(
     ///     ...     [1.0, 2.0, -1.0],
     ///     ...     [0, 1, 2, 3],
     ///     ...     [1, 0, 3, 2],
@@ -909,8 +909,8 @@ impl PyDirectedInteractionOperator {
     ///
     /// .. doctest::
     ///
-    ///     >>> from qiskit_fermions.operators import DirectedInteractionOperator
-    ///     >>> op = DirectedInteractionOperator.from_dict({(): -1.0j, ((0, 0), (0, 1)): 1.0})
+    ///     >>> from qiskit_fermions.operators import TransferVertexOperator
+    ///     >>> op = TransferVertexOperator.from_dict({(): -1.0j, ((0, 0), (0, 1)): 1.0})
     ///     >>> adj = op.adjoint()
     ///     >>> print(format(adj))
     ///      -0.000000e0 +1.000000e0j * ()
@@ -932,9 +932,9 @@ impl PyDirectedInteractionOperator {
     ///
     /// .. doctest::
     ///
-    ///     >>> from qiskit_fermions.operators import DirectedInteractionOperator
-    ///     >>> op = DirectedInteractionOperator.from_dict({(): 1e-7})
-    ///     >>> zero = DirectedInteractionOperator.zero()
+    ///     >>> from qiskit_fermions.operators import TransferVertexOperator
+    ///     >>> op = TransferVertexOperator.from_dict({(): 1e-7})
+    ///     >>> zero = TransferVertexOperator.zero()
     ///     >>> op.equiv(zero)
     ///     False
     ///     >>> op.equiv(zero, 1e-6)
@@ -959,12 +959,12 @@ impl PyDirectedInteractionOperator {
     /// .. note::
     ///    When a term is being reordered, the mixed commutation and anti-commutation relations
     ///    have to be taken into account. See
-    ///    :ref:`here <DirectedInteractionOperator-definition>` for the detailed definitions.
+    ///    :ref:`here <TransferVertexOperator-definition>` for the detailed definitions.
     ///
     /// .. doctest::
     ///
-    ///     >>> from qiskit_fermions.operators import DirectedInteractionOperator
-    ///     >>> op = DirectedInteractionOperator.from_dict({((0, 1), (1, 0), (1, 2), (0, 0), (2, 2)): 1})
+    ///     >>> from qiskit_fermions.operators import TransferVertexOperator
+    ///     >>> op = TransferVertexOperator.from_dict({((0, 1), (1, 0), (1, 2), (0, 0), (2, 2)): 1})
     ///     >>> print(format(op.normal_ordered().simplify()))
     ///      -1.000000e0 -0.000000e0j * (V(0) V(2) T(0,1) T(1,0) T(1,2))
     ///
@@ -997,8 +997,8 @@ impl PyDirectedInteractionOperator {
     ///
     /// .. doctest::
     ///
-    ///     >>> from qiskit_fermions.operators import DirectedInteractionOperator
-    ///     >>> op = DirectedInteractionOperator.from_dict({
+    ///     >>> from qiskit_fermions.operators import TransferVertexOperator
+    ///     >>> op = TransferVertexOperator.from_dict({
     ///     ...     ((0, 1), (2, 3)): 1,
     ///     ...     ((1, 2), (3, 0)): 1,
     ///     ... })
@@ -1023,7 +1023,7 @@ impl PyDirectedInteractionOperator {
 }
 
 #[pymodule]
-pub mod directed_interaction_operator {
+pub mod transfer_vertex_operator {
     #[pymodule_export]
-    use super::PyDirectedInteractionOperator;
+    use super::PyTransferVertexOperator;
 }

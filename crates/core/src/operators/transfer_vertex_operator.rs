@@ -18,21 +18,21 @@ use std::ops::{
     Add, AddAssign, BitAnd, BitAndAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign,
 };
 
-pub type DirectedInteraction<'a> = (&'a u32, &'a u32);
+pub type TransferAction<'a> = (&'a u32, &'a u32);
 
 #[derive(Clone, Copy, Debug, PartialEq)]
-pub struct DirectedInteractionOperatorTermView<'a> {
+pub struct TransferVertexOperatorTermView<'a> {
     pub coeff: Complex64,
     pub left_indices: &'a [u32],
     pub right_indices: &'a [u32],
 }
 
-impl DirectedInteractionOperatorTermView<'_> {
-    pub fn iter(&'_ self) -> impl ExactSizeIterator<Item = DirectedInteraction<'_>> + '_ {
+impl TransferVertexOperatorTermView<'_> {
+    pub fn iter(&'_ self) -> impl ExactSizeIterator<Item = TransferAction<'_>> + '_ {
         zip(self.left_indices, self.right_indices)
     }
 
-    pub fn to_vec(&'_ self) -> Vec<DirectedInteraction<'_>> {
+    pub fn to_vec(&'_ self) -> Vec<TransferAction<'_>> {
         zip(self.left_indices, self.right_indices).collect()
     }
 
@@ -42,7 +42,7 @@ impl DirectedInteractionOperatorTermView<'_> {
 }
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct DirectedInteractionOperator {
+pub struct TransferVertexOperator {
     pub coeffs: Vec<Complex64>,
     pub left_indices: Vec<u32>,
     pub right_indices: Vec<u32>,
@@ -50,9 +50,9 @@ pub struct DirectedInteractionOperator {
     pub groups: Option<Vec<u32>>,
 }
 
-crate::impl_operator_macro!(DirectedInteractionOperator);
+crate::impl_operator_macro!(TransferVertexOperator);
 
-impl DirectedInteractionOperator {
+impl TransferVertexOperator {
     #[inline]
     pub fn coeffs(&self) -> &[Complex64] {
         &self.coeffs
@@ -83,11 +83,11 @@ impl DirectedInteractionOperator {
 
     pub fn iter(
         &'_ self,
-    ) -> impl ExactSizeIterator<Item = DirectedInteractionOperatorTermView<'_>> + '_ {
+    ) -> impl ExactSizeIterator<Item = TransferVertexOperatorTermView<'_>> + '_ {
         self.coeffs.iter().enumerate().map(|(i, coeff)| {
             let start = self.boundaries[i];
             let end = self.boundaries[i + 1];
-            DirectedInteractionOperatorTermView {
+            TransferVertexOperatorTermView {
                 coeff: *coeff,
                 left_indices: &self.left_indices[start..end],
                 right_indices: &self.right_indices[start..end],
@@ -123,9 +123,7 @@ impl DirectedInteractionOperator {
     }
 }
 
-fn _normal_ordered_term(
-    term_view: DirectedInteractionOperatorTermView,
-) -> DirectedInteractionOperator {
+fn _normal_ordered_term(term_view: TransferVertexOperatorTermView) -> TransferVertexOperator {
     let mut coeffs = vec![];
     let mut left_indices = vec![];
     let mut right_indices = vec![];
@@ -185,7 +183,7 @@ fn _normal_ordered_term(
         });
         boundaries.push(right_indices.len())
     }
-    DirectedInteractionOperator {
+    TransferVertexOperator {
         coeffs,
         left_indices,
         right_indices,
@@ -195,8 +193,8 @@ fn _normal_ordered_term(
 }
 
 fn _compose(
-    a: &DirectedInteractionOperator,
-    b: &DirectedInteractionOperator,
+    a: &TransferVertexOperator,
+    b: &TransferVertexOperator,
 ) -> (Vec<Complex64>, Vec<u32>, Vec<u32>, Vec<usize>) {
     let mut coeffs = vec![];
     let mut left_indices = vec![];
@@ -216,7 +214,7 @@ fn _compose(
     (coeffs, left_indices, right_indices, boundaries)
 }
 
-impl OperatorTrait for DirectedInteractionOperator {
+impl OperatorTrait for TransferVertexOperator {
     fn zero() -> Self {
         Self {
             coeffs: vec![],
@@ -375,10 +373,10 @@ mod tests {
 
     #[test]
     fn test_zero() {
-        let zero = DirectedInteractionOperator::zero();
+        let zero = TransferVertexOperator::zero();
         assert_eq!(
             zero,
-            DirectedInteractionOperator {
+            TransferVertexOperator {
                 coeffs: vec![],
                 left_indices: vec![],
                 right_indices: vec![],
@@ -390,10 +388,10 @@ mod tests {
 
     #[test]
     fn test_one() {
-        let one = DirectedInteractionOperator::one();
+        let one = TransferVertexOperator::one();
         assert_eq!(
             one,
-            DirectedInteractionOperator {
+            TransferVertexOperator {
                 coeffs: vec![Complex64::new(1.0, 0.0)],
                 left_indices: vec![],
                 right_indices: vec![],
@@ -405,8 +403,8 @@ mod tests {
 
     #[test]
     fn test_add() {
-        let one = DirectedInteractionOperator::one();
-        let two = DirectedInteractionOperator {
+        let one = TransferVertexOperator::one();
+        let two = TransferVertexOperator {
             coeffs: vec![Complex64::new(2.0, 0.0)],
             left_indices: vec![],
             right_indices: vec![],
@@ -416,7 +414,7 @@ mod tests {
         let three = one + two;
         assert_eq!(
             three,
-            DirectedInteractionOperator {
+            TransferVertexOperator {
                 coeffs: vec![Complex64::new(1.0, 0.0), Complex64::new(2.0, 0.0)],
                 left_indices: vec![],
                 right_indices: vec![],
@@ -428,8 +426,8 @@ mod tests {
 
     #[test]
     fn test_add_assign() {
-        let mut op = DirectedInteractionOperator::one();
-        let two = DirectedInteractionOperator {
+        let mut op = TransferVertexOperator::one();
+        let two = TransferVertexOperator {
             coeffs: vec![Complex64::new(2.0, 0.0)],
             left_indices: vec![],
             right_indices: vec![],
@@ -439,7 +437,7 @@ mod tests {
         op += two;
         assert_eq!(
             op,
-            DirectedInteractionOperator {
+            TransferVertexOperator {
                 coeffs: vec![Complex64::new(1.0, 0.0), Complex64::new(2.0, 0.0)],
                 left_indices: vec![],
                 right_indices: vec![],
@@ -451,8 +449,8 @@ mod tests {
 
     #[test]
     fn test_sub() {
-        let one = DirectedInteractionOperator::one();
-        let two = DirectedInteractionOperator {
+        let one = TransferVertexOperator::one();
+        let two = TransferVertexOperator {
             coeffs: vec![Complex64::new(2.0, 0.0)],
             left_indices: vec![],
             right_indices: vec![],
@@ -462,7 +460,7 @@ mod tests {
         let new_one = two - one;
         assert_eq!(
             new_one,
-            DirectedInteractionOperator {
+            TransferVertexOperator {
                 coeffs: vec![Complex64::new(2.0, 0.0), Complex64::new(-1.0, 0.0)],
                 left_indices: vec![],
                 right_indices: vec![],
@@ -474,8 +472,8 @@ mod tests {
 
     #[test]
     fn test_sub_assign() {
-        let mut op = DirectedInteractionOperator::one();
-        let two = DirectedInteractionOperator {
+        let mut op = TransferVertexOperator::one();
+        let two = TransferVertexOperator {
             coeffs: vec![Complex64::new(2.0, 0.0)],
             left_indices: vec![],
             right_indices: vec![],
@@ -485,7 +483,7 @@ mod tests {
         op -= two;
         assert_eq!(
             op,
-            DirectedInteractionOperator {
+            TransferVertexOperator {
                 coeffs: vec![Complex64::new(1.0, 0.0), Complex64::new(-2.0, 0.0)],
                 left_indices: vec![],
                 right_indices: vec![],
@@ -497,11 +495,11 @@ mod tests {
 
     #[test]
     fn test_mul() {
-        let one = DirectedInteractionOperator::one();
+        let one = TransferVertexOperator::one();
         let three = one * Complex64::new(3.0, 0.0);
         assert_eq!(
             three,
-            DirectedInteractionOperator {
+            TransferVertexOperator {
                 coeffs: vec![Complex64::new(3.0, 0.0)],
                 left_indices: vec![],
                 right_indices: vec![],
@@ -513,11 +511,11 @@ mod tests {
 
     #[test]
     fn test_rmul() {
-        let one = DirectedInteractionOperator::one();
+        let one = TransferVertexOperator::one();
         let three = Complex64::new(3.0, 0.0) * one;
         assert_eq!(
             three,
-            DirectedInteractionOperator {
+            TransferVertexOperator {
                 coeffs: vec![Complex64::new(3.0, 0.0)],
                 left_indices: vec![],
                 right_indices: vec![],
@@ -529,11 +527,11 @@ mod tests {
 
     #[test]
     fn test_mul_assign() {
-        let mut op = DirectedInteractionOperator::one();
+        let mut op = TransferVertexOperator::one();
         op *= Complex64::new(3.0, 0.0);
         assert_eq!(
             op,
-            DirectedInteractionOperator {
+            TransferVertexOperator {
                 coeffs: vec![Complex64::new(3.0, 0.0)],
                 left_indices: vec![],
                 right_indices: vec![],
@@ -545,7 +543,7 @@ mod tests {
 
     #[test]
     fn test_div() {
-        let three = DirectedInteractionOperator {
+        let three = TransferVertexOperator {
             coeffs: vec![Complex64::new(3.0, 0.0)],
             left_indices: vec![],
             right_indices: vec![],
@@ -555,7 +553,7 @@ mod tests {
         let one_half = three / Complex64::new(2.0, 0.0);
         assert_eq!(
             one_half,
-            DirectedInteractionOperator {
+            TransferVertexOperator {
                 coeffs: vec![Complex64::new(1.5, 0.0)],
                 left_indices: vec![],
                 right_indices: vec![],
@@ -567,7 +565,7 @@ mod tests {
 
     #[test]
     fn test_idiv() {
-        let mut op = DirectedInteractionOperator {
+        let mut op = TransferVertexOperator {
             coeffs: vec![Complex64::new(3.0, 0.0)],
             left_indices: vec![],
             right_indices: vec![],
@@ -577,7 +575,7 @@ mod tests {
         op /= Complex64::new(2.0, 0.0);
         assert_eq!(
             op,
-            DirectedInteractionOperator {
+            TransferVertexOperator {
                 coeffs: vec![Complex64::new(1.5, 0.0)],
                 left_indices: vec![],
                 right_indices: vec![],
@@ -589,10 +587,10 @@ mod tests {
 
     #[test]
     fn test_neg() {
-        let one = DirectedInteractionOperator::one();
+        let one = TransferVertexOperator::one();
         assert_eq!(
             -one,
-            DirectedInteractionOperator {
+            TransferVertexOperator {
                 coeffs: vec![Complex64::new(-1.0, 0.0)],
                 left_indices: vec![],
                 right_indices: vec![],
@@ -604,14 +602,14 @@ mod tests {
 
     #[test]
     fn test_and() {
-        let op1 = DirectedInteractionOperator {
+        let op1 = TransferVertexOperator {
             coeffs: vec![Complex64::new(2.0, 0.0), Complex64::new(3.0, 0.0)],
             left_indices: vec![0],
             right_indices: vec![1],
             boundaries: vec![0, 0, 1],
             groups: None,
         };
-        let op2 = DirectedInteractionOperator {
+        let op2 = TransferVertexOperator {
             coeffs: vec![Complex64::new(1.5, 0.0), Complex64::new(4.0, 0.0)],
             left_indices: vec![2],
             right_indices: vec![3],
@@ -621,7 +619,7 @@ mod tests {
         let result = op1 & op2;
         assert_eq!(
             result,
-            DirectedInteractionOperator {
+            TransferVertexOperator {
                 coeffs: vec![
                     Complex64::new(3.0, 0.0),
                     Complex64::new(8.0, 0.0),
@@ -638,14 +636,14 @@ mod tests {
 
     #[test]
     fn test_and_assign() {
-        let mut op1 = DirectedInteractionOperator {
+        let mut op1 = TransferVertexOperator {
             coeffs: vec![Complex64::new(2.0, 0.0), Complex64::new(3.0, 0.0)],
             left_indices: vec![0],
             right_indices: vec![1],
             boundaries: vec![0, 0, 1],
             groups: None,
         };
-        let op2 = DirectedInteractionOperator {
+        let op2 = TransferVertexOperator {
             coeffs: vec![Complex64::new(1.5, 0.0), Complex64::new(4.0, 0.0)],
             left_indices: vec![2],
             right_indices: vec![3],
@@ -655,7 +653,7 @@ mod tests {
         op1 &= op2;
         assert_eq!(
             op1,
-            DirectedInteractionOperator {
+            TransferVertexOperator {
                 coeffs: vec![
                     Complex64::new(3.0, 0.0),
                     Complex64::new(8.0, 0.0),
@@ -672,14 +670,14 @@ mod tests {
 
     #[test]
     fn test_matmul() {
-        let op1 = DirectedInteractionOperator {
+        let op1 = TransferVertexOperator {
             coeffs: vec![Complex64::new(2.0, 0.0), Complex64::new(3.0, 0.0)],
             left_indices: vec![0],
             right_indices: vec![1],
             boundaries: vec![0, 0, 1],
             groups: None,
         };
-        let op2 = DirectedInteractionOperator {
+        let op2 = TransferVertexOperator {
             coeffs: vec![Complex64::new(1.5, 0.0), Complex64::new(4.0, 0.0)],
             left_indices: vec![2],
             right_indices: vec![3],
@@ -689,7 +687,7 @@ mod tests {
         let result = op2.__matmul__(&op1);
         assert_eq!(
             result,
-            DirectedInteractionOperator {
+            TransferVertexOperator {
                 coeffs: vec![
                     Complex64::new(3.0, 0.0),
                     Complex64::new(8.0, 0.0),
@@ -706,14 +704,14 @@ mod tests {
 
     #[test]
     fn test_matmul_assign() {
-        let op1 = DirectedInteractionOperator {
+        let op1 = TransferVertexOperator {
             coeffs: vec![Complex64::new(2.0, 0.0), Complex64::new(3.0, 0.0)],
             left_indices: vec![0],
             right_indices: vec![1],
             boundaries: vec![0, 0, 1],
             groups: None,
         };
-        let mut op2 = DirectedInteractionOperator {
+        let mut op2 = TransferVertexOperator {
             coeffs: vec![Complex64::new(1.5, 0.0), Complex64::new(4.0, 0.0)],
             left_indices: vec![2],
             right_indices: vec![3],
@@ -723,7 +721,7 @@ mod tests {
         op2.__imatmul__(&op1);
         assert_eq!(
             op2,
-            DirectedInteractionOperator {
+            TransferVertexOperator {
                 coeffs: vec![
                     Complex64::new(3.0, 0.0),
                     Complex64::new(8.0, 0.0),
@@ -740,7 +738,7 @@ mod tests {
 
     #[test]
     fn test_pow() {
-        let op = DirectedInteractionOperator {
+        let op = TransferVertexOperator {
             coeffs: vec![Complex64::new(2.0, 0.0)],
             left_indices: vec![0],
             right_indices: vec![1],
@@ -748,7 +746,7 @@ mod tests {
             groups: None,
         };
         // exponent=0
-        let one = DirectedInteractionOperator::one();
+        let one = TransferVertexOperator::one();
         assert_eq!(op.__pow__(0), one);
 
         // exponent=1
@@ -758,7 +756,7 @@ mod tests {
         let squared = op.__pow__(2);
         assert_eq!(
             squared,
-            DirectedInteractionOperator {
+            TransferVertexOperator {
                 coeffs: vec![Complex64::new(4.0, 0.0)],
                 left_indices: vec![0, 0],
                 right_indices: vec![1, 1],
@@ -770,7 +768,7 @@ mod tests {
 
     #[test]
     fn test_ichop() {
-        let mut op = DirectedInteractionOperator {
+        let mut op = TransferVertexOperator {
             coeffs: vec![
                 Complex64::new(1e-4, 0.0),
                 Complex64::new(1e-6, 0.0),
@@ -784,7 +782,7 @@ mod tests {
 
         op.ichop(1e-7);
 
-        let expected1 = DirectedInteractionOperator {
+        let expected1 = TransferVertexOperator {
             coeffs: vec![Complex64::new(1e-4, 0.0), Complex64::new(1e-6, 0.0)],
             left_indices: vec![0],
             right_indices: vec![1],
@@ -796,7 +794,7 @@ mod tests {
 
         op.ichop(1e-5);
 
-        let expected2 = DirectedInteractionOperator {
+        let expected2 = TransferVertexOperator {
             coeffs: vec![Complex64::new(1e-4, 0.0)],
             left_indices: vec![],
             right_indices: vec![],
@@ -809,7 +807,7 @@ mod tests {
 
     #[test]
     fn test_adjoint() {
-        let op1 = DirectedInteractionOperator {
+        let op1 = TransferVertexOperator {
             coeffs: vec![Complex64::new(0.0, 2.0), Complex64::new(3.0, 0.0)],
             left_indices: vec![0],
             right_indices: vec![1],
@@ -817,7 +815,7 @@ mod tests {
             groups: None,
         };
         let adj = op1.adjoint();
-        let expected = DirectedInteractionOperator {
+        let expected = TransferVertexOperator {
             coeffs: vec![Complex64::new(0.0, -2.0), Complex64::new(3.0, 0.0)],
             left_indices: vec![0],
             right_indices: vec![1],
@@ -829,15 +827,15 @@ mod tests {
 
     #[test]
     fn test_equiv() {
-        let zero = DirectedInteractionOperator::zero();
-        let op = Complex64::new(1e-8, 0.0) * DirectedInteractionOperator::one();
+        let zero = TransferVertexOperator::zero();
+        let op = Complex64::new(1e-8, 0.0) * TransferVertexOperator::one();
         assert!(op.equiv(&zero, 1e-6));
         assert!(!op.equiv(&zero, 1e-10));
     }
 
     #[test]
     fn test_normal_ordered_noop() {
-        let op = DirectedInteractionOperator {
+        let op = TransferVertexOperator {
             coeffs: vec![Complex64::new(1.0, 0.0)],
             left_indices: vec![0, 1, 1, 0],
             right_indices: vec![0, 1, 1, 1],
@@ -851,7 +849,7 @@ mod tests {
     #[test]
     fn test_normal_ordered_gandon_rel1() {
         // Tests the 1. relation of Eq. (7) from arXiv:2512.11418v1: {T_{jk}, V_{k}} = 0
-        let op = DirectedInteractionOperator {
+        let op = TransferVertexOperator {
             coeffs: vec![Complex64::new(1.0, 0.0), Complex64::new(1.0, 0.0)],
             left_indices: vec![0, 1, 0, 0],
             right_indices: vec![1, 1, 1, 0],
@@ -859,7 +857,7 @@ mod tests {
             groups: None,
         };
 
-        let expected = DirectedInteractionOperator {
+        let expected = TransferVertexOperator {
             coeffs: vec![Complex64::new(-1.0, 0.0), Complex64::new(-1.0, 0.0)],
             left_indices: vec![1, 0, 0, 0],
             right_indices: vec![1, 1, 0, 1],
@@ -873,7 +871,7 @@ mod tests {
     #[test]
     fn test_normal_ordered_gandon_rel2() {
         // Tests the 2. relation of Eq. (7) from arXiv:2512.11418v1: {T_{jk}, T_{lk}} = 0
-        let op = DirectedInteractionOperator {
+        let op = TransferVertexOperator {
             coeffs: vec![Complex64::new(1.0, 0.0), Complex64::new(1.0, 0.0)],
             left_indices: vec![2, 0, 1, 1],
             right_indices: vec![1, 1, 2, 0],
@@ -881,7 +879,7 @@ mod tests {
             groups: None,
         };
 
-        let expected = DirectedInteractionOperator {
+        let expected = TransferVertexOperator {
             coeffs: vec![Complex64::new(-1.0, 0.0), Complex64::new(-1.0, 0.0)],
             left_indices: vec![0, 2, 1, 1],
             right_indices: vec![1, 1, 0, 2],
@@ -895,7 +893,7 @@ mod tests {
     #[test]
     fn test_normal_ordered_gandon_rel3() {
         // Tests the 3. relation of Eq. (7) from arXiv:2512.11418v1: [V_{k}, V_{l}] = 0
-        let op = DirectedInteractionOperator {
+        let op = TransferVertexOperator {
             coeffs: vec![Complex64::new(1.0, 0.0)],
             left_indices: vec![1, 0],
             right_indices: vec![1, 0],
@@ -903,7 +901,7 @@ mod tests {
             groups: None,
         };
 
-        let expected = DirectedInteractionOperator {
+        let expected = TransferVertexOperator {
             coeffs: vec![Complex64::new(1.0, 0.0)],
             left_indices: vec![0, 1],
             right_indices: vec![0, 1],
@@ -917,7 +915,7 @@ mod tests {
     #[test]
     fn test_normal_ordered_gandon_rel4() {
         // Tests the 4. relation of Eq. (7) from arXiv:2512.11418v1: [T_{jk}, V_{l}] = 0
-        let op = DirectedInteractionOperator {
+        let op = TransferVertexOperator {
             coeffs: vec![Complex64::new(1.0, 0.0)],
             left_indices: vec![0, 2],
             right_indices: vec![1, 2],
@@ -925,7 +923,7 @@ mod tests {
             groups: None,
         };
 
-        let expected = DirectedInteractionOperator {
+        let expected = TransferVertexOperator {
             coeffs: vec![Complex64::new(1.0, 0.0)],
             left_indices: vec![2, 0],
             right_indices: vec![2, 1],
@@ -939,7 +937,7 @@ mod tests {
     #[test]
     fn test_normal_ordered_gandon_rel5() {
         // Tests the 5. relation of Eq. (7) from arXiv:2512.11418v1: [T_{jk}, T_{lm}] = 0
-        let op = DirectedInteractionOperator {
+        let op = TransferVertexOperator {
             coeffs: vec![Complex64::new(1.0, 0.0)],
             left_indices: vec![2, 0],
             right_indices: vec![3, 1],
@@ -947,7 +945,7 @@ mod tests {
             groups: None,
         };
 
-        let expected = DirectedInteractionOperator {
+        let expected = TransferVertexOperator {
             coeffs: vec![Complex64::new(1.0, 0.0)],
             left_indices: vec![0, 2],
             right_indices: vec![1, 3],
@@ -961,7 +959,7 @@ mod tests {
     #[test]
     fn test_normal_ordered_gandon_rel6() {
         // Tests the 6. relation of Eq. (7) from arXiv:2512.11418v1: [T_{jk}, T_{kj}] = 0
-        let op = DirectedInteractionOperator {
+        let op = TransferVertexOperator {
             coeffs: vec![Complex64::new(1.0, 0.0)],
             left_indices: vec![1, 0],
             right_indices: vec![0, 1],
@@ -969,7 +967,7 @@ mod tests {
             groups: None,
         };
 
-        let expected = DirectedInteractionOperator {
+        let expected = TransferVertexOperator {
             coeffs: vec![Complex64::new(1.0, 0.0)],
             left_indices: vec![0, 1],
             right_indices: vec![1, 0],
@@ -983,7 +981,7 @@ mod tests {
     #[test]
     fn test_normal_ordered_gandon_rel7() {
         // Tests the 7. relation of Eq. (7) from arXiv:2512.11418v1: [T_{jk}, T_{km}] = 0
-        let op = DirectedInteractionOperator {
+        let op = TransferVertexOperator {
             coeffs: vec![Complex64::new(1.0, 0.0)],
             left_indices: vec![2, 0],
             right_indices: vec![0, 1],
@@ -991,7 +989,7 @@ mod tests {
             groups: None,
         };
 
-        let expected = DirectedInteractionOperator {
+        let expected = TransferVertexOperator {
             coeffs: vec![Complex64::new(1.0, 0.0)],
             left_indices: vec![0, 2],
             right_indices: vec![1, 0],
@@ -1004,7 +1002,7 @@ mod tests {
 
     #[test]
     fn test_is_hermitian() {
-        let op = DirectedInteractionOperator {
+        let op = TransferVertexOperator {
             coeffs: vec![Complex64::new(0.0, 1.00001), Complex64::new(0.0, -1.0)],
             left_indices: vec![0, 0],
             right_indices: vec![1, 1],
@@ -1017,7 +1015,7 @@ mod tests {
 
     #[test]
     fn test_get_support() {
-        let op = DirectedInteractionOperator {
+        let op = TransferVertexOperator {
             coeffs: vec![Complex64::new(1.0, 0.0), Complex64::new(1.0, 0.0)],
             left_indices: vec![0, 3, 7],
             right_indices: vec![1, 4, 7],
@@ -1030,7 +1028,7 @@ mod tests {
 
     #[test]
     fn test_relabel_modes() {
-        let op = DirectedInteractionOperator {
+        let op = TransferVertexOperator {
             coeffs: vec![Complex64::new(1.0, 0.0), Complex64::new(1.0, 0.0)],
             left_indices: vec![0, 2, 1, 3],
             right_indices: vec![1, 3, 2, 0],
@@ -1042,7 +1040,7 @@ mod tests {
 
         let relabeled = op.relabel_modes(permutation).ok();
 
-        let expected = DirectedInteractionOperator {
+        let expected = TransferVertexOperator {
             coeffs: vec![Complex64::new(1.0, 0.0), Complex64::new(1.0, 0.0)],
             left_indices: vec![4, 5, 2, 3],
             right_indices: vec![2, 3, 5, 4],
@@ -1055,7 +1053,7 @@ mod tests {
 
     #[test]
     fn test_relabel_modes_duplicate_err() {
-        let op = DirectedInteractionOperator {
+        let op = TransferVertexOperator {
             coeffs: vec![Complex64::new(1.0, 0.0), Complex64::new(1.0, 0.0)],
             left_indices: vec![0, 2, 1, 3],
             right_indices: vec![1, 3, 2, 0],
@@ -1072,7 +1070,7 @@ mod tests {
 
     #[test]
     fn test_relabel_modes_index_too_small_err() {
-        let op = DirectedInteractionOperator {
+        let op = TransferVertexOperator {
             coeffs: vec![Complex64::new(1.0, 0.0), Complex64::new(1.0, 0.0)],
             left_indices: vec![0, 2, 1, 3],
             right_indices: vec![1, 3, 2, 0],
@@ -1089,7 +1087,7 @@ mod tests {
 
     #[test]
     fn test_split_out_groups() {
-        let op = DirectedInteractionOperator {
+        let op = TransferVertexOperator {
             coeffs: vec![
                 Complex64::new(1.0, 0.0),
                 Complex64::new(1.0, 0.0),
@@ -1102,14 +1100,14 @@ mod tests {
         };
 
         let expected = vec![
-            DirectedInteractionOperator {
+            TransferVertexOperator {
                 coeffs: vec![Complex64::new(1.0, 0.0), Complex64::new(1.0, 0.0)],
                 left_indices: vec![0, 2],
                 right_indices: vec![1, 3],
                 boundaries: vec![0, 1, 2],
                 groups: None,
             },
-            DirectedInteractionOperator {
+            TransferVertexOperator {
                 coeffs: vec![Complex64::new(2.0, 0.0)],
                 left_indices: vec![1, 3],
                 right_indices: vec![0, 2],
@@ -1124,7 +1122,7 @@ mod tests {
 
     #[test]
     fn test_split_out_groups_err() {
-        let op = DirectedInteractionOperator {
+        let op = TransferVertexOperator {
             coeffs: vec![
                 Complex64::new(1.0, 0.0),
                 Complex64::new(1.0, 0.0),

@@ -10,10 +10,10 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
-"""The DirectedInteraction type."""
+"""The TransferAction type."""
 
 from typing import NewType
 
-DirectedInteraction = NewType("DirectedInteraction", tuple[int, int])
+TransferAction = NewType("TransferAction", tuple[int, int])
 
-DirectedInteraction.__doc__ = """The DirectedInteraction type."""
+TransferAction.__doc__ = """The TransferAction type."""

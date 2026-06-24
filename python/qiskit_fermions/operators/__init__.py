@@ -62,10 +62,10 @@ Hermitian generators:
 .. autosummary::
    :toctree: ../stubs/
 
-   DirectedInteraction
-   DirectedInteractionOperator
    EdgeAction
    EdgeVertexOperator
+   TransferAction
+   TransferVertexOperator
 
 Protocol
 --------
@@ -83,22 +83,20 @@ protocol below:
 
 """
 
-from qiskit_fermions._lib.operators.directed_interaction_operator import DirectedInteractionOperator
 from qiskit_fermions._lib.operators.edge_vertex_operator import (
     EdgeVertexOperator,
 )
 from qiskit_fermions._lib.operators.fermion_operator import FermionOperator
 from qiskit_fermions._lib.operators.majorana_operator import MajoranaOperator
+from qiskit_fermions._lib.operators.transfer_vertex_operator import TransferVertexOperator
 
-from .directed_interaction import DirectedInteraction
 from .edge_action import EdgeAction
 from .fermion_action import FermionAction, ann, cre
 from .majorana_action import MajoranaAction, gamma
 from .protocol import OperatorTrait
+from .transfer_action import TransferAction
 
 __all__ = [
-    "DirectedInteraction",
-    "DirectedInteractionOperator",
     "EdgeAction",
     "EdgeVertexOperator",
     "FermionAction",
@@ -106,6 +104,8 @@ __all__ = [
     "MajoranaAction",
     "MajoranaOperator",
     "OperatorTrait",
+    "TransferAction",
+    "TransferVertexOperator",
     "ann",
     "cre",
     "gamma",

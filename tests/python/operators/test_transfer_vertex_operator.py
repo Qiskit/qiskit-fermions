@@ -12,14 +12,14 @@
 
 import numpy as np
 import pytest
-from qiskit_fermions.operators import DirectedInteractionOperator
+from qiskit_fermions.operators import TransferVertexOperator
 from qiskit_fermions.operators.library import anti_commutator, commutator
 
 
-class TestDirectedInteractionOperator:
+class TestTransferVertexOperator:
     @staticmethod
-    def get_class() -> type[DirectedInteractionOperator]:
-        return DirectedInteractionOperator
+    def get_class() -> type[TransferVertexOperator]:
+        return TransferVertexOperator
 
     def test_getters(self, subtests):
         cls = self.get_class()

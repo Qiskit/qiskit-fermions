@@ -11,23 +11,21 @@
 # that they have been altered from the originals.
 
 from qiskit_fermions.mappers.library import (
-    directed_interaction_to_edge_vertex,
-    directed_interaction_to_fermion,
-    directed_interaction_to_majorana,
+    transfer_vertex_to_edge_vertex,
+    transfer_vertex_to_fermion,
+    transfer_vertex_to_majorana,
 )
 from qiskit_fermions.operators import (
-    DirectedInteractionOperator,
     EdgeVertexOperator,
     FermionOperator,
     MajoranaOperator,
+    TransferVertexOperator,
 )
 
 
-def test_directed_to_fermion():
-    inter_op = DirectedInteractionOperator.from_dict(
-        {((0, 0),): 1.0, ((1, 2),): 2.0, ((2, 1),): -2}
-    )
-    fer_op = directed_interaction_to_fermion(inter_op).simplify()
+def test_transfer_vertex_to_fermion():
+    inter_op = TransferVertexOperator.from_dict({((0, 0),): 1.0, ((1, 2),): 2.0, ((2, 1),): -2})
+    fer_op = transfer_vertex_to_fermion(inter_op).simplify()
     expected = FermionOperator.from_dict(
         {
             (): 1,
@@ -39,20 +37,16 @@ def test_directed_to_fermion():
     assert fer_op.equiv(expected)
 
 
-def test_directed_to_majorana():
-    inter_op = DirectedInteractionOperator.from_dict(
-        {((0, 0),): 1.0, ((1, 2),): 2.0, ((2, 1),): -2}
-    )
-    maj_op = directed_interaction_to_majorana(inter_op)
+def test_transfer_vertex_to_majorana():
+    inter_op = TransferVertexOperator.from_dict({((0, 0),): 1.0, ((1, 2),): 2.0, ((2, 1),): -2})
+    maj_op = transfer_vertex_to_majorana(inter_op)
     expected = MajoranaOperator.from_dict({(0, 1): -1j, (3, 4): 1j, (2, 5): 1j})
     assert maj_op.equiv(expected)
 
 
-def test_directed_to_edge_vertex():
-    inter_op = DirectedInteractionOperator.from_dict(
-        {((0, 0),): 1.0, ((1, 2),): 2.0, ((2, 1),): -2}
-    )
-    edge_vertex_op = directed_interaction_to_edge_vertex(inter_op)
+def test_transfer_vertex_to_edge_vertex():
+    inter_op = TransferVertexOperator.from_dict({((0, 0),): 1.0, ((1, 2),): 2.0, ((2, 1),): -2})
+    edge_vertex_op = transfer_vertex_to_edge_vertex(inter_op)
     expected = EdgeVertexOperator.from_dict(
         {((0, 0),): 1, ((1, 1), (1, 2)): 1j, ((1, 2), (2, 2)): -1j}
     )

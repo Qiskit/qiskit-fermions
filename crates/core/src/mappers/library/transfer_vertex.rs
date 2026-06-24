@@ -14,14 +14,12 @@ use num_complex::Complex64;
 use std::cmp::Ordering;
 
 use crate::operators::OperatorTrait;
-use crate::operators::directed_interaction_operator::{
-    DirectedInteraction, DirectedInteractionOperator,
-};
 use crate::operators::edge_vertex_operator::EdgeVertexOperator;
 use crate::operators::fermion_operator::FermionOperator;
 use crate::operators::majorana_operator::MajoranaOperator;
+use crate::operators::transfer_vertex_operator::{TransferAction, TransferVertexOperator};
 
-fn map_directed_to_fermion(action: DirectedInteraction) -> FermionOperator {
+fn map_transfer_vertex_to_fermion(action: TransferAction) -> FermionOperator {
     match (*action.0).cmp(action.1) {
         Ordering::Equal => FermionOperator {
             coeffs: vec![Complex64::new(1.0, 0.0), Complex64::new(-2.0, 0.0)],
@@ -63,14 +61,14 @@ fn map_directed_to_fermion(action: DirectedInteraction) -> FermionOperator {
     }
 }
 
-pub fn directed_interaction_to_fermion(inter_op: &DirectedInteractionOperator) -> FermionOperator {
+pub fn transfer_vertex_to_fermion(inter_op: &TransferVertexOperator) -> FermionOperator {
     let mut mapped_operator = FermionOperator::zero();
 
     inter_op.iter().for_each(|term| {
         let mut mapped_term = FermionOperator::one();
 
         term.iter()
-            .for_each(|action| mapped_term.__imatmul__(&map_directed_to_fermion(action)));
+            .for_each(|action| mapped_term.__imatmul__(&map_transfer_vertex_to_fermion(action)));
 
         mapped_term.__imul__(term.coeff);
 
@@ -80,7 +78,7 @@ pub fn directed_interaction_to_fermion(inter_op: &DirectedInteractionOperator) -
     mapped_operator
 }
 
-fn map_directed_to_majorana(action: DirectedInteraction) -> MajoranaOperator {
+fn map_transfer_vertex_to_majorana(action: TransferAction) -> MajoranaOperator {
     match (*action.0).cmp(action.1) {
         Ordering::Equal => MajoranaOperator {
             coeffs: vec![Complex64::new(0.0, -1.0)],
@@ -103,16 +101,14 @@ fn map_directed_to_majorana(action: DirectedInteraction) -> MajoranaOperator {
     }
 }
 
-pub fn directed_interaction_to_majorana(
-    inter_op: &DirectedInteractionOperator,
-) -> MajoranaOperator {
+pub fn transfer_vertex_to_majorana(inter_op: &TransferVertexOperator) -> MajoranaOperator {
     let mut mapped_operator = MajoranaOperator::zero();
 
     inter_op.iter().for_each(|term| {
         let mut mapped_term = MajoranaOperator::one();
 
         term.iter()
-            .for_each(|action| mapped_term.__imatmul__(&map_directed_to_majorana(action)));
+            .for_each(|action| mapped_term.__imatmul__(&map_transfer_vertex_to_majorana(action)));
 
         mapped_term.__imul__(term.coeff);
 
@@ -122,7 +118,7 @@ pub fn directed_interaction_to_majorana(
     mapped_operator
 }
 
-fn map_directed_to_edge_vertex(action: DirectedInteraction) -> EdgeVertexOperator {
+fn map_transfer_vertex_to_edge_vertex(action: TransferAction) -> EdgeVertexOperator {
     match (*action.0).cmp(action.1) {
         Ordering::Equal => EdgeVertexOperator {
             coeffs: vec![Complex64::new(1.0, 0.0)],
@@ -148,16 +144,15 @@ fn map_directed_to_edge_vertex(action: DirectedInteraction) -> EdgeVertexOperato
     }
 }
 
-pub fn directed_interaction_to_edge_vertex(
-    inter_op: &DirectedInteractionOperator,
-) -> EdgeVertexOperator {
+pub fn transfer_vertex_to_edge_vertex(inter_op: &TransferVertexOperator) -> EdgeVertexOperator {
     let mut mapped_operator = EdgeVertexOperator::zero();
 
     inter_op.iter().for_each(|term| {
         let mut mapped_term = EdgeVertexOperator::one();
 
-        term.iter()
-            .for_each(|action| mapped_term.__imatmul__(&map_directed_to_edge_vertex(action)));
+        term.iter().for_each(|action| {
+            mapped_term.__imatmul__(&map_transfer_vertex_to_edge_vertex(action))
+        });
 
         mapped_term.__imul__(term.coeff);
 
@@ -172,8 +167,8 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_directed_to_fermion() {
-        let inter_op = DirectedInteractionOperator {
+    fn test_transfer_vertex_to_fermion() {
+        let inter_op = TransferVertexOperator {
             coeffs: vec![
                 Complex64::new(1.0, 0.0),
                 Complex64::new(2.0, 0.0),
@@ -185,7 +180,7 @@ mod tests {
             groups: None,
         };
 
-        let fer_op = directed_interaction_to_fermion(&inter_op).simplify(1e-10);
+        let fer_op = transfer_vertex_to_fermion(&inter_op).simplify(1e-10);
 
         let expected = FermionOperator {
             coeffs: vec![
@@ -204,8 +199,8 @@ mod tests {
     }
 
     #[test]
-    fn test_directed_to_majorana() {
-        let inter_op = DirectedInteractionOperator {
+    fn test_transfer_vertex_to_majorana() {
+        let inter_op = TransferVertexOperator {
             coeffs: vec![
                 Complex64::new(1.0, 0.0),
                 Complex64::new(2.0, 0.0),
@@ -217,7 +212,7 @@ mod tests {
             groups: None,
         };
 
-        let maj_op = directed_interaction_to_majorana(&inter_op);
+        let maj_op = transfer_vertex_to_majorana(&inter_op);
 
         let expected = MajoranaOperator {
             coeffs: vec![
@@ -234,8 +229,8 @@ mod tests {
     }
 
     #[test]
-    fn test_directed_to_edge_vertex() {
-        let inter_op = DirectedInteractionOperator {
+    fn test_transfer_vertex_to_edge_vertex() {
+        let inter_op = TransferVertexOperator {
             coeffs: vec![
                 Complex64::new(1.0, 0.0),
                 Complex64::new(2.0, 0.0),
@@ -247,7 +242,7 @@ mod tests {
             groups: None,
         };
 
-        let edge_vertex = directed_interaction_to_edge_vertex(&inter_op);
+        let edge_vertex = transfer_vertex_to_edge_vertex(&inter_op);
 
         let expected = EdgeVertexOperator {
             coeffs: vec![

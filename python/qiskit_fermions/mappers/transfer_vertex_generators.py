@@ -10,32 +10,32 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
-"""DirectedInteractionOperator mapper."""
+"""TransferVertexOperator mapper."""
 
 from collections.abc import Callable
 from operator import and_
 from typing import TYPE_CHECKING, TypeVar
 
 if TYPE_CHECKING:
-    from qiskit_fermions._lib.operators.directed_interaction_operator import (
-        DirectedInteractionOperator,
+    from qiskit_fermions._lib.operators.transfer_vertex_operator import (
+        TransferVertexOperator,
     )
-    from qiskit_fermions.operators.directed_interaction import DirectedInteraction
+    from qiskit_fermions.operators.transfer_action import TransferAction
 
 T = TypeVar("T")
 
 
-def map_directed_interaction_generators(
-    operator: "DirectedInteractionOperator",
-    map_interaction: Callable[["DirectedInteraction"], T],
+def map_transfer_vertex_generators(
+    operator: "TransferVertexOperator",
+    map_interaction: Callable[["TransferAction"], T],
     identity: Callable[[], T],
     compose: Callable[[T, T], T] | None = None,
 ) -> T:
-    """Map a :class:`.DirectedInteractionOperator` to another operator type.
+    """Map a :class:`.TransferVertexOperator` to another operator type.
 
     This is a generic function to aid in implementing new mappers for
-    :class:`.DirectedInteractionOperator` instances. At its core, it simply iterates over the
-    terms of the operator, mapping each encountered :class:`.DirectedInteraction` with the
+    :class:`.TransferVertexOperator` instances. At its core, it simply iterates over the
+    terms of the operator, mapping each encountered :class:`.TransferAction` with the
     user-provided ``map_interaction`` function. In combination with the user-provided ``identity``
     generator, this allows mapping to arbitrary output types.
 
@@ -45,11 +45,11 @@ def map_directed_interaction_generators(
 
     .. doctest::
 
-        >>> from qiskit_fermions.mappers import map_directed_interaction_generators
-        >>> from qiskit_fermions.operators import DirectedInteraction, DirectedInteractionOperator
+        >>> from qiskit_fermions.mappers import map_transfer_vertex_generators
+        >>> from qiskit_fermions.operators import TransferAction, TransferVertexOperator
         >>> from qiskit.quantum_info import SparsePauliOp
         >>>
-        >>> def jordan_wigner_nearest_neighbor(mode: DirectedInteraction) -> SparsePauliOp:
+        >>> def jordan_wigner_nearest_neighbor(mode: TransferAction) -> SparsePauliOp:
         ...     match abs(mode[0] - mode[1]):
         ...         case 0:
         ...             pauli = "Z"
@@ -70,18 +70,18 @@ def map_directed_interaction_generators(
         >>> def identity() -> SparsePauliOp:
         ...     return SparsePauliOp.from_sparse_list([("", [], 1)], num_qubits)
         >>>
-        >>> op = DirectedInteractionOperator.from_dict({
+        >>> op = TransferVertexOperator.from_dict({
         ...     ((0, 0),): 2.0,
         ...     ((0, 1),): 0.5,
         ...     ((1, 1), (1, 2)): 1.0,
         ... })
-        >>> qop = map_directed_interaction_generators(op, jordan_wigner_nearest_neighbor, identity)
+        >>> qop = map_transfer_vertex_generators(op, jordan_wigner_nearest_neighbor, identity)
         >>> print([(label, complex(coeff)) for label, coeff in sorted(qop.label_iter())])
         [('IIII', 0j), ('IIIZ', (2+0j)), ('IIYY', (-0.25+0j)), ('IYXI', 0.5j)]
 
     Args:
         operator: the operator to be mapped.
-        map_interaction: the function to map a single :class:`.DirectedInteraction` to the desired
+        map_interaction: the function to map a single :class:`.TransferAction` to the desired
             output type.
         identity: the function to generate the multiplicative identity instance of the output type.
         compose: an optional function to implement the compositiion logic of two output type
