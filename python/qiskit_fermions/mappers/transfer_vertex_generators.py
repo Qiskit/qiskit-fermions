@@ -27,7 +27,7 @@ T = TypeVar("T")
 
 def map_transfer_vertex_generators(
     operator: "TransferVertexOperator",
-    map_interaction: Callable[["TransferAction"], T],
+    map_action: Callable[["TransferAction"], T],
     identity: Callable[[], T],
     compose: Callable[[T, T], T] | None = None,
 ) -> T:
@@ -36,7 +36,7 @@ def map_transfer_vertex_generators(
     This is a generic function to aid in implementing new mappers for
     :class:`.TransferVertexOperator` instances. At its core, it simply iterates over the
     terms of the operator, mapping each encountered :class:`.TransferAction` with the
-    user-provided ``map_interaction`` function. In combination with the user-provided ``identity``
+    user-provided ``map_action`` function. In combination with the user-provided ``identity``
     generator, this allows mapping to arbitrary output types.
 
     .. note::
@@ -81,7 +81,7 @@ def map_transfer_vertex_generators(
 
     Args:
         operator: the operator to be mapped.
-        map_interaction: the function to map a single :class:`.TransferAction` to the desired
+        map_action: the function to map a single :class:`.TransferAction` to the desired
             output type.
         identity: the function to generate the multiplicative identity instance of the output type.
         compose: an optional function to implement the compositiion logic of two output type
@@ -98,7 +98,7 @@ def map_transfer_vertex_generators(
         mapped_terms = identity()
 
         for term in terms:
-            mapped_terms = compose(map_interaction(term), mapped_terms)
+            mapped_terms = compose(map_action(term), mapped_terms)
 
         mapped_operator += coeff * mapped_terms
 

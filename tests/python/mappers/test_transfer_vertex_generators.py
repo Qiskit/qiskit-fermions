@@ -21,7 +21,7 @@ def jordan_wigner_nearest_neighbor(op: TransferVertexOperator, num_qubits: int) 
     """Custom Jordan-Wigner transformation for nearest neighbor interactions."""
 
     @cache
-    def map_interaction(mode: TransferAction) -> SparsePauliOp:
+    def map_action(mode: TransferAction) -> SparsePauliOp:
         match abs(mode[0] - mode[1]):
             case 0:
                 pauli = "Z"
@@ -38,7 +38,7 @@ def jordan_wigner_nearest_neighbor(op: TransferVertexOperator, num_qubits: int) 
 
     return map_transfer_vertex_generators(
         op,
-        map_interaction,
+        map_action,
         lambda: SparsePauliOp.from_sparse_list([("", [], 1)], num_qubits=num_qubits),
     )
 

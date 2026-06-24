@@ -21,7 +21,7 @@ def jordan_wigner_nearest_neighbor(op: EdgeVertexOperator, num_qubits: int) -> S
     """Custom Jordan-Wigner transformation for nearest neighbor interactions."""
 
     @cache
-    def map_interaction(mode: EdgeAction) -> SparsePauliOp:
+    def map_action(mode: EdgeAction) -> SparsePauliOp:
         match abs(mode[0] - mode[1]):
             case 0:
                 pauli = "Z"
@@ -36,7 +36,7 @@ def jordan_wigner_nearest_neighbor(op: EdgeVertexOperator, num_qubits: int) -> S
 
     return map_edge_vertex_generators(
         op,
-        map_interaction,
+        map_action,
         lambda: SparsePauliOp.from_sparse_list([("", [], 1)], num_qubits=num_qubits),
     )
 
