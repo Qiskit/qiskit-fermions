@@ -12,11 +12,19 @@
 
 use pyo3::prelude::*;
 
+pub mod edge_vertex;
 pub mod jordan_wigner;
 pub mod majorana_fermion;
+pub mod transfer_vertex;
 
 #[pymodule]
 pub mod mappers_library {
+    #[pymodule_export]
+    use super::transfer_vertex::transfer_vertex;
+
+    #[pymodule_export]
+    use super::edge_vertex::edge_vertex;
+
     #[pymodule_export]
     use super::jordan_wigner::jordan_wigner;
 

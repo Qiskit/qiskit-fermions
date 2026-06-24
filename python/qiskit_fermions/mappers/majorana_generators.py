@@ -93,29 +93,3 @@ def map_majorana_action_generators(
         mapped_operator += coeff * mapped_terms
 
     return mapped_operator
-
-
-# TODO: map_majorana_even_generators
-#
-# The idea of this function is to provide a quick means to implement a mapping for even Majorana
-# operators (i.e. `op.is_even()` returns `True`). In those cases, every term is known to have an
-# even number of actions inside of it, allowing us to process them in pairs. Every pair of actions
-# will thus correspond to a `tuple[int, int] = (i, j)` for which 4 cases are possible:
-#   1. both `i` and `j` are odd
-#   2. `i` is odd, `j` is even
-#   3. `i` is even, `j` is odd
-#   4. both `i` and `j` are even
-#
-# All these cases can be broken down into a mapping using only 2 user-provided functions:
-#   A. `map_pair`: which implements a mapping for `(gamma(i, True), gamma(j, True)` (i.e. case 1)
-#   B. `map_single`: which implements a mapping for `(gamma(i, True), gamma(i, False)`
-#
-# The cases above then simply become compositions of the results of A and B.
-#
-# However, I dislike the arbitrary choice of picking case 1 over 4 for `map_pair` and would much
-# rather have the user make this choice.
-# Therefore, I would even propose to outsource these case distinctions entirely to the user-provided
-# function.
-# All that this function would then do is to iterate over pairs rather than individual actions.
-# This also avoids hard-coding an assignment assumption about the nature of gamma/gamma' mapping to
-# even/odd indices, respectively.
