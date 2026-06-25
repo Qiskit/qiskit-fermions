@@ -95,7 +95,7 @@ impl EdgeVertexOperator {
 
     pub fn num_groups(&self) -> Option<u32> {
         let self_groups = self.groups.as_ref()?;
-        if self_groups.len() == 0 {
+        if self_groups.is_empty() {
             Some(0)
         } else {
             Some(self_groups.iter().max().unwrap() + 1)
