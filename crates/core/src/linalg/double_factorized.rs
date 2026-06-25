@@ -267,8 +267,7 @@ fn quadrature(mat: &Array2<Complex64>, sign: f64) -> Array2<Complex64> {
     let prefactor = Complex64::new(0.5, 0.0) * (Complex64::new(1.0, 0.0) - sign * i);
     let (nrows, ncols) = mat.dim();
     Array2::from_shape_fn((nrows, ncols), |(r, c)| {
-        let adjoint = mat[[c, r]].conj();
-        prefactor * (mat[[r, c]] + sign * i * adjoint)
+        prefactor * (mat[[r, c]] + sign * i * mat[[c, r]].conj())
     })
 }
 
@@ -300,11 +299,10 @@ pub fn double_factorized(
     let norb = two_body_tensor.shape()[0];
     // Reshape the two-body tensor `(norb, norb, norb, norb)` into a `(norb², norb²)`.
     let reshaped = Array2::from_shape_fn((norb * norb, norb * norb), |(row, col)| {
-        let p = row / norb;
-        let q = row % norb;
-        let r = col / norb;
-        let s = col % norb;
-        Complex64::new(two_body_tensor[[p, q, r, s]], 0.0)
+        Complex64::new(
+            two_body_tensor[[row / norb, row % norb, col / norb, col % norb]],
+            0.0,
+        )
     });
 
     // Produce the outer factorization columns and their coefficients. The Cholesky path folds the
@@ -320,18 +318,14 @@ pub fn double_factorized(
         (outer_vecs, coeffs)
     };
 
-    // Each column reshapes to a `(norb, norb)` matrix.
-    let outer_mats: Vec<Array2<Complex64>> = (0..outer_coeffs.len())
-        .map(|t| Array2::from_shape_fn((norb, norb), |(p, q)| outer_columns[[p * norb + q, t]]))
-        .collect();
-
-    // Build the per-term `(Z, U)` factors from the set of reshaped outer matrices, scaling each
+    // 1. Each column reshapes to a `(norb, norb)` matrix.
+    // 2. Build the per-term `(Z, U)` factors from the set of reshaped outer matrices, scaling each
     // diagonal Coulomb matrix by the associated outer coefficient.
-    outer_mats
-        .iter()
+    (0..outer_coeffs.len())
+        .map(|t| Array2::from_shape_fn((norb, norb), |(p, q)| outer_columns[[p * norb + q, t]]))
         .zip(outer_coeffs.iter())
         .map(|(mat, &coeff)| {
-            let (eigs, rotation) = hermitian_eigh(mat, None, None);
+            let (eigs, rotation) = hermitian_eigh(&mat, None, None);
             let eigs = eigs.as_slice().unwrap();
             let diag_coulomb = diag_coulomb_outer(coeff, eigs, eigs);
             (diag_coulomb, rotation)
@@ -359,11 +353,7 @@ pub fn double_factorized_t2(
 
     // Transpose axes (0, 2, 1, 3) then reshape to (nocc*nvrt, nocc*nvrt).
     let t2_mat = Array2::from_shape_fn((nocc * nvrt, nocc * nvrt), |(row, col)| {
-        let i = row / nvrt;
-        let a = row % nvrt;
-        let j = col / nvrt;
-        let b = col % nvrt;
-        t2_amplitudes[[i, j, a, b]]
+        t2_amplitudes[[row / nvrt, col / nvrt, row % nvrt, col % nvrt]]
     });
 
     let (outer_eigs, outer_vecs) = hermitian_eigh(&t2_mat, Some(tol), None);
@@ -451,11 +441,7 @@ pub fn double_factorized_t2_alpha_beta(
 
     // Transpose axes (0, 2, 1, 3) then reshape to (nocc_a*nvrt_a, nocc_b*nvrt_b).
     let t2_mat = Array2::from_shape_fn((nocc_a * nvrt_a, nocc_b * nvrt_b), |(row, col)| {
-        let i = row / nvrt_a;
-        let a = row % nvrt_a;
-        let j = col / nvrt_b;
-        let b = col % nvrt_b;
-        t2_amplitudes[[i, j, a, b]]
+        t2_amplitudes[[row / nvrt_a, col / nvrt_b, row % nvrt_a, col % nvrt_b]]
     });
 
     let (left, singular_vals, right) = thin_svd(&t2_mat, Some(tol), None);

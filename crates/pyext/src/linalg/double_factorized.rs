@@ -25,20 +25,8 @@ type PyDoubleFactorizedTerm<'py> = (Bound<'py, PyArray2<f64>>, Bound<'py, PyArra
 type PyReadonlyDoubleFactorizedTerm<'py> =
     (PyReadonlyArray2<'py, f64>, PyReadonlyArray2<'py, Complex64>);
 
-/// An alpha-beta double-factorized term as exposed to Python: a 2-tuple of the three diagonal
-/// Coulomb matrices ``(aa, ab, bb)`` and the two orbital rotations ``(alpha, beta)``.
-type PyDoubleFactorizedT2AlphaBetaTerm<'py> = (
-    [Bound<'py, PyArray2<f64>>; 3],
-    [Bound<'py, PyArray2<Complex64>>; 2],
-);
-
-type PyReadonlyDoubleFactorizedT2AlphaBetaTerm<'py> = (
-    [PyReadonlyArray2<'py, f64>; 3],
-    [PyReadonlyArray2<'py, Complex64>; 2],
-);
-
 /// Converts a single core [`DoubleFactorizedTerm`] into its Python representation.
-fn term_into_py(py: Python<'_>, term: DoubleFactorizedTerm) -> PyDoubleFactorizedTerm<'_> {
+fn df_term_into_py(py: Python<'_>, term: DoubleFactorizedTerm) -> PyDoubleFactorizedTerm<'_> {
     let (diag_coulomb, orbital_rotation) = term;
     (
         diag_coulomb.into_pyarray(py),
@@ -46,8 +34,28 @@ fn term_into_py(py: Python<'_>, term: DoubleFactorizedTerm) -> PyDoubleFactorize
     )
 }
 
+/// Converts a Python representation of [`DoubleFactorizedTerm`] to its core form.
+fn df_term_from_py(term: PyReadonlyDoubleFactorizedTerm) -> DoubleFactorizedTerm {
+    let (diag_coulomb, orbital_rotation) = term;
+    (
+        diag_coulomb.as_array().to_owned(),
+        orbital_rotation.as_array().to_owned(),
+    )
+}
+
+/// An alpha-beta double-factorized term as exposed to Python: a 2-tuple of the three diagonal
+/// Coulomb matrices ``(aa, ab, bb)`` and the two orbital rotations ``(alpha, beta)``.
+type PyDoubleFactorizedT2AlphaBetaTerm<'py> = (
+    [Bound<'py, PyArray2<f64>>; 3],
+    [Bound<'py, PyArray2<Complex64>>; 2],
+);
+type PyReadonlyDoubleFactorizedT2AlphaBetaTerm<'py> = (
+    [PyReadonlyArray2<'py, f64>; 3],
+    [PyReadonlyArray2<'py, Complex64>; 2],
+);
+
 /// Converts a single core [`DoubleFactorizedT2AlphaBetaTerm`] into its Python representation.
-fn alpha_beta_term_into_py(
+fn dfab_term_into_py(
     py: Python<'_>,
     term: DoubleFactorizedT2AlphaBetaTerm,
 ) -> PyDoubleFactorizedT2AlphaBetaTerm<'_> {
@@ -63,6 +71,23 @@ fn alpha_beta_term_into_py(
         ],
         [alpha.into_pyarray(py), beta.into_pyarray(py)],
     )
+}
+
+/// Converts a Python representation of [`DoubleFactorizedT2AlphaBetaTerm`] to its core form.
+fn dfab_term_from_py(
+    term: PyReadonlyDoubleFactorizedT2AlphaBetaTerm,
+) -> DoubleFactorizedT2AlphaBetaTerm {
+    let (diag_coulomb, orbital_rotation) = term;
+    let [aa, ab, bb] = diag_coulomb;
+    let [alpha, beta] = orbital_rotation;
+    DoubleFactorizedT2AlphaBetaTerm {
+        diag_coulomb: [
+            aa.as_array().to_owned(),
+            ab.as_array().to_owned(),
+            bb.as_array().to_owned(),
+        ],
+        orbital_rotations: [alpha.as_array().to_owned(), beta.as_array().to_owned()],
+    }
 }
 
 /// Double-factorized decomposition of a real two-body tensor.
@@ -102,7 +127,7 @@ pub fn py_double_factorized<'py>(
         cholesky,
     )
     .into_iter()
-    .map(|term| term_into_py(py, term))
+    .map(|term| df_term_into_py(py, term))
     .collect()
 }
 
@@ -130,7 +155,7 @@ pub fn py_double_factorized_t2<'py>(
 ) -> Vec<PyDoubleFactorizedTerm<'py>> {
     double_factorized_t2(&t2_amplitudes.as_array().to_owned(), tol, max_terms)
         .into_iter()
-        .map(|term| term_into_py(py, term))
+        .map(|term| df_term_into_py(py, term))
         .collect()
 }
 
@@ -155,7 +180,7 @@ pub fn py_reconstruct_t2<'py>(
 ) -> Bound<'py, PyArray4<Complex64>> {
     let terms: Vec<DoubleFactorizedTerm> = terms
         .into_iter()
-        .map(|(z, u)| (z.as_array().to_owned(), u.as_array().to_owned()))
+        .map(|term| df_term_from_py(term))
         .collect();
     reconstruct_t2(&terms, nocc).into_pyarray(py)
 }
@@ -186,7 +211,7 @@ pub fn py_double_factorized_t2_alpha_beta<'py>(
 ) -> Vec<PyDoubleFactorizedT2AlphaBetaTerm<'py>> {
     double_factorized_t2_alpha_beta(&t2_amplitudes.as_array().to_owned(), tol, max_terms)
         .into_iter()
-        .map(|term| alpha_beta_term_into_py(py, term))
+        .map(|term| dfab_term_into_py(py, term))
         .collect()
 }
 
@@ -214,16 +239,7 @@ pub fn py_reconstruct_t2_alpha_beta<'py>(
 ) -> Bound<'py, PyArray4<Complex64>> {
     let terms: Vec<DoubleFactorizedT2AlphaBetaTerm> = terms
         .into_iter()
-        .map(
-            |([aa, ab, bb], [alpha, beta])| DoubleFactorizedT2AlphaBetaTerm {
-                diag_coulomb: [
-                    aa.as_array().to_owned(),
-                    ab.as_array().to_owned(),
-                    bb.as_array().to_owned(),
-                ],
-                orbital_rotations: [alpha.as_array().to_owned(), beta.as_array().to_owned()],
-            },
-        )
+        .map(|term| dfab_term_from_py(term))
         .collect();
     reconstruct_t2_alpha_beta(&terms, norb, nocc_a, nocc_b).into_pyarray(py)
 }
