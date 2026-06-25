@@ -37,12 +37,11 @@ pub struct DoubleFactorizedT2AlphaBetaTerm {
 }
 
 // ---------------------------------------------------------------------------------------------
-// nalgebra <-> ndarray conversion helpers
+// ndarray -> nalgebra conversion helper
 //
 // nalgebra is column-major; ndarray (by default) is row-major. To convert an ndarray matrix
 // into a nalgebra matrix we build it from the row-major data interpreted as `(ncols, nrows)`
-// column-major and transpose, or more simply use `DMatrix::from_row_slice`. To go back, we
-// read the nalgebra matrix in row order via element access.
+// column-major and transpose, or more simply use `DMatrix::from_row_slice`.
 // ---------------------------------------------------------------------------------------------
 
 /// Converts a row-major [`Array2`] into a column-major nalgebra [`DMatrix`].
@@ -52,12 +51,6 @@ fn ndarray_to_nalgebra<T: nalgebra::Scalar + Copy>(mat: &Array2<T>) -> DMatrix<T
     // layout. Ensure standard layout first in case the input is a transposed/strided view.
     let standard = mat.as_standard_layout();
     DMatrix::from_row_slice(nrows, ncols, standard.as_slice().unwrap())
-}
-
-/// Converts a column-major nalgebra [`DMatrix`] into a row-major [`Array2`].
-fn nalgebra_to_ndarray<T: nalgebra::Scalar + Copy>(mat: &DMatrix<T>) -> Array2<T> {
-    let (nrows, ncols) = (mat.nrows(), mat.ncols());
-    Array2::from_shape_fn((nrows, ncols), |(i, j)| mat[(i, j)])
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -113,7 +106,15 @@ fn hermitian_eigh(
 /// Returns `(left_vecs, singular_vals, right_vecs)` where `left_vecs` has the left singular
 /// vectors as columns, `singular_vals` is sorted in descending order, and `right_vecs` has the
 /// right singular vectors as rows (i.e. it is `V^H`, matching `scipy.linalg.svd`).
-fn thin_svd(mat: &Array2<Complex64>) -> (Array2<Complex64>, Array1<f64>, Array2<Complex64>) {
+///
+/// This function optionally discards the smallest singular values whose cumulative sum stays below
+/// `tol`, capping the number of retained vectors at `max_vecs` (default: all). Singular values are
+/// non-negative and already sorted in descending order.
+fn thin_svd(
+    mat: &Array2<Complex64>,
+    tol: Option<f64>,
+    max_vecs: Option<usize>,
+) -> (Array2<Complex64>, Array1<f64>, Array2<Complex64>) {
     let nalg = ndarray_to_nalgebra(mat);
     // `SVD::new` computes the thin SVD and sorts singular values in descending order.
     let svd = nalg.svd(true, true);
@@ -121,11 +122,21 @@ fn thin_svd(mat: &Array2<Complex64>) -> (Array2<Complex64>, Array1<f64>, Array2<
     let v_t: DMatrix<Complex64> = svd.v_t.expect("right singular vectors were requested");
     let singular_vals =
         Array1::from_shape_fn(svd.singular_values.len(), |i| svd.singular_values[i]);
-    (
-        nalgebra_to_ndarray(&u),
-        singular_vals,
-        nalgebra_to_ndarray(&v_t),
-    )
+
+    let dim = singular_vals.len();
+    let mut n_keep = dim;
+
+    if tol.is_some() {
+        let ascending = (0..dim).rev().map(|i| singular_vals[i]);
+        let n_discard = cumulative_discard_count(ascending, tol.unwrap());
+
+        n_keep = max_vecs.unwrap_or(dim).min(dim - n_discard);
+    }
+
+    let kept_left = Array2::from_shape_fn((u.nrows(), n_keep), |(row, col)| u[(row, col)]);
+    let kept_s = Array1::from_shape_fn(n_keep, |i| singular_vals[i]);
+    let kept_right = Array2::from_shape_fn((n_keep, v_t.ncols()), |(row, col)| v_t[(row, col)]);
+    (kept_left, kept_s, kept_right)
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -150,30 +161,6 @@ fn cumulative_discard_count(ascending_abs_tail: impl Iterator<Item = f64>, tol: 
         }
     }
     discard
-}
-
-/// Truncated thin SVD.
-///
-/// Discards the smallest singular values whose cumulative sum stays below `tol`, capping the
-/// number of retained vectors at `max_vecs` (default: all). Singular values are non-negative
-/// and already sorted in descending order.
-fn truncated_svd(
-    mat: &Array2<Complex64>,
-    tol: f64,
-    max_vecs: Option<usize>,
-) -> (Array2<Complex64>, Array1<f64>, Array2<Complex64>) {
-    let (left, singular_vals, right) = thin_svd(mat);
-    let dim = singular_vals.len();
-
-    let ascending = (0..dim).rev().map(|i| singular_vals[i]);
-    let n_discard = cumulative_discard_count(ascending, tol);
-
-    let n_vecs = max_vecs.unwrap_or(dim).min(dim - n_discard);
-
-    let kept_left = Array2::from_shape_fn((left.nrows(), n_vecs), |(row, col)| left[[row, col]]);
-    let kept_s = Array1::from_shape_fn(n_vecs, |i| singular_vals[i]);
-    let kept_right = Array2::from_shape_fn((n_vecs, right.ncols()), |(row, col)| right[[row, col]]);
-    (kept_left, kept_s, kept_right)
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -478,7 +465,7 @@ pub fn double_factorized_t2_alpha_beta(
         t2_amplitudes[[i, j, a, b]]
     });
 
-    let (left, singular_vals, right) = truncated_svd(&t2_mat, tol, None);
+    let (left, singular_vals, right) = thin_svd(&t2_mat, Some(tol), None);
     let n_vecs = singular_vals.len();
 
     // The four per-outer-vector "rows" each pair an alpha one-body tensor (from `left_mat`) with
@@ -680,20 +667,6 @@ mod tests {
             return false;
         }
         a.iter().zip(b.iter()).all(|(x, y)| (x - y).abs() <= tol)
-    }
-
-    #[test]
-    fn test_nalgebra_ndarray_roundtrip() {
-        for dim in 1..=5 {
-            let mat = random_unitary(dim);
-            let back = nalgebra_to_ndarray(&ndarray_to_nalgebra(&mat));
-            assert!(
-                mat.iter()
-                    .zip(back.iter())
-                    .all(|(x, y)| (x - y).norm() < 1e-12),
-                "round-trip conversion failed for dim {dim}"
-            );
-        }
     }
 
     #[test]
