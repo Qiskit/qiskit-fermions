@@ -40,6 +40,37 @@ documentation, as well as the :mod:`qiskit_fermions.operators.library`.
        QfFermionOperator* hamil = qf_ferm_op_from_fcidump(fcidump);
        uint32_t num_modes = 2 * qf_fcidump_norb(fcidump);
 
+.. hint::
+
+   The full electronic structure Hamiltonian contains certain terms whose
+   inclusion in a time-evolution circuit will have no impact on the perceived
+   bitstrings and, thus, only result in an increased sampling overhead.
+   Therefore, it is recommended that such terms be filtered from the Hamiltonian
+   before continuing with the remaining procedure.
+
+   In the example below we remove all those terms that act on 1 or fewer unique
+   fermionic modes. This includes the constant energy offset, whose time
+   evolution only introduces a global phase into the circuit, as well as the
+   number-operators (:math:`a^\dagger_i a_i`) whose time evolution amounts to
+   single-qubit Z rotations which do not impact the sampled bitstrings.
+
+   .. tab-set-code::
+
+       .. code-block:: python
+
+          >>> hamil = FermionOperator.from_terms(
+          ...     [
+          ...         (term, coeff) for term, coeff in hamil.iter_terms()
+          ...         if len(set(idx for _, idx in term)) > 1
+          ...     ]
+          ... )
+
+       .. code-block:: c
+
+          // WARNING: The C API of the FermionOperator does not provide convenience
+          // iterators, so the equivalent filtering has to be implemented more
+          // manually.
+
 
 2. Group Hamiltonian terms
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -55,6 +86,10 @@ time evolving a state under their action.
 The :mod:`qiskit_fermions.operators.grouping` module provides convenience
 functions for grouping an operator's terms. This is explained in more
 detail in :ref:`this guide <grouping_explanation>`.
+
+.. caution::
+   The implementation of the :func:`~group_terms_by_electronic_structure`
+   assumes the terms of the Hamiltonian to be normal-ordered!
 
 .. tab-set-code::
 
