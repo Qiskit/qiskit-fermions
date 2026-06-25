@@ -41,10 +41,10 @@ from qiskit_fermions._lib.linalg.double_factorized import (
 from qiskit_fermions._lib.linalg.givens import givens_decomposition
 
 __all__ = [
-    "givens_decomposition",
     "double_factorized",
     "double_factorized_t2",
-    "reconstruct_t2",
     "double_factorized_t2_alpha_beta",
+    "givens_decomposition",
+    "reconstruct_t2",
     "reconstruct_t2_alpha_beta",
 ]

@@ -81,18 +81,18 @@ fn hermitian_eigh(
     let mut order: Vec<usize> = (0..dim).collect();
     // When we want to truncate the eigenpairs, we must order the eigenvalues by their |eigs|,
     // otherwise we order them by their non-absolute values.
-    if tol.is_none() {
-        // Order by ascending eigenvalue.
-        order.sort_by(|&a, &b| eigs[a].partial_cmp(&eigs[b]).unwrap());
-    } else {
+    if let Some(tol) = tol {
         // Order by descending |eigenvalue|.
         order.sort_by(|&a, &b| eigs[b].abs().partial_cmp(&eigs[a].abs()).unwrap());
 
         // The reversed (ascending-magnitude) tail used for the cumulative discard count.
         let ascending_abs = order.iter().rev().map(|&i| eigs[i].abs());
-        let n_discard = cumulative_discard_count(ascending_abs, tol.unwrap());
+        let n_discard = cumulative_discard_count(ascending_abs, tol);
 
         n_keep = max_vecs.unwrap_or(dim).min(dim - n_discard);
+    } else {
+        // Order by ascending eigenvalue.
+        order.sort_by(|&a, &b| eigs[a].partial_cmp(&eigs[b]).unwrap());
     }
 
     let kept_vals = Array1::from_shape_fn(n_keep, |i| eigs[order[i]]);
@@ -126,9 +126,9 @@ fn thin_svd(
     let dim = singular_vals.len();
     let mut n_keep = dim;
 
-    if tol.is_some() {
+    if let Some(tol) = tol {
         let ascending = (0..dim).rev().map(|i| singular_vals[i]);
-        let n_discard = cumulative_discard_count(ascending, tol.unwrap());
+        let n_discard = cumulative_discard_count(ascending, tol);
 
         n_keep = max_vecs.unwrap_or(dim).min(dim - n_discard);
     }
@@ -298,7 +298,7 @@ pub fn double_factorized(
     let max_vecs = max_vecs.unwrap_or(norb * (norb + 1) / 2);
 
     let norb = two_body_tensor.shape()[0];
-    /// Reshape the two-body tensor `(norb, norb, norb, norb)` into a `(norb², norb²)`.
+    // Reshape the two-body tensor `(norb, norb, norb, norb)` into a `(norb², norb²)`.
     let reshaped = Array2::from_shape_fn((norb * norb, norb * norb), |(row, col)| {
         let p = row / norb;
         let q = row % norb;
@@ -325,8 +325,8 @@ pub fn double_factorized(
         .map(|t| Array2::from_shape_fn((norb, norb), |(p, q)| outer_columns[[p * norb + q, t]]))
         .collect();
 
-    /// Build the per-term `(Z, U)` factors from the set of reshaped outer matrices, scaling each
-    /// diagonal Coulomb matrix by the associated outer coefficient.
+    // Build the per-term `(Z, U)` factors from the set of reshaped outer matrices, scaling each
+    // diagonal Coulomb matrix by the associated outer coefficient.
     outer_mats
         .iter()
         .zip(outer_coeffs.iter())

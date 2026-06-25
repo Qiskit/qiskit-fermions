@@ -22,12 +22,19 @@ use qiskit_fermions_core::linalg::double_factorized::{
 /// A double-factorized term as exposed to Python: a 2-tuple of the diagonal Coulomb matrix and the
 /// orbital rotation, both as numpy arrays.
 type PyDoubleFactorizedTerm<'py> = (Bound<'py, PyArray2<f64>>, Bound<'py, PyArray2<Complex64>>);
+type PyReadonlyDoubleFactorizedTerm<'py> =
+    (PyReadonlyArray2<'py, f64>, PyReadonlyArray2<'py, Complex64>);
 
 /// An alpha-beta double-factorized term as exposed to Python: a 2-tuple of the three diagonal
 /// Coulomb matrices ``(aa, ab, bb)`` and the two orbital rotations ``(alpha, beta)``.
 type PyDoubleFactorizedT2AlphaBetaTerm<'py> = (
     [Bound<'py, PyArray2<f64>>; 3],
     [Bound<'py, PyArray2<Complex64>>; 2],
+);
+
+type PyReadonlyDoubleFactorizedT2AlphaBetaTerm<'py> = (
+    [PyReadonlyArray2<'py, f64>; 3],
+    [PyReadonlyArray2<'py, Complex64>; 2],
 );
 
 /// Converts a single core [`DoubleFactorizedTerm`] into its Python representation.
@@ -143,7 +150,7 @@ pub fn py_double_factorized_t2<'py>(
 #[pyfunction(name = "reconstruct_t2", signature = (terms, nocc))]
 pub fn py_reconstruct_t2<'py>(
     py: Python<'py>,
-    terms: Vec<(PyReadonlyArray2<'py, f64>, PyReadonlyArray2<'py, Complex64>)>,
+    terms: Vec<PyReadonlyDoubleFactorizedTerm>,
     nocc: usize,
 ) -> Bound<'py, PyArray4<Complex64>> {
     let terms: Vec<DoubleFactorizedTerm> = terms
@@ -200,10 +207,7 @@ pub fn py_double_factorized_t2_alpha_beta<'py>(
 #[pyfunction(name = "reconstruct_t2_alpha_beta", signature = (terms, norb, nocc_a, nocc_b))]
 pub fn py_reconstruct_t2_alpha_beta<'py>(
     py: Python<'py>,
-    terms: Vec<(
-        [PyReadonlyArray2<'py, f64>; 3],
-        [PyReadonlyArray2<'py, Complex64>; 2],
-    )>,
+    terms: Vec<PyReadonlyDoubleFactorizedT2AlphaBetaTerm>,
     norb: usize,
     nocc_a: usize,
     nocc_b: usize,

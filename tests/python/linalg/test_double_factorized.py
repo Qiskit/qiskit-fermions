@@ -34,7 +34,7 @@ from qiskit_fermions.linalg import (
     reconstruct_t2_alpha_beta,
 )
 
-from ..utils import random_t2_amplitudes, random_two_body_tensor, random_unitary
+from ..utils import random_t2_amplitudes, random_two_body_tensor
 
 RNG = np.random.default_rng(139632037091916421993148931543991464292)
 
