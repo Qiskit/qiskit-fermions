@@ -232,64 +232,8 @@ pub fn modified_cholesky(
 }
 
 // ---------------------------------------------------------------------------------------------
-// Two-body tensor: double_factorized
+// Matrix construction helpers
 // ---------------------------------------------------------------------------------------------
-
-/// Double-factorized decomposition of a real two-body tensor.
-///
-/// Represents `h_{pqrs} = Σ_t Σ_{kl} Z^{(t)}_{kl} U^{(t)}_{pk} U^{(t)}_{qk} U^{(t)}_{rl} U^{(t)}_{sl}`,
-/// returning a list of `(Z, U)` terms where each `Z` is a real symmetric diagonal Coulomb matrix
-/// and each `U` is a unitary orbital rotation.
-///
-/// When `cholesky` is `true` (the default behavior in the original library) the outer
-/// factorization uses a modified Cholesky decomposition; otherwise it uses a truncated
-/// eigendecomposition.
-pub fn double_factorized(
-    two_body_tensor: &Array4<f64>,
-    tol: f64,
-    max_vecs: Option<usize>,
-    cholesky: bool,
-) -> Vec<DoubleFactorizedTerm> {
-    let norb = two_body_tensor.shape()[0];
-    if norb == 0 {
-        return Vec::new();
-    }
-    let max_vecs = max_vecs.unwrap_or(norb * (norb + 1) / 2);
-
-    let norb = two_body_tensor.shape()[0];
-    let reshaped = reshaped_two_body(two_body_tensor);
-
-    // Produce the outer factorization columns and their coefficients. The Cholesky path folds the
-    // scale into the vectors themselves (unit coefficients); the eigh path keeps the eigenvalues
-    // as coefficients.
-    let (outer_columns, outer_coeffs) = if cholesky {
-        let cholesky_vecs = modified_cholesky(&reshaped, tol, Some(max_vecs));
-        let n_vecs = cholesky_vecs.ncols();
-        (cholesky_vecs, vec![1.0; n_vecs])
-    } else {
-        let (outer_eigs, outer_vecs) = hermitian_eigh(&reshaped, Some(tol), Some(max_vecs));
-        let coeffs = outer_eigs.to_vec();
-        (outer_vecs, coeffs)
-    };
-
-    // Each column reshapes to a `(norb, norb)` matrix.
-    let outer_mats: Vec<Array2<Complex64>> = (0..outer_coeffs.len())
-        .map(|t| Array2::from_shape_fn((norb, norb), |(p, q)| outer_columns[[p * norb + q, t]]))
-        .collect();
-    terms_from_outer_matrices(&outer_mats, &outer_coeffs)
-}
-
-/// Reshapes a two-body tensor `(norb, norb, norb, norb)` into a `(norb², norb²)` complex matrix.
-fn reshaped_two_body(two_body_tensor: &Array4<f64>) -> Array2<Complex64> {
-    let norb = two_body_tensor.shape()[0];
-    Array2::from_shape_fn((norb * norb, norb * norb), |(row, col)| {
-        let p = row / norb;
-        let q = row % norb;
-        let r = col / norb;
-        let s = col % norb;
-        Complex64::new(two_body_tensor[[p, q, r, s]], 0.0)
-    })
-}
 
 /// Builds a diagonal Coulomb matrix as the scaled outer product `coeff * eigs_k[k] * eigs_l[l]`.
 ///
@@ -300,28 +244,6 @@ fn diag_coulomb_outer(coeff: f64, eigs_k: &[f64], eigs_l: &[f64]) -> Array2<f64>
         coeff * eigs_k[k] * eigs_l[l]
     })
 }
-
-/// Builds the per-term `(Z, U)` factors from a set of reshaped outer matrices, scaling each
-/// diagonal Coulomb matrix by an associated outer coefficient.
-fn terms_from_outer_matrices(
-    outer_mats: &[Array2<Complex64>],
-    outer_coeffs: &[f64],
-) -> Vec<DoubleFactorizedTerm> {
-    outer_mats
-        .iter()
-        .zip(outer_coeffs.iter())
-        .map(|(mat, &coeff)| {
-            let (eigs, rotation) = hermitian_eigh(mat, None, None);
-            let eigs = eigs.as_slice().unwrap();
-            let diag_coulomb = diag_coulomb_outer(coeff, eigs, eigs);
-            (diag_coulomb, rotation)
-        })
-        .collect()
-}
-
-// ---------------------------------------------------------------------------------------------
-// t2 amplitudes (spin-restricted)
-// ---------------------------------------------------------------------------------------------
 
 /// Places a flat occupied×virtual vector into the (virtual, occupied) block of a `(norb, norb)`
 /// zero matrix. The flat index runs in `product(occupied, virtual)` order (occupied outer,
@@ -349,6 +271,77 @@ fn quadrature(mat: &Array2<Complex64>, sign: f64) -> Array2<Complex64> {
         prefactor * (mat[[r, c]] + sign * i * adjoint)
     })
 }
+
+// ---------------------------------------------------------------------------------------------
+// Two-body tensor: double_factorized
+// ---------------------------------------------------------------------------------------------
+
+/// Double-factorized decomposition of a real two-body tensor.
+///
+/// Represents `h_{pqrs} = Σ_t Σ_{kl} Z^{(t)}_{kl} U^{(t)}_{pk} U^{(t)}_{qk} U^{(t)}_{rl} U^{(t)}_{sl}`,
+/// returning a list of `(Z, U)` terms where each `Z` is a real symmetric diagonal Coulomb matrix
+/// and each `U` is a unitary orbital rotation.
+///
+/// When `cholesky` is `true` (the default behavior in the original library) the outer
+/// factorization uses a modified Cholesky decomposition; otherwise it uses a truncated
+/// eigendecomposition.
+pub fn double_factorized(
+    two_body_tensor: &Array4<f64>,
+    tol: f64,
+    max_vecs: Option<usize>,
+    cholesky: bool,
+) -> Vec<DoubleFactorizedTerm> {
+    let norb = two_body_tensor.shape()[0];
+    if norb == 0 {
+        return Vec::new();
+    }
+    let max_vecs = max_vecs.unwrap_or(norb * (norb + 1) / 2);
+
+    let norb = two_body_tensor.shape()[0];
+    /// Reshape the two-body tensor `(norb, norb, norb, norb)` into a `(norb², norb²)`.
+    let reshaped = Array2::from_shape_fn((norb * norb, norb * norb), |(row, col)| {
+        let p = row / norb;
+        let q = row % norb;
+        let r = col / norb;
+        let s = col % norb;
+        Complex64::new(two_body_tensor[[p, q, r, s]], 0.0)
+    });
+
+    // Produce the outer factorization columns and their coefficients. The Cholesky path folds the
+    // scale into the vectors themselves (unit coefficients); the eigh path keeps the eigenvalues
+    // as coefficients.
+    let (outer_columns, outer_coeffs) = if cholesky {
+        let cholesky_vecs = modified_cholesky(&reshaped, tol, Some(max_vecs));
+        let n_vecs = cholesky_vecs.ncols();
+        (cholesky_vecs, vec![1.0; n_vecs])
+    } else {
+        let (outer_eigs, outer_vecs) = hermitian_eigh(&reshaped, Some(tol), Some(max_vecs));
+        let coeffs = outer_eigs.to_vec();
+        (outer_vecs, coeffs)
+    };
+
+    // Each column reshapes to a `(norb, norb)` matrix.
+    let outer_mats: Vec<Array2<Complex64>> = (0..outer_coeffs.len())
+        .map(|t| Array2::from_shape_fn((norb, norb), |(p, q)| outer_columns[[p * norb + q, t]]))
+        .collect();
+
+    /// Build the per-term `(Z, U)` factors from the set of reshaped outer matrices, scaling each
+    /// diagonal Coulomb matrix by the associated outer coefficient.
+    outer_mats
+        .iter()
+        .zip(outer_coeffs.iter())
+        .map(|(mat, &coeff)| {
+            let (eigs, rotation) = hermitian_eigh(mat, None, None);
+            let eigs = eigs.as_slice().unwrap();
+            let diag_coulomb = diag_coulomb_outer(coeff, eigs, eigs);
+            (diag_coulomb, rotation)
+        })
+        .collect()
+}
+
+// ---------------------------------------------------------------------------------------------
+// t2 amplitudes (spin-restricted)
+// ---------------------------------------------------------------------------------------------
 
 /// Double-factorized decomposition of spin-restricted `t2` amplitudes.
 ///
