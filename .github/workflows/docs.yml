@@ -53,7 +53,8 @@ jobs:
       - name: Install Package
         shell: bash
         run: |
-          pip install --group build --group docs qiskit
+          pip install --pre qiskit
+          pip install --group build --group docs
           SETUPTOOLS_RUST_CARGO_PROFILE=release pip install --no-build-isolation -e ".[all]"
 
       - name: Build docs

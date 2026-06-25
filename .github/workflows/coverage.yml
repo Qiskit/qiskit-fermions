@@ -52,7 +52,7 @@ jobs:
           cd build/qiskit
           # checkout the latest (i.e. stable) release tag
           git checkout $(gh release -R Qiskit/qiskit view --json tagName --jq ".tagName")
-          make c
+          make c qiskit-pyo3-ffi
 
       - name: Rust coverage
         shell: bash
@@ -78,7 +78,8 @@ jobs:
       - name: Install Python package
         shell: bash
         run: |
-          pip install --group build --group coverage qiskit
+          pip install --pre qiskit
+          pip install --group build --group coverage
           SETUPTOOLS_RUST_CARGO_PROFILE=release pip install --no-build-isolation -e ".[all]"
 
       - name: Python coverage

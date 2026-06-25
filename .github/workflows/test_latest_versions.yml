@@ -62,7 +62,7 @@ jobs:
           cd build/qiskit
           # checkout the latest (i.e. stable) release tag
           git checkout $(gh release -R Qiskit/qiskit view --json tagName --jq ".tagName")
-          make c
+          make c qiskit-pyo3-ffi
           if [[ "$RUNNER_OS" == "Windows" ]]; then
             # NOTE: we manually need to copy the `.dll.lib` file for now
             cp target/release/qiskit_cext.dll.lib dist/c/lib/qiskit.dll.lib
@@ -107,27 +107,24 @@ jobs:
           make testc
 
       - name: Install Python package
-        if: ${{ matrix.os != 'windows-latest' }}
         shell: bash
         run: |
-          pip install --group build --group test qiskit
+          pip install --pre qiskit
+          pip install --group build --group test
           SETUPTOOLS_RUST_CARGO_PROFILE=release pip install --no-build-isolation -e .
 
       - name: Python tests
-        if: ${{ matrix.os != 'windows-latest' }}
         shell: bash
         run: |
           make pystubs testpython
 
       - name: Optional tests
-        if: ${{ matrix.os != 'windows-latest' }}
         shell: bash
         run: |
           SETUPTOOLS_RUST_CARGO_PROFILE=release pip install --no-build-isolation -e ".[all]"
           make testoptional
 
       - name: Documentation tests
-        if: ${{ matrix.os != 'windows-latest' }}
         shell: bash
         run: |
           make doctest

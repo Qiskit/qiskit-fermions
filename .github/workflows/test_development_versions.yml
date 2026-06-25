@@ -54,7 +54,7 @@ jobs:
           git clone https://github.com/Qiskit/qiskit build/qiskit
           cd build/qiskit
           git rev-parse HEAD
-          make c
+          make c qiskit-pyo3-ffi
           python -m build --wheel
 
       - name: Rust tests

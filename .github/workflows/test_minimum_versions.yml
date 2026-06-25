@@ -57,7 +57,7 @@ jobs:
           cd build/qiskit
           # checkout the minimum release tag
           git checkout 2.4.0
-          make c
+          make c qiskit-pyo3-ffi
 
       - name: Rust tests
         shell: bash
@@ -82,7 +82,8 @@ jobs:
 
       - name: Install Python dependencies (minimum versions)
         run: |
-          pip install --group build --group test qiskit uv
+          pip install --pre qiskit
+          pip install --group build --group test uv
           uv sync --active --resolution lowest-direct
 
       - name: Install Python package
