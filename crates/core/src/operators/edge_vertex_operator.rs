@@ -93,9 +93,18 @@ impl EdgeVertexOperator {
         })
     }
 
+    pub fn num_groups(&self) -> Option<u32> {
+        let self_groups = self.groups.as_ref()?;
+        if self_groups.len() == 0 {
+            Some(0)
+        } else {
+            Some(self_groups.iter().max().unwrap() + 1)
+        }
+    }
+
     pub fn split_out_groups(&self) -> Option<Vec<Self>> {
         let self_groups = self.groups.as_ref()?;
-        let num_groups = self_groups.iter().max().unwrap() + 1;
+        let num_groups = self.num_groups()?;
         let mut groups = vec![Self::zero(); num_groups as usize];
         for (group_idx, term) in zip(self_groups.iter(), self.iter()) {
             groups[*group_idx as usize]._append_term(

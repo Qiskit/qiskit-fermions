@@ -797,6 +797,31 @@ impl PyFermionOperator {
         self.inner.groups = groups;
     }
 
+    /// Returns the number of groups.
+    ///
+    /// If :attr:`groups` is ``None``, this function also returns ``None``. Otherwise, it will
+    /// return the number of groups which is defined to be the largest occurring group index plus
+    /// 1 (which may therefore be used as the index for the next group).
+    ///
+    /// .. doctest::
+    ///
+    ///     >>> from qiskit_fermions.operators import FermionOperator
+    ///     >>> op = FermionOperator(
+    ///     ...     [1.0, 2.0, -1.0, -2.0],
+    ///     ...     [True, False, True, False, True, False, True, False],
+    ///     ...     [0, 1, 2, 3, 1, 0, 3, 2],
+    ///     ...     [0, 2, 4, 6, 8],
+    ///     ... )
+    ///     >>> op.groups = [0, 1, 0, 1]
+    ///     >>> op.num_groups()
+    ///     2
+    ///
+    /// Returns:
+    ///     The largest group index in :attr:`groups` plus 1.
+    pub fn num_groups(&self) -> Option<u32> {
+        self.inner.num_groups()
+    }
+
     /// Splits this operator into an optional list of new operators based on :attr:`groups`.
     ///
     /// If :attr:`groups` is ``None``, this function also returns ``None``. Otherwise, it will
