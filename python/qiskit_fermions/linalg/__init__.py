@@ -24,7 +24,7 @@ This module provides various linear algebra utilities.
    :toctree: ../stubs/
 
    givens_decomposition
-   double_factorized
+   double_factorized_2body
    double_factorized_t2
    reconstruct_t2
    double_factorized_t2_alpha_beta
@@ -32,7 +32,7 @@ This module provides various linear algebra utilities.
 """
 
 from qiskit_fermions._lib.linalg.double_factorized import (
-    double_factorized,
+    double_factorized_2body,
     double_factorized_t2,
     double_factorized_t2_alpha_beta,
     reconstruct_t2,
@@ -41,7 +41,7 @@ from qiskit_fermions._lib.linalg.double_factorized import (
 from qiskit_fermions._lib.linalg.givens import givens_decomposition
 
 __all__ = [
-    "double_factorized",
+    "double_factorized_2body",
     "double_factorized_t2",
     "double_factorized_t2_alpha_beta",
     "givens_decomposition",

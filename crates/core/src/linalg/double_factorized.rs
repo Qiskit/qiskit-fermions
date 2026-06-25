@@ -272,7 +272,7 @@ fn quadrature(mat: &Array2<Complex64>, sign: f64) -> Array2<Complex64> {
 }
 
 // ---------------------------------------------------------------------------------------------
-// Two-body tensor: double_factorized
+// Two-body tensor: double_factorized_2body
 // ---------------------------------------------------------------------------------------------
 
 /// Double-factorized decomposition of a real two-body tensor.
@@ -284,7 +284,7 @@ fn quadrature(mat: &Array2<Complex64>, sign: f64) -> Array2<Complex64> {
 /// When `cholesky` is `true` (the default behavior in the original library) the outer
 /// factorization uses a modified Cholesky decomposition; otherwise it uses a truncated
 /// eigendecomposition.
-pub fn double_factorized(
+pub fn double_factorized_2body(
     two_body_tensor: &Array4<f64>,
     tol: f64,
     max_vecs: Option<usize>,
@@ -668,7 +668,7 @@ mod tests {
     fn test_double_factorized_cholesky() {
         for norb in 2..=4 {
             let tensor = random_two_body_tensor(norb);
-            let terms = double_factorized(&tensor, 1e-10, None, true);
+            let terms = double_factorized_2body(&tensor, 1e-10, None, true);
             let reconstructed = reconstruct_two_body(&terms, norb);
             assert!(
                 tensors_real_approx_equal(&tensor, &reconstructed, 1e-8),
@@ -681,7 +681,7 @@ mod tests {
     fn test_double_factorized_eigh() {
         for norb in 2..=4 {
             let tensor = random_two_body_tensor(norb);
-            let terms = double_factorized(&tensor, 1e-10, None, false);
+            let terms = double_factorized_2body(&tensor, 1e-10, None, false);
             let reconstructed = reconstruct_two_body(&terms, norb);
             assert!(
                 tensors_real_approx_equal(&tensor, &reconstructed, 1e-8),
@@ -694,8 +694,8 @@ mod tests {
     fn test_double_factorized_max_vecs_truncates() {
         let norb = 4;
         let tensor = random_two_body_tensor(norb);
-        let full = double_factorized(&tensor, 1e-10, None, true);
-        let truncated = double_factorized(&tensor, 1e-10, Some(1), true);
+        let full = double_factorized_2body(&tensor, 1e-10, None, true);
+        let truncated = double_factorized_2body(&tensor, 1e-10, Some(1), true);
         assert!(truncated.len() <= full.len());
         assert!(truncated.len() <= 1);
     }

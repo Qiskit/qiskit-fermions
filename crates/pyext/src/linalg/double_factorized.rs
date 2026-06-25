@@ -15,8 +15,9 @@ use numpy::{IntoPyArray, PyArray2, PyArray4, PyReadonlyArray2, PyReadonlyArray4}
 use pyo3::prelude::*;
 use pyo3_stub_gen::derive::*;
 use qiskit_fermions_core::linalg::double_factorized::{
-    DoubleFactorizedT2AlphaBetaTerm, DoubleFactorizedTerm, double_factorized, double_factorized_t2,
-    double_factorized_t2_alpha_beta, reconstruct_t2, reconstruct_t2_alpha_beta,
+    DoubleFactorizedT2AlphaBetaTerm, DoubleFactorizedTerm, double_factorized_2body,
+    double_factorized_t2, double_factorized_t2_alpha_beta, reconstruct_t2,
+    reconstruct_t2_alpha_beta,
 };
 
 /// A double-factorized term as exposed to Python: a 2-tuple of the diagonal Coulomb matrix and the
@@ -97,9 +98,8 @@ fn dfab_term_from_py(
 /// returning a list of :math:`(Z, U)` terms where each :math:`Z` is a real symmetric diagonal
 /// Coulomb matrix and each :math:`U` is a unitary orbital rotation.
 ///
-/// When ``cholesky`` is ``True`` (the default behavior in the original library) the outer
-/// factorization uses a modified Cholesky decomposition; otherwise it uses a truncated
-/// eigendecomposition.
+/// When ``cholesky`` is ``True`` (the default behavior) the outer factorization uses a modified
+/// Cholesky decomposition; otherwise it uses a truncated eigendecomposition.
 ///
 /// Arguments:
 ///     two_body_tensor: the real two-body tensor of shape ``(norb, norb, norb, norb)``.
@@ -112,15 +112,15 @@ fn dfab_term_from_py(
 ///     A list of :math:`(Z, U)` 2-tuples, where ``Z`` is the diagonal Coulomb matrix and ``U`` is
 ///     the orbital rotation.
 #[gen_stub_pyfunction(module = "qiskit_fermions.linalg.double_factorized")]
-#[pyfunction(name = "double_factorized", signature = (two_body_tensor, tol, max_vecs=None, cholesky=true))]
-pub fn py_double_factorized<'py>(
+#[pyfunction(name = "double_factorized_2body", signature = (two_body_tensor, tol, max_vecs=None, cholesky=true))]
+pub fn py_double_factorized_2body<'py>(
     py: Python<'py>,
     two_body_tensor: PyReadonlyArray4<f64>,
     tol: f64,
     max_vecs: Option<usize>,
     cholesky: bool,
 ) -> Vec<PyDoubleFactorizedTerm<'py>> {
-    double_factorized(
+    double_factorized_2body(
         &two_body_tensor.as_array().to_owned(),
         tol,
         max_vecs,
@@ -247,7 +247,7 @@ pub fn py_reconstruct_t2_alpha_beta<'py>(
 #[pymodule]
 pub mod double_factorized {
     #[pymodule_export]
-    use super::py_double_factorized;
+    use super::py_double_factorized_2body;
     #[pymodule_export]
     use super::py_double_factorized_t2;
     #[pymodule_export]

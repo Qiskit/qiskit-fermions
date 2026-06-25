@@ -27,7 +27,7 @@ import itertools
 import numpy as np
 import pytest
 from qiskit_fermions.linalg import (
-    double_factorized,
+    double_factorized_2body,
     double_factorized_t2,
     double_factorized_t2_alpha_beta,
     reconstruct_t2,
@@ -74,7 +74,7 @@ def _reconstruct_two_body(terms) -> np.ndarray:
 def test_double_factorized_random(dim: int, cholesky: bool):
     """Test double-factorized decomposition on a random tensor."""
     two_body_tensor = random_two_body_tensor(dim, seed=RNG)
-    terms = double_factorized(two_body_tensor, 1e-8, None, cholesky)
+    terms = double_factorized_2body(two_body_tensor, 1e-8, None, cholesky)
     if dim == 0:
         assert terms == []
         return
@@ -87,22 +87,22 @@ def test_double_factorized_tol_max_vecs(cholesky: bool):
     """Test double-factorized decomposition error threshold and max vecs."""
     dim = 5
     two_body_tensor = random_two_body_tensor(dim, seed=RNG)
-    full = double_factorized(two_body_tensor, 1e-8, None, cholesky)
+    full = double_factorized_2body(two_body_tensor, 1e-8, None, cholesky)
 
     # test max_vecs caps the number of returned terms
     max_vecs = 3
-    terms = double_factorized(two_body_tensor, 1e-8, max_vecs, cholesky)
+    terms = double_factorized_2body(two_body_tensor, 1e-8, max_vecs, cholesky)
     assert len(terms) == max_vecs
     assert len(terms) <= len(full)
 
     # test that a looser tolerance discards terms
-    loose = double_factorized(two_body_tensor, 1e-1, None, cholesky)
+    loose = double_factorized_2body(two_body_tensor, 1e-1, None, cholesky)
     assert len(loose) <= len(full)
     reconstructed = _reconstruct_two_body(loose) if loose else np.zeros_like(two_body_tensor)
     np.testing.assert_allclose(reconstructed, two_body_tensor, atol=1e-1)
 
     # test error threshold and max vecs together
-    terms = double_factorized(two_body_tensor, 1e-1, max_vecs, cholesky)
+    terms = double_factorized_2body(two_body_tensor, 1e-1, max_vecs, cholesky)
     assert len(terms) <= max_vecs
 
 
