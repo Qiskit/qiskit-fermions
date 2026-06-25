@@ -1050,6 +1050,22 @@ mod tests {
     }
 
     #[test]
+    fn test_num_groups() {
+        let mut zero = EdgeVertexOperator::zero();
+
+        assert!(zero.num_groups().is_none());
+
+        zero.groups = Some(vec![]);
+
+        assert_eq!(zero.num_groups(), Some(0));
+
+        let mut one = EdgeVertexOperator::one();
+        one.groups = Some(vec![0]);
+
+        assert_eq!(one.num_groups(), Some(1));
+    }
+
+    #[test]
     fn test_split_out_groups() {
         let op = EdgeVertexOperator {
             coeffs: vec![
