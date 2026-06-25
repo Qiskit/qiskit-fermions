@@ -44,6 +44,20 @@ jobs:
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
 
+      - name: Generate qiskit-pyo3-ffi crate
+        shell: bash
+        env:
+          GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+        run: |
+          git clone https://github.com/Qiskit/qiskit build/qiskit
+          cd build/qiskit
+          # checkout the latest (i.e. stable) release tag
+          git checkout $(gh release -R Qiskit/qiskit view 2.5.0rc1 --json tagName --jq ".tagName")
+          make qiskit-pyo3-ffi
+          # ad-hoc workaround until a proper solution is found for
+          # `qiskit-pyo3-ffi` being nested in our workspace folder
+          sed -i '/\[workspace\]/d' dist/rust/qiskit-pyo3-ffi/Cargo.toml
+
       - name: Tell reno to name the upcoming release after the branch we are on
         shell: bash
         run: |
