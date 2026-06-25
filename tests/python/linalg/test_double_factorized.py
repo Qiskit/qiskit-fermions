@@ -30,7 +30,6 @@ from qiskit_fermions.linalg import (
     double_factorized,
     double_factorized_t2,
     double_factorized_t2_alpha_beta,
-    modified_cholesky,
     reconstruct_t2,
     reconstruct_t2_alpha_beta,
 )
@@ -69,18 +68,6 @@ def _reconstruct_two_body(terms) -> np.ndarray:
         orbital_rotations,
         orbital_rotations,
     )
-
-
-@pytest.mark.parametrize("dim", range(6))
-def test_modified_cholesky(dim: int):
-    """Test modified Cholesky decomposition on a random tensor."""
-    # construct a random positive definite matrix
-    unitary = random_unitary(dim, seed=RNG)
-    eigs = RNG.uniform(size=dim)
-    mat = unitary @ np.diag(eigs) @ unitary.T.conj()
-    cholesky_vecs = modified_cholesky(mat, 1e-8, None)
-    reconstructed = np.einsum("ji,ki->jk", cholesky_vecs, cholesky_vecs.conj())
-    np.testing.assert_allclose(reconstructed, mat, atol=1e-8)
 
 
 @pytest.mark.parametrize("dim, cholesky", itertools.product(range(6), [False, True]))

@@ -15,9 +15,8 @@ use numpy::{IntoPyArray, PyArray2, PyArray4, PyReadonlyArray2, PyReadonlyArray4}
 use pyo3::prelude::*;
 use pyo3_stub_gen::derive::*;
 use qiskit_fermions_core::linalg::double_factorized::{
-    DoubleFactorizedT2AlphaBetaTerm, DoubleFactorizedTerm, double_factorized,
-    double_factorized_t2, double_factorized_t2_alpha_beta, modified_cholesky, reconstruct_t2,
-    reconstruct_t2_alpha_beta,
+    DoubleFactorizedT2AlphaBetaTerm, DoubleFactorizedTerm, double_factorized, double_factorized_t2,
+    double_factorized_t2_alpha_beta, reconstruct_t2, reconstruct_t2_alpha_beta,
 };
 
 /// A double-factorized term as exposed to Python: a 2-tuple of the diagonal Coulomb matrix and the
@@ -50,35 +49,13 @@ fn alpha_beta_term_into_py(
         orbital_rotations: [alpha, beta],
     } = term;
     (
-        [aa.into_pyarray(py), ab.into_pyarray(py), bb.into_pyarray(py)],
+        [
+            aa.into_pyarray(py),
+            ab.into_pyarray(py),
+            bb.into_pyarray(py),
+        ],
         [alpha.into_pyarray(py), beta.into_pyarray(py)],
     )
-}
-
-/// Modified Cholesky decomposition of a Hermitian positive-semidefinite matrix.
-///
-/// Decomposes ``mat`` into a sum of outer products :math:`M = \sum_i v_i v_i^\dagger`, returning the
-/// vectors :math:`v_i` as the columns of the result. The number of terms is governed by ``tol``,
-/// while ``max_vecs`` (default: the matrix dimension) is always respected even if it forces the
-/// truncation error above ``tol``.
-///
-/// Arguments:
-///     mat: the Hermitian positive-semidefinite matrix, :math:`M`, to decompose.
-///     tol: the tolerance controlling the truncation error of the decomposition.
-///     max_vecs: the maximum number of Cholesky vectors to retain. Defaults to the dimension of
-///         ``mat``.
-///
-/// Returns:
-///     A 2-dimensional array whose columns are the Cholesky vectors :math:`v_i`.
-#[gen_stub_pyfunction(module = "qiskit_fermions.linalg.double_factorized")]
-#[pyfunction(name = "modified_cholesky", signature = (mat, tol, max_vecs=None))]
-pub fn py_modified_cholesky<'py>(
-    py: Python<'py>,
-    mat: PyReadonlyArray2<Complex64>,
-    tol: f64,
-    max_vecs: Option<usize>,
-) -> Bound<'py, PyArray2<Complex64>> {
-    modified_cholesky(&mat.as_array().to_owned(), tol, max_vecs).into_pyarray(py)
 }
 
 /// Double-factorized decomposition of a real two-body tensor.
@@ -111,10 +88,15 @@ pub fn py_double_factorized<'py>(
     max_vecs: Option<usize>,
     cholesky: bool,
 ) -> Vec<PyDoubleFactorizedTerm<'py>> {
-    double_factorized(&two_body_tensor.as_array().to_owned(), tol, max_vecs, cholesky)
-        .into_iter()
-        .map(|term| term_into_py(py, term))
-        .collect()
+    double_factorized(
+        &two_body_tensor.as_array().to_owned(),
+        tol,
+        max_vecs,
+        cholesky,
+    )
+    .into_iter()
+    .map(|term| term_into_py(py, term))
+    .collect()
 }
 
 /// Double-factorized decomposition of spin-restricted :math:`t_2` amplitudes.
@@ -228,14 +210,16 @@ pub fn py_reconstruct_t2_alpha_beta<'py>(
 ) -> Bound<'py, PyArray4<Complex64>> {
     let terms: Vec<DoubleFactorizedT2AlphaBetaTerm> = terms
         .into_iter()
-        .map(|([aa, ab, bb], [alpha, beta])| DoubleFactorizedT2AlphaBetaTerm {
-            diag_coulomb: [
-                aa.as_array().to_owned(),
-                ab.as_array().to_owned(),
-                bb.as_array().to_owned(),
-            ],
-            orbital_rotations: [alpha.as_array().to_owned(), beta.as_array().to_owned()],
-        })
+        .map(
+            |([aa, ab, bb], [alpha, beta])| DoubleFactorizedT2AlphaBetaTerm {
+                diag_coulomb: [
+                    aa.as_array().to_owned(),
+                    ab.as_array().to_owned(),
+                    bb.as_array().to_owned(),
+                ],
+                orbital_rotations: [alpha.as_array().to_owned(), beta.as_array().to_owned()],
+            },
+        )
         .collect();
     reconstruct_t2_alpha_beta(&terms, norb, nocc_a, nocc_b).into_pyarray(py)
 }
@@ -243,15 +227,13 @@ pub fn py_reconstruct_t2_alpha_beta<'py>(
 #[pymodule]
 pub mod double_factorized {
     #[pymodule_export]
-    use super::py_modified_cholesky;
-    #[pymodule_export]
     use super::py_double_factorized;
     #[pymodule_export]
     use super::py_double_factorized_t2;
     #[pymodule_export]
-    use super::py_reconstruct_t2;
-    #[pymodule_export]
     use super::py_double_factorized_t2_alpha_beta;
+    #[pymodule_export]
+    use super::py_reconstruct_t2;
     #[pymodule_export]
     use super::py_reconstruct_t2_alpha_beta;
 }

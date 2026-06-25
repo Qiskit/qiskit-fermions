@@ -173,7 +173,7 @@ fn cumulative_discard_count(ascending_abs_tail: impl Iterator<Item = f64>, tol: 
 /// `v_i` as the columns of the result. The number of terms is governed by `tol`, while
 /// `max_vecs` (default: the matrix dimension) is always respected even if it forces the
 /// truncation error above `tol`.
-pub fn modified_cholesky(
+fn modified_cholesky(
     mat: &Array2<Complex64>,
     tol: f64,
     max_vecs: Option<usize>,
