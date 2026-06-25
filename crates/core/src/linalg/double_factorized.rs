@@ -68,26 +68,44 @@ fn nalgebra_to_ndarray<T: nalgebra::Scalar + Copy>(mat: &DMatrix<T>) -> Array2<T
 ///
 /// Returns eigenvalues sorted in ascending order (matching numpy's `eigh`) together with the
 /// corresponding eigenvectors as the columns of the returned matrix.
-fn hermitian_eigh(mat: &Array2<Complex64>) -> (Array1<f64>, Array2<Complex64>) {
+///
+/// This function optionally truncates the returned eigenpairs by sorting them by descending
+/// absolute eigenvalue, then discards the smallest-magnitude eigenpairs whose cumulative absolute
+/// sum stays below `tol`, capping the number of retained vectors at `max_vecs` (default: all).
+fn hermitian_eigh(
+    mat: &Array2<Complex64>,
+    tol: Option<f64>,
+    max_vecs: Option<usize>,
+) -> (Array1<f64>, Array2<Complex64>) {
     let nalg = ndarray_to_nalgebra(mat);
     let eigen = nalg.symmetric_eigen();
-    sort_eigen_ascending(&eigen.eigenvalues, &eigen.eigenvectors)
-}
 
-/// Sorts eigenpairs in ascending order of eigenvalue and converts them to ndarray types.
-fn sort_eigen_ascending<T: nalgebra::Scalar + Copy>(
-    eigenvalues: &nalgebra::DVector<f64>,
-    eigenvectors: &DMatrix<T>,
-) -> (Array1<f64>, Array2<T>) {
-    let dim = eigenvalues.len();
+    let eigs = &eigen.eigenvalues;
+    let vecs = &eigen.eigenvectors;
+    let dim = eigs.len();
+    let mut n_keep = dim;
+
     let mut order: Vec<usize> = (0..dim).collect();
-    order.sort_by(|&a, &b| eigenvalues[a].partial_cmp(&eigenvalues[b]).unwrap());
+    // When we want to truncate the eigenpairs, we must order the eigenvalues by their |eigs|,
+    // otherwise we order them by their non-absolute values.
+    if tol.is_none() {
+        // Order by ascending eigenvalue.
+        order.sort_by(|&a, &b| eigs[a].partial_cmp(&eigs[b]).unwrap());
+    } else {
+        // Order by descending |eigenvalue|.
+        order.sort_by(|&a, &b| eigs[b].abs().partial_cmp(&eigs[a].abs()).unwrap());
 
-    let sorted_vals = Array1::from_shape_fn(dim, |i| eigenvalues[order[i]]);
-    let sorted_vecs = Array2::from_shape_fn((eigenvectors.nrows(), dim), |(row, col)| {
-        eigenvectors[(row, order[col])]
-    });
-    (sorted_vals, sorted_vecs)
+        // The reversed (ascending-magnitude) tail used for the cumulative discard count.
+        let ascending_abs = order.iter().rev().map(|&i| eigs[i].abs());
+        let n_discard = cumulative_discard_count(ascending_abs, tol.unwrap());
+
+        n_keep = max_vecs.unwrap_or(dim).min(dim - n_discard);
+    }
+
+    let kept_vals = Array1::from_shape_fn(n_keep, |i| eigs[order[i]]);
+    let kept_vecs =
+        Array2::from_shape_fn((vecs.nrows(), n_keep), |(row, col)| vecs[(row, order[col])]);
+    (kept_vals, kept_vecs)
 }
 
 /// Thin SVD of a complex matrix.
@@ -132,35 +150,6 @@ fn cumulative_discard_count(ascending_abs_tail: impl Iterator<Item = f64>, tol: 
         }
     }
     discard
-}
-
-/// Truncated Hermitian eigendecomposition.
-///
-/// Sorts eigenpairs by descending absolute eigenvalue, then discards the smallest-magnitude
-/// eigenpairs whose cumulative absolute sum stays below `tol`, capping the number of retained
-/// vectors at `max_vecs` (default: all).
-fn truncated_eigh(
-    mat: &Array2<Complex64>,
-    tol: f64,
-    max_vecs: Option<usize>,
-) -> (Array1<f64>, Array2<Complex64>) {
-    let (eigs, vecs) = hermitian_eigh(mat);
-    let dim = eigs.len();
-
-    // Order by descending |eigenvalue|.
-    let mut order: Vec<usize> = (0..dim).collect();
-    order.sort_by(|&a, &b| eigs[b].abs().partial_cmp(&eigs[a].abs()).unwrap());
-
-    // The reversed (ascending-magnitude) tail used for the cumulative discard count.
-    let ascending_abs = order.iter().rev().map(|&i| eigs[i].abs());
-    let n_discard = cumulative_discard_count(ascending_abs, tol);
-
-    let n_vecs = max_vecs.unwrap_or(dim).min(dim - n_discard);
-
-    let kept_eigs = Array1::from_shape_fn(n_vecs, |i| eigs[order[i]]);
-    let kept_vecs =
-        Array2::from_shape_fn((vecs.nrows(), n_vecs), |(row, col)| vecs[[row, order[col]]]);
-    (kept_eigs, kept_vecs)
 }
 
 /// Truncated thin SVD.
@@ -291,7 +280,7 @@ pub fn double_factorized(
         let n_vecs = cholesky_vecs.ncols();
         (cholesky_vecs, vec![1.0; n_vecs])
     } else {
-        let (outer_eigs, outer_vecs) = truncated_eigh(&reshaped, tol, Some(max_vecs));
+        let (outer_eigs, outer_vecs) = hermitian_eigh(&reshaped, Some(tol), Some(max_vecs));
         let coeffs = outer_eigs.to_vec();
         (outer_vecs, coeffs)
     };
@@ -335,7 +324,7 @@ fn terms_from_outer_matrices(
         .iter()
         .zip(outer_coeffs.iter())
         .map(|(mat, &coeff)| {
-            let (eigs, rotation) = hermitian_eigh(mat);
+            let (eigs, rotation) = hermitian_eigh(mat, None, None);
             let eigs = eigs.as_slice().unwrap();
             let diag_coulomb = diag_coulomb_outer(coeff, eigs, eigs);
             (diag_coulomb, rotation)
@@ -397,7 +386,7 @@ pub fn double_factorized_t2(
         t2_amplitudes[[i, j, a, b]]
     });
 
-    let (outer_eigs, outer_vecs) = truncated_eigh(&t2_mat, tol, None);
+    let (outer_eigs, outer_vecs) = hermitian_eigh(&t2_mat, Some(tol), None);
     let n_vecs = outer_eigs.len();
 
     let mut terms: Vec<DoubleFactorizedTerm> = Vec::with_capacity(2 * n_vecs);
@@ -407,7 +396,7 @@ pub fn double_factorized_t2(
 
         for (sign, coeff_sign) in [(1.0, 1.0), (-1.0, -1.0)] {
             let one_body = quadrature(&mat, sign);
-            let (eigs, rotation) = hermitian_eigh(&one_body);
+            let (eigs, rotation) = hermitian_eigh(&one_body, None, None);
             let coeff = coeff_sign * outer_eigs[t];
             let eigs = eigs.as_slice().unwrap();
             let diag_coulomb = diag_coulomb_outer(coeff, eigs, eigs);
@@ -520,8 +509,8 @@ pub fn double_factorized_t2_alpha_beta(
         for (row_idx, (sign, beta_mat)) in rows.iter().enumerate() {
             let one_body_a = quadrature(&left_mat, *sign);
             let one_body_b = quadrature(beta_mat, *sign);
-            let (eigs_a, rotation_a) = hermitian_eigh(&one_body_a);
-            let (eigs_b, rotation_b) = hermitian_eigh(&one_body_b);
+            let (eigs_a, rotation_a) = hermitian_eigh(&one_body_a, None, None);
+            let (eigs_b, rotation_b) = hermitian_eigh(&one_body_b, None, None);
 
             let coeff = 0.5 * coeff_signs[row_idx] * singular_vals[t];
 
