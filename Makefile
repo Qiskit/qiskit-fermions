@@ -42,7 +42,7 @@ docsclean:
 # ==============================================================================
 .PHONY: testrust
 testrust:
-	cargo test -p qiskit-fermions-core --no-default-features
+	cargo test -p qiskit-fermions-core --no-default-features --features cext
 
 .PHONY: rustcoverage
 rustcoverage: export RUSTFLAGS:=-Cinstrument-coverage

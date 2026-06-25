@@ -1004,6 +1004,7 @@ dependencies = [
  "ndarray",
  "num-complex",
  "num-traits",
+ "qiskit-pyo3-ffi",
  "qiskit-sys",
  "rayon",
  "regex",
@@ -1020,7 +1021,15 @@ dependencies = [
  "pyo3",
  "pyo3-stub-gen",
  "qiskit-fermions-core",
- "qiskit-sys",
+ "qiskit-pyo3-ffi",
+]
+
+[[package]]
+name = "qiskit-pyo3-ffi"
+version = "0.1.0"
+dependencies = [
+ "num-complex",
+ "pyo3",
 ]
 
 [[package]]
@@ -1028,7 +1037,6 @@ name = "qiskit-sys"
 version = "2.2.3"
 dependencies = [
  "bindgen",
- "pyo3",
 ]
 
 [[package]]

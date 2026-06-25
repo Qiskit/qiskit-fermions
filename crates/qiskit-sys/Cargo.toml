@@ -6,12 +6,5 @@ license.workspace = true
 description = "Raw bindings to libqiskit"
 version = "2.2.3"
 
-[dependencies]
-pyo3 = { workspace = true, optional = true }
-
-[features]
-default = []
-python_binding = ["dep:pyo3"]
-
 [build-dependencies]
 bindgen = "0.72.0"

@@ -14,18 +14,20 @@ use std::env;
 use std::path::Path;
 
 fn main() {
-    let qiskit_lib = env::var("QISKIT_LIB").unwrap();
+    if cfg!(feature = "cext") {
+        let qiskit_lib = env::var("QISKIT_LIB").unwrap();
 
-    let qiskit_lib_path = Path::new(&qiskit_lib);
+        let qiskit_lib_path = Path::new(&qiskit_lib);
 
-    match qiskit_lib_path.try_exists() {
-        Ok(b) => match b {
-            true => {}
-            false => panic!("Qiskit path does not exist"),
-        },
-        Err(e) => panic!("{e:?}"),
+        match qiskit_lib_path.try_exists() {
+            Ok(b) => match b {
+                true => {}
+                false => panic!("Qiskit path does not exist"),
+            },
+            Err(e) => panic!("{e:?}"),
+        }
+
+        let qiskit_lib_dir = qiskit_lib_path.parent().unwrap().to_str().unwrap();
+        println!("cargo:rustc-link-arg=-Wl,-rpath,{}", qiskit_lib_dir);
     }
-
-    let qiskit_lib_dir = qiskit_lib_path.parent().unwrap().to_str().unwrap();
-    println!("cargo:rustc-link-arg=-Wl,-rpath,{}", qiskit_lib_dir);
 }

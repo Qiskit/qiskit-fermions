@@ -58,56 +58,10 @@ fn generate_bindings_c() {
         .expect("Couldn't write bindings!");
 }
 
-fn generate_bindings_py() {
-    let qiskit_lib = env::var("QISKIT_LIB").unwrap();
-    let qiskit_include = env::var("QISKIT_INCLUDE").unwrap();
-
-    let qiskit_lib_path = Path::new(&qiskit_lib);
-
-    match qiskit_lib_path.try_exists() {
-        Ok(b) => match b {
-            true => {}
-            false => panic!("Qiskit path does not exist"),
-        },
-        Err(e) => panic!("{e:?}"),
-    }
-
-    let qiskit_lib_dir = qiskit_lib_path.parent().unwrap().to_str().unwrap();
-
-    println!("cargo:rustc-link-search={}", qiskit_lib_dir);
-    println!("cargo:rustc-link-arg=-Wl,-rpath,{}", qiskit_lib_dir);
-    println!("cargo:rustc-link-arg={}", qiskit_lib);
-
-    let bindings: bindgen::Bindings = bindgen::Builder::default()
-        // NOTE: somehow on Windows the BINDGEN_EXTRA_CLANG_ARGS don't appear to work, resulting in
-        // the Python.h file not being found unless we manually insert it below.
-        // .clang_arg(format!("-I{}", python_include))
-        .clang_arg(format!("-I{}", qiskit_include))
-        .clang_arg("-DQISKIT_C_PYTHON_INTERFACE=1")
-        .raw_line("use pyo3::ffi::PyObject;")
-        .header(format!("{}/qiskit.h", qiskit_include))
-        .allowlist_item("^(qk_.*)$")
-        .allowlist_item("^(Qk.*)$")
-        .blocklist_item("^(Py.*)$")
-        .opaque_type("PyObject")
-        .parse_callbacks(Box::new(CargoCallbacks))
-        .generate()
-        .expect("Unable to generate bindings");
-
-    let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
-    bindings
-        .write_to_file(out_path.join("bindings.rs"))
-        .expect("Couldn't write bindings!");
-}
-
 fn main() {
     println!("cargo:rerun-if-changed=build.rs");
     println!("cargo::rerun-if-env-changed=QISKIT_LIB");
     println!("cargo::rerun-if-env-changed=QISKIT_INCLUDE");
 
-    if cfg!(feature = "python_binding") {
-        generate_bindings_py();
-    } else {
-        generate_bindings_c();
-    }
+    generate_bindings_c();
 }

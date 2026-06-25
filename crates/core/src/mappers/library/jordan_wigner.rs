@@ -14,33 +14,50 @@ use crate::operators::fermion_operator::{FermionAction, FermionOperator};
 use rayon::prelude::*;
 use std::sync::{Arc, Mutex};
 
-fn map_action(action: FermionAction, num_qubits: u32) -> *mut qiskit_sys::QkObs {
+cfg_select! {
+    feature = "pyext" => {
+        use num_complex::Complex64 as QkComplex64;
+        extern crate qiskit_pyo3_ffi as ffi;
+        use ffi::QkBitTerm::X as QkBitTermX;
+        use ffi::QkBitTerm::Y as QkBitTermY;
+        use ffi::QkBitTerm::Z as QkBitTermZ;
+    }
+    feature = "cext" => {
+        extern crate qiskit_sys as ffi;
+        use ffi::QkComplex64 as QkComplex64;
+        use ffi::QkBitTerm_QkBitTerm_X as QkBitTermX;
+        use ffi::QkBitTerm_QkBitTerm_Y as QkBitTermY;
+        use ffi::QkBitTerm_QkBitTerm_Z as QkBitTermZ;
+    }
+}
+
+fn map_action(action: FermionAction, num_qubits: u32) -> *mut ffi::QkObs {
     let fer_idx = *action.1 as usize;
     let im = if *action.0 { -0.5 } else { 0.5 };
-    let mut coeffs: Vec<qiskit_sys::QkComplex64> = vec![
-        qiskit_sys::QkComplex64 { re: 0.5, im: 0.0 },
-        qiskit_sys::QkComplex64 { re: 0.0, im },
+    let mut coeffs: Vec<QkComplex64> = vec![
+        QkComplex64 { re: 0.5, im: 0.0 },
+        QkComplex64 { re: 0.0, im },
     ];
 
-    let mut bit_terms = Vec::<qiskit_sys::QkBitTerm>::new();
+    let mut bit_terms = Vec::<ffi::QkBitTerm>::new();
     let mut indices = Vec::<u32>::new();
     for qb_idx in 0..fer_idx {
-        bit_terms.push(qiskit_sys::QkBitTerm_QkBitTerm_Z);
+        bit_terms.push(QkBitTermZ);
         indices.push(qb_idx as u32);
     }
-    bit_terms.push(qiskit_sys::QkBitTerm_QkBitTerm_X);
+    bit_terms.push(QkBitTermX);
     indices.push(fer_idx as u32);
     for qb_idx in 0..fer_idx {
-        bit_terms.push(qiskit_sys::QkBitTerm_QkBitTerm_Z);
+        bit_terms.push(QkBitTermZ);
         indices.push(qb_idx as u32);
     }
-    bit_terms.push(qiskit_sys::QkBitTerm_QkBitTerm_Y);
+    bit_terms.push(QkBitTermY);
     indices.push(fer_idx as u32);
 
     let mut boundaries: Vec<usize> = vec![0, fer_idx + 1, 2 * fer_idx + 2];
 
     unsafe {
-        qiskit_sys::qk_obs_new(
+        ffi::qk_obs_new(
             num_qubits,
             coeffs.len().try_into().unwrap(),
             bit_terms.len().try_into().unwrap(),
@@ -54,13 +71,13 @@ fn map_action(action: FermionAction, num_qubits: u32) -> *mut qiskit_sys::QkObs 
 
 // NOTE: https://stackoverflow.com/a/50341075
 struct Wrapper {
-    ptr: *mut qiskit_sys::QkObs,
+    ptr: *mut ffi::QkObs,
 }
 unsafe impl Send for Wrapper {}
 
 // TODO: can we clean up the coding pattern of overwriting a data structure in-place to avoid the
 // repetitive re-allocations?
-pub fn jordan_wigner(fer_op: &FermionOperator, num_qubits: u32) -> *mut qiskit_sys::QkObs {
+pub fn jordan_wigner(fer_op: &FermionOperator, num_qubits: u32) -> *mut ffi::QkObs {
     let pool = rayon::ThreadPoolBuilder::new()
         .num_threads(0)
         .build()
@@ -69,38 +86,38 @@ pub fn jordan_wigner(fer_op: &FermionOperator, num_qubits: u32) -> *mut qiskit_s
     let mut qubit_ops = vec![];
     for _ in 0..pool.current_num_threads() {
         qubit_ops.push(Arc::new(Mutex::new(Wrapper {
-            ptr: unsafe { qiskit_sys::qk_obs_zero(num_qubits) },
+            ptr: unsafe { ffi::qk_obs_zero(num_qubits) },
         })));
     }
 
     pool.install(|| {
         fer_op.iter().par_bridge().for_each(|term| {
-            let qk_coeff = qiskit_sys::QkComplex64 {
+            let qk_coeff = QkComplex64 {
                 re: term.coeff.re,
                 im: term.coeff.im,
             };
 
-            let mut mapped_term = unsafe { qiskit_sys::qk_obs_identity(num_qubits) };
+            let mut mapped_term = unsafe { ffi::qk_obs_identity(num_qubits) };
 
             term.iter().for_each(|action| {
                 let mapped_action = map_action(action, num_qubits);
-                let new_term = unsafe { qiskit_sys::qk_obs_compose(mapped_action, mapped_term) };
-                unsafe { qiskit_sys::qk_obs_free(mapped_action) };
-                unsafe { qiskit_sys::qk_obs_free(mapped_term) };
+                let new_term = unsafe { ffi::qk_obs_compose(mapped_action, mapped_term) };
+                unsafe { ffi::qk_obs_free(mapped_action) };
+                unsafe { ffi::qk_obs_free(mapped_term) };
                 mapped_term = new_term;
             });
 
-            let canon_term = unsafe { qiskit_sys::qk_obs_canonicalize(mapped_term, 1e-18) };
-            unsafe { qiskit_sys::qk_obs_free(mapped_term) };
+            let canon_term = unsafe { ffi::qk_obs_canonicalize(mapped_term, 1e-18) };
+            unsafe { ffi::qk_obs_free(mapped_term) };
 
             let qubit_op = qubit_ops[pool.current_thread_index().unwrap()]
                 // this should never lock because we have one item per thread
                 .lock()
                 .unwrap();
 
-            unsafe { qiskit_sys::qk_obs_scaled_add_inplace(qubit_op.ptr, canon_term, &qk_coeff) };
+            unsafe { ffi::qk_obs_scaled_add_inplace(qubit_op.ptr, canon_term, &qk_coeff) };
 
-            unsafe { qiskit_sys::qk_obs_free(canon_term) };
+            unsafe { ffi::qk_obs_free(canon_term) };
         });
     });
 
@@ -108,32 +125,32 @@ pub fn jordan_wigner(fer_op: &FermionOperator, num_qubits: u32) -> *mut qiskit_s
         .par_iter()
         .fold(
             || Wrapper {
-                ptr: unsafe { qiskit_sys::qk_obs_zero(num_qubits) },
+                ptr: unsafe { ffi::qk_obs_zero(num_qubits) },
             },
             {
                 |op1: Wrapper, op2| {
                     let op_locked = op2.lock().unwrap();
-                    unsafe { qiskit_sys::qk_obs_add_inplace(op1.ptr, op_locked.ptr) };
-                    unsafe { qiskit_sys::qk_obs_free(op_locked.ptr) };
+                    unsafe { ffi::qk_obs_add_inplace(op1.ptr, op_locked.ptr) };
+                    unsafe { ffi::qk_obs_free(op_locked.ptr) };
                     op1
                 }
             },
         )
         .reduce(
             || Wrapper {
-                ptr: unsafe { qiskit_sys::qk_obs_zero(num_qubits) },
+                ptr: unsafe { ffi::qk_obs_zero(num_qubits) },
             },
             {
                 |op1, op2| {
-                    let num_add_terms1 = unsafe { qiskit_sys::qk_obs_num_terms(op1.ptr) };
-                    let num_add_terms2 = unsafe { qiskit_sys::qk_obs_num_terms(op2.ptr) };
+                    let num_add_terms1 = unsafe { ffi::qk_obs_num_terms(op1.ptr) };
+                    let num_add_terms2 = unsafe { ffi::qk_obs_num_terms(op2.ptr) };
                     if num_add_terms1 > num_add_terms2 {
-                        unsafe { qiskit_sys::qk_obs_add_inplace(op1.ptr, op2.ptr) };
-                        unsafe { qiskit_sys::qk_obs_free(op2.ptr) };
+                        unsafe { ffi::qk_obs_add_inplace(op1.ptr, op2.ptr) };
+                        unsafe { ffi::qk_obs_free(op2.ptr) };
                         op1
                     } else {
-                        unsafe { qiskit_sys::qk_obs_add_inplace(op2.ptr, op1.ptr) };
-                        unsafe { qiskit_sys::qk_obs_free(op1.ptr) };
+                        unsafe { ffi::qk_obs_add_inplace(op2.ptr, op1.ptr) };
+                        unsafe { ffi::qk_obs_free(op1.ptr) };
                         op2
                     }
                 }
@@ -228,102 +245,75 @@ mod tests {
         };
         let qb_op = jordan_wigner(&fer_op, 4);
 
-        let mut coeffs: Vec<qiskit_sys::QkComplex64> = vec![
-            qiskit_sys::QkComplex64 {
+        let mut coeffs: Vec<QkComplex64> = vec![
+            QkComplex64 {
                 re: -0.8105479805373261,
                 im: 0.0,
             },
-            qiskit_sys::QkComplex64 {
+            QkComplex64 {
                 re: -0.22575349222402477,
                 im: 0.0,
             },
-            qiskit_sys::QkComplex64 {
+            QkComplex64 {
                 re: 0.17218393261915543,
                 im: 0.0,
             },
-            qiskit_sys::QkComplex64 {
+            QkComplex64 {
                 re: 0.12091263261776633,
                 im: 0.0,
             },
-            qiskit_sys::QkComplex64 {
+            QkComplex64 {
                 re: 0.17218393261915554,
                 im: 0.0,
             },
-            qiskit_sys::QkComplex64 {
+            QkComplex64 {
                 re: 0.16892753870087912,
                 im: 0.0,
             },
-            qiskit_sys::QkComplex64 {
+            QkComplex64 {
                 re: -0.22575349222402477,
                 im: 0.0,
             },
-            qiskit_sys::QkComplex64 {
+            QkComplex64 {
                 re: 0.16614543256382416,
                 im: 0.0,
             },
-            qiskit_sys::QkComplex64 {
+            QkComplex64 {
                 re: 0.04523279994605783,
                 im: 0.0,
             },
-            qiskit_sys::QkComplex64 {
+            QkComplex64 {
                 re: 0.04523279994605783,
                 im: 0.0,
             },
-            qiskit_sys::QkComplex64 {
+            QkComplex64 {
                 re: 0.04523279994605783,
                 im: 0.0,
             },
-            qiskit_sys::QkComplex64 {
+            QkComplex64 {
                 re: 0.04523279994605783,
                 im: 0.0,
             },
-            qiskit_sys::QkComplex64 {
+            QkComplex64 {
                 re: 0.16614543256382416,
                 im: 0.0,
             },
-            qiskit_sys::QkComplex64 {
+            QkComplex64 {
                 re: 0.17464343068300459,
                 im: 0.0,
             },
-            qiskit_sys::QkComplex64 {
+            QkComplex64 {
                 re: 0.12091263261776633,
                 im: 0.0,
             },
         ];
 
-        let mut bit_terms: Vec<qiskit_sys::QkBitTerm> = vec![
-            qiskit_sys::QkBitTerm_QkBitTerm_Z,
-            qiskit_sys::QkBitTerm_QkBitTerm_Z,
-            qiskit_sys::QkBitTerm_QkBitTerm_Z,
-            qiskit_sys::QkBitTerm_QkBitTerm_Z,
-            qiskit_sys::QkBitTerm_QkBitTerm_Z,
-            qiskit_sys::QkBitTerm_QkBitTerm_Z,
-            qiskit_sys::QkBitTerm_QkBitTerm_Z,
-            qiskit_sys::QkBitTerm_QkBitTerm_Z,
-            qiskit_sys::QkBitTerm_QkBitTerm_Z,
-            qiskit_sys::QkBitTerm_QkBitTerm_Z,
-            qiskit_sys::QkBitTerm_QkBitTerm_Y,
-            qiskit_sys::QkBitTerm_QkBitTerm_Y,
-            qiskit_sys::QkBitTerm_QkBitTerm_Y,
-            qiskit_sys::QkBitTerm_QkBitTerm_Y,
-            qiskit_sys::QkBitTerm_QkBitTerm_Y,
-            qiskit_sys::QkBitTerm_QkBitTerm_Y,
-            qiskit_sys::QkBitTerm_QkBitTerm_X,
-            qiskit_sys::QkBitTerm_QkBitTerm_X,
-            qiskit_sys::QkBitTerm_QkBitTerm_X,
-            qiskit_sys::QkBitTerm_QkBitTerm_X,
-            qiskit_sys::QkBitTerm_QkBitTerm_Y,
-            qiskit_sys::QkBitTerm_QkBitTerm_Y,
-            qiskit_sys::QkBitTerm_QkBitTerm_X,
-            qiskit_sys::QkBitTerm_QkBitTerm_X,
-            qiskit_sys::QkBitTerm_QkBitTerm_X,
-            qiskit_sys::QkBitTerm_QkBitTerm_X,
-            qiskit_sys::QkBitTerm_QkBitTerm_Z,
-            qiskit_sys::QkBitTerm_QkBitTerm_Z,
-            qiskit_sys::QkBitTerm_QkBitTerm_Z,
-            qiskit_sys::QkBitTerm_QkBitTerm_Z,
-            qiskit_sys::QkBitTerm_QkBitTerm_Z,
-            qiskit_sys::QkBitTerm_QkBitTerm_Z,
+        let mut bit_terms: Vec<ffi::QkBitTerm> = vec![
+            QkBitTermZ, QkBitTermZ, QkBitTermZ, QkBitTermZ, QkBitTermZ, QkBitTermZ, QkBitTermZ,
+            QkBitTermZ, QkBitTermZ, QkBitTermZ, QkBitTermY, QkBitTermY, QkBitTermY, QkBitTermY,
+            QkBitTermY, QkBitTermY, QkBitTermX, QkBitTermX, QkBitTermX, QkBitTermX, QkBitTermY,
+            QkBitTermY, QkBitTermX, QkBitTermX, QkBitTermX, QkBitTermX, QkBitTermZ, QkBitTermZ,
+            QkBitTermZ, QkBitTermZ, QkBitTermZ, QkBitTermZ,
         ];
 
         let mut indices: Vec<u32> = vec![
@@ -335,7 +325,7 @@ mod tests {
             vec![0, 0, 1, 2, 4, 5, 7, 8, 10, 14, 18, 22, 26, 28, 30, 32];
 
         let mut expected = unsafe {
-            qiskit_sys::qk_obs_new(
+            ffi::qk_obs_new(
                 4,
                 coeffs.len().try_into().unwrap(),
                 bit_terms.len().try_into().unwrap(),
@@ -346,16 +336,16 @@ mod tests {
             )
         };
 
-        let factor = qiskit_sys::QkComplex64 { re: -1.0, im: 0.0 };
-        expected = unsafe { qiskit_sys::qk_obs_multiply(expected, &factor) };
+        let factor = QkComplex64 { re: -1.0, im: 0.0 };
+        expected = unsafe { ffi::qk_obs_multiply(expected, &factor) };
 
-        let mut diff = unsafe { qiskit_sys::qk_obs_add(qb_op, expected) };
+        let mut diff = unsafe { ffi::qk_obs_add(qb_op, expected) };
 
-        diff = unsafe { qiskit_sys::qk_obs_canonicalize(diff, 1e-6) };
+        diff = unsafe { ffi::qk_obs_canonicalize(diff, 1e-6) };
 
-        let zero = unsafe { qiskit_sys::qk_obs_zero(4) };
+        let zero = unsafe { ffi::qk_obs_zero(4) };
 
-        let equal = unsafe { qiskit_sys::qk_obs_equal(diff, zero) };
+        let equal = unsafe { ffi::qk_obs_equal(diff, zero) };
 
         assert!(equal)
     }
