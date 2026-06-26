@@ -56,7 +56,7 @@ jobs:
           make qiskit-pyo3-ffi
           # ad-hoc workaround until a proper solution is found for
           # `qiskit-pyo3-ffi` being nested in our workspace folder
-          sed -i '/\[workspace\]/d' dist/rust/qiskit-pyo3-ffi/Cargo.toml
+          sed -i.bak '/\[workspace\]/d' dist/rust/qiskit-pyo3-ffi/Cargo.toml
 
       - name: Tell reno to name the upcoming release after the branch we are on
         shell: bash
