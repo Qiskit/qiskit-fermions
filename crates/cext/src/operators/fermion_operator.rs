@@ -402,13 +402,16 @@ pub unsafe extern "C" fn qf_ferm_op_has_groups(op: *const FermionOperator) -> bo
 
 /// @ingroup qf_ferm_op
 ///
-/// @brief Gets the number of unique group indices from an operator.
+/// @brief Gets the number of groups from an operator.
 ///
-/// @param op A pointer to the fermionic operator whose number of group indices to get.
+/// @param op A pointer to the fermionic operator whose number of groups to get.
 ///
-/// @return The number of unique group indices from the operator's ``groups`` attribute.
+/// @return The number of group indices from the operator's ``groups`` attribute.
 ///
 /// @rst
+///
+/// .. note::
+///    The number of groups is evaluated lazily as the largest occurring group index plus 1.
 ///
 /// .. seealso::
 ///    The explanation on :ref:`grouping_explanation`.
@@ -428,11 +431,10 @@ pub unsafe extern "C" fn qf_ferm_op_has_groups(op: *const FermionOperator) -> bo
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn qf_ferm_op_num_groups(op: *const FermionOperator) -> u32 {
     let op = unsafe { const_ptr_as_ref(op) };
-    let groups = &op.groups.as_ref().expect(
+    op.num_groups().expect(
         "Expected groups to be present. It is the user's responsibility to check this via \
         qf_ferm_op_has_groups before calling this function.",
-    );
-    groups.iter().max().unwrap() + 1
+    )
 }
 
 /// @ingroup qf_ferm_op

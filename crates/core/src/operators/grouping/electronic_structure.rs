@@ -228,11 +228,12 @@ mod tests {
         let fcidump = FCIDump::from_file(file_path);
 
         let op = FermionOperator::from(&fcidump);
-
-        let groups = op.split_out_groups();
+        // NOTE: even though the FCIDump loading automatically tracks groups, we can reduce the
+        // overall number of groups by first normal-ordering the Hamiltonian and grouping the
+        // remaining terms.
         assert!(
-            groups.is_none(),
-            "We should not have any group indices yet!"
+            op.num_groups() == Some(23),
+            "Expected 23 groups to be found by the FCIDump parsing."
         );
 
         let mut normal = op.normal_ordered(None).simplify(1e-16);
@@ -277,11 +278,12 @@ mod tests {
         let fcidump = FCIDump::from_file(file_path);
 
         let op = FermionOperator::from(&fcidump);
-
-        let groups = op.split_out_groups();
+        // NOTE: even though the FCIDump loading automatically tracks groups, we can reduce the
+        // overall number of groups by first normal-ordering the Hamiltonian and grouping the
+        // remaining terms.
         assert!(
-            groups.is_none(),
-            "We should not have any group indices yet!"
+            op.num_groups() == Some(23),
+            "Expected 23 groups to be found by the FCIDump parsing."
         );
 
         let mut normal = op.normal_ordered(None).simplify(1e-16);

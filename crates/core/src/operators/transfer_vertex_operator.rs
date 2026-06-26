@@ -95,9 +95,18 @@ impl TransferVertexOperator {
         })
     }
 
+    pub fn num_groups(&self) -> Option<u32> {
+        let self_groups = self.groups.as_ref()?;
+        if self_groups.is_empty() {
+            Some(0)
+        } else {
+            Some(self_groups.iter().max().unwrap() + 1)
+        }
+    }
+
     pub fn split_out_groups(&self) -> Option<Vec<Self>> {
         let self_groups = self.groups.as_ref()?;
-        let num_groups = self_groups.iter().max().unwrap() + 1;
+        let num_groups = self.num_groups()?;
         let mut groups = vec![Self::zero(); num_groups as usize];
         for (group_idx, term) in zip(self_groups.iter(), self.iter()) {
             groups[*group_idx as usize]._append_term(
@@ -1083,6 +1092,22 @@ mod tests {
         let relabeled = op.relabel_modes(permutation);
 
         assert!(matches!(relabeled, Err(CoherenceError::IndexMapTooSmall)));
+    }
+
+    #[test]
+    fn test_num_groups() {
+        let mut zero = TransferVertexOperator::zero();
+
+        assert!(zero.num_groups().is_none());
+
+        zero.groups = Some(vec![]);
+
+        assert_eq!(zero.num_groups(), Some(0));
+
+        let mut one = TransferVertexOperator::one();
+        one.groups = Some(vec![0]);
+
+        assert_eq!(one.num_groups(), Some(1));
     }
 
     #[test]
