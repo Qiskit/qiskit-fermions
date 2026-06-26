@@ -15,11 +15,7 @@
 from qiskit_fermions._lib.operators.operators_terms.filtering.diagonal import (
     filter_diagonal_terms,
 )
-from qiskit_fermions._lib.operators.operators_terms.filtering.unique_modes import (
-    filter_terms_by_num_unique_modes,
-)
 
 __all__ = [
     "filter_diagonal_terms",
-    "filter_terms_by_num_unique_modes",
 ]

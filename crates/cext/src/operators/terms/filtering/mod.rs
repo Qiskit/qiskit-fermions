@@ -11,4 +11,3 @@
 // that they have been altered from the originals.
 
 pub mod diagonal;
-pub mod unique_modes;

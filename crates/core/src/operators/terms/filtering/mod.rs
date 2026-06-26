@@ -14,7 +14,6 @@ use crate::operators::fermion_operator::{FermionOperator, FermionOperatorTermVie
 use std::collections::HashMap;
 
 pub mod diagonal;
-pub mod unique_modes;
 
 /// Retains only those terms of `op` for which `keep` returns `true`, dropping the rest.
 ///
