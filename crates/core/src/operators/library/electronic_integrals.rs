@@ -100,13 +100,16 @@ pub trait From1Body {
 
 impl FermionOperator {
     #[inline]
-    fn _insert_1body_idx(op: &mut Self, c: Complex64, i: u32, a: u32) {
+    fn _insert_1body_idx(op: &mut Self, c: Complex64, i: u32, a: u32, group_idx: Option<u32>) {
         op.coeffs.push(c);
         op.actions.push(true);
         op.actions.push(false);
         op.modes.push(i);
         op.modes.push(a);
         op.boundaries.push(op.modes.len());
+        if let Some(idx) = group_idx {
+            op.groups.as_mut().unwrap().push(idx);
+        }
         if i != a {
             op.coeffs.push(c);
             op.actions.push(true);
@@ -114,11 +117,22 @@ impl FermionOperator {
             op.modes.push(a);
             op.modes.push(i);
             op.boundaries.push(op.modes.len());
+            if let Some(idx) = group_idx {
+                op.groups.as_mut().unwrap().push(idx);
+            }
         }
     }
 
     #[inline]
-    fn _insert_2body_idx(op: &mut Self, c: Complex64, i: u32, j: u32, b: u32, a: u32) {
+    fn _insert_2body_idx(
+        op: &mut Self,
+        c: Complex64,
+        i: u32,
+        j: u32,
+        b: u32,
+        a: u32,
+        group_idx: Option<u32>,
+    ) {
         op.coeffs.push(c);
         op.actions.push(true);
         op.actions.push(true);
@@ -129,6 +143,9 @@ impl FermionOperator {
         op.modes.push(b);
         op.modes.push(a);
         op.boundaries.push(op.modes.len());
+        if let Some(idx) = group_idx {
+            op.groups.as_mut().unwrap().push(idx);
+        }
     }
 }
 
@@ -140,13 +157,16 @@ impl From1Body for FermionOperator {
             .for_each(|(ia, &coeff)| {
                 let (i, a) = _inflate_index(ia as u32);
                 let c = Complex64::new(coeff, 0.0);
-                Self::_insert_1body_idx(self, c, i, a);
-                Self::_insert_1body_idx(self, c, i + norb, a + norb);
+                let mut next_group_idx = self.num_groups();
+                Self::_insert_1body_idx(self, c, i, a, next_group_idx);
+                next_group_idx = self.num_groups();
+                Self::_insert_1body_idx(self, c, i + norb, a + norb, next_group_idx);
             });
     }
 
     fn from_1body_tril_spin_sym(one_body_a: ArrayView1<f64>, norb: u32) -> Self {
         let mut op = Self::zero();
+        op.groups = Some(vec![]);
         op.add_1body_tril_spin_sym(one_body_a, norb);
         op
     }
@@ -163,7 +183,8 @@ impl From1Body for FermionOperator {
             .for_each(|(ia, &coeff)| {
                 let (i, a) = _inflate_index(ia as u32);
                 let c = Complex64::new(coeff, 0.0);
-                Self::_insert_1body_idx(self, c, i, a);
+                let next_group_idx = self.num_groups();
+                Self::_insert_1body_idx(self, c, i, a, next_group_idx);
             });
 
         one_body_b
@@ -172,7 +193,8 @@ impl From1Body for FermionOperator {
             .for_each(|(ia, &coeff)| {
                 let (i, a) = _inflate_index(ia as u32);
                 let c = Complex64::new(coeff, 0.0);
-                Self::_insert_1body_idx(self, c, i + norb, a + norb);
+                let next_group_idx = self.num_groups();
+                Self::_insert_1body_idx(self, c, i + norb, a + norb, next_group_idx);
             });
     }
 
@@ -182,6 +204,7 @@ impl From1Body for FermionOperator {
         norb: u32,
     ) -> Self {
         let mut op = Self::zero();
+        op.groups = Some(vec![]);
         op.add_1body_tril_spin(one_body_a, one_body_b, norb);
         op
     }
@@ -219,19 +242,32 @@ impl From2Body for FermionOperator {
             .filter(|&(_, coeff)| coeff.abs() > 0.0)
             .for_each(|(iajb, &coeff)| {
                 let c = Complex64::new(0.5 * coeff, 0.0);
+                let next_group_idx = self.num_groups();
+                let group_idx_ab = next_group_idx.map(|x| x + 1);
+                let group_idx_ba = next_group_idx.map(|x| x + 2);
+                let group_idx_bb = next_group_idx.map(|x| x + 3);
                 _expand_s8_index(iajb as u32)
                     .iter()
                     .for_each(|&(i, a, j, b)| {
-                        Self::_insert_2body_idx(self, c, i, j, b, a);
-                        Self::_insert_2body_idx(self, c, i + norb, j, b, a + norb);
-                        Self::_insert_2body_idx(self, c, i, j + norb, b + norb, a);
-                        Self::_insert_2body_idx(self, c, i + norb, j + norb, b + norb, a + norb);
+                        Self::_insert_2body_idx(self, c, i, j, b, a, next_group_idx);
+                        Self::_insert_2body_idx(self, c, i + norb, j, b, a + norb, group_idx_ab);
+                        Self::_insert_2body_idx(self, c, i, j + norb, b + norb, a, group_idx_ba);
+                        Self::_insert_2body_idx(
+                            self,
+                            c,
+                            i + norb,
+                            j + norb,
+                            b + norb,
+                            a + norb,
+                            group_idx_bb,
+                        );
                     });
             });
     }
 
     fn from_2body_tril_spin_sym(two_body_aa: ArrayView1<f64>, norb: u32) -> Self {
         let mut op = Self::zero();
+        op.groups = Some(vec![]);
         op.add_2body_tril_spin_sym(two_body_aa, norb);
         op
     }
@@ -248,10 +284,11 @@ impl From2Body for FermionOperator {
             .filter(|&(_, coeff)| coeff.abs() > 0.0)
             .for_each(|(iajb, &coeff)| {
                 let c = Complex64::new(0.5 * coeff, 0.0);
+                let next_group_idx = self.num_groups();
                 _expand_s8_index(iajb as u32)
                     .iter()
                     .for_each(|&(i, a, j, b)| {
-                        Self::_insert_2body_idx(self, c, i, j, b, a);
+                        Self::_insert_2body_idx(self, c, i, j, b, a, next_group_idx);
                     });
             });
 
@@ -261,11 +298,13 @@ impl From2Body for FermionOperator {
             .filter(|&(_, coeff)| coeff.abs() > 0.0)
             .for_each(|(iajb, &coeff)| {
                 let c = Complex64::new(0.5 * coeff, 0.0);
+                let next_group_idx = self.num_groups();
+                let group_idx_b = next_group_idx.map(|x| x + 1);
                 _expand_s4_index(iajb as u32, npair)
                     .iter()
                     .for_each(|&(i, a, j, b)| {
-                        Self::_insert_2body_idx(self, c, i, j + norb, b + norb, a);
-                        Self::_insert_2body_idx(self, c, j + norb, i, a, b + norb);
+                        Self::_insert_2body_idx(self, c, i, j + norb, b + norb, a, next_group_idx);
+                        Self::_insert_2body_idx(self, c, j + norb, i, a, b + norb, group_idx_b);
                     });
             });
 
@@ -274,10 +313,19 @@ impl From2Body for FermionOperator {
             .filter(|&(_, coeff)| coeff.abs() > 0.0)
             .for_each(|(iajb, &coeff)| {
                 let c = Complex64::new(0.5 * coeff, 0.0);
+                let next_group_idx = self.num_groups();
                 _expand_s8_index(iajb as u32)
                     .iter()
                     .for_each(|&(i, a, j, b)| {
-                        Self::_insert_2body_idx(self, c, i + norb, j + norb, b + norb, a + norb);
+                        Self::_insert_2body_idx(
+                            self,
+                            c,
+                            i + norb,
+                            j + norb,
+                            b + norb,
+                            a + norb,
+                            next_group_idx,
+                        );
                     });
             });
     }
@@ -289,6 +337,7 @@ impl From2Body for FermionOperator {
         norb: u32,
     ) -> Self {
         let mut op = Self::zero();
+        op.groups = Some(vec![]);
         op.add_2body_tril_spin(two_body_aa, two_body_ab, two_body_bb, norb);
         op
     }
@@ -316,7 +365,7 @@ mod tests {
             actions: [true, false].iter().cloned().cycle().take(16).collect(),
             modes: vec![0, 0, 2, 2, 1, 0, 0, 1, 3, 2, 2, 3, 1, 1, 3, 3],
             boundaries: vec![0, 2, 4, 6, 8, 10, 12, 14, 16],
-            groups: None,
+            groups: Some(vec![0, 1, 2, 2, 3, 3, 4, 5]),
         };
 
         assert_eq!(op, expected);
@@ -342,7 +391,7 @@ mod tests {
             actions: [true, false].iter().cloned().cycle().take(16).collect(),
             modes: vec![0, 0, 1, 0, 0, 1, 1, 1, 2, 2, 3, 2, 2, 3, 3, 3],
             boundaries: vec![0, 2, 4, 6, 8, 10, 12, 14, 16],
-            groups: None,
+            groups: Some(vec![0, 1, 1, 2, 3, 4, 4, 5]),
         };
 
         assert_eq!(op, expected);
@@ -384,7 +433,11 @@ mod tests {
                 3, 3, 3, 3,
             ],
             boundaries: (0..257).step_by(4).collect(),
-            groups: None,
+            groups: Some(vec![
+                0, 1, 2, 3, 4, 5, 6, 7, 4, 5, 6, 7, 4, 5, 6, 7, 4, 5, 6, 7, 8, 9, 10, 11, 8, 9, 10,
+                11, 8, 9, 10, 11, 8, 9, 10, 11, 12, 13, 14, 15, 12, 13, 14, 15, 16, 17, 18, 19, 16,
+                17, 18, 19, 16, 17, 18, 19, 16, 17, 18, 19, 20, 21, 22, 23,
+            ]),
         };
 
         assert_eq!(op, expected);
@@ -434,7 +487,11 @@ mod tests {
                 3, 3, 3, 3,
             ],
             boundaries: (0..257).step_by(4).collect(),
-            groups: None,
+            groups: Some(vec![
+                0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 4, 4, 4, 4, 5, 6, 7, 8, 9, 8, 9, 10, 11, 12, 13,
+                12, 13, 14, 15, 14, 15, 14, 15, 14, 15, 16, 17, 16, 17, 18, 19, 20, 21, 20, 21, 22,
+                23, 24, 25, 25, 25, 25, 26, 26, 26, 26, 27, 27, 28, 28, 28, 28, 29,
+            ]),
         };
 
         assert_eq!(op, expected);
