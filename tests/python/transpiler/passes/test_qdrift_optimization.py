@@ -133,3 +133,43 @@ def test_qdrift_optimization_with_groups():
     # NOTE: the normal-ordering and subsequent simplifying of our Hamiltonian before grouping the
     # operator terms results in an unpredictable group ordering and, thus, unpredictable circuit to
     # assert against at this point.
+
+
+def _is_diagonal(term):
+    creations = sorted(idx for action, idx in term if action)
+    annihilations = sorted(idx for action, idx in term if not action)
+    return creations == annihilations
+
+
+def test_qdrift_optimization_filter_diagonal_terms():
+    file_path = Path(__file__).parent / "../../../h2.fcidump"
+    fcidump = FCIDump.from_file(str(file_path))
+    num_modes = 2 * fcidump.norb
+    hamil = FermionOperator.from_fcidump(fcidump)
+    normal = hamil.normal_ordered().simplify(atol=1e-16)
+    group_terms_by_electronic_structure(normal, num_modes, two_body_physicist_order=False)
+
+    # sanity check: the grouped, normal-ordered Hamiltonian still contains diagonal terms (the
+    # constant offset and number operators) which the filtering is expected to remove.
+    assert any(_is_diagonal(term) for term, _ in normal.iter_terms())
+    num_groups_before = normal.num_groups()
+
+    time = 1.5
+    circ = FermionicCircuit(num_modes)
+    circ.append(Evolution(num_modes, normal, time=time), circ.modes)
+
+    num_terms = 5
+    qdrift = QDriftTrotterization(num_terms, filter_diagonal_terms=True, rng=42)
+    pm = FermionicPassManager(qdrift)
+
+    qdrift_circ = pm.run(circ)
+    assert qdrift_circ.count_ops() == {"Evolution": num_terms}
+
+    # the user's original operator must not have been mutated by the pass
+    assert normal.num_groups() == num_groups_before
+    assert any(_is_diagonal(term) for term, _ in normal.iter_terms())
+
+    # none of the sampled sub-operators may contain a diagonal term
+    for instruction in qdrift_circ._inner.data:
+        for term, _ in instruction.operation.operator.iter_terms():
+            assert not _is_diagonal(term), "a diagonal term was sampled despite filtering"

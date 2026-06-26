@@ -592,6 +592,27 @@ impl PyFermionOperator {
         Ok(format!("<FermionOperator with {} terms>", self.__len__()))
     }
 
+    /// Returns a deep copy of this operator.
+    ///
+    /// The copy carries over the group indices and is fully independent of the original:
+    ///
+    /// .. doctest::
+    ///
+    ///     >>> import copy
+    ///     >>> from qiskit_fermions.operators import FermionOperator
+    ///     >>> op = FermionOperator.from_dict({((True, 0), (False, 1)): 1.0})
+    ///     >>> op.groups = [0]
+    ///     >>> other = copy.deepcopy(op)
+    ///     >>> other.groups = [1]
+    ///     >>> op.groups  # the original is unaffected
+    ///     [0]
+    ///
+    /// Returns:
+    ///     An independent deep copy of this operator.
+    fn __deepcopy__(&self, _memo: &Bound<'_, PyAny>) -> Self {
+        self.clone()
+    }
+
     fn __format__(&self, _format_spec: &str) -> PyResult<String> {
         let mut sorted: Vec<_> = self.inner.iter().collect();
         sorted.sort_by_key(|&term| term.into_vec());

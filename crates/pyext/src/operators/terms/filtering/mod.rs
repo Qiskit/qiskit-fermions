@@ -12,10 +12,14 @@
 
 use pyo3::prelude::*;
 
+pub mod diagonal;
 pub mod unique_modes;
 
 #[pymodule]
 pub mod filtering {
+    #[pymodule_export]
+    use super::diagonal::diagonal;
+
     #[pymodule_export]
     use super::unique_modes::unique_modes;
 }

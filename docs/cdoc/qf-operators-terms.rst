@@ -43,6 +43,7 @@ that do not contribute meaningfully to a downstream computation.
 
   ============================================= ===========================================================
   :c:func:`qf_filter_terms_by_num_unique_modes` Filters out the terms of an operator by their unique modes.
+  :c:func:`qf_filter_diagonal_terms`            Filters out the terms of an operator that are diagonal.
   ============================================= ===========================================================
 
 .. doxygengroup:: qf_operator_terms

@@ -11,7 +11,8 @@
 // that they have been altered from the originals.
 
 use crate::operators::fermion_operator::FermionOperator;
-use std::collections::{HashMap, HashSet};
+use crate::operators::terms::filtering::retain_terms;
+use std::collections::HashSet;
 
 /// Filters out the terms of an operator that act on too few unique modes.
 ///
@@ -27,43 +28,10 @@ use std::collections::{HashMap, HashSet};
 /// after terms (and possibly entire groups) have been removed. Callers must therefore *not* rely on
 /// the specific group index of any term being preserved across a call to this function.
 pub fn filter_terms_by_num_unique_modes(op: &mut FermionOperator, min_unique_modes: u32) {
-    // We compute the new flat storage for the surviving terms into fresh vectors and only assign
-    // them back at the end, because `op.iter()` borrows `op` immutably for the duration of the
-    // loop.
-    let mut coeffs = Vec::with_capacity(op.coeffs.len());
-    let mut actions = Vec::with_capacity(op.actions.len());
-    let mut modes = Vec::with_capacity(op.modes.len());
-    let mut boundaries = vec![0usize];
-    let mut groups = op
-        .groups
-        .as_ref()
-        .map(|_| Vec::with_capacity(op.coeffs.len()));
-    // Maps an original group index to its reassigned, contiguous index. Entries are created lazily
-    // in order of first appearance among the surviving terms, so the resulting indices span
-    // 0..k without gaps even when entire groups are dropped.
-    let mut group_remap: HashMap<u32, u32> = HashMap::new();
-
-    for (idx, term) in op.iter().enumerate() {
+    retain_terms(op, |term| {
         let num_unique = term.modes.iter().collect::<HashSet<_>>().len() as u32;
-        if num_unique < min_unique_modes {
-            continue;
-        }
-        coeffs.push(term.coeff);
-        actions.extend_from_slice(term.actions);
-        modes.extend_from_slice(term.modes);
-        boundaries.push(modes.len());
-        if let (Some(dst), Some(src)) = (groups.as_mut(), op.groups.as_ref()) {
-            let next = group_remap.len() as u32;
-            let new_idx = *group_remap.entry(src[idx]).or_insert(next);
-            dst.push(new_idx);
-        }
-    }
-
-    op.coeffs = coeffs;
-    op.actions = actions;
-    op.modes = modes;
-    op.boundaries = boundaries;
-    op.groups = groups;
+        num_unique >= min_unique_modes
+    });
 }
 
 #[cfg(test)]
