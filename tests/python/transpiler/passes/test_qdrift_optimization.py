@@ -31,6 +31,7 @@ def test_qdrift_optimization_no_groups(subtests):
     fcidump = FCIDump.from_file(str(file_path))
     num_modes = 2 * fcidump.norb
     hamil = FermionOperator.from_fcidump(fcidump)
+    hamil.groups = None
     time = 1.5
     circ = FermionicCircuit(num_modes)
     evo = Evolution(num_modes, hamil, time=time)
