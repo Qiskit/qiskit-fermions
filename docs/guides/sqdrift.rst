@@ -54,22 +54,21 @@ documentation, as well as the :mod:`qiskit_fermions.operators.library`.
    number-operators (:math:`a^\dagger_i a_i`) whose time evolution amounts to
    single-qubit Z rotations which do not impact the sampled bitstrings.
 
+   The :func:`~qiskit_fermions.operators.terms.filtering.filter_terms_by_num_unique_modes`
+   function does exactly this when provided a ``min_unique_modes`` of ``2``.
+
    .. tab-set-code::
 
        .. code-block:: python
 
-          >>> hamil = FermionOperator.from_terms(
-          ...     [
-          ...         (term, coeff) for term, coeff in hamil.iter_terms()
-          ...         if len(set(idx for _, idx in term)) > 1
-          ...     ]
+          >>> from qiskit_fermions.operators.terms.filtering import (
+          ...     filter_terms_by_num_unique_modes,
           ... )
+          >>> filter_terms_by_num_unique_modes(hamil, 2)
 
        .. code-block:: c
 
-          // WARNING: The C API of the FermionOperator does not provide convenience
-          // iterators, so the equivalent filtering has to be implemented more
-          // manually.
+          qf_filter_terms_by_num_unique_modes(hamil, 2);
 
 
 2. Group Hamiltonian terms

@@ -12,14 +12,10 @@
 
 use pyo3::prelude::*;
 
-pub mod filtering;
-pub mod grouping;
+pub mod unique_modes;
 
 #[pymodule]
-pub mod operators_terms {
+pub mod filtering {
     #[pymodule_export]
-    use super::filtering::filtering;
-
-    #[pymodule_export]
-    use super::grouping::grouping;
+    use super::unique_modes::unique_modes;
 }

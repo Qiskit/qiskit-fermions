@@ -9,6 +9,7 @@ Operator Terms
    :maxdepth: 1
 
    qf-operators-terms-grouping
+   qf-operators-terms-filtering
 
 The C API provides various functions to operator on the individual terms of an operator,
 partitioning them based on their structure.
@@ -31,6 +32,18 @@ information automatically.
   ================================================ ==============================================================
   :c:func:`qf_group_terms_by_electronic_structure` Groups the terms of an operator by their electronic structure.
   ================================================ ==============================================================
+
+Filtering
+---------
+
+The C API provides a collection of functions for removing terms from an operator
+that do not contribute meaningfully to a downstream computation.
+
+.. table::
+
+  ============================================= ===========================================================
+  :c:func:`qf_filter_terms_by_num_unique_modes` Filters out the terms of an operator by their unique modes.
+  ============================================= ===========================================================
 
 .. doxygengroup:: qf_operator_terms
    :content-only:

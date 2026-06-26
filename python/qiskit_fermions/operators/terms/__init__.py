@@ -37,10 +37,23 @@ a collection of functions which determine the grouping information automatically
    :toctree: ../stubs/
 
    group_terms_by_electronic_structure
+
+Filtering
+---------
+
+This module provides convenience functions for removing terms from an operator that do not
+contribute meaningfully to a downstream computation.
+
+.. autosummary::
+   :toctree: ../stubs/
+
+   filter_terms_by_num_unique_modes
 """
 
+from .filtering import filter_terms_by_num_unique_modes
 from .grouping import group_terms_by_electronic_structure
 
 __all__ = [
+    "filter_terms_by_num_unique_modes",
     "group_terms_by_electronic_structure",
 ]

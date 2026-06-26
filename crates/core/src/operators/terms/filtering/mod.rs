@@ -10,16 +10,4 @@
 // copyright notice, and modified files need to carry a notice indicating
 // that they have been altered from the originals.
 
-use pyo3::prelude::*;
-
-pub mod filtering;
-pub mod grouping;
-
-#[pymodule]
-pub mod operators_terms {
-    #[pymodule_export]
-    use super::filtering::filtering;
-
-    #[pymodule_export]
-    use super::grouping::grouping;
-}
+pub mod unique_modes;

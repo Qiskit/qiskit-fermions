@@ -31,6 +31,10 @@
  */
 
 /**
+ * @defgroup qf_operator_terms_filtering qf_operator_terms_filtering
+ */
+
+/**
  * @defgroup qf_operator_library qf_operator_library
  */
 
