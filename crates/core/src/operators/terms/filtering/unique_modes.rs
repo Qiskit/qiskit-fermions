@@ -11,7 +11,7 @@
 // that they have been altered from the originals.
 
 use crate::operators::fermion_operator::FermionOperator;
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 
 /// Filters out the terms of an operator that act on too few unique modes.
 ///
@@ -21,9 +21,11 @@ use std::collections::HashSet;
 /// `a^\dagger_i a_i` acts on a single unique mode (`i`), while the constant term acts on none.
 ///
 /// This is mutating `op` in place. If `op` tracks group indices (see
-/// [`FermionOperator::groups`]), the entries of the surviving terms are kept as-is and are *not*
-/// re-indexed; group indices may therefore become non-contiguous if all terms of a group are
-/// removed.
+/// [`FermionOperator::groups`]), terms that survive the filtering retain their relative grouping
+/// (i.e. terms that shared a group still share one), but the group indices are reassigned to a
+/// contiguous range starting from 0. This is necessary to keep the grouping information consistent
+/// after terms (and possibly entire groups) have been removed. Callers must therefore *not* rely on
+/// the specific group index of any term being preserved across a call to this function.
 pub fn filter_terms_by_num_unique_modes(op: &mut FermionOperator, min_unique_modes: u32) {
     // We compute the new flat storage for the surviving terms into fresh vectors and only assign
     // them back at the end, because `op.iter()` borrows `op` immutably for the duration of the
@@ -36,6 +38,10 @@ pub fn filter_terms_by_num_unique_modes(op: &mut FermionOperator, min_unique_mod
         .groups
         .as_ref()
         .map(|_| Vec::with_capacity(op.coeffs.len()));
+    // Maps an original group index to its reassigned, contiguous index. Entries are created lazily
+    // in order of first appearance among the surviving terms, so the resulting indices span
+    // 0..k without gaps even when entire groups are dropped.
+    let mut group_remap: HashMap<u32, u32> = HashMap::new();
 
     for (idx, term) in op.iter().enumerate() {
         let num_unique = term.modes.iter().collect::<HashSet<_>>().len() as u32;
@@ -47,7 +53,9 @@ pub fn filter_terms_by_num_unique_modes(op: &mut FermionOperator, min_unique_mod
         modes.extend_from_slice(term.modes);
         boundaries.push(modes.len());
         if let (Some(dst), Some(src)) = (groups.as_mut(), op.groups.as_ref()) {
-            dst.push(src[idx]);
+            let next = group_remap.len() as u32;
+            let new_idx = *group_remap.entry(src[idx]).or_insert(next);
+            dst.push(new_idx);
         }
     }
 
@@ -114,19 +122,42 @@ mod tests {
     }
 
     #[test]
-    fn test_filter_keeps_group_indices_without_reindexing() {
+    fn test_filter_reindexes_group_indices() {
         // Three terms in groups 0, 1, 2. Filtering with threshold 2 drops the first two terms
         // (constant + number operator), which removes groups 0 and 1 entirely. The surviving term
-        // must keep its original group index (2) rather than being re-indexed to 0.
+        // (originally group 2) must be re-indexed to the contiguous range starting at 0.
         let mut op = build_mixed_op();
         op.groups = Some(vec![0, 1, 2]);
 
         filter_terms_by_num_unique_modes(&mut op, 2);
 
-        assert_eq!(op.groups, Some(vec![2]));
-        // The non-contiguous group indices are the explicitly chosen behavior: `num_groups` is
-        // still derived as `max + 1`.
-        assert_eq!(op.num_groups(), Some(3));
+        assert_eq!(op.groups, Some(vec![0]));
+        // The group indices are contiguous, so `num_groups` reflects the actual surviving count.
+        assert_eq!(op.num_groups(), Some(1));
+    }
+
+    #[test]
+    fn test_filter_preserves_relative_grouping() {
+        // Two hopping terms (2 unique modes) sharing group 5, plus a number operator (1 unique
+        // mode) in group 2 that gets dropped. The two survivors must remain grouped together and
+        // be re-indexed to a contiguous index (0).
+        let mut op = FermionOperator {
+            coeffs: vec![
+                Complex64::new(1.0, 0.0),
+                Complex64::new(2.0, 0.0),
+                Complex64::new(3.0, 0.0),
+            ],
+            actions: vec![true, false, true, false, true, false],
+            modes: vec![0, 1, 0, 0, 1, 0],
+            boundaries: vec![0, 2, 4, 6],
+            groups: Some(vec![5, 2, 5]),
+        };
+
+        filter_terms_by_num_unique_modes(&mut op, 2);
+
+        // Both surviving terms shared group 5; they must still share a single, re-indexed group.
+        assert_eq!(op.groups, Some(vec![0, 0]));
+        assert_eq!(op.num_groups(), Some(1));
     }
 
     #[test]

@@ -34,9 +34,10 @@ use qiskit_fermions_core::operators::terms::filtering::unique_modes::filter_term
 ///
 /// .. note::
 ///    The operator is modified *in place*. If it tracks group indices (see
-///    :attr:`~qiskit_fermions.operators.FermionOperator.groups`), the entries of the surviving
-///    terms are kept as-is and are *not* re-indexed. Group indices may therefore become
-///    non-contiguous if all terms of a group are removed.
+///    :attr:`~qiskit_fermions.operators.FermionOperator.groups`), surviving terms retain their
+///    relative grouping but the group indices are reassigned to a contiguous range starting from 0.
+///    You must therefore *not* rely on the specific group index of any term being preserved across
+///    a call to this function.
 ///
 /// .. doctest::
 ///
