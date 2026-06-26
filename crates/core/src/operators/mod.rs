@@ -241,7 +241,7 @@ macro_rules! impl_operator_macro {
 
 pub mod edge_vertex_operator;
 pub mod fermion_operator;
-pub mod grouping;
 pub mod library;
 pub mod majorana_operator;
+pub mod terms;
 pub mod transfer_vertex_operator;

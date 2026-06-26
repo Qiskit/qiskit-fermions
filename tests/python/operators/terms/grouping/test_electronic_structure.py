@@ -16,8 +16,8 @@ from pathlib import Path
 
 import pytest
 from qiskit_fermions.operators import FermionOperator
-from qiskit_fermions.operators.grouping import group_terms_by_electronic_structure
 from qiskit_fermions.operators.library import FCIDump
+from qiskit_fermions.operators.terms.grouping import group_terms_by_electronic_structure
 
 
 def test_grouping_error():
@@ -27,7 +27,7 @@ def test_grouping_error():
 
 
 def test_group_terms_by_electronic_structure():
-    file_path = Path(__file__).parent / "../../../h2.fcidump"
+    file_path = Path(__file__).parent / "../../../../h2.fcidump"
     fcidump = FCIDump.from_file(str(file_path))
 
     op = FermionOperator.from_fcidump(fcidump)

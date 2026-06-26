@@ -14,9 +14,9 @@ use crate::exit_codes::ExitCode;
 use crate::pointers::mut_ptr_as_ref;
 
 use qiskit_fermions_core::operators::fermion_operator::FermionOperator;
-use qiskit_fermions_core::operators::grouping::electronic_structure::group_terms_by_electronic_structure;
+use qiskit_fermions_core::operators::terms::grouping::electronic_structure::group_terms_by_electronic_structure;
 
-/// @ingroup qf_operator_grouping
+/// @ingroup qf_operator_terms_grouping
 ///
 /// @brief Groups the terms of an operator by their electronic structure.
 ///

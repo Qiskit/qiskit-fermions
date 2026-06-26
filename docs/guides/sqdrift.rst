@@ -83,7 +83,7 @@ Crucially, grouping terms that are related by symmetry results in a favorable
 cancellation of Pauli terms, resulting in an overall shorter circuit depth when
 time evolving a state under their action.
 
-The :mod:`qiskit_fermions.operators.grouping` module provides convenience
+The :mod:`qiskit_fermions.operators.terms.grouping` module provides convenience
 functions for grouping an operator's terms. This is explained in more
 detail in :ref:`this guide <grouping_explanation>`.
 
@@ -95,7 +95,7 @@ detail in :ref:`this guide <grouping_explanation>`.
 
     .. code-block:: python
 
-       >>> from qiskit_fermions.operators.grouping import group_terms_by_electronic_structure
+       >>> from qiskit_fermions.operators.terms.grouping import group_terms_by_electronic_structure
        >>>
        >>> normal = hamil.normal_ordered().simplify(atol=1e-16)
        >>> exit_code = group_terms_by_electronic_structure(normal, num_modes, two_body_physicist_order=False)

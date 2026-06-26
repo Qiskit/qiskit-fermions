@@ -95,9 +95,9 @@ macro_rules! impl_operator_magic_methods {
 
 pub mod edge_vertex_operator;
 pub mod fermion_operator;
-pub mod grouping;
 pub mod library;
 pub mod majorana_operator;
+pub mod terms;
 pub mod transfer_vertex_operator;
 
 #[pymodule]
@@ -112,10 +112,10 @@ pub mod operators {
     use super::majorana_operator::majorana_operator;
 
     #[pymodule_export]
-    use super::grouping::operators_grouping;
+    use super::library::operators_library;
 
     #[pymodule_export]
-    use super::library::operators_library;
+    use super::terms::operators_terms;
 
     #[pymodule_export]
     use super::transfer_vertex_operator::transfer_vertex_operator;

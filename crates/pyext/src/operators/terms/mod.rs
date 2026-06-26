@@ -12,10 +12,10 @@
 
 use pyo3::prelude::*;
 
-pub mod electronic_structure;
+pub mod grouping;
 
 #[pymodule]
-pub mod operators_grouping {
+pub mod operators_terms {
     #[pymodule_export]
-    use super::electronic_structure::electronic_structure;
+    use super::grouping::grouping;
 }

@@ -13,7 +13,7 @@
 use crate::operators::fermion_operator::PyFermionOperator;
 use pyo3::{exceptions::PyValueError, prelude::*};
 use pyo3_stub_gen::derive::*;
-use qiskit_fermions_core::operators::grouping::electronic_structure::group_terms_by_electronic_structure;
+use qiskit_fermions_core::operators::terms::grouping::electronic_structure::group_terms_by_electronic_structure;
 
 /// Groups the terms of an operator by their electronic structure.
 ///
@@ -64,7 +64,7 @@ use qiskit_fermions_core::operators::grouping::electronic_structure::group_terms
 ///
 /// Raises:
 ///     ValueError: if an unexpected term is encountered.
-#[gen_stub_pyfunction(module = "qiskit_fermions.operators.grouping.electronic_structure")]
+#[gen_stub_pyfunction(module = "qiskit_fermions.operators.terms.grouping.electronic_structure")]
 #[pyfunction(name = "group_terms_by_electronic_structure")]
 #[pyo3(signature = (op, num_modes, *, two_body_physicist_order=false))]
 pub fn py_group_terms_by_electronic_structure(

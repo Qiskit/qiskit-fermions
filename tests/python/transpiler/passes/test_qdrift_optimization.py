@@ -20,8 +20,8 @@ import numpy as np
 from qiskit_fermions.circuit import FermionicCircuit
 from qiskit_fermions.circuit.library import Evolution
 from qiskit_fermions.operators import FermionOperator
-from qiskit_fermions.operators.grouping import group_terms_by_electronic_structure
 from qiskit_fermions.operators.library import FCIDump
+from qiskit_fermions.operators.terms.grouping import group_terms_by_electronic_structure
 from qiskit_fermions.transpiler.passes import QDriftTrotterization
 from qiskit_fermions.transpiler.passmanager import FermionicPassManager
 
