@@ -123,5 +123,8 @@ class OperatorTrait(Protocol):
     def groups(self, groups: list[int] | None) -> None:
         """Sets the groups indices."""
 
+    def num_groups(self) -> int | None:
+        """Returns the number of groups."""
+
     def split_out_groups(self) -> list[Self]:
         """Splits this operator into an optional list of new operators based on its :attr:`.groups`."""
