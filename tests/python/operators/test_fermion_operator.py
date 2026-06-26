@@ -104,6 +104,33 @@ class TestFermionOperator:
         with subtests.test("list"):
             assert op.equiv(cls.from_terms(list(op.iter_terms())))
 
+    def test_iter_with_groups(self):
+        cls = self.get_class()
+        op = cls.one()
+        op.groups = [0]
+        assert list(op.iter_terms_with_groups()) == [([], 1, 0)]
+
+    def test_from_terms_with_groups(self, subtests):
+        cls = self.get_class()
+        op = cls.from_dict(
+            {
+                (): 2,
+                (cre(1), ann(2)): 1,
+                (cre(2), ann(1)): 0.5,
+                (cre(3), ann(4)): -0.5j,
+                (cre(4), ann(3)): 1 - 0.5j,
+            }
+        )
+        op.groups = [0, 1, 2, 3, 4]
+        with subtests.test("iterator"):
+            reconstructed = cls.from_terms_with_groups(op.iter_terms_with_groups())
+            assert op.equiv(reconstructed)
+            assert op.groups == reconstructed.groups
+        with subtests.test("list"):
+            reconstructed = cls.from_terms_with_groups(list(op.iter_terms_with_groups()))
+            assert op.equiv(reconstructed)
+            assert op.groups == reconstructed.groups
+
     def test_ichop(self):
         cls = self.get_class()
         op = cls.from_dict({(): 1e-4, ((True, 0),): 1e-6, ((False, 0),): 1e-10})

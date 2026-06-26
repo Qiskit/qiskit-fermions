@@ -102,6 +102,33 @@ class TestEdgeVertexOperator:
         with subtests.test("list"):
             assert op.equiv(cls.from_terms(list(op.iter_terms())))
 
+    def test_iter_with_groups(self):
+        cls = self.get_class()
+        op = cls.one()
+        op.groups = [0]
+        assert list(op.iter_terms_with_groups()) == [([], 1, 0)]
+
+    def test_from_terms_with_groups(self, subtests):
+        cls = self.get_class()
+        op = cls.from_dict(
+            {
+                (): 2,
+                ((0, 1),): 1,
+                ((3, 4),): 0.5,
+                ((0, 1), (2, 3)): -0.5j,
+                ((3, 4), (0, 1)): 1 - 0.5j,
+            }
+        )
+        op.groups = [0, 1, 2, 3, 4]
+        with subtests.test("iterator"):
+            reconstructed = cls.from_terms_with_groups(op.iter_terms_with_groups())
+            assert op.equiv(reconstructed)
+            assert op.groups == reconstructed.groups
+        with subtests.test("list"):
+            reconstructed = cls.from_terms_with_groups(list(op.iter_terms_with_groups()))
+            assert op.equiv(reconstructed)
+            assert op.groups == reconstructed.groups
+
     def test_ichop(self):
         cls = self.get_class()
         op = cls.from_dict({(): 1e-4, ((0, 1),): 1e-6, ((1, 2),): 1e-10})

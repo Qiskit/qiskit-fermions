@@ -87,6 +87,13 @@ class OperatorTrait(Protocol):
     def from_terms(cls, terms: Iterable) -> Self:
         """Constructs a new operator from an iterator (see also :meth:`.iter_terms`)."""
 
+    def iter_terms_with_groups(self) -> Iterator:
+        """Iterates over the terms of this operator with their group indices."""
+
+    @classmethod
+    def from_terms_with_groups(cls, terms: Iterable) -> Self:
+        """Constructs a new operator from an iterator (see also :meth:`.iter_terms_with_groups`)."""
+
     def equiv(self, other: Self, atol: float) -> bool:
         """Checks this operator with another for equivalence up to the specified absolute tolerance."""
 
