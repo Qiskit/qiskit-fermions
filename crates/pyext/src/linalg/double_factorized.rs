@@ -101,7 +101,7 @@ fn dfab_term_from_py(
 /// When ``cholesky`` is ``True`` (the default behavior) the outer factorization uses a modified
 /// Cholesky decomposition; otherwise it uses a truncated eigendecomposition.
 ///
-/// Arguments:
+/// Args:
 ///     two_body_tensor: the real two-body tensor of shape ``(norb, norb, norb, norb)``.
 ///     tol: the tolerance controlling the truncation error of the decomposition.
 ///     max_vecs: the maximum number of terms to retain. Defaults to ``norb * (norb + 1) / 2``.
@@ -137,7 +137,7 @@ pub fn py_double_factorized_2body<'py>(
 /// :math:`(Z, U)` terms suitable for reconstruction by :func:`reconstruct_t2`. The number of terms
 /// is truncated to ``max_terms`` (default: all).
 ///
-/// Arguments:
+/// Args:
 ///     t2_amplitudes: the :math:`t_2` amplitudes of shape ``(nocc, nocc, nvrt, nvrt)``.
 ///     tol: the tolerance controlling the truncation error of the decomposition.
 ///     max_terms: the maximum number of terms to retain. Defaults to all.
@@ -165,7 +165,7 @@ pub fn py_double_factorized_t2<'py>(
 /// :math:`i \sum_k \sum_{pq} Z^{(k)}_{pq} U^{(k)}_{ap} U^{(k)*}_{ip} U^{(k)}_{bq} U^{(k)*}_{jq}`
 /// and slices to the occupied/virtual block ``[:nocc, :nocc, nocc:, nocc:]``.
 ///
-/// Arguments:
+/// Args:
 ///     terms: the list of :math:`(Z, U)` 2-tuples produced by :func:`double_factorized_t2`.
 ///     nocc: the number of occupied orbitals.
 ///
@@ -190,7 +190,7 @@ pub fn py_reconstruct_t2<'py>(
 /// Returns a list of terms suitable for reconstruction by :func:`reconstruct_t2_alpha_beta`. The
 /// number of terms is truncated to ``max_terms`` (default: all).
 ///
-/// Arguments:
+/// Args:
 ///     t2_amplitudes: the alpha-beta :math:`t_2` amplitudes of shape
 ///         ``(nocc_a, nocc_b, nvrt_a, nvrt_b)``.
 ///     tol: the tolerance controlling the truncation error of the decomposition.
@@ -217,7 +217,7 @@ pub fn py_double_factorized_t2_alpha_beta<'py>(
 
 /// Reconstructs alpha-beta :math:`t_2` amplitudes from a double-factorized decomposition.
 ///
-/// Arguments:
+/// Args:
 ///     terms: the list of terms produced by :func:`double_factorized_t2_alpha_beta`, each a 2-tuple
 ///         of the ``(aa, ab, bb)`` diagonal Coulomb matrices and the ``(alpha, beta)`` orbital
 ///         rotations.

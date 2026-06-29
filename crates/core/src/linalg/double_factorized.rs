@@ -11,10 +11,12 @@
 // that they have been altered from the originals.
 
 // The explicit (exact) decompositions in this module were translated from the Python
-// implementation in the `ffsim` library
-// (https://github.com/qiskit-community/ffsim, Apache-2.0, (C) IBM), specifically
-// `ffsim/linalg/double_factorized_decomposition.py`. The `optimize=True` "compressed"
-// code paths from the original are intentionally not ported here.
+// implementation in the `ffsim` library (https://github.com/qiskit-community/ffsim, Apache-2.0,
+// (C) IBM), specifically `ffsim/linalg/double_factorized_decomposition.py`. The `optimize=True`
+// "compressed" code paths from the original are intentionally not ported here.
+//
+// Claude Opus 4.8 was used for the original language port but the code has since been reviewed and
+// refactored manually.
 
 use nalgebra::DMatrix;
 use ndarray::{Array1, Array2, Array4};
@@ -281,9 +283,8 @@ fn quadrature(mat: &Array2<Complex64>, sign: f64) -> Array2<Complex64> {
 /// returning a list of `(Z, U)` terms where each `Z` is a real symmetric diagonal Coulomb matrix
 /// and each `U` is a unitary orbital rotation.
 ///
-/// When `cholesky` is `true` (the default behavior in the original library) the outer
-/// factorization uses a modified Cholesky decomposition; otherwise it uses a truncated
-/// eigendecomposition.
+/// When `cholesky` is `true` the outer factorization uses a modified Cholesky decomposition;
+/// otherwise it uses a truncated eigendecomposition.
 pub fn double_factorized_2body(
     two_body_tensor: &Array4<f64>,
     tol: f64,
