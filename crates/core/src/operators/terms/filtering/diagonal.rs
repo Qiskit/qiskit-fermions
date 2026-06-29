@@ -22,12 +22,10 @@ use std::iter::zip;
 /// the multiset of annihilation modes.
 fn _is_diagonal(term: FermionOperatorTermView) -> bool {
     let mut creations: Vec<u32> = zip(term.actions, term.modes)
-        .filter(|(action, _)| **action)
-        .map(|(_, mode)| *mode)
+        .filter_map(|(&action, &mode)| if action { Some(mode) } else { None })
         .collect();
     let mut annihilations: Vec<u32> = zip(term.actions, term.modes)
-        .filter(|(action, _)| !**action)
-        .map(|(_, mode)| *mode)
+        .filter_map(|(&action, &mode)| if !action { Some(mode) } else { None })
         .collect();
     creations.sort_unstable();
     annihilations.sort_unstable();
@@ -39,8 +37,7 @@ fn _is_diagonal(term: FermionOperatorTermView) -> bool {
 /// Every term that is a product of number operators (`a^\dagger_i a_i`) is dropped from `op`. This
 /// includes the constant term (a product of zero number operators), single number operators, as
 /// well as higher-order products such as `n_i n_j = a^\dagger_i a^\dagger_j a_j a_i`. Such terms
-/// are diagonal in the occupation-number basis, so their time evolution does not affect the
-/// sampled bitstrings (it only introduces global phases and single-qubit Z rotations).
+/// are diagonal in the occupation-number basis.
 ///
 /// # Assumptions
 ///

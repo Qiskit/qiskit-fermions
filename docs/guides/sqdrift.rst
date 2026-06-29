@@ -40,29 +40,6 @@ documentation, as well as the :mod:`qiskit_fermions.operators.library`.
        QfFermionOperator* hamil = qf_ferm_op_from_fcidump(fcidump);
        uint32_t num_modes = 2 * qf_fcidump_norb(fcidump);
 
-.. hint::
-
-   The full electronic structure Hamiltonian contains certain terms whose
-   inclusion in a time-evolution circuit will have no impact on the perceived
-   bitstrings and, thus, only result in an increased sampling overhead.
-   Therefore, it is recommended that such terms be filtered from the Hamiltonian
-   before continuing with the remaining procedure.
-
-   These are exactly the terms that are *diagonal* in the occupation-number
-   basis, i.e. the products of number operators (:math:`a^\dagger_i a_i`). This
-   includes the constant energy offset, whose time evolution only introduces a
-   global phase into the circuit, the individual number-operators whose time
-   evolution amounts to single-qubit Z rotations, as well as higher-order
-   products such as :math:`n_i n_j`. None of these impact the sampled
-   bitstrings.
-
-   The :func:`~qiskit_fermions.operators.terms.filtering.filter_diagonal_terms`
-   function removes all such terms. As shown in step 4 below, the
-   :class:`.QDriftTrotterization` pass can apply this filtering automatically
-   via its ``filter_diagonal_terms`` flag, so an explicit call is usually not
-   necessary.
-
-
 2. Group Hamiltonian terms
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -153,15 +130,34 @@ each circuit, every time we transpile the circuit. Through this, we can generate
 multiple circuit randomizations as required by the `SqDRIFT`_ algorithm by
 repeatedly running the transpilation pipeline.
 
+.. hint::
+
+   The full electronic structure Hamiltonian contains certain terms whose
+   inclusion in a time-evolution circuit will have no impact on the perceived
+   bitstrings and, thus, only result in an increased sampling overhead.
+   Therefore, it is recommended that such terms be filtered from the Hamiltonian
+   before continuing with the remaining procedure.
+
+   The terms that fit this description are exactly those that are *diagonal* in
+   the occupation-number basis, i.e. the products of number operators
+   (:math:`a^\dagger_i a_i`). This includes the constant energy offset, whose
+   time evolution only introduces a global phase into the circuit, the
+   individual number-operators whose time evolution amounts to single-qubit Z
+   rotations, as well as higher-order products such as :math:`n_i n_j`. None of
+   these impact the sampled bitstrings.
+
+   The :func:`~qiskit_fermions.operators.terms.filtering.filter_diagonal_terms`
+   function can be used to remove such terms from an operator manually (for
+   example before constructing the :class:`.Evolution` gate in the previous
+   step. Alternatively, the :class:`.QDriftTrotterization` pass can apply this
+   filtering automatically via its ``filter_diagonal_terms=True`` flag, so an
+   explicit call is usually not necessary.
+
 This step also introduces the few parameters with which one can tweak the
 ensemble of circuits to generate:
 
 * the number of circuits to generate: ``num_sqdrift_randomizations``
 * the length of each circuit in terms of excitation groups: ``num_groups``
-
-We also set ``filter_diagonal_terms=True`` so that the pass automatically removes
-the diagonal (bitstring-invariant) terms discussed in step 1, sparing us the
-manual filtering step.
 
 .. tab-set-code::
 

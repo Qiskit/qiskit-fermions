@@ -23,10 +23,13 @@ use qiskit_fermions_core::operators::terms::filtering::diagonal::filter_diagonal
 /// single number operators, as well as higher-order products such as
 /// :math:`n_i n_j = a^\dagger_i a^\dagger_j a_j a_i`.
 ///
-/// Such terms are diagonal in the occupation-number basis, so their time evolution does not affect
-/// the sampled bitstrings: it only introduces global phases and single-qubit Z rotations. Removing
-/// them is therefore recommended when preparing an electronic-structure Hamiltonian for the qDRIFT
-/// time evolution used by SqDRIFT, as it avoids an otherwise unnecessary sampling overhead.
+/// .. hint::
+///    A major motivation for filtering such terms arises during the time evolution of operators,
+///    where such diagonal terms, do not affect the time evolution besides introducing a global
+///    phase. Consequently, bitstrings sampled from a time evolved state remain unaffected.
+///    Removing them is therefore recommended, for example when preparing an electronic-structure
+///    Hamiltonian for the qDRIFT time evolution used by SqDRIFT, as it avoids an otherwise
+///    unnecessary sampling overhead.
 ///
 /// .. caution::
 ///    The provided operator *must* be normal-ordered! This is an underlying assumption of the
@@ -61,7 +64,6 @@ use qiskit_fermions_core::operators::terms::filtering::diagonal::filter_diagonal
 ///     op: the normal-ordered operator whose diagonal terms to filter out.
 #[gen_stub_pyfunction(module = "qiskit_fermions.operators.terms.filtering.diagonal")]
 #[pyfunction(name = "filter_diagonal_terms")]
-#[pyo3(signature = (op))]
 pub fn py_filter_diagonal_terms(op: &Bound<PyFermionOperator>) {
     filter_diagonal_terms(&mut op.borrow_mut().inner);
 }

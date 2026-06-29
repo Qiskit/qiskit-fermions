@@ -12,9 +12,9 @@
 
 # ruff: noqa: D205,D212,D415
 """
-===============
+==============
 Operator Terms
-===============
+==============
 
 .. currentmodule:: qiskit_fermions.operators.terms
 
@@ -27,7 +27,7 @@ Grouping
 Please refer to :ref:`grouping_explanation` for a detailed explanation of this module's
 functionality.
 
-Library
+Members
 ^^^^^^^
 
 Rather than always relying on the user to provide the group indices themselves, this module provides
@@ -43,6 +43,9 @@ Filtering
 
 This module provides convenience functions for removing terms from an operator that do not
 contribute meaningfully to a downstream computation.
+
+Members
+^^^^^^^
 
 .. autosummary::
    :toctree: ../stubs/

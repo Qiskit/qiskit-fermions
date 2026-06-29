@@ -11,7 +11,7 @@ Operator Terms
    qf-operators-terms-grouping
    qf-operators-terms-filtering
 
-The C API provides various functions to operator on the individual terms of an operator,
+The C API provides various functions to operate on the individual terms of an operator,
 partitioning them based on their structure.
 
 Grouping
@@ -20,7 +20,7 @@ Grouping
 Please refer to :ref:`grouping_explanation` for a detailed explanation of this module's
 functionality.
 
-Library
+Members
 ^^^^^^^
 
 Rather than always relying on the user to provide the group indices themselves,
@@ -38,6 +38,9 @@ Filtering
 
 The C API provides a collection of functions for removing terms from an operator
 that do not contribute meaningfully to a downstream computation.
+
+Members
+^^^^^^^
 
 .. table::
 
