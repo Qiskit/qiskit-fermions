@@ -12,10 +12,13 @@
 
 use pyo3::prelude::*;
 
+pub mod double_factorized;
 pub mod givens;
 
 #[pymodule]
 pub mod linalg {
+    #[pymodule_export]
+    use super::double_factorized::double_factorized;
     #[pymodule_export]
     use super::givens::givens;
 }

@@ -38,7 +38,7 @@ use qiskit_fermions_core::linalg::givens::{GivensRotation, givens_decomposition}
 ///    -s^\dagger & c
 ///    \end{pmatrix}
 ///
-/// Arguments:
+/// Args:
 ///     unitary: the unitary matrix, :math:`U`, to be decomposed.
 ///
 /// Returns:
