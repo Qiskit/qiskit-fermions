@@ -14,6 +14,8 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 import numpy as np
 from qiskit.dagcircuit import DAGCircuit
 from qiskit.transpiler import TransformationPass
@@ -60,19 +62,24 @@ class QDriftTrotterization(TransformationPass):
             time = node.op.params[0]
             num_modes = len(node.qargs)
 
-            if hamil.groups is not None:
-                terms = hamil.split_out_groups()
+            terms: list[Any]  # can be either a list of operator terms or operator instances
+            if hamil.groups is None:
+                # NOTE: the qDRIFT protocol replaces the operator's coefficients with identities
+                # because the evolution time is entirely dictated by `delta` (computed below), since
+                # the operator's coefficients only impact the probability of a term being included.
+                terms = [(actions, 1.0) for actions, _ in hamil.iter_terms()]
+                weights = np.abs(hamil.get_coeffs())
+            else:
                 all_coeffs = hamil.get_coeffs()
                 groups = hamil.groups
-                max_group_idx = max(groups)
-                weights = np.zeros(
-                    (max_group_idx + 1),
-                )
+                weights = np.zeros((hamil.num_groups(),))
                 np.add.at(weights, groups, np.abs(all_coeffs))
                 weights /= np.unique(groups, return_counts=True)[1]
-            else:
-                terms = list(hamil.iter_terms())
-                weights = np.abs(hamil.get_coeffs())
+                # NOTE: we do not pre-process the coefficients of these different group terms here,
+                # because we would unnecessarily need to loop over all terms in all groups. Instead,
+                # we replace the coefficients by identity values only once that particular group
+                # term actually gets sampled.
+                terms = hamil.split_out_groups()
 
             lambd = np.sum(weights)
             delta = (lambd * time) / self.num_terms
@@ -84,8 +91,16 @@ class QDriftTrotterization(TransformationPass):
             )
 
             for ind in sampled_indices:
-                term = terms[ind]
-                op = hamil.__class__.from_terms([term]) if isinstance(term, tuple) else term
+                sampled_term = terms[ind]
+                if isinstance(sampled_term, tuple):
+                    # in this case, we have already replaced the operator coefficient by 1.0
+                    identity_terms = [sampled_term]
+                else:
+                    # NOTE: as per the comment earlier, we have not replaced the coefficients with
+                    # identity values in the case of working with grouped operator terms.
+                    identity_terms = [(actions, 1.0) for actions, _ in sampled_term.iter_terms()]
+
+                op = hamil.__class__.from_terms(identity_terms)
                 evo = Evolution(num_modes, op, time=delta)
                 out_dag.apply_operation_back(evo, qargs=out_dag.qubits)
 
