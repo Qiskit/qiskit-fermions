@@ -31,6 +31,7 @@ def test_qdrift_optimization_no_groups(subtests):
     fcidump = FCIDump.from_file(str(file_path))
     num_modes = 2 * fcidump.norb
     hamil = FermionOperator.from_fcidump(fcidump)
+    hamil.groups = None
     time = 1.5
     circ = FermionicCircuit(num_modes)
     evo = Evolution(num_modes, hamil, time=time)
@@ -63,16 +64,12 @@ def test_qdrift_optimization_no_groups(subtests):
         expected_gates = [
             Evolution(
                 num_modes,
-                FermionOperator.from_terms(
-                    [(((True, 0), (True, 1), (False, 1), (False, 0)), 0.3322908651276483)]
-                ),
+                FermionOperator.from_terms([(((True, 0), (True, 1), (False, 1), (False, 0)), 1.0)]),
                 time=8.273087572037902,
             ),
             Evolution(
                 num_modes,
-                FermionOperator.from_terms(
-                    [(((True, 2), (True, 0), (False, 0), (False, 2)), 0.33785507740175824)]
-                ),
+                FermionOperator.from_terms([(((True, 2), (True, 0), (False, 0), (False, 2)), 1.0)]),
                 time=8.273087572037902,
             ),
         ]
@@ -92,14 +89,12 @@ def test_qdrift_optimization_no_groups(subtests):
         expected_gates = [
             Evolution(
                 num_modes,
-                FermionOperator.from_terms(
-                    [(((True, 1), (True, 0), (False, 0), (False, 1)), 0.3322908651276483)]
-                ),
+                FermionOperator.from_terms([(((True, 1), (True, 0), (False, 0), (False, 1)), 1.0)]),
                 time=8.273087572037902,
             ),
             Evolution(
                 num_modes,
-                FermionOperator.from_terms([((), 0.7199689944489797)]),
+                FermionOperator.from_terms([((), 1.0)]),
                 time=8.273087572037902,
             ),
         ]

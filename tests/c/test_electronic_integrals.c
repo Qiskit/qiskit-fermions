@@ -31,6 +31,9 @@ static int test_ferm_op_from_1body_tril_spin_sym(void) {
     QfFermionOperator *expected = qf_ferm_op_new(num_terms, num_actions, coeffs_exp, actions_exp,
                                                  indices_exp, boundaries_exp);
 
+    uint32_t groups[8] = {0, 1, 2, 2, 3, 3, 4, 5};
+    qf_ferm_op_set_groups(expected, groups, 8);
+
     bool is_equal = qf_ferm_op_equal(op, expected);
 
     qf_ferm_op_free(op);
@@ -58,6 +61,9 @@ static int test_ferm_op_from_1body_tril_spin(void) {
     uint32_t boundaries_exp[9] = {0, 2, 4, 6, 8, 10, 12, 14, 16};
     QfFermionOperator *expected = qf_ferm_op_new(num_terms, num_actions, coeffs_exp, actions_exp,
                                                  indices_exp, boundaries_exp);
+
+    uint32_t groups[8] = {0, 1, 1, 2, 3, 4, 4, 5};
+    qf_ferm_op_set_groups(expected, groups, 8);
 
     bool is_equal = qf_ferm_op_equal(op, expected);
 
@@ -127,6 +133,13 @@ static int test_ferm_op_from_2body_tril_spin_sym(void) {
 
     QfFermionOperator *expected = qf_ferm_op_new(num_terms, num_actions, coeffs_exp, actions_exp,
                                                  indices_exp, boundaries_exp);
+
+    uint32_t groups[64] = {
+        0,  1,  2,  3,  4,  5,  6,  7,  4,  5,  6,  7,  4,  5,  6,  7,  4,  5,  6,  7,  8,  9,
+        10, 11, 8,  9,  10, 11, 8,  9,  10, 11, 8,  9,  10, 11, 12, 13, 14, 15, 12, 13, 14, 15,
+        16, 17, 18, 19, 16, 17, 18, 19, 16, 17, 18, 19, 16, 17, 18, 19, 20, 21, 22, 23,
+    };
+    qf_ferm_op_set_groups(expected, groups, 64);
 
     bool is_equal = qf_ferm_op_equal(op, expected);
 
@@ -198,6 +211,13 @@ static int test_ferm_op_from_2body_tril_spin(void) {
                                    208, 212, 216, 220, 224, 228, 232, 236, 240, 244, 248, 252, 256};
     QfFermionOperator *expected = qf_ferm_op_new(num_terms, num_actions, coeffs_exp, actions_exp,
                                                  indices_exp, boundaries_exp);
+
+    uint32_t groups[64] = {
+        0,  1,  1,  1,  1,  2,  2,  2,  2,  3,  3,  4,  4,  4,  4,  5,  6,  7,  8,  9,  8,  9,
+        10, 11, 12, 13, 12, 13, 14, 15, 14, 15, 14, 15, 14, 15, 16, 17, 16, 17, 18, 19, 20, 21,
+        20, 21, 22, 23, 24, 25, 25, 25, 25, 26, 26, 26, 26, 27, 27, 28, 28, 28, 28, 29,
+    };
+    qf_ferm_op_set_groups(expected, groups, 64);
 
     bool is_equal = qf_ferm_op_equal(op, expected);
 

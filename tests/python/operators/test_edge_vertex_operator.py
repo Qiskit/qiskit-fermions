@@ -336,7 +336,7 @@ class TestEdgeVertexOperator:
             permutation = [4, 2, 5]
             op.relabel_modes(permutation)
 
-    def test_split_out_groups(self):
+    def test_split_out_groups(self, subtests):
         cls = self.get_class()
 
         # NOTE: we rely on Python dict's insertion order to guarantee the correct order of terms in
@@ -347,11 +347,20 @@ class TestEdgeVertexOperator:
         op = cls.from_dict(group0)
         group1 = {((1, 0), (2, 3)): 2}
         op += cls.from_dict(group1)
+
+        with subtests.test("num_groups none"):
+            assert op.num_groups() is None
+
         op.groups = [0, 0, 1]
+
+        with subtests.test("num_groups some"):
+            assert op.num_groups() == 2
 
         groups = op.split_out_groups()
         expected = [cls.from_dict(group0), cls.from_dict(group1)]
-        assert all([a.equiv(b) for a, b in zip(groups, expected, strict=True)])
+
+        with subtests.test("split groups"):
+            assert all([a.equiv(b) for a, b in zip(groups, expected, strict=True)])
 
     def test_split_out_groups_err(self):
         cls = self.get_class()

@@ -183,10 +183,12 @@ impl FCIDump {
 impl From<&FCIDump> for FermionOperator {
     fn from(fcidump: &FCIDump) -> Self {
         let mut op = Self::zero();
+        op.groups = Some(vec![]);
 
         if let Some(coeff) = fcidump.constant {
             op.coeffs.push(Complex64::new(coeff, 0.0));
             op.boundaries.push(op.boundaries.len() - 1);
+            op.groups = Some(vec![0]);
         };
 
         match &fcidump.one_body_b {
@@ -348,10 +350,13 @@ mod tests {
                 72, 76, 80, 84, 88, 92, 96, 100, 104, 108, 112, 116, 120, 124, 128, 132, 136, 140,
                 144,
             ],
-            groups: None,
+            groups: Some(vec![
+                0, 1, 2, 2, 3, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 10, 11, 12, 13, 10, 11, 12, 13,
+                10, 11, 12, 13, 14, 15, 16, 17, 14, 15, 16, 17, 18, 19, 20, 21,
+            ]),
         };
 
-        assert!(op.equiv(&expected, 1e-10));
+        assert_eq!(op, expected);
     }
 
     #[test]
@@ -576,10 +581,14 @@ mod tests {
                 208, 212, 216, 220, 224, 228, 232, 236, 240, 244, 248, 252, 256, 260, 264, 268,
                 272,
             ],
-            groups: None,
+            groups: Some(vec![
+                0, 1, 1, 2, 3, 4, 4, 5, 6, 7, 7, 7, 7, 8, 8, 8, 8, 9, 9, 10, 10, 10, 10, 11, 12,
+                13, 14, 15, 14, 15, 16, 17, 18, 19, 18, 19, 20, 21, 20, 21, 20, 21, 20, 21, 22, 23,
+                22, 23, 24, 25, 26, 27, 26, 27, 28, 29, 30, 31, 31, 31, 31, 32, 32, 32, 32, 33, 33,
+                34, 34, 34, 34, 35,
+            ]),
         };
 
-        println!("{op:#?}");
-        assert!(op.equiv(&expected, 1e-10));
+        assert_eq!(op, expected);
     }
 }

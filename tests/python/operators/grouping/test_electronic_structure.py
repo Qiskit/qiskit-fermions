@@ -31,7 +31,10 @@ def test_group_terms_by_electronic_structure():
     fcidump = FCIDump.from_file(str(file_path))
 
     op = FermionOperator.from_fcidump(fcidump)
-    assert op.groups is None, "We should not have any group indices yet!"
+    # NOTE: even though the FCIDump loading automatically tracks groups, we can reduce the
+    # overall number of groups by first normal-ordering the Hamiltonian and grouping the
+    # remaining terms.
+    assert op.num_groups() == 23, "Expected 23 groups to be found by the FCIDump parsing."
 
     normal = op.normal_ordered().simplify(atol=1e-16)
 
@@ -40,9 +43,7 @@ def test_group_terms_by_electronic_structure():
     )
     assert res is None, "We should not have a GroupingError here!"
     assert normal.groups is not None, "Now we should have group indices!"
-    assert max(normal.groups) == 13, (
-        "The number of groups we expect is 14, meaning the highest group index should be 13!"
-    )
+    assert normal.num_groups() == 14, "The number of groups we expect is 14!"
 
     groups = normal.split_out_groups()
     assert len(groups) == 14, "Expected 14 individual operators, one for each group."
