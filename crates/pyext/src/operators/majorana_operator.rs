@@ -46,6 +46,27 @@ impl MajoranaOperatorDataIter {
     }
 }
 
+#[gen_stub_pyclass]
+#[pyclass(
+    module = "qiskit_fermions.operators.majorana_operator",
+    name = "MajoranaOperatorDataGroupIter"
+)]
+struct MajoranaOperatorDataGroupIter {
+    inner: std::vec::IntoIter<(Vec<PyMajoranaAction>, Complex64, u32)>,
+}
+
+#[gen_stub_pymethods]
+#[pymethods]
+impl MajoranaOperatorDataGroupIter {
+    fn __iter__(slf: PyRef<'_, Self>) -> PyRef<'_, Self> {
+        slf
+    }
+
+    fn __next__(mut slf: PyRefMut<'_, Self>) -> Option<(Vec<PyMajoranaAction>, Complex64, u32)> {
+        slf.inner.next()
+    }
+}
+
 /// A Majorana fermion operator.
 ///
 /// ----
@@ -160,6 +181,7 @@ impl MajoranaOperatorDataIter {
 ///    zero
 ///    one
 ///    from_terms
+///    from_terms_with_groups
 ///
 /// Formatting
 /// ----------
@@ -225,6 +247,7 @@ impl MajoranaOperatorDataIter {
 /// .. autosummary::
 ///
 ///    iter_terms
+///    iter_terms_with_groups
 ///
 /// Arithmetics
 /// -----------
@@ -738,6 +761,69 @@ impl PyMajoranaOperator {
             inner.boundaries.push(inner.modes.len());
             Ok(())
         })?;
+        Ok(Self { inner })
+    }
+
+    /// An iterator over the operator's terms with their associated group index.
+    ///
+    /// .. warning::
+    ///    Mutating the iteration items does **not** affect the underlying operator data.
+    ///
+    /// .. doctest::
+    ///
+    ///     >>> from qiskit_fermions.operators import MajoranaOperator
+    ///     >>> op = MajoranaOperator([2.0, 1.0, -1.0j], [0, 1], [0, 0, 1, 2])
+    ///     >>> op.groups = [0, 1, 1]
+    ///     >>> list(op.iter_terms_with_groups())
+    ///     [([], (2+0j), 0), ([0], (1+0j), 1), ([1], (-0-1j), 1)]
+    ///
+    /// ..
+    fn iter_terms_with_groups(slf: PyRef<'_, Self>) -> PyResult<Py<MajoranaOperatorDataGroupIter>> {
+        let vectorized: Vec<(Vec<PyMajoranaAction>, Complex64, u32)> = slf
+            .inner
+            .iter_with_groups()
+            .map(|term| (term.into_vec(), term.coeff, term.group))
+            .collect();
+        let iter = MajoranaOperatorDataGroupIter {
+            inner: vectorized.into_iter(),
+        };
+        Py::new(slf.py(), iter)
+    }
+
+    /// Constructs a new operator from an iterator of terms with groups (see also
+    /// :meth:`.iter_terms_with_groups`).
+    ///
+    /// .. doctest::
+    ///
+    ///     >>> from qiskit_fermions.operators import MajoranaOperator
+    ///     >>> op = MajoranaOperator([2.0, 1.0, -1.0j], [0, 1], [0, 0, 1, 2])
+    ///     >>> op.groups = [0, 1, 1]
+    ///     >>> reconstructed = MajoranaOperator.from_terms_with_groups(op.iter_terms_with_groups())
+    ///     >>> op.equiv(reconstructed) and op.groups == reconstructed.groups
+    ///     True
+    ///
+    /// Args:
+    ///     terms: an iterator of terms as produced by :meth:`.iter_terms_with_groups`.
+    ///
+    /// Returns:
+    ///     A new operator.
+    #[classmethod]
+    fn from_terms_with_groups(
+        _cls: &Bound<'_, PyType>,
+        terms: &Bound<'_, PyAny>,
+    ) -> PyResult<Self> {
+        let mut inner = MajoranaOperator::zero();
+        let mut groups = vec![];
+        terms.try_iter()?.try_for_each(|item| -> PyResult<()> {
+            let (term, coeff, group) =
+                item?.extract::<(Vec<PyMajoranaAction>, Complex64, u32)>()?;
+            inner.coeffs.push(coeff);
+            inner.modes.extend_from_slice(&term);
+            inner.boundaries.push(inner.modes.len());
+            groups.push(group);
+            Ok(())
+        })?;
+        inner.groups = Some(groups);
         Ok(Self { inner })
     }
 

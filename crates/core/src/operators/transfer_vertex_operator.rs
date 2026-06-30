@@ -41,6 +41,28 @@ impl TransferVertexOperatorTermView<'_> {
     }
 }
 
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct TransferVertexOperatorGroupTermView<'a> {
+    pub coeff: Complex64,
+    pub left_indices: &'a [u32],
+    pub right_indices: &'a [u32],
+    pub group: u32,
+}
+
+impl TransferVertexOperatorGroupTermView<'_> {
+    pub fn iter(&'_ self) -> impl ExactSizeIterator<Item = TransferAction<'_>> + '_ {
+        zip(self.left_indices, self.right_indices)
+    }
+
+    pub fn to_vec(&'_ self) -> Vec<TransferAction<'_>> {
+        zip(self.left_indices, self.right_indices).collect()
+    }
+
+    pub fn into_vec(&'_ self) -> Vec<(u32, u32)> {
+        zip(self.left_indices.to_vec(), self.right_indices.to_vec()).collect()
+    }
+}
+
 #[derive(Clone, Debug, PartialEq)]
 pub struct TransferVertexOperator {
     pub coeffs: Vec<Complex64>,
@@ -95,6 +117,29 @@ impl TransferVertexOperator {
         })
     }
 
+    pub fn iter_with_groups(
+        &'_ self,
+    ) -> impl ExactSizeIterator<Item = TransferVertexOperatorGroupTermView<'_>> + '_ {
+        if let Some(groups) = &self.groups {
+            return self
+                .coeffs
+                .iter()
+                .zip(groups)
+                .enumerate()
+                .map(|(i, (coeff, gidx))| {
+                    let start = self.boundaries[i];
+                    let end = self.boundaries[i + 1];
+                    TransferVertexOperatorGroupTermView {
+                        coeff: *coeff,
+                        left_indices: &self.left_indices[start..end],
+                        right_indices: &self.right_indices[start..end],
+                        group: *gidx,
+                    }
+                });
+        }
+        panic!("This method can only be called when groups are present!");
+    }
+
     pub fn num_groups(&self) -> Option<u32> {
         let self_groups = self.groups.as_ref()?;
         if self_groups.is_empty() {
@@ -105,11 +150,9 @@ impl TransferVertexOperator {
     }
 
     pub fn split_out_groups(&self) -> Option<Vec<Self>> {
-        let self_groups = self.groups.as_ref()?;
-        let num_groups = self.num_groups()?;
-        let mut groups = vec![Self::zero(); num_groups as usize];
-        for (group_idx, term) in zip(self_groups.iter(), self.iter()) {
-            groups[*group_idx as usize]._append_term(
+        let mut groups = vec![Self::zero(); self.num_groups()? as usize];
+        for term in self.iter_with_groups() {
+            groups[term.group as usize]._append_term(
                 term.coeff,
                 term.left_indices,
                 term.right_indices,
@@ -1161,5 +1204,45 @@ mod tests {
 
         let groups = op.split_out_groups();
         assert!(groups.is_none());
+    }
+
+    #[test]
+    fn test_iter_with_groups() {
+        let op = TransferVertexOperator {
+            coeffs: vec![
+                Complex64::new(1.0, 0.0),
+                Complex64::new(1.0, 0.0),
+                Complex64::new(2.0, 0.0),
+            ],
+            left_indices: vec![0, 2, 1, 3],
+            right_indices: vec![1, 3, 0, 2],
+            boundaries: vec![0, 1, 2, 4],
+            groups: Some(vec![0, 0, 1]),
+        };
+
+        let terms: Vec<TransferVertexOperatorGroupTermView> = op.iter_with_groups().collect();
+
+        let expected = vec![
+            TransferVertexOperatorGroupTermView {
+                coeff: Complex64::new(1.0, 0.0),
+                left_indices: &[0],
+                right_indices: &[1],
+                group: 0,
+            },
+            TransferVertexOperatorGroupTermView {
+                coeff: Complex64::new(1.0, 0.0),
+                left_indices: &[2],
+                right_indices: &[3],
+                group: 0,
+            },
+            TransferVertexOperatorGroupTermView {
+                coeff: Complex64::new(2.0, 0.0),
+                left_indices: &[1, 3],
+                right_indices: &[0, 2],
+                group: 1,
+            },
+        ];
+
+        assert_eq!(terms, expected);
     }
 }

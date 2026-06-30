@@ -13,7 +13,6 @@
 use crate::operators::{CoherenceError, OperatorMacro, OperatorTrait};
 use num_complex::{Complex64, ComplexFloat};
 use std::collections::{HashMap, HashSet};
-use std::iter::zip;
 use std::ops::{
     Add, AddAssign, BitAnd, BitAndAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign,
 };
@@ -31,7 +30,26 @@ impl MajoranaOperatorTermView<'_> {
         self.modes.iter()
     }
 
-    // TODO: refactor these following methods
+    pub fn to_vec(&'_ self) -> Vec<MajoranaAction<'_>> {
+        self.modes.iter().collect()
+    }
+
+    pub fn into_vec(&'_ self) -> Vec<u32> {
+        self.modes.to_vec()
+    }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct MajoranaOperatorGroupTermView<'a> {
+    pub coeff: Complex64,
+    pub modes: &'a [u32],
+    pub group: u32,
+}
+
+impl MajoranaOperatorGroupTermView<'_> {
+    pub fn iter(&'_ self) -> impl ExactSizeIterator<Item = MajoranaAction<'_>> + '_ {
+        self.modes.iter()
+    }
 
     pub fn to_vec(&'_ self) -> Vec<MajoranaAction<'_>> {
         self.modes.iter().collect()
@@ -86,6 +104,28 @@ impl MajoranaOperator {
         })
     }
 
+    pub fn iter_with_groups(
+        &'_ self,
+    ) -> impl ExactSizeIterator<Item = MajoranaOperatorGroupTermView<'_>> + '_ {
+        if let Some(groups) = &self.groups {
+            return self
+                .coeffs
+                .iter()
+                .zip(groups)
+                .enumerate()
+                .map(|(i, (coeff, gidx))| {
+                    let start = self.boundaries[i];
+                    let end = self.boundaries[i + 1];
+                    MajoranaOperatorGroupTermView {
+                        coeff: *coeff,
+                        modes: &self.modes[start..end],
+                        group: *gidx,
+                    }
+                });
+        }
+        panic!("This method can only be called when groups are present!");
+    }
+
     pub fn num_groups(&self) -> Option<u32> {
         let self_groups = self.groups.as_ref()?;
         if self_groups.is_empty() {
@@ -96,11 +136,9 @@ impl MajoranaOperator {
     }
 
     pub fn split_out_groups(&self) -> Option<Vec<Self>> {
-        let self_groups = self.groups.as_ref()?;
-        let num_groups = self.num_groups()?;
-        let mut groups = vec![Self::zero(); num_groups as usize];
-        for (group_idx, term) in zip(self_groups.iter(), self.iter()) {
-            groups[*group_idx as usize]._append_term(term.coeff, term.modes);
+        let mut groups = vec![Self::zero(); self.num_groups()? as usize];
+        for term in self.iter_with_groups() {
+            groups[term.group as usize]._append_term(term.coeff, term.modes);
         }
         Some(groups)
     }
@@ -1074,5 +1112,41 @@ mod tests {
 
         let groups = op.split_out_groups();
         assert!(groups.is_none());
+    }
+
+    #[test]
+    fn test_iter_with_groups() {
+        let op = MajoranaOperator {
+            coeffs: vec![
+                Complex64::new(1.0, 0.0),
+                Complex64::new(1.0, 0.0),
+                Complex64::new(2.0, 0.0),
+            ],
+            modes: vec![0, 1, 1, 0, 0, 0, 1, 1],
+            boundaries: vec![0, 2, 4, 8],
+            groups: Some(vec![0, 0, 1]),
+        };
+
+        let terms: Vec<MajoranaOperatorGroupTermView> = op.iter_with_groups().collect();
+
+        let expected = vec![
+            MajoranaOperatorGroupTermView {
+                coeff: Complex64::new(1.0, 0.0),
+                modes: &[0, 1],
+                group: 0,
+            },
+            MajoranaOperatorGroupTermView {
+                coeff: Complex64::new(1.0, 0.0),
+                modes: &[1, 0],
+                group: 0,
+            },
+            MajoranaOperatorGroupTermView {
+                coeff: Complex64::new(2.0, 0.0),
+                modes: &[0, 0, 1, 1],
+                group: 1,
+            },
+        ];
+
+        assert_eq!(terms, expected);
     }
 }

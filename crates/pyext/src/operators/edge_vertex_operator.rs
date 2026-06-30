@@ -46,6 +46,27 @@ impl EdgeVertexOperatorDataIter {
     }
 }
 
+#[gen_stub_pyclass]
+#[pyclass(
+    module = "qiskit_fermions.operators.edge_vertex_operator",
+    name = "EdgeVertexOperatorDataGroupIter"
+)]
+struct EdgeVertexOperatorDataGroupIter {
+    inner: std::vec::IntoIter<(Vec<PyEdgeAction>, Complex64, u32)>,
+}
+
+#[gen_stub_pymethods]
+#[pymethods]
+impl EdgeVertexOperatorDataGroupIter {
+    fn __iter__(slf: PyRef<'_, Self>) -> PyRef<'_, Self> {
+        slf
+    }
+
+    fn __next__(mut slf: PyRefMut<'_, Self>) -> Option<(Vec<PyEdgeAction>, Complex64, u32)> {
+        slf.inner.next()
+    }
+}
+
 /// An edge-vertex operator.
 ///
 /// ----
@@ -198,6 +219,7 @@ impl EdgeVertexOperatorDataIter {
 ///    zero
 ///    one
 ///    from_terms
+///    from_terms_with_groups
 ///
 /// Formatting
 /// ----------
@@ -264,6 +286,7 @@ impl EdgeVertexOperatorDataIter {
 /// .. autosummary::
 ///
 ///    iter_terms
+///    iter_terms_with_groups
 ///
 /// Arithmetics
 /// -----------
@@ -834,6 +857,73 @@ impl PyEdgeVertexOperator {
             inner.boundaries.push(inner.right_indices.len());
             Ok(())
         })?;
+        Ok(Self { inner })
+    }
+
+    /// An iterator over the operator's terms with their associated group index.
+    ///
+    /// .. warning::
+    ///    Mutating the iteration items does **not** affect the underlying operator data.
+    ///
+    /// .. doctest::
+    ///
+    ///     >>> from qiskit_fermions.operators import EdgeVertexOperator
+    ///     >>> op = EdgeVertexOperator([2.0, 1.0, -1.0j], [0, 0], [0, 1], [0, 0, 1, 2])
+    ///     >>> op.groups = [0, 1, 1]
+    ///     >>> list(op.iter_terms_with_groups())
+    ///     [([], (2+0j), 0), ([(0, 0)], (1+0j), 1), ([(0, 1)], (-0-1j), 1)]
+    ///
+    /// ..
+    fn iter_terms_with_groups(
+        slf: PyRef<'_, Self>,
+    ) -> PyResult<Py<EdgeVertexOperatorDataGroupIter>> {
+        let vectorized: Vec<(Vec<PyEdgeAction>, Complex64, u32)> = slf
+            .inner
+            .iter_with_groups()
+            .map(|term| (term.into_vec(), term.coeff, term.group))
+            .collect();
+        let iter = EdgeVertexOperatorDataGroupIter {
+            inner: vectorized.into_iter(),
+        };
+        Py::new(slf.py(), iter)
+    }
+
+    /// Constructs a new operator from an iterator of terms with groups (see also
+    /// :meth:`.iter_terms_with_groups`).
+    ///
+    /// .. doctest::
+    ///
+    ///     >>> from qiskit_fermions.operators import EdgeVertexOperator
+    ///     >>> op = EdgeVertexOperator([2.0, 1.0, -1.0j], [0, 0], [0, 1], [0, 0, 1, 2])
+    ///     >>> op.groups = [0, 1, 1]
+    ///     >>> reconstructed = EdgeVertexOperator.from_terms_with_groups(op.iter_terms_with_groups())
+    ///     >>> op.equiv(reconstructed) and op.groups == reconstructed.groups
+    ///     True
+    ///
+    /// Args:
+    ///     terms: an iterator of terms as produced by :meth:`.iter_terms_with_groups`.
+    ///
+    /// Returns:
+    ///     A new operator.
+    #[classmethod]
+    fn from_terms_with_groups(
+        _cls: &Bound<'_, PyType>,
+        terms: &Bound<'_, PyAny>,
+    ) -> PyResult<Self> {
+        let mut inner = EdgeVertexOperator::zero();
+        let mut groups = vec![];
+        terms.try_iter()?.try_for_each(|item| -> PyResult<()> {
+            let (term, coeff, group) = item?.extract::<(Vec<PyEdgeAction>, Complex64, u32)>()?;
+            inner.coeffs.push(coeff);
+            term.iter().for_each(|(l, r)| {
+                inner.left_indices.push(*l);
+                inner.right_indices.push(*r);
+            });
+            inner.boundaries.push(inner.right_indices.len());
+            groups.push(group);
+            Ok(())
+        })?;
+        inner.groups = Some(groups);
         Ok(Self { inner })
     }
 

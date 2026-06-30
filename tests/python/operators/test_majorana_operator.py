@@ -99,6 +99,33 @@ class TestMajoranaOperator:
         with subtests.test("list"):
             assert op.equiv(cls.from_terms(list(op.iter_terms())))
 
+    def test_iter_with_groups(self):
+        cls = self.get_class()
+        op = cls.one()
+        op.groups = [0]
+        assert list(op.iter_terms_with_groups()) == [([], 1, 0)]
+
+    def test_from_terms_with_groups(self, subtests):
+        cls = self.get_class()
+        op = cls.from_dict(
+            {
+                (): 2,
+                (gamma(0, False),): 1,
+                (gamma(0, False), gamma(0, True)): 0.5,
+                (gamma(1, False), gamma(0, True)): -0.5j,
+                (gamma(1, True), gamma(1, False)): 1 - 0.5j,
+            }
+        )
+        op.groups = [0, 1, 2, 3, 4]
+        with subtests.test("iterator"):
+            reconstructed = cls.from_terms_with_groups(op.iter_terms_with_groups())
+            assert op.equiv(reconstructed)
+            assert op.groups == reconstructed.groups
+        with subtests.test("list"):
+            reconstructed = cls.from_terms_with_groups(list(op.iter_terms_with_groups()))
+            assert op.equiv(reconstructed)
+            assert op.groups == reconstructed.groups
+
     def test_ichop(self):
         cls = self.get_class()
         op = cls.from_dict({(): 1e-4, (0,): 1e-6, (1,): 1e-10})
