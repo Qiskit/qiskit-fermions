@@ -15,16 +15,13 @@
 from __future__ import annotations
 
 from qiskit.circuit.library import PauliEvolutionGate
+from qiskit.passmanager import MultiStagePassManager
 from qiskit_fermions.circuit import FermionicCircuit
 from qiskit_fermions.circuit.library import Evolution
 from qiskit_fermions.mappers.library import jordan_wigner
 from qiskit_fermions.operators import FermionOperator
+from qiskit_fermions.transpiler import FermionicCircuitToDAG, QuantumDAGToCircuit
 from qiskit_fermions.transpiler.passes import EvolutionSynthesis, F2QSynthesis, TrivialF2QLayout
-from qiskit_fermions.transpiler.passmanager import (
-    FermionicPassManager,
-    FermionicStagedPassManager,
-    FermionicToQubitConverter,
-)
 
 
 def test_evolution_gate_synthesis():
@@ -45,9 +42,12 @@ def test_evolution_gate_synthesis():
     synth = F2QSynthesis()
     synth.plugins[Evolution] = EvolutionSynthesis(jordan_wigner)
 
-    pm = FermionicStagedPassManager()
-    pm.layout = FermionicPassManager(TrivialF2QLayout())
-    pm.synthesis = FermionicToQubitConverter(synth)
+    pm = MultiStagePassManager(
+        input=FermionicCircuitToDAG(),
+        layout=TrivialF2QLayout(),
+        synthesis=synth,
+        output=QuantumDAGToCircuit(),
+    )
 
     qu_circ = pm.run(circ)
 
@@ -83,9 +83,12 @@ def test_custom_qubit_ordering():
     synth = F2QSynthesis()
     synth.plugins[Evolution] = EvolutionSynthesis(custom_qubit_ordering_mapper_fn)
 
-    pm = FermionicStagedPassManager()
-    pm.layout = FermionicPassManager(TrivialF2QLayout())
-    pm.synthesis = FermionicToQubitConverter(synth)
+    pm = MultiStagePassManager(
+        input=FermionicCircuitToDAG(),
+        layout=TrivialF2QLayout(),
+        synthesis=synth,
+        output=QuantumDAGToCircuit(),
+    )
 
     qu_circ = pm.run(circ)
 

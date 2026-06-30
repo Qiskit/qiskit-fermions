@@ -17,9 +17,9 @@ from __future__ import annotations
 from typing import Protocol, cast
 
 from qiskit.dagcircuit import DAGCircuit, DAGOpNode
-from qiskit.transpiler import TransformationPass
+from qiskit.passmanager import GenericPass
 
-from qiskit_fermions.circuit import FermionicGate
+from qiskit_fermions.circuit import FermionicDAGCircuit, FermionicGate
 
 from ... import F2QLayout
 
@@ -44,7 +44,7 @@ class F2QSynthesisPlugin(Protocol):
         ...
 
 
-class F2QSynthesis(TransformationPass):
+class F2QSynthesis(GenericPass[FermionicDAGCircuit, DAGCircuit]):
     """A transpilation pass to map fermion-based circuit instructions to qubit-based ones.
 
     This transpilation pass works similarly to Qiskit's
@@ -72,7 +72,7 @@ class F2QSynthesis(TransformationPass):
            :no-special-members:
         """
 
-    def run(self, dag: DAGCircuit) -> DAGCircuit:
+    def run(self, dag: FermionicDAGCircuit) -> DAGCircuit:
         """Runs this transpilation pass.
 
         Args:

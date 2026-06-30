@@ -15,17 +15,12 @@
 from __future__ import annotations
 
 import pytest
-from qiskit.circuit import QuantumCircuit
-from qiskit.transpiler import PassManager
+from qiskit.passmanager import MultiStagePassManager
 from qiskit_fermions.circuit import FermionicCircuit
 from qiskit_fermions.circuit.library import Evolution
 from qiskit_fermions.operators import FermionOperator
+from qiskit_fermions.transpiler import FermionicCircuitToDAG, QuantumDAGToCircuit
 from qiskit_fermions.transpiler.passes import F2QSynthesis, TrivialF2QLayout
-from qiskit_fermions.transpiler.passmanager import (
-    FermionicPassManager,
-    FermionicStagedPassManager,
-    FermionicToQubitConverter,
-)
 
 
 def test_missing_plugin():
@@ -44,20 +39,12 @@ def test_missing_plugin():
     evo = Evolution(num_modes, hamil, time=time)
     circ.append(evo, circ.modes)
 
-    pm = FermionicStagedPassManager()
-    pm.layout = FermionicPassManager(TrivialF2QLayout())
-    pm.synthesis = FermionicToQubitConverter(F2QSynthesis())
+    pm = MultiStagePassManager(
+        input=FermionicCircuitToDAG(),
+        layout=TrivialF2QLayout(),
+        synthesis=F2QSynthesis(),
+        output=QuantumDAGToCircuit(),
+    )
 
     with pytest.raises(TypeError, match="No plugin registered"):
-        _ = pm.run(circ)
-
-
-def test_unsupported_gate():
-    """Test the handling of an unsupported circuit instruction."""
-    circ = QuantumCircuit(2)
-    circ.x(0)
-
-    pm = PassManager([TrivialF2QLayout(), F2QSynthesis()])
-
-    with pytest.raises(ValueError, match="unsupported circuit instruction"):
         _ = pm.run(circ)

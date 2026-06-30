@@ -44,6 +44,7 @@ from collections.abc import Sequence
 from typing import TypeAlias
 
 from qiskit.circuit import QuantumRegister, Qubit
+from qiskit.dagcircuit import DAGCircuit
 
 FermionicMode: TypeAlias = Qubit
 
@@ -53,6 +54,8 @@ FermionicSpecifier: TypeAlias = (
     FermionicMode | FermionicRegister | int | slice | Sequence[FermionicMode | int]
 )
 """A type alias equivalent to Qiskit's ``QubitSpecifier`` but for fermionic modes."""
+
+FermionicDAGCircuit: TypeAlias = DAGCircuit
 
 # NOTE: we must explicitly define the type aliases _before_ the following imports to ensure that
 # they can actually use those type aliases themselves.

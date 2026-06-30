@@ -127,8 +127,6 @@ its own interfaces of these transpiler pass managers listed below.
    :toctree: ../stubs/
 
    FermionicPassManager
-   FermionicStagedPassManager
-   FermionicToQubitConverter
 
 Presets
 ^^^^^^^
@@ -141,11 +139,28 @@ from __future__ import annotations
 
 from typing import TypeAlias
 
-from qiskit.circuit import QuantumRegister
+from qiskit.circuit import QuantumCircuit, QuantumRegister
+from qiskit.dagcircuit import DAGCircuit
+from qiskit.passmanager import GenericPass
+from qiskit.transpiler import TranspileLayout
 
-from qiskit_fermions.circuit import FermionicRegister
+from qiskit_fermions.circuit import FermionicDAGCircuit, FermionicRegister
 
-from .passmanager import FermionicPassManager, FermionicStagedPassManager, FermionicToQubitConverter
+from .passmanager import FermionicCircuitToDAG, FermionicDAGToCircuit, FermionicPassManager
+
+
+class QuantumDAGToCircuit(GenericPass[DAGCircuit, QuantumCircuit]):
+    """TODO."""
+
+    def run(self, passmanager_ir: DAGCircuit) -> QuantumCircuit:
+        """TODO."""
+        qc = passmanager_ir.to_circuit(copy_operations=False)
+        qc._layout = TranspileLayout.from_property_set(passmanager_ir, self.property_set)
+        return qc
+
+
+FermionicDAGCircuitPass: TypeAlias = GenericPass[FermionicDAGCircuit, FermionicDAGCircuit]
+"""TODO."""
 
 F2QLayout: TypeAlias = dict[FermionicRegister, QuantumRegister]
 """A mapping of fermionic mode registers to quantum registers.
@@ -159,7 +174,7 @@ size of the registers on either side of this mapping may differ.
 
 __all__ = [
     "F2QLayout",
+    "FermionicCircuitToDAG",
+    "FermionicDAGToCircuit",
     "FermionicPassManager",
-    "FermionicStagedPassManager",
-    "FermionicToQubitConverter",
 ]
