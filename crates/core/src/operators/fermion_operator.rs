@@ -33,7 +33,27 @@ impl FermionOperatorTermView<'_> {
         zip(self.actions, self.modes)
     }
 
-    // TODO: refactor these following methods
+    pub fn to_vec(&'_ self) -> Vec<FermionAction<'_>> {
+        zip(self.actions, self.modes).collect()
+    }
+
+    pub fn into_vec(&'_ self) -> Vec<(bool, u32)> {
+        zip(self.actions.to_vec(), self.modes.to_vec()).collect()
+    }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct FermionOperatorGroupTermView<'a> {
+    pub coeff: Complex64,
+    pub actions: &'a [bool],
+    pub modes: &'a [u32],
+    pub group: u32,
+}
+
+impl FermionOperatorGroupTermView<'_> {
+    pub fn iter(&'_ self) -> impl ExactSizeIterator<Item = FermionAction<'_>> + '_ {
+        zip(self.actions, self.modes)
+    }
 
     pub fn to_vec(&'_ self) -> Vec<FermionAction<'_>> {
         zip(self.actions, self.modes).collect()
@@ -96,6 +116,29 @@ impl FermionOperator {
         })
     }
 
+    pub fn iter_with_groups(
+        &'_ self,
+    ) -> impl ExactSizeIterator<Item = FermionOperatorGroupTermView<'_>> + '_ {
+        if let Some(groups) = &self.groups {
+            return self
+                .coeffs
+                .iter()
+                .zip(groups)
+                .enumerate()
+                .map(|(i, (coeff, gidx))| {
+                    let start = self.boundaries[i];
+                    let end = self.boundaries[i + 1];
+                    FermionOperatorGroupTermView {
+                        coeff: *coeff,
+                        actions: &self.actions[start..end],
+                        modes: &self.modes[start..end],
+                        group: *gidx,
+                    }
+                });
+        }
+        panic!("This method can only be called when groups are present!");
+    }
+
     pub fn num_groups(&self) -> Option<u32> {
         let self_groups = self.groups.as_ref()?;
         if self_groups.is_empty() {
@@ -106,11 +149,9 @@ impl FermionOperator {
     }
 
     pub fn split_out_groups(&self) -> Option<Vec<Self>> {
-        let self_groups = self.groups.as_ref()?;
-        let num_groups = self.num_groups()?;
-        let mut groups = vec![Self::zero(); num_groups as usize];
-        for (group_idx, term) in zip(self_groups.iter(), self.iter()) {
-            groups[*group_idx as usize]._append_term(term.coeff, term.actions, term.modes);
+        let mut groups = vec![Self::zero(); self.num_groups()? as usize];
+        for term in self.iter_with_groups() {
+            groups[term.group as usize]._append_term(term.coeff, term.actions, term.modes);
         }
         Some(groups)
     }
@@ -1199,5 +1240,45 @@ mod tests {
 
         let groups = op.split_out_groups();
         assert!(groups.is_none());
+    }
+
+    #[test]
+    fn test_iter_with_groups() {
+        let op = FermionOperator {
+            coeffs: vec![
+                Complex64::new(1.0, 0.0),
+                Complex64::new(1.0, 0.0),
+                Complex64::new(2.0, 0.0),
+            ],
+            actions: vec![true, false, true, false, true, true, false, false],
+            modes: vec![0, 1, 1, 0, 0, 0, 1, 1],
+            boundaries: vec![0, 2, 4, 8],
+            groups: Some(vec![0, 0, 1]),
+        };
+
+        let terms: Vec<FermionOperatorGroupTermView> = op.iter_with_groups().collect();
+
+        let expected = vec![
+            FermionOperatorGroupTermView {
+                coeff: Complex64::new(1.0, 0.0),
+                actions: &[true, false],
+                modes: &[0, 1],
+                group: 0,
+            },
+            FermionOperatorGroupTermView {
+                coeff: Complex64::new(1.0, 0.0),
+                actions: &[true, false],
+                modes: &[1, 0],
+                group: 0,
+            },
+            FermionOperatorGroupTermView {
+                coeff: Complex64::new(2.0, 0.0),
+                actions: &[true, true, false, false],
+                modes: &[0, 0, 1, 1],
+                group: 1,
+            },
+        ];
+
+        assert_eq!(terms, expected);
     }
 }

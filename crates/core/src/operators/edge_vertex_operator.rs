@@ -41,6 +41,28 @@ impl EdgeVertexOperatorTermView<'_> {
     }
 }
 
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct EdgeVertexOperatorGroupTermView<'a> {
+    pub coeff: Complex64,
+    pub left_indices: &'a [u32],
+    pub right_indices: &'a [u32],
+    pub group: u32,
+}
+
+impl EdgeVertexOperatorGroupTermView<'_> {
+    pub fn iter(&'_ self) -> impl ExactSizeIterator<Item = EdgeAction<'_>> + '_ {
+        zip(self.left_indices, self.right_indices)
+    }
+
+    pub fn to_vec(&'_ self) -> Vec<EdgeAction<'_>> {
+        zip(self.left_indices, self.right_indices).collect()
+    }
+
+    pub fn into_vec(&'_ self) -> Vec<(u32, u32)> {
+        zip(self.left_indices.to_vec(), self.right_indices.to_vec()).collect()
+    }
+}
+
 #[derive(Clone, Debug, PartialEq)]
 pub struct EdgeVertexOperator {
     pub coeffs: Vec<Complex64>,
@@ -93,6 +115,29 @@ impl EdgeVertexOperator {
         })
     }
 
+    pub fn iter_with_groups(
+        &'_ self,
+    ) -> impl ExactSizeIterator<Item = EdgeVertexOperatorGroupTermView<'_>> + '_ {
+        if let Some(groups) = &self.groups {
+            return self
+                .coeffs
+                .iter()
+                .zip(groups)
+                .enumerate()
+                .map(|(i, (coeff, gidx))| {
+                    let start = self.boundaries[i];
+                    let end = self.boundaries[i + 1];
+                    EdgeVertexOperatorGroupTermView {
+                        coeff: *coeff,
+                        left_indices: &self.left_indices[start..end],
+                        right_indices: &self.right_indices[start..end],
+                        group: *gidx,
+                    }
+                });
+        }
+        panic!("This method can only be called when groups are present!");
+    }
+
     pub fn num_groups(&self) -> Option<u32> {
         let self_groups = self.groups.as_ref()?;
         if self_groups.is_empty() {
@@ -103,11 +148,9 @@ impl EdgeVertexOperator {
     }
 
     pub fn split_out_groups(&self) -> Option<Vec<Self>> {
-        let self_groups = self.groups.as_ref()?;
-        let num_groups = self.num_groups()?;
-        let mut groups = vec![Self::zero(); num_groups as usize];
-        for (group_idx, term) in zip(self_groups.iter(), self.iter()) {
-            groups[*group_idx as usize]._append_term(
+        let mut groups = vec![Self::zero(); self.num_groups()? as usize];
+        for term in self.iter_with_groups() {
+            groups[term.group as usize]._append_term(
                 term.coeff,
                 term.left_indices,
                 term.right_indices,
@@ -1116,5 +1159,45 @@ mod tests {
 
         let groups = op.split_out_groups();
         assert!(groups.is_none());
+    }
+
+    #[test]
+    fn test_iter_with_groups() {
+        let op = EdgeVertexOperator {
+            coeffs: vec![
+                Complex64::new(1.0, 0.0),
+                Complex64::new(1.0, 0.0),
+                Complex64::new(2.0, 0.0),
+            ],
+            left_indices: vec![0, 2, 1, 3],
+            right_indices: vec![1, 3, 0, 2],
+            boundaries: vec![0, 1, 2, 4],
+            groups: Some(vec![0, 0, 1]),
+        };
+
+        let terms: Vec<EdgeVertexOperatorGroupTermView> = op.iter_with_groups().collect();
+
+        let expected = vec![
+            EdgeVertexOperatorGroupTermView {
+                coeff: Complex64::new(1.0, 0.0),
+                left_indices: &[0],
+                right_indices: &[1],
+                group: 0,
+            },
+            EdgeVertexOperatorGroupTermView {
+                coeff: Complex64::new(1.0, 0.0),
+                left_indices: &[2],
+                right_indices: &[3],
+                group: 0,
+            },
+            EdgeVertexOperatorGroupTermView {
+                coeff: Complex64::new(2.0, 0.0),
+                left_indices: &[1, 3],
+                right_indices: &[0, 2],
+                group: 1,
+            },
+        ];
+
+        assert_eq!(terms, expected);
     }
 }

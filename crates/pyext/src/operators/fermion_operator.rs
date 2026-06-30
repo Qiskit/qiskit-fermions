@@ -46,6 +46,27 @@ impl FermionOperatorDataIter {
     }
 }
 
+#[gen_stub_pyclass]
+#[pyclass(
+    module = "qiskit_fermions.operators.fermion_operator",
+    name = "FermionOperatorDataGroupIter"
+)]
+struct FermionOperatorDataGroupIter {
+    inner: std::vec::IntoIter<(Vec<PyFermionAction>, Complex64, u32)>,
+}
+
+#[gen_stub_pymethods]
+#[pymethods]
+impl FermionOperatorDataGroupIter {
+    fn __iter__(slf: PyRef<'_, Self>) -> PyRef<'_, Self> {
+        slf
+    }
+
+    fn __next__(mut slf: PyRefMut<'_, Self>) -> Option<(Vec<PyFermionAction>, Complex64, u32)> {
+        slf.inner.next()
+    }
+}
+
 /// A spin-less fermionic operator.
 ///
 /// ----
@@ -159,6 +180,7 @@ impl FermionOperatorDataIter {
 ///    zero
 ///    one
 ///    from_terms
+///    from_terms_with_groups
 ///
 /// Formatting
 /// ----------
@@ -225,6 +247,7 @@ impl FermionOperatorDataIter {
 /// .. autosummary::
 ///
 ///    iter_terms
+///    iter_terms_with_groups
 ///
 /// Arithmetics
 /// -----------
@@ -801,6 +824,81 @@ impl PyFermionOperator {
             inner.boundaries.push(inner.modes.len());
             Ok(())
         })?;
+        Ok(Self { inner })
+    }
+
+    /// An iterator over the operator's terms with their associated group index.
+    ///
+    /// .. warning::
+    ///    Mutating the iteration items does **not** affect the underlying operator data.
+    ///
+    /// .. doctest::
+    ///
+    ///     >>> from qiskit_fermions.operators import FermionOperator
+    ///     >>> op = FermionOperator(
+    ///     ...     [2.0, 1.0, -1.0],
+    ///     ...     [True, False, True, False],
+    ///     ...     [0, 1, 1, 0],
+    ///     ...     [0, 0, 2, 4],
+    ///     ... )
+    ///     >>> op.groups = [0, 1, 1]
+    ///     >>> list(sorted(op.iter_terms_with_groups()))
+    ///     [([], (2+0j), 0), ([(True, 0), (False, 1)], (1+0j), 1), ([(True, 1), (False, 0)], (-1+0j), 1)]
+    ///
+    /// ..
+    fn iter_terms_with_groups(slf: PyRef<'_, Self>) -> PyResult<Py<FermionOperatorDataGroupIter>> {
+        let vectorized: Vec<(Vec<PyFermionAction>, Complex64, u32)> = slf
+            .inner
+            .iter_with_groups()
+            .map(|term| (term.into_vec(), term.coeff, term.group))
+            .collect();
+        let iter = FermionOperatorDataGroupIter {
+            inner: vectorized.into_iter(),
+        };
+        Py::new(slf.py(), iter)
+    }
+
+    /// Constructs a new operator from an iterator of terms with groups (see also
+    /// :meth:`.iter_terms_with_groups`).
+    ///
+    /// .. doctest::
+    ///
+    ///     >>> from qiskit_fermions.operators import FermionOperator
+    ///     >>> op = FermionOperator(
+    ///     ...     [2.0, 1.0, -1.0],
+    ///     ...     [True, False, True, False],
+    ///     ...     [0, 1, 1, 0],
+    ///     ...     [0, 0, 2, 4],
+    ///     ... )
+    ///     >>> op.groups = [0, 1, 1]
+    ///     >>> reconstructed = FermionOperator.from_terms_with_groups(op.iter_terms_with_groups())
+    ///     >>> op.equiv(reconstructed) and op.groups == reconstructed.groups
+    ///     True
+    ///
+    /// Args:
+    ///     terms: an iterator of terms as produced by :meth:`.iter_terms_with_groups`.
+    ///
+    /// Returns:
+    ///     A new operator.
+    #[classmethod]
+    fn from_terms_with_groups(
+        _cls: &Bound<'_, PyType>,
+        terms: &Bound<'_, PyAny>,
+    ) -> PyResult<Self> {
+        let mut inner = FermionOperator::zero();
+        let mut groups = vec![];
+        terms.try_iter()?.try_for_each(|item| -> PyResult<()> {
+            let (term, coeff, group) = item?.extract::<(Vec<PyFermionAction>, Complex64, u32)>()?;
+            inner.coeffs.push(coeff);
+            term.iter().for_each(|(a, m)| {
+                inner.actions.push(*a);
+                inner.modes.push(*m);
+            });
+            inner.boundaries.push(inner.modes.len());
+            groups.push(group);
+            Ok(())
+        })?;
+        inner.groups = Some(groups);
         Ok(Self { inner })
     }
 
