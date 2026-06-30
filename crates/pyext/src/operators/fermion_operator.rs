@@ -180,6 +180,7 @@ impl FermionOperatorDataGroupIter {
 ///    zero
 ///    one
 ///    from_terms
+///    from_terms_with_groups
 ///
 /// Formatting
 /// ----------
@@ -246,6 +247,7 @@ impl FermionOperatorDataGroupIter {
 /// .. autosummary::
 ///
 ///    iter_terms
+///    iter_terms_with_groups
 ///
 /// Arithmetics
 /// -----------

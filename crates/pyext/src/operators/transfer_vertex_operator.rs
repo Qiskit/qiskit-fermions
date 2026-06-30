@@ -224,6 +224,7 @@ impl TransferVertexOperatorDataGroupIter {
 ///    zero
 ///    one
 ///    from_terms
+///    from_terms_with_groups
 ///
 /// Formatting
 /// ----------
@@ -290,6 +291,7 @@ impl TransferVertexOperatorDataGroupIter {
 /// .. autosummary::
 ///
 ///    iter_terms
+///    iter_terms_with_groups
 ///
 /// Arithmetics
 /// -----------

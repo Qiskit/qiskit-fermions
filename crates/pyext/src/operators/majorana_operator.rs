@@ -181,6 +181,7 @@ impl MajoranaOperatorDataGroupIter {
 ///    zero
 ///    one
 ///    from_terms
+///    from_terms_with_groups
 ///
 /// Formatting
 /// ----------
@@ -246,6 +247,7 @@ impl MajoranaOperatorDataGroupIter {
 /// .. autosummary::
 ///
 ///    iter_terms
+///    iter_terms_with_groups
 ///
 /// Arithmetics
 /// -----------
