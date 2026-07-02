@@ -25,8 +25,6 @@ use qiskit_fermions_core::mappers::library::jordan_wigner::jordan_wigner;
 /// Returns:
 ///     The mapped qubit operator.
 ///
-/// ----
-///
 /// Definition
 /// ==========
 ///
@@ -66,8 +64,6 @@ use qiskit_fermions_core::mappers::library::jordan_wigner::jordan_wigner;
 ///     >>> qop = jordan_wigner(fop, 4)
 ///     >>> qop.simplify()
 ///     <SparseObservable with 5 terms on 4 qubits: (2.05-0.25j)() + (-0.05+0j)(Z_0) + (0+0.25j)(Z_1) + (0+0.25j)(Z_2 Z_1) + (0-0.25j)(Z_2)>
-///
-/// ----
 ///
 /// .. [1] P. Jordan and E. Wigner, Über das Paulische Äquivalenzverbot,
 ///        Zeitschrift für Physik 47, No. 9. (1928), pp. 631–651,

@@ -27,8 +27,6 @@ use qiskit_fermions_core::mappers::library::edge_vertex::{
 /// Returns:
 ///     The mapped fermionic operator.
 ///
-/// ----
-///
 /// Definition
 /// ==========
 ///
@@ -68,8 +66,6 @@ pub fn py_edge_vertex_to_fermion(inter_op: PyEdgeVertexOperator) -> PyFermionOpe
 ///
 /// Returns:
 ///     The mapped majorana operator.
-///
-/// ----
 ///
 /// Definition
 /// ==========

@@ -69,8 +69,6 @@ impl MajoranaOperatorDataGroupIter {
 
 /// A Majorana fermion operator.
 ///
-/// ----
-///
 /// Definition
 /// ==========
 ///
@@ -103,8 +101,6 @@ impl MajoranaOperatorDataGroupIter {
 /// where :math:`c_i` is the (complex) coefficient making up the linear combination of products of
 /// :math:`\gamma_j`. The index :math:`j` can take any value between 0 and the number of majorana
 /// fermionic modes acted upon by the operator minus 1.
-///
-/// ----
 ///
 /// .. _MajoranaOperator-implementation:
 ///
@@ -351,8 +347,6 @@ impl MajoranaOperatorDataGroupIter {
 ///    is_hermitian
 ///    max_rank
 ///    is_even
-///
-/// ----
 ///
 /// .. [1] https://en.wikipedia.org/wiki/Majorana_fermion
 #[gen_stub_pyclass]

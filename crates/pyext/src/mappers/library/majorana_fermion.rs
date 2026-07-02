@@ -26,8 +26,6 @@ use qiskit_fermions_core::mappers::library::majorana_fermion::{
 /// Returns:
 ///     The mapped majorana operator.
 ///
-/// ----
-///
 /// Definition
 /// ==========
 ///
@@ -72,8 +70,6 @@ pub fn py_fermion_to_majorana(fer_op: PyFermionOperator) -> PyMajoranaOperator {
 ///
 /// Returns:
 ///     The mapped fermion operator.
-///
-/// ----
 ///
 /// Definition
 /// ==========

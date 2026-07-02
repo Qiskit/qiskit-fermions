@@ -28,8 +28,6 @@ use qiskit_fermions_core::mappers::library::transfer_vertex::{
 /// Returns:
 ///     The mapped fermionic operator.
 ///
-/// ----
-///
 /// Definition
 /// ==========
 ///
@@ -68,8 +66,6 @@ pub fn py_transfer_vertex_to_fermion(inter_op: PyTransferVertexOperator) -> PyFe
 /// Returns:
 ///     The mapped majorana operator.
 ///
-/// ----
-///
 /// Definition
 /// ==========
 ///
@@ -106,8 +102,6 @@ pub fn py_transfer_vertex_to_majorana(inter_op: PyTransferVertexOperator) -> PyM
 ///
 /// Returns:
 ///     The mapped edge-vertex operator.
-///
-/// ----
 ///
 /// Definition
 /// ==========

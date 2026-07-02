@@ -19,8 +19,6 @@ use qiskit_fermions_core::operators::library::fcidump::FCIDump;
 
 /// An electronic structure Hamiltonian in FCIDump format.
 ///
-/// ----
-///
 /// Definition
 /// ==========
 ///
@@ -50,8 +48,6 @@ use qiskit_fermions_core::operators::library::fcidump::FCIDump;
 ///    The implementation of this data structure is opaque to Python and only provides a few
 ///    attributes and methods documented at the end of this page.
 ///
-/// ----
-///
 /// Conversion
 /// ==========
 ///
@@ -63,8 +59,6 @@ use qiskit_fermions_core::operators::library::fcidump::FCIDump;
 ///   ===================================== =================================================================
 ///   :meth:`.FermionOperator.from_fcidump` Constructs a :class:`.FermionOperator` from an :class:`.FCIDump`.
 ///   ===================================== =================================================================
-///
-/// ----
 ///
 /// .. [1] P. J. Knowles and N. C. Handy, Computer Physics Communications 54 (1989) 75-83.
 #[gen_stub_pyclass]
