@@ -73,7 +73,7 @@ test = [
 ]
 coverage = [
     {include-group = "test"},
-    "pytest-cov>=7.0",
+    "pytest-cov>=7.1.0",
 ]
 docs = [
     {include-group = "doctest"},
