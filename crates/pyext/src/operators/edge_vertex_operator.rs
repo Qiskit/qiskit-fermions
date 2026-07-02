@@ -69,8 +69,6 @@ impl EdgeVertexOperatorDataGroupIter {
 
 /// An edge-vertex operator.
 ///
-/// ----
-///
 /// .. _EdgeVertexOperator-definition:
 ///
 /// Definition
@@ -139,8 +137,6 @@ impl EdgeVertexOperatorDataGroupIter {
 /// 1.
 ///
 /// We will refer to :math:`E_{lr}` as `generalized` edge operators.
-///
-/// ----
 ///
 /// .. _EdgeVertexOperator-implementation:
 ///
@@ -388,8 +384,6 @@ impl EdgeVertexOperatorDataGroupIter {
 /// .. autosummary::
 ///
 ///    is_hermitian
-///
-/// ----
 ///
 /// .. [1] Gandon et al., `arXiv:2512.11418 <https://arxiv.org/abs/2512.11418v2>`_.
 #[gen_stub_pyclass]

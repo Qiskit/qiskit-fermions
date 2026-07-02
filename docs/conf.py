@@ -94,6 +94,10 @@ autodoc_default_options = {
 }
 napoleon_google_docstring = True
 napoleon_numpy_docstring = False
+# Sphinx 9 rewrote autodoc and no longer resolves the module for members of our aliased
+# classes (e.g. FermionicRegister = QuantumRegister). Use the legacy implementation until fixed.
+# See https://github.com/sphinx-doc/sphinx/issues/14089
+autodoc_use_legacy_class_based = True
 
 
 # This adds numbers to the captions for figures, tables,
