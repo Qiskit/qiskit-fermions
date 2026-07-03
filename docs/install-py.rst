@@ -1,10 +1,6 @@
 Install the Python API
 =======================
 
-.. warning::
-   Windows is not yet fully supported by the ``qiskit-fermions`` Python API.
-   We are actively working on resolving this. Stay tuned for updates!
-
 Requirements
 ------------
 
@@ -51,7 +47,15 @@ simple:
 
          $ SETUPTOOLS_RUST_CARGO_PROFILE=release pip install --no-build-isolation -e .
 
-4. (optional) Verify that the installation was successful:
+4. (optional) You may wish to generate the Python type stub files to have better
+   integration with coding tools (e.g. for tab completion). You can do that
+   quite simply like so:
+
+   .. code:: console
+
+      $ make pystubs
+
+5. (optional) Verify that the installation was successful:
    The simplest test is to try and import one of the classes provided by the
    ``qiskit-fermions`` package, for example like so:
 
