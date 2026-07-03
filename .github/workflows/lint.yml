@@ -41,25 +41,10 @@ jobs:
             python -m pip install -U pip tox
             sudo apt-get install -y clang-format
 
-      - name: Generate qiskit-pyo3-ffi crate
-        shell: bash
-        env:
-          GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
-        run: |
-          git clone https://github.com/Qiskit/qiskit build/qiskit
-          cd build/qiskit
-          # checkout the latest (i.e. stable) release tag
-          git checkout $(gh release -R Qiskit/qiskit view 2.5.0rc1 --json tagName --jq ".tagName")
-          make qiskit-pyo3-ffi
-          # ad-hoc workaround until a proper solution is found for
-          # `qiskit-pyo3-ffi` being nested in our workspace folder
-          sed -i.bak '/\[workspace\]/d' dist/rust/qiskit-pyo3-ffi/Cargo.toml
-
       - name: Install Package
         shell: bash
         run: |
-          pip install --pre qiskit
-          pip install --group build --group lint
+          pip install --group build --group lint qiskit
           SETUPTOOLS_RUST_CARGO_PROFILE=release pip install --no-build-isolation -e ".[all]"
 
       - name: Run lint check

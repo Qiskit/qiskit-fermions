@@ -54,10 +54,7 @@ jobs:
           git clone https://github.com/Qiskit/qiskit build/qiskit
           cd build/qiskit
           git rev-parse HEAD
-          make c qiskit-pyo3-ffi
-          # ad-hoc workaround until a proper solution is found for
-          # `qiskit-pyo3-ffi` being nested in our workspace folder
-          sed -i.bak '/\[workspace\]/d' dist/rust/qiskit-pyo3-ffi/Cargo.toml
+          make c
           python -m build --wheel
 
       - name: Rust tests

@@ -56,11 +56,8 @@ jobs:
           git clone https://github.com/Qiskit/qiskit build/qiskit
           cd build/qiskit
           # checkout the minimum release tag
-          git checkout 2.5.0rc1
-          make c qiskit-pyo3-ffi
-          # ad-hoc workaround until a proper solution is found for
-          # `qiskit-pyo3-ffi` being nested in our workspace folder
-          sed -i.bak '/\[workspace\]/d' dist/rust/qiskit-pyo3-ffi/Cargo.toml
+          git checkout 2.5.0
+          make c
 
       - name: Rust tests
         shell: bash
@@ -85,8 +82,7 @@ jobs:
 
       - name: Install Python dependencies (minimum versions)
         run: |
-          pip install --pre qiskit
-          pip install --group build --group test uv
+          pip install --group build --group test qiskit uv
           uv sync --active --resolution lowest-direct
 
       - name: Install Python package

@@ -61,11 +61,8 @@ jobs:
           git clone https://github.com/Qiskit/qiskit build/qiskit
           cd build/qiskit
           # checkout the latest (i.e. stable) release tag
-          git checkout $(gh release -R Qiskit/qiskit view 2.5.0rc1 --json tagName --jq ".tagName")
-          make c qiskit-pyo3-ffi
-          # ad-hoc workaround until a proper solution is found for
-          # `qiskit-pyo3-ffi` being nested in our workspace folder
-          sed -i.bak '/\[workspace\]/d' dist/rust/qiskit-pyo3-ffi/Cargo.toml
+          git checkout $(gh release -R Qiskit/qiskit view --json tagName --jq ".tagName")
+          make c
           if [[ "$RUNNER_OS" == "Windows" ]]; then
             # NOTE: we manually need to copy the `.dll.lib` file for now
             cp target/release/qiskit_cext.dll.lib dist/c/lib/qiskit.dll.lib
@@ -112,8 +109,7 @@ jobs:
       - name: Install Python package
         shell: bash
         run: |
-          pip install --pre qiskit
-          pip install --group build --group test
+          pip install --group build --group test qiskit
           SETUPTOOLS_RUST_CARGO_PROFILE=release pip install --no-build-isolation -e .
 
       - name: Python tests
