@@ -34,7 +34,7 @@ def generate_preset_jw_pass_manager(**kwargs) -> MultiStagePassManager:
     Args:
         kwargs: any additional keyword arguments are forwarded to
             :external:func:`~qiskit.transpiler.generate_preset_pass_manager` whose output is used
-            for the ``quantum`` stage.
+            for the ``qubit`` stage.
 
     Returns:
         The preset staged fermion-to-qubit transpiler pipeline.
@@ -53,7 +53,7 @@ def generate_preset_jw_pass_manager(**kwargs) -> MultiStagePassManager:
         optimization=optimization,
         layout=layout,
         synthesis=synth,
-        quantum=generate_preset_pass_manager(**kwargs),
+        qubit=generate_preset_pass_manager(**kwargs),
         output=QuantumDAGToCircuit(),
     )
 

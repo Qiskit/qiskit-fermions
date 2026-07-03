@@ -42,7 +42,7 @@ Stage                                                Description
 :ref:`qiskit_fermions-transpiler-stage-optimization` fermionic-level optimization
 :ref:`qiskit_fermions-transpiler-stage-layout`       fermion-to-qubit layouting
 :ref:`qiskit_fermions-transpiler-stage-synthesis`    fermion-to-qubit synthesis
-:ref:`qiskit_fermions-transpiler-stage-quantum`      continued transpilation on the qubit-level
+:ref:`qiskit_fermions-transpiler-stage-qubit`        continued transpilation on the qubit-level
 ==================================================== ==========================================
 
 .. _qiskit_fermions-transpiler-stage-optimization:
@@ -93,12 +93,12 @@ How a given :class:`.FermionicGate` can be synthesized in terms of qubit-based o
 on the particular gate type as well as the user-chosen fermion-to-qubit mapping. For more details,
 refer to :ref:`qiskit_fermions-transpiler-passes-synthesis-plugins`.
 
-.. _qiskit_fermions-transpiler-stage-quantum:
+.. _qiskit_fermions-transpiler-stage-qubit:
 
-Quantum
-^^^^^^^
+Qubit
+^^^^^
 
-At this point in the transpilation process, we have reached :class:`~qiskit.circuit.QuantumCircuit`
+At this point in the transpilation process, we have reached a :class:`~qiskit.circuit.QuantumCircuit`
 instance and can continue to use Qiskit's transpilation pipeline as one would usually.
 
 .. hint::
