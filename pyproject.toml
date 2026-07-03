@@ -159,6 +159,9 @@ ba = "ba"
 thr = "thr"
 iz = "iz"
 
+[tool.typos.files]
+extend-exclude = ["crates/qiskit-pyo3-ffi"]
+
 # While we don't mandate the use of uv, we use it during CI for handling package
 # resolution and thus are configuring components of it below.
 [tool.uv.extra-build-dependencies]

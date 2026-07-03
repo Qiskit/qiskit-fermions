@@ -17,10 +17,9 @@
 
 import argparse
 import multiprocessing
-import os
 import pathlib
-import sys
 import re
+import sys
 
 # regex for character encoding from PEP 263
 pep263 = re.compile(r"^[ \t\f]*#.*?coding[:=][ \t]*([-_.a-zA-Z0-9]+)")
@@ -28,15 +27,14 @@ line_start = re.compile(r"^(\/\/|#) This code is a Qiskit project.$")
 copyright_line = re.compile(r"^(\/\/|#) \(C\) Copyright IBM 20")
 
 
-def discover_files(code_paths):
+def discover_files(code_paths, ignore_paths):
     """Find all .py, .rs, .c, .h, and .sh files in a list of trees"""
     return [
         file
         for extension in ("py", "rs", "c", "h", "sh")
         for path in code_paths
         for file in pathlib.Path(path).glob(f"**/*.{extension}")
-        # CMake generates some files inside the tree.
-        if not file.is_relative_to("tests/c/build")
+        if not any(file.is_relative_to(ignore_path) for ignore_path in ignore_paths)
     ]
 
 
@@ -106,8 +104,14 @@ def _main():
         nargs="+",
         help="Paths to scan",
     )
+    parser.add_argument(
+        "--ignore",
+        type=str,
+        nargs="+",
+        help="Paths to ignore",
+    )
     args = parser.parse_args()
-    files = discover_files(args.paths)
+    files = discover_files(args.paths, ignore_paths=args.ignore)
     with multiprocessing.Pool() as pool:
         res = pool.map(validate_header, files)
     failed_files = [x for x in res if x[1] is False]
