@@ -25,6 +25,7 @@ The following objects are simple type aliases to make this re-interpretation mor
 
 .. autosummary::
    :toctree: ../stubs/
+   :template: autosummary/typealias.rst
 
    FermionicDAGCircuit
    FermionicMode
