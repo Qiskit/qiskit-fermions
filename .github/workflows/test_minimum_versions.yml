@@ -56,7 +56,7 @@ jobs:
           git clone https://github.com/Qiskit/qiskit build/qiskit
           cd build/qiskit
           # checkout the minimum release tag
-          git checkout 2.4.0
+          git checkout 2.5.0
           make c
 
       - name: Rust tests

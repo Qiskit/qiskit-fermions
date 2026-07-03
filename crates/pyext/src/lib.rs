@@ -19,6 +19,15 @@ pub mod operators;
 
 #[pymodule]
 mod _lib {
+    use pyo3::prelude::*;
+    use qiskit_pyo3_ffi as ffi;
+
+    #[pymodule_init]
+    fn init(m: &Bound<'_, PyModule>) -> PyResult<()> {
+        ffi::qk_import(m.py())?;
+        Ok(())
+    }
+
     #[pymodule_export]
     use super::linalg::linalg;
 

@@ -24,8 +24,8 @@ num-complex.workspace = true
 numpy.workspace = true
 pyo3.workspace = true
 pyo3-stub-gen.workspace = true
-qiskit-fermions-core.workspace = true
-qiskit-sys = { workspace = true, features = ["python_binding"] }
+qiskit-fermions-core = { workspace = true, features = ["pyext"] }
+qiskit-pyo3-ffi.workspace = true
 
 [[bin]]
 name = "stub_gen"

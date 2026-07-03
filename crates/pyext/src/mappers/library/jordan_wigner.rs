@@ -14,6 +14,7 @@ use crate::operators::fermion_operator::PyFermionOperator;
 use pyo3::prelude::*;
 use pyo3_stub_gen::derive::*;
 use qiskit_fermions_core::mappers::library::jordan_wigner::jordan_wigner;
+use qiskit_pyo3_ffi as ffi;
 
 /// Map a :class:`.FermionOperator` to a :class:`~qiskit.quantum_info.SparseObservable` under the
 /// Jordan-Wigner transformation. [1]_
@@ -75,7 +76,7 @@ pub fn py_jordan_wigner(op: PyFermionOperator, num_qubits: u32) -> Py<PyAny> {
     let obs = jordan_wigner(&op.inner, num_qubits);
     unsafe {
         let py = Python::assume_attached();
-        let py_obs = qiskit_sys::qk_obs_to_python(obs);
+        let py_obs = ffi::qk_obs_to_python(obs);
         Bound::from_owned_ptr(py, py_obs).into()
     }
 }

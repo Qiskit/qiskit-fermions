@@ -12,7 +12,7 @@ doctest = false
 crate-type = ["rlib"]
 
 [dependencies]
-qiskit-fermions-core.workspace = true
+qiskit-fermions-core = { workspace = true, features = ["cext"] }
 qiskit-sys.workspace = true
 ndarray.workspace = true
 num-complex.workspace = true
