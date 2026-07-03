@@ -15,7 +15,11 @@ example from the :ref:`fermionic circuits guide <fermionic_circuit_explanation>`
 Transpilation stages
 --------------------
 
-The :class:`.FermionicStagedPassManager` splits transpilation into four stages:
+As explained in :mod:`qiskit_fermions.transpiler`, the preset pass managers in
+this project split the transpilation into the following stages:
+
+**Input**
+   Converts the input circuit to a DAG data structure.
 
 **Optimization**
    Fermionic-level optimizations that keep the circuit in fermionic space. These
@@ -33,9 +37,12 @@ The :class:`.FermionicStagedPassManager` splits transpilation into four stages:
    mapping. :class:`.FermionicGate` instances are transformed into sequences of
    standard quantum gates.
 
-**Quantum**
+**Qubit**
    Standard Qiskit transpilation on the resulting qubit circuit, including
    optimization, layout, and routing for your target hardware.
+
+**Output**
+   Converts the internal DAG data structure to the desirerd output format.
 
 A practical example: transpilation using Jordan-Wigner
 ------------------------------------------------------
