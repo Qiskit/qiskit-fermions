@@ -35,6 +35,10 @@ class TrivialF2QLayout(FermionicDAGCircuitPass):
 
         Args:
             dag: the DAG circuit representation of a :class:`.FermionicCircuit`.
+
+        Returns:
+            The unchanged input. But the :attr:`.property_set` of this transpilation pipeline will
+            be updated.
         """
         layout: F2QLayout = {}
         for qreg in dag.qregs.values():

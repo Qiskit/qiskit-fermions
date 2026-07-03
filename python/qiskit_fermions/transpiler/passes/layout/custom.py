@@ -48,6 +48,10 @@ class CustomF2QLayout(FermionicDAGCircuitPass):
 
         Args:
             dag: the DAG circuit representation of a :class:`.FermionicCircuit`.
+
+        Returns:
+            The unchanged input. But the :attr:`.property_set` of this transpilation pipeline will
+            be updated.
         """
         self.property_set["f2q_layout"] = self.layout
 
