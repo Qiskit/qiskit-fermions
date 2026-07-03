@@ -19,13 +19,10 @@ fn main() {
 
         let qiskit_lib_path = Path::new(&qiskit_lib);
 
-        match qiskit_lib_path.try_exists() {
-            Ok(b) => match b {
-                true => {}
-                false => panic!("Qiskit path does not exist"),
-            },
-            Err(e) => panic!("{e:?}"),
-        }
+        assert!(
+            qiskit_lib_path.try_exists().unwrap(),
+            "Qiskit path does not exist"
+        );
 
         let qiskit_lib_dir = qiskit_lib_path.parent().unwrap().to_str().unwrap();
         println!("cargo:rustc-link-arg=-Wl,-rpath,{}", qiskit_lib_dir);
