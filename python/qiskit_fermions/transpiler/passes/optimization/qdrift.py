@@ -17,13 +17,14 @@ from __future__ import annotations
 from typing import Any
 
 import numpy as np
-from qiskit.dagcircuit import DAGCircuit
-from qiskit.transpiler import TransformationPass
 
+from qiskit_fermions.circuit import FermionicDAGCircuit
 from qiskit_fermions.circuit.library import Evolution
 
+from ... import FermionicDAGCircuitPass
 
-class QDriftTrotterization(TransformationPass):
+
+class QDriftTrotterization(FermionicDAGCircuitPass):
     """A transpilation pass to Trotterize :class:`.Evolution` gates via the qDRIFT protocol."""
 
     def __init__(self, num_terms: int, *, rng: np.random.Generator | int | None = None) -> None:
@@ -41,7 +42,7 @@ class QDriftTrotterization(TransformationPass):
 
         self._rng = rng if isinstance(rng, np.random.Generator) else np.random.default_rng(rng)
 
-    def run(self, dag: DAGCircuit) -> DAGCircuit:
+    def run(self, dag: FermionicDAGCircuit) -> FermionicDAGCircuit:
         """Runs this transpilation pass.
 
         Args:

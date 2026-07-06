@@ -25,7 +25,9 @@ The following objects are simple type aliases to make this re-interpretation mor
 
 .. autosummary::
    :toctree: ../stubs/
+   :template: autosummary/typealias.rst
 
+   FermionicDAGCircuit
    FermionicMode
    FermionicRegister
    FermionicSpecifier
@@ -44,15 +46,34 @@ from collections.abc import Sequence
 from typing import TypeAlias
 
 from qiskit.circuit import QuantumRegister, Qubit
+from qiskit.dagcircuit import DAGCircuit
 
 FermionicMode: TypeAlias = Qubit
+"""A type alias of :class:`~qiskit.circuit.Qubit`.
+
+Although this does not really give us any functional guarantees, it serves to better document the
+API contract that instances of this type are interpreted as fermionic modes.
+"""
 
 FermionicRegister: TypeAlias = QuantumRegister
+"""A type alias of :class:`~qiskit.circuit.QubitRegister`.
+
+Although this does not really give us any functional guarantees, it serves to better document the
+API contract that instances of this type are interpreted as registers of fermionic modes.
+"""
 
 FermionicSpecifier: TypeAlias = (
     FermionicMode | FermionicRegister | int | slice | Sequence[FermionicMode | int]
 )
 """A type alias equivalent to Qiskit's ``QubitSpecifier`` but for fermionic modes."""
+
+FermionicDAGCircuit: TypeAlias = DAGCircuit
+"""A type alias of :class:`~qiskit.dagcircuit.DAGCircuit`.
+
+Although this does not really give us any functional guarantees, it serves to better document the
+API contract that instances of this type only contain circuit instructions of type
+:class:`.FermionicGate`.
+"""
 
 # NOTE: we must explicitly define the type aliases _before_ the following imports to ensure that
 # they can actually use those type aliases themselves.
@@ -62,6 +83,7 @@ from .fermionic_gate import FermionicGate
 
 __all__ = [
     "FermionicCircuit",
+    "FermionicDAGCircuit",
     "FermionicGate",
     "FermionicMode",
     "FermionicRegister",

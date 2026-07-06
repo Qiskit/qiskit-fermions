@@ -27,8 +27,8 @@ such as topological and operational constraints of the hardware used to execute 
 We are not going to explain this in more detail here, and instead refer to Qiskit's documentation of
 the :mod:`qiskit.transpiler` module.
 
-The focus here lies on explaining how we achieve the transpilation of a :class:`.FermionicCircuit` to
-a :class:`~qiskit.circuit.QuantumCircuit`.
+The focus here lies on explaining how we achieve the transpilation of a :class:`.FermionicCircuit`
+to a :class:`~qiskit.circuit.QuantumCircuit`.
 
 ------
 Stages
@@ -39,11 +39,26 @@ Conceptually, we split the transpilation process into several stages:
 ==================================================== ==========================================
 Stage                                                Description
 ==================================================== ==========================================
+:ref:`qiskit_fermions-transpiler-stage-input`        convert to DAG data structure
 :ref:`qiskit_fermions-transpiler-stage-optimization` fermionic-level optimization
 :ref:`qiskit_fermions-transpiler-stage-layout`       fermion-to-qubit layouting
 :ref:`qiskit_fermions-transpiler-stage-synthesis`    fermion-to-qubit synthesis
-:ref:`qiskit_fermions-transpiler-stage-quantum`      continued transpilation on the qubit-level
+:ref:`qiskit_fermions-transpiler-stage-qubit`        continued transpilation on the qubit-level
+:ref:`qiskit_fermions-transpiler-stage-output`       convert from DAG data structure
 ==================================================== ==========================================
+
+.. _qiskit_fermions-transpiler-stage-input:
+
+Input
+^^^^^
+
+The various transpiler passes are implemented to work with :class:`.FermionicDAGCircuit` as the
+underlying data structure to store the circuit operations. Such `directed acyclic graphs` (DAGs)
+provide an efficient data model for the traversal and manipulation of circuits.
+
+However, an end-user is more likely to work with a :class:`.FermionicCircuit` as it provides a more
+intuitive interface and data model. As such, this input stage simply runs the
+:class:`.FermionicCircuitToDAG` transpiler pass.
 
 .. _qiskit_fermions-transpiler-stage-optimization:
 
@@ -51,7 +66,7 @@ Optimization
 ^^^^^^^^^^^^
 
 This stage of the transpilation pipeline can implement circuit optimizations while preserving the
-type of circuit to be an instance of :class:`.FermionicCircuit`. As such, no qubit information is
+type of circuit to be an instance of :class:`.FermionicDAGCircuit`. As such, no qubit information is
 required (or necessarily available) at this point in the transpilation pipeline.
 
 .. _qiskit_fermions-transpiler-stage-layout:
@@ -89,46 +104,65 @@ conceptually similar to Qiskit's :class:`~qiskit.transpiler.passes.HighLevelSynt
 uses various `plugins` for transpiling high-level circuit instructions. For more details, refer to
 the documentation of :class:`.F2QSynthesis` directly.
 
-How a given :class:`.FermionicGate` can be synthesized in terms of qubit-based operations will depend
-on the particular gate type as well as the user-chosen fermion-to-qubit mapping. For more details,
-refer to :ref:`qiskit_fermions-transpiler-passes-synthesis-plugins`.
+How a given :class:`.FermionicGate` can be synthesized in terms of qubit-based operations will
+depend on the particular gate type as well as the user-chosen fermion-to-qubit mapping. For more
+details, refer to :ref:`qiskit_fermions-transpiler-passes-synthesis-plugins`.
 
-.. _qiskit_fermions-transpiler-stage-quantum:
+.. _qiskit_fermions-transpiler-stage-qubit:
 
-Quantum
-^^^^^^^
+Qubit
+^^^^^
 
-At this point in the transpilation process, we have reached :class:`~qiskit.circuit.QuantumCircuit`
-instance and can continue to use Qiskit's transpilation pipeline as one would usually.
+At this point in the transpilation process, we have reached a
+:class:`~qiskit.dagcircuit.DAGCircuit` instance and can continue to use Qiskit's transpilation
+pipeline as one would usually.
 
 .. hint::
    Additional transpiler passes for optimizations on the qubit-level that take into account the
    knowledge of a circuit originating from a :class:`.FermionicCircuit` may be added in the future!
 
+.. _qiskit_fermions-transpiler-stage-output:
+
+Output
+^^^^^^
+
+This stage implements effectively the reverse of :ref:`qiskit_fermions-transpiler-stage-input`, by
+calling the :class:`.QuantumDAGToCircuit` transpiler pass.
+
 -------------
 Pass Managers
 -------------
 
-Qiskit's transpilation process is orchestrated by a :class:`~qiskit.transpiler.PassManager`.
-In particular, a :class:`~qiskit.transpiler.StagedPassManager` can be used to orchestrate the
-transpilation into stages as explained above.
+All of the stages above are the default stages by how the :mod:`~qiskit_fermions.transpiler.presets`
+orchestrate the various :class:`~qiskit.passmanager.BasePassManager`s in their resulting
+:class:`~qiskit.passmanager.MultiStagePassManager`.
 
-Here, we are dealing with a change of circuit representation converting :class:`.FermionicCircuit`
-instances to :external:class:`~qiskit.circuit.QuantumCircuit` ones. As such, this module provides
-its own interfaces of these transpiler pass managers listed below.
+The individual stages can be either a single pass (when they change from one internal representation
+(IR) to another, such as the :ref:`qiskit_fermions-transpiler-stage-input`,
+:ref:`qiskit_fermions-transpiler-stage-synthesis`, and
+:ref:`qiskit_fermions-transpiler-stage-output` stages above) or a stage can be a
+:class:`~qiskit.passmanager.BasePassManager` whose internal passes can be modified.
 
-.. note::
-   Qiskit is currently working on native support of transpiler pipelines involving more than a
-   single intermediate representation. Once that gets more formalized, the implementation here
-   will be aligned with the resulting interfaces. See also `this tracking issue
-   <https://github.com/Qiskit/qiskit/issues/16115>`_.
+For the stages operating on fermionic circuits (:ref:`qiskit_fermions-transpiler-stage-optimization`
+and :ref:`qiskit_fermions-transpiler-stage-layout`), the type of passmanager to use is
+:class:`.FermionicPassManager`.
 
 .. autosummary::
    :toctree: ../stubs/
 
    FermionicPassManager
-   FermionicStagedPassManager
-   FermionicToQubitConverter
+
+Conversion Passes
+^^^^^^^^^^^^^^^^^
+
+Some very basic conversion passes are provided directly by this module:
+
+.. autosummary::
+   :toctree: ../stubs/
+
+   FermionicCircuitToDAG
+   FermionicDAGToCircuit
+   QuantumDAGToCircuit
 
 Presets
 ^^^^^^^
@@ -142,10 +176,15 @@ from __future__ import annotations
 from typing import TypeAlias
 
 from qiskit.circuit import QuantumRegister
+from qiskit.passmanager import GenericPass
 
-from qiskit_fermions.circuit import FermionicRegister
+from qiskit_fermions.circuit import FermionicDAGCircuit, FermionicRegister
 
-from .passmanager import FermionicPassManager, FermionicStagedPassManager, FermionicToQubitConverter
+from .converters import FermionicCircuitToDAG, FermionicDAGToCircuit, QuantumDAGToCircuit
+from .passmanager import FermionicPassManager
+
+FermionicDAGCircuitPass: TypeAlias = GenericPass[FermionicDAGCircuit, FermionicDAGCircuit]
+"""The type definition of a fermionic-to-fermionic generic transpiler pass."""
 
 F2QLayout: TypeAlias = dict[FermionicRegister, QuantumRegister]
 """A mapping of fermionic mode registers to quantum registers.
@@ -159,7 +198,8 @@ size of the registers on either side of this mapping may differ.
 
 __all__ = [
     "F2QLayout",
+    "FermionicCircuitToDAG",
+    "FermionicDAGToCircuit",
     "FermionicPassManager",
-    "FermionicStagedPassManager",
-    "FermionicToQubitConverter",
+    "QuantumDAGToCircuit",
 ]

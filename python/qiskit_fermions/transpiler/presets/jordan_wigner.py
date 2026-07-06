@@ -12,12 +12,13 @@
 
 """The preset transpiler pipeline based on the Jordan-Wigner fermion-to-qubit mapping."""
 
+from qiskit.passmanager import MultiStagePassManager
 from qiskit.transpiler import generate_preset_pass_manager
 
 from qiskit_fermions.circuit.library import Evolution, InitializeModes, OrbitalRotation
 from qiskit_fermions.mappers.library import jordan_wigner
 
-from .. import FermionicPassManager, FermionicStagedPassManager, FermionicToQubitConverter
+from .. import FermionicCircuitToDAG, FermionicPassManager, QuantumDAGToCircuit
 from ..passes import (
     EvolutionSynthesis,
     F2QSynthesis,
@@ -27,13 +28,13 @@ from ..passes import (
 )
 
 
-def generate_preset_jw_pass_manager(**kwargs) -> FermionicStagedPassManager:
+def generate_preset_jw_pass_manager(**kwargs) -> MultiStagePassManager:
     """Generates a preset transpiler pipeline based on the :func:`.jordan_wigner` mapping.
 
     Args:
         kwargs: any additional keyword arguments are forwarded to
             :external:func:`~qiskit.transpiler.generate_preset_pass_manager` whose output is used
-            for the ``quantum`` stage of the resulting :class:`.FermionicStagedPassManager`.
+            for the ``qubit`` stage.
 
     Returns:
         The preset staged fermion-to-qubit transpiler pipeline.
@@ -47,12 +48,13 @@ def generate_preset_jw_pass_manager(**kwargs) -> FermionicStagedPassManager:
     synth.plugins[InitializeModes] = InitializeModesSynthesis()
     synth.plugins[OrbitalRotation] = OrbitalRotationSynthesis()
 
-    synthesis = FermionicToQubitConverter(synth)
-
-    pm = FermionicStagedPassManager()
-    pm.optimization = optimization
-    pm.layout = layout
-    pm.synthesis = synthesis
-    pm.quantum = generate_preset_pass_manager(**kwargs)
+    pm = MultiStagePassManager(
+        input=FermionicCircuitToDAG(),
+        optimization=optimization,
+        layout=layout,
+        synthesis=synth,
+        qubit=generate_preset_pass_manager(**kwargs),
+        output=QuantumDAGToCircuit(),
+    )
 
     return pm
