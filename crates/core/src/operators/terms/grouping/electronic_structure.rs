@@ -11,7 +11,7 @@
 // that they have been altered from the originals.
 
 use crate::operators::fermion_operator::{FermionOperator, FermionOperatorTermView};
-use crate::operators::grouping::GroupingError;
+use crate::operators::terms::grouping::GroupingError;
 use std::cmp::{max, min};
 use std::collections::HashMap;
 

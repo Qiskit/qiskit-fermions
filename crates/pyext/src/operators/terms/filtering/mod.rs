@@ -10,7 +10,12 @@
 // copyright notice, and modified files need to carry a notice indicating
 // that they have been altered from the originals.
 
-pub mod fermion_operator;
-pub mod library;
-pub mod majorana_operator;
-pub mod terms;
+use pyo3::prelude::*;
+
+pub mod diagonal;
+
+#[pymodule]
+pub mod filtering {
+    #[pymodule_export]
+    use super::diagonal::diagonal;
+}

@@ -14,7 +14,8 @@
 
 from __future__ import annotations
 
-from typing import Any
+import copy
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -23,15 +24,33 @@ from qiskit_fermions.circuit.library import Evolution
 
 from ... import FermionicDAGCircuitPass
 
+if TYPE_CHECKING:
+    from qiskit_fermions._lib.operators.terms.filtering import filter_diagonal_terms
+else:
+    from qiskit_fermions.operators.terms.filtering import filter_diagonal_terms
+
 
 class QDriftTrotterization(FermionicDAGCircuitPass):
     """A transpilation pass to Trotterize :class:`.Evolution` gates via the qDRIFT protocol."""
 
-    def __init__(self, num_terms: int, *, rng: np.random.Generator | int | None = None) -> None:
+    def __init__(
+        self,
+        num_terms: int,
+        *,
+        filter_diagonal_terms: bool = False,
+        rng: np.random.Generator | int | None = None,
+    ) -> None:
         """Initializes the transpiler pass.
 
         Args:
             num_terms: the number of terms to include in the qDRIFT Trotterization.
+            filter_diagonal_terms: when set to ``True``, terms that are diagonal in the
+                occupation-number basis (i.e. products of number operators) are removed from the
+                Hamiltonian before the qDRIFT sampling. The time evolution of such terms does not
+                affect the sampled bitstrings, so including them would only increase the sampling
+                overhead. This automates the manual filtering otherwise required when preparing a
+                Hamiltonian for SqDRIFT. The Hamiltonian is assumed to be normal-ordered. See also
+                :func:`~qiskit_fermions.operators.terms.filtering.filter_diagonal_terms`.
             rng: the random number generator (rng) to be used. When this is an ``int``, the internal
                 rng will be initialized with ``np.random.default_rng(seed=rng)``.
         """
@@ -39,6 +58,9 @@ class QDriftTrotterization(FermionicDAGCircuitPass):
 
         self.num_terms = num_terms
         """The number of terms to include in the qDRIFT Trotterization."""
+
+        self.filter_diagonal_terms = filter_diagonal_terms
+        """Whether to filter out diagonal terms before the qDRIFT sampling."""
 
         self._rng = rng if isinstance(rng, np.random.Generator) else np.random.default_rng(rng)
 
@@ -62,6 +84,13 @@ class QDriftTrotterization(FermionicDAGCircuitPass):
             hamil = node.op.operator
             time = node.op.params[0]
             num_modes = len(node.qargs)
+
+            if self.filter_diagonal_terms:
+                # Work on a copy so that the user's original operator (held by the Evolution gate)
+                # is left untouched. Filtering re-indexes any group information to a contiguous
+                # range, keeping the grouped branch below consistent.
+                hamil = copy.deepcopy(hamil)
+                filter_diagonal_terms(hamil)
 
             terms: list[Any]  # can be either a list of operator terms or operator instances
             if hamil.groups is None:

@@ -23,7 +23,15 @@
  */
 
 /**
- * @defgroup qf_operator_grouping qf_operator_grouping
+ * @defgroup qf_operator_terms qf_operator_terms
+ */
+
+/**
+ * @defgroup qf_operator_terms_grouping qf_operator_terms_grouping
+ */
+
+/**
+ * @defgroup qf_operator_terms_filtering qf_operator_terms_filtering
  */
 
 /**

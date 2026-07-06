@@ -582,6 +582,10 @@ impl PyEdgeVertexOperator {
         self.inner.get_support()
     }
 
+    fn __deepcopy__(&self, _memo: &Bound<'_, PyAny>) -> Self {
+        self.clone()
+    }
+
     fn __richcmp__(&self, other: &Self, op: CompareOp, _py: Python<'_>) -> PyResult<bool> {
         match op {
             CompareOp::Eq => {
@@ -923,7 +927,7 @@ impl PyEdgeVertexOperator {
 
     /// An optional vector of `group indices` for each term.
     ///
-    /// For more information refer to the :mod:`~qiskit_fermions.operators.grouping` module.
+    /// For more information refer to the :mod:`~qiskit_fermions.operators.terms.grouping` module.
     #[getter]
     pub fn get_groups(&self) -> Option<Vec<u32>> {
         self.inner.groups.clone()

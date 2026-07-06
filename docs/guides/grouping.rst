@@ -3,6 +3,10 @@
 Group operator terms: exploit the operator structure
 ====================================================
 
+Grouping is one of the operations under :mod:`qiskit_fermions.operators.terms`,
+which collects routines that partition the terms of an operator based on their
+structure.
+
 As described in the :ref:`operators guide <term_grouping>`, operators can store a
 **groups array** - an optional part of the sparse data structure that associates each
 term with a group index. Terms sharing the same group index form a group, enabling
@@ -35,7 +39,7 @@ operator's ``groups`` attribute. Below is an example for grouping terms
 according to the *line flow sets* as shown in Figure 1c of [1]_.
 
 .. hint::
-   The :mod:`qiskit_fermions.operators.grouping` module provides convenience
+   The :mod:`qiskit_fermions.operators.terms.grouping` module provides convenience
    methods for automatically identifying structure in an operator and assigning
    group indices accordingly.
 

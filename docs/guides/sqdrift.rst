@@ -40,7 +40,6 @@ documentation, as well as the :mod:`qiskit_fermions.operators.library`.
        QfFermionOperator* hamil = qf_ferm_op_from_fcidump(fcidump);
        uint32_t num_modes = 2 * qf_fcidump_norb(fcidump);
 
-
 2. Group Hamiltonian terms
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -52,15 +51,19 @@ Crucially, grouping terms that are related by symmetry results in a favorable
 cancellation of Pauli terms, resulting in an overall shorter circuit depth when
 time evolving a state under their action.
 
-The :mod:`qiskit_fermions.operators.grouping` module provides convenience
+The :mod:`qiskit_fermions.operators.terms.grouping` module provides convenience
 functions for grouping an operator's terms. This is explained in more
 detail in :ref:`this guide <grouping_explanation>`.
+
+.. caution::
+   The implementation of the :func:`~group_terms_by_electronic_structure`
+   assumes the terms of the Hamiltonian to be normal-ordered!
 
 .. tab-set-code::
 
     .. code-block:: python
 
-       >>> from qiskit_fermions.operators.grouping import group_terms_by_electronic_structure
+       >>> from qiskit_fermions.operators.terms.grouping import group_terms_by_electronic_structure
        >>>
        >>> normal = hamil.normal_ordered().simplify(atol=1e-16)
        >>> exit_code = group_terms_by_electronic_structure(normal, num_modes, two_body_physicist_order=False)
@@ -127,6 +130,29 @@ each circuit, every time we transpile the circuit. Through this, we can generate
 multiple circuit randomizations as required by the `SqDRIFT`_ algorithm by
 repeatedly running the transpilation pipeline.
 
+.. hint::
+
+   The full electronic structure Hamiltonian contains certain terms whose
+   inclusion in a time-evolution circuit will have no impact on the perceived
+   bitstrings and, thus, only result in an increased sampling overhead.
+   Therefore, it is recommended that such terms be filtered from the Hamiltonian
+   before continuing with the remaining procedure.
+
+   The terms that fit this description are exactly those that are *diagonal* in
+   the occupation-number basis, i.e. the products of number operators
+   (:math:`a^\dagger_i a_i`). This includes the constant energy offset, whose
+   time evolution only introduces a global phase into the circuit, the
+   individual number-operators whose time evolution amounts to single-qubit Z
+   rotations, as well as higher-order products such as :math:`n_i n_j`. None of
+   these impact the sampled bitstrings.
+
+   The :func:`~qiskit_fermions.operators.terms.filtering.filter_diagonal_terms`
+   function can be used to remove such terms from an operator manually (for
+   example before constructing the :class:`.Evolution` gate in the previous
+   step. Alternatively, the :class:`.QDriftTrotterization` pass can apply this
+   filtering automatically via its ``filter_diagonal_terms=True`` flag, so an
+   explicit call is usually not necessary.
+
 This step also introduces the few parameters with which one can tweak the
 ensemble of circuits to generate:
 
@@ -142,7 +168,7 @@ ensemble of circuits to generate:
        >>> from qiskit_fermions.transpiler.passes import QDriftTrotterization
        >>>
        >>> num_groups = 10
-       >>> qdrift = QDriftTrotterization(num_groups, rng=42)
+       >>> qdrift = QDriftTrotterization(num_groups, filter_diagonal_terms=True, rng=42)
        >>>
        >>> pm = generate_preset_jw_pass_manager()
        >>> pm.optimization = FermionicPassManager([qdrift])

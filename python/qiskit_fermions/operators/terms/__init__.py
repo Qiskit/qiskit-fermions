@@ -12,17 +12,23 @@
 
 # ruff: noqa: D205,D212,D415
 """
-=================
-Operator Grouping
-=================
+==============
+Operator Terms
+==============
 
-.. currentmodule:: qiskit_fermions.operators.grouping
+.. currentmodule:: qiskit_fermions.operators.terms
+
+This module collects routines that operate on the individual terms of an operator, partitioning
+them based on their structure. The submodules below group related functionality.
+
+Grouping
+--------
 
 Please refer to :ref:`grouping_explanation` for a detailed explanation of this module's
 functionality.
 
-Library
--------
+Members
+^^^^^^^
 
 Rather than always relying on the user to provide the group indices themselves, this module provides
 a collection of functions which determine the grouping information automatically.
@@ -31,12 +37,26 @@ a collection of functions which determine the grouping information automatically
    :toctree: ../stubs/
 
    group_terms_by_electronic_structure
+
+Filtering
+---------
+
+This module provides convenience functions for removing terms from an operator that do not
+contribute meaningfully to a downstream computation.
+
+Members
+^^^^^^^
+
+.. autosummary::
+   :toctree: ../stubs/
+
+   filter_diagonal_terms
 """
 
-from qiskit_fermions._lib.operators.operators_grouping.electronic_structure import (
-    group_terms_by_electronic_structure,
-)
+from .filtering import filter_diagonal_terms
+from .grouping import group_terms_by_electronic_structure
 
 __all__ = [
+    "filter_diagonal_terms",
     "group_terms_by_electronic_structure",
 ]
