@@ -511,6 +511,10 @@ impl PyMajoranaOperator {
         self.inner.get_support()
     }
 
+    fn __deepcopy__(&self, _memo: &Bound<'_, PyAny>) -> Self {
+        self.clone()
+    }
+
     fn __richcmp__(&self, other: &Self, op: CompareOp, _py: Python<'_>) -> PyResult<bool> {
         match op {
             CompareOp::Eq => {
