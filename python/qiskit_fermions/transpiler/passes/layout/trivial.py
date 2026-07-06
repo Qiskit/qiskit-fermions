@@ -15,13 +15,13 @@
 from __future__ import annotations
 
 from qiskit.circuit import QuantumRegister
-from qiskit.dagcircuit import DAGCircuit
-from qiskit.transpiler import AnalysisPass
 
-from ... import F2QLayout
+from qiskit_fermions.circuit import FermionicDAGCircuit
+
+from ... import F2QLayout, FermionicDAGCircuitPass
 
 
-class TrivialF2QLayout(AnalysisPass):
+class TrivialF2QLayout(FermionicDAGCircuitPass):
     """Trivially maps :math:`n` fermionic modes to :math:`n` qubits.
 
     This pass simply populates the ``f2q_layout`` field of the
@@ -30,14 +30,20 @@ class TrivialF2QLayout(AnalysisPass):
     :class:`~qiskit.circuit.QuantumRegister`.
     """
 
-    def run(self, dag: DAGCircuit) -> None:
+    def run(self, dag: FermionicDAGCircuit) -> FermionicDAGCircuit:
         """Runs this analysis pass.
 
         Args:
             dag: the DAG circuit representation of a :class:`.FermionicCircuit`.
+
+        Returns:
+            The unchanged input. But the :attr:`.property_set` of this transpilation pipeline will
+            be updated.
         """
         layout: F2QLayout = {}
         for qreg in dag.qregs.values():
             layout[qreg] = QuantumRegister(len(qreg))
 
         self.property_set["f2q_layout"] = layout
+
+        return dag

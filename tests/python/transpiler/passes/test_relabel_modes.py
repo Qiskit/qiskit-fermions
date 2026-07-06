@@ -16,21 +16,18 @@ from __future__ import annotations
 
 import pytest
 from qiskit.circuit.library import PauliEvolutionGate
+from qiskit.passmanager import MultiStagePassManager
 from qiskit_fermions.circuit import FermionicCircuit
 from qiskit_fermions.circuit.library import Evolution, InitializeModes
 from qiskit_fermions.mappers.library import jordan_wigner
 from qiskit_fermions.operators import FermionOperator
+from qiskit_fermions.transpiler import FermionicCircuitToDAG, QuantumDAGToCircuit
 from qiskit_fermions.transpiler.passes import (
     EvolutionSynthesis,
     F2QSynthesis,
     InitializeModesSynthesis,
     RelabelModes,
     TrivialF2QLayout,
-)
-from qiskit_fermions.transpiler.passmanager import (
-    FermionicPassManager,
-    FermionicStagedPassManager,
-    FermionicToQubitConverter,
 )
 from qiskit_fermions.utils.optionals import HAS_PYOMO
 
@@ -64,10 +61,13 @@ def test_relabel_modes_fixed_permutation():
     permutation = [0, 2, 1, 3]
     relabel = RelabelModes(permutation)
 
-    pm = FermionicStagedPassManager()
-    pm.optimization = FermionicPassManager(relabel)
-    pm.layout = FermionicPassManager(TrivialF2QLayout())
-    pm.synthesis = FermionicToQubitConverter(synth)
+    pm = MultiStagePassManager(
+        input=FermionicCircuitToDAG(),
+        optimization=relabel,
+        layout=TrivialF2QLayout(),
+        synthesis=synth,
+        output=QuantumDAGToCircuit(),
+    )
 
     qu_circ = pm.run(circ)
 
@@ -105,10 +105,13 @@ def test_relabel_modes_local_indices():
     permutation = [0, 2, 1, 3, 4, 5, 6, 7]
     relabel = RelabelModes(permutation)
 
-    pm = FermionicStagedPassManager()
-    pm.optimization = FermionicPassManager(relabel)
-    pm.layout = FermionicPassManager(TrivialF2QLayout())
-    pm.synthesis = FermionicToQubitConverter(synth)
+    pm = MultiStagePassManager(
+        input=FermionicCircuitToDAG(),
+        optimization=relabel,
+        layout=TrivialF2QLayout(),
+        synthesis=synth,
+        output=QuantumDAGToCircuit(),
+    )
 
     qu_circ = pm.run(circ)
 
@@ -139,10 +142,13 @@ def test_relabel_modes_pyomo_optimization():
     solver.options["time_limit"] = 60
     relabel = RelabelModes(solver=solver)
 
-    pm = FermionicStagedPassManager()
-    pm.optimization = FermionicPassManager(relabel)
-    pm.layout = FermionicPassManager(TrivialF2QLayout())
-    pm.synthesis = FermionicToQubitConverter(synth)
+    pm = MultiStagePassManager(
+        input=FermionicCircuitToDAG(),
+        optimization=relabel,
+        layout=TrivialF2QLayout(),
+        synthesis=synth,
+        output=QuantumDAGToCircuit(),
+    )
 
     qu_circ = pm.run(circ)
 

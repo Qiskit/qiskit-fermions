@@ -14,6 +14,7 @@ use crate::operators::fermion_operator::PyFermionOperator;
 use pyo3::prelude::*;
 use pyo3_stub_gen::derive::*;
 use qiskit_fermions_core::mappers::library::jordan_wigner::jordan_wigner;
+use qiskit_pyo3_ffi as ffi;
 
 /// Map a :class:`.FermionOperator` to a :class:`~qiskit.quantum_info.SparseObservable` under the
 /// Jordan-Wigner transformation. [1]_
@@ -24,8 +25,6 @@ use qiskit_fermions_core::mappers::library::jordan_wigner::jordan_wigner;
 ///
 /// Returns:
 ///     The mapped qubit operator.
-///
-/// ----
 ///
 /// Definition
 /// ==========
@@ -67,8 +66,6 @@ use qiskit_fermions_core::mappers::library::jordan_wigner::jordan_wigner;
 ///     >>> qop.simplify()
 ///     <SparseObservable with 5 terms on 4 qubits: (2.05-0.25j)() + (-0.05+0j)(Z_0) + (0+0.25j)(Z_1) + (0+0.25j)(Z_2 Z_1) + (0-0.25j)(Z_2)>
 ///
-/// ----
-///
 /// .. [1] P. Jordan and E. Wigner, Über das Paulische Äquivalenzverbot,
 ///        Zeitschrift für Physik 47, No. 9. (1928), pp. 631–651,
 ///        `doi:10.1007/BF01331938 <https://link.springer.com/article/10.1007/BF01331938>`_.
@@ -79,7 +76,7 @@ pub fn py_jordan_wigner(op: PyFermionOperator, num_qubits: u32) -> Py<PyAny> {
     let obs = jordan_wigner(&op.inner, num_qubits);
     unsafe {
         let py = Python::assume_attached();
-        let py_obs = qiskit_sys::qk_obs_to_python(obs);
+        let py_obs = ffi::qk_obs_to_python(obs);
         Bound::from_owned_ptr(py, py_obs).into()
     }
 }

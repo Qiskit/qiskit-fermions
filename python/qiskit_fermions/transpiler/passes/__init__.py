@@ -26,7 +26,7 @@ This module provides various transpiler passes for the stages explained in
 Optimization Passes
 -------------------
 
-These passes provide different kinds of optimization of :class:`.FermionicCircuit` instances.
+These passes provide different kinds of optimization of :class:`.FermionicDAGCircuit` instances.
 
 .. autosummary::
    :toctree: ../stubs/
@@ -56,11 +56,12 @@ needs to be placed in the ``f2q_layout`` field of the
 Synthesis Passes
 ----------------
 
-The main logic for mapping a :class:`.FermionicCircuit` to a :class:`~qiskit.circuit.QuantumCircuit`
-is implemented by a single synthesis pass, namely the :class:`.F2QSynthesis`. It is conceptually
-similar to Qiskit's :class:`~qiskit.transpiler.passes.HighLevelSynthesis` because it simply iterates
-over the :class:`.FermionicCircuit` instructions and delegates the mapping to qubit-based instructions
-to :ref:`qiskit_fermions-transpiler-passes-synthesis-plugins` for each of the encountered types of
+The main logic for mapping a :class:`.FermionicDAGCircuit` to a
+:class:`~qiskit.dagcircuit.DAGCircuit` is implemented by a single synthesis pass, namely the
+:class:`.F2QSynthesis`. It is conceptually similar to Qiskit's
+:class:`~qiskit.transpiler.passes.HighLevelSynthesis` because it simply iterates over the
+:class:`.FermionicDAGCircuit` instructions and delegates the mapping to qubit-based instructions to
+:ref:`qiskit_fermions-transpiler-passes-synthesis-plugins` for each of the encountered types of
 :class:`.FermionicGate`.
 
 .. autosummary::

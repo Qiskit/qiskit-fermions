@@ -14,13 +14,12 @@
 
 from __future__ import annotations
 
-from qiskit.dagcircuit import DAGCircuit
-from qiskit.transpiler import AnalysisPass
+from qiskit_fermions.circuit import FermionicDAGCircuit
 
-from ... import F2QLayout
+from ... import F2QLayout, FermionicDAGCircuitPass
 
 
-class CustomF2QLayout(AnalysisPass):
+class CustomF2QLayout(FermionicDAGCircuitPass):
     """Sets the user-provided :type:`~qiskit_fermions.transpiler.F2QLayout` in the transpiler.
 
     This pass simply populates the ``f2q_layout`` field of the
@@ -44,10 +43,16 @@ class CustomF2QLayout(AnalysisPass):
         """The user-provided mapping of :type:`~qiskit_fermions.circuit.FermionicRegister` to
         :class:`~qiskit.circuit.QuantumRegister`."""
 
-    def run(self, dag: DAGCircuit) -> None:
+    def run(self, dag: FermionicDAGCircuit) -> FermionicDAGCircuit:
         """Runs this analysis pass.
 
         Args:
             dag: the DAG circuit representation of a :class:`.FermionicCircuit`.
+
+        Returns:
+            The unchanged input. But the :attr:`.property_set` of this transpilation pipeline will
+            be updated.
         """
         self.property_set["f2q_layout"] = self.layout
+
+        return dag

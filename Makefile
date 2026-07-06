@@ -14,7 +14,13 @@ export BINDGEN_EXTRA_CLANG_ARGS := "-I$(shell python -c "import sysconfig; print
 lint:
 	cargo metadata --format-version=1 --locked >/dev/null
 	cargo fmt --check
-	cargo clippy --all-targets -- -D warnings
+	# The `cext` and `pyext` features of `qiskit-fermions-core` select mutually
+	# exclusive FFI backends, so they must never be unified into a single build.
+	# `cargo clippy --all-targets` over the whole workspace would do exactly that,
+	# so we lint the two backends as separate, disjoint compilation units instead.
+	cargo clippy -p qiskit-fermions-core --all-targets --features cext -- -D warnings
+	cargo clippy -p qiskit-fermions-cext --all-targets -- -D warnings
+	cargo clippy -p qiskit-fermions-pyext --all-targets -- -D warnings
 	tox -e lint
 	clang-format --dry-run -Werror --style="file:.clang-format" -i tests/c/*.c tests/c/*.h
 
@@ -42,7 +48,7 @@ docsclean:
 # ==============================================================================
 .PHONY: testrust
 testrust:
-	cargo test -p qiskit-fermions-core --no-default-features
+	cargo test -p qiskit-fermions-core --no-default-features --features cext
 
 .PHONY: rustcoverage
 rustcoverage: export RUSTFLAGS:=-Cinstrument-coverage

@@ -30,8 +30,6 @@ use qiskit_fermions_core::operators::fermion_operator::FermionOperator;
 /// :external+cqiskit:doc:`QkObs <cdoc/qk-obs>` under the Jordan-Wigner
 /// transformation. [1]_
 ///
-/// ----
-///
 /// Definition
 /// ----------
 ///

@@ -36,3 +36,4 @@ qiskit-fermions-core = { path = "crates/core" }
 qiskit-fermions-pyext = { path = "crates/pyext" }
 qiskit-fermions-cext = { path = "crates/cext" }
 qiskit-sys = { path = "crates/qiskit-sys" }
+qiskit-pyo3-ffi = { path = "crates/qiskit-pyo3-ffi" }

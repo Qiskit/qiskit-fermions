@@ -1,12 +1,6 @@
 Install ``qiskit-fermions``
 ===========================
 
-.. hint::
-   Support for Windows is still a work-in-progress. Compiling the C API should
-   be possible, but the Python API is still not fully functional. We are working
-   on improving this situation. In the meantime, we suggest that you use the
-   Linux subsystem on Windows.
-
 Requirements
 ------------
 

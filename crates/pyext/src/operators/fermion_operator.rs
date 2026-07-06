@@ -69,8 +69,6 @@ impl FermionOperatorDataGroupIter {
 
 /// A spin-less fermionic operator.
 ///
-/// ----
-///
 /// Definition
 /// ==========
 ///
@@ -96,8 +94,6 @@ impl FermionOperatorDataGroupIter {
 /// where :math:`\hat{A_j} \in \{ a_j, a^\dagger_j \}` and :math:`c_i` is the (complex) coefficient
 /// making up the linear combination of products. The index :math:`j` can take any value between 0
 /// and the number of fermionic modes acted upon by the operator minus 1.
-///
-/// ----
 ///
 /// .. _FermionOperator-implementation:
 ///
@@ -351,8 +347,6 @@ impl FermionOperatorDataGroupIter {
 ///    is_hermitian
 ///    max_rank
 ///    conserves_particle_number
-///
-/// ----
 ///
 /// .. [1] https://en.wikipedia.org/wiki/Second_quantization#Fermion_creation_and_annihilation_operators
 #[gen_stub_pyclass]

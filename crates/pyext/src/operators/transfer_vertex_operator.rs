@@ -69,8 +69,6 @@ impl TransferVertexOperatorDataGroupIter {
 
 /// An transfer-vertex operator.
 ///
-/// ----
-///
 /// .. _TransferVertexOperator-definition:
 ///
 /// Definition
@@ -144,8 +142,6 @@ impl TransferVertexOperatorDataGroupIter {
 /// 1.
 ///
 /// We will refer to :math:`T_{lr}` as `generalized` transfer operators.
-///
-/// ----
 ///
 /// .. _TransferVertexOperator-implementation:
 ///
@@ -393,8 +389,6 @@ impl TransferVertexOperatorDataGroupIter {
 /// .. autosummary::
 ///
 ///    is_hermitian
-///
-/// ----
 ///
 /// .. [1] Gandon et al., `arXiv:2512.11418 <https://arxiv.org/abs/2512.11418v2>`_.
 #[gen_stub_pyclass]

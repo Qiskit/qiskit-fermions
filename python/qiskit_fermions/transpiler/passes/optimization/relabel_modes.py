@@ -21,14 +21,14 @@ from itertools import islice
 from typing import TYPE_CHECKING, Any
 
 from qiskit import QuantumRegister
-from qiskit.dagcircuit import DAGCircuit
-from qiskit.transpiler import TransformationPass
 
 from qiskit_fermions._lib.operators.fermion_operator import FermionOperator
-from qiskit_fermions.circuit import FermionicRegister
+from qiskit_fermions.circuit import FermionicDAGCircuit, FermionicRegister
 from qiskit_fermions.circuit.library import Evolution
 from qiskit_fermions.mappers.optimization import build_excitation_span_minimization_model
 from qiskit_fermions.utils.optionals import HAS_PYOMO
+
+from ... import FermionicDAGCircuitPass
 
 if TYPE_CHECKING:
     import pyomo
@@ -48,7 +48,7 @@ def _sliding_window(iterable: Iterable[Any], n: int) -> Generator[tuple[Any, ...
         yield tuple(window)
 
 
-class RelabelModes(TransformationPass):
+class RelabelModes(FermionicDAGCircuitPass):
     """A transpilation pass to relabel the fermionic modes.
 
     .. caution::
@@ -111,7 +111,7 @@ class RelabelModes(TransformationPass):
         self._model_kwargs = kwargs
 
     def find_permutation(
-        self, dag: DAGCircuit
+        self, dag: FermionicDAGCircuit
     ) -> tuple[list[int] | None, pyomo.opt.results.results_.SolverResults | None]:
         """Finds a mode index :attr:`.permutation` when not specified by the user.
 
@@ -198,7 +198,7 @@ class RelabelModes(TransformationPass):
         permutation = [round(value(model.y[i])) for i in range(num_modes)]
         return permutation, result
 
-    def run(self, dag: DAGCircuit) -> DAGCircuit:
+    def run(self, dag: FermionicDAGCircuit) -> FermionicDAGCircuit:
         """Runs this transpilation pass.
 
         Args:
