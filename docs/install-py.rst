@@ -31,12 +31,11 @@ simple:
 
       $ pip install --group build
 
-3. Install the ``qiskit-fermions`` Python package into your environment with
-   ``--no-build-isolation`` to ensure that ``qiskit`` is available:
+3. Install the ``qiskit-fermions`` Python package into your environment:
 
    .. code:: console
 
-      $ pip install --no-build-isolation .
+      $ pip install .
 
    .. hint::
 
@@ -45,7 +44,7 @@ simple:
 
       .. code:: console
 
-         $ SETUPTOOLS_RUST_CARGO_PROFILE=release pip install --no-build-isolation -e .
+         $ SETUPTOOLS_RUST_CARGO_PROFILE=release pip install -e .
 
 4. (optional) You may wish to generate the Python type stub files to have better
    integration with coding tools (e.g. for tab completion). You can do that

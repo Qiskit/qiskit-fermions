@@ -3,6 +3,7 @@
 requires = [
     "setuptools>=77.0.1",
     "setuptools-rust",
+    "qiskit>=2.5",
 ]
 build-backend = "setuptools.build_meta"
 
@@ -45,6 +46,7 @@ optimization = [
 build = [
     "setuptools>=77.0.1",
     "setuptools-rust",
+    "qiskit>=2.5",
 ]
 style = [
     "ruff==0.15.8",
@@ -161,8 +163,3 @@ iz = "iz"
 
 [tool.typos.files]
 extend-exclude = ["crates/qiskit-pyo3-ffi"]
-
-# While we don't mandate the use of uv, we use it during CI for handling package
-# resolution and thus are configuring components of it below.
-[tool.uv.extra-build-dependencies]
-qiskit-fermions = ["qiskit"]

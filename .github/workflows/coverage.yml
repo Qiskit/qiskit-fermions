@@ -79,7 +79,7 @@ jobs:
         shell: bash
         run: |
           pip install --group build --group coverage qiskit
-          SETUPTOOLS_RUST_CARGO_PROFILE=release pip install --no-build-isolation -e ".[all]"
+          SETUPTOOLS_RUST_CARGO_PROFILE=release pip install -e ".[all]"
 
       - name: Python coverage
         shell: bash
