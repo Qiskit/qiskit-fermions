@@ -51,11 +51,65 @@ def _sliding_window(iterable: Iterable[Any], n: int) -> Generator[tuple[Any, ...
 class RelabelModes(FermionicDAGCircuitPass):
     """A transpilation pass to relabel the fermionic modes.
 
-    .. caution::
-       This transpiler pass is known to have the following limitations:
+    Post-processing
+    ^^^^^^^^^^^^^^^
 
-       - handling of gates other than :class:`.Evolution` is currently not implemented
-       - handling of gates acting on a local subset of fermionic modes is not implemented
+    The :class:`.FermionicDAGCircuit` returned by this transpiler pass will have a new field in its
+    :attr:`~qiskit.dagcircuit.DAGCircuit.metadata` called ``permutation`` which will contain the
+    fermionic mode index re-labeling that was applied by this transpiler pass.
+
+    .. note::
+       This metadata may **not** be equal to the value of :attr:`permutation`, specifically when the
+       automatic permutation optimization gets used.
+
+    When working with this transpiler pass, bitstrings sampled from the final circuit will need to
+    have their bits re-ordered according to the reverse permutation:
+
+    .. doctest::
+
+       >>> from qiskit.passmanager import MultiStagePassManager
+       >>> from qiskit.providers.basic_provider import BasicSimulator
+       >>> from qiskit_fermions.circuit import FermionicCircuit
+       >>> from qiskit_fermions.circuit.library import InitializeModes
+       >>> from qiskit_fermions.transpiler import FermionicCircuitToDAG, QuantumDAGToCircuit
+       >>> from qiskit_fermions.transpiler.passes import (
+       ...     F2QSynthesis, InitializeModesSynthesis, RelabelModes, TrivialF2QLayout,
+       ... )
+       >>>
+       >>> circ = FermionicCircuit(4)
+       >>> circ.append(InitializeModes([1, 1, 0, 0]), circ.modes)
+       >>>
+       >>> synth = F2QSynthesis()
+       >>> synth.plugins[InitializeModes] = InitializeModesSynthesis()
+       >>>
+       >>> relabel = RelabelModes(permutation=[0, 2, 1, 3])
+       >>>
+       >>> pm = MultiStagePassManager(
+       ...     init=FermionicCircuitToDAG(),
+       ...     optimization=relabel,
+       ...     layout=TrivialF2QLayout(),
+       ...     synthesis=synth,
+       ...     output=QuantumDAGToCircuit(),
+       ... )
+       >>>
+       >>> qcirc = pm.run(circ)
+       >>> qcirc.measure_all()
+       >>>
+       >>> bit_permutation = qcirc.metadata["permutation"]
+       >>> print(bit_permutation)
+       [0, 2, 1, 3]
+       >>>
+       >>> res = BasicSimulator().run(qcirc, shots=1).result()
+       >>> counts = res.get_counts()
+       >>>
+       >>> # undo bit permutation (note the negative idx due to the small-endian convention of
+       >>> # Qiskit's qubit ordering)
+       >>> post_processed = {
+       ...     "".join(bitstring[-idx] for idx in bit_permutation): count
+       ...     for bitstring, count in counts.items()
+       ... }
+       >>> print(post_processed)
+       {'0011': 1}
     """
 
     def __init__(
