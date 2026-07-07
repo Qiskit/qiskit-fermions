@@ -82,7 +82,7 @@ jobs:
         shell: bash
         run: |
           pip install --group build --group test "qiskit @ file:$(echo build/qiskit/dist/*.whl)"
-          SETUPTOOLS_RUST_CARGO_PROFILE=release pip install --no-build-isolation -e .
+          SETUPTOOLS_RUST_CARGO_PROFILE=release pip install -e .
 
       - name: Python tests
         shell: bash
@@ -92,7 +92,7 @@ jobs:
       - name: Optional tests
         shell: bash
         run: |
-          SETUPTOOLS_RUST_CARGO_PROFILE=release pip install --no-build-isolation -e ".[all]"
+          SETUPTOOLS_RUST_CARGO_PROFILE=release pip install -e ".[all]"
           make testoptional
 
       - name: Documentation tests
