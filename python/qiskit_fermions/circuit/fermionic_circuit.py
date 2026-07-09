@@ -37,7 +37,7 @@ class FermionicCircuit:
     """
 
     def __init__(self, num_modes: int) -> None:
-        """Initializes a FermionicCircuit instance.
+        """Initializing a circuit instance can be done with the arguments listed below.
 
         Args:
             num_modes: the number of fermionic modes on which this circuit acts.

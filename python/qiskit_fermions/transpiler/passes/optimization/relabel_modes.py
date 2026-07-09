@@ -51,8 +51,7 @@ def _sliding_window(iterable: Iterable[Any], n: int) -> Generator[tuple[Any, ...
 class RelabelModes(FermionicDAGCircuitPass):
     """A transpilation pass to relabel the fermionic modes.
 
-    Post-processing
-    ^^^^^^^^^^^^^^^
+    .. rubric:: Post-processing
 
     The :class:`.FermionicDAGCircuit` returned by this transpiler pass will have a new field in its
     :attr:`~qiskit.dagcircuit.DAGCircuit.metadata` called ``permutation`` which will contain the
@@ -119,7 +118,7 @@ class RelabelModes(FermionicDAGCircuitPass):
         solver: pyomo.opt.SolverFactory | None = None,
         **kwargs,
     ) -> None:
-        """Initializes the transpiler pass.
+        """Initializing this transpiler pass can be done with the arguments listed below.
 
         Args:
             permutation: the index permutation used to relabel the fermionic mode indices. When this

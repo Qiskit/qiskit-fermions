@@ -34,7 +34,7 @@ class FermionicGate(Gate):
        this `re-interpretation`. You have been warned.
     """
 
-    def __init__(
+    def __init__(  # noqa: D107
         self,
         name: str,
         num_modes: int,
@@ -43,7 +43,6 @@ class FermionicGate(Gate):
         *,
         label: str | None = None,
     ) -> None:
-        """Initializes a FermionicGate instance."""
         if params is None:
             params = []
         super().__init__(name, num_modes, params, label)

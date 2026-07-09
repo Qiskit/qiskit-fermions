@@ -85,7 +85,7 @@ rst_prolog = f"""
 # Options for autodoc. These reflect the values from Qiskit SDK and Runtime.
 autosummary_generate = True
 autosummary_generate_overwrite = False
-autoclass_content = "class"
+autoclass_content = "both"
 autodoc_typehints = "description"
 autodoc_class_signature = "separated"
 autodoc_default_options = {

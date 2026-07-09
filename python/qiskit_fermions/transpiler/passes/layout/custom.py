@@ -32,7 +32,7 @@ class CustomF2QLayout(FermionicDAGCircuitPass):
     """
 
     def __init__(self, layout: F2QLayout) -> None:
-        """Initializes the transpiler pass.
+        """Initializing this transpiler pass can be done with the arguments listed below.
 
         Args:
             layout: the custom ``f2q_layout`` to use.

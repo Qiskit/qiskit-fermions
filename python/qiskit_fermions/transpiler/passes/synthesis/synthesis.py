@@ -57,8 +57,7 @@ class F2QSynthesis(GenericPass[FermionicDAGCircuit, DAGCircuit]):
     :class:`~qiskit_fermions.transpiler.F2QLayout` setting.
     """
 
-    def __init__(self) -> None:
-        """Initializes the transpiler pass."""
+    def __init__(self) -> None:  # noqa: D107
         super().__init__()
 
         self.plugins: dict[type[DAGOpNode], F2QSynthesisPlugin] = {}
