@@ -40,7 +40,7 @@ class QDriftTrotterization(FermionicDAGCircuitPass):
         filter_diagonal_terms: bool = False,
         rng: np.random.Generator | int | None = None,
     ) -> None:
-        """Initializes the transpiler pass.
+        """Initializing this transpiler pass can be done with the arguments listed below.
 
         Args:
             num_terms: the number of terms to include in the qDRIFT Trotterization.

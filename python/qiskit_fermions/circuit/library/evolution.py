@@ -23,7 +23,7 @@ class Evolution(FermionicGate):
     """Implements the time evolution of an operator."""
 
     def __init__(self, num_modes: int, operator: OperatorTrait, time: float = 1.0) -> None:
-        """Initializes an Evolution gate.
+        """Initializing an instance of this gate can be done with the arguments listed below.
 
         Args:
             num_modes: the number of fermionic modes on which this gate acts.

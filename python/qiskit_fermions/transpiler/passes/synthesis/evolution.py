@@ -33,7 +33,7 @@ class EvolutionSynthesis:
     """A :class:`.F2QSynthesisPlugin` for transpiling a :class:`.Evolution`."""
 
     def __init__(self, mapper_fn: MapperFunction) -> None:
-        """Initializes the transpilation plugin.
+        """Initializing this transpiler pass plugin can be done with the arguments listed below.
 
         Args:
             mapper_fn: the fermion-to-qubit operator mapping function.

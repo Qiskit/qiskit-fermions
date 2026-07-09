@@ -30,7 +30,7 @@ class InitializeModes(FermionicGate):
     """
 
     def __init__(self, occupation: Sequence[bool]) -> None:
-        """Initializes the modes of a :class:`.FermionicRegister` with the provided occupation.
+        """Initializing an instance of this gate can be done with the arguments listed below.
 
         Args:
             occupation: a sequence of booleans indicating the occupation for each mode in the

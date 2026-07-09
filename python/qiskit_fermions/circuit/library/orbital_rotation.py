@@ -23,7 +23,7 @@ class OrbitalRotation(FermionicGate):
     """Implements an orbital rotation."""
 
     def __init__(self, rotation_unitary: np.ndarray) -> None:
-        """Initializes the orbital rotation.
+        """Initializing an instance of this gate can be done with the arguments listed below.
 
         Args:
             rotation_unitary: the unitary matrix representing the orbital rotation coefficients.
