@@ -5,7 +5,7 @@ resolver = "3"
 [workspace.package]
 version = "0.0.0"
 edition = "2024"
-rust-version = "1.91"
+rust-version = "1.95"
 license = "Apache-2.0"
 
 # Shared dependencies that can be inherited.  This just helps a little with
