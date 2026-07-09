@@ -12,15 +12,18 @@
 
 """Synthesis passes."""
 
-from .evolution import EvolutionSynthesis
-from .initialize_modes import InitializeModesSynthesis
-from .orbital_rotation import OrbitalRotationSynthesis
-from .synthesis import F2QSynthesis, F2QSynthesisPlugin
+from .evolution import MapperFnEvolutionSynthesis
+from .initialize_modes import TrivialOccupationInitializeModesSynthesis
+from .orbital_rotation import GivensDecompositionOrbitalRotationSynthesis
+from .plugin import F2QSynthesisPlugin, F2QSynthesisPluginManager
+from .synthesis import F2QSynthesis, F2QSynthesisConfig
 
 __all__ = [
-    "EvolutionSynthesis",
     "F2QSynthesis",
+    "F2QSynthesisConfig",
     "F2QSynthesisPlugin",
-    "InitializeModesSynthesis",
-    "OrbitalRotationSynthesis",
+    "F2QSynthesisPluginManager",
+    "GivensDecompositionOrbitalRotationSynthesis",
+    "MapperFnEvolutionSynthesis",
+    "TrivialOccupationInitializeModesSynthesis",
 ]

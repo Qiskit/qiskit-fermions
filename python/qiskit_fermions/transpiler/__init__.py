@@ -87,6 +87,7 @@ Therefore, the user-provided fermion-to-qubit layout (:type:`F2QLayout`) associa
 
 .. autosummary::
    :toctree: ../stubs/
+   :template: autosummary/typealias.rst
 
    F2QLayout
 

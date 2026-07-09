@@ -21,7 +21,11 @@ from qiskit_fermions.circuit.library import Evolution
 from qiskit_fermions.mappers.library import jordan_wigner
 from qiskit_fermions.operators import FermionOperator
 from qiskit_fermions.transpiler import FermionicCircuitToDAG, QuantumDAGToCircuit
-from qiskit_fermions.transpiler.passes import EvolutionSynthesis, F2QSynthesis, TrivialF2QLayout
+from qiskit_fermions.transpiler.passes import (
+    F2QSynthesis,
+    MapperFnEvolutionSynthesis,
+    TrivialF2QLayout,
+)
 
 
 def test_evolution_gate_synthesis():
@@ -40,7 +44,7 @@ def test_evolution_gate_synthesis():
     circ.append(evo, circ.modes)
 
     synth = F2QSynthesis()
-    synth.plugins[Evolution] = EvolutionSynthesis(jordan_wigner)
+    synth.methods["Evolution"] = MapperFnEvolutionSynthesis(jordan_wigner)
 
     pm = MultiStagePassManager(
         input=FermionicCircuitToDAG(),
@@ -81,7 +85,7 @@ def test_custom_qubit_ordering():
         return jordan_wigner(relabeled, num_qubits)
 
     synth = F2QSynthesis()
-    synth.plugins[Evolution] = EvolutionSynthesis(custom_qubit_ordering_mapper_fn)
+    synth.methods["Evolution"] = MapperFnEvolutionSynthesis(custom_qubit_ordering_mapper_fn)
 
     pm = MultiStagePassManager(
         input=FermionicCircuitToDAG(),

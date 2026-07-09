@@ -12,9 +12,9 @@
 
 # ruff: noqa: D205,D212,D415
 """
-====================
-Transpilation Passes
-====================
+=================
+Transpiler Passes
+=================
 
 .. currentmodule:: qiskit_fermions.transpiler.passes
 
@@ -68,45 +68,31 @@ The main logic for mapping a :class:`.FermionicDAGCircuit` to a
    :toctree: ../stubs/
 
    F2QSynthesis
-
-.. _qiskit_fermions-transpiler-passes-synthesis-plugins:
-
-Plugins
-^^^^^^^
-
-As mentioned above, the :class:`.F2QSynthesis` transpiler pass exposes a `plugin interface` through
-which implementations for mapping fermion-based instructions to qubit-based ones can be registered.
-For more details on how to implement your own plugin, refer to :attr:`.F2QSynthesis.plugins`.
-
-For most common gates provided by :mod:`qiskit_fermions.circuit.library`, this module already
-provides builtin plugins:
-
-.. autosummary::
-   :toctree: ../stubs/
-
-   EvolutionSynthesis
-   InitializeModesSynthesis
-   OrbitalRotationSynthesis
+   ~synthesis.synthesis.F2QSynthesisConfig
 """
 
 from .layout import CustomF2QLayout, TrivialF2QLayout
 from .optimization import QDriftTrotterization, RelabelModes
 from .synthesis import (
-    EvolutionSynthesis,
     F2QSynthesis,
+    F2QSynthesisConfig,
     F2QSynthesisPlugin,
-    InitializeModesSynthesis,
-    OrbitalRotationSynthesis,
+    F2QSynthesisPluginManager,
+    GivensDecompositionOrbitalRotationSynthesis,
+    MapperFnEvolutionSynthesis,
+    TrivialOccupationInitializeModesSynthesis,
 )
 
 __all__ = [
     "CustomF2QLayout",
-    "EvolutionSynthesis",
     "F2QSynthesis",
+    "F2QSynthesisConfig",
     "F2QSynthesisPlugin",
-    "InitializeModesSynthesis",
-    "OrbitalRotationSynthesis",
+    "F2QSynthesisPluginManager",
+    "GivensDecompositionOrbitalRotationSynthesis",
+    "MapperFnEvolutionSynthesis",
     "QDriftTrotterization",
     "RelabelModes",
     "TrivialF2QLayout",
+    "TrivialOccupationInitializeModesSynthesis",
 ]

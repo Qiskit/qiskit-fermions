@@ -24,7 +24,11 @@ from qiskit_fermions.circuit import FermionicCircuit
 from qiskit_fermions.circuit.library import Evolution
 from qiskit_fermions.operators import MajoranaOperator
 from qiskit_fermions.transpiler import FermionicCircuitToDAG, QuantumDAGToCircuit
-from qiskit_fermions.transpiler.passes import CustomF2QLayout, EvolutionSynthesis, F2QSynthesis
+from qiskit_fermions.transpiler.passes import (
+    CustomF2QLayout,
+    F2QSynthesis,
+    MapperFnEvolutionSynthesis,
+)
 
 
 # NOTE: this is a very specific implementation of the Fermi-Hubbard model on a square lattice. It is
@@ -329,7 +333,7 @@ def test_custom_layout():
     layout = CustomF2QLayout({circ.register: QuantumRegister(num_qubits)})
 
     synth = F2QSynthesis()
-    synth.plugins[Evolution] = EvolutionSynthesis(mapper_fn)
+    synth.methods["Evolution"] = MapperFnEvolutionSynthesis(mapper_fn)
 
     pm = MultiStagePassManager(
         input=FermionicCircuitToDAG(),
