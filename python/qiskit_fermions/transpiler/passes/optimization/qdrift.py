@@ -30,22 +30,6 @@ else:
     from qiskit_fermions.operators.terms.filtering import filter_diagonal_terms
 
 
-def _unit_sign(coeff: complex, atol: float = 1e-12) -> complex:
-    """Return the unit-magnitude sign of ``coeff``.
-
-    qDRIFT samples a term with probability proportional to ``abs(coeff)`` and then
-    applies a rotation whose *direction* is fixed by ``coeff``'s sign/phase, at a
-    magnitude entirely set by the (shared) sampled evolution time. Coefficients
-    that are numerically negligible (e.g. residual floating-point noise from an
-    upstream integral transform) are treated as having a well-defined ``+1`` sign
-    rather than letting that noise dictate the rotation direction.
-    """
-    magnitude = abs(coeff)
-    if magnitude < atol:
-        return 1.0 + 0j
-    return coeff / magnitude
-
-
 class QDriftTrotterization(FermionicDAGCircuitPass):
     """A transpilation pass to Trotterize :class:`.Evolution` gates via the qDRIFT protocol."""
 
@@ -115,7 +99,7 @@ class QDriftTrotterization(FermionicDAGCircuitPass):
                 # magnitude of a coefficient sets its sampling probability, but its sign fixes the
                 # direction of the rotation and must be preserved for the Trotterization to
                 # approximate the target time evolution.
-                terms = [(actions, _unit_sign(coeff)) for actions, coeff in hamil.iter_terms()]
+                terms = [(actions, np.sign(coeff)) for actions, coeff in hamil.iter_terms()]
                 weights = np.abs(hamil.get_coeffs())
             else:
                 all_coeffs = hamil.get_coeffs()
@@ -148,7 +132,7 @@ class QDriftTrotterization(FermionicDAGCircuitPass):
                     # of grouped operator terms. Keep each term's sign (dropping only its magnitude)
                     # so that the sampled rotation points in the correct direction.
                     unit_terms = [
-                        (actions, _unit_sign(coeff)) for actions, coeff in sampled_term.iter_terms()
+                        (actions, np.sign(coeff)) for actions, coeff in sampled_term.iter_terms()
                     ]
 
                 op = hamil.__class__.from_terms(unit_terms)

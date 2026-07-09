@@ -23,7 +23,6 @@ from qiskit_fermions.operators import FermionOperator
 from qiskit_fermions.operators.library import FCIDump
 from qiskit_fermions.operators.terms.grouping import group_terms_by_electronic_structure
 from qiskit_fermions.transpiler.passes import QDriftTrotterization
-from qiskit_fermions.transpiler.passes.optimization.qdrift import _unit_sign
 from qiskit_fermions.transpiler.passmanager import FermionicPassManager
 
 
@@ -62,9 +61,6 @@ def test_qdrift_optimization_no_groups(subtests):
         qdrift_circ = pm.run(circ)
         assert qdrift_circ.count_ops() == {"Evolution": num_terms}
 
-        # NOTE: both terms sampled under this seed happen to have positive coefficients in
-        # h2.fcidump, so this case does not exercise coefficient-sign preservation. See
-        # test_qdrift_optimization_preserves_coefficient_sign and test_unit_sign below for that.
         expected_gates = [
             Evolution(
                 num_modes,
@@ -171,20 +167,6 @@ def test_qdrift_optimization_filter_diagonal_terms():
     for instruction in qdrift_circ._inner.data:
         for term, _ in instruction.operation.operator.iter_terms():
             assert not _is_diagonal(term), "a diagonal term was sampled despite filtering"
-
-
-def test_unit_sign():
-    """The ``_unit_sign`` helper must preserve the sign/phase of a coefficient's magnitude
-    while treating numerically-negligible coefficients (floating-point noise) as +1 rather
-    than amplifying that noise into a spurious rotation direction."""
-    assert _unit_sign(2.5 + 0j) == 1.0 + 0j
-    assert _unit_sign(-2.5 + 0j) == -1.0 + 0j
-    assert _unit_sign(-1.2563390730032502 + 0j) == -1.0 + 0j
-
-    # coefficients this close to zero are floating-point noise (e.g. from an upstream
-    # integral transform), not genuine negative terms; they must not flip the sign
-    assert _unit_sign(-2.3575299028703285e-16 + 0j) == 1.0 + 0j
-    assert _unit_sign(0.0 + 0j) == 1.0 + 0j
 
 
 def test_qdrift_optimization_preserves_coefficient_sign():
