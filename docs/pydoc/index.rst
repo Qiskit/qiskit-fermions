@@ -48,6 +48,7 @@ Transpiler
 
    qiskit_fermions.transpiler
    qiskit_fermions.transpiler.passes
+   qiskit_fermions.transpiler.passes.plugins
    qiskit_fermions.transpiler.passes.utils
    qiskit_fermions.transpiler.presets
 
