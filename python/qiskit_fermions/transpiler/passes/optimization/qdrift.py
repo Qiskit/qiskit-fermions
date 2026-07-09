@@ -94,10 +94,12 @@ class QDriftTrotterization(FermionicDAGCircuitPass):
 
             terms: list[Any]  # can be either a list of operator terms or operator instances
             if hamil.groups is None:
-                # NOTE: the qDRIFT protocol replaces the operator's coefficients with identities
-                # because the evolution time is entirely dictated by `delta` (computed below), since
-                # the operator's coefficients only impact the probability of a term being included.
-                terms = [(actions, 1.0) for actions, _ in hamil.iter_terms()]
+                # NOTE: the qDRIFT protocol normalizes each term to unit magnitude because the
+                # evolution time is entirely dictated by `delta` (computed below). Only the
+                # magnitude of a coefficient sets its sampling probability, but its sign fixes the
+                # direction of the rotation and must be preserved for the Trotterization to
+                # approximate the target time evolution.
+                terms = [(actions, np.sign(coeff)) for actions, coeff in hamil.iter_terms()]
                 weights = np.abs(hamil.get_coeffs())
             else:
                 all_coeffs = hamil.get_coeffs()
@@ -123,14 +125,17 @@ class QDriftTrotterization(FermionicDAGCircuitPass):
             for ind in sampled_indices:
                 sampled_term = terms[ind]
                 if isinstance(sampled_term, tuple):
-                    # in this case, we have already replaced the operator coefficient by 1.0
-                    identity_terms = [sampled_term]
+                    # in this case, we have already normalized the coefficient to its sign
+                    unit_terms = [sampled_term]
                 else:
-                    # NOTE: as per the comment earlier, we have not replaced the coefficients with
-                    # identity values in the case of working with grouped operator terms.
-                    identity_terms = [(actions, 1.0) for actions, _ in sampled_term.iter_terms()]
+                    # NOTE: as per the comment earlier, we have not yet normalized the coefficients
+                    # of grouped operator terms. Keep each term's sign (dropping only its magnitude)
+                    # so that the sampled rotation points in the correct direction.
+                    unit_terms = [
+                        (actions, np.sign(coeff)) for actions, coeff in sampled_term.iter_terms()
+                    ]
 
-                op = hamil.__class__.from_terms(identity_terms)
+                op = hamil.__class__.from_terms(unit_terms)
                 evo = Evolution(num_modes, op, time=delta)
                 out_dag.apply_operation_back(evo, qargs=out_dag.qubits)
 

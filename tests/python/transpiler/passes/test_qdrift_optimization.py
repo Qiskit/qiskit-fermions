@@ -167,3 +167,36 @@ def test_qdrift_optimization_filter_diagonal_terms():
     for instruction in qdrift_circ._inner.data:
         for term, _ in instruction.operation.operator.iter_terms():
             assert not _is_diagonal(term), "a diagonal term was sampled despite filtering"
+
+
+def test_qdrift_optimization_preserves_coefficient_sign():
+    """Regression test for a bug where every sampled term's coefficient was replaced with a
+    hardcoded +1.0, discarding its sign. This made every rotation point in the same direction
+    regardless of whether the original Hamiltonian coefficient was positive or negative, so the
+    synthesized circuit did not converge to the target time evolution for Hamiltonians with
+    mixed-sign coefficients (the general case).
+
+    Uses a real negative single-body coefficient taken from h2.fcidump (the on-site term for
+    mode 0), so this is not merely a synthetic edge case.
+    """
+    num_modes = 2
+    coeff = -1.2563390730032502 + 0j
+    hamil = FermionOperator.from_terms([(((True, 0), (False, 0)), coeff)])
+    hamil.groups = None
+
+    time = 1.5
+    circ = FermionicCircuit(num_modes)
+    circ.append(Evolution(num_modes, hamil, time=time), circ.modes)
+
+    num_terms = 3
+    qdrift = QDriftTrotterization(num_terms, rng=42)
+    pm = FermionicPassManager(qdrift)
+
+    qdrift_circ = pm.run(circ)
+    assert qdrift_circ.count_ops() == {"Evolution": num_terms}
+
+    # a single-term Hamiltonian means every sampled sub-operator is a copy of that same term;
+    # each must retain its negative sign rather than being flattened to +1.0
+    for instruction in qdrift_circ._inner.data:
+        coeffs = instruction.operation.operator.get_coeffs()
+        assert np.all(np.real(coeffs) < 0), f"expected a negative coefficient, got {coeffs}"
