@@ -18,7 +18,7 @@ from pathlib import Path
 
 import numpy as np
 from qiskit_fermions.circuit import FermionicCircuit
-from qiskit_fermions.circuit.library import Evolution
+from qiskit_fermions.circuit.library import Evolution, InitializeModes
 from qiskit_fermions.operators import FermionOperator
 from qiskit_fermions.operators.library import FCIDump
 from qiskit_fermions.operators.terms.grouping import group_terms_by_electronic_structure
@@ -200,3 +200,24 @@ def test_qdrift_optimization_preserves_coefficient_sign():
     for instruction in qdrift_circ._inner.data:
         coeffs = instruction.operation.operator.get_coeffs()
         assert np.all(np.real(coeffs) < 0), f"expected a negative coefficient, got {coeffs}"
+
+
+def test_qdrift_preserves_non_evolution_gates():
+    file_path = Path(__file__).parent / "../../../h2.fcidump"
+    fcidump = FCIDump.from_file(str(file_path))
+    num_modes = 2 * fcidump.norb
+    hamil = FermionOperator.from_fcidump(fcidump)
+    hamil.groups = None
+    time = 1.5
+    circ = FermionicCircuit(num_modes)
+    init = InitializeModes([1, 0, 1, 0])
+    circ.append(init, circ.modes)
+    evo = Evolution(num_modes, hamil, time=time)
+    circ.append(evo, circ.modes)
+
+    num_terms = 4
+    qdrift = QDriftTrotterization(num_terms)
+    pm = FermionicPassManager(qdrift)
+
+    qdrift_circ = pm.run(circ)
+    assert qdrift_circ.count_ops() == {"InitializeModes": 1, "Evolution": num_terms}

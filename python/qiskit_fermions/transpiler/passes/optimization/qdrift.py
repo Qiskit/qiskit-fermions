@@ -79,6 +79,7 @@ class QDriftTrotterization(FermionicDAGCircuitPass):
 
         for node in dag.op_nodes():
             if not isinstance(node.op, Evolution):
+                out_dag.apply_operation_back(node.op, qargs=node.qargs)
                 continue
 
             hamil = node.op.operator
