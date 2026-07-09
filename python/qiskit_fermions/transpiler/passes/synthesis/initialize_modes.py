@@ -22,19 +22,15 @@ from ... import F2QLayout
 from ..utils import map_node_single_register
 
 
-class InitializeModesSynthesis:
-    """A :class:`.F2QSynthesisPlugin` for transpiling a :class:`.InitializeModes`.
-
-    .. caution::
-       This is an early development prototype. Beware of changes to its interface without warning
-       during the pre-release development of this package.
+class TrivialOccupationInitializeModesSynthesis:
+    """A :class:`.F2QSynthesisPlugin` for transpiling :class:`.InitializeModes` with trivial occupation.
 
     .. warning::
-       This transpilation pass plugin is known to have certain limitations, including:
+       This transpilation pass plugin makes the following assumptions:
 
-       - assuming an occupation-basis encoding (like Jordan-Wigner)
-       - assuming a trivial fermion-to-qubit layout (i.e. no change in their register lengths)
-       - assuming a 1-to-1 mapping of fermionic mode indices to qubit indices
+       - an occupation-basis encoding (like Jordan-Wigner)
+       - a trivial fermion-to-qubit layout (i.e. no change in their register lengths)
+       - a 1-to-1 mapping of fermionic mode indices to qubit indices
     """
 
     def run(self, in_node: DAGOpNode, out_dag: DAGCircuit, *, f2q_layout: F2QLayout) -> None:

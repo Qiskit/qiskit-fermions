@@ -23,11 +23,11 @@ from qiskit_fermions.mappers.library import jordan_wigner
 from qiskit_fermions.operators import FermionOperator
 from qiskit_fermions.transpiler import FermionicCircuitToDAG, QuantumDAGToCircuit
 from qiskit_fermions.transpiler.passes import (
-    EvolutionSynthesis,
     F2QSynthesis,
-    InitializeModesSynthesis,
+    MapperFnEvolutionSynthesis,
     RelabelModes,
     TrivialF2QLayout,
+    TrivialOccupationInitializeModesSynthesis,
 )
 from qiskit_fermions.utils.optionals import HAS_PYOMO
 
@@ -55,8 +55,8 @@ def test_relabel_modes_fixed_permutation():
     circ.append(evo, circ.modes)
 
     synth = F2QSynthesis()
-    synth.plugins[Evolution] = EvolutionSynthesis(jordan_wigner)
-    synth.plugins[InitializeModes] = InitializeModesSynthesis()
+    synth.methods["Evolution"] = MapperFnEvolutionSynthesis(jordan_wigner)
+    synth.methods["InitializeModes"] = TrivialOccupationInitializeModesSynthesis()
 
     permutation = [0, 2, 1, 3]
     relabel = RelabelModes(permutation)
@@ -99,8 +99,8 @@ def test_relabel_modes_local_indices():
     circ.append(evo, circ.modes[:num_modes])
 
     synth = F2QSynthesis()
-    synth.plugins[Evolution] = EvolutionSynthesis(jordan_wigner)
-    synth.plugins[InitializeModes] = InitializeModesSynthesis()
+    synth.methods["Evolution"] = MapperFnEvolutionSynthesis(jordan_wigner)
+    synth.methods["InitializeModes"] = TrivialOccupationInitializeModesSynthesis()
 
     permutation = [0, 2, 1, 3, 4, 5, 6, 7]
     relabel = RelabelModes(permutation)
@@ -136,7 +136,7 @@ def test_relabel_modes_pyomo_optimization():
     circ.append(evo, circ.modes)
 
     synth = F2QSynthesis()
-    synth.plugins[Evolution] = EvolutionSynthesis(jordan_wigner)
+    synth.methods["Evolution"] = MapperFnEvolutionSynthesis(jordan_wigner)
 
     solver = SolverFactory("appsi_highs")
     solver.options["time_limit"] = 60

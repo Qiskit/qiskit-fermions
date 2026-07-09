@@ -29,8 +29,8 @@ MapperFunction = Callable[[OperatorTrait, int], SparseObservable]
 """The function signature for :attr:`mapper_fn`."""
 
 
-class EvolutionSynthesis:
-    """A :class:`.F2QSynthesisPlugin` for transpiling a :class:`.Evolution`."""
+class MapperFnEvolutionSynthesis:
+    """A :class:`.F2QSynthesisPlugin` for transpiling :class:`.Evolution` under a custom mapping."""
 
     def __init__(self, mapper_fn: MapperFunction) -> None:
         """Initializing this transpiler pass plugin can be done with the arguments listed below.

@@ -87,7 +87,7 @@ autosummary_generate = True
 autosummary_generate_overwrite = False
 autoclass_content = "both"
 autodoc_typehints = "description"
-autodoc_class_signature = "separated"
+autodoc_class_signature = "mixed"
 autodoc_default_options = {
     "inherited-members": None,
     "show-inheritance": True,

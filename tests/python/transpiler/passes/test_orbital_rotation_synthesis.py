@@ -20,7 +20,7 @@ from qiskit_fermions.circuit.library import OrbitalRotation
 from qiskit_fermions.transpiler import FermionicCircuitToDAG, QuantumDAGToCircuit
 from qiskit_fermions.transpiler.passes import (
     F2QSynthesis,
-    OrbitalRotationSynthesis,
+    GivensDecompositionOrbitalRotationSynthesis,
     TrivialF2QLayout,
 )
 
@@ -35,7 +35,7 @@ def test_orbital_rotation_global_gate_synthesis():
     circ.append(rot, circ.modes)
 
     synth = F2QSynthesis()
-    synth.plugins[OrbitalRotation] = OrbitalRotationSynthesis()
+    synth.methods["OrbitalRotation"] = GivensDecompositionOrbitalRotationSynthesis()
 
     pm = MultiStagePassManager(
         input=FermionicCircuitToDAG(),
@@ -61,7 +61,7 @@ def test_initialize_modes_local_gate_synthesis():
     circ.append(rot_b, circ.modes[3:])
 
     synth = F2QSynthesis()
-    synth.plugins[OrbitalRotation] = OrbitalRotationSynthesis()
+    synth.methods["OrbitalRotation"] = GivensDecompositionOrbitalRotationSynthesis()
 
     pm = MultiStagePassManager(
         input=FermionicCircuitToDAG(),

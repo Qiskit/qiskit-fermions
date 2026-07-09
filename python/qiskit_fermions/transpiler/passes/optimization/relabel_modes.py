@@ -72,14 +72,15 @@ class RelabelModes(FermionicDAGCircuitPass):
        >>> from qiskit_fermions.circuit.library import InitializeModes
        >>> from qiskit_fermions.transpiler import FermionicCircuitToDAG, QuantumDAGToCircuit
        >>> from qiskit_fermions.transpiler.passes import (
-       ...     F2QSynthesis, InitializeModesSynthesis, RelabelModes, TrivialF2QLayout,
+       ...     F2QSynthesis, F2QSynthesisPluginManager, RelabelModes, TrivialF2QLayout,
        ... )
        >>>
        >>> circ = FermionicCircuit(4)
        >>> circ.append(InitializeModes([1, 1, 0, 0]), circ.modes)
        >>>
+       >>> synth_plugins = F2QSynthesisPluginManager()
        >>> synth = F2QSynthesis()
-       >>> synth.plugins[InitializeModes] = InitializeModesSynthesis()
+       >>> synth.methods["InitializeModes"] = synth_plugins.method("InitializeModes", "TrivialOccupation")()
        >>>
        >>> relabel = RelabelModes(permutation=[0, 2, 1, 3])
        >>>

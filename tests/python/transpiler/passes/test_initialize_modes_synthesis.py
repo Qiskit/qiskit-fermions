@@ -22,8 +22,8 @@ from qiskit_fermions.circuit.library import InitializeModes
 from qiskit_fermions.transpiler import FermionicCircuitToDAG, QuantumDAGToCircuit
 from qiskit_fermions.transpiler.passes import (
     F2QSynthesis,
-    InitializeModesSynthesis,
     TrivialF2QLayout,
+    TrivialOccupationInitializeModesSynthesis,
 )
 
 
@@ -35,7 +35,7 @@ def test_initialize_modes_global_gate_synthesis():
     circ.append(init, circ.modes)
 
     synth = F2QSynthesis()
-    synth.plugins[InitializeModes] = InitializeModesSynthesis()
+    synth.methods["InitializeModes"] = TrivialOccupationInitializeModesSynthesis()
 
     pm = MultiStagePassManager(
         input=FermionicCircuitToDAG(),
@@ -61,7 +61,7 @@ def test_initialize_modes_local_gate_synthesis():
     circ.append(init, circ.modes[1:3])
 
     synth = F2QSynthesis()
-    synth.plugins[InitializeModes] = InitializeModesSynthesis()
+    synth.methods["InitializeModes"] = TrivialOccupationInitializeModesSynthesis()
 
     pm = MultiStagePassManager(
         input=FermionicCircuitToDAG(),

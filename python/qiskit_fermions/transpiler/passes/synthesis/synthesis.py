@@ -14,34 +14,36 @@
 
 from __future__ import annotations
 
-from typing import Protocol, cast
+from collections.abc import Mapping, Sequence
+from typing import Any, TypeAlias, cast
 
-from qiskit.dagcircuit import DAGCircuit, DAGOpNode
+from qiskit.dagcircuit import DAGCircuit
 from qiskit.passmanager import GenericPass
 
 from qiskit_fermions.circuit import FermionicDAGCircuit, FermionicGate
 
 from ... import F2QLayout
+from .plugin import F2QSynthesisPlugin, F2QSynthesisPluginManager
 
+F2QSynthesisConfig: TypeAlias = dict[
+    str, str | tuple[str, Sequence[Any]] | tuple[str, Sequence[Any], Mapping[str, Any]]
+]
+"""The dictionary type used to configure the :attr:`.F2QSynthesis.methods`.
 
-class F2QSynthesisPlugin(Protocol):
-    """The protocol for plugins to the :class:`.F2QSynthesis` transpiler pass."""
+The keys of this dictionary must be names of :class:`.FermionicGate` circuit instructions.
+The values can be one of three types:
 
-    def run(self, in_node: DAGOpNode, out_dag: DAGCircuit, *, f2q_layout: F2QLayout) -> None:
-        """Translates the provided fermion-based circuit instruction to a qubit-based one.
-
-        Args:
-            in_node: a fermion-based circuit instruction stored in a
-                :class:`~qiskit.dagcircuit.DAGOpNode`. Specifically, this guarantees that
-                :attr:`~qiskit.dagcircuit.DAGOpNode.op` is of type :class:`.FermionicGate`.
-            out_dag: the qubit-based :class:`~qiskit.dagcircuit.DAGCircuit` into which this plugin
-                must insert the translated circuit instruction.
-            f2q_layout: the :type:`~qiskit_fermions.transpiler.F2QLayout` setting that is global to
-                the transpilation process. It is the plugin's responsibility to respect this mapping
-                of :type:`~qiskit_fermions.circuit.FermionicRegister` to
-                :class:`~qiskit.circuit.QuantumRegister`.
-        """
-        ...
+1. ``str``: the simplest scenario simply specifies the name of the plugin method to use for the
+   corresponding key in this dictionary. The plugin is extracted from the
+   :class:`.F2QSynthesisPluginManager` and it's ``__init__`` method may **not** require any
+   arguments.
+2. ``tuple[str, Sequence[Any]]``: the first ``str`` is the same as the above, and the second
+   ``Sequence[Any]`` can be used to provide any positional arguments to the plugin's ``__init__``
+   method.
+3. ``tuple[str, Sequence[Any], Mapping[str, Any]]``: the first two fields are the same as in 2. and
+   the third ``Mapping[str, Any]`` can be used to provide any keyword arguments to the plugin's
+   ``__init__`` method.
+"""
 
 
 class F2QSynthesis(GenericPass[FermionicDAGCircuit, DAGCircuit]):
@@ -49,27 +51,92 @@ class F2QSynthesis(GenericPass[FermionicDAGCircuit, DAGCircuit]):
 
     This transpilation pass works similarly to Qiskit's
     :class:`~qiskit.transpiler.passes.HighLevelSynthesis` pass; given an input
-    :class:`~qiskit.dagcircuit.DAGCircuit` with :class:`.FermionicGate` instructions, it iterates them
-    and delegates the translation to qubit-based instructions to matching :attr:`plugins`.
-    The insertion of the qubit-based circuit instructions into the output
-    :class:`~qiskit.dagcircuit.DAGCircuit` is also left to the plugin. This pass will merely have
-    prepared the :class:`~qiskit.circuit.QuantumRegister` according to the global transpilation
+    :class:`.FermionicDAGCircuit`, it iterates the contained instructions and delegates the
+    translation to qubit-based instructions to matching :attr:`methods`. The insertion of the
+    qubit-based circuit instructions into the output :class:`~qiskit.dagcircuit.DAGCircuit` is also
+    left to the plugin method. This pass will merely have prepared the
+    :class:`~qiskit.circuit.QuantumRegister` according to the global transpilation
     :class:`~qiskit_fermions.transpiler.F2QLayout` setting.
+
+    .. rubric:: Usage
+
+    There are two ways to configure the plugins used by this transpiler pass. The examples below
+    show the equivalent configuration to the :func:`.generate_preset_jw_pass_manager`.
+
+    1. Providing a ``config`` during initialization:
+
+       .. doctest::
+
+          >>> from qiskit_fermions.mappers.library import jordan_wigner
+          >>> from qiskit_fermions.transpiler import passes
+          >>>
+          >>> config = {
+          ...     "Evolution": ("MapperFn", (jordan_wigner,)),
+          ...     "InitializeModes": "TrivialOccupation",
+          ...     "OrbitalRotation": "GivensDecomposition",
+          ... }
+          >>> synth = passes.F2QSynthesis(config)
+
+    2. Manually populating the :attr:`methods` attribute:
+
+       .. doctest::
+
+          >>> from qiskit_fermions.mappers.library import jordan_wigner
+          >>> from qiskit_fermions.transpiler import passes
+          >>>
+          >>> synth = passes.F2QSynthesis()
+          >>> synth.methods["Evolution"] = passes.MapperFnEvolutionSynthesis(jordan_wigner)
+          >>> synth.methods["InitializeModes"] = passes.TrivialOccupationInitializeModesSynthesis()
+          >>> synth.methods["OrbitalRotation"] = passes.GivensDecompositionOrbitalRotationSynthesis()
+
+       Through this manual approach it is also possible to inject custom
+       :class:`.F2QSynthesisPlugin` implementations without requiring them to be registered through
+       an `entry-point <https://setuptools.pypa.io/en/latest/userguide/entry_point.html>`_.
+
     """
 
-    def __init__(self) -> None:  # noqa: D107
+    def __init__(self, config: F2QSynthesisConfig | None = None) -> None:
+        """Initializing this transpiler pass can be done with the arguments listed below.
+
+        Args:
+            config: an optional dictionary to pre-populate the :attr:`methods` with plugins provided
+                by the :class:`.F2QSynthesisPluginManager`.
+        """
         super().__init__()
 
-        self.plugins: dict[type[DAGOpNode], F2QSynthesisPlugin] = {}
-        """A dictionary of fermion-to-qubit circuit instruction transpilation plugins.
+        self.methods: dict[str, F2QSynthesisPlugin] = {}
+        """A dictionary of fermion-to-qubit circuit instruction transpilation methods.
 
-        .. autoclass:: F2QSynthesisPlugin
-           :show-inheritance:
-           :members:
-           :exclude-members: __init__
-           :no-inherited-members:
-           :no-special-members:
+        For this transpilation pass to have any effect, this dictionary must be populated with
+        instances of the :class:`.F2QSynthesisPlugin` protocol. The keys of this dictionary
+        correspond to the ``__name__`` of a circuit instruction.
+
+        All available transpilation plugins are managed by the :class:`.F2QSynthesisPluginManager`.
+
+        .. note::
+           This dictionary is **empty** by default! You can pre-populate it with plugins provided by
+           the :class:`.F2QSynthesisPluginManager` by providing a ``config`` argument during
+           initialization of this transpiler pass instance.
         """
+
+        if config is not None:
+            pm = F2QSynthesisPluginManager()
+            for op_name, method_spec in config.items():
+                init_args: Sequence[Any] = ()
+                init_kwargs: Mapping[str, Any] = {}
+                match method_spec:
+                    case str():
+                        method_name = method_spec
+                    case (name, args):
+                        method_name = name
+                        init_args = args
+                    case (name, args, kwargs):
+                        method_name = name
+                        init_args = args
+                        init_kwargs = kwargs
+
+                method = pm.method(op_name, method_name)
+                self.methods[op_name] = method(*init_args, **init_kwargs)
 
     def run(self, dag: FermionicDAGCircuit) -> DAGCircuit:
         """Runs this transpilation pass.
@@ -86,7 +153,7 @@ class F2QSynthesis(GenericPass[FermionicDAGCircuit, DAGCircuit]):
             ValueError: when a :class:`~qiskit.dagcircuit.DAGOpNode` is encountered whose
                 :attr:`~qiskit.dagcircuit.DAGOpNode.op` is not of type :class:`.FermionicGate`.
             TypeError: when a :class:`.FermionicGate` type is encountered for which no translation
-                plugin is present in :attr:`plugins`.
+                plugin is present in :attr:`methods`.
         """
         f2q_layout = cast(F2QLayout, self.property_set["f2q_layout"])
 
@@ -102,7 +169,7 @@ class F2QSynthesis(GenericPass[FermionicDAGCircuit, DAGCircuit]):
             if not isinstance(node.op, FermionicGate):
                 raise ValueError("Encountered an unsupported circuit instruction type: {}", op_type)
 
-            plugin = self.plugins.get(op_type, None)
+            plugin = self.methods.get(op_type.__name__, None)
             if plugin is None:
                 raise TypeError(
                     "No plugin registered for transpiling a circuit instruction of type: {}",

@@ -15,17 +15,10 @@
 from qiskit.passmanager import MultiStagePassManager
 from qiskit.transpiler import generate_preset_pass_manager
 
-from qiskit_fermions.circuit.library import Evolution, InitializeModes, OrbitalRotation
 from qiskit_fermions.mappers.library import jordan_wigner
 
 from .. import FermionicCircuitToDAG, FermionicPassManager, QuantumDAGToCircuit
-from ..passes import (
-    EvolutionSynthesis,
-    F2QSynthesis,
-    InitializeModesSynthesis,
-    OrbitalRotationSynthesis,
-    TrivialF2QLayout,
-)
+from ..passes import F2QSynthesis, F2QSynthesisConfig, TrivialF2QLayout
 
 
 def generate_preset_jw_pass_manager(**kwargs) -> MultiStagePassManager:
@@ -43,10 +36,12 @@ def generate_preset_jw_pass_manager(**kwargs) -> MultiStagePassManager:
 
     layout = FermionicPassManager(TrivialF2QLayout())
 
-    synth = F2QSynthesis()
-    synth.plugins[Evolution] = EvolutionSynthesis(jordan_wigner)  # type: ignore[arg-type]
-    synth.plugins[InitializeModes] = InitializeModesSynthesis()
-    synth.plugins[OrbitalRotation] = OrbitalRotationSynthesis()
+    config: F2QSynthesisConfig = {
+        "Evolution": ("MapperFn", (jordan_wigner,)),
+        "InitializeModes": "TrivialOccupation",
+        "OrbitalRotation": "GivensDecomposition",
+    }
+    synth = F2QSynthesis(config)
 
     pm = MultiStagePassManager(
         input=FermionicCircuitToDAG(),

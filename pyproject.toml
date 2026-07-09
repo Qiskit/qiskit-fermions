@@ -31,6 +31,7 @@ requires-python = ">=3.10"
 
 dependencies = [
     "qiskit>=2.5.0, <3",
+    "stevedore>=3.0.0",
     "typing-extensions",
 ]
 
@@ -95,6 +96,11 @@ dev = [
     {include-group = "coverage"},
     "tox>=4.28.0",
 ]
+
+[project.entry-points."qiskit_fermions.transpiler.synthesis"]
+"Evolution.MapperFn" = "qiskit_fermions.transpiler.passes.synthesis:MapperFnEvolutionSynthesis"
+"InitializeModes.TrivialOccupation" = "qiskit_fermions.transpiler.passes.synthesis:TrivialOccupationInitializeModesSynthesis"
+"OrbitalRotation.GivensDecomposition" = "qiskit_fermions.transpiler.passes.synthesis:GivensDecompositionOrbitalRotationSynthesis"
 
 [tool.setuptools]
 include-package-data = true
