@@ -35,7 +35,7 @@ pub struct FCIDump {
 impl FCIDump {
     pub fn from_file(file_path: String) -> Self {
         let mut file = match File::open(&file_path) {
-            Err(why) => panic!("Could not open {}: {}", &file_path, why),
+            Err(why) => panic!("Could not open {}: {}", file_path, why),
             Ok(file) => file,
         };
         let mut contents = String::new();
