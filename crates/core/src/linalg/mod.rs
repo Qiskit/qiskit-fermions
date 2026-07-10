@@ -11,4 +11,5 @@
 // that they have been altered from the originals.
 
 pub mod double_factorized;
+pub mod fci;
 pub mod givens;
