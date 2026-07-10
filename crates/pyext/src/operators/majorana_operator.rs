@@ -1077,10 +1077,17 @@ impl PyMajoranaOperator {
     ///       1.000000e0 +0.000000e0j * (γ'2 γ3 γ2 γ'1)
     ///
     /// Args:
-    ///     permutation: the index permutation list.
+    ///     permutation: the index permutation list. Mode ``i`` is relabeled to ``permutation[i]``,
+    ///         so the list must contain no duplicate entries and must be long enough to index every
+    ///         mode the operator acts upon (its length must exceed the operator's largest mode
+    ///         index).
     ///
     /// Returns:
     ///     A new operator with its modes relabeled.
+    ///
+    /// Raises:
+    ///     ValueError: if ``permutation`` contains duplicate entries, or is too short to relabel
+    ///         some mode the operator acts upon.
     fn relabel_modes(&self, permutation: Vec<u32>) -> PyResult<Self> {
         let out = self.inner.relabel_modes(permutation);
         match out {
