@@ -18,6 +18,7 @@ from collections import OrderedDict
 from collections.abc import Sequence
 from typing import TYPE_CHECKING, Any, cast
 
+import numpy as np
 from qiskit.circuit import Instruction, QuantumCircuit, QuantumRegister
 
 from . import FermionicMode, FermionicSpecifier
@@ -108,3 +109,66 @@ class FermionicCircuit:
     def draw(self, *args, **kwargs) -> Any:
         """Directly exposes the inner circuit's :meth:`~qiskit.circuit.QuantumCircuit.draw` method."""
         return self._inner.draw(*args, **kwargs)
+
+    def _apply_unitary_(
+        self, vec: np.ndarray, norb: int, nelec: int | tuple[int, int], copy: bool
+    ) -> np.ndarray:
+        """Applies this circuit to an ffsim state vector, implementing ffsim's protocol.
+
+        This walks the circuit in topological order and applies each instruction's unitary effect to
+        the state vector via ffsim's ``SupportsApplyUnitary`` protocol. Each instruction acting on a
+        subset of the register has its fermionic modes relabeled to their absolute (global) indices
+        before being applied.
+
+        Args:
+            vec: the state vector to apply this circuit to.
+            norb: the number of spatial orbitals.
+            nelec: either a single integer representing the number of fermions for a spinless system,
+                or a pair of integers storing the numbers of spin alpha and spin beta fermions.
+            copy: whether to copy the vector before operating on it.
+
+        Returns:
+            The transformed vector.
+
+        Raises:
+            TypeError: if a circuit instruction does not implement ffsim's
+                ``SupportsApplyUnitary`` protocol.
+            ValueError: if a circuit instruction declines to apply its unitary for the given
+                ``norb`` and ``nelec``.
+        """
+        from qiskit_fermions.transpiler.converters import FermionicCircuitToDAG
+
+        dag = FermionicCircuitToDAG().run(self)
+
+        if copy:
+            vec = vec.copy()
+
+        for node in dag.topological_op_nodes():
+            instr = node.op
+
+            # the absolute (global) mode indices this instruction acts on
+            freg_indices = [dag.find_bit(qubit).index for qubit in node.qargs]
+
+            # prefer the placement-aware variant so the instruction's operator is relabeled onto its
+            # absolute modes; fall back to the plain protocol method otherwise (identity placement)
+            placed_method = getattr(instr, "_apply_unitary_placed_", None)
+            if placed_method is not None:
+                result = placed_method(vec, norb, nelec, False, freg_indices)
+            else:
+                method = getattr(instr, "_apply_unitary_", None)
+                if method is None:
+                    raise TypeError(
+                        f"Circuit instruction of type '{type(instr)}' does not implement "
+                        "ffsim's SupportsApplyUnitary protocol!"
+                    )
+                result = method(vec, norb, nelec, False)
+
+            if result is NotImplemented:
+                raise ValueError(
+                    f"Circuit instruction of type '{type(instr)}' declined to apply its unitary "
+                    f"for {norb=}, {nelec=}!"
+                )
+
+            vec = result
+
+        return vec

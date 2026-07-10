@@ -39,10 +39,13 @@ dependencies = [
 
 [project.optional-dependencies]
 all = [
-    "qiskit-fermions[optimization]",
+    "qiskit-fermions[optimization,simulation]",
 ]
 optimization = [
     "pyomo",
+]
+simulation = [
+    "ffsim",
 ]
 
 [dependency-groups]

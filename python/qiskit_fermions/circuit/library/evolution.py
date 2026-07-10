@@ -14,6 +14,8 @@
 
 from __future__ import annotations
 
+import numpy as np
+
 from qiskit_fermions.operators.protocol import OperatorTrait
 
 from .. import FermionicGate
@@ -93,3 +95,42 @@ class Evolution(FermionicGate):
             )
 
         self._definition = definition._inner
+
+    def _apply_unitary_(
+        self, vec: np.ndarray, norb: int, nelec: int | tuple[int, int], copy: bool
+    ) -> np.ndarray:
+        """Applies this gate's ``exp(-i * time * operator)`` to an ffsim state vector.
+
+        This implements ffsim's ``SupportsApplyUnitary`` protocol. See
+        :meth:`_apply_unitary_placed_` for the details; this method assumes the gate's operator is
+        already expressed in the space defined by ``(norb, nelec)`` (i.e. an identity mode placement).
+        """
+        return self._apply_unitary_placed_(vec, norb, nelec, copy, list(range(self.num_modes)))
+
+    def _apply_unitary_placed_(
+        self,
+        vec: np.ndarray,
+        norb: int,
+        nelec: int | tuple[int, int],
+        copy: bool,
+        freg_indices: list[int],
+    ) -> np.ndarray:
+        """Applies ``exp(-i * time * operator)`` after relabeling the operator to global modes.
+
+        Args:
+            vec: the state vector to act on.
+            norb: the number of spatial orbitals of the *global* state vector.
+            nelec: either a single integer for a spinless system, or a pair of integers storing the
+                numbers of spin alpha and spin beta fermions.
+            copy: whether to copy the vector before operating on it.
+            freg_indices: the absolute (global) mode indices that this gate's local modes map onto.
+                The operator is relabeled from its local modes to these global modes before being
+                applied, mirroring the transpiler's synthesis pass.
+
+        Returns:
+            The transformed vector, or ``NotImplemented`` for a spinless (integer ``nelec``) system.
+        """
+        from ._ffsim import apply_fermion_operator_evolution
+
+        operator = self.operator.relabel_modes(freg_indices)
+        return apply_fermion_operator_evolution(operator, self.params[0], vec, norb, nelec, copy)

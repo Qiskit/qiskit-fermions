@@ -1,0 +1,171 @@
+# This code is a Qiskit project.
+#
+# (C) Copyright IBM 2026.
+#
+# This code is licensed under the Apache License, Version 2.0. You may
+# obtain a copy of this license in the LICENSE.txt file in the root directory
+# of this source tree or at https://www.apache.org/licenses/LICENSE-2.0.
+#
+# Any modifications or derivative works of this code must retain this
+# copyright notice, and modified files need to carry a notice indicating
+# that they have been altered from the originals.
+
+"""Tests for applying an Evolution gate to an ffsim state vector (SupportsApplyUnitary)."""
+
+from __future__ import annotations
+
+from pathlib import Path
+
+import numpy as np
+import pytest
+from qiskit_fermions.circuit import FermionicCircuit
+from qiskit_fermions.circuit.library import Evolution
+from qiskit_fermions.operators import FermionOperator
+from qiskit_fermions.operators.library import FCIDump
+
+ffsim = pytest.importorskip("ffsim")
+scipy_sparse_linalg = pytest.importorskip("scipy.sparse.linalg")
+
+
+def test_evolution_apply_unitary_matches_ffsim_oracle():
+    """The evolution matches an oracle built from ffsim's own FermionOperator."""
+    # hopping a†_0 a_1 + a†_1 a_0 on (alpha) orbitals 0 and 1
+    hamil = FermionOperator.from_dict(
+        {
+            ((True, 0), (False, 1)): 1.0,
+            ((True, 1), (False, 0)): 1.0,
+        }
+    )
+    norb = 2
+    nelec = (1, 1)
+    time = 0.37
+
+    vec0 = ffsim.slater_determinant(norb, ([0], [0]))
+
+    # oracle: identical operator built natively with ffsim helpers, evolved via linear_operator
+    ffsim_op = ffsim.FermionOperator(
+        {
+            (ffsim.cre_a(0), ffsim.des_a(1)): 1.0,
+            (ffsim.cre_a(1), ffsim.des_a(0)): 1.0,
+        }
+    )
+    linop = ffsim.linear_operator(ffsim_op, norb=norb, nelec=nelec)
+    expected = scipy_sparse_linalg.expm_multiply(-1j * time * linop, vec0, traceA=0.0)
+
+    vec0_before = vec0.copy()
+    result = Evolution(2, hamil, time=time)._apply_unitary_(vec0, norb, nelec, copy=True)
+
+    np.testing.assert_allclose(result, expected, atol=1e-10)
+    # copy=True must leave the input untouched
+    np.testing.assert_array_equal(vec0, vec0_before)
+
+
+def test_evolution_apply_unitary_through_circuit_with_placement():
+    """A subset-placed Evolution gate is relabeled to global modes and evolved correctly."""
+    norb = 2
+    nelec = (1, 1)
+    time = 0.37
+
+    # local hopping on the gate's own modes 0 and 1
+    local_hamil = FermionOperator.from_dict(
+        {
+            ((True, 0), (False, 1)): 1.0,
+            ((True, 1), (False, 0)): 1.0,
+        }
+    )
+    # place it on global modes [0, 1] (both alpha orbitals)
+    circ = FermionicCircuit(2 * norb)
+    circ.append(Evolution(2, local_hamil, time=time), [circ.modes[0], circ.modes[1]])
+
+    vec0 = ffsim.slater_determinant(norb, ([0], [0]))
+
+    # oracle on the equivalent global operator
+    ffsim_op = ffsim.FermionOperator(
+        {
+            (ffsim.cre_a(0), ffsim.des_a(1)): 1.0,
+            (ffsim.cre_a(1), ffsim.des_a(0)): 1.0,
+        }
+    )
+    linop = ffsim.linear_operator(ffsim_op, norb=norb, nelec=nelec)
+    expected = scipy_sparse_linalg.expm_multiply(-1j * time * linop, vec0, traceA=0.0)
+
+    result = circ._apply_unitary_(vec0, norb, nelec, copy=True)
+
+    np.testing.assert_allclose(result, expected, atol=1e-10)
+
+
+def test_evolution_apply_unitary_via_ffsim_apply_unitary():
+    """The public ffsim.apply_unitary entry point works on a FermionicCircuit."""
+    norb = 2
+    nelec = (1, 1)
+    time = 0.37
+
+    hamil = FermionOperator.from_dict(
+        {
+            ((True, 0), (False, 1)): 1.0,
+            ((True, 1), (False, 0)): 1.0,
+        }
+    )
+    circ = FermionicCircuit(2 * norb)
+    circ.append(Evolution(2 * norb, hamil, time=time), circ.modes)
+
+    vec0 = ffsim.slater_determinant(norb, ([0], [0]))
+
+    ffsim_op = ffsim.FermionOperator(
+        {
+            (ffsim.cre_a(0), ffsim.des_a(1)): 1.0,
+            (ffsim.cre_a(1), ffsim.des_a(0)): 1.0,
+        }
+    )
+    linop = ffsim.linear_operator(ffsim_op, norb=norb, nelec=nelec)
+    expected = scipy_sparse_linalg.expm_multiply(-1j * time * linop, vec0, traceA=0.0)
+
+    result = ffsim.apply_unitary(vec0, circ, norb=norb, nelec=nelec)
+
+    np.testing.assert_allclose(result, expected, atol=1e-10)
+
+
+def test_evolution_apply_unitary_spinless_returns_not_implemented():
+    """A spinless (integer nelec) system is declined via NotImplemented."""
+    hamil = FermionOperator.from_dict({((True, 0), (False, 1)): 1.0})
+    result = Evolution(2, hamil, time=0.5)._apply_unitary_(
+        np.ones(1, dtype=complex), norb=2, nelec=1, copy=True
+    )
+    assert result is NotImplemented
+
+
+def test_evolution_apply_unitary_rejects_spin_nonconserving():
+    """ffsim's guard rejects operators that do not conserve particle number and spin-z."""
+    norb = 2
+    nelec = (1, 1)
+    # cre_a(0) des_b(0): moves an electron from the beta to the alpha sector -> not Sz-conserving
+    hamil = FermionOperator.from_dict({((True, 0), (False, 2)): 1.0})
+    vec0 = ffsim.slater_determinant(norb, ([0], [0]))
+
+    with pytest.raises(ValueError):
+        Evolution(2 * norb, hamil, time=0.5)._apply_unitary_(vec0, norb, nelec, copy=True)
+
+
+def test_evolution_apply_unitary_matches_ffsim_molecular_hamiltonian():
+    """Evolving under a full FCIDump Hamiltonian matches ffsim's MolecularHamiltonian path."""
+    fcidump_file = str(Path(__file__).parent / "../../../h2.fcidump")
+
+    fcidump = FCIDump.from_file(fcidump_file)
+    norb = fcidump.norb
+    nelec = (1, 1)
+    time = 1.0
+
+    # our path: FermionOperator.from_fcidump -> Evolution -> ffsim.apply_unitary
+    hamil = FermionOperator.from_fcidump(fcidump)
+    circ = FermionicCircuit(2 * norb)
+    circ.append(Evolution(2 * norb, hamil, time=time), circ.modes)
+
+    initial = ffsim.hartree_fock_state(norb, nelec)
+    result = ffsim.apply_unitary(initial, circ, norb=norb, nelec=nelec)
+
+    # reference: load the same FCIDump into ffsim's native MolecularHamiltonian and evolve directly
+    mol_hamiltonian = ffsim.MolecularData.from_fcidump(fcidump_file).hamiltonian
+    linop = ffsim.linear_operator(mol_hamiltonian, norb=norb, nelec=nelec)
+    expected = scipy_sparse_linalg.expm_multiply(-1j * time * linop, initial, traceA=0.0)
+
+    np.testing.assert_allclose(result, expected, atol=1e-10)
