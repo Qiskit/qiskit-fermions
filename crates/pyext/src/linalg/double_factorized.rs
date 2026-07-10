@@ -102,7 +102,9 @@ fn dfab_term_from_py(
 /// Cholesky decomposition; otherwise it uses a truncated eigendecomposition.
 ///
 /// Args:
-///     two_body_tensor: the real two-body tensor of shape ``(norb, norb, norb, norb)``.
+///     two_body_tensor: the real two-body tensor of shape ``(norb, norb, norb, norb)``, in
+///         `chemist` ordering :math:`(pq|rs)` (i.e. the index pairs :math:`(p,q)` and :math:`(r,s)`
+///         each label a charge density, as in the reconstruction formula above).
 ///     tol: the tolerance controlling the truncation error of the decomposition.
 ///     max_vecs: the maximum number of terms to retain. Defaults to ``norb * (norb + 1) / 2``.
 ///     cholesky: whether to use the modified Cholesky decomposition (``True``) or a truncated
