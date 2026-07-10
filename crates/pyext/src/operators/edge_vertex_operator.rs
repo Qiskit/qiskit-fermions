@@ -776,6 +776,8 @@ impl PyEdgeVertexOperator {
 
     /// Removes terms whose coefficient magnitude lies below the provided threshold.
     ///
+    /// This method modifies the operator *in place* and returns ``None``.
+    ///
     /// .. caution::
     ///    This method truncates coefficients greedily! If the acted upon operator may contain
     ///    separate coefficients for duplicate terms consider calling :meth:`.simplify` instead!
