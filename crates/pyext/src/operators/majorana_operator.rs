@@ -117,7 +117,7 @@ impl MajoranaOperatorDataGroupIter {
 ///    ============== =================================================================================
 ///    ``coeffs``     A vector of complex coefficients consisting of two 64-bit floating point numbers.
 ///    ``modes``      A vector of 32-bit integers storing the majorana mode indices acted upon.
-///    ``boundaries`` A vector of integers indicating the boundaries in ``actions`` and ``indices``.
+///    ``boundaries`` A vector of integers indicating the boundaries in ``modes``.
 ///    ============== =================================================================================
 ///
 /// The integers in ``modes`` index the Majorana modes, :math:`j`. When using the convenience
@@ -935,8 +935,8 @@ impl PyMajoranaOperator {
     ///
     /// .. note::
     ///    This is the mathematical comparison you almost always want. It differs from the ``==``
-    ///    operator, which tests exact equality of the *stored* terms (their coefficients, actions,
-    ///    modes, and internal term boundaries) with no tolerance and no simplification. Two
+    ///    operator, which tests exact equality of the *stored* terms (their coefficients, modes,
+    ///    and internal term boundaries) with no tolerance and no simplification. Two
     ///    mathematically equal operators can therefore compare unequal under ``==`` if they are
     ///    stored differently -- for example an unsimplified ``a + a`` versus ``2 * a``, or terms
     ///    held in a different order. Use ``equiv`` to compare operators up to numerical tolerance.
