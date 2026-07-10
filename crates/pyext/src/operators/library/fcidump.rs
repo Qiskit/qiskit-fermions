@@ -104,16 +104,15 @@ impl PyFCIDump {
 
     /// Returns the number of electrons.
     ///
-    /// This number, :math:`n`, is extracted from the ``NELEC=n`` field in the header of the
-    /// FCIDump file.
+    /// This number is extracted from the ``NELEC`` field in the header of the FCIDump file.
     #[getter]
     fn nelec(&self) -> u32 {
         self.inner.nelec
     }
 
-    /// Returns the spin quantum number, :math:`2S`.
+    /// Returns twice the spin quantum number, :math:`2S`.
     ///
-    /// This number, :math:`S`, is extracted from the ``MS2=S`` field in the header of the FCIDump
+    /// This number, :math:`2S`, is extracted from the ``MS2=2S`` field in the header of the FCIDump
     /// file.
     #[getter]
     fn ms2(&self) -> u32 {
