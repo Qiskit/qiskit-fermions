@@ -57,6 +57,34 @@ class TestFermionOperator:
         op = cls.one()
         assert op == cls.from_dict({(): 1})
 
+    def test_richcmp(self, subtests):
+        cls = self.get_class()
+
+        # two terms, each of length two (boundaries has len(coeffs) + 1 entries)
+        coeffs = [1, 2]
+        actions = [True, False, True, False]
+        modes = [0, 1, 0, 1]
+        boundaries = [0, 2, 4]
+
+        op = cls(coeffs, actions, modes, boundaries)
+
+        with subtests.test("equal"):
+            other = cls(coeffs, actions, modes, boundaries)
+            # `!=` must be the exact negation of `==`
+            assert (op == other) is True
+            assert (op != other) is False
+
+        # each field differs individually: `!=` must be the negation of `==`.
+        for name, other in [
+            ("coeffs", cls([1, 3], actions, modes, boundaries)),
+            ("actions", cls(coeffs, [False, True, True, False], modes, boundaries)),
+            ("modes", cls(coeffs, actions, [1, 0, 0, 1], boundaries)),
+            ("boundaries", cls(coeffs, actions, modes, [0, 1, 4])),
+        ]:
+            with subtests.test(name):
+                assert (op == other) is False
+                assert (op != other) is True
+
     def test_repr(self):
         cls = self.get_class()
         op = cls.from_dict(

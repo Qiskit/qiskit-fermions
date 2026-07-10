@@ -516,37 +516,12 @@ impl PyMajoranaOperator {
     }
 
     fn __richcmp__(&self, other: &Self, op: CompareOp, _py: Python<'_>) -> PyResult<bool> {
+        let eq = self.inner.coeffs == other.inner.coeffs
+            && self.inner.modes == other.inner.modes
+            && self.inner.boundaries == other.inner.boundaries;
         match op {
-            CompareOp::Eq => {
-                let coeffs_eq = self.inner.coeffs == other.inner.coeffs;
-                if !coeffs_eq {
-                    return Ok(false);
-                }
-                let modes_eq = self.inner.modes == other.inner.modes;
-                if !modes_eq {
-                    return Ok(false);
-                }
-                let boundaries_eq = self.inner.boundaries == other.inner.boundaries;
-                if !boundaries_eq {
-                    return Ok(false);
-                }
-                Ok(true)
-            }
-            CompareOp::Ne => {
-                let coeffs_neq = self.inner.coeffs != other.inner.coeffs;
-                if !coeffs_neq {
-                    return Ok(false);
-                }
-                let modes_neq = self.inner.modes != other.inner.modes;
-                if !modes_neq {
-                    return Ok(false);
-                }
-                let boundaries_neq = self.inner.boundaries != other.inner.boundaries;
-                if !boundaries_neq {
-                    return Ok(false);
-                }
-                Ok(true)
-            }
+            CompareOp::Eq => Ok(eq),
+            CompareOp::Ne => Ok(!eq),
             _ => Err(PyErr::new::<PyNotImplementedError, _>("")),
         }
     }

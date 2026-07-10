@@ -592,45 +592,13 @@ impl PyTransferVertexOperator {
     }
 
     fn __richcmp__(&self, other: &Self, op: CompareOp, _py: Python<'_>) -> PyResult<bool> {
+        let eq = self.inner.coeffs == other.inner.coeffs
+            && self.inner.left_indices == other.inner.left_indices
+            && self.inner.right_indices == other.inner.right_indices
+            && self.inner.boundaries == other.inner.boundaries;
         match op {
-            CompareOp::Eq => {
-                let coeffs_eq = self.inner.coeffs == other.inner.coeffs;
-                if !coeffs_eq {
-                    return Ok(false);
-                }
-                let left_indices_eq = self.inner.left_indices == other.inner.left_indices;
-                if !left_indices_eq {
-                    return Ok(false);
-                }
-                let right_indices_eq = self.inner.right_indices == other.inner.right_indices;
-                if !right_indices_eq {
-                    return Ok(false);
-                }
-                let boundaries_eq = self.inner.boundaries == other.inner.boundaries;
-                if !boundaries_eq {
-                    return Ok(false);
-                }
-                Ok(true)
-            }
-            CompareOp::Ne => {
-                let coeffs_neq = self.inner.coeffs != other.inner.coeffs;
-                if !coeffs_neq {
-                    return Ok(false);
-                }
-                let left_indices_neq = self.inner.left_indices != other.inner.left_indices;
-                if !left_indices_neq {
-                    return Ok(false);
-                }
-                let right_indices_neq = self.inner.right_indices != other.inner.right_indices;
-                if !right_indices_neq {
-                    return Ok(false);
-                }
-                let boundaries_neq = self.inner.boundaries != other.inner.boundaries;
-                if !boundaries_neq {
-                    return Ok(false);
-                }
-                Ok(true)
-            }
+            CompareOp::Eq => Ok(eq),
+            CompareOp::Ne => Ok(!eq),
             _ => Err(PyErr::new::<PyNotImplementedError, _>("")),
         }
     }

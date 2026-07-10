@@ -52,6 +52,32 @@ class TestMajoranaOperator:
         op = cls.one()
         assert op.equiv(cls.from_dict({(): 1}))
 
+    def test_richcmp(self, subtests):
+        cls = self.get_class()
+
+        # two terms, each of length two (boundaries has len(coeffs) + 1 entries)
+        coeffs = [1, 2]
+        modes = [0, 1, 0, 1]
+        boundaries = [0, 2, 4]
+
+        op = cls(coeffs, modes, boundaries)
+
+        with subtests.test("equal"):
+            other = cls(coeffs, modes, boundaries)
+            # `!=` must be the exact negation of `==`
+            assert (op == other) is True
+            assert (op != other) is False
+
+        # each field differs individually: `!=` must be the negation of `==`.
+        for name, other in [
+            ("coeffs", cls([1, 3], modes, boundaries)),
+            ("modes", cls(coeffs, [1, 0, 0, 1], boundaries)),
+            ("boundaries", cls(coeffs, modes, [0, 1, 4])),
+        ]:
+            with subtests.test(name):
+                assert (op == other) is False
+                assert (op != other) is True
+
     def test_repr(self):
         cls = self.get_class()
         op = cls.from_dict(
