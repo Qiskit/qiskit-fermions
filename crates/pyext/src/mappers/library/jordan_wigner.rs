@@ -19,12 +19,25 @@ use qiskit_pyo3_ffi as ffi;
 /// Map a :class:`.FermionOperator` to a :class:`~qiskit.quantum_info.SparseObservable` under the
 /// Jordan-Wigner transformation. [1]_
 ///
+/// Fermionic mode :math:`j` is mapped to qubit :math:`j` of the resulting
+/// :class:`~qiskit.quantum_info.SparseObservable` (i.e. the identity is used on any qubit outside
+/// the operator's support). This follows Qiskit's little-endian qubit ordering, where the qubit
+/// index in a Pauli label such as ``X_2 Z_1 Z_0`` is the mode index.
+///
 /// Args:
 ///     op: the fermionic operator to map.
-///     num_qubits: the number of qubits for the resulting qubit operator.
+///     num_qubits: the number of qubits for the resulting qubit operator. This must be strictly
+///         greater than the largest mode index in ``op`` (any additional qubits are padded with the
+///         identity).
 ///
 /// Returns:
-///     The mapped qubit operator.
+///     The mapped qubit operator. The result is `not` simplified; call
+///     :meth:`~qiskit.quantum_info.SparseObservable.simplify` to combine duplicate terms.
+///
+/// .. warning::
+///    Passing a ``num_qubits`` that is too small to hold the operator's support aborts the process
+///    rather than raising a Python exception. Ensure ``num_qubits`` exceeds the largest mode index
+///    before calling.
 ///
 /// Definition
 /// ==========
