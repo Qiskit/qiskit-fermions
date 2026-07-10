@@ -14,12 +14,25 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING, Protocol, cast
+
 import numpy as np
 
 from qiskit_fermions.operators.protocol import OperatorTrait
-from qiskit_fermions.utils.optionals import HAS_FFSIM
 
 from .. import FermionicGate
+
+if TYPE_CHECKING:
+    import scipy.sparse.linalg
+
+
+class _SupportsLinearOperator(Protocol):
+    """An operator exposing ffsim's ``_linear_operator_`` protocol (currently ``FermionOperator``)."""
+
+    def _linear_operator_(
+        self, norb: int, nelec: int | tuple[int, int]
+    ) -> scipy.sparse.linalg.LinearOperator:
+        """Returns a SciPy ``LinearOperator`` for the ``(norb, nelec)`` FCI sector."""
 
 
 class Evolution(FermionicGate):
@@ -108,7 +121,6 @@ class Evolution(FermionicGate):
         """
         return self._apply_unitary_placed_(vec, norb, nelec, copy, list(range(self.num_modes)))
 
-    @HAS_FFSIM.require_in_call
     def _apply_unitary_placed_(
         self,
         vec: np.ndarray,
@@ -119,10 +131,10 @@ class Evolution(FermionicGate):
     ) -> np.ndarray:
         """Applies ``exp(-i * time * operator)`` after relabeling the operator to global modes.
 
-        The operator is relabeled onto its global modes, converted to an ``ffsim.FermionOperator``,
-        turned into a ``scipy`` ``LinearOperator`` via ``ffsim.linear_operator``, and applied to the
-        vector via ``scipy.sparse.linalg.expm_multiply``. This mirrors ffsim's own ``_apply_unitary_``
-        implementations (e.g. for its UCCSD operators).
+        The operator is relabeled onto its global modes and turned into a ``scipy`` ``LinearOperator``
+        via its ``_linear_operator_`` protocol method (backed by a native FCI matrix-vector kernel),
+        then applied to the vector via ``scipy.sparse.linalg.expm_multiply``. This mirrors ffsim's own
+        ``_apply_unitary_`` implementations (e.g. for its UCCSD operators).
 
         Args:
             vec: the state vector to act on.
@@ -139,20 +151,17 @@ class Evolution(FermionicGate):
         Returns:
             The transformed vector.
 
-        Raises:
-            MissingOptionalLibraryError: if ``ffsim`` is not installed.
-            ValueError: if the operator does not conserve particle number and the z-component of spin
-                (raised by ``ffsim.linear_operator``).
+        .. note::
+            Unlike ``ffsim.linear_operator``, the native kernel does not reject operators that fail to
+            conserve particle number or the z-component of spin; such terms map amplitude out of the
+            fixed ``(norb, nelec)`` sector and are silently dropped. The caller is responsible for
+            supplying a Hamiltonian that preserves the sector.
         """
-        import ffsim
         import scipy.sparse.linalg
-
-        from ._ffsim import to_ffsim_operator
 
         if copy:
             vec = vec.copy()
 
-        operator = self.operator.relabel_modes(freg_indices)
-        ffsim_op = to_ffsim_operator(operator, norb, nelec)
-        linop = ffsim.linear_operator(ffsim_op, norb=norb, nelec=nelec)
+        operator = cast(_SupportsLinearOperator, self.operator.relabel_modes(freg_indices))
+        linop = operator._linear_operator_(norb, nelec)
         return scipy.sparse.linalg.expm_multiply(-1j * self.params[0] * linop, vec, traceA=0.0)

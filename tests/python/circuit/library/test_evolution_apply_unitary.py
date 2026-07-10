@@ -208,16 +208,26 @@ def test_evolution_apply_unitary_spinless_matches_exact_diagonalization():
     np.testing.assert_array_equal(vec0, vec0_before)
 
 
-def test_evolution_apply_unitary_rejects_spin_nonconserving():
-    """ffsim's guard rejects operators that do not conserve particle number and spin-z."""
+def test_ffsim_operator_conversion_rejects_spin_nonconserving():
+    """ffsim's guard rejects operators that do not conserve particle number and spin-z.
+
+    The evolution path now applies the operator through its own native FCI kernel
+    (``FermionOperator._linear_operator_``), which -- unlike ``ffsim.linear_operator`` -- does not
+    guard sector conservation: a spin-non-conserving term maps amplitude out of the fixed
+    ``(norb, nelec)`` sector and is silently dropped rather than raising. This guard therefore only
+    remains where conversion still goes through ffsim's *own* ``FermionOperator`` data structure, so
+    that is what this test exercises.
+    """
+    from qiskit_fermions.circuit.library._ffsim import to_ffsim_operator
+
     norb = 2
     nelec = (1, 1)
     # cre_a(0) des_b(0): moves an electron from the beta to the alpha sector -> not Sz-conserving
     hamil = FermionOperator.from_dict({((True, 0), (False, 2)): 1.0})
-    vec0 = ffsim.slater_determinant(norb, ([0], [0]))
 
+    ffsim_op = to_ffsim_operator(hamil, norb, nelec)
     with pytest.raises(ValueError):
-        Evolution(2 * norb, hamil, time=0.5)._apply_unitary_(vec0, norb, nelec, copy=True)
+        ffsim.linear_operator(ffsim_op, norb=norb, nelec=nelec)
 
 
 def test_evolution_apply_unitary_matches_ffsim_molecular_hamiltonian():

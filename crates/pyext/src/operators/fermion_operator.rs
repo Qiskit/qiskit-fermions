@@ -1082,12 +1082,16 @@ impl PyFermionOperator {
             .map_err(crate::value_err)
     }
 
-    /// Returns a SciPy-``LinearOperator``-compatible view of this operator on a fixed FCI sector.
+    /// Returns a native FCI matrix-vector view of this operator on a fixed sector.
     ///
-    /// This implements ffsim's ``_linear_operator_`` protocol: the returned object can be passed to
-    /// :func:`scipy.sparse.linalg.expm_multiply` (or ``ffsim.linear_operator``) and applies this
-    /// operator to a state vector via a native matrix-vector kernel, avoiding any conversion to an
-    /// intermediate representation.
+    /// This is the native kernel carrier behind the public ``_linear_operator_`` protocol method:
+    /// it applies this operator to a state vector via a native matrix-vector kernel, avoiding any
+    /// conversion to an intermediate representation. The returned object duck-types the subset of
+    /// the SciPy ``LinearOperator`` interface that :func:`scipy.sparse.linalg.expm_multiply` needs,
+    /// but it is **not** itself a SciPy ``LinearOperator``. The public ``_linear_operator_`` method
+    /// (added in Python, see :mod:`qiskit_fermions.operators`) wraps this into a genuine
+    /// :class:`scipy.sparse.linalg.LinearOperator` -- which is what ffsim's ``_linear_operator_``
+    /// protocol (and ``ffsim.linear_operator``) require.
     ///
     /// The FCI sector is selected by ``nelec``:
     ///
@@ -1107,7 +1111,7 @@ impl PyFermionOperator {
     ///
     /// Raises:
     ///     TypeError: if ``nelec`` is neither an ``int`` nor a ``(int, int)`` tuple.
-    fn _linear_operator_(
+    fn _fci_linear_operator_(
         &self,
         norb: u32,
         nelec: &Bound<'_, PyAny>,

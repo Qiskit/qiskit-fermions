@@ -98,6 +98,10 @@ protocol below:
 
 """
 
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from qiskit_fermions._lib.operators.edge_vertex_operator import (
     EdgeVertexOperator,
 )
@@ -110,6 +114,49 @@ from .fermion_action import FermionAction, ann, cre
 from .majorana_action import MajoranaAction, gamma
 from .protocol import OperatorTrait
 from .transfer_action import TransferAction
+
+if TYPE_CHECKING:
+    import scipy.sparse.linalg
+
+
+def _fermion_operator_linear_operator(  # noqa: D417
+    self: FermionOperator, norb: int, nelec: int | tuple[int, int]
+) -> scipy.sparse.linalg.LinearOperator:
+    """Returns a SciPy ``LinearOperator`` for this operator on the ``(norb, nelec)`` FCI sector.
+
+    This implements ffsim's ``_linear_operator_`` protocol, so a
+    :class:`~qiskit_fermions.operators.FermionOperator` can be passed directly to
+    :func:`scipy.sparse.linalg.expm_multiply` or to ``ffsim.linear_operator``. It wraps the native
+    matrix-vector kernel (:meth:`FermionOperator._fci_linear_operator_`) in a genuine
+    :class:`scipy.sparse.linalg.LinearOperator`; ``expm_multiply`` requires the adjoint action, so
+    both ``matvec`` and ``rmatvec`` are supplied.
+
+    This is attached to :class:`FermionOperator` as ``_linear_operator_`` at import time: the native
+    :class:`~qiskit_fermions._lib.operators.fermion_operator.FermionOperator` is a compiled type whose
+    instances cannot itself subclass SciPy's ``LinearOperator``, so the protocol method is provided in
+    Python.
+
+    Args:
+        norb: the number of spatial orbitals.
+        nelec: the electron count -- an integer for a spinless sector, or an ``(n_alpha, n_beta)``
+            pair for a spinful one.
+
+    Returns:
+        A :class:`scipy.sparse.linalg.LinearOperator` applying this operator on the requested sector.
+    """
+    import scipy.sparse.linalg
+
+    kernel = self._fci_linear_operator_(norb, nelec)
+    return scipy.sparse.linalg.LinearOperator(
+        shape=kernel.shape,
+        matvec=kernel.matvec,
+        rmatvec=kernel.rmatvec,
+        dtype=kernel.dtype,
+    )
+
+
+# Attach the ffsim ``_linear_operator_`` protocol method to the compiled ``FermionOperator`` type.
+FermionOperator._linear_operator_ = _fermion_operator_linear_operator
 
 __all__ = [
     "EdgeAction",

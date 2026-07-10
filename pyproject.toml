@@ -33,6 +33,7 @@ requires-python = ">=3.10"
 
 dependencies = [
     "qiskit>=2.5.0, <3",
+    "scipy>=1.10",
     "stevedore>=3.0.0",
     "typing-extensions",
 ]
