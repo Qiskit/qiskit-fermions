@@ -35,6 +35,11 @@ impl PyFermionOperator {
     /// and :math:`j` are the indices expanded from the triangular index :math:`ij` which indexes
     /// the array, and :math:`n` is the number of orbitals, ``norb``.
     ///
+    /// The resulting operator acts on :math:`2n` spin-less fermionic modes in block-spin ordering:
+    /// modes :math:`0, \dots, n-1` are the :math:`\alpha`-spin orbitals and modes
+    /// :math:`n, \dots, 2n-1` are the :math:`\beta`-spin orbitals (so orbital :math:`i` of the
+    /// :math:`\beta`-spin species is mode :math:`i+n`).
+    ///
     /// .. doctest::
     ///
     ///    >>> import numpy as np
@@ -85,6 +90,11 @@ impl PyFermionOperator {
     /// ``one_body_a`` (``one_body_b``, resp.), :math:`i` and :math:`j` are the indices expanded
     /// from the triangular index :math:`ij` which indexes the arrays, and :math:`n` is the number
     /// of orbitals, ``norb``.
+    ///
+    /// The resulting operator acts on :math:`2n` spin-less fermionic modes in block-spin ordering:
+    /// modes :math:`0, \dots, n-1` are the :math:`\alpha`-spin orbitals and modes
+    /// :math:`n, \dots, 2n-1` are the :math:`\beta`-spin orbitals (so orbital :math:`i` of the
+    /// :math:`\beta`-spin species is mode :math:`i+n`).
     ///
     /// .. doctest::
     ///
@@ -149,6 +159,15 @@ impl PyFermionOperator {
     /// permutations of the 4-index :math:`(i,j,k,l)` (see below), and :math:`n` is the number of
     /// orbitals, ``norb``.
     ///
+    /// The two-body coefficients are expected in `chemist` ordering, :math:`(ij|kl)`, i.e. the two
+    /// index pairs :math:`(i,j)` and :math:`(k,l)` each label a charge density. The factor of
+    /// :math:`\frac{1}{2}` is the conventional two-body prefactor.
+    ///
+    /// The resulting operator acts on :math:`2n` spin-less fermionic modes in block-spin ordering:
+    /// modes :math:`0, \dots, n-1` are the :math:`\alpha`-spin orbitals and modes
+    /// :math:`n, \dots, 2n-1` are the :math:`\beta`-spin orbitals (so orbital :math:`i` of the
+    /// :math:`\beta`-spin species is mode :math:`i+n`).
+    ///
     /// .. note::
     ///     ``two_body_aa`` is an S8-fold symmetric array. That means, it is the flattened
     ///     lower-triangular data of a matrix of shape ``(npair, npair)``, where
@@ -205,6 +224,15 @@ impl PyFermionOperator {
     /// :math:`ijkl` is the running index of the array, :math:`\mathcal{P}` (:math:`\mathcal{P'}`)
     /// generates the unique permutations of the 4-index :math:`(i,j,k,l)` (see below), and
     /// :math:`n` is the number of orbitals, ``norb``.
+    ///
+    /// The two-body coefficients are expected in `chemist` ordering, :math:`(ij|kl)`, i.e. the two
+    /// index pairs :math:`(i,j)` and :math:`(k,l)` each label a charge density. The factor of
+    /// :math:`\frac{1}{2}` is the conventional two-body prefactor.
+    ///
+    /// The resulting operator acts on :math:`2n` spin-less fermionic modes in block-spin ordering:
+    /// modes :math:`0, \dots, n-1` are the :math:`\alpha`-spin orbitals and modes
+    /// :math:`n, \dots, 2n-1` are the :math:`\beta`-spin orbitals (so orbital :math:`i` of the
+    /// :math:`\beta`-spin species is mode :math:`i+n`).
     ///
     /// .. note::
     ///     ``two_body_aa`` and ``two_body_bb`` are a S8-fold symmetric arrays. That means, they

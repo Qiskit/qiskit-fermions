@@ -32,7 +32,9 @@ Available Testers
 
 from qiskit.utils import LazyImportTester
 
-HAS_PYOMO = LazyImportTester("pyomo", name="Pyomo", install="pip install pyomo")
+HAS_PYOMO = LazyImportTester(
+    "pyomo", name="Pyomo", install="pip install qiskit_fermions[optimization]"
+)
 """`Pyomo <https://www.pyomo.org/>`__ is a Python-based optimization modeling language used to build
 linear and mixed-integer programs (LP/MILP) for classical solvers.
 

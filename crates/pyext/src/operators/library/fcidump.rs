@@ -44,6 +44,9 @@ use qiskit_fermions_core::operators::library::fcidump::FCIDump;
 ///
 /// The only required values are the 1-body alpha-spin integrals.
 ///
+/// The two-body integrals are expected in `chemist` ordering, :math:`(ij|kl)`, matching the FCIDump
+/// convention.
+///
 /// .. note::
 ///    The implementation of this data structure is opaque to Python and only provides a few
 ///    attributes and methods documented at the end of this page.
@@ -104,16 +107,15 @@ impl PyFCIDump {
 
     /// Returns the number of electrons.
     ///
-    /// This number, :math:`n`, is extracted from the ``NELEC=n`` field in the header of the
-    /// FCIDump file.
+    /// This number is extracted from the ``NELEC`` field in the header of the FCIDump file.
     #[getter]
     fn nelec(&self) -> u32 {
         self.inner.nelec
     }
 
-    /// Returns the spin quantum number, :math:`2S`.
+    /// Returns twice the spin quantum number, :math:`2S`.
     ///
-    /// This number, :math:`S`, is extracted from the ``MS2=S`` field in the header of the FCIDump
+    /// This number, :math:`2S`, is extracted from the ``MS2=2S`` field in the header of the FCIDump
     /// file.
     #[getter]
     fn ms2(&self) -> u32 {
@@ -147,7 +149,8 @@ impl PyFermionOperator {
     ///     fcidump: the FCIDump data structure.
     ///
     /// Returns:
-    ///     The constructed operator.
+    ///     The constructed operator. When the FCIDump provides a constant (e.g. nuclear-repulsion)
+    ///     energy, it is included as the identity term ``()``.
     #[classmethod]
     fn from_fcidump(_cls: &Bound<'_, PyType>, fcidump: PyFCIDump) -> Self {
         Self {

@@ -67,7 +67,7 @@ impl TransferVertexOperatorDataGroupIter {
     }
 }
 
-/// An transfer-vertex operator.
+/// A transfer-vertex operator.
 ///
 /// .. _TransferVertexOperator-definition:
 ///
@@ -781,6 +781,8 @@ impl PyTransferVertexOperator {
 
     /// Removes terms whose coefficient magnitude lies below the provided threshold.
     ///
+    /// This method modifies the operator *in place* and returns ``None``.
+    ///
     /// .. caution::
     ///    This method truncates coefficients greedily! If the acted upon operator may contain
     ///    separate coefficients for duplicate terms consider calling :meth:`.simplify` instead!
@@ -1011,15 +1013,14 @@ impl PyTransferVertexOperator {
 
     /// Returns the Hermitian conjugate (or adjoint) of this operator.
     ///
-    /// .. note::
-    ///    All generators of this operator are themselves Hermitian, which means this entire
-    ///    operator is guaranteed to be self-adjoint. Thus, this method simply returns a copy of
-    ///    the original operator.
+    /// The generators of this operator (the vertex and transfer operators) are individually
+    /// Hermitian, so the terms themselves are unchanged by the adjoint; only the coefficients are
+    /// affected:
     ///
-    /// This affects the terms and coefficients as follows:
-    ///
-    /// - the actions in each term reverse their order and flip between creation and annihilation
     /// - the coefficients are complex conjugated
+    ///
+    /// Note that this does not make the operator self-adjoint in general: an operator with complex
+    /// coefficients differs from its adjoint (as the doctest below illustrates).
     ///
     /// .. doctest::
     ///
@@ -1043,6 +1044,14 @@ impl PyTransferVertexOperator {
     /// tolerance. To be more precise, this method returns ``True``, when all the absolute values
     /// of the coefficients in the difference ``other - self`` are below the specified threshold
     /// ``atol``.
+    ///
+    /// .. note::
+    ///    This is the mathematical comparison you almost always want. It differs from the ``==``
+    ///    operator, which tests exact equality of the *stored* terms (their coefficients, indices,
+    ///    and internal term boundaries) with no tolerance and no simplification. Two mathematically
+    ///    equal operators can therefore compare unequal under ``==`` if they are stored differently
+    ///    -- for example an unsimplified ``a + a`` versus ``2 * a``, or terms held in a different
+    ///    order. Use ``equiv`` to compare operators up to numerical tolerance.
     ///
     /// .. doctest::
     ///
@@ -1123,10 +1132,17 @@ impl PyTransferVertexOperator {
     ///       1.000000e0 +0.000000e0j * (T(4,2) T(5,3))
     ///
     /// Args:
-    ///     permutation: the index permutation list.
+    ///     permutation: the index permutation list. Mode ``i`` is relabeled to ``permutation[i]``,
+    ///         so the list must contain no duplicate entries and must be long enough to index every
+    ///         mode the operator acts upon (its length must exceed the operator's largest mode
+    ///         index).
     ///
     /// Returns:
     ///     A new operator with its modes relabeled.
+    ///
+    /// Raises:
+    ///     ValueError: if ``permutation`` contains duplicate entries, or is too short to relabel
+    ///         some mode the operator acts upon.
     fn relabel_modes(&self, permutation: Vec<u32>) -> PyResult<Self> {
         let out = self.inner.relabel_modes(permutation);
         match out {

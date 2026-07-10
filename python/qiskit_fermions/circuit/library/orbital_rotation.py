@@ -20,13 +20,32 @@ from .. import FermionicGate
 
 
 class OrbitalRotation(FermionicGate):
-    """Implements an orbital rotation."""
+    r"""Implements an orbital rotation.
+
+    Given an :math:`n \times n` unitary matrix :math:`U` (``rotation_unitary``), this gate
+    implements the single-particle basis change that maps the creation operators as
+
+    .. math::
+
+        a^\dagger_i \mapsto \sum_j U_{ji} a^\dagger_j,
+
+    which is equivalent to applying the many-body unitary
+
+    .. math::
+
+        \exp\left(\sum_{ij} \log(U)_{ij} \, a^\dagger_i a_j\right).
+
+    The number of fermionic modes the gate acts on is the dimension :math:`n` of
+    ``rotation_unitary``.
+    """
 
     def __init__(self, rotation_unitary: np.ndarray) -> None:
-        """Initializing an instance of this gate can be done with the arguments listed below.
+        r"""Initializing an instance of this gate can be done with the arguments listed below.
 
         Args:
-            rotation_unitary: the unitary matrix representing the orbital rotation coefficients.
+            rotation_unitary: the :math:`n \times n` unitary matrix :math:`U` defining the orbital
+                rotation via :math:`a^\dagger_i \mapsto \sum_j U_{ji} a^\dagger_j`. It must be
+                square and unitary; this is the caller's responsibility and is not verified.
         """
         self.rotation_unitary = rotation_unitary
         """The unitary matrix representing the orbital rotation coefficients."""

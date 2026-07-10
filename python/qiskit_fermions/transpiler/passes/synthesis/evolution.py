@@ -30,7 +30,14 @@ MapperFunction = Callable[[OperatorTrait, int], SparseObservable]
 
 
 class MapperFnEvolutionSynthesis:
-    """A :class:`.F2QSynthesisPlugin` for transpiling :class:`.Evolution` under a custom mapping."""
+    r"""A :class:`.F2QSynthesisPlugin` for transpiling :class:`.Evolution` under a custom mapping.
+
+    This plugin maps the fermionic Hamiltonian :math:`H` of the incoming :class:`.Evolution` gate to
+    a qubit operator using :attr:`mapper_fn` and emits a
+    :class:`~qiskit.circuit.library.PauliEvolutionGate`. It thereby preserves the
+    :math:`e^{-i t H}` convention of the :class:`.Evolution` gate, with the same evolution time
+    :math:`t`.
+    """
 
     def __init__(self, mapper_fn: MapperFunction) -> None:
         """Initializing this transpiler pass plugin can be done with the arguments listed below.
@@ -54,7 +61,12 @@ class MapperFnEvolutionSynthesis:
         """
 
     def run(self, in_node: DAGOpNode, out_dag: DAGCircuit, *, f2q_layout: F2QLayout) -> None:
-        """Runs this transpilation plugin.
+        r"""Runs this transpilation plugin.
+
+        The fermionic Hamiltonian of the incoming :class:`.Evolution` gate is mapped to a qubit
+        operator via :attr:`mapper_fn`, simplified, and appended to ``out_dag`` as a
+        :class:`~qiskit.circuit.library.PauliEvolutionGate` implementing :math:`e^{-i t H}` with the
+        original evolution time :math:`t`.
 
         Args:
             in_node: the input fermion-based circuit instruction. When this plugin gets called, the

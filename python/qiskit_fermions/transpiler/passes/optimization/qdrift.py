@@ -31,7 +31,28 @@ else:
 
 
 class QDriftTrotterization(FermionicDAGCircuitPass):
-    """A transpilation pass to Trotterize :class:`.Evolution` gates via the qDRIFT protocol."""
+    r"""A transpilation pass to Trotterize :class:`.Evolution` gates via the qDRIFT protocol.
+
+    This pass replaces the exact evolution :math:`e^{-i t H}` of each :class:`.Evolution` gate by a
+    randomized product formula: it draws ``num_terms`` samples from the Hamiltonian's terms (or
+    :attr:`~qiskit_fermions.operators.FermionOperator.groups`, if assigned), with each term sampled
+    with a probability proportional to the magnitude of its coefficient, and emits one
+    :class:`.Evolution` gate per sample. Every sampled gate evolves its (unit-magnitude,
+    sign-preserving) term for the same time
+
+    .. math::
+
+        \delta = \frac{\lambda t}{\texttt{num\_terms}}, \qquad \lambda = \sum_j |c_j|,
+
+    where the :math:`c_j` are the coefficients of the sampled terms/groups. The ordered product of
+    the sampled evolutions does not reproduce :math:`e^{-i t H}` exactly; rather, its expectation
+    over the sampling approximates the exact evolution, with an error that decreases as
+    ``num_terms`` grows. Because the output depends on the random draws, it differs from run to run
+    unless a fixed ``rng`` is supplied.
+
+    .. seealso::
+       The qDRIFT protocol was introduced in `arXiv:1811.08017 <https://arxiv.org/abs/1811.08017>`_.
+    """
 
     def __init__(
         self,
@@ -43,7 +64,9 @@ class QDriftTrotterization(FermionicDAGCircuitPass):
         """Initializing this transpiler pass can be done with the arguments listed below.
 
         Args:
-            num_terms: the number of terms to include in the qDRIFT Trotterization.
+            num_terms: the number of terms to sample for the qDRIFT Trotterization. This equals the
+                number of :class:`.Evolution` gates emitted per input gate; a larger value reduces
+                the Trotterization error at the cost of a deeper circuit.
             filter_diagonal_terms: when set to ``True``, terms that are diagonal in the
                 occupation-number basis (i.e. products of number operators) are removed from the
                 Hamiltonian before the qDRIFT sampling. The time evolution of such terms does not
@@ -66,6 +89,11 @@ class QDriftTrotterization(FermionicDAGCircuitPass):
 
     def run(self, dag: FermionicDAGCircuit) -> FermionicDAGCircuit:
         """Runs this transpilation pass.
+
+        Each :class:`.Evolution` node is replaced by ``num_terms`` sampled single-term
+        :class:`.Evolution` gates (see the class docstring). Nodes that are not :class:`.Evolution`
+        gates are copied to the output unchanged. Since the sampling is random, the output varies
+        between runs unless the ``rng`` was seeded.
 
         Args:
             dag: the input circuit with fermion-based instructions. Only
