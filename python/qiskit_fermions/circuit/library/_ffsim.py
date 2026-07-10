@@ -12,10 +12,10 @@
 
 """Glue code for using `ffsim <https://github.com/qiskit-community/ffsim>`__ as a simulation engine.
 
-The functions in this module bridge :class:`~qiskit_fermions.operators.FermionOperator` (whose modes
-carry no intrinsic spin label) to ffsim's ``FermionOperator`` (which indexes ladder operators by a
-separate ``(orbital, spin)`` pair). Two mode interpretations are supported, selected by the type of
-``nelec``:
+The :func:`to_ffsim_operator` function bridges :class:`~qiskit_fermions.operators.FermionOperator`
+(whose modes carry no intrinsic spin label) to ffsim's ``FermionOperator`` (which indexes ladder
+operators by a separate ``(orbital, spin)`` pair). Two mode interpretations are supported, selected by
+the type of ``nelec``:
 
 * **Spinful** (``nelec`` is an ``(n_alpha, n_beta)`` pair): the operator's ``2 * norb`` modes are
   spin-orbitals following the convention of the ``FermionOperator.from_1body/2body_*_spin*``
@@ -28,14 +28,12 @@ separate ``(orbital, spin)`` pair). Two mode interpretations are supported, sele
   sector (the FCI space has dimension ``C(norb, nelec)``).
 
 ``ffsim`` (and its transitive ``scipy``/``pyscf`` dependencies) is an optional dependency, so all
-imports here are performed lazily inside the functions.
+imports here are performed lazily inside the function.
 """
 
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
-
-import numpy as np
 
 from qiskit_fermions.utils.optionals import HAS_FFSIM
 
@@ -45,6 +43,7 @@ if TYPE_CHECKING:
     from qiskit_fermions._lib.operators.fermion_operator import FermionOperator
 
 
+@HAS_FFSIM.require_in_call
 def to_ffsim_operator(
     operator: FermionOperator, norb: int, nelec: int | tuple[int, int]
 ) -> ffsim.FermionOperator:
@@ -77,7 +76,6 @@ def to_ffsim_operator(
         ValueError: if the operator acts on a mode outside the range implied by ``norb`` (``[0, norb)``
             for a spinless system, else ``[0, 2 * norb)``).
     """
-    HAS_FFSIM.require_now("converting a FermionOperator to an ffsim.FermionOperator")
     import ffsim
 
     # (action, spin) -> ffsim ladder-operator constructor
@@ -107,48 +105,3 @@ def to_ffsim_operator(
         data[tuple(ffsim_term)] = coeff
 
     return ffsim.FermionOperator(data)
-
-
-def apply_fermion_operator_evolution(
-    operator: FermionOperator,
-    time: float,
-    vec: np.ndarray,
-    norb: int,
-    nelec: int | tuple[int, int],
-    copy: bool,
-) -> np.ndarray:
-    """Applies ``exp(-i * time * operator)`` to an ffsim state vector.
-
-    This mirrors ffsim's own :meth:`_apply_unitary_` implementations (e.g. for its UCCSD operators):
-    the operator is converted to an ``ffsim.FermionOperator``, turned into a ``scipy`` ``LinearOperator``
-    via ``ffsim.linear_operator``, and applied to the vector via ``scipy.sparse.linalg.expm_multiply``.
-
-    Args:
-        operator: the (spinless) fermionic operator to time evolve under.
-        time: the evolution time.
-        vec: the state vector to act on.
-        norb: the number of spatial orbitals.
-        nelec: either a single integer for a spinless system, or a pair of integers storing the
-            numbers of spin alpha and spin beta fermions. An integer selects the spinless mode
-            interpretation (the operator's ``norb`` modes are alpha orbitals); a pair selects the
-            spinful ``(orb, spin)`` interpretation of the operator's ``2 * norb`` modes.
-        copy: whether to copy the vector before operating on it.
-
-    Returns:
-        The transformed vector.
-
-    Raises:
-        MissingOptionalLibraryError: if ``ffsim`` is not installed.
-        ValueError: if the operator does not conserve particle number and the z-component of spin
-            (raised by ``ffsim.linear_operator``).
-    """
-    HAS_FFSIM.require_now("applying a FermionOperator evolution to a state vector")
-    import ffsim
-    import scipy.sparse.linalg
-
-    if copy:
-        vec = vec.copy()
-
-    ffsim_op = to_ffsim_operator(operator, norb, nelec)
-    linop = ffsim.linear_operator(ffsim_op, norb=norb, nelec=nelec)
-    return scipy.sparse.linalg.expm_multiply(-1j * time * linop, vec, traceA=0.0)

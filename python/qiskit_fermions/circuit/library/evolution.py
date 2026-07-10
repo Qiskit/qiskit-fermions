@@ -17,6 +17,7 @@ from __future__ import annotations
 import numpy as np
 
 from qiskit_fermions.operators.protocol import OperatorTrait
+from qiskit_fermions.utils.optionals import HAS_FFSIM
 
 from .. import FermionicGate
 
@@ -107,6 +108,7 @@ class Evolution(FermionicGate):
         """
         return self._apply_unitary_placed_(vec, norb, nelec, copy, list(range(self.num_modes)))
 
+    @HAS_FFSIM.require_in_call
     def _apply_unitary_placed_(
         self,
         vec: np.ndarray,
@@ -117,11 +119,18 @@ class Evolution(FermionicGate):
     ) -> np.ndarray:
         """Applies ``exp(-i * time * operator)`` after relabeling the operator to global modes.
 
+        The operator is relabeled onto its global modes, converted to an ``ffsim.FermionOperator``,
+        turned into a ``scipy`` ``LinearOperator`` via ``ffsim.linear_operator``, and applied to the
+        vector via ``scipy.sparse.linalg.expm_multiply``. This mirrors ffsim's own ``_apply_unitary_``
+        implementations (e.g. for its UCCSD operators).
+
         Args:
             vec: the state vector to act on.
             norb: the number of spatial orbitals of the *global* state vector.
             nelec: either a single integer for a spinless system, or a pair of integers storing the
-                numbers of spin alpha and spin beta fermions.
+                numbers of spin alpha and spin beta fermions. An integer selects the spinless mode
+                interpretation (the operator's ``norb`` modes are alpha orbitals); a pair selects the
+                spinful ``(orb, spin)`` interpretation of the operator's ``2 * norb`` modes.
             copy: whether to copy the vector before operating on it.
             freg_indices: the absolute (global) mode indices that this gate's local modes map onto.
                 The operator is relabeled from its local modes to these global modes before being
@@ -129,8 +138,21 @@ class Evolution(FermionicGate):
 
         Returns:
             The transformed vector.
+
+        Raises:
+            MissingOptionalLibraryError: if ``ffsim`` is not installed.
+            ValueError: if the operator does not conserve particle number and the z-component of spin
+                (raised by ``ffsim.linear_operator``).
         """
-        from ._ffsim import apply_fermion_operator_evolution
+        import ffsim
+        import scipy.sparse.linalg
+
+        from ._ffsim import to_ffsim_operator
+
+        if copy:
+            vec = vec.copy()
 
         operator = self.operator.relabel_modes(freg_indices)
-        return apply_fermion_operator_evolution(operator, self.params[0], vec, norb, nelec, copy)
+        ffsim_op = to_ffsim_operator(operator, norb, nelec)
+        linop = ffsim.linear_operator(ffsim_op, norb=norb, nelec=nelec)
+        return scipy.sparse.linalg.expm_multiply(-1j * self.params[0] * linop, vec, traceA=0.0)
