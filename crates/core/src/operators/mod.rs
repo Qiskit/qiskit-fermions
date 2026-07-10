@@ -23,6 +23,10 @@ pub enum CoherenceError {
     DuplicateIndices,
     #[error("the provided index mapping does not account for the entire length of the operator")]
     IndexMapTooSmall,
+    #[error(
+        "num_qubits ({num_qubits}) is too small for an operator acting on mode index {max_mode}"
+    )]
+    NumQubitsTooSmall { num_qubits: u32, max_mode: u32 },
 }
 
 pub trait OperatorTrait {

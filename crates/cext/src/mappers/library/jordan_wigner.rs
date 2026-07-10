@@ -10,6 +10,7 @@
 // copyright notice, and modified files need to carry a notice indicating
 // that they have been altered from the originals.
 
+use crate::exit_codes::ExitCode;
 use crate::pointers::const_ptr_as_ref;
 
 use qiskit_fermions_core::mappers::library::jordan_wigner::jordan_wigner;
@@ -20,9 +21,14 @@ use qiskit_fermions_core::operators::fermion_operator::FermionOperator;
 /// @brief Applies the Jordan-Wigner transformation to an operator.
 ///
 /// @param op A pointer to the fermionic operator to be mapped.
-/// @param num_qubits The number of qubits of the resulting operator.
+/// @param num_qubits The number of qubits of the resulting operator. This must be strictly greater
+///        than the largest mode index acted upon by ``op``.
+/// @param out A pointer to where the created qubit operator will be written on success. It is left
+///        untouched if the transformation fails.
 ///
-/// @return A pointer to the created qubit operator.
+/// @return An exit code. This is ``>0`` if an error occurred. In particular, a
+///         ``QfExitCode_ValueError`` is returned if ``num_qubits`` is too small to hold the
+///         operator's support.
 ///
 /// @rst
 ///
@@ -63,16 +69,27 @@ use qiskit_fermions_core::operators::fermion_operator::FermionOperator;
 ///     QfFermionOperator *hamil = qf_ferm_op_one();
 ///
 ///     // and map it to a qubit operator
-///     QkObs *result = qf_jordan_wigner(hamil, 4);
+///     QkObs *result;
+///     QfExitCode exit = qf_jordan_wigner(hamil, 4, &result);
+///
+///     assert(exit == QfExitCode_Success);
 ///
 /// @endrst
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn qf_jordan_wigner(
     op: *const FermionOperator,
     num_qubits: u32,
-) -> *mut qiskit_sys::QkObs {
+    out: *mut *mut qiskit_sys::QkObs,
+) -> ExitCode {
     // SAFETY: Per documentation, the pointers are non-null and aligned.
     let op = unsafe { const_ptr_as_ref(op) };
 
-    jordan_wigner(op, num_qubits)
+    match jordan_wigner(op, num_qubits) {
+        Ok(obs) => {
+            // SAFETY: Per documentation, `out` is non-null and aligned.
+            unsafe { out.write(obs) };
+            ExitCode::Success
+        }
+        Err(_) => ExitCode::ValueError,
+    }
 }

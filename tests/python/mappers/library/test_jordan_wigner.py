@@ -10,6 +10,7 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
+import pytest
 from qiskit.quantum_info import SparseObservable
 from qiskit_fermions.mappers.library import jordan_wigner
 from qiskit_fermions.operators import FermionOperator
@@ -59,3 +60,14 @@ def test_jordan_wigner():
     )
     diff = (qop - expected).simplify()
     assert diff == SparseObservable.zero(num_qubits)
+
+
+def test_jordan_wigner_num_qubits_too_small():
+    # an operator acting on mode index 3 requires at least 4 qubits; too few qubits must raise a
+    # catchable ValueError instead of aborting the interpreter
+    op = FermionOperator.from_dict({((True, 3),): 1.0})
+    with pytest.raises(ValueError):
+        jordan_wigner(op, 3)
+
+    # exactly enough qubits succeeds
+    assert isinstance(jordan_wigner(op, 4), SparseObservable)
