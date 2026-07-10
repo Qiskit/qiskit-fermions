@@ -125,13 +125,87 @@ def test_evolution_apply_unitary_via_ffsim_apply_unitary():
     np.testing.assert_allclose(result, expected, atol=1e-10)
 
 
-def test_evolution_apply_unitary_spinless_returns_not_implemented():
-    """A spinless (integer nelec) system is declined via NotImplemented."""
-    hamil = FermionOperator.from_dict({((True, 0), (False, 1)): 1.0})
-    result = Evolution(2, hamil, time=0.5)._apply_unitary_(
-        np.ones(1, dtype=complex), norb=2, nelec=1, copy=True
-    )
-    assert result is NotImplemented
+def _spinless_evolution_oracle(terms, norb, nelec, time, vec0):
+    """Independent exact-diagonalization reference for a spinless evolution ``exp(-i t H) |vec0>``.
+
+    Builds ``H`` as a dense matrix in the ``C(norb, nelec)`` determinant basis, addressing each
+    determinant with pyscf's ``cistring`` (the same ordering ffsim/pyscf use for the state vector),
+    then exponentiates it exactly with ``scipy.linalg.expm``. This deliberately avoids ffsim's own
+    ``FermionOperator`` machinery so it is a true cross-check of the spinless path rather than a
+    tautology.
+    """
+    import itertools
+
+    import scipy.linalg
+    from pyscf.fci import cistring
+
+    def addr(occ):
+        string = 0
+        for orb in occ:
+            string |= 1 << orb
+        return cistring.str2addr(norb, nelec, string)
+
+    def apply_ladder(occ, action, mode):
+        occ = list(occ)
+        if action:  # creation
+            if mode in occ:
+                return None, 0
+            sign = (-1) ** sum(1 for o in occ if o < mode)
+            return tuple(sorted([*occ, mode])), sign
+        # annihilation
+        if mode not in occ:
+            return None, 0
+        sign = (-1) ** sum(1 for o in occ if o < mode)
+        occ.remove(mode)
+        return tuple(occ), sign
+
+    dets = list(itertools.combinations(range(norb), nelec))
+    dim = len(dets)
+    hamil_mat = np.zeros((dim, dim), dtype=complex)
+    for term, coeff in terms.items():
+        for det in dets:
+            occ, sign, ok = det, 1, True
+            for action, mode in reversed(term):  # ladder ops act right-to-left
+                occ, s = apply_ladder(occ, action, mode)
+                if occ is None:
+                    ok = False
+                    break
+                sign *= s
+            if ok:
+                hamil_mat[addr(occ), addr(det)] += coeff * sign
+
+    return scipy.linalg.expm(-1j * time * hamil_mat) @ vec0
+
+
+def test_evolution_apply_unitary_spinless_matches_exact_diagonalization():
+    """The spinless (integer nelec) path matches an independent exact-diagonalization oracle."""
+    pytest.importorskip("pyscf")
+
+    norb = 5
+    nelec = 2  # spinless: integer nelec -> C(5, 2) = 10 dimensional FCI space
+    time = 0.37
+
+    # a particle-conserving spinless operator (hopping + number + density-density)
+    terms = {
+        ((True, 0), (False, 1)): 0.7 + 0.2j,
+        ((True, 1), (False, 0)): 0.7 - 0.2j,  # hermitian conjugate of the hop above
+        ((True, 2), (False, 2)): 0.5,
+        ((True, 0), (False, 0), (True, 3), (False, 3)): 1.3,
+    }
+    hamil = FermionOperator.from_dict(terms)
+
+    rng = np.random.default_rng(0)
+    dim = 10
+    vec0 = rng.standard_normal(dim) + 1j * rng.standard_normal(dim)
+
+    expected = _spinless_evolution_oracle(terms, norb, nelec, time, vec0)
+
+    vec0_before = vec0.copy()
+    result = Evolution(norb, hamil, time=time)._apply_unitary_(vec0, norb, nelec, copy=True)
+
+    np.testing.assert_allclose(result, expected, atol=1e-10)
+    # copy=True must leave the input untouched
+    np.testing.assert_array_equal(vec0, vec0_before)
 
 
 def test_evolution_apply_unitary_rejects_spin_nonconserving():

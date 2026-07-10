@@ -14,12 +14,9 @@
 
 from __future__ import annotations
 
-import numpy as np
 import pytest
 from qiskit_fermions.circuit import FermionicCircuit
 from qiskit_fermions.circuit.fermionic_gate import FermionicGate
-from qiskit_fermions.circuit.library import Evolution
-from qiskit_fermions.operators import FermionOperator
 
 ffsim = pytest.importorskip("ffsim")
 
@@ -41,10 +38,22 @@ def test_apply_unitary_raises_when_instruction_lacks_protocol():
 
 def test_apply_unitary_raises_when_instruction_declines():
     """A circuit instruction returning NotImplemented raises ValueError."""
-    # the spinless (integer nelec) system is declined by Evolution via NotImplemented
-    hamil = FermionOperator.from_dict({((True, 0), (False, 1)): 1.0})
-    circ = FermionicCircuit(2)
-    circ.append(Evolution(2, hamil, time=0.5), circ.modes)
+
+    class _DecliningGate(FermionicGate):
+        """A gate that implements the protocol but declines to act."""
+
+        def __init__(self):
+            super().__init__("declines", 2)
+
+        def _apply_unitary_(self, vec, norb, nelec, copy):
+            return NotImplemented
+
+    norb = 2
+    nelec = (1, 1)
+    circ = FermionicCircuit(2 * norb)
+    circ.append(_DecliningGate(), [circ.modes[0], circ.modes[1]])
+
+    vec0 = ffsim.slater_determinant(norb, ([0], [0]))
 
     with pytest.raises(ValueError, match="declined to apply"):
-        circ._apply_unitary_(np.ones(1, dtype=complex), norb=2, nelec=1, copy=True)
+        circ._apply_unitary_(vec0, norb, nelec, copy=True)

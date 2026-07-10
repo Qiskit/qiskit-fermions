@@ -128,7 +128,7 @@ class Evolution(FermionicGate):
                 applied, mirroring the transpiler's synthesis pass.
 
         Returns:
-            The transformed vector, or ``NotImplemented`` for a spinless (integer ``nelec``) system.
+            The transformed vector.
         """
         from ._ffsim import apply_fermion_operator_evolution
 
