@@ -47,7 +47,11 @@ static int test_mapping(void) {
         qf_ferm_op_add_term(hamil, 4, action_2body + 4 * i, indices_2body + 4 * i, &coeff_2body[i]);
     }
 
-    QkObs *result = qf_jordan_wigner(hamil, 4);
+    QkObs *result;
+    if (qf_jordan_wigner(hamil, 4, &result) != QfExitCode_Success) {
+        qf_ferm_op_free(hamil);
+        return RuntimeError;
+    }
 
     QkComplex64 coeffs[15] = {
         {-0.8105479805373266, 0.0}, {0.1721839326191555, 0.0},   {-0.22575349222402474, 0.0},
@@ -89,9 +93,33 @@ static int test_mapping(void) {
     return Ok;
 }
 
+static int test_num_qubits_too_small(void) {
+    // an operator acting on mode index 3 requires at least 4 qubits
+    QfFermionOperator *op = qf_ferm_op_zero();
+    QkComplex64 coeff = {1.0, 0.0};
+    bool action[1] = {true};
+    uint32_t index[1] = {3};
+    qf_ferm_op_add_term(op, 1, action, index, &coeff);
+
+    // too few qubits must be reported instead of aborting the process
+    QkObs *result = NULL;
+    QfExitCode exit = qf_jordan_wigner(op, 3, &result);
+
+    qf_ferm_op_free(op);
+
+    if (exit != QfExitCode_ValueError) {
+        return RuntimeError;
+    }
+    if (result != NULL) {
+        return NullptrError;
+    }
+    return Ok;
+}
+
 int test_jordan_wigner(void) {
     int num_failed = 0;
     num_failed += RUN_TEST(test_mapping);
+    num_failed += RUN_TEST(test_num_qubits_too_small);
 
     fflush(stderr);
     fprintf(stderr, "=== Number of failed subtests: %i\n", num_failed);

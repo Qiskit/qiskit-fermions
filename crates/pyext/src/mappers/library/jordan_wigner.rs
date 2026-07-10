@@ -11,6 +11,7 @@
 // that they have been altered from the originals.
 
 use crate::operators::fermion_operator::PyFermionOperator;
+use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
 use pyo3_stub_gen::derive::*;
 use qiskit_fermions_core::mappers::library::jordan_wigner::jordan_wigner;
@@ -34,10 +35,9 @@ use qiskit_pyo3_ffi as ffi;
 ///     The mapped qubit operator. The result is `not` simplified; call
 ///     :meth:`~qiskit.quantum_info.SparseObservable.simplify` to combine duplicate terms.
 ///
-/// .. warning::
-///    Passing a ``num_qubits`` that is too small to hold the operator's support aborts the process
-///    rather than raising a Python exception. Ensure ``num_qubits`` exceeds the largest mode index
-///    before calling.
+/// Raises:
+///     ValueError: if ``num_qubits`` is too small to hold the operator's support, i.e. if it is
+///         not larger than the largest mode index acted upon by ``op``.
 ///
 /// Definition
 /// ==========
@@ -85,12 +85,13 @@ use qiskit_pyo3_ffi as ffi;
 #[gen_stub_pyfunction(module = "qiskit_fermions.mappers.library.jordan_wigner")]
 #[pyfunction(name = "jordan_wigner")]
 #[gen_stub(override_return_type(type_repr="qiskit.quantum_info.SparseObservable", imports=("qiskit.quantum_info")))]
-pub fn py_jordan_wigner(op: PyFermionOperator, num_qubits: u32) -> Py<PyAny> {
-    let obs = jordan_wigner(&op.inner, num_qubits);
+pub fn py_jordan_wigner(op: PyFermionOperator, num_qubits: u32) -> PyResult<Py<PyAny>> {
+    let obs =
+        jordan_wigner(&op.inner, num_qubits).map_err(|e| PyValueError::new_err(e.to_string()))?;
     unsafe {
         let py = Python::assume_attached();
         let py_obs = ffi::qk_obs_to_python(obs);
-        Bound::from_owned_ptr(py, py_obs).into()
+        Ok(Bound::from_owned_ptr(py, py_obs).into())
     }
 }
 

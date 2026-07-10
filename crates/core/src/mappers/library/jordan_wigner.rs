@@ -10,6 +10,7 @@
 // copyright notice, and modified files need to carry a notice indicating
 // that they have been altered from the originals.
 
+use crate::operators::CoherenceError;
 use crate::operators::fermion_operator::{FermionAction, FermionOperator};
 use rayon::prelude::*;
 use std::sync::{Arc, Mutex};
@@ -77,7 +78,22 @@ unsafe impl Send for Wrapper {}
 
 // TODO: can we clean up the coding pattern of overwriting a data structure in-place to avoid the
 // repetitive re-allocations?
-pub fn jordan_wigner(fer_op: &FermionOperator, num_qubits: u32) -> *mut ffi::QkObs {
+pub fn jordan_wigner(
+    fer_op: &FermionOperator,
+    num_qubits: u32,
+) -> Result<*mut ffi::QkObs, CoherenceError> {
+    // Each mode index `j` maps onto qubit `j`, so the operator's largest mode index must fit
+    // within `num_qubits`. Without this check, the underlying `qk_obs_*` calls receive an
+    // out-of-range qubit index and abort the process with a non-unwinding panic.
+    if let Some(&max_mode) = fer_op.modes.iter().max()
+        && max_mode >= num_qubits
+    {
+        return Err(CoherenceError::NumQubitsTooSmall {
+            num_qubits,
+            max_mode,
+        });
+    }
+
     let pool = rayon::ThreadPoolBuilder::new()
         .num_threads(0)
         .build()
@@ -157,7 +173,7 @@ pub fn jordan_wigner(fer_op: &FermionOperator, num_qubits: u32) -> *mut ffi::QkO
             },
         );
 
-    mapped_operator.ptr
+    Ok(mapped_operator.ptr)
 }
 
 #[cfg(test)]
@@ -243,7 +259,7 @@ mod tests {
             ],
             groups: None,
         };
-        let qb_op = jordan_wigner(&fer_op, 4);
+        let qb_op = jordan_wigner(&fer_op, 4).unwrap();
 
         let mut coeffs: Vec<QkComplex64> = vec![
             QkComplex64 {
@@ -348,5 +364,30 @@ mod tests {
         let equal = unsafe { ffi::qk_obs_equal(diff, zero) };
 
         assert!(equal)
+    }
+
+    #[test]
+    fn test_jordan_wigner_num_qubits_too_small() {
+        // an operator acting on mode index 3 requires at least 4 qubits
+        let fer_op = FermionOperator {
+            coeffs: vec![Complex64::new(1.0, 0.0)],
+            actions: vec![true],
+            modes: vec![3],
+            boundaries: vec![0, 1],
+            groups: None,
+        };
+
+        // too few qubits must be reported instead of aborting the process
+        let err = jordan_wigner(&fer_op, 3).unwrap_err();
+        assert!(matches!(
+            err,
+            CoherenceError::NumQubitsTooSmall {
+                num_qubits: 3,
+                max_mode: 3
+            }
+        ));
+
+        // exactly enough qubits succeeds
+        assert!(jordan_wigner(&fer_op, 4).is_ok());
     }
 }
