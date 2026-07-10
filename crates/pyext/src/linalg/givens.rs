@@ -47,6 +47,31 @@ use qiskit_fermions_core::linalg::givens::{GivensRotation, givens_decomposition}
 ///     * the sequence of Givens rotations represented as 4-tuples as explained above
 ///     * the vector of complex phases of the diagonal matrix, :math:`D`
 ///
+/// The original unitary is recovered by processing the returned rotations in `reverse` order and
+/// right-multiplying the diagonal matrix by the `element-wise complex conjugate` of each rotation
+/// matrix :math:`G_k` (as defined above). That is, for :math:`N` returned rotations,
+///
+/// .. math::
+///
+///    U = D \cdot \overline{G_N} \cdot \overline{G_{N-1}} \cdots \overline{G_1},
+///
+/// where :math:`\overline{G_k}` denotes element-wise conjugation (not the conjugate transpose) and
+/// each :math:`G_k` acts only on rows/columns :math:`i` and :math:`j` of its rotation.
+///
+/// .. doctest::
+///
+///     >>> import numpy as np
+///     >>> from qiskit_fermions.linalg import givens_decomposition
+///     >>> unitary = np.array([[0.6, 0.8j], [0.8, -0.6j]], dtype=complex)
+///     >>> rotations, phases = givens_decomposition(unitary)
+///     >>> reconstructed = np.diag(phases).astype(complex)
+///     >>> for c, s, i, j in rotations[::-1]:
+///     ...     givens_mat = np.eye(2, dtype=complex)
+///     ...     givens_mat[np.ix_((i, j), (i, j))] = [[c, s], [-s.conjugate(), c]]
+///     ...     reconstructed = reconstructed @ givens_mat.conj()
+///     >>> bool(np.allclose(reconstructed, unitary))
+///     True
+///
 /// .. [1] W. R. Clements et al., Optimal design for universal multiport interferometers,
 ///        Optica 3, 1460-1465 (2016),
 ///        `doi:10.1364/OPTICA.3.001460 <https://doi.org/10.1364/OPTICA.3.001460>`_.
