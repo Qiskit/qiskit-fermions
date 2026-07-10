@@ -55,6 +55,34 @@ class TestTransferVertexOperator:
         op = cls.one()
         assert op == cls.from_dict({(): 1})
 
+    def test_richcmp(self, subtests):
+        cls = self.get_class()
+
+        # two terms, each of length two (boundaries has len(coeffs) + 1 entries)
+        coeffs = [1, 2]
+        l_indices = [0, 1, 0, 1]
+        r_indices = [1, 2, 1, 2]
+        boundaries = [0, 2, 4]
+
+        op = cls(coeffs, l_indices, r_indices, boundaries)
+
+        with subtests.test("equal"):
+            other = cls(coeffs, l_indices, r_indices, boundaries)
+            # `!=` must be the exact negation of `==`
+            assert (op == other) is True
+            assert (op != other) is False
+
+        # each field differs individually: `!=` must be the negation of `==`.
+        for name, other in [
+            ("coeffs", cls([1, 3], l_indices, r_indices, boundaries)),
+            ("left_indices", cls(coeffs, [1, 0, 0, 1], r_indices, boundaries)),
+            ("right_indices", cls(coeffs, l_indices, [2, 1, 1, 2], boundaries)),
+            ("boundaries", cls(coeffs, l_indices, r_indices, [0, 1, 4])),
+        ]:
+            with subtests.test(name):
+                assert (op == other) is False
+                assert (op != other) is True
+
     def test_repr(self):
         cls = self.get_class()
         op = cls.from_dict(
