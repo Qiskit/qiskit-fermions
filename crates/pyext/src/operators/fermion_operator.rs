@@ -19,8 +19,11 @@ use pyo3::{class::basic::CompareOp, exceptions::PyNotImplementedError};
 use pyo3_stub_gen::derive::*;
 use std::collections::HashMap;
 
+use qiskit_fermions_core::linalg::fci::BinomialTable;
 use qiskit_fermions_core::operators::fermion_operator::FermionOperator;
 use qiskit_fermions_core::operators::{OperatorMacro, OperatorTrait};
+
+use crate::linalg::fci::FciLinearOperator;
 
 pub type PyFermionAction = (bool, u32);
 
@@ -1077,6 +1080,60 @@ impl PyFermionOperator {
             .relabel_modes(permutation)
             .map(Into::into)
             .map_err(crate::value_err)
+    }
+
+    /// Returns a SciPy-``LinearOperator``-compatible view of this operator on a fixed FCI sector.
+    ///
+    /// This implements ffsim's ``_linear_operator_`` protocol: the returned object can be passed to
+    /// :func:`scipy.sparse.linalg.expm_multiply` (or ``ffsim.linear_operator``) and applies this
+    /// operator to a state vector via a native matrix-vector kernel, avoiding any conversion to an
+    /// intermediate representation.
+    ///
+    /// The FCI sector is selected by ``nelec``:
+    ///
+    /// * an ``int`` treats the operator's ``norb`` modes as spinless orbitals; the state vector has
+    ///   length :math:`\binom{norb}{nelec}`.
+    /// * a ``(n_alpha, n_beta)`` tuple treats the operator's ``2 * norb`` modes as spin-orbitals
+    ///   under the block-spin convention; the state vector has length
+    ///   :math:`\binom{norb}{n_\alpha} \binom{norb}{n_\beta}`.
+    ///
+    /// Args:
+    ///     norb: the number of (spatial) orbitals.
+    ///     nelec: the electron count -- an ``int`` for a spinless sector, or a ``(n_alpha, n_beta)``
+    ///         tuple for a spinful one.
+    ///
+    /// Returns:
+    ///     A native ``LinearOperator``-compatible object for the requested sector.
+    ///
+    /// Raises:
+    ///     TypeError: if ``nelec`` is neither an ``int`` nor a ``(int, int)`` tuple.
+    fn _linear_operator_(
+        &self,
+        norb: u32,
+        nelec: &Bound<'_, PyAny>,
+    ) -> PyResult<FciLinearOperator> {
+        let table = BinomialTable::new(norb);
+        // The adjoint backs `rmatvec` (the action of `A.H`), which SciPy's `expm_multiply` needs.
+        let adj = self.inner.adjoint();
+        if let Ok(nocc) = nelec.extract::<u32>() {
+            let dim = table.num_strings(norb, nocc);
+            let op = self.inner.clone();
+            let matvec = Box::new(move |vec: &[Complex64]| op.fci_matvec_spinless(norb, nocc, vec));
+            let rmatvec =
+                Box::new(move |vec: &[Complex64]| adj.fci_matvec_spinless(norb, nocc, vec));
+            Ok(FciLinearOperator::new(dim, matvec, rmatvec))
+        } else {
+            let (n_alpha, n_beta) = nelec.extract::<(u32, u32)>()?;
+            let dim = table.num_strings(norb, n_alpha) * table.num_strings(norb, n_beta);
+            let op = self.inner.clone();
+            let matvec = Box::new(move |vec: &[Complex64]| {
+                op.fci_matvec_spinful(norb, n_alpha, n_beta, vec)
+            });
+            let rmatvec = Box::new(move |vec: &[Complex64]| {
+                adj.fci_matvec_spinful(norb, n_alpha, n_beta, vec)
+            });
+            Ok(FciLinearOperator::new(dim, matvec, rmatvec))
+        }
     }
 }
 
