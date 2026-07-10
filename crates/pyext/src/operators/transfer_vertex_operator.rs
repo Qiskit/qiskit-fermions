@@ -1011,15 +1011,14 @@ impl PyTransferVertexOperator {
 
     /// Returns the Hermitian conjugate (or adjoint) of this operator.
     ///
-    /// .. note::
-    ///    All generators of this operator are themselves Hermitian, which means this entire
-    ///    operator is guaranteed to be self-adjoint. Thus, this method simply returns a copy of
-    ///    the original operator.
+    /// The generators of this operator (the vertex and transfer operators) are individually
+    /// Hermitian, so the terms themselves are unchanged by the adjoint; only the coefficients are
+    /// affected:
     ///
-    /// This affects the terms and coefficients as follows:
-    ///
-    /// - the actions in each term reverse their order and flip between creation and annihilation
     /// - the coefficients are complex conjugated
+    ///
+    /// Note that this does not make the operator self-adjoint in general: an operator with complex
+    /// coefficients differs from its adjoint (as the doctest below illustrates).
     ///
     /// .. doctest::
     ///
