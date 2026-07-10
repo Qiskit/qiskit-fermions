@@ -67,7 +67,7 @@ impl TransferVertexOperatorDataGroupIter {
     }
 }
 
-/// An transfer-vertex operator.
+/// A transfer-vertex operator.
 ///
 /// .. _TransferVertexOperator-definition:
 ///
