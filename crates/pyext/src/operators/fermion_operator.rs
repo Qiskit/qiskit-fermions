@@ -987,6 +987,14 @@ impl PyFermionOperator {
     /// of the coefficients in the difference ``other - self`` are below the specified threshold
     /// ``atol``.
     ///
+    /// .. note::
+    ///    This is the mathematical comparison you almost always want. It differs from the ``==``
+    ///    operator, which tests exact equality of the *stored* terms (their coefficients, actions,
+    ///    modes, and internal term boundaries) with no tolerance and no simplification. Two
+    ///    mathematically equal operators can therefore compare unequal under ``==`` if they are
+    ///    stored differently -- for example an unsimplified ``a + a`` versus ``2 * a``, or terms
+    ///    held in a different order. Use ``equiv`` to compare operators up to numerical tolerance.
+    ///
     /// .. doctest::
     ///
     ///     >>> from qiskit_fermions.operators import FermionOperator
