@@ -20,15 +20,36 @@ from .. import FermionicGate
 
 
 class Evolution(FermionicGate):
-    """Implements the time evolution of an operator."""
+    r"""Implements the time evolution of an operator.
+
+    Given a fermionic ``operator`` :math:`H` and an evolution ``time`` :math:`t`, this gate
+    implements the unitary
+
+    .. math::
+
+        U = e^{-i t H}.
+
+    For :math:`U` to be unitary, :math:`H` must be Hermitian. This is the caller's responsibility
+    and is not verified.
+
+    .. note::
+       How this evolution is decomposed into a circuit is not fixed by this gate alone. The default
+       :meth:`_define` implementation splits the evolution group-by-group when the ``operator`` has
+       :attr:`~qiskit_fermions.operators.FermionOperator.groups` assigned, and term-by-term
+       otherwise, yielding a first-order product formula (which is exact only when the individual
+       factors mutually commute). The transpilation process may further alter this decomposition
+       (for example, :class:`.QDriftTrotterization` replaces it with a randomized product formula).
+    """
 
     def __init__(self, num_modes: int, operator: OperatorTrait, time: float = 1.0) -> None:
-        """Initializing an instance of this gate can be done with the arguments listed below.
+        r"""Initializing an instance of this gate can be done with the arguments listed below.
 
         Args:
             num_modes: the number of fermionic modes on which this gate acts.
-            operator: the operator under which to time evolve the acted-upon fermionic modes.
-            time: the evolution time.
+            operator: the Hermitian operator :math:`H` under which to time evolve the acted-upon
+                fermionic modes.
+            time: the evolution time :math:`t` entering the exponent of :math:`e^{-i t H}`. A
+                negative value evolves backwards in time.
         """
         self.operator = operator
         """The operator under which to time evolve the acted-upon fermionic modes."""
