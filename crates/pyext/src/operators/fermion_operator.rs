@@ -19,7 +19,7 @@ use pyo3::{class::basic::CompareOp, exceptions::PyNotImplementedError};
 use pyo3_stub_gen::derive::*;
 use std::collections::HashMap;
 
-use qiskit_fermions_core::linalg::fci::BinomialTable;
+use qiskit_fermions_core::linalg::fci::{BinomialTable, MAX_ORBITALS};
 use qiskit_fermions_core::operators::fermion_operator::FermionOperator;
 use qiskit_fermions_core::operators::{OperatorMacro, OperatorTrait};
 
@@ -1111,11 +1111,18 @@ impl PyFermionOperator {
     ///
     /// Raises:
     ///     TypeError: if ``nelec`` is neither an ``int`` nor a ``(int, int)`` tuple.
+    ///     ValueError: if ``norb`` exceeds the maximum number of orbitals the bitmask
+    ///         representation supports (64).
     fn _fci_linear_operator_(
         &self,
         norb: u32,
         nelec: &Bound<'_, PyAny>,
     ) -> PyResult<FciLinearOperator> {
+        if norb > MAX_ORBITALS {
+            return Err(PyValueError::new_err(format!(
+                "norb={norb} exceeds the maximum of {MAX_ORBITALS} orbitals"
+            )));
+        }
         let table = BinomialTable::new(norb);
         // The adjoint backs `rmatvec` (the action of `A.H`), which SciPy's `expm_multiply` needs.
         let adj = self.inner.adjoint();

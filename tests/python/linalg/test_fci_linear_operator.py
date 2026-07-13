@@ -204,3 +204,10 @@ def test_fci_linear_operator_matvec_rejects_wrong_length():
     linop = op._linear_operator_(2, (1, 1))  # dim 4
     with pytest.raises(ValueError):
         linop.matvec(np.ones(3, dtype=complex))
+
+
+def test_fci_linear_operator_rejects_too_many_orbitals():
+    """A norb beyond the bitmask limit raises a catchable ValueError, not a Rust panic."""
+    op = FermionOperator.from_dict({((True, 0), (False, 1)): 1.0})
+    with pytest.raises(ValueError, match="exceeds the maximum"):
+        op._linear_operator_(65, 2)
