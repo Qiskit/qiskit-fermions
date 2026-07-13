@@ -985,7 +985,7 @@ dependencies = [
 
 [[package]]
 name = "qiskit-fermions-cext"
-version = "0.0.0"
+version = "0.1.0-dev0"
 dependencies = [
  "cbindgen",
  "ndarray",
@@ -998,7 +998,7 @@ dependencies = [
 
 [[package]]
 name = "qiskit-fermions-core"
-version = "0.0.0"
+version = "0.1.0-dev0"
 dependencies = [
  "nalgebra",
  "ndarray",
@@ -1013,7 +1013,7 @@ dependencies = [
 
 [[package]]
 name = "qiskit-fermions-pyext"
-version = "0.0.0"
+version = "0.1.0-dev0"
 dependencies = [
  "ndarray",
  "num-complex",
