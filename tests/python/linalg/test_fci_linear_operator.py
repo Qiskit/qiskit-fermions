@@ -25,22 +25,6 @@ from qiskit_fermions.operators import FermionOperator
 ffsim = pytest.importorskip("ffsim")
 
 
-def _wrap(linop):
-    """Wraps our duck-typed FciLinearOperator into a genuine SciPy ``LinearOperator``.
-
-    ``scipy.sparse.linalg.expm_multiply`` needs a real ``LinearOperator`` (it takes ``-1j * t * A``
-    and, via its one-norm estimator, ``A.H``); our native object supplies the ``matvec``/``rmatvec``
-    kernels. Wiring this wrapper into the simulation path is deferred to a later phase; here we build
-    it explicitly to exercise the native kernels end-to-end.
-    """
-    return ssl.LinearOperator(
-        shape=linop.shape,
-        matvec=linop.matvec,
-        rmatvec=linop.rmatvec,
-        dtype=linop.dtype,
-    )
-
-
 def test_fci_linear_operator_shape_and_dtype_spinful():
     """The wrapper reports the FCI sector dimension and a complex128 dtype."""
     op = FermionOperator.from_dict({((True, 0), (False, 1)): 1.0})
@@ -99,8 +83,6 @@ def test_fci_linear_operator_rmatvec_is_adjoint():
 
 def test_fci_linear_operator_expm_multiply_matches_ffsim_oracle():
     """Evolving via the native spinful operator matches an ffsim-built oracle."""
-    scipy_sparse_linalg = pytest.importorskip("scipy.sparse.linalg")
-
     hamil = FermionOperator.from_dict(
         {
             ((True, 0), (False, 1)): 1.0,
@@ -117,10 +99,10 @@ def test_fci_linear_operator_expm_multiply_matches_ffsim_oracle():
         }
     )
     ff_linop = ffsim.linear_operator(ffsim_op, norb=norb, nelec=nelec)
-    expected = scipy_sparse_linalg.expm_multiply(-1j * time * ff_linop, vec0, traceA=0.0)
+    expected = ssl.expm_multiply(-1j * time * ff_linop, vec0, traceA=0.0)
 
-    ours = _wrap(hamil._linear_operator_(norb, nelec))
-    result = scipy_sparse_linalg.expm_multiply(-1j * time * ours, vec0, traceA=0.0)
+    ours = hamil._linear_operator_(norb, nelec)
+    result = ssl.expm_multiply(-1j * time * ours, vec0, traceA=0.0)
 
     np.testing.assert_allclose(result, expected, atol=1e-10)
 
@@ -192,7 +174,7 @@ def test_fci_linear_operator_expm_multiply_spinless_matches_exact_diagonalizatio
 
     expected = _spinless_evolution_oracle(terms, norb, nelec, time, vec0)
 
-    ours = _wrap(hamil._linear_operator_(norb, nelec))
+    ours = hamil._linear_operator_(norb, nelec)
     result = ssl.expm_multiply(-1j * time * ours, vec0, traceA=0.0)
 
     np.testing.assert_allclose(result, expected, atol=1e-10)

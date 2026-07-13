@@ -58,26 +58,19 @@ impl FciLinearOperator {
         }
     }
 
-    /// Applies `kernel` to `vec` after coercing `vec` to the layout the kernel expects.
+    /// Applies `kernel` to `vec`.
     ///
-    /// SciPy's `LinearOperator` machinery may hand us real probe vectors (from the one-norm
-    /// estimator) or non-contiguous `(dim, 1)` column slices; `ascontiguousarray` casts to
-    /// `complex128`, and `reshape(-1)` on a now-contiguous buffer flattens without copying, giving
-    /// the contiguous 1-D layout the kernel can slice.
+    /// `vec` must be a contiguous one-dimensional `complex128` array of length `dim`. The public
+    /// `_linear_operator_` wrapper (in :mod:`qiskit_fermions.operators`) is responsible for coercing
+    /// SciPy's probe vectors (real dtype, or non-contiguous `(dim, 1)` columns) into this layout
+    /// before they reach here, so the coercion cost is paid with numpy handles bound once per
+    /// operator rather than re-resolved on every matvec.
     fn apply<'py>(
         py: Python<'py>,
         kernel: &Matvec,
-        vec: &Bound<'py, PyAny>,
+        vec: PyReadonlyArray1<'py, Complex64>,
     ) -> PyResult<Bound<'py, PyArray1<Complex64>>> {
-        let numpy = py.import("numpy")?;
-        let complex128 = numpy.getattr("complex128")?;
-        let vec = numpy
-            .getattr("ascontiguousarray")?
-            .call1((vec, complex128))?
-            .call_method1("reshape", (-1,))?
-            .extract::<PyReadonlyArray1<Complex64>>()?;
-        let vec = vec.as_slice()?;
-        let out = kernel(vec).map_err(|e| PyValueError::new_err(e.to_string()))?;
+        let out = kernel(vec.as_slice()?).map_err(|e| PyValueError::new_err(e.to_string()))?;
         Ok(out.into_pyarray(py))
     }
 }
@@ -101,10 +94,8 @@ impl FciLinearOperator {
     /// Applies the operator to a state vector: returns ``op @ vec``.
     ///
     /// Args:
-    ///     vec: the input state vector of length ``dim``. It is coerced to a contiguous
-    ///         one-dimensional ``complex128`` array, so real inputs and column vectors of shape
-    ///         ``(dim, 1)`` are accepted -- this is what SciPy's ``expm_multiply`` (via its
-    ///         one-norm estimator) feeds a ``LinearOperator``.
+    ///     vec: the input state vector, a contiguous one-dimensional ``complex128`` array of length
+    ///         ``dim``.
     ///
     /// Returns:
     ///     The transformed state vector of length ``dim``.
@@ -115,7 +106,7 @@ impl FciLinearOperator {
     fn matvec<'py>(
         &self,
         py: Python<'py>,
-        vec: &Bound<'py, PyAny>,
+        vec: PyReadonlyArray1<'py, Complex64>,
     ) -> PyResult<Bound<'py, PyArray1<Complex64>>> {
         Self::apply(py, &self.matvec, vec)
     }
@@ -125,7 +116,8 @@ impl FciLinearOperator {
     /// SciPy's ``expm_multiply`` requires this because its one-norm estimator operates on ``A.H``.
     ///
     /// Args:
-    ///     vec: the input state vector of length ``dim`` (coerced as in :meth:`matvec`).
+    ///     vec: the input state vector, a contiguous one-dimensional ``complex128`` array of length
+    ///         ``dim``.
     ///
     /// Returns:
     ///     The adjoint-transformed state vector of length ``dim``.
@@ -136,7 +128,7 @@ impl FciLinearOperator {
     fn rmatvec<'py>(
         &self,
         py: Python<'py>,
-        vec: &Bound<'py, PyAny>,
+        vec: PyReadonlyArray1<'py, Complex64>,
     ) -> PyResult<Bound<'py, PyArray1<Complex64>>> {
         Self::apply(py, &self.rmatvec, vec)
     }

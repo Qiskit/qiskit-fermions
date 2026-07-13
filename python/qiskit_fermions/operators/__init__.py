@@ -131,6 +131,12 @@ def _fermion_operator_linear_operator(  # noqa: D417
     :class:`scipy.sparse.linalg.LinearOperator`; ``expm_multiply`` requires the adjoint action, so
     both ``matvec`` and ``rmatvec`` are supplied.
 
+    The native kernel requires a contiguous one-dimensional ``complex128`` vector, whereas SciPy's
+    machinery may feed a ``LinearOperator`` real probe vectors (from its one-norm estimator) or
+    non-contiguous ``(dim, 1)`` column slices. The ``matvec``/``rmatvec`` wrappers coerce the input
+    with ``numpy.ascontiguousarray(v, complex128).reshape(-1)``; the numpy handles are bound once
+    here (per operator) rather than re-resolved on every matvec inside the ``expm_multiply`` loop.
+
     This is attached to :class:`FermionOperator` as ``_linear_operator_`` at import time: the native
     :class:`~qiskit_fermions._lib.operators.fermion_operator.FermionOperator` is a compiled type whose
     instances cannot itself subclass SciPy's ``LinearOperator``, so the protocol method is provided in
@@ -144,13 +150,27 @@ def _fermion_operator_linear_operator(  # noqa: D417
     Returns:
         A :class:`scipy.sparse.linalg.LinearOperator` applying this operator on the requested sector.
     """
+    import numpy as np
     import scipy.sparse.linalg
 
     kernel = self._fci_linear_operator_(norb, nelec)
+
+    # Bind the coercion handles once per operator (not once per matvec): SciPy hands a
+    # LinearOperator real probe vectors or non-contiguous (dim, 1) columns, which the native kernel
+    # cannot slice directly.
+    ascontiguousarray = np.ascontiguousarray
+    complex128 = np.complex128
+
+    def matvec(vec):
+        return kernel.matvec(ascontiguousarray(vec, complex128).reshape(-1))
+
+    def rmatvec(vec):
+        return kernel.rmatvec(ascontiguousarray(vec, complex128).reshape(-1))
+
     return scipy.sparse.linalg.LinearOperator(
         shape=kernel.shape,
-        matvec=kernel.matvec,
-        rmatvec=kernel.rmatvec,
+        matvec=matvec,
+        rmatvec=rmatvec,
         dtype=kernel.dtype,
     )
 
