@@ -20,6 +20,7 @@ import sys
 from inspect import ismodule
 
 from . import _lib  # type: ignore[attr-defined]
+from .version import __version__  # noqa: F401
 
 __modules = {_lib: "qiskit_fermions._lib"}
 

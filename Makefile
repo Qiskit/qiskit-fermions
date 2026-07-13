@@ -259,3 +259,23 @@ coverage: rustcoverage ccoverage pycoverage coveragereport
 coverageclean:
 	rm *.profraw python.info rust.info coveralls.info tests/c/build/*.profraw
 	rm -rf htmlcov/
+
+# ==============================================================================
+# Recipes for Versioning
+# ==============================================================================
+.PHONY: version-bump
+
+# Set the project version across Python (VERSION.txt) and Rust (Cargo.toml), then refresh
+# Cargo.lock.  Pass the new version in PEP 440 form, e.g.
+#
+#     make version-bump VERSION=0.2.0.dev0
+#     make version-bump VERSION=1.0.0rc1
+#     make version-bump VERSION=1.0.0
+#
+version-bump:
+ifndef VERSION
+	$(error VERSION is required, e.g. `make version-bump VERSION=0.2.0.dev0`)
+endif
+	python tools/set_version.py "$(VERSION)"
+	# Regenerate Cargo.lock so the workspace crate versions match Cargo.toml.
+	cargo metadata --format-version=1 >/dev/null

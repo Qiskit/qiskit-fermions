@@ -9,7 +9,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "qiskit-fermions"
-version = "0.0.0"
+dynamic = ["version"]
 readme = "README.md"
 description = "Qiskit for Fermions"
 license = "Apache-2.0"
@@ -106,6 +106,12 @@ dev = [
 [tool.setuptools]
 include-package-data = true
 
+[tool.setuptools.dynamic]
+version = { attr = "qiskit_fermions.version.__version__" }
+
+[tool.setuptools.package-data]
+qiskit_fermions = ["VERSION.txt", "py.typed"]
+
 [tool.setuptools.packages.find]
 where = ["python"]
 include = ["qiskit_fermions", "qiskit_fermions.*"]
@@ -113,6 +119,11 @@ include = ["qiskit_fermions", "qiskit_fermions.*"]
 [tool.coverage.run]
 branch = true
 parallel = true
+omit = [
+    # `version.py` shells out to git and is exercised only during packaging, not by the test
+    # suite; exclude the whole file rather than annotating every line with `# pragma: no cover`.
+    "*/qiskit_fermions/version.py",
+]
 
 [tool.coverage.report]
 fail_under = 95
