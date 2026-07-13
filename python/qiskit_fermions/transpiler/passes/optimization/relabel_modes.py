@@ -72,6 +72,12 @@ class RelabelModes(FermionicDAGCircuitPass):
        permutation is only available from the metadata; and even when :attr:`permutation` was
        provided explicitly, the metadata is guaranteed to reflect what the pass did.
 
+       Note that the ``permutation`` metadata field is only present when the pass actually relabeled
+       the circuit. When the pass has no effect -- for example, when the automatic optimization
+       cannot run because the optional ``pyomo`` dependency or a :attr:`solver` is missing -- the
+       returned circuit is unchanged and carries no ``permutation`` metadata, so access it defensively
+       (e.g. ``qcirc.metadata.get("permutation")``).
+
     Conceptually, undoing the relabeling assigns to each original mode ``m`` the value that was
     measured for new mode ``permutation[m]``. In practice this is complicated by the fact that
     :class:`.FermionicRegister` modes and Qiskit's classical bits run in opposite (little-endian)
@@ -115,7 +121,7 @@ class RelabelModes(FermionicDAGCircuitPass):
        >>> qcirc = pm.run(circ)
        >>> qcirc.measure_all()
        >>>
-       >>> bit_permutation = qcirc.metadata["permutation"]
+       >>> bit_permutation = qcirc.metadata.get("permutation")
        >>> print(bit_permutation)
        [0, 2, 4, 1, 3, 5]
        >>>
