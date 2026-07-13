@@ -60,9 +60,10 @@ class RelabelModes(FermionicDAGCircuitPass):
 
     .. rubric:: Post-processing
 
-    The relabeling changes the mode-to-qubit assignment, so any bitstring sampled from the final
-    circuit is expressed in the *new* mode order and must be mapped back to the *original* order
-    before it can be interpreted. The relabeling that was actually applied is recorded in a
+    The relabeling reorders the fermionic modes, which in turn influences the fermion-to-qubit
+    mapping chosen by a later synthesis stage (and thus the achievable circuit depth). Because the
+    mode order changes, any bitstring sampled from the final circuit is expressed in the *new* mode
+    order and must be mapped back to the *original* order before it can be interpreted. The relabeling that was actually applied is recorded in a
     ``permutation`` field of the returned :class:`.FermionicDAGCircuit`'s
     :attr:`~qiskit.dagcircuit.DAGCircuit.metadata`.
 
