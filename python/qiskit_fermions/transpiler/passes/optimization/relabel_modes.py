@@ -51,18 +51,36 @@ def _sliding_window(iterable: Iterable[Any], n: int) -> Generator[tuple[Any, ...
 class RelabelModes(FermionicDAGCircuitPass):
     """A transpilation pass to relabel the fermionic modes.
 
+    This pass reorders the fermionic modes of a circuit. The reordering is described by a
+    ``permutation`` list, read as a mapping from *original* to *new* mode index: original mode ``i``
+    is placed at new index ``permutation[i]`` in the relabeled circuit. For example,
+    ``permutation = [0, 2, 4, 1, 3, 5]`` places original mode ``1`` at new index ``2``, original
+    mode ``2`` at new index ``4``, and so on. Being a permutation, each index must appear exactly
+    once.
+
     .. rubric:: Post-processing
 
-    The :class:`.FermionicDAGCircuit` returned by this transpiler pass will have a new field in its
-    :attr:`~qiskit.dagcircuit.DAGCircuit.metadata` called ``permutation`` which will contain the
-    fermionic mode index re-labeling that was applied by this transpiler pass.
+    The relabeling changes the mode-to-qubit assignment, so any bitstring sampled from the final
+    circuit is expressed in the *new* mode order and must be mapped back to the *original* order
+    before it can be interpreted. The relabeling that was actually applied is recorded in a
+    ``permutation`` field of the returned :class:`.FermionicDAGCircuit`'s
+    :attr:`~qiskit.dagcircuit.DAGCircuit.metadata`.
 
-    .. note::
-       This metadata may **not** be equal to the value of :attr:`permutation`, specifically when the
-       automatic permutation optimization gets used.
+    .. important::
+       Always read the relabeling from the circuit metadata rather than from :attr:`permutation`.
+       When the automatic optimization is used (i.e. :attr:`permutation` is ``None``), the applied
+       permutation is only available from the metadata; and even when :attr:`permutation` was
+       provided explicitly, the metadata is guaranteed to reflect what the pass did.
 
-    When working with this transpiler pass, bitstrings sampled from the final circuit will need to
-    have their bits re-ordered according to the reverse permutation:
+    Conceptually, undoing the relabeling assigns to each original mode ``m`` the value that was
+    measured for new mode ``permutation[m]``. In practice this is complicated by the fact that
+    :class:`.FermionicRegister` modes and Qiskit's classical bits run in opposite (little-endian)
+    order, so the mode-space gather turns into an index negation (``~idx``) followed by a final
+    reversal (``[::-1]``) on the counts bitstrings.
+
+    The example below relabels a six-mode system from a blocked spin ordering
+    (``[u0, u1, u2, d0, d1, d2]``) to an interleaved one (``[u0, d0, u1, d1, u2, d2]``), a common
+    trick to reduce the implementation depth, and then undoes the relabeling on the sampled counts:
 
     .. doctest::
 
@@ -75,14 +93,16 @@ class RelabelModes(FermionicDAGCircuitPass):
        ...     F2QSynthesis, F2QSynthesisPluginManager, RelabelModes, TrivialF2QLayout,
        ... )
        >>>
-       >>> circ = FermionicCircuit(4)
-       >>> circ.append(InitializeModes([1, 1, 0, 0]), circ.modes)
+       >>> # blocked occupation: spin-up orbitals 0 and 1 and spin-down orbital 0 are occupied
+       >>> circ = FermionicCircuit(6)
+       >>> circ.append(InitializeModes([1, 1, 0, 1, 0, 0]), circ.modes)
        >>>
        >>> synth_plugins = F2QSynthesisPluginManager()
        >>> synth = F2QSynthesis()
        >>> synth.methods["InitializeModes"] = synth_plugins.method("InitializeModes", "TrivialOccupation")()
        >>>
-       >>> relabel = RelabelModes(permutation=[0, 2, 1, 3])
+       >>> # map blocked mode order onto the interleaved one
+       >>> relabel = RelabelModes(permutation=[0, 2, 4, 1, 3, 5])
        >>>
        >>> pm = MultiStagePassManager(
        ...     init=FermionicCircuitToDAG(),
@@ -97,19 +117,20 @@ class RelabelModes(FermionicDAGCircuitPass):
        >>>
        >>> bit_permutation = qcirc.metadata["permutation"]
        >>> print(bit_permutation)
-       [0, 2, 1, 3]
+       [0, 2, 4, 1, 3, 5]
        >>>
        >>> res = BasicSimulator().run(qcirc, shots=1).result()
        >>> counts = res.get_counts()
+       >>> print(counts)  # measured in the interleaved ordering
+       {'000111': 1}
        >>>
-       >>> # undo bit permutation (note the negative idx due to the small-endian convention of
-       >>> # Qiskit's qubit ordering)
+       >>> # undo the relabeling to recover the counts in the original blocked ordering
        >>> post_processed = {
-       ...     "".join(bitstring[-idx] for idx in bit_permutation): count
+       ...     "".join(bitstring[~idx] for idx in bit_permutation)[::-1]: count
        ...     for bitstring, count in counts.items()
        ... }
-       >>> print(post_processed)
-       {'0011': 1}
+       >>> print(post_processed)  # recovered in the original blocked ordering
+       {'001011': 1}
     """
 
     def __init__(
@@ -138,15 +159,16 @@ class RelabelModes(FermionicDAGCircuitPass):
         self.permutation = permutation
         """The index permutation used to relabel the fermionic mode indices.
 
-        This may either be a ``list[int]`` in which case its length has to match the number of
-        fermionic modes of the circuit being transpiled. This scenario therefore requires the
-        transpiler pass to be tailored quite specifically to the user's circuit.
-
-        Being a permutation, each index in this list has to appear exactly once.
+        This may either be a ``list[int]``, mapping original mode index ``i`` to new mode index
+        ``permutation[i]`` (see the class docstring for details). Its length has to match the number
+        of fermionic modes of the circuit being transpiled, and each index has to appear exactly
+        once. This scenario therefore requires the transpiler pass to be tailored quite specifically
+        to the user's circuit.
 
         Or it may be ``None``, in which case the :func:`.build_excitation_span_minimization_model`
         function is used to define an optimization problem which tries to minimize the span of all
-        occurring fermionic excitations.
+        occurring fermionic excitations. In this case the applied permutation is only available from
+        the transpiled circuit's metadata (see the class docstring).
 
         .. note::
            The use of this optimization model is only implemented for time evolution gates
