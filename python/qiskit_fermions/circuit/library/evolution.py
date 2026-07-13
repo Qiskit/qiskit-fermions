@@ -164,4 +164,8 @@ class Evolution(FermionicGate):
 
         operator = cast(_SupportsLinearOperator, self.operator.relabel_modes(freg_indices))
         linop = operator._linear_operator_(norb, nelec)
+        # ``traceA`` is only a balancing hint for scipy (it factors out ``exp(traceA / n)`` to
+        # improve conditioning), not a correctness input: an inexact value costs at most some
+        # numerical conditioning. Passing 0.0 avoids scipy estimating the trace itself and mirrors
+        # ffsim's own ``_apply_unitary_`` implementations.
         return scipy.sparse.linalg.expm_multiply(-1j * self.params[0] * linop, vec, traceA=0.0)
