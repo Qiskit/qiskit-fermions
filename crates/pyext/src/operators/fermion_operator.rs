@@ -1135,7 +1135,8 @@ impl PyFermionOperator {
             Ok(FciLinearOperator::new(dim, matvec, rmatvec))
         } else {
             let (n_alpha, n_beta) = nelec.extract::<(u32, u32)>()?;
-            let dim = table.num_strings(norb, n_alpha) * table.num_strings(norb, n_beta);
+            let dim = qiskit_fermions_core::linalg::fci::spinful_dim(&table, norb, n_alpha, n_beta)
+                .map_err(|e| PyValueError::new_err(e.to_string()))?;
             let op = self.inner.clone();
             let matvec = Box::new(move |vec: &[Complex64]| {
                 op.fci_matvec_spinful(norb, n_alpha, n_beta, vec)

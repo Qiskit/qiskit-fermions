@@ -241,6 +241,8 @@ pub enum FciMatvecError {
     /// A term acts on a mode outside the range implied by `norb` (`[0, norb)` when spinless, else
     /// `[0, 2 * norb)`).
     ModeOutOfRange { mode: u32, num_modes: u32 },
+    /// The spinful FCI dimension `C(norb, n_alpha) * C(norb, n_beta)` overflows `usize`.
+    DimensionOverflow { dim_a: usize, dim_b: usize },
 }
 
 impl std::fmt::Display for FciMatvecError {
@@ -254,11 +256,32 @@ impl std::fmt::Display for FciMatvecError {
                 f,
                 "mode {mode} is outside the range [0, {num_modes}) implied by the number of orbitals"
             ),
+            FciMatvecError::DimensionOverflow { dim_a, dim_b } => write!(
+                f,
+                "spinful FCI dimension {dim_a} * {dim_b} overflows the addressable range"
+            ),
         }
     }
 }
 
 impl std::error::Error for FciMatvecError {}
+
+/// Computes the spinful FCI dimension `C(norb, n_alpha) * C(norb, n_beta)`, checking for overflow.
+///
+/// The per-sector dimensions each fit in `usize`, but their product need not; a silent wrap could
+/// defeat the vector-length check and corrupt the matvec, so overflow is reported as an error.
+pub fn spinful_dim(
+    table: &BinomialTable,
+    norb: u32,
+    n_alpha: u32,
+    n_beta: u32,
+) -> Result<usize, FciMatvecError> {
+    let dim_a = table.num_strings(norb, n_alpha);
+    let dim_b = table.num_strings(norb, n_beta);
+    dim_a
+        .checked_mul(dim_b)
+        .ok_or(FciMatvecError::DimensionOverflow { dim_a, dim_b })
+}
 
 /// The occupation strings of a fixed-particle-number sector, addressed by their linear index.
 ///
@@ -371,9 +394,8 @@ pub fn spinful_matvec<'a>(
     vec: &[Complex64],
 ) -> Result<Vec<Complex64>, FciMatvecError> {
     let table = BinomialTable::new(norb);
-    let dim_a = table.num_strings(norb, n_alpha);
     let dim_b = table.num_strings(norb, n_beta);
-    let dim = dim_a * dim_b;
+    let dim = spinful_dim(&table, norb, n_alpha, n_beta)?;
     if vec.len() != dim {
         return Err(FciMatvecError::DimensionMismatch {
             expected: dim,
@@ -984,5 +1006,17 @@ mod tests {
                 num_modes: 6
             }
         ));
+    }
+
+    #[test]
+    fn spinful_dim_reports_overflow() {
+        let table = BinomialTable::new(64);
+        // Each half-filled sector is ~1.8e18 (< usize::MAX), but their product ~3.3e36 overflows.
+        let err = spinful_dim(&table, 64, 32, 32).unwrap_err();
+        assert!(matches!(err, FciMatvecError::DimensionOverflow { .. }));
+
+        // A representable product still succeeds and equals the plain product.
+        let dim = spinful_dim(&table, 4, 2, 2).unwrap();
+        assert_eq!(dim, table.num_strings(4, 2) * table.num_strings(4, 2));
     }
 }
