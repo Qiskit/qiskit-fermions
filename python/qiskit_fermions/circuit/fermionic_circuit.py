@@ -138,6 +138,11 @@ class FermionicCircuit:
         """
         from qiskit_fermions.transpiler.converters import FermionicCircuitToDAG
 
+        # PERF: the DAG depends only on the circuit structure (``self``), not on ``vec``/``norb``/
+        # ``nelec``, yet it is rebuilt on every call. This is fine for a single ``apply_unitary``, but
+        # repeated evolutions of the same circuit (parameter sweeps, time-stepping) redo identical
+        # work. Left as-is deliberately: caching would require invalidating on every circuit mutation
+        # (a correctness hazard on a mutable circuit). Revisit if a repeated-call use case arises.
         dag = FermionicCircuitToDAG().run(self)
 
         if copy:
