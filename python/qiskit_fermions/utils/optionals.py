@@ -27,26 +27,10 @@ when a dependency is required.
 Available Testers
 -----------------
 
-.. autodata:: HAS_FFSIM
 .. autodata:: HAS_PYOMO
 """
 
 from qiskit.utils import LazyImportTester
-
-HAS_FFSIM = LazyImportTester(
-    "ffsim", name="ffsim", install='pip install "qiskit-fermions[simulation]"'
-)
-"""`ffsim <https://github.com/qiskit-community/ffsim>`__ is a high-performance simulator for
-fermionic quantum circuits that exploits particle-number and spin-Z conservation. It is the default
-simulation engine for :class:`~qiskit_fermions.circuit.FermionicCircuit`.
-
-.. note::
-   ``ffsim`` does not support Windows, which is why it is an optional dependency.
-
-.. seealso::
-   :external:class:`~qiskit.utils.LazyDependencyManager` for usage examples and the available
-   methods of this object.
-"""
 
 HAS_PYOMO = LazyImportTester(
     "pyomo", name="Pyomo", install='pip install "qiskit_fermions[optimization]"'
