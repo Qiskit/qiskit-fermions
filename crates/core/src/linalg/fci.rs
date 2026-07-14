@@ -283,6 +283,54 @@ pub fn spinful_dim(
         .ok_or(FciMatvecError::DimensionOverflow { dim_a, dim_b })
 }
 
+/// Builds the FCI state vector of a single occupation determinant (a one-hot at its address).
+///
+/// The occupied orbitals of each spin sector are given as bitmasks (bit `p` set iff orbital `p` is
+/// occupied), matching [`str2addr`]'s convention. `beta_str` selects the mode interpretation exactly
+/// as the matvec kernels do:
+///
+/// * **Spinless** (`beta_str` is `None`): the vector has length `C(norb, n_alpha)` and a single `1`
+///   at `str2addr(alpha_str)`, where `n_alpha` is the population count of `alpha_str`.
+/// * **Spinful** (`beta_str` is `Some`): the vector has length `dim_a * dim_b` with the flat index
+///   `str2addr(alpha_str) * dim_b + str2addr(beta_str)` (alpha slow, beta fast), matching the
+///   block-spin ordering used throughout this module.
+///
+/// This is the seeding counterpart of the matvec kernels: it produces, in the same basis ordering,
+/// the determinant that a Jordan-Wigner occupation prepares from the vacuum. The result is a genuine
+/// determinant (sign `+1`) because the occupied orbitals are addressed directly by their bitmask,
+/// which is inherently sorted.
+///
+/// The population counts of the masks define the target sector; the caller is responsible for
+/// ensuring they match the intended `(n_alpha, n_beta)`. Errors are limited to a spinful dimension
+/// that overflows `usize` (via [`spinful_dim`]).
+pub fn slater_determinant_statevector(
+    norb: u32,
+    alpha_str: u64,
+    beta_str: Option<u64>,
+) -> Result<Vec<Complex64>, FciMatvecError> {
+    let table = BinomialTable::new(norb);
+    let n_alpha = alpha_str.count_ones();
+    let addr_a = str2addr(&table, norb, n_alpha, alpha_str);
+
+    match beta_str {
+        None => {
+            let dim = table.num_strings(norb, n_alpha);
+            let mut vec = vec![Complex64::new(0.0, 0.0); dim];
+            vec[addr_a] = Complex64::new(1.0, 0.0);
+            Ok(vec)
+        }
+        Some(beta_str) => {
+            let n_beta = beta_str.count_ones();
+            let dim = spinful_dim(&table, norb, n_alpha, n_beta)?;
+            let dim_b = table.num_strings(norb, n_beta);
+            let addr_b = str2addr(&table, norb, n_beta, beta_str);
+            let mut vec = vec![Complex64::new(0.0, 0.0); dim];
+            vec[addr_a * dim_b + addr_b] = Complex64::new(1.0, 0.0);
+            Ok(vec)
+        }
+    }
+}
+
 /// The occupation strings of a fixed-particle-number sector, addressed by their linear index.
 ///
 /// Element `addr` is the occupation string with [`str2addr`] equal to `addr`. Precomputing this list
@@ -544,6 +592,65 @@ mod tests {
                         addr,
                         "round-trip failed"
                     );
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn slater_determinant_spinless_is_one_hot_at_str2addr() {
+        // The spinless seed is a one-hot at str2addr(occupation), which (per the ascending-bitmask
+        // ordering) equals the index of that occupation in the enumeration.
+        let table = BinomialTable::new(8);
+        for norb in 0..=8u32 {
+            for nocc in 0..=norb {
+                let dim = table.num_strings(norb, nocc);
+                for (i, string) in enumerate_strings(norb, nocc).into_iter().enumerate() {
+                    let vec = slater_determinant_statevector(norb, string, None).unwrap();
+                    assert_eq!(vec.len(), dim, "norb={norb} nocc={nocc}");
+                    for (addr, amp) in vec.iter().enumerate() {
+                        let want = if addr == i {
+                            Complex64::new(1.0, 0.0)
+                        } else {
+                            Complex64::new(0.0, 0.0)
+                        };
+                        assert_eq!(*amp, want, "norb={norb} nocc={nocc} string={string:b}");
+                    }
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn slater_determinant_spinful_matches_block_spin_flat_index() {
+        // The spinful seed is a one-hot at addr_a * dim_b + addr_b (alpha slow, beta fast).
+        let table = BinomialTable::new(5);
+        for norb in 1..=5u32 {
+            for n_alpha in 0..=norb {
+                for n_beta in 0..=norb {
+                    let dim_b = table.num_strings(norb, n_beta);
+                    let dim = table.num_strings(norb, n_alpha) * dim_b;
+                    for alpha in enumerate_strings(norb, n_alpha) {
+                        for beta in enumerate_strings(norb, n_beta) {
+                            let vec =
+                                slater_determinant_statevector(norb, alpha, Some(beta)).unwrap();
+                            assert_eq!(vec.len(), dim);
+                            let addr_a = str2addr(&table, norb, n_alpha, alpha);
+                            let addr_b = str2addr(&table, norb, n_beta, beta);
+                            let flat = addr_a * dim_b + addr_b;
+                            for (addr, amp) in vec.iter().enumerate() {
+                                let want = if addr == flat {
+                                    Complex64::new(1.0, 0.0)
+                                } else {
+                                    Complex64::new(0.0, 0.0)
+                                };
+                                assert_eq!(
+                                    *amp, want,
+                                    "norb={norb} a={alpha:b} b={beta:b} flat={flat}"
+                                );
+                            }
+                        }
+                    }
                 }
             }
         }

@@ -111,7 +111,7 @@ class FermionicCircuit:
         return self._inner.draw(*args, **kwargs)
 
     def _apply_unitary_(
-        self, vec: np.ndarray, norb: int, nelec: int | tuple[int, int], copy: bool
+        self, vec: np.ndarray | None, norb: int, nelec: int | tuple[int, int], copy: bool
     ) -> np.ndarray:
         """Applies this circuit to an ffsim state vector, implementing ffsim's protocol.
 
@@ -121,11 +121,16 @@ class FermionicCircuit:
         before being applied.
 
         Args:
-            vec: the state vector to apply this circuit to.
+            vec: the state vector to apply this circuit to. May be ``None`` to let the circuit's
+                first instruction seed the initial state (e.g. :class:`.InitializeModes`, which
+                prepares an occupation determinant from no incoming state); the seeded vector is then
+                threaded through the remaining instructions. A ``None`` vector requires the first
+                instruction to be able to produce a state -- one that only transforms an incoming
+                vector will raise.
             norb: the number of spatial orbitals.
             nelec: either a single integer representing the number of fermions for a spinless system,
                 or a pair of integers storing the numbers of spin alpha and spin beta fermions.
-            copy: whether to copy the vector before operating on it.
+            copy: whether to copy the vector before operating on it. Ignored when ``vec`` is ``None``.
 
         Returns:
             The transformed vector.
@@ -145,7 +150,10 @@ class FermionicCircuit:
         # (a correctness hazard on a mutable circuit). Revisit if a repeated-call use case arises.
         dag = FermionicCircuitToDAG().run(self)
 
-        if copy:
+        # ``vec`` may be None to let the first instruction seed the state (e.g. InitializeModes);
+        # only copy a real array. The gate-to-gate loop below then threads whatever the first
+        # instruction returns into the rest of the circuit.
+        if copy and vec is not None:
             vec = vec.copy()
 
         for node in dag.topological_op_nodes():

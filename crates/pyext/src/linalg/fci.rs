@@ -16,7 +16,7 @@ use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
 use pyo3_stub_gen::derive::*;
 
-use qiskit_fermions_core::linalg::fci::FciMatvecError;
+use qiskit_fermions_core::linalg::fci::{FciMatvecError, slater_determinant_statevector};
 
 /// A matvec closure closing over an operator and a fixed FCI sector.
 ///
@@ -134,8 +134,43 @@ impl FciLinearOperator {
     }
 }
 
+/// Builds the FCI state vector of a single occupation determinant.
+///
+/// This is the state-vector seed a Jordan-Wigner occupation prepares from the vacuum, produced
+/// directly in the FCI basis ordering (the same ordering the matvec kernels and ``ffsim`` use). The
+/// occupied orbitals of each spin sector are passed as bitmasks (bit ``p`` set iff orbital ``p`` is
+/// occupied).
+///
+/// Args:
+///     norb: the number of spatial orbitals.
+///     alpha_str: the occupation bitmask of the alpha sector (or of the single spinless sector).
+///     beta_str: the occupation bitmask of the beta sector, or ``None`` for a spinless system. When
+///         ``None`` the returned vector has length ``C(norb, popcount(alpha_str))``; otherwise it has
+///         length ``C(norb, popcount(alpha_str)) * C(norb, popcount(beta_str))`` with the block-spin
+///         flat index ``addr_a * dim_b + addr_b``.
+///
+/// Returns:
+///     The one-hot Slater-determinant state vector as a ``complex128`` array.
+///
+/// Raises:
+///     ValueError: if the spinful FCI dimension overflows the addressable range.
+#[gen_stub_pyfunction(module = "qiskit_fermions.linalg.fci")]
+#[pyfunction(name = "slater_determinant_statevector", signature = (norb, alpha_str, beta_str=None))]
+pub fn py_slater_determinant_statevector(
+    py: Python<'_>,
+    norb: u32,
+    alpha_str: u64,
+    beta_str: Option<u64>,
+) -> PyResult<Bound<'_, PyArray1<Complex64>>> {
+    let vec = slater_determinant_statevector(norb, alpha_str, beta_str)
+        .map_err(|err| PyValueError::new_err(err.to_string()))?;
+    Ok(vec.into_pyarray(py))
+}
+
 #[pymodule]
 pub mod fci {
     #[pymodule_export]
     use super::FciLinearOperator;
+    #[pymodule_export]
+    use super::py_slater_determinant_statevector;
 }
