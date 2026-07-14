@@ -81,7 +81,7 @@ Internally, operators are stored in arrays inspired by sparse matrix data format
    Additional arrays might be present depending on the operator type. For example,
    :class:`.FermionOperator` instances include an **actions array** of booleans
    that specifies the type of fermionic action acting on the respective mode
-   index. In contrast, the :class:`MajoranaOperator` class doses not require
+   index. In contrast, the :class:`MajoranaOperator` class does not require
    this distinction since it encodes that information in the parity of the mode
    index. See the API documentation for your specific operator type to
    understand the full storage format.

@@ -34,7 +34,7 @@ should be formatted as [doctests](https://docs.python.org/3/library/doctest.html
 
 All of these tests are detected and run by `pytest` for which another simple `make` target exists:
 ```bash
-mask testpython
+make testpython
 ```
 
 Note, that this target requires compilation of the `pyext` crate which not only ensures that the

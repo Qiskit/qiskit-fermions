@@ -42,7 +42,7 @@ this project split the transpilation into the following stages:
    optimization, layout, and routing for your target hardware.
 
 **Output**
-   Converts the internal DAG data structure to the desirerd output format.
+   Converts the internal DAG data structure to the desired output format.
 
 A practical example: transpilation using Jordan-Wigner
 ------------------------------------------------------
