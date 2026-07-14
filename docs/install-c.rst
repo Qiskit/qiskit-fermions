@@ -47,6 +47,15 @@ Install steps
 2. Configure your shell environment with the locations of your compiled Qiskit C
    API library and include directory.
 
+   .. important::
+      The C API links against the Qiskit **C** library, so ``QISKIT_LIB`` and
+      ``QISKIT_INCLUDE`` must resolve to it. If unset, the build defaults them to
+      the installed ``qiskit`` package's C artifacts
+      (``qiskit.capi.get_lib()``/``get_include()``); set them explicitly, as
+      below, to build against a separately compiled Qiskit C API such as the
+      ``build/qiskit`` clone above. (The Python extension does not use these
+      variables at all — it links Qiskit through ``qiskit-pyo3-ffi``.)
+
    .. hint::
       This code uses the ``build/qiskit`` path from the code at
       the top of this page.  Adjust the paths according to your setup.

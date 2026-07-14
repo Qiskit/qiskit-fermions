@@ -46,6 +46,18 @@ simple:
 
          $ SETUPTOOLS_RUST_CARGO_PROFILE=release pip install -e .
 
+   .. hint::
+
+      Some features rely on optional dependencies. To install all of them,
+      use the ``all`` extra:
+
+      .. code:: console
+
+         $ pip install ".[all]"
+
+      Refer to the ``[project.optional-dependencies]`` section of
+      ``pyproject.toml`` to see which dependency groups are available.
+
 4. (optional) You may wish to generate the Python type stub files to have better
    integration with coding tools (e.g. for tab completion). You can do that
    quite simply like so:
@@ -73,3 +85,11 @@ simple:
 
          $ pip install --group test
          $ make testpython
+
+      To additionally run the tests that exercise optional dependencies,
+      install the extras and use the ``testoptional`` target:
+
+      .. code:: console
+
+         $ pip install -e ".[all]"
+         $ make testoptional

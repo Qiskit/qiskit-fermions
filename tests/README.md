@@ -16,6 +16,12 @@ This will run the tests included in the `core` crate which contains all native R
 package.
 Refer to [this readme](`crates/README.md`) for an explanation of the different crates.
 
+> **Note:** `make testrust` builds the `core` crate with its `cext` feature (linking `qiskit-sys`),
+> so — just like the C API — it reads `QISKIT_LIB` and `QISKIT_INCLUDE`, which must resolve to a
+> Qiskit **C** library. See the [C installation instructions](../docs/install-c.rst) for how these
+> are defaulted and when to set them explicitly. (The Python test target does *not* use them, because
+> `pyext` links Qiskit through `qiskit-pyo3-ffi` instead.)
+
 If at some point we start writing integration tests for the Rust API, these should be implemented in
 `crates/core/tests` to ensure that `cargo test` will find them.
 See also [here](https://doc.rust-lang.org/rust-by-example/testing/integration_testing.html).
@@ -28,7 +34,7 @@ should be formatted as [doctests](https://docs.python.org/3/library/doctest.html
 
 All of these tests are detected and run by `pytest` for which another simple `make` target exists:
 ```bash
-mask testpython
+make testpython
 ```
 
 Note, that this target requires compilation of the `pyext` crate which not only ensures that the
@@ -47,6 +53,10 @@ make testc
 
 This in turn requires compilation of the `cext` crate which also ensures that the C header file gets
 updated via [`cbindgen`](https://github.com/mozilla/cbindgen).
+
+> **Note:** like `make testrust`, this links `qiskit-sys` against the Qiskit **C** library, so it
+> reads `QISKIT_LIB` and `QISKIT_INCLUDE` (see the
+> [C installation instructions](../docs/install-c.rst)).
 
 ## Coverage
 

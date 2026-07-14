@@ -2,7 +2,7 @@
 <div align="left">
 
   [![License](https://img.shields.io/github/license/Qiskit/qiskit-fermions?label=License)](LICENSE.txt)
-  [![Docs](https://img.shields.io/badge/%F0%9F%93%84%20Docs-stable-blue.svg)](https://qiskit.github.io/qiskit-fermions/)
+  [![Docs](https://img.shields.io/badge/%F0%9F%93%84%20Docs-dev-blue.svg)](https://qiskit.github.io/qiskit-fermions/)
   [![Qiskit](https://img.shields.io/badge/Qiskit%20-%20%3E%3D2.5%20-%20%236133BD?logo=Qiskit)](https://github.com/Qiskit/qiskit)
   [![Python](https://img.shields.io/badge/python-3.10%7C3.11%7C3.12%7C3.13%7C3.14-blue.svg)](https://www.python.org/)
   [![rustc](https://img.shields.io/badge/rustc-1.95+-blue.svg)](https://rust-lang.github.io/rfcs/2495-min-rust-version.html)
@@ -69,6 +69,11 @@ Please refer to the [Python installation instructions](docs/install-py.rst).
 ----------------------------------------------------------------------------------------------------
 
 ### Deprecation Policy
+
+> [!IMPORTANT]
+> This policy does **not** apply yet. Until the first release is tagged, `qiskit-fermions` is in
+> early development: `main` is unstable, breaking changes may happen at any time without notice, and
+> release notes are not being tracked. The policy below takes effect with the first tagged release.
 
 We follow [semantic versioning](https://semver.org/) and are guided by the principles in
 [Qiskit's deprecation policy](https://github.com/Qiskit/qiskit/blob/main/DEPRECATION.md).

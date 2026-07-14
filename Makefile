@@ -1,11 +1,6 @@
 export QISKIT_LIB ?= $(shell python -c "import qiskit; print(qiskit.capi.get_lib())")
 export QISKIT_INCLUDE ?= $(shell python -c "import qiskit; print(qiskit.capi.get_include())")
 
-# We must export this variable to ensure that `qiskit-sys` can find the Python.h
-# correctly. Arguably, it should be able to handle that itself within its build
-# script.
-export BINDGEN_EXTRA_CLANG_ARGS := "-I$(shell python -c "import sysconfig; print(sysconfig.get_path('include'))")"
-
 # ==============================================================================
 # Recipes for Linting
 # ==============================================================================

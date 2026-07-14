@@ -69,6 +69,10 @@ correctly pre-fixed, for example like so: ``:c:func:`qf_ferm_op_free` ``.
 
 ## Release Notes
 
+> **Note:** Release notes are not being tracked yet. Until the first release is tagged, `main` is an
+> unstable development branch and changes do **not** need a `reno` entry. The workflow below applies
+> once the first release is tagged.
+
 Release notes are managed by [`reno`](https://pypi.org/project/reno/).
 The [Qiskit contributing guide](https://github.com/Qiskit/qiskit/blob/main/CONTRIBUTING.md) contains
 a great explanation of working with `reno` which also applies to this package.
