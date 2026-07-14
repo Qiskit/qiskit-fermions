@@ -24,6 +24,13 @@ The scope of this package includes the following functionality:
 Deprecation policy
 ------------------
 
+.. important::
+
+   This policy does **not** apply yet. Until the first release is tagged, ``qiskit-fermions`` is in
+   early development: ``main`` is unstable, breaking changes may happen at any time without notice,
+   and release notes are not being tracked. The policy below takes effect with the first tagged
+   release.
+
 We follow `semantic versioning <https://semver.org/>`_ and are guided by the principles in
 `Qiskit's deprecation policy <https://github.com/Qiskit/qiskit/blob/main/DEPRECATION.md>`_.
 We may occasionally make breaking changes in order to improve the user experience.
