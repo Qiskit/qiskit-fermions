@@ -36,11 +36,11 @@ This full triple is not always worthwhile — decide case-by-case. Features may 
 
 ## Build & test
 
-**Always use the Makefile targets, not raw `cargo`** — the Makefile exports `QISKIT_LIB`, `QISKIT_INCLUDE`, and `BINDGEN_EXTRA_CLANG_ARGS` that the FFI crates need to link. Qiskit must be installed in the same environment.
+**Always use the Makefile targets, not raw `cargo`** — the Makefile exports `QISKIT_LIB` and `QISKIT_INCLUDE` that the FFI crates need to link. Qiskit must be installed in the same environment.
 
-> **`QISKIT_LIB`/`QISKIT_INCLUDE` — when you must set them.** These point at the compiled Qiskit **C** library, and which builds need them follows directly from the FFI backend (see the crate architecture above):
-> - **Python builds (`pyext`)** — `make pyext`, `make pyext-dev`, `make pystubs`, `make testpython`, … — link Qiskit through `qiskit-pyo3-ffi` and **do not need** these vars. The Makefile's `?=` fallback derives them from the installed `qiskit` package, which is enough to satisfy the `pyext` path.
-> - **C API and Rust-core builds (`cext`)** — `make cext`, `make testc`, **and `make testrust`** (which runs `cargo test -p qiskit-fermions-core --no-default-features --features cext`) — link `qiskit-sys` against the compiled Qiskit **C** library and therefore **require `QISKIT_LIB`/`QISKIT_INCLUDE` set to that C library**. The auto-derive fallback is *not* correct here: pointing these at the Python package would link against Python instead. Set them explicitly, e.g. `QISKIT_LIB=$(find "$(pwd)"/build/qiskit/dist/c/lib/libqiskit.*) QISKIT_INCLUDE="$(pwd)"/build/qiskit/dist/c/include`. See `docs/install-c.rst` for building the Qiskit C API.
+> **`QISKIT_LIB`/`QISKIT_INCLUDE`.** These point at the Qiskit **C** library, and which builds read them follows directly from the FFI backend (see the crate architecture above):
+> - **Python builds (`pyext`)** — `make pyext`, `make pyext-dev`, `make pystubs`, `make testpython`, … — link Qiskit through `qiskit-pyo3-ffi` and **do not read** these vars at all.
+> - **C API and Rust-core builds (`cext`)** — `make cext`, `make testc`, **`make testrust`** (`cargo test -p qiskit-fermions-core --no-default-features --features cext`), and also `make lint`/`make docs` (which build the `cext` backend transitively) — link `qiskit-sys` against the Qiskit **C** library and read these vars. The Makefile defaults them via `?=` to the installed `qiskit` package's C artifacts (`qiskit.capi.get_lib()`/`get_include()`), which works when that package ships a usable C library. When it does not — or you want to build/test against a separately compiled Qiskit C API — **override them**, e.g. `QISKIT_LIB=$(find "$(pwd)"/build/qiskit/dist/c/lib/libqiskit.*) QISKIT_INCLUDE="$(pwd)"/build/qiskit/dist/c/include`. See `docs/install-c.rst` for building the Qiskit C API.
 
 | Task | Command |
 |------|---------|
