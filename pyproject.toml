@@ -74,6 +74,10 @@ doctest = [
     "rustworkx[mpl]",
     "pylatexenc",
     "sybil>=9.3.0",
+    # the LUCJ guide (docs/guides/lucj.rst) renders and evaluates a UCJ ansatz, which requires the
+    # simulation backend and PySCF for the underlying quantum chemistry
+    "ffsim",
+    "pyscf",
 ]
 test = [
     {include-group = "basetest"},
