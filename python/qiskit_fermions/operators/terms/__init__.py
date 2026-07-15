@@ -51,12 +51,28 @@ Members
    :toctree: ../stubs/
 
    filter_diagonal_terms
+
+Ordering
+--------
+
+This module provides a function to reorder the terms of an operator into a canonical,
+coefficient-independent order.
+
+Members
+^^^^^^^
+
+.. autosummary::
+   :toctree: ../stubs/
+
+   canonical_order
 """
 
 from .filtering import filter_diagonal_terms
 from .grouping import group_terms_by_electronic_structure
+from .ordering import canonical_order
 
 __all__ = [
+    "canonical_order",
     "filter_diagonal_terms",
     "group_terms_by_electronic_structure",
 ]

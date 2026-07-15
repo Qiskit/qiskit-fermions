@@ -12,18 +12,10 @@
 
 use pyo3::prelude::*;
 
-pub mod filtering;
-pub mod grouping;
-pub mod ordering;
+pub mod canonical;
 
 #[pymodule]
-pub mod operators_terms {
+pub mod ordering {
     #[pymodule_export]
-    use super::filtering::filtering;
-
-    #[pymodule_export]
-    use super::grouping::grouping;
-
-    #[pymodule_export]
-    use super::ordering::ordering;
+    use super::canonical::canonical;
 }
