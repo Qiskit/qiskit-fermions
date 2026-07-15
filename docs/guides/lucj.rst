@@ -164,9 +164,16 @@ on the alpha modes ``0..norb`` and the beta modes ``norb..2*norb`` independently
 .. plot::
    :alt: The gates that the UCJ ansatz decomposes into.
    :context: close-figs
+   :include-source:
 
    >>> circuit.decompose().draw("mpl", fold=-1)
    <Figure size ... with 1 Axes>
+
+.. note::
+   Each layer ends with :math:`\mathcal{U}_k` and the next begins with
+   :math:`\mathcal{U}_{k+1}^\dagger`, so adjacent :class:`.OrbitalRotation` gates could be merged
+   into a single rotation. A transpilation pass performing this fusion is a planned future
+   development.
 
 4. Simulate the ansatz and evaluate its energy
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
