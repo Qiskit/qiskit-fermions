@@ -10,6 +10,7 @@
 // copyright notice, and modified files need to carry a notice indicating
 // that they have been altered from the originals.
 
+use crate::operators::OperatorTrait;
 use crate::operators::fermion_operator::{FermionOperator, FermionOperatorTermView};
 use std::collections::HashMap;
 

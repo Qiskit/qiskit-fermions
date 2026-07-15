@@ -10,8 +10,8 @@
 // copyright notice, and modified files need to carry a notice indicating
 // that they have been altered from the originals.
 
-use crate::operators::CoherenceError;
 use crate::operators::fermion_operator::{FermionAction, FermionOperator};
+use crate::operators::{CoherenceError, OperatorTrait};
 use rayon::prelude::*;
 use std::sync::{Arc, Mutex};
 

@@ -729,11 +729,11 @@ impl PyMajoranaOperator {
     #[classmethod]
     fn from_terms(_cls: &Bound<'_, PyType>, terms: &Bound<'_, PyAny>) -> PyResult<Self> {
         let mut inner = MajoranaOperator::zero();
+        // We append directly rather than routing through the core `from_terms*`; see
+        // `FermionOperator.from_terms` for the rationale (avoids materializing owned buffers).
         terms.try_iter()?.try_for_each(|item| -> PyResult<()> {
             let (term, coeff) = item?.extract::<(Vec<PyMajoranaAction>, Complex64)>()?;
-            inner.coeffs.push(coeff);
-            inner.modes.extend_from_slice(&term);
-            inner.boundaries.push(inner.modes.len());
+            inner._append_term(coeff, &term);
             Ok(())
         })?;
         Ok(Self { inner })
@@ -789,12 +789,11 @@ impl PyMajoranaOperator {
     ) -> PyResult<Self> {
         let mut inner = MajoranaOperator::zero();
         let mut groups = vec![];
+        // See `FermionOperator.from_terms` for why we append directly instead of using `from_terms*`.
         terms.try_iter()?.try_for_each(|item| -> PyResult<()> {
             let (term, coeff, group) =
                 item?.extract::<(Vec<PyMajoranaAction>, Complex64, u32)>()?;
-            inner.coeffs.push(coeff);
-            inner.modes.extend_from_slice(&term);
-            inner.boundaries.push(inner.modes.len());
+            inner._append_term(coeff, &term);
             groups.push(group);
             Ok(())
         })?;

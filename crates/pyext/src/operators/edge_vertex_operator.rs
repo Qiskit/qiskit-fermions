@@ -815,14 +815,12 @@ impl PyEdgeVertexOperator {
     #[classmethod]
     fn from_terms(_cls: &Bound<'_, PyType>, terms: &Bound<'_, PyAny>) -> PyResult<Self> {
         let mut inner = EdgeVertexOperator::zero();
+        // We append directly rather than routing through the core `from_terms*`; see
+        // `FermionOperator.from_terms` for the rationale (avoids materializing owned buffers).
         terms.try_iter()?.try_for_each(|item| -> PyResult<()> {
             let (term, coeff) = item?.extract::<(Vec<PyEdgeAction>, Complex64)>()?;
-            inner.coeffs.push(coeff);
-            term.iter().for_each(|(l, r)| {
-                inner.left_indices.push(*l);
-                inner.right_indices.push(*r);
-            });
-            inner.boundaries.push(inner.right_indices.len());
+            let (left_indices, right_indices): (Vec<u32>, Vec<u32>) = term.into_iter().unzip();
+            inner._append_term(coeff, &left_indices, &right_indices);
             Ok(())
         })?;
         Ok(Self { inner })
@@ -880,14 +878,11 @@ impl PyEdgeVertexOperator {
     ) -> PyResult<Self> {
         let mut inner = EdgeVertexOperator::zero();
         let mut groups = vec![];
+        // See `FermionOperator.from_terms` for why we append directly instead of using `from_terms*`.
         terms.try_iter()?.try_for_each(|item| -> PyResult<()> {
             let (term, coeff, group) = item?.extract::<(Vec<PyEdgeAction>, Complex64, u32)>()?;
-            inner.coeffs.push(coeff);
-            term.iter().for_each(|(l, r)| {
-                inner.left_indices.push(*l);
-                inner.right_indices.push(*r);
-            });
-            inner.boundaries.push(inner.right_indices.len());
+            let (left_indices, right_indices): (Vec<u32>, Vec<u32>) = term.into_iter().unzip();
+            inner._append_term(coeff, &left_indices, &right_indices);
             groups.push(group);
             Ok(())
         })?;

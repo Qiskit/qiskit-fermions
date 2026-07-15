@@ -95,49 +95,12 @@ impl TransferVertexOperator {
         &self.boundaries
     }
 
-    fn _append_term(&mut self, coeff: Complex64, left_indices: &[u32], right_indices: &[u32]) {
+    pub fn _append_term(&mut self, coeff: Complex64, left_indices: &[u32], right_indices: &[u32]) {
         // WARNING: this does not handle `groups` by design!
         self.coeffs.push(coeff);
         self.left_indices.extend_from_slice(left_indices);
         self.right_indices.extend_from_slice(right_indices);
         self.boundaries.push(self.left_indices.len());
-    }
-
-    pub fn iter(
-        &'_ self,
-    ) -> impl ExactSizeIterator<Item = TransferVertexOperatorTermView<'_>> + '_ {
-        self.coeffs.iter().enumerate().map(|(i, coeff)| {
-            let start = self.boundaries[i];
-            let end = self.boundaries[i + 1];
-            TransferVertexOperatorTermView {
-                coeff: *coeff,
-                left_indices: &self.left_indices[start..end],
-                right_indices: &self.right_indices[start..end],
-            }
-        })
-    }
-
-    pub fn iter_with_groups(
-        &'_ self,
-    ) -> impl ExactSizeIterator<Item = TransferVertexOperatorGroupTermView<'_>> + '_ {
-        if let Some(groups) = &self.groups {
-            return self
-                .coeffs
-                .iter()
-                .zip(groups)
-                .enumerate()
-                .map(|(i, (coeff, gidx))| {
-                    let start = self.boundaries[i];
-                    let end = self.boundaries[i + 1];
-                    TransferVertexOperatorGroupTermView {
-                        coeff: *coeff,
-                        left_indices: &self.left_indices[start..end],
-                        right_indices: &self.right_indices[start..end],
-                        group: *gidx,
-                    }
-                });
-        }
-        panic!("This method can only be called when groups are present!");
     }
 
     pub fn num_groups(&self) -> Option<u32> {
@@ -267,6 +230,9 @@ fn _compose(
 }
 
 impl OperatorTrait for TransferVertexOperator {
+    type TermView<'a> = TransferVertexOperatorTermView<'a>;
+    type GroupTermView<'a> = TransferVertexOperatorGroupTermView<'a>;
+
     fn zero() -> Self {
         Self {
             coeffs: vec![],
@@ -380,6 +346,66 @@ impl OperatorTrait for TransferVertexOperator {
         self.right_indices = right_indices;
         self.boundaries = boundaries;
         self.groups = None;
+    }
+
+    fn iter(&self) -> impl ExactSizeIterator<Item = Self::TermView<'_>> {
+        self.coeffs.iter().enumerate().map(|(i, coeff)| {
+            let start = self.boundaries[i];
+            let end = self.boundaries[i + 1];
+            TransferVertexOperatorTermView {
+                coeff: *coeff,
+                left_indices: &self.left_indices[start..end],
+                right_indices: &self.right_indices[start..end],
+            }
+        })
+    }
+
+    fn iter_with_groups(&self) -> impl ExactSizeIterator<Item = Self::GroupTermView<'_>> {
+        if let Some(groups) = &self.groups {
+            return self
+                .coeffs
+                .iter()
+                .zip(groups)
+                .enumerate()
+                .map(|(i, (coeff, gidx))| {
+                    let start = self.boundaries[i];
+                    let end = self.boundaries[i + 1];
+                    TransferVertexOperatorGroupTermView {
+                        coeff: *coeff,
+                        left_indices: &self.left_indices[start..end],
+                        right_indices: &self.right_indices[start..end],
+                        group: *gidx,
+                    }
+                });
+        }
+        panic!("This method can only be called when groups are present!");
+    }
+
+    fn from_terms<'a, I>(terms: I) -> Self
+    where
+        Self: 'a,
+        I: IntoIterator<Item = Self::TermView<'a>>,
+    {
+        let mut out = Self::zero();
+        for term in terms {
+            out._append_term(term.coeff, term.left_indices, term.right_indices);
+        }
+        out
+    }
+
+    fn from_terms_with_groups<'a, I>(terms: I) -> Self
+    where
+        Self: 'a,
+        I: IntoIterator<Item = Self::GroupTermView<'a>>,
+    {
+        let mut out = Self::zero();
+        let mut groups = Vec::new();
+        for term in terms {
+            out._append_term(term.coeff, term.left_indices, term.right_indices);
+            groups.push(term.group);
+        }
+        out.groups = Some(groups);
+        out
     }
 
     fn get_support(&self) -> HashSet<u32> {

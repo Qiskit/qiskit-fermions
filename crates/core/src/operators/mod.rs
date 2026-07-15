@@ -43,6 +43,48 @@ pub trait OperatorTrait {
     fn __imatmul__(&mut self, other: &Self);
     fn ichop(&mut self, atol: f64);
 
+    /// The borrowed view of a single term yielded by [`OperatorTrait::iter`].
+    type TermView<'a>: PartialEq
+    where
+        Self: 'a;
+
+    /// The borrowed view of a single term (together with its group index) yielded by
+    /// [`OperatorTrait::iter_with_groups`].
+    type GroupTermView<'a>: PartialEq
+    where
+        Self: 'a;
+
+    /// Iterates over the terms of the operator.
+    ///
+    /// The yielded `Item` is the associated type `Self::TermView<'_>` rather than a concrete view.
+    /// Implementations must spell it the same way: returning the concrete view type would make the
+    /// impl signature more specific than this one and trip the `refining_impl_trait` lint.
+    fn iter(&self) -> impl ExactSizeIterator<Item = Self::TermView<'_>>;
+
+    /// Iterates over the terms of the operator together with their group index.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the operator does not track group indices (i.e. `groups` is `None`).
+    fn iter_with_groups(&self) -> impl ExactSizeIterator<Item = Self::GroupTermView<'_>>;
+
+    /// Constructs an operator from an iterator of term views.
+    ///
+    /// This is the inverse of [`OperatorTrait::iter`]: the term views may borrow from any operator
+    /// (including `self`); their data is copied into the freshly-built, owned result.
+    fn from_terms<'a, I>(terms: I) -> Self
+    where
+        Self: Sized + 'a,
+        I: IntoIterator<Item = Self::TermView<'a>>;
+
+    /// Constructs an operator (with group indices) from an iterator of group term views.
+    ///
+    /// This is the inverse of [`OperatorTrait::iter_with_groups`].
+    fn from_terms_with_groups<'a, I>(terms: I) -> Self
+    where
+        Self: Sized + 'a,
+        I: IntoIterator<Item = Self::GroupTermView<'a>>;
+
     fn get_support(&self) -> HashSet<u32>;
     fn relabel_modes(&self, permutation: Vec<u32>) -> Result<Self, CoherenceError>
     where
