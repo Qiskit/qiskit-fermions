@@ -115,126 +115,61 @@ in packed (lower-triangular) `chemist` ordering, which is exactly what PySCF pro
    ...     h1e_tril, norb
    ... ) + FermionOperator.from_2body_tril_spin_sym(h2e_tril, norb)
 
-3. Factorize the amplitudes into ansatz layers
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+3. Build the LUCJ circuit
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The connection between the cluster amplitudes and the UCJ ansatz runs through a *double
-factorization* of the :math:`t_2` amplitudes. Each term of the factorization is a
-:math:`(Z, U)` pair -- a real symmetric diagonal Coulomb matrix :math:`Z` and a unitary
-orbital rotation :math:`U` -- and together the terms define the ansatz layers
-:math:`\mathcal{U}_k e^{i\mathcal{J}_k} \mathcal{U}_k^\dagger`. We use
-:func:`~qiskit_fermions.linalg.double_factorized_t2` from this package's linear-algebra module
-to perform the factorization directly on the CCSD amplitudes; no external ansatz object is
-required.
-
-.. code-block:: python
-
-   >>> from qiskit_fermions.linalg import double_factorized_t2
-   >>>
-   >>> # each term is a (diagonal Coulomb matrix Z, orbital rotation U) pair defining one layer
-   >>> terms = double_factorized_t2(t2.astype(complex), tol=1e-8)
-
-The :math:`t_1` amplitudes contribute an optional final orbital rotation, constructed as
-:math:`\exp(t_1 - t_1^\dagger)` after embedding the amplitudes into an anti-Hermitian
-generator over all orbitals:
-
-.. code-block:: python
-
-   >>> import numpy as np
-   >>> import scipy.linalg
-   >>>
-   >>> def final_rotation_from_t1(t1):
-   ...     """Build the orbital rotation exp(t1 - t1^dagger) from the t1 amplitudes."""
-   ...     nocc, nvrt = t1.shape
-   ...     generator = np.zeros((nocc + nvrt, nocc + nvrt), dtype=complex)
-   ...     generator[:nocc, nocc:] = -t1.conj()
-   ...     generator[nocc:, :nocc] = t1.T
-   ...     return scipy.linalg.expm(generator)
-   >>>
-   >>> final_orbital_rotation = final_rotation_from_t1(t1)
-
-4. Translate the layers into fermionic operators
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Each diagonal Coulomb layer is a :class:`.FermionOperator`. We use the block-spin mode
-convention that the fermionic circuit shares with the simulation backend: mode :math:`p` is
-the spin-up (alpha) orbital :math:`p`, and mode :math:`\text{norb} + p` is the spin-down
-(beta) orbital :math:`p`. A number operator is then :math:`n_m = a^\dagger_m a_m`, so each
-product :math:`n_{i\sigma} n_{j\tau}` is a single four-operator term.
-
-For the spin-balanced ansatz, a single matrix :math:`Z` describes each layer: the alpha-alpha
-and beta-beta blocks both equal :math:`Z`, and the alpha-beta and beta-alpha blocks equal
-:math:`Z` and its transpose (here :math:`Z` is symmetric, so they coincide).
-
-.. code-block:: python
-
-   >>> from qiskit_fermions.operators import cre, ann
-   >>>
-   >>> def diag_coulomb_operator(mat, norb):
-   ...     """Build J = 1/2 sum_{ij,st} Z_{ij} n_{i,s} n_{j,t} as a FermionOperator."""
-   ...     blocks = {(0, 0): mat, (0, 1): mat, (1, 0): mat.T, (1, 1): mat}
-   ...     terms = {}
-   ...     for (sigma, tau), block in blocks.items():
-   ...         for i in range(norb):
-   ...             for j in range(norb):
-   ...                 coeff = 0.5 * block[i, j]
-   ...                 if coeff == 0.0:
-   ...                     continue
-   ...                 mode_i, mode_j = sigma * norb + i, tau * norb + j
-   ...                 term = (cre(mode_i), ann(mode_i), cre(mode_j), ann(mode_j))
-   ...                 terms[term] = terms.get(term, 0.0) + coeff
-   ...     return FermionOperator.from_dict(terms)
-
-The orbital rotations act on both spin sectors with the same ``norb x norb`` matrix. A
-:class:`.OrbitalRotation` gate acts on exactly the modes it is placed on, so instead of
-embedding the rotation into a larger block-diagonal matrix we simply append it twice: once to
-the alpha modes ``0..norb`` and once to the beta modes ``norb..2*norb``. Because the two spin
-sectors are disjoint, the sectors never mix and the placements commute.
-
-.. code-block:: python
-
-   >>> from qiskit_fermions.circuit.library import OrbitalRotation
-   >>>
-   >>> def add_orbital_rotation(circuit, rotation, norb):
-   ...     """Append a per-spin orbital rotation to the alpha and beta halves of the register."""
-   ...     circuit.append(OrbitalRotation(rotation), circuit.modes[:norb])
-   ...     circuit.append(OrbitalRotation(rotation), circuit.modes[norb:])
-
-5. Assemble the LUCJ circuit
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-We now build the :class:`.FermionicCircuit`. It opens with an :class:`.InitializeModes` gate
-that prepares the Hartree-Fock reference determinant (the first ``n_alpha`` alpha modes and
-first ``n_beta`` beta modes occupied). Each factorization term contributes the sequence
-:math:`\mathcal{U}_k^\dagger`, then :math:`e^{i\mathcal{J}_k}` (an :class:`.Evolution` with
-``time=-1`` so that :math:`e^{-i(-1)\mathcal{J}_k} = e^{i\mathcal{J}_k}`), then
-:math:`\mathcal{U}_k`. Finally we append the :math:`t_1`-derived orbital rotation.
+The :class:`.UCJ` gate assembles the ansatz directly from the coupled-cluster amplitudes. Its
+:meth:`~qiskit_fermions.circuit.library.UCJ.from_t_amplitudes` constructor performs a *double
+factorization* of the :math:`t_2` amplitudes (via
+:func:`~qiskit_fermions.linalg.double_factorized_t2`) to obtain the per-layer diagonal Coulomb
+matrices and orbital rotations, and derives an optional final orbital rotation from the
+:math:`t_1` amplitudes.
 
 .. code-block:: python
 
    >>> from qiskit_fermions.circuit import FermionicCircuit
-   >>> from qiskit_fermions.circuit.library import Evolution, InitializeModes
+   >>> from qiskit_fermions.circuit.library import UCJ
    >>>
-   >>> n_alpha, n_beta = nelec
-   >>> occupation = [False] * (2 * norb)
-   >>> for i in range(n_alpha):
-   ...     occupation[i] = True
-   >>> for i in range(n_beta):
-   ...     occupation[norb + i] = True
+   >>> ansatz = UCJ.from_t_amplitudes(nelec, t2, t1=t1)
    >>>
    >>> circuit = FermionicCircuit(2 * norb)
-   >>> circuit.append(InitializeModes(occupation), circuit.modes)
-   >>>
-   >>> for diag_coulomb_mat, orbital_rotation in terms:
-   ...     diag_coulomb = diag_coulomb_operator(diag_coulomb_mat, norb)
-   ...     add_orbital_rotation(circuit, orbital_rotation.conj().T, norb)
-   ...     circuit.append(Evolution(2 * norb, diag_coulomb, time=-1.0), circuit.modes)
-   ...     add_orbital_rotation(circuit, orbital_rotation, norb)
-   >>>
-   >>> add_orbital_rotation(circuit, final_orbital_rotation, norb)
+   >>> circuit.append(ansatz, circuit.modes)
 
-6. Simulate the ansatz and evaluate its energy
+.. skip: end
+
+Decomposing the gate reveals its anatomy: an :class:`.InitializeModes` gate prepares the
+Hartree-Fock reference determinant, and each ansatz layer contributes an orbital rotation
+:math:`\mathcal{U}_k^\dagger`, then :math:`e^{i\mathcal{J}_k}` (an :class:`.Evolution` of the
+diagonal Coulomb operator :math:`\mathcal{J}_k`), then :math:`\mathcal{U}_k`, with a final
+orbital rotation at the end. The orbital rotations act per spin sector, so each is placed on the
+alpha modes ``0..norb`` and the beta modes ``norb..2*norb`` independently.
+
+The plot below illustrates this structure for a small two-orbital, single-repetition example
+built directly from explicit tensors (a diagonal Coulomb matrix and an orbital rotation):
+
+.. plot::
+   :alt: The gates that a UCJ ansatz decomposes into.
+   :context: close-figs
+   :include-source:
+
+   >>> import numpy as np
+   >>> from qiskit_fermions.circuit import FermionicCircuit
+   >>> from qiskit_fermions.circuit.library import UCJ
+   >>>
+   >>> example_diag_coulomb = np.array([[[[0.0, 0.5], [0.5, 0.0]], [[1.0, 0.2], [0.2, 1.0]]]])
+   >>> example_rotations = np.array([[[0.0, 1.0], [1.0, 0.0]]], dtype=complex)
+   >>> example_ansatz = UCJ(2, (1, 1), example_diag_coulomb, example_rotations)
+   >>>
+   >>> example_circuit = FermionicCircuit(2 * 2)
+   >>> example_circuit.append(example_ansatz, example_circuit.modes)
+   >>> example_circuit.decompose().draw("mpl", fold=-1)
+   <Figure size ... with 1 Axes>
+
+4. Simulate the ansatz and evaluate its energy
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. skip: start if(not HAS_FFSIM or not HAS_PYSCF)
+
 
 Because every gate in the circuit implements ``ffsim``'s ``SupportsApplyUnitary`` protocol,
 the whole :class:`.FermionicCircuit` can be applied to a fixed particle-number state vector with
@@ -247,6 +182,7 @@ molecular Hamiltonian, adding back the constant core energy.
 .. code-block:: python
 
    >>> import ffsim
+   >>> import numpy as np
    >>>
    >>> reference = ffsim.hartree_fock_state(norb, nelec)
    >>> state = ffsim.apply_unitary(reference, circuit, norb=norb, nelec=nelec)
@@ -261,12 +197,18 @@ molecular Hamiltonian, adding back the constant core energy.
 .. skip: end
 
 .. note::
-   The molecular Hamiltonian and the ansatz layers are built entirely with the core
+   The molecular Hamiltonian and the ansatz are built entirely with the core
    :mod:`qiskit_fermions` API -- :class:`.FermionOperator` (including its electronic-integral
-   constructors) and :func:`~qiskit_fermions.linalg.double_factorized_t2` -- plus NumPy and
+   constructors) and the :class:`.UCJ` gate (whose
+   :meth:`~qiskit_fermions.circuit.library.UCJ.from_t_amplitudes` uses the exact double
+   factorization in :func:`~qiskit_fermions.linalg.double_factorized_t2`) -- plus NumPy and
    SciPy. Running the classical chemistry requires PySCF, and preparing and evolving the state
    vector (as well as wrapping the operator via :func:`ffsim.linear_operator`) require the
    optional dependency managed by :data:`.HAS_FFSIM`.
+
+   To use ffsim's optimized ("compressed") double factorization instead, build an ``ffsim`` UCJ
+   operator with ``optimize=True`` and pass its ``diag_coulomb_mats`` / ``orbital_rotations`` /
+   ``final_orbital_rotation`` into :class:`.UCJ` directly.
 
 Next steps
 ^^^^^^^^^^

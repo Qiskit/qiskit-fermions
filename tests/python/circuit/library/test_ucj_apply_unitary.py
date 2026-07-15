@@ -128,6 +128,33 @@ def test_ucj_gate_through_circuit_matches_ffsim():
     np.testing.assert_allclose(result, expected, atol=1e-10)
 
 
+def test_ucj_single_rep_matches_hand_composed_ffsim_primitives():
+    """A single-rep UCJ matches a reference composed directly from ffsim's gate primitives.
+
+    This cross-check does not go through ``UCJOpSpinBalanced``: it applies ffsim's orbital-rotation
+    and diagonal-Coulomb-evolution kernels by hand in the ``U exp(i J) U^dagger`` order, giving an
+    independent oracle for the diagonal Coulomb operator convention the :class:`.UCJ` gate builds.
+    """
+    norb = 3
+    nelec = (2, 1)
+
+    ucj_op = ffsim.random.random_ucj_op_spin_balanced(norb, n_reps=1, seed=555)
+    orbital_rotation = ucj_op.orbital_rotations[0]
+    mat_aa, mat_ab = ucj_op.diag_coulomb_mats[0]
+
+    reference = ffsim.hartree_fock_state(norb, nelec)
+
+    # hand-composed reference: U^dagger, then exp(-i * (-1) * J), then U (i.e. U exp(i J) U^dagger)
+    vec = ffsim.apply_orbital_rotation(reference, orbital_rotation.conj().T, norb=norb, nelec=nelec)
+    vec = ffsim.apply_diag_coulomb_evolution(
+        vec, (mat_aa, mat_ab, mat_aa), time=-1.0, norb=norb, nelec=nelec
+    )
+    expected = ffsim.apply_orbital_rotation(vec, orbital_rotation, norb=norb, nelec=nelec)
+
+    result = _apply_ours(ucj_op, norb, nelec, reference)
+    np.testing.assert_allclose(result, expected, atol=1e-10)
+
+
 def test_ucj_from_t_amplitudes_balanced_matches_ffsim():
     """UCJ.from_t_amplitudes (balanced) matches ffsim's from_t_amplitudes, including LUCJ locality."""
     pyscf = pytest.importorskip("pyscf")
