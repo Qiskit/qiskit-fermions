@@ -44,8 +44,8 @@ use qiskit_fermions_core::operators::fermion_operator::FermionOperator;
 ///
 /// .. math::
 ///
-///    a^\dagger_j \rightarrow \bigotimes_{k\lt j} \sigma^Z_k \otimes \sigma^+_j ~~\text{and}~~
-///    a_j \rightarrow \bigotimes_{k\lt j} \sigma^Z_k \otimes \sigma^-_j \, ,
+///    a^\dagger_j \rightarrow \bigotimes_{k\lt j} \sigma^Z_k \otimes \sigma^-_j ~~\text{and}~~
+///    a_j \rightarrow \bigotimes_{k\lt j} \sigma^Z_k \otimes \sigma^+_j \, ,
 ///
 /// where :math:`a^\dagger_j` (:math:`a_j`) is the fermionic creation (annihilation) operator
 /// acting on the :math:`j`-th spin-less fermionic mode, :math:`\sigma^P` with
