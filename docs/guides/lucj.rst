@@ -36,46 +36,34 @@ with :math:`n_{i\sigma}` the number operator on spatial orbital :math:`i` with s
 
 The (L)UCJ ansatz can be initialized from the amplitudes of a coupled-cluster singles and
 doubles (CCSD) calculation. Here we run restricted Hartree-Fock followed by CCSD for a hydrogen
-molecule in the ``6-31g`` basis.
+molecule in the ``6-31g`` basis, using `PySCF <https://pyscf.org/>`_ for the quantum chemistry.
 
-.. tab-set::
+.. plot::
+   :context:
+   :nofigs:
+   :include-source:
 
-   .. tab-item:: Python
-      :sync: python
-
-      .. plot::
-         :context:
-         :nofigs:
-         :include-source:
-
-         >>> import pyscf
-         >>> import pyscf.cc
-         >>>
-         >>> # build the molecule and run Hartree-Fock
-         >>> mol = pyscf.gto.Mole()
-         >>> mol.build(
-         ...     atom=[["H", (0, 0, 0)], ["H", (0, 0, 0.74)]],
-         ...     basis="6-31g",
-         ...     symmetry="Dooh",
-         ...     verbose=0,
-         ... )
-         <pyscf.gto.mole.Mole object at ...>
-         >>> scf = pyscf.scf.RHF(mol).run()
-         >>>
-         >>> mo_coeff = scf.mo_coeff
-         >>> norb = mo_coeff.shape[1]
-         >>> nelec = (mol.nelec[0], mol.nelec[1])
-         >>>
-         >>> # run CCSD for the t-amplitudes
-         >>> ccsd = pyscf.cc.CCSD(scf).run()
-         >>> t1, t2 = ccsd.t1, ccsd.t2
-
-   .. tab-item:: C
-      :sync: c
-
-      .. code-block:: c
-
-         // The classical calculation is performed with an external library such as PySCF.
+   >>> import pyscf
+   >>> import pyscf.cc
+   >>>
+   >>> # build the molecule and run Hartree-Fock
+   >>> mol = pyscf.gto.Mole()
+   >>> mol.build(
+   ...     atom=[["H", (0, 0, 0)], ["H", (0, 0, 0.74)]],
+   ...     basis="6-31g",
+   ...     symmetry="Dooh",
+   ...     verbose=0,
+   ... )
+   <pyscf.gto.mole.Mole object at ...>
+   >>> scf = pyscf.scf.RHF(mol).run()
+   >>>
+   >>> mo_coeff = scf.mo_coeff
+   >>> norb = mo_coeff.shape[1]
+   >>> nelec = (mol.nelec[0], mol.nelec[1])
+   >>>
+   >>> # run CCSD for the t-amplitudes
+   >>> ccsd = pyscf.cc.CCSD(scf).run()
+   >>> t1, t2 = ccsd.t1, ccsd.t2
 
 2. Build the molecular Hamiltonian as a fermionic operator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -120,7 +108,11 @@ in packed (lower-triangular) `chemist` ordering, which is exactly what PySCF pro
 
       .. code-block:: c
 
-         // The C API for the electronic-integral constructors is not available yet.
+         // Given the packed integrals (obtained as above), the C API exposes matching
+         // electronic-integral constructors:
+         //
+         //   QfFermionOperator *h1 = qf_ferm_op_from_1body_tril_spin_sym(h1e_tril, norb);
+         //   QfFermionOperator *h2 = qf_ferm_op_from_2body_tril_spin_sym(h2e_tril, norb);
 
 3. Build the LUCJ circuit
 ^^^^^^^^^^^^^^^^^^^^^^^^^
