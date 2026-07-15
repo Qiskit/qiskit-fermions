@@ -10,7 +10,7 @@
 // copyright notice, and modified files need to carry a notice indicating
 // that they have been altered from the originals.
 
-use crate::operators::{CoherenceError, OperatorMacro, OperatorTrait};
+use crate::operators::{CoherenceError, OperatorMacro, OperatorTrait, TermSortKey};
 use num_complex::{Complex64, ComplexFloat};
 use std::collections::{HashMap, HashSet};
 use std::ops::{
@@ -35,6 +35,13 @@ impl MajoranaOperatorTermView<'_> {
     }
 
     pub fn into_vec(&'_ self) -> Vec<u32> {
+        self.modes.to_vec()
+    }
+}
+
+impl TermSortKey for MajoranaOperatorTermView<'_> {
+    fn sort_key(&self) -> impl Ord {
+        // A Majorana term is fully described by its (ordered) mode indices.
         self.modes.to_vec()
     }
 }

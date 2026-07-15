@@ -10,7 +10,7 @@
 // copyright notice, and modified files need to carry a notice indicating
 // that they have been altered from the originals.
 
-use crate::operators::{CoherenceError, OperatorMacro, OperatorTrait};
+use crate::operators::{CoherenceError, OperatorMacro, OperatorTrait, TermSortKey};
 use num_complex::{Complex64, ComplexFloat};
 use std::cmp::Ordering;
 use std::collections::{HashMap, HashSet};
@@ -39,6 +39,19 @@ impl FermionOperatorTermView<'_> {
 
     pub fn into_vec(&'_ self) -> Vec<(bool, u32)> {
         zip(self.actions.to_vec(), self.modes.to_vec()).collect()
+    }
+}
+
+impl TermSortKey for FermionOperatorTermView<'_> {
+    fn sort_key(&self) -> impl Ord {
+        // Compare the operator string position-by-position: for each factor, its mode index first
+        // and then its action. Zipping keeps the comparison aligned with how the term reads
+        // left-to-right, rather than comparing all modes before any actions.
+        self.modes
+            .iter()
+            .copied()
+            .zip(self.actions.iter().copied())
+            .collect::<Vec<(u32, bool)>>()
     }
 }
 

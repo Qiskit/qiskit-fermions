@@ -10,7 +10,7 @@
 // copyright notice, and modified files need to carry a notice indicating
 // that they have been altered from the originals.
 
-use crate::operators::{CoherenceError, OperatorMacro, OperatorTrait};
+use crate::operators::{CoherenceError, OperatorMacro, OperatorTrait, TermSortKey};
 use num_complex::{Complex64, ComplexFloat};
 use std::collections::{HashMap, HashSet};
 use std::iter::zip;
@@ -38,6 +38,18 @@ impl EdgeVertexOperatorTermView<'_> {
 
     pub fn into_vec(&'_ self) -> Vec<(u32, u32)> {
         zip(self.left_indices.to_vec(), self.right_indices.to_vec()).collect()
+    }
+}
+
+impl TermSortKey for EdgeVertexOperatorTermView<'_> {
+    fn sort_key(&self) -> impl Ord {
+        // Compare the operator string position-by-position, each factor being a (left, right) vertex
+        // pair. Zipping keeps the comparison aligned with how the term reads left-to-right.
+        self.left_indices
+            .iter()
+            .copied()
+            .zip(self.right_indices.iter().copied())
+            .collect::<Vec<(u32, u32)>>()
     }
 }
 

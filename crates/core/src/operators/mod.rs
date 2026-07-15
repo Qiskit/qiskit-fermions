@@ -29,6 +29,17 @@ pub enum CoherenceError {
     NumQubitsTooSmall { num_qubits: u32, max_mode: u32 },
 }
 
+/// Provides a total, coefficient-independent ordering key for a single term view.
+///
+/// Implemented by the `*TermView` structs. The key is derived purely from the term's structure
+/// (the operator string it represents), so two operators that differ only in their coefficients
+/// order their terms identically and scaling an operator never reshuffles it. This is what
+/// [`operators::terms::ordering::canonical`](crate::operators::terms::ordering::canonical) sorts by.
+pub trait TermSortKey {
+    /// Returns the ordering key for this term.
+    fn sort_key(&self) -> impl Ord;
+}
+
 pub trait OperatorTrait {
     fn zero() -> Self;
     fn one() -> Self;
@@ -44,7 +55,7 @@ pub trait OperatorTrait {
     fn ichop(&mut self, atol: f64);
 
     /// The borrowed view of a single term yielded by [`OperatorTrait::iter`].
-    type TermView<'a>: PartialEq
+    type TermView<'a>: PartialEq + TermSortKey
     where
         Self: 'a;
 
