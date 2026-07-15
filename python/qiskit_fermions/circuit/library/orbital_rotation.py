@@ -54,6 +54,39 @@ class OrbitalRotation(FermionicGate):
 
         super().__init__("OrbitalRotation", self.rotation_unitary.shape[0], [])
 
+    @classmethod
+    def from_t1_amplitudes(cls, t1: np.ndarray) -> OrbitalRotation:
+        r"""Constructs an orbital rotation from :math:`t_1` (singles) amplitudes.
+
+        The rotation is the unitary :math:`\exp(t_1 - t_1^\dagger)`, where the
+        :math:`n_\text{occ} \times n_\text{virt}` amplitude matrix :math:`t_1` is embedded into the
+        anti-Hermitian generator over all :math:`n = n_\text{occ} + n_\text{virt}` orbitals
+
+        .. math::
+
+            G = \begin{pmatrix} 0 & -t_1^* \\ t_1^\top & 0 \end{pmatrix},
+
+        with the occupied orbitals ordered before the virtual ones. This is the single-excitation
+        orbital rotation entering the (L)UCJ ansatz when it is initialized from coupled-cluster
+        amplitudes; see :class:`.UCJ`.
+
+        Args:
+            t1: the :math:`t_1` amplitudes of shape ``(nocc, nvrt)``, where ``nocc`` is the number
+                of occupied orbitals and ``nvrt`` is the number of virtual orbitals.
+
+        Returns:
+            An :class:`.OrbitalRotation` acting on :math:`n = n_\text{occ} + n_\text{virt}` modes,
+            whose ``rotation_unitary`` is :math:`\exp(t_1 - t_1^\dagger)`.
+        """
+        import scipy.linalg
+
+        nocc, nvrt = t1.shape
+        norb = nocc + nvrt
+        generator = np.zeros((norb, norb), dtype=complex)
+        generator[:nocc, nocc:] = -t1.conj()
+        generator[nocc:, :nocc] = t1.T
+        return cls(scipy.linalg.expm(generator))
+
     def _apply_unitary_(
         self, vec: np.ndarray, norb: int, nelec: int | tuple[int, int], copy: bool
     ) -> np.ndarray:

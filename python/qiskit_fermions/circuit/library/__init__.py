@@ -28,13 +28,16 @@ This module provides a library of :class:`.FermionicGate` implementations.
    Evolution
    InitializeModes
    OrbitalRotation
+   UCJ
 """
 
 from .evolution import Evolution
 from .initialize_modes import InitializeModes
 from .orbital_rotation import OrbitalRotation
+from .ucj import UCJ
 
 __all__ = [
+    "UCJ",
     "Evolution",
     "InitializeModes",
     "OrbitalRotation",
