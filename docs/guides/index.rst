@@ -27,6 +27,7 @@ specific example applications:
    :glob:
 
    sqdrift
+   lucj
 
 Explanations
 ============
