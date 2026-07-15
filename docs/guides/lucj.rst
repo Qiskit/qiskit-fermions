@@ -34,11 +34,11 @@ the fermionic gates in :mod:`qiskit_fermions.circuit.library`: an
 the :math:`\mathcal{U}_k`, and :class:`.Evolution` gates for the :math:`e^{i \mathcal{J}_k}`
 factors.
 
-The ansatz parameters are derived entirely with this package's own
-:mod:`~qiskit_fermions.linalg` module, so building the circuit needs only ``qiskit-fermions``
-together with NumPy and SciPy. This guide additionally uses `PySCF <https://pyscf.org/>`_ to
-run the underlying quantum chemistry and the optional ``ffsim`` dependency (managed by
-:data:`.HAS_FFSIM`) to package the integrals and simulate the resulting circuit.
+Both the ansatz parameters and the molecular Hamiltonian are built with this package's own API:
+the ansatz layers come from :mod:`~qiskit_fermions.linalg`, and the Hamiltonian is assembled as a
+:class:`.FermionOperator` from the active-space integrals. This guide uses
+`PySCF <https://pyscf.org/>`_ to run the underlying quantum chemistry, and the optional ``ffsim``
+dependency (managed by :data:`.HAS_FFSIM`) only to prepare and evolve the state vector.
 
 .. invisible-code-block: python
 
@@ -48,38 +48,74 @@ run the underlying quantum chemistry and the optional ``ffsim`` dependency (mana
 
 .. skip: start if(not HAS_FFSIM or not HAS_PYSCF)
 
-1. Obtain the cluster amplitudes from a classical calculation
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+1. Run the classical calculation and choose an active space
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The (L)UCJ ansatz can be initialized from the amplitudes of a coupled-cluster singles and
-doubles (CCSD) calculation. Here we run restricted Hartree-Fock followed by CCSD for a
-hydrogen molecule in the ``6-31g`` basis. We use ``pyscf`` for the quantum chemistry and
-``ffsim`` only to package the active-space integrals (and, later, to simulate the ansatz).
+doubles (CCSD) calculation. Here we run restricted Hartree-Fock for a nitrogen molecule in the
+``sto-6g`` basis, then define an active space by freezing the two core orbitals. The CCSD
+calculation that provides the :math:`t`-amplitudes is run with the same frozen core.
 
 .. code-block:: python
 
    >>> import pyscf
    >>> import pyscf.cc
-   >>> import ffsim
    >>>
    >>> # build the molecule and run Hartree-Fock
    >>> mol = pyscf.gto.Mole()
    >>> mol.build(
-   ...     atom=[["H", (0, 0, 0)], ["H", (0, 0, 0.74)]],
-   ...     basis="6-31g",
+   ...     atom=[["N", (0, 0, 0)], ["N", (0, 0, 1.1)]],
+   ...     basis="sto-6g",
    ...     symmetry="Dooh",
    ...     verbose=0,
    ... )
    <pyscf.gto.mole.Mole object at ...>
    >>> scf = pyscf.scf.RHF(mol).run()
    >>>
-   >>> # extract the active-space definition and run CCSD for the t-amplitudes
-   >>> mol_data = ffsim.MolecularData.from_scf(scf)
-   >>> norb, nelec = mol_data.norb, mol_data.nelec
-   >>> ccsd = pyscf.cc.CCSD(scf).run()
+   >>> # freeze the two core orbitals to define the active space
+   >>> n_frozen = 2
+   >>> active_space = range(n_frozen, mol.nao_nr())
+   >>> norb = len(active_space)
+   >>> n_active_elec = int(sum(scf.mo_occ[active_space]))
+   >>> nelec = (n_active_elec // 2, n_active_elec // 2)
+   >>>
+   >>> # run CCSD (with the same frozen core) for the t-amplitudes
+   >>> ccsd = pyscf.cc.CCSD(scf, frozen=range(n_frozen)).run()
    >>> t1, t2 = ccsd.t1, ccsd.t2
 
-2. Factorize the amplitudes into ansatz layers
+2. Build the molecular Hamiltonian as a fermionic operator
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+We will need the active-space Hamiltonian later to evaluate the ansatz energy. We build it
+directly as a :class:`.FermionOperator` from the active-space integrals: PySCF's ``CASCI``
+helper returns the one-body integrals ``h1e`` (together with the constant core energy ``ecore``,
+which folds in the frozen-core and nuclear-repulsion contributions) and the two-body integrals
+``h2e``. The electronic-integral constructors
+:meth:`~qiskit_fermions.operators.FermionOperator.from_1body_tril_spin_sym` and
+:meth:`~qiskit_fermions.operators.FermionOperator.from_2body_tril_spin_sym` expect the integrals
+in packed (lower-triangular) `chemist` ordering, which is exactly what PySCF produces.
+
+.. code-block:: python
+
+   >>> import pyscf.mcscf
+   >>> from pyscf import ao2mo, lib
+   >>>
+   >>> from qiskit_fermions.operators import FermionOperator
+   >>>
+   >>> # active-space integrals and the constant (frozen-core + nuclear) energy
+   >>> cas = pyscf.mcscf.CASCI(scf, norb, nelec)
+   >>> h1e, ecore = cas.get_h1eff()
+   >>> h2e = cas.get_h2eff()
+   >>>
+   >>> # pack into the lower-triangular chemist-ordered layout the constructors expect
+   >>> h1e_tril = lib.pack_tril(h1e)
+   >>> h2e_tril = lib.pack_tril(ao2mo.restore(4, h2e, norb))
+   >>>
+   >>> hamiltonian = FermionOperator.from_1body_tril_spin_sym(
+   ...     h1e_tril, norb
+   ... ) + FermionOperator.from_2body_tril_spin_sym(h2e_tril, norb)
+
+3. Factorize the amplitudes into ansatz layers
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The connection between the cluster amplitudes and the UCJ ansatz runs through a *double
@@ -117,7 +153,7 @@ generator over all orbitals:
    >>>
    >>> final_orbital_rotation = final_rotation_from_t1(t1)
 
-3. Translate the layers into fermionic operators
+4. Translate the layers into fermionic operators
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Each diagonal Coulomb layer is a :class:`.FermionOperator`. We use the block-spin mode
@@ -132,7 +168,7 @@ and beta-beta blocks both equal :math:`Z`, and the alpha-beta and beta-alpha blo
 
 .. code-block:: python
 
-   >>> from qiskit_fermions.operators import FermionOperator, cre, ann
+   >>> from qiskit_fermions.operators import cre, ann
    >>>
    >>> def diag_coulomb_operator(mat, norb):
    ...     """Build J = 1/2 sum_{ij,st} Z_{ij} n_{i,s} n_{j,t} as a FermionOperator."""
@@ -164,7 +200,7 @@ sectors are disjoint, the sectors never mix and the placements commute.
    ...     circuit.append(OrbitalRotation(rotation), circuit.modes[:norb])
    ...     circuit.append(OrbitalRotation(rotation), circuit.modes[norb:])
 
-4. Assemble the LUCJ circuit
+5. Assemble the LUCJ circuit
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 We now build the :class:`.FermionicCircuit`. It opens with an :class:`.InitializeModes` gate
@@ -197,21 +233,26 @@ first ``n_beta`` beta modes occupied). Each factorization term contributes the s
    >>>
    >>> add_orbital_rotation(circuit, final_orbital_rotation, norb)
 
-5. Simulate the ansatz and evaluate its energy
+6. Simulate the ansatz and evaluate its energy
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Because every gate in the circuit implements ``ffsim``'s ``SupportsApplyUnitary`` protocol,
-the whole :class:`.FermionicCircuit` can be applied directly to a fixed particle-number state
-vector. The :class:`.InitializeModes` gate seeds the reference determinant, so we can apply
-the circuit starting from no incoming state (``None``). We then compute the ansatz energy as
-the expectation value of the molecular Hamiltonian.
+the whole :class:`.FermionicCircuit` can be applied to a fixed particle-number state vector with
+:func:`ffsim.apply_unitary`, starting from the Hartree-Fock reference. The
+:class:`.FermionOperator` likewise implements ffsim's ``SupportsLinearOperator`` protocol, so we
+can obtain a SciPy :class:`~scipy.sparse.linalg.LinearOperator` for it via
+:func:`ffsim.linear_operator` and evaluate the ansatz energy as the expectation value of the
+molecular Hamiltonian, adding back the constant core energy.
 
 .. code-block:: python
 
-   >>> state = circuit._apply_unitary_(None, norb, nelec, copy=True)
+   >>> import ffsim
    >>>
-   >>> hamiltonian = ffsim.linear_operator(mol_data.hamiltonian, norb=norb, nelec=nelec)
-   >>> energy = np.vdot(state, hamiltonian @ state).real
+   >>> reference = ffsim.hartree_fock_state(norb, nelec)
+   >>> state = ffsim.apply_unitary(reference, circuit, norb=norb, nelec=nelec)
+   >>>
+   >>> linop = ffsim.linear_operator(hamiltonian, norb=norb, nelec=nelec)
+   >>> energy = np.vdot(state, linop @ state).real + ecore
    >>>
    >>> # the LUCJ energy improves on the Hartree-Fock reference
    >>> bool(energy < scf.e_tot)
@@ -220,10 +261,12 @@ the expectation value of the molecular Hamiltonian.
 .. skip: end
 
 .. note::
-   Deriving the ansatz layers from the CCSD amplitudes uses only the core
-   :mod:`qiskit_fermions` API (:func:`~qiskit_fermions.linalg.double_factorized_t2`) plus NumPy
-   and SciPy. Running the classical chemistry requires PySCF, and packaging the integrals and
-   simulating the circuit require the optional dependency managed by :data:`.HAS_FFSIM`.
+   The molecular Hamiltonian and the ansatz layers are built entirely with the core
+   :mod:`qiskit_fermions` API -- :class:`.FermionOperator` (including its electronic-integral
+   constructors) and :func:`~qiskit_fermions.linalg.double_factorized_t2` -- plus NumPy and
+   SciPy. Running the classical chemistry requires PySCF, and preparing and evolving the state
+   vector (as well as wrapping the operator via :func:`ffsim.linear_operator`) require the
+   optional dependency managed by :data:`.HAS_FFSIM`.
 
 Next steps
 ^^^^^^^^^^
