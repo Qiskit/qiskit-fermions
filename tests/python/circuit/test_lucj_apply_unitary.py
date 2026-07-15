@@ -39,13 +39,18 @@ from qiskit_fermions.operators import FermionOperator, ann, cre
 ffsim = pytest.importorskip("ffsim")
 
 
-def _block_diag(mat_a: np.ndarray, mat_b: np.ndarray) -> np.ndarray:
-    """Assembles a block-spin orbital rotation from independent alpha/beta rotations."""
-    norb = mat_a.shape[0]
-    full = np.zeros((2 * norb, 2 * norb), dtype=complex)
-    full[:norb, :norb] = mat_a
-    full[norb:, norb:] = mat_b
-    return full
+def _append_per_spin_rotation(circ: FermionicCircuit, rotation: np.ndarray, norb: int) -> None:
+    """Appends the same ``norb x norb`` rotation to the alpha and beta halves of the register.
+
+    A spin-balanced orbital rotation acts with the same matrix on both spin sectors. Rather than
+    embedding it into a ``2 * norb`` block-diagonal matrix placed on all modes, we append two local
+    :class:`.OrbitalRotation` gates -- one on the alpha modes ``0..norb`` and one on the beta modes
+    ``norb..2*norb``. Placement embeds each local rotation onto exactly those modes, so the two
+    gates together realize the block-diagonal ``diag(rotation, rotation)`` (the sectors are disjoint,
+    so the gates commute).
+    """
+    circ.append(OrbitalRotation(rotation), circ.modes[:norb])
+    circ.append(OrbitalRotation(rotation), circ.modes[norb:])
 
 
 def _diag_coulomb_operator(mat_aa: np.ndarray, mat_ab: np.ndarray, norb: int) -> FermionOperator:
@@ -120,20 +125,18 @@ def _lucj_circuit(
     for orbital_rotation, (mat_aa, mat_ab) in zip(
         ucj_op.orbital_rotations, ucj_op.diag_coulomb_mats, strict=True
     ):
-        full = _block_diag(orbital_rotation, orbital_rotation)
         diag_coulomb = _diag_coulomb_operator(mat_aa, mat_ab, norb)
         if group_diag_coulomb and len(diag_coulomb):
             diag_coulomb.groups = [0] * len(diag_coulomb)
 
         # U_k^dagger, then exp(i J_k) == exp(-i * (-1) * J_k), then U_k. Gates are applied in append
         # order, so the block realizes U_k exp(i J_k) U_k^dagger acting on the incoming state.
-        circ.append(OrbitalRotation(full.conj().T), circ.modes)
+        _append_per_spin_rotation(circ, orbital_rotation.conj().T, norb)
         circ.append(Evolution(2 * norb, diag_coulomb, time=-1.0), circ.modes)
-        circ.append(OrbitalRotation(full), circ.modes)
+        _append_per_spin_rotation(circ, orbital_rotation, norb)
 
     if ucj_op.final_orbital_rotation is not None:
-        final = _block_diag(ucj_op.final_orbital_rotation, ucj_op.final_orbital_rotation)
-        circ.append(OrbitalRotation(final), circ.modes)
+        _append_per_spin_rotation(circ, ucj_op.final_orbital_rotation, norb)
 
     return circ
 

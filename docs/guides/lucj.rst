@@ -149,18 +149,20 @@ and beta-beta blocks both equal :math:`Z`, and the alpha-beta and beta-alpha blo
    ...                 terms[term] = terms.get(term, 0.0) + coeff
    ...     return FermionOperator.from_dict(terms)
 
-The orbital rotations act on both spin sectors with the same matrix. Since the fermionic
-circuit acts on all ``2 * norb`` block-spin modes, we embed each ``norb x norb`` rotation
-block-diagonally so that it never mixes the alpha and beta sectors:
+The orbital rotations act on both spin sectors with the same ``norb x norb`` matrix. A
+:class:`.OrbitalRotation` gate acts on exactly the modes it is placed on, so instead of
+embedding the rotation into a larger block-diagonal matrix we simply append it twice: once to
+the alpha modes ``0..norb`` and once to the beta modes ``norb..2*norb``. Because the two spin
+sectors are disjoint, the sectors never mix and the placements commute.
 
 .. code-block:: python
 
-   >>> def block_diag(mat, norb):
-   ...     """Embed a per-spin orbital rotation onto the 2*norb block-spin modes."""
-   ...     full = np.zeros((2 * norb, 2 * norb), dtype=complex)
-   ...     full[:norb, :norb] = mat
-   ...     full[norb:, norb:] = mat
-   ...     return full
+   >>> from qiskit_fermions.circuit.library import OrbitalRotation
+   >>>
+   >>> def add_orbital_rotation(circuit, rotation, norb):
+   ...     """Append a per-spin orbital rotation to the alpha and beta halves of the register."""
+   ...     circuit.append(OrbitalRotation(rotation), circuit.modes[:norb])
+   ...     circuit.append(OrbitalRotation(rotation), circuit.modes[norb:])
 
 4. Assemble the LUCJ circuit
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -175,7 +177,7 @@ first ``n_beta`` beta modes occupied). Each factorization term contributes the s
 .. code-block:: python
 
    >>> from qiskit_fermions.circuit import FermionicCircuit
-   >>> from qiskit_fermions.circuit.library import Evolution, InitializeModes, OrbitalRotation
+   >>> from qiskit_fermions.circuit.library import Evolution, InitializeModes
    >>>
    >>> n_alpha, n_beta = nelec
    >>> occupation = [False] * (2 * norb)
@@ -188,13 +190,12 @@ first ``n_beta`` beta modes occupied). Each factorization term contributes the s
    >>> circuit.append(InitializeModes(occupation), circuit.modes)
    >>>
    >>> for diag_coulomb_mat, orbital_rotation in terms:
-   ...     full = block_diag(orbital_rotation, norb)
    ...     diag_coulomb = diag_coulomb_operator(diag_coulomb_mat, norb)
-   ...     circuit.append(OrbitalRotation(full.conj().T), circuit.modes)
+   ...     add_orbital_rotation(circuit, orbital_rotation.conj().T, norb)
    ...     circuit.append(Evolution(2 * norb, diag_coulomb, time=-1.0), circuit.modes)
-   ...     circuit.append(OrbitalRotation(full), circuit.modes)
+   ...     add_orbital_rotation(circuit, orbital_rotation, norb)
    >>>
-   >>> circuit.append(OrbitalRotation(block_diag(final_orbital_rotation, norb)), circuit.modes)
+   >>> add_orbital_rotation(circuit, final_orbital_rotation, norb)
 
 5. Simulate the ansatz and evaluate its energy
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
