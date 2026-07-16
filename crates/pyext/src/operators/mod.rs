@@ -19,9 +19,7 @@ macro_rules! impl_operator_magic_methods {
         #[pymethods]
         impl $name {
             fn __add__(&self, other: &Self) -> Self {
-                Self {
-                    inner: self.inner.__add__(&other.inner),
-                }
+                self.inner.__add__(&other.inner).into()
             }
 
             fn __iadd__(&mut self, other: &Self) {
@@ -29,9 +27,7 @@ macro_rules! impl_operator_magic_methods {
             }
 
             fn __sub__(&self, other: &Self) -> Self {
-                Self {
-                    inner: self.inner.__sub__(&other.inner),
-                }
+                self.inner.__sub__(&other.inner).into()
             }
 
             fn __isub__(&mut self, other: &Self) {
@@ -39,15 +35,11 @@ macro_rules! impl_operator_magic_methods {
             }
 
             fn __mul__(&self, other: Complex64) -> Self {
-                Self {
-                    inner: self.inner.__mul__(other),
-                }
+                self.inner.__mul__(other).into()
             }
 
             fn __rmul__(&self, other: Complex64) -> Self {
-                Self {
-                    inner: self.inner.__mul__(other),
-                }
+                self.inner.__mul__(other).into()
             }
 
             fn __imul__(&mut self, other: Complex64) {
@@ -55,9 +47,7 @@ macro_rules! impl_operator_magic_methods {
             }
 
             fn __truediv__(&self, other: Complex64) -> Self {
-                Self {
-                    inner: self.inner.__div__(other),
-                }
+                self.inner.__div__(other).into()
             }
 
             fn __itruediv__(&mut self, other: Complex64) {
@@ -65,15 +55,11 @@ macro_rules! impl_operator_magic_methods {
             }
 
             fn __neg__(&self) -> Self {
-                Self {
-                    inner: self.inner.__neg__(),
-                }
+                self.inner.__neg__().into()
             }
 
             fn __and__(&self, other: &Self) -> Self {
-                Self {
-                    inner: self.inner.__and__(&other.inner),
-                }
+                self.inner.__and__(&other.inner).into()
             }
 
             fn __iand__(&mut self, other: &Self) {
@@ -81,9 +67,7 @@ macro_rules! impl_operator_magic_methods {
             }
 
             fn __matmul__(&self, other: &Self) -> Self {
-                Self {
-                    inner: self.inner.__matmul__(&other.inner),
-                }
+                self.inner.__matmul__(&other.inner).into()
             }
 
             fn __imatmul__(&mut self, other: &Self) {

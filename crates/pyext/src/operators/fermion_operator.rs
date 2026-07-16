@@ -618,9 +618,7 @@ impl PyFermionOperator {
     /// ..
     #[classmethod]
     fn zero(_cls: &Bound<'_, PyType>) -> Self {
-        Self {
-            inner: FermionOperator::zero(),
-        }
+        FermionOperator::zero().into()
     }
 
     /// Constructs the multiplicative identity operator.
@@ -638,9 +636,7 @@ impl PyFermionOperator {
     /// ..
     #[classmethod]
     fn one(_cls: &Bound<'_, PyType>) -> Self {
-        Self {
-            inner: FermionOperator::one(),
-        }
+        FermionOperator::one().into()
     }
 
     fn __len__(&self) -> usize {
@@ -650,12 +646,7 @@ impl PyFermionOperator {
     fn __pow__(&self, exponent: u32, modulo: Option<u32>) -> PyResult<Self> {
         match modulo {
             Some(_) => Err(PyNotImplementedError::new_err("mod argument not supported")),
-            None => {
-                let result = Self {
-                    inner: self.inner.__pow__(exponent as usize),
-                };
-                Ok(result)
-            }
+            None => Ok(self.inner.__pow__(exponent as usize).into()),
         }
     }
 
@@ -689,9 +680,7 @@ impl PyFermionOperator {
     ///     An equivalent but simplified operator.
     #[pyo3(signature = (atol=1e-8))]
     fn simplify(&self, atol: f64) -> Self {
-        Self {
-            inner: self.inner.simplify(atol),
-        }
+        self.inner.simplify(atol).into()
     }
 
     /// Removes terms whose coefficient magnitude lies below the provided threshold.
@@ -780,7 +769,7 @@ impl PyFermionOperator {
             inner._append_term(coeff, &actions, &modes);
             Ok(())
         })?;
-        Ok(Self { inner })
+        Ok(inner.into())
     }
 
     /// An iterator over the operator's terms with their associated group index.
@@ -852,7 +841,7 @@ impl PyFermionOperator {
             Ok(())
         })?;
         inner.groups = Some(groups);
-        Ok(Self { inner })
+        Ok(inner.into())
     }
 
     /// An optional vector of `group indices` for each term.
@@ -926,8 +915,7 @@ impl PyFermionOperator {
             None => None,
             Some(g) => {
                 let mut out = Vec::with_capacity(g.len());
-                g.into_iter()
-                    .for_each(|group_op| out.push(Self { inner: group_op }));
+                g.into_iter().for_each(|group_op| out.push(group_op.into()));
                 Some(out)
             }
         }
@@ -951,9 +939,7 @@ impl PyFermionOperator {
     ///
     /// ..
     fn adjoint(&self) -> Self {
-        Self {
-            inner: self.inner.adjoint(),
-        }
+        self.inner.adjoint().into()
     }
 
     /// Checks this operator for equivalence with another operator.
@@ -1036,9 +1022,7 @@ impl PyFermionOperator {
     ///     An equivalent but normal-ordered operator.
     #[pyo3(signature = (sandwich=None))]
     fn normal_ordered(&self, sandwich: Option<bool>) -> Self {
-        Self {
-            inner: self.inner.normal_ordered(sandwich),
-        }
+        self.inner.normal_ordered(sandwich).into()
     }
 
     /// Returns whether this operator is Hermitian.
@@ -1140,7 +1124,7 @@ impl PyFermionOperator {
     fn relabel_modes(&self, permutation: Vec<u32>) -> PyResult<Self> {
         let out = self.inner.relabel_modes(permutation);
         match out {
-            Ok(op) => Ok(Self { inner: op }),
+            Ok(op) => Ok(op.into()),
             Err(e) => Err(PyValueError::new_err(e.to_string())),
         }
     }

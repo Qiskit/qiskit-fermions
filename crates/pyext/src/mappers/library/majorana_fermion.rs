@@ -58,9 +58,7 @@ use qiskit_fermions_core::mappers::library::majorana_fermion::{
 #[gen_stub_pyfunction(module = "qiskit_fermions.mappers.library.majorana")]
 #[pyfunction(name = "fermion_to_majorana")]
 pub fn py_fermion_to_majorana(fer_op: PyFermionOperator) -> PyMajoranaOperator {
-    PyMajoranaOperator {
-        inner: fermion_to_majorana(&fer_op.inner),
-    }
+    fermion_to_majorana(&fer_op.inner).into()
 }
 
 /// Map a :class:`.MajoranaOperator` to a :class:`.FermionOperator`.
@@ -102,9 +100,7 @@ pub fn py_fermion_to_majorana(fer_op: PyFermionOperator) -> PyMajoranaOperator {
 #[gen_stub_pyfunction(module = "qiskit_fermions.mappers.library.majorana")]
 #[pyfunction(name = "majorana_to_fermion")]
 pub fn py_majorana_to_fermion(maj_op: PyMajoranaOperator) -> PyFermionOperator {
-    PyFermionOperator {
-        inner: majorana_to_fermion(&maj_op.inner),
-    }
+    majorana_to_fermion(&maj_op.inner).into()
 }
 
 #[pymodule]

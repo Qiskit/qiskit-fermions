@@ -54,9 +54,7 @@ use qiskit_fermions_core::mappers::library::edge_vertex::{
 #[gen_stub_pyfunction(module = "qiskit_fermions.mappers.library.edge_vertex")]
 #[pyfunction(name = "edge_vertex_to_fermion")]
 pub fn py_edge_vertex_to_fermion(inter_op: PyEdgeVertexOperator) -> PyFermionOperator {
-    PyFermionOperator {
-        inner: edge_vertex_to_fermion(&inter_op.inner),
-    }
+    edge_vertex_to_fermion(&inter_op.inner).into()
 }
 
 /// Map an :class:`.EdgeVertexOperator` to a :class:`.MajoranaOperator`.
@@ -90,9 +88,7 @@ pub fn py_edge_vertex_to_fermion(inter_op: PyEdgeVertexOperator) -> PyFermionOpe
 #[gen_stub_pyfunction(module = "qiskit_fermions.mappers.library.edge_vertex")]
 #[pyfunction(name = "edge_vertex_to_majorana")]
 pub fn py_edge_vertex_to_majorana(inter_op: PyEdgeVertexOperator) -> PyMajoranaOperator {
-    PyMajoranaOperator {
-        inner: edge_vertex_to_majorana(&inter_op.inner),
-    }
+    edge_vertex_to_majorana(&inter_op.inner).into()
 }
 
 #[pymodule]

@@ -153,8 +153,6 @@ impl PyFermionOperator {
     ///     energy, it is included as the identity term ``()``.
     #[classmethod]
     fn from_fcidump(_cls: &Bound<'_, PyType>, fcidump: PyFCIDump) -> Self {
-        Self {
-            inner: FermionOperator::from(&fcidump.inner),
-        }
+        FermionOperator::from(&fcidump.inner).into()
     }
 }

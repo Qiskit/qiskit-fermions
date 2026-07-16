@@ -27,23 +27,17 @@ macro_rules! impl_commutators {
         impl $name {
             #[staticmethod]
             pub fn _commutator_(op_a: Self, op_b: Self) -> Self {
-                Self {
-                    inner: commutator(&op_a.inner, &op_b.inner),
-                }
+                commutator(&op_a.inner, &op_b.inner).into()
             }
 
             #[staticmethod]
             pub fn _anti_commutator_(op_a: Self, op_b: Self) -> Self {
-                Self {
-                    inner: anti_commutator(&op_a.inner, &op_b.inner),
-                }
+                anti_commutator(&op_a.inner, &op_b.inner).into()
             }
 
             #[staticmethod]
             pub fn _double_commutator_(op_a: Self, op_b: Self, op_c: Self, sign: bool) -> Self {
-                Self {
-                    inner: double_commutator(&op_a.inner, &op_b.inner, &op_c.inner, sign),
-                }
+                double_commutator(&op_a.inner, &op_b.inner, &op_c.inner, sign).into()
             }
         }
     };
