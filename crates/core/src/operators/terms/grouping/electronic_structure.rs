@@ -10,6 +10,7 @@
 // copyright notice, and modified files need to carry a notice indicating
 // that they have been altered from the originals.
 
+use crate::operators::OperatorTrait;
 use crate::operators::fermion_operator::{FermionOperator, FermionOperatorTermView};
 use crate::operators::terms::grouping::GroupingError;
 use std::cmp::{max, min};
@@ -71,7 +72,6 @@ mod tests {
 
     use super::*;
 
-    use crate::operators::OperatorTrait;
     use crate::operators::library::fcidump::FCIDump;
 
     #[test]

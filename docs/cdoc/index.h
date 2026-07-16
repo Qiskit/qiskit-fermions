@@ -35,6 +35,10 @@
  */
 
 /**
+ * @defgroup qf_operator_terms_ordering qf_operator_terms_ordering
+ */
+
+/**
  * @defgroup qf_operator_library qf_operator_library
  */
 

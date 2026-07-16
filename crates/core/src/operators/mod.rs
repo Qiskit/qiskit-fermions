@@ -29,6 +29,17 @@ pub enum CoherenceError {
     NumQubitsTooSmall { num_qubits: u32, max_mode: u32 },
 }
 
+/// Provides a total, coefficient-independent ordering key for a single term view.
+///
+/// Implemented by the `*TermView` structs. The key is derived purely from the term's structure
+/// (the operator string it represents), so two operators that differ only in their coefficients
+/// order their terms identically and scaling an operator never reshuffles it. This is what
+/// [`operators::terms::ordering::canonical`](crate::operators::terms::ordering::canonical) sorts by.
+pub trait TermSortKey {
+    /// Returns the ordering key for this term.
+    fn sort_key(&self) -> impl Ord;
+}
+
 pub trait OperatorTrait {
     fn zero() -> Self;
     fn one() -> Self;
@@ -42,6 +53,57 @@ pub trait OperatorTrait {
     fn __iand__(&mut self, other: &Self);
     fn __imatmul__(&mut self, other: &Self);
     fn ichop(&mut self, atol: f64);
+
+    /// The borrowed view of a single term yielded by [`OperatorTrait::iter`].
+    type TermView<'a>: PartialEq + TermSortKey
+    where
+        Self: 'a;
+
+    /// The borrowed view of a single term (together with its group index) yielded by
+    /// [`OperatorTrait::iter_with_groups`].
+    ///
+    /// Its [`TermSortKey`] must match that of the corresponding [`Self::TermView`] (i.e. ignore the
+    /// group index), so that ordering a grouped operator agrees with ordering the same terms
+    /// ungrouped.
+    type GroupTermView<'a>: PartialEq + TermSortKey
+    where
+        Self: 'a;
+
+    /// Iterates over the terms of the operator.
+    ///
+    /// The yielded `Item` is the associated type `Self::TermView<'_>` rather than a concrete view.
+    /// Implementations must spell it the same way: returning the concrete view type would make the
+    /// impl signature more specific than this one and trip the `refining_impl_trait` lint.
+    fn iter(&self) -> impl ExactSizeIterator<Item = Self::TermView<'_>>;
+
+    /// Returns whether the operator tracks group indices (i.e. `groups` is `Some`).
+    ///
+    /// [`iter_with_groups`](Self::iter_with_groups) may only be called when this is `true`.
+    fn has_groups(&self) -> bool;
+
+    /// Iterates over the terms of the operator together with their group index.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the operator does not track group indices (i.e. `groups` is `None`).
+    fn iter_with_groups(&self) -> impl ExactSizeIterator<Item = Self::GroupTermView<'_>>;
+
+    /// Constructs an operator from an iterator of term views.
+    ///
+    /// This is the inverse of [`OperatorTrait::iter`]: the term views may borrow from any operator
+    /// (including `self`); their data is copied into the freshly-built, owned result.
+    fn from_terms<'a, I>(terms: I) -> Self
+    where
+        Self: Sized + 'a,
+        I: IntoIterator<Item = Self::TermView<'a>>;
+
+    /// Constructs an operator (with group indices) from an iterator of group term views.
+    ///
+    /// This is the inverse of [`OperatorTrait::iter_with_groups`].
+    fn from_terms_with_groups<'a, I>(terms: I) -> Self
+    where
+        Self: Sized + 'a,
+        I: IntoIterator<Item = Self::GroupTermView<'a>>;
 
     fn get_support(&self) -> HashSet<u32>;
     fn relabel_modes(&self, permutation: Vec<u32>) -> Result<Self, CoherenceError>

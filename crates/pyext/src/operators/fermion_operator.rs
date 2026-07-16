@@ -359,6 +359,12 @@ pub struct PyFermionOperator {
     pub inner: FermionOperator,
 }
 
+impl From<FermionOperator> for PyFermionOperator {
+    fn from(inner: FermionOperator) -> Self {
+        Self { inner }
+    }
+}
+
 crate::impl_operator_magic_methods!(PyFermionOperator);
 
 #[gen_stub_pymethods]
@@ -761,14 +767,17 @@ impl PyFermionOperator {
     #[classmethod]
     fn from_terms(_cls: &Bound<'_, PyType>, terms: &Bound<'_, PyAny>) -> PyResult<Self> {
         let mut inner = FermionOperator::zero();
+        // We build the operator term-by-term via `_append_term` rather than routing through the
+        // core `OperatorTrait::from_terms`. The latter takes an iterator of borrowed term *views*
+        // (`TermView<'a>`) all tied to a single lifetime `'a`, whereas here each term arrives as an
+        // owned Python tuple. Adapting to `from_terms` would require materializing every term into
+        // owned buffers up front and keeping them all alive for the duration of the iterator (so the
+        // views can borrow from them) — a full extra copy of the operator's data. Appending directly
+        // keeps construction streaming, one term at a time, with no such buffer.
         terms.try_iter()?.try_for_each(|item| -> PyResult<()> {
             let (term, coeff) = item?.extract::<(Vec<PyFermionAction>, Complex64)>()?;
-            inner.coeffs.push(coeff);
-            term.iter().for_each(|(a, m)| {
-                inner.actions.push(*a);
-                inner.modes.push(*m);
-            });
-            inner.boundaries.push(inner.modes.len());
+            let (actions, modes): (Vec<bool>, Vec<u32>) = term.into_iter().unzip();
+            inner._append_term(coeff, &actions, &modes);
             Ok(())
         })?;
         Ok(Self { inner })
@@ -834,14 +843,11 @@ impl PyFermionOperator {
     ) -> PyResult<Self> {
         let mut inner = FermionOperator::zero();
         let mut groups = vec![];
+        // See `from_terms` for why we append directly instead of using the core `from_terms*`.
         terms.try_iter()?.try_for_each(|item| -> PyResult<()> {
             let (term, coeff, group) = item?.extract::<(Vec<PyFermionAction>, Complex64, u32)>()?;
-            inner.coeffs.push(coeff);
-            term.iter().for_each(|(a, m)| {
-                inner.actions.push(*a);
-                inner.modes.push(*m);
-            });
-            inner.boundaries.push(inner.modes.len());
+            let (actions, modes): (Vec<bool>, Vec<u32>) = term.into_iter().unzip();
+            inner._append_term(coeff, &actions, &modes);
             groups.push(group);
             Ok(())
         })?;

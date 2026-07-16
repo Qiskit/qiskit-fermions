@@ -10,7 +10,7 @@
 // copyright notice, and modified files need to carry a notice indicating
 // that they have been altered from the originals.
 
-use crate::operators::{CoherenceError, OperatorMacro, OperatorTrait};
+use crate::operators::{CoherenceError, OperatorMacro, OperatorTrait, TermSortKey};
 use num_complex::{Complex64, ComplexFloat};
 use std::cmp::Ordering;
 use std::collections::{HashMap, HashSet};
@@ -42,6 +42,15 @@ impl FermionOperatorTermView<'_> {
     }
 }
 
+impl TermSortKey for FermionOperatorTermView<'_> {
+    fn sort_key(&self) -> impl Ord {
+        // Compare the operator string position-by-position, each factor being an (action, mode)
+        // pair. This matches `into_vec` (and hence the sorted display order), so the canonical
+        // order agrees with how terms are printed.
+        self.into_vec()
+    }
+}
+
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct FermionOperatorGroupTermView<'a> {
     pub coeff: Complex64,
@@ -61,6 +70,14 @@ impl FermionOperatorGroupTermView<'_> {
 
     pub fn into_vec(&'_ self) -> Vec<(bool, u32)> {
         zip(self.actions.to_vec(), self.modes.to_vec()).collect()
+    }
+}
+
+impl TermSortKey for FermionOperatorGroupTermView<'_> {
+    fn sort_key(&self) -> impl Ord {
+        // Match the ungrouped `TermView` key exactly (ignoring `group`), so ordering a grouped
+        // operator agrees with ordering the same terms ungrouped.
+        self.into_vec()
     }
 }
 
@@ -96,47 +113,19 @@ impl FermionOperator {
         &self.boundaries
     }
 
-    fn _append_term(&mut self, coeff: Complex64, actions: &[bool], modes: &[u32]) {
-        // WARNING: this does not handle `groups` by design!
+    /// Appends a single term to the operator. Low-level building block for construction.
+    ///
+    /// # Warning
+    ///
+    /// This does **not** maintain `groups`: it pushes a coefficient and a boundary but no group
+    /// index. Only call it while `self.groups` is `None` (e.g. on a fresh [`Self::zero`]); calling
+    /// it on an operator that tracks groups leaves `coeffs.len()` out of sync with `groups.len()`,
+    /// after which [`iter_with_groups`](Self::iter_with_groups) silently drops the trailing terms.
+    pub fn _append_term(&mut self, coeff: Complex64, actions: &[bool], modes: &[u32]) {
         self.coeffs.push(coeff);
         self.actions.extend_from_slice(actions);
         self.modes.extend_from_slice(modes);
         self.boundaries.push(self.modes.len());
-    }
-
-    pub fn iter(&'_ self) -> impl ExactSizeIterator<Item = FermionOperatorTermView<'_>> + '_ {
-        self.coeffs.iter().enumerate().map(|(i, coeff)| {
-            let start = self.boundaries[i];
-            let end = self.boundaries[i + 1];
-            FermionOperatorTermView {
-                coeff: *coeff,
-                actions: &self.actions[start..end],
-                modes: &self.modes[start..end],
-            }
-        })
-    }
-
-    pub fn iter_with_groups(
-        &'_ self,
-    ) -> impl ExactSizeIterator<Item = FermionOperatorGroupTermView<'_>> + '_ {
-        if let Some(groups) = &self.groups {
-            return self
-                .coeffs
-                .iter()
-                .zip(groups)
-                .enumerate()
-                .map(|(i, (coeff, gidx))| {
-                    let start = self.boundaries[i];
-                    let end = self.boundaries[i + 1];
-                    FermionOperatorGroupTermView {
-                        coeff: *coeff,
-                        actions: &self.actions[start..end],
-                        modes: &self.modes[start..end],
-                        group: *gidx,
-                    }
-                });
-        }
-        panic!("This method can only be called when groups are present!");
     }
 
     pub fn num_groups(&self) -> Option<u32> {
@@ -296,6 +285,9 @@ fn _compose(
 }
 
 impl OperatorTrait for FermionOperator {
+    type TermView<'a> = FermionOperatorTermView<'a>;
+    type GroupTermView<'a> = FermionOperatorGroupTermView<'a>;
+
     fn zero() -> Self {
         Self {
             coeffs: vec![],
@@ -407,6 +399,70 @@ impl OperatorTrait for FermionOperator {
         self.modes = modes;
         self.boundaries = boundaries;
         self.groups = None;
+    }
+
+    fn iter(&self) -> impl ExactSizeIterator<Item = Self::TermView<'_>> {
+        self.coeffs.iter().enumerate().map(|(i, coeff)| {
+            let start = self.boundaries[i];
+            let end = self.boundaries[i + 1];
+            FermionOperatorTermView {
+                coeff: *coeff,
+                actions: &self.actions[start..end],
+                modes: &self.modes[start..end],
+            }
+        })
+    }
+
+    fn has_groups(&self) -> bool {
+        self.groups.is_some()
+    }
+
+    fn iter_with_groups(&self) -> impl ExactSizeIterator<Item = Self::GroupTermView<'_>> {
+        if let Some(groups) = &self.groups {
+            return self
+                .coeffs
+                .iter()
+                .zip(groups)
+                .enumerate()
+                .map(|(i, (coeff, gidx))| {
+                    let start = self.boundaries[i];
+                    let end = self.boundaries[i + 1];
+                    FermionOperatorGroupTermView {
+                        coeff: *coeff,
+                        actions: &self.actions[start..end],
+                        modes: &self.modes[start..end],
+                        group: *gidx,
+                    }
+                });
+        }
+        panic!("This method can only be called when groups are present!");
+    }
+
+    fn from_terms<'a, I>(terms: I) -> Self
+    where
+        Self: 'a,
+        I: IntoIterator<Item = Self::TermView<'a>>,
+    {
+        let mut out = Self::zero();
+        for term in terms {
+            out._append_term(term.coeff, term.actions, term.modes);
+        }
+        out
+    }
+
+    fn from_terms_with_groups<'a, I>(terms: I) -> Self
+    where
+        Self: 'a,
+        I: IntoIterator<Item = Self::GroupTermView<'a>>,
+    {
+        let mut out = Self::zero();
+        let mut groups = Vec::new();
+        for term in terms {
+            out._append_term(term.coeff, term.actions, term.modes);
+            groups.push(term.group);
+        }
+        out.groups = Some(groups);
+        out
     }
 
     fn get_support(&self) -> HashSet<u32> {
@@ -1280,5 +1336,39 @@ mod tests {
         ];
 
         assert_eq!(terms, expected);
+    }
+
+    #[test]
+    fn test_iter_from_terms_round_trip() {
+        let op = FermionOperator {
+            coeffs: vec![Complex64::new(1.0, 0.0), Complex64::new(2.0, 0.0)],
+            actions: vec![true, false, true, true, false, false],
+            modes: vec![0, 1, 0, 0, 1, 1],
+            boundaries: vec![0, 2, 6],
+            groups: None,
+        };
+
+        let round_trip = FermionOperator::from_terms(op.iter());
+
+        assert_eq!(round_trip, op);
+    }
+
+    #[test]
+    fn test_iter_with_groups_from_terms_with_groups_round_trip() {
+        let op = FermionOperator {
+            coeffs: vec![
+                Complex64::new(1.0, 0.0),
+                Complex64::new(1.0, 0.0),
+                Complex64::new(2.0, 0.0),
+            ],
+            actions: vec![true, false, true, false, true, true, false, false],
+            modes: vec![0, 1, 1, 0, 0, 0, 1, 1],
+            boundaries: vec![0, 2, 4, 8],
+            groups: Some(vec![0, 0, 1]),
+        };
+
+        let round_trip = FermionOperator::from_terms_with_groups(op.iter_with_groups());
+
+        assert_eq!(round_trip, op);
     }
 }

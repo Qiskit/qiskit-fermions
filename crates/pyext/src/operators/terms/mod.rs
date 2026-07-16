@@ -14,6 +14,7 @@ use pyo3::prelude::*;
 
 pub mod filtering;
 pub mod grouping;
+pub mod ordering;
 
 #[pymodule]
 pub mod operators_terms {
@@ -22,4 +23,7 @@ pub mod operators_terms {
 
     #[pymodule_export]
     use super::grouping::grouping;
+
+    #[pymodule_export]
+    use super::ordering::ordering;
 }
