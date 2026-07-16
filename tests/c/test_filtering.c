@@ -30,7 +30,7 @@ static int test_filter_drops_constant_number_and_products(void) {
     QfFermionOperator *op =
         qf_ferm_op_new(num_terms, num_actions, coeffs, actions, modes, boundaries);
 
-    qf_filter_diagonal_terms(op);
+    qf_ferm_op_filter_diagonal_terms(op);
 
     // Only the off-diagonal hopping term a†_0 a_1 must survive.
     QfFermionOperator *expected = qf_ferm_op_zero();
@@ -64,7 +64,7 @@ static int test_filter_keeps_off_diagonal_hopping(void) {
     QfFermionOperator *expected =
         qf_ferm_op_new(num_terms, num_actions, coeffs, actions, modes, boundaries);
 
-    qf_filter_diagonal_terms(op);
+    qf_ferm_op_filter_diagonal_terms(op);
 
     bool is_equal = qf_ferm_op_equal(op, expected);
 
@@ -89,7 +89,7 @@ static int test_filter_electronic_structure_hamiltonian(void) {
     uint64_t num_terms_before;
     qf_ferm_op_get_coeffs(normal, &coeffs_before, &num_terms_before);
 
-    qf_filter_diagonal_terms(normal);
+    qf_ferm_op_filter_diagonal_terms(normal);
 
     QkComplex64 *coeffs_after;
     uint64_t num_terms_after;

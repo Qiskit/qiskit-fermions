@@ -73,7 +73,7 @@ detail in :ref:`this guide <grouping_explanation>`.
 
     .. code-block:: c
 
-       QfExitCode exit = qf_group_terms_by_electronic_structure(normal, num_modes, false);
+       QfExitCode exit = qf_ferm_op_group_terms_by_electronic_structure(normal, num_modes, false);
 
 3. Prepare the time evolution circuit
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
