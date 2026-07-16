@@ -12,45 +12,35 @@
 
 """The FermionAction type."""
 
-import sys
-from typing import NamedTuple
+from typing import TypeAlias
 
-if sys.version_info >= (3, 11):
-    from typing import Self
-else:
-    from typing_extensions import Self
+FermionAction: TypeAlias = tuple[bool, int]
+"""A fermionic creation or annihilation action.
 
-
-class FermionAction(NamedTuple):
-    """A fermionic creation or annihilation action."""
-
-    action: bool
-    """Whether this action is a creation (``True``) or annihilation (``False``) one."""
-
-    mode: int
-    """The spin-less fermionic mode index on which to act."""
-
-    @classmethod
-    def creation(cls, mode: int) -> Self:
-        """Constructs a creation action on the fermionic mode at ``mode``.
-
-        Args:
-            mode: the spin-less fermionic mode on which to act.
-        """
-        return cls(action=True, mode=mode)
-
-    @classmethod
-    def annihilation(cls, mode: int) -> Self:
-        """Constructs an annihilation action on the fermionic mode at ``mode``.
-
-        Args:
-            mode: the spin-less fermionic mode on which to act.
-        """
-        return cls(action=False, mode=mode)
+A 2-tuple ``(action, mode)`` where ``action`` is ``True`` for a creation and ``False`` for an
+annihilation action, and ``mode`` is the spin-less fermionic mode index on which to act.
+"""
 
 
-cre = FermionAction.creation
-"""A convenience alias for :meth:`FermionAction.creation`."""
+def cre(mode: int) -> FermionAction:
+    """Constructs a creation action on the fermionic mode at ``mode``.
 
-ann = FermionAction.annihilation
-"""A convenience alias for :meth:`FermionAction.annihilation`."""
+    Args:
+        mode: the spin-less fermionic mode on which to act.
+
+    Returns:
+        A creation :class:`.FermionAction` on ``mode``.
+    """
+    return (True, mode)
+
+
+def ann(mode: int) -> FermionAction:
+    """Constructs an annihilation action on the fermionic mode at ``mode``.
+
+    Args:
+        mode: the spin-less fermionic mode on which to act.
+
+    Returns:
+        An annihilation :class:`.FermionAction` on ``mode``.
+    """
+    return (False, mode)

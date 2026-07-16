@@ -29,8 +29,13 @@ annihilation operators.
 
 .. autosummary::
    :toctree: ../stubs/
+   :template: autosummary/typealias.rst
 
    FermionAction
+
+.. autosummary::
+   :toctree: ../stubs/
+
    FermionOperator
    cre
    ann
@@ -42,8 +47,13 @@ This operator represents fermionic operators in terms of Majorana fermions.
 
 .. autosummary::
    :toctree: ../stubs/
+   :template: autosummary/typealias.rst
 
    MajoranaAction
+
+.. autosummary::
+   :toctree: ../stubs/
+
    MajoranaOperator
    gamma
 
@@ -61,10 +71,15 @@ Hermitian generators:
 
 .. autosummary::
    :toctree: ../stubs/
+   :template: autosummary/typealias.rst
 
    EdgeAction
-   EdgeVertexOperator
    TransferAction
+
+.. autosummary::
+   :toctree: ../stubs/
+
+   EdgeVertexOperator
    TransferVertexOperator
 
 Protocol

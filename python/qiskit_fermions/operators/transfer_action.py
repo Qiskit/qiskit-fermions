@@ -12,8 +12,7 @@
 
 """The TransferAction type."""
 
-from typing import NewType
+from typing import TypeAlias
 
-TransferAction = NewType("TransferAction", tuple[int, int])
-
-TransferAction.__doc__ = """The TransferAction type."""
+TransferAction: TypeAlias = tuple[int, int]
+"""The TransferAction type."""

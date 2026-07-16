@@ -12,11 +12,10 @@
 
 """The MajoranaAction type."""
 
-from typing import NewType, cast
+from typing import TypeAlias
 
-MajoranaAction = NewType("MajoranaAction", int)
-
-MajoranaAction.__doc__ = """The MajoranaAction type. See :func:`.gamma` for more details."""
+MajoranaAction: TypeAlias = int
+"""The MajoranaAction type. See :func:`.gamma` for more details."""
 
 
 def gamma(mode: int, is_prime: bool) -> MajoranaAction:
@@ -43,4 +42,4 @@ def gamma(mode: int, is_prime: bool) -> MajoranaAction:
     Returns:
         A ``MajoranaAction`` object, which is essentially the flat index ``2*mode+int(is_prime)``.
     """
-    return cast(MajoranaAction, 2 * mode + int(is_prime))
+    return 2 * mode + int(is_prime)
