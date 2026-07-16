@@ -295,15 +295,15 @@ class UCJ(FermionicGate):
         )
 
         if variant == "spinless":
-            cls._mask_symmetric(diag_coulomb_mats, interaction_pairs)
+            cls._mask(diag_coulomb_mats, interaction_pairs, symmetric=True)
             return diag_coulomb_mats, orbital_rotations
 
         # balanced: stack the single Z into the [aa, ab] layout (aa == ab == Z)
         diag_coulomb_mats = np.stack([diag_coulomb_mats, diag_coulomb_mats], axis=1)
         if interaction_pairs is not None:
             pairs_aa, pairs_ab = interaction_pairs
-            cls._mask_symmetric(diag_coulomb_mats[:, 0], pairs_aa)
-            cls._mask_symmetric(diag_coulomb_mats[:, 1], pairs_ab)
+            cls._mask(diag_coulomb_mats[:, 0], pairs_aa, symmetric=True)
+            cls._mask(diag_coulomb_mats[:, 1], pairs_ab, symmetric=True)
         return diag_coulomb_mats, orbital_rotations
 
     @classmethod
@@ -355,15 +355,15 @@ class UCJ(FermionicGate):
         if isinstance(n_reps, int):
             diag_coulomb_mats = diag_coulomb_mats[:n_reps]
             orbital_rotations = orbital_rotations[:n_reps]
-        diag_coulomb_mats, orbital_rotations = cls._pad_unbalanced(
+        diag_coulomb_mats, orbital_rotations = cls._pad(
             diag_coulomb_mats, orbital_rotations, n_reps if isinstance(n_reps, int) else None, norb
         )
 
         if interaction_pairs is not None:
             pairs_aa, pairs_ab, pairs_bb = interaction_pairs
-            cls._mask_symmetric(diag_coulomb_mats[:, 0], pairs_aa)
-            cls._mask_asymmetric(diag_coulomb_mats[:, 1], pairs_ab)
-            cls._mask_symmetric(diag_coulomb_mats[:, 2], pairs_bb)
+            cls._mask(diag_coulomb_mats[:, 0], pairs_aa, symmetric=True)
+            cls._mask(diag_coulomb_mats[:, 1], pairs_ab, symmetric=False)
+            cls._mask(diag_coulomb_mats[:, 2], pairs_bb, symmetric=True)
 
         return diag_coulomb_mats, orbital_rotations
 
@@ -395,38 +395,36 @@ class UCJ(FermionicGate):
 
     @staticmethod
     def _pad(diag_coulomb_mats, orbital_rotations, n_reps, norb):
-        """Pads balanced/spinless tensors to ``n_reps`` with zero J and identity rotations."""
+        """Pads the tensors to ``n_reps`` reps with zero J and identity rotation(s), in any variant.
+
+        A ``None`` or tuple ``n_reps`` is a no-op (the tuple form targets per-block rep counts, which
+        are already applied upstream). The padding block shapes are inferred from the existing tensors
+        so this handles the spinless/balanced single rotation and the unbalanced per-spin pair alike.
+        """
         if isinstance(n_reps, tuple) or n_reps is None:
             return diag_coulomb_mats, orbital_rotations
         n_have = diag_coulomb_mats.shape[0]
         if n_have >= n_reps:
             return diag_coulomb_mats, orbital_rotations
         pad = n_reps - n_have
-        diag_coulomb_mats = np.concatenate([diag_coulomb_mats, np.zeros((pad, norb, norb))])
-        orbital_rotations = np.concatenate(
-            [orbital_rotations, np.stack([np.eye(norb) for _ in range(pad)])]
+        dc_block = np.zeros((pad, *diag_coulomb_mats.shape[1:]))
+        # one identity per trailing rotation slot (a single rotation, or an [alpha, beta] pair)
+        n_rot = orbital_rotations.shape[1] if orbital_rotations.ndim == 4 else 1
+        eye = np.eye(norb) if n_rot == 1 else np.stack([np.eye(norb)] * n_rot)
+        rot_block = np.stack([eye] * pad)
+        return (
+            np.concatenate([diag_coulomb_mats, dc_block]),
+            np.concatenate([orbital_rotations, rot_block]),
         )
-        return diag_coulomb_mats, orbital_rotations
 
     @staticmethod
-    def _pad_unbalanced(diag_coulomb_mats, orbital_rotations, n_reps, norb):
-        """Pads unbalanced tensors to ``n_reps`` with zero J and identity per-spin rotations."""
-        if n_reps is None:
-            return diag_coulomb_mats, orbital_rotations
-        n_have = diag_coulomb_mats.shape[0]
-        if n_have >= n_reps:
-            return diag_coulomb_mats, orbital_rotations
-        pad = n_reps - n_have
-        diag_coulomb_mats = np.concatenate([diag_coulomb_mats, np.zeros((pad, 3, norb, norb))])
-        eye_pair = np.stack([np.eye(norb), np.eye(norb)])
-        orbital_rotations = np.concatenate(
-            [orbital_rotations, np.stack([eye_pair for _ in range(pad)])]
-        )
-        return diag_coulomb_mats, orbital_rotations
+    def _mask(mats: np.ndarray, pairs: list[tuple[int, int]] | None, *, symmetric: bool) -> None:
+        """Zeros diagonal Coulomb entries outside the allowed ``pairs``, in place.
 
-    @staticmethod
-    def _mask_symmetric(mats: np.ndarray, pairs: list[tuple[int, int]] | None) -> None:
-        """Zeros diagonal Coulomb entries outside the (symmetrized) allowed ``pairs``, in place."""
+        With ``symmetric=True`` a pair ``(i, j)`` also whitelists ``(j, i)`` (same-spin blocks, whose
+        interactions are symmetric); with ``symmetric=False`` only the listed ordered entries survive
+        (the alpha-beta block).
+        """
         if pairs is None:
             return
         norb = mats.shape[-1]
@@ -434,19 +432,8 @@ class UCJ(FermionicGate):
         if pairs:
             rows, cols = zip(*pairs, strict=True)
             mask[rows, cols] = True
-            mask[cols, rows] = True
-        mats *= mask
-
-    @staticmethod
-    def _mask_asymmetric(mats: np.ndarray, pairs: list[tuple[int, int]] | None) -> None:
-        """Zeros alpha-beta entries outside the (non-symmetrized) allowed ``pairs``, in place."""
-        if pairs is None:
-            return
-        norb = mats.shape[-1]
-        mask = np.zeros((norb, norb), dtype=bool)
-        if pairs:
-            rows, cols = zip(*pairs, strict=True)
-            mask[rows, cols] = True
+            if symmetric:
+                mask[cols, rows] = True
         mats *= mask
 
     def _infer_variant(self, norb: int) -> str:
