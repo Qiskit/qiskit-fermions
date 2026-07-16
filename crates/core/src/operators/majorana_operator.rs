@@ -41,8 +41,10 @@ impl MajoranaOperatorTermView<'_> {
 
 impl TermSortKey for MajoranaOperatorTermView<'_> {
     fn sort_key(&self) -> impl Ord {
-        // A Majorana term is fully described by its (ordered) mode indices.
-        self.modes.to_vec()
+        // A Majorana term is fully described by its (ordered) mode indices. This matches `into_vec`
+        // (and hence the sorted display order), so the canonical order agrees with how terms are
+        // printed.
+        self.into_vec()
     }
 }
 

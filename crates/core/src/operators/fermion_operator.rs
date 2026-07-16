@@ -44,14 +44,10 @@ impl FermionOperatorTermView<'_> {
 
 impl TermSortKey for FermionOperatorTermView<'_> {
     fn sort_key(&self) -> impl Ord {
-        // Compare the operator string position-by-position: for each factor, its mode index first
-        // and then its action. Zipping keeps the comparison aligned with how the term reads
-        // left-to-right, rather than comparing all modes before any actions.
-        self.modes
-            .iter()
-            .copied()
-            .zip(self.actions.iter().copied())
-            .collect::<Vec<(u32, bool)>>()
+        // Compare the operator string position-by-position, each factor being an (action, mode)
+        // pair. This matches `into_vec` (and hence the sorted display order), so the canonical
+        // order agrees with how terms are printed.
+        self.into_vec()
     }
 }
 
