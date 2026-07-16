@@ -1256,4 +1256,38 @@ mod tests {
 
         assert_eq!(terms, expected);
     }
+
+    #[test]
+    fn test_iter_from_terms_round_trip() {
+        let op = EdgeVertexOperator {
+            coeffs: vec![Complex64::new(1.0, 0.0), Complex64::new(2.0, 0.0)],
+            left_indices: vec![0, 1, 3],
+            right_indices: vec![1, 0, 2],
+            boundaries: vec![0, 1, 3],
+            groups: None,
+        };
+
+        let round_trip = EdgeVertexOperator::from_terms(op.iter());
+
+        assert_eq!(round_trip, op);
+    }
+
+    #[test]
+    fn test_iter_with_groups_from_terms_with_groups_round_trip() {
+        let op = EdgeVertexOperator {
+            coeffs: vec![
+                Complex64::new(1.0, 0.0),
+                Complex64::new(1.0, 0.0),
+                Complex64::new(2.0, 0.0),
+            ],
+            left_indices: vec![0, 2, 1, 3],
+            right_indices: vec![1, 3, 0, 2],
+            boundaries: vec![0, 1, 2, 4],
+            groups: Some(vec![0, 0, 1]),
+        };
+
+        let round_trip = EdgeVertexOperator::from_terms_with_groups(op.iter_with_groups());
+
+        assert_eq!(round_trip, op);
+    }
 }

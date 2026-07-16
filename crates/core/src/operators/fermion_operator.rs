@@ -1337,4 +1337,38 @@ mod tests {
 
         assert_eq!(terms, expected);
     }
+
+    #[test]
+    fn test_iter_from_terms_round_trip() {
+        let op = FermionOperator {
+            coeffs: vec![Complex64::new(1.0, 0.0), Complex64::new(2.0, 0.0)],
+            actions: vec![true, false, true, true, false, false],
+            modes: vec![0, 1, 0, 0, 1, 1],
+            boundaries: vec![0, 2, 6],
+            groups: None,
+        };
+
+        let round_trip = FermionOperator::from_terms(op.iter());
+
+        assert_eq!(round_trip, op);
+    }
+
+    #[test]
+    fn test_iter_with_groups_from_terms_with_groups_round_trip() {
+        let op = FermionOperator {
+            coeffs: vec![
+                Complex64::new(1.0, 0.0),
+                Complex64::new(1.0, 0.0),
+                Complex64::new(2.0, 0.0),
+            ],
+            actions: vec![true, false, true, false, true, true, false, false],
+            modes: vec![0, 1, 1, 0, 0, 0, 1, 1],
+            boundaries: vec![0, 2, 4, 8],
+            groups: Some(vec![0, 0, 1]),
+        };
+
+        let round_trip = FermionOperator::from_terms_with_groups(op.iter_with_groups());
+
+        assert_eq!(round_trip, op);
+    }
 }
