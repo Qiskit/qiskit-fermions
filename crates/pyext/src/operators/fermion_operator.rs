@@ -13,7 +13,6 @@
 use std::collections::HashSet;
 
 use num_complex::Complex64;
-use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
 use pyo3::types::PyType;
 use pyo3::{class::basic::CompareOp, exceptions::PyNotImplementedError};
@@ -1122,11 +1121,10 @@ impl PyFermionOperator {
     ///     ValueError: if ``permutation`` contains duplicate entries, or is too short to relabel
     ///         some mode the operator acts upon.
     fn relabel_modes(&self, permutation: Vec<u32>) -> PyResult<Self> {
-        let out = self.inner.relabel_modes(permutation);
-        match out {
-            Ok(op) => Ok(op.into()),
-            Err(e) => Err(PyValueError::new_err(e.to_string())),
-        }
+        self.inner
+            .relabel_modes(permutation)
+            .map(Into::into)
+            .map_err(crate::value_err)
     }
 }
 
