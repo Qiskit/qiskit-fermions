@@ -60,6 +60,9 @@ resulting operators are mathematically identical, the term order can have
 significant implications on algorithm behavior at runtime, due to the term
 iteration order.
 
+.. note::
+   Unlike :func:`canonical_order`, :func:`order_terms` has no counterpart in the C API.
+
 Members
 ^^^^^^^
 
@@ -67,14 +70,16 @@ Members
    :toctree: ../stubs/
 
    canonical_order
+   order_terms
 """
 
 from .filtering import filter_diagonal_terms
 from .grouping import group_terms_by_electronic_structure
-from .ordering import canonical_order
+from .ordering import canonical_order, order_terms
 
 __all__ = [
     "canonical_order",
     "filter_diagonal_terms",
     "group_terms_by_electronic_structure",
+    "order_terms",
 ]
