@@ -14,11 +14,29 @@
 
 from __future__ import annotations
 
+import numpy as np
 import pytest
 from qiskit_fermions.circuit import FermionicCircuit
 from qiskit_fermions.circuit.fermionic_gate import FermionicGate
 
 ffsim = pytest.importorskip("ffsim")
+
+
+class _PlainProtocolGate(FermionicGate):
+    """A gate implementing only ffsim's plain ``_apply_unitary_`` (no ``_apply_unitary_placed_``).
+
+    Stands in for any third-party gate that supports only the base protocol. It scales the vector by
+    a fixed factor so that whether (and how) it was applied is observable in the returned state,
+    without relying on gate-object identity (a circuit copies the instructions it stores).
+    """
+
+    SCALE = 2.0
+
+    def __init__(self, num_modes: int = 2):
+        super().__init__("plain", num_modes)
+
+    def _apply_unitary_(self, vec, norb, nelec, copy):
+        return self.SCALE * vec
 
 
 def test_apply_unitary_raises_when_instruction_lacks_protocol():
@@ -57,3 +75,38 @@ def test_apply_unitary_raises_when_instruction_declines():
 
     with pytest.raises(ValueError, match="declined to apply"):
         circ._apply_unitary_(vec0, norb, nelec, copy=True)
+
+
+def test_apply_unitary_rejects_plain_protocol_gate_on_non_identity_placement():
+    """A plain-``_apply_unitary_`` gate placed on a non-identity subset raises rather than misapplies.
+
+    ffsim's base protocol has no mode argument, so the gate acts on modes ``0..k`` of the vector and
+    cannot honor a subset placement. Placing it on ``[1, 2]`` of a larger register would silently act
+    on the wrong modes, so the walk rejects it instead.
+    """
+    norb = 2
+    nelec = (1, 1)
+    circ = FermionicCircuit(2 * norb)
+    circ.append(_PlainProtocolGate(2), [circ.modes[1], circ.modes[2]])  # non-identity placement
+
+    vec0 = ffsim.slater_determinant(norb, ([0], [0]))
+
+    with pytest.raises(ValueError, match="no mode-placement argument"):
+        circ._apply_unitary_(vec0, norb, nelec, copy=True)
+
+
+def test_apply_unitary_accepts_plain_protocol_gate_on_identity_placement():
+    """A plain-``_apply_unitary_`` gate on the identity placement ``[0, 1, ...]`` is applied as-is.
+
+    The gate scales the vector by a known factor, so the observable output confirms the fallback
+    path ran the gate (rather than being wrongly rejected).
+    """
+    norb = 2
+    nelec = (1, 1)
+    circ = FermionicCircuit(2 * norb)
+    circ.append(_PlainProtocolGate(2 * norb), circ.modes)  # identity placement [0, 1, 2, 3]
+
+    vec0 = ffsim.slater_determinant(norb, ([0], [0]))
+
+    result = circ._apply_unitary_(vec0, norb, nelec, copy=True)
+    np.testing.assert_array_equal(result, _PlainProtocolGate.SCALE * vec0)

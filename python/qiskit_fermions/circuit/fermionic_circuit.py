@@ -142,7 +142,8 @@ class FermionicCircuit:
             TypeError: if a circuit instruction does not implement ffsim's
                 ``SupportsApplyUnitary`` protocol.
             ValueError: if a circuit instruction declines to apply its unitary for the given
-                ``norb`` and ``nelec``.
+                ``norb`` and ``nelec``, or if an instruction implementing only the plain
+                ``_apply_unitary_`` protocol is placed on a non-identity mode subset.
         """
         return self._apply_unitary_placed_(vec, norb, nelec, copy, list(range(len(self.register))))
 
@@ -165,6 +166,13 @@ class FermionicCircuit:
         :meth:`_apply_unitary_`; a subset placement lets this circuit act as the definition of a gate
         placed on a subset of a larger register (e.g. :class:`.UCJ`).
 
+        An instruction is placed onto its absolute modes only if it implements the placement-aware
+        ``_apply_unitary_placed_`` extension. An instruction implementing only ffsim's plain
+        ``_apply_unitary_`` -- which has no mode argument and therefore acts on modes ``0..k`` of the
+        vector -- can only be honored when its placement is the identity ``[0, 1, ..., k-1]``; on any
+        other subset the placement cannot be expressed and the instruction is rejected rather than
+        silently applied on the wrong modes.
+
         Args:
             vec: the state vector to apply this circuit to. May be ``None`` to let the circuit's
                 first instruction seed the initial state (e.g. :class:`.InitializeModes`, which
@@ -185,7 +193,8 @@ class FermionicCircuit:
             TypeError: if a circuit instruction does not implement ffsim's
                 ``SupportsApplyUnitary`` protocol.
             ValueError: if a circuit instruction declines to apply its unitary for the given
-                ``norb`` and ``nelec``.
+                ``norb`` and ``nelec``, or if an instruction implementing only the plain
+                ``_apply_unitary_`` protocol is placed on a non-identity mode subset.
         """
         from qiskit_fermions.transpiler.converters import FermionicCircuitToDAG
 
@@ -210,7 +219,7 @@ class FermionicCircuit:
             node_freg_indices = [freg_indices[dag.find_bit(qubit).index] for qubit in node.qargs]
 
             # prefer the placement-aware variant so the instruction's operator is relabeled onto its
-            # absolute modes; fall back to the plain protocol method otherwise (identity placement)
+            # absolute modes; fall back to the plain protocol method otherwise
             placed_method = getattr(instr, "_apply_unitary_placed_", None)
             if placed_method is not None:
                 result = placed_method(vec, norb, nelec, False, node_freg_indices)
@@ -220,6 +229,20 @@ class FermionicCircuit:
                     raise TypeError(
                         f"Circuit instruction of type '{type(instr)}' does not implement "
                         "ffsim's SupportsApplyUnitary protocol!"
+                    )
+                # ffsim's plain ``_apply_unitary_(vec, norb, nelec, copy)`` protocol has no mode
+                # argument: the instruction acts on modes ``0..k`` of the global vector, so it can
+                # only be honored when its placement is the identity ``[0, 1, ..., k-1]``. On any
+                # other subset the placement cannot be expressed, and applying it anyway would
+                # silently act on the wrong modes -- reject instead of producing a wrong state.
+                if node_freg_indices != list(range(len(node.qargs))):
+                    raise ValueError(
+                        f"Circuit instruction of type '{type(instr)}' implements only ffsim's "
+                        "'_apply_unitary_' protocol, which has no mode-placement argument, but it "
+                        f"is placed on the non-identity modes {node_freg_indices}. Such an "
+                        "instruction can only be applied on the identity placement "
+                        f"{list(range(len(node.qargs)))}; implement '_apply_unitary_placed_' to "
+                        "support subset placement."
                     )
                 result = method(vec, norb, nelec, False)
 
