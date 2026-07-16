@@ -55,8 +55,10 @@ Members
 Ordering
 --------
 
-This module provides a function to reorder the terms of an operator into a canonical,
-coefficient-independent order.
+This module provides functions to reorder the terms of an operator. While the
+resulting operators are mathematically identical, the term order can have
+significant implications on algorithm behavior at runtime, due to the term
+iteration order.
 
 Members
 ^^^^^^^

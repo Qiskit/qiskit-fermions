@@ -27,7 +27,7 @@ use qiskit_fermions_core::operators::terms::ordering::canonical::canonical_order
 /// for a given set of terms regardless of how the operator was assembled. The terms themselves are
 /// left untouched — this only reorders them, it does not simplify or normal-order the operator.
 ///
-/// This works for any operator type implementing the
+/// This works for any of the built-in operator types implementing the
 /// :class:`~qiskit_fermions.operators.OperatorTrait` protocol; the returned operator is of the same
 /// type as the input.
 ///
