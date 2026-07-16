@@ -123,7 +123,7 @@ class UCJ(FermionicGate):
         """The number of spatial orbitals."""
         self.nelec = nelec
         """The number of electrons (spinless) or the ``(n_alpha, n_beta)`` pair (spinful)."""
-        self.diag_coulomb_mats = np.asarray(diag_coulomb_mats, dtype=float)
+        self.diag_coulomb_mats = self._to_real_diag_coulomb_mats(diag_coulomb_mats)
         """The diagonal Coulomb matrices defining each ansatz repetition."""
         self.orbital_rotations = np.asarray(orbital_rotations, dtype=complex)
         """The orbital rotations defining each ansatz repetition."""
@@ -193,12 +193,15 @@ class UCJ(FermionicGate):
                 factorization; if larger, the ansatz is padded with identity rotations and zero
                 diagonal Coulomb matrices. For the ``"unbalanced"`` variant a pair
                 ``(n_reps_ab, n_reps_same_spin)`` independently sets the number of alpha-beta and
-                same-spin terms.
+                same-spin terms; a tuple is only valid for that variant.
             interaction_pairs: the allowed diagonal Coulomb interactions (the "local" in LUCJ). For
                 ``"spinless"`` a single list of upper-triangular ``(i, j)`` pairs; for ``"balanced"``
                 a pair ``(pairs_aa, pairs_ab)``; for ``"unbalanced"`` a triple
-                ``(pairs_aa, pairs_ab, pairs_bb)``. Any element may be ``None`` (no restriction);
-                the same-spin (aa/bb) masks are symmetrized while the alpha-beta (ab) mask is not.
+                ``(pairs_aa, pairs_ab, pairs_bb)``. A list of pairs restricts that block to exactly
+                those entries; the same-spin (aa/bb) masks are symmetrized while the alpha-beta (ab)
+                mask is not. Use ``None`` -- not an empty list ``[]`` -- to impose *no* restriction:
+                a ``None`` element (or the whole argument being ``None``) leaves the block untouched,
+                whereas an empty list allows no interactions and so zeros the entire block.
             tol: the double-factorization truncation tolerance.
             reference_occupation: forwarded to :class:`.UCJ`; defaults to the Hartree-Fock
                 determinant.
@@ -207,7 +210,8 @@ class UCJ(FermionicGate):
             The constructed :class:`.UCJ` gate.
 
         Raises:
-            ValueError: if ``variant`` is not recognized.
+            ValueError: if ``variant`` is not recognized, or if a tuple ``n_reps`` is passed for a
+                variant other than ``"unbalanced"``.
         """
         if variant == "unbalanced":
             # the variant selects which argument shapes are valid; mypy cannot narrow the unions
@@ -271,7 +275,15 @@ class UCJ(FermionicGate):
         """Factorizes a single ``t2`` tensor into the balanced/spinless ansatz tensors."""
         from qiskit_fermions._lib.linalg.double_factorized import double_factorized_t2
 
-        max_terms = None if isinstance(n_reps, tuple) else n_reps
+        if isinstance(n_reps, tuple):
+            # a tuple ``n_reps`` is the ``(n_reps_ab, n_reps_same_spin)`` pair meaningful only to the
+            # unbalanced variant; for balanced/spinless it has a single term count, so a tuple here
+            # would otherwise be silently ignored (no truncation, no padding). Reject it instead.
+            raise ValueError(
+                f"A tuple n_reps={n_reps!r} is only valid for the 'unbalanced' variant; pass a "
+                f"single integer (or None) for the '{variant}' variant."
+            )
+        max_terms = n_reps
         terms = double_factorized_t2(np.asarray(t2, dtype=complex), tol, max_terms=max_terms)
         norb = terms[0][1].shape[-1] if terms else np.asarray(t2).shape[0] + np.asarray(t2).shape[2]
 
@@ -476,6 +488,26 @@ class UCJ(FermionicGate):
             pass
 
         return variant
+
+    @staticmethod
+    def _to_real_diag_coulomb_mats(diag_coulomb_mats: np.ndarray) -> np.ndarray:
+        """Coerces the diagonal Coulomb matrices to real, rejecting a non-negligible imaginary part.
+
+        Diagonal Coulomb matrices are real by definition, but the documented ffsim ``optimize=True``
+        workflow hands over complex arrays whose imaginary parts are numerical round-off. A bare
+        ``np.asarray(..., dtype=float)`` would drop those parts silently (only a ``ComplexWarning``),
+        so instead take the real part explicitly and raise if the imaginary part is not negligible --
+        surfacing genuinely complex input rather than silently truncating it.
+        """
+        arr = np.asarray(diag_coulomb_mats)
+        if np.iscomplexobj(arr):
+            if not np.allclose(arr.imag, 0.0):
+                raise ValueError(
+                    "diag_coulomb_mats has a non-negligible imaginary part; diagonal Coulomb "
+                    "matrices must be real."
+                )
+            arr = arr.real
+        return np.asarray(arr, dtype=float)
 
     @staticmethod
     def _hartree_fock_occupation(

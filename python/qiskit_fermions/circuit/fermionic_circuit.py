@@ -142,8 +142,9 @@ class FermionicCircuit:
             TypeError: if a circuit instruction does not implement ffsim's
                 ``SupportsApplyUnitary`` protocol.
             ValueError: if a circuit instruction declines to apply its unitary for the given
-                ``norb`` and ``nelec``, or if an instruction implementing only the plain
-                ``_apply_unitary_`` protocol is placed on a non-identity mode subset.
+                ``norb`` and ``nelec``; if an instruction implementing only the plain
+                ``_apply_unitary_`` protocol is placed on a non-identity mode subset; or if the
+                circuit is empty and ``vec`` is ``None`` (there is no state to return).
         """
         return self._apply_unitary_placed_(vec, norb, nelec, copy, list(range(len(self.register))))
 
@@ -193,8 +194,9 @@ class FermionicCircuit:
             TypeError: if a circuit instruction does not implement ffsim's
                 ``SupportsApplyUnitary`` protocol.
             ValueError: if a circuit instruction declines to apply its unitary for the given
-                ``norb`` and ``nelec``, or if an instruction implementing only the plain
-                ``_apply_unitary_`` protocol is placed on a non-identity mode subset.
+                ``norb`` and ``nelec``; if an instruction implementing only the plain
+                ``_apply_unitary_`` protocol is placed on a non-identity mode subset; or if the
+                circuit is empty and ``vec`` is ``None`` (there is no state to return).
         """
         from qiskit_fermions.transpiler.converters import FermionicCircuitToDAG
 
@@ -253,5 +255,14 @@ class FermionicCircuit:
                 )
 
             vec = result
+
+        if vec is None:
+            # no instruction ran (an empty circuit) and no incoming vector was supplied, so there is
+            # no state to return. The protocol must yield an array, not ``None``; a caller wanting an
+            # identity here must pass the vector to act on.
+            raise ValueError(
+                "Cannot apply an empty circuit to a vector of None: there is no incoming state and "
+                "no instruction to seed one. Pass a state vector for the circuit to act on."
+            )
 
         return vec

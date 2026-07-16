@@ -85,7 +85,7 @@ def test_initialize_modes_apply_unitary_vec_none_seeds_from_nothing():
 
 
 def test_initialize_modes_apply_unitary_agreeing_vec_logs_and_seeds(caplog):
-    """A non-None vec that agrees with the occupation's sector is accepted, logged, and overwritten."""
+    """A non-None vec that agrees with the occupation's sector is accepted, warned, and overwritten."""
     norb = 3
     nelec = (2, 1)
     occupation = [True, True, False, True, False, False]
@@ -96,13 +96,17 @@ def test_initialize_modes_apply_unitary_agreeing_vec_logs_and_seeds(caplog):
     incoming = rng.standard_normal(len(expected)) + 1j * rng.standard_normal(len(expected))
     incoming_before = incoming.copy()
 
-    with caplog.at_level(logging.INFO, logger="qiskit_fermions.circuit.library.initialize_modes"):
+    with caplog.at_level(
+        logging.WARNING, logger="qiskit_fermions.circuit.library.initialize_modes"
+    ):
         result = InitializeModes(occupation)._apply_unitary_(incoming, norb, nelec, copy=True)
 
     np.testing.assert_allclose(result, expected, atol=1e-12)
     # the incoming amplitudes are replaced by the determinant, and the input is left untouched
     np.testing.assert_array_equal(incoming, incoming_before)
-    assert any("agrees with the occupation" in rec.message for rec in caplog.records)
+    # discarding accumulated state is surprising enough to warrant a warning, not just an info log
+    assert any(rec.levelname == "WARNING" for rec in caplog.records)
+    assert any("discarding the incoming state vector" in rec.message for rec in caplog.records)
 
 
 def test_initialize_modes_apply_unitary_through_circuit_with_placement():

@@ -184,13 +184,15 @@ class OrbitalRotation(FermionicGate):
         diagonal blocks, but only when ``full`` is block-diagonal across the alpha/beta split; a
         rotation with nonzero off-diagonal blocks mixes the spin sectors -- which does not conserve
         the per-spin electron counts and so cannot act on a fixed ``(n_alpha, n_beta)`` sector -- and
-        raises :class:`ValueError`. The result is also exactly the argument
-        :func:`ffsim.apply_orbital_rotation` expects.
+        raises :class:`ValueError`. The off-block test uses a small tolerance so that a
+        genuinely block-diagonal rotation carrying only floating-point round-off in its off-blocks
+        (e.g. one assembled via ``scipy.linalg.expm`` of a block-diagonal generator) is accepted. The
+        result is also exactly the argument :func:`ffsim.apply_orbital_rotation` expects.
         """
         if isinstance(nelec, numbers.Integral):
             return full
 
-        if np.any(full[:norb, norb:]) or np.any(full[norb:, :norb]):
+        if not np.allclose(full[:norb, norb:], 0.0) or not np.allclose(full[norb:, :norb], 0.0):
             raise ValueError(
                 "OrbitalRotation mixes the alpha and beta spin sectors, which does not conserve the "
                 "individual electron counts and cannot act on a fixed (n_alpha, n_beta) sector."
@@ -222,13 +224,17 @@ class OrbitalRotation(FermionicGate):
             vec = vec.copy()
 
         log_mat = scipy.linalg.logm(full)
+        # ``logm`` of a block-diagonal / sparse rotation leaves ~1e-16 round-off in nominally-zero
+        # entries; drop them with a tolerance rather than an exact ``!= 0.0`` so the generator carries
+        # only the genuine terms (an exactly-zero threshold keeps the junk, bloating the operator).
+        tol = 1e-12
         # the generator's modes are already global (``full`` was embedded onto them), so no relabel
         # is needed -- unlike Evolution, which relabels a local operator onto its global modes
         terms = {
             ((True, i), (False, j)): complex(log_mat[i, j])
             for i in range(full.shape[0])
             for j in range(full.shape[1])
-            if log_mat[i, j] != 0.0
+            if abs(log_mat[i, j]) > tol
         }
         generator = FermionOperator.from_dict(terms)
 

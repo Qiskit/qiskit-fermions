@@ -93,9 +93,10 @@ class InitializeModes(FermionicGate):
         Args:
             vec: the state vector to act on, or ``None`` to seed from no incoming state. When a real
                 array is passed it must *agree* with the occupation -- same ``(norb, nelec)`` sector
-                dimension -- in which case an informational message is logged and the freshly seeded
-                determinant is returned (the incoming amplitudes are replaced, since this gate defines
-                the initial state). A vector of the wrong length is rejected.
+                dimension -- in which case a warning is logged and the freshly seeded determinant is
+                returned (the incoming amplitudes are replaced, since this gate defines the initial
+                state; placing it mid-circuit therefore drops the preceding gates' effect). A vector
+                of the wrong length is rejected.
             norb: the number of spatial orbitals of the *global* state vector.
             nelec: either a single integer for a spinless system, or a pair of integers storing the
                 numbers of spin alpha and spin beta fermions. An integer selects the spinless mode
@@ -162,9 +163,11 @@ class InitializeModes(FermionicGate):
                     f"match the dimension {len(seed)} of the (norb={norb}, nelec={nelec!r}) sector "
                     "defined by its occupation."
                 )
-            logger.info(
-                "InitializeModes: incoming state vector agrees with the occupation's "
-                "(norb=%s, nelec=%r) sector; seeding the occupation determinant.",
+            logger.warning(
+                "InitializeModes: discarding the incoming state vector and reseeding the "
+                "occupation determinant for the (norb=%s, nelec=%r) sector. This gate is a state "
+                "producer, not a transform, so any accumulated amplitudes are replaced -- placing "
+                "it after other gates (rather than at the circuit start) drops their effect.",
                 norb,
                 nelec,
             )

@@ -155,17 +155,17 @@ pub fn addr2str(table: &BinomialTable, norb: u32, nocc: u32, addr: usize) -> u64
     let mut remaining = addr;
     // Assign the electrons from the highest-indexed (position `nocc`) down to the first.
     for which in (1..=nocc).rev() {
-        // Find the largest orbital `orb` with C(orb, which) <= remaining.
-        let mut orb = norb;
-        loop {
-            orb -= 1;
-            let weight = table.comb(orb, which);
-            if weight <= remaining {
-                string |= 1u64 << orb;
-                remaining -= weight;
-                break;
-            }
-        }
+        // Find the largest orbital `orb` with C(orb, which) <= remaining. Iterating `(0..norb).rev()`
+        // (rather than an unbounded `loop { orb -= 1; .. }`) keeps `orb` from underflowing past 0 in
+        // release builds when `addr` is out of range for the sector -- the `debug_assert!` above
+        // catches that in debug, and the explicit `expect` below turns the same violation into a
+        // clear panic in release instead of a `u32` subtract-overflow or an out-of-bounds table read.
+        let orb = (0..norb)
+            .rev()
+            .find(|&orb| table.comb(orb, which) <= remaining)
+            .expect("addr out of range for the (norb, nocc) sector");
+        string |= 1u64 << orb;
+        remaining -= table.comb(orb, which);
     }
     string
 }

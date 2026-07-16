@@ -301,3 +301,24 @@ def test_orbital_rotation_apply_unitary_rejects_spin_mixing(monkeypatch):
     monkeypatch.setattr(orbital_rotation_module, "HAS_FFSIM", False)
     with pytest.raises(ValueError, match="mixes the alpha and beta spin sectors"):
         OrbitalRotation(full)._apply_unitary_(vec0, norb, nelec, copy=True)
+
+
+def test_orbital_rotation_apply_unitary_accepts_block_diagonal_with_float_noise():
+    """A block-diagonal rotation carrying only float round-off in its off-blocks is accepted.
+
+    The spin-mixing check tolerates round-off so a genuinely block-diagonal rotation (e.g. built via
+    ``expm`` of a block-diagonal generator) is not wrongly rejected. The result must still match the
+    exact-diagonalization oracle for the intended block-diagonal rotation.
+    """
+    norb = 3
+    nelec = (2, 1)
+    full = _block_diag(random_unitary(norb, seed=1), random_unitary(norb, seed=2))
+    # inject sub-tolerance noise into the nominally-zero alpha/beta off-blocks
+    full[:norb, norb:] += 1e-14
+    full[norb:, :norb] += 1e-14
+    vec0 = ffsim.slater_determinant(norb, ([0, 1], [0]))
+
+    result = OrbitalRotation(full)._apply_unitary_(vec0, norb, nelec, copy=True)
+    # the oracle uses the full (noisy) matrix directly; the accepted result must agree with it
+    expected = _orbital_rotation_oracle(full, norb, nelec, vec0)
+    np.testing.assert_allclose(result, expected, atol=1e-10)

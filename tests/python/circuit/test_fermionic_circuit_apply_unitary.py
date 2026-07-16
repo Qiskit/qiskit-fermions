@@ -95,6 +95,28 @@ def test_apply_unitary_rejects_plain_protocol_gate_on_non_identity_placement():
         circ._apply_unitary_(vec0, norb, nelec, copy=True)
 
 
+def test_apply_unitary_empty_circuit_with_none_vec_raises():
+    """An empty circuit applied to ``vec=None`` raises rather than returning ``None``.
+
+    With no instruction to seed a state and no incoming vector, there is nothing to return; the
+    protocol requires an array, so this is rejected instead of silently yielding ``None``.
+    """
+    circ = FermionicCircuit(4)
+    with pytest.raises(ValueError, match="empty circuit"):
+        circ._apply_unitary_(None, 2, (1, 1), copy=True)
+
+
+def test_apply_unitary_empty_circuit_with_vec_returns_it():
+    """An empty circuit applied to a real vector returns that vector unchanged (identity)."""
+    norb = 2
+    nelec = (1, 1)
+    circ = FermionicCircuit(2 * norb)
+    vec0 = ffsim.slater_determinant(norb, ([0], [0]))
+
+    result = circ._apply_unitary_(vec0, norb, nelec, copy=True)
+    np.testing.assert_array_equal(result, vec0)
+
+
 def test_apply_unitary_accepts_plain_protocol_gate_on_identity_placement():
     """A plain-``_apply_unitary_`` gate on the identity placement ``[0, 1, ...]`` is applied as-is.
 

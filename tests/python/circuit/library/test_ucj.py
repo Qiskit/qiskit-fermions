@@ -141,6 +141,47 @@ def test_ucj_spinless_true_uses_norb_modes():
     assert ops["OrbitalRotation"] == 2 * n_reps
 
 
+def test_ucj_accepts_complex_diag_coulomb_with_zero_imaginary_part():
+    """Complex-typed diag-Coulomb mats with a negligible imaginary part are coerced to real."""
+    norb = 3
+    mats, rotations = _balanced_tensors(norb, 1, seed=11)
+    gate = UCJ(norb, (1, 1), mats.astype(complex), rotations)
+    assert gate.diag_coulomb_mats.dtype == np.float64
+    np.testing.assert_allclose(gate.diag_coulomb_mats, mats)
+
+
+def test_ucj_rejects_complex_diag_coulomb_with_nonzero_imaginary_part():
+    """A genuinely complex diag-Coulomb matrix is rejected rather than silently truncated."""
+    norb = 3
+    mats, rotations = _balanced_tensors(norb, 1, seed=12)
+    complex_mats = mats.astype(complex)
+    complex_mats[0, 0, 0, 1] += 0.5j
+    with pytest.raises(ValueError, match="imaginary part"):
+        UCJ(norb, (1, 1), complex_mats, rotations)
+
+
+def test_ucj_from_t_amplitudes_rejects_tuple_n_reps_for_balanced():
+    """A tuple n_reps is only valid for the unbalanced variant; balanced/spinless reject it."""
+    nocc, nvrt = 1, 2
+    t2 = np.zeros((nocc, nocc, nvrt, nvrt))
+    with pytest.raises(ValueError, match="only valid for the 'unbalanced' variant"):
+        UCJ.from_t_amplitudes((1, 1), t2, variant="balanced", n_reps=(2, 3))
+
+
+def test_ucj_from_t_amplitudes_empty_interaction_pairs_zeros_layer():
+    """An empty-list interaction_pairs zeros the whole diagonal-Coulomb block (unlike None)."""
+    nocc, nvrt = 1, 2
+    rng = np.random.default_rng(13)
+    t2 = rng.standard_normal((nocc, nocc, nvrt, nvrt))
+    t2 = t2 + t2.transpose(1, 0, 3, 2)  # a nontrivial symmetric t2 so the factorization is nonzero
+    gate = UCJ.from_t_amplitudes(2, t2, variant="spinless", interaction_pairs=[])
+    # [] allows no interactions -> every diagonal-Coulomb matrix is zeroed
+    np.testing.assert_array_equal(gate.diag_coulomb_mats, 0.0)
+    # None (no restriction) leaves the genuine factorization terms in place
+    gate_none = UCJ.from_t_amplitudes(2, t2, variant="spinless", interaction_pairs=None)
+    assert np.any(gate_none.diag_coulomb_mats != 0.0)
+
+
 def test_orbital_rotation_from_t1_amplitudes_is_unitary():
     """OrbitalRotation.from_t1_amplitudes builds a unitary of the right size."""
     t1 = np.array([[0.1, 0.2], [0.3, -0.1]])  # 2 occ, 2 virt
