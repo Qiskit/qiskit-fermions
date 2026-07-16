@@ -31,7 +31,9 @@ crate::declare_operator_iters!(
     "qiskit_fermions._lib.operators.transfer_vertex_operator",
     "TransferVertexOperatorDataIter",
     "TransferVertexOperatorDataGroupIter",
-    PyTransferAction
+    PyTransferAction,
+    "tuple[list[tuple[int, int]], complex]",
+    "tuple[list[tuple[int, int]], complex, int]"
 );
 
 /// A transfer-vertex operator.

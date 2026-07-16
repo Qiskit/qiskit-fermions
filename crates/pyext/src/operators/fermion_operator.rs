@@ -31,7 +31,9 @@ crate::declare_operator_iters!(
     "qiskit_fermions._lib.operators.fermion_operator",
     "FermionOperatorDataIter",
     "FermionOperatorDataGroupIter",
-    PyFermionAction
+    PyFermionAction,
+    "tuple[list[tuple[bool, int]], complex]",
+    "tuple[list[tuple[bool, int]], complex, int]"
 );
 
 /// A spin-less fermionic operator.

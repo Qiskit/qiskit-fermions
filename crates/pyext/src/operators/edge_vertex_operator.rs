@@ -31,7 +31,9 @@ crate::declare_operator_iters!(
     "qiskit_fermions._lib.operators.edge_vertex_operator",
     "EdgeVertexOperatorDataIter",
     "EdgeVertexOperatorDataGroupIter",
-    PyEdgeAction
+    PyEdgeAction,
+    "tuple[list[tuple[int, int]], complex]",
+    "tuple[list[tuple[int, int]], complex, int]"
 );
 
 /// An edge-vertex operator.
