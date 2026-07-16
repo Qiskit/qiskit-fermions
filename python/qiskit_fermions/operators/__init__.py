@@ -31,7 +31,7 @@ annihilation operators.
    :toctree: ../stubs/
    :template: autosummary/typealias.rst
 
-   FermionAction
+   ~fermion_action.FermionAction
 
 .. autosummary::
    :toctree: ../stubs/
@@ -49,7 +49,7 @@ This operator represents fermionic operators in terms of Majorana fermions.
    :toctree: ../stubs/
    :template: autosummary/typealias.rst
 
-   MajoranaAction
+   ~majorana_action.MajoranaAction
 
 .. autosummary::
    :toctree: ../stubs/
@@ -73,8 +73,8 @@ Hermitian generators:
    :toctree: ../stubs/
    :template: autosummary/typealias.rst
 
-   EdgeAction
-   TransferAction
+   ~edge_action.EdgeAction
+   ~transfer_action.TransferAction
 
 .. autosummary::
    :toctree: ../stubs/
