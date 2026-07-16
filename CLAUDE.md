@@ -36,23 +36,31 @@ This full triple is not always worthwhile — decide case-by-case. Features may 
 
 ## Build & test
 
-**Always use the Makefile targets, not raw `cargo`** — the Makefile exports `QISKIT_LIB` and `QISKIT_INCLUDE` that the FFI crates need to link. Qiskit must be installed in the same environment.
+**Always use the Makefile targets, not raw `cargo`** — the Makefile exports `QISKIT_LIB` and `QISKIT_INCLUDE` (auto-derived from the installed `qiskit` package) that the `cext` backend needs to link against Qiskit's C library. Qiskit must be installed in the same environment.
 
-> **`QISKIT_LIB`/`QISKIT_INCLUDE`.** These point at the Qiskit **C** library, and which builds read them follows directly from the FFI backend (see the crate architecture above):
+> **`QISKIT_LIB`/`QISKIT_INCLUDE`.** These point at the Qiskit **C** library — `QISKIT_LIB` is the **library file** itself (the build derives the `-L` search dir from its parent), not the containing directory, while `QISKIT_INCLUDE` is the header directory. Whether a target reads them — and whether the auto-derived defaults suffice — depends on what it does with the `cext` backend, not just whether it touches it:
 > - **Python builds (`pyext`)** — `make pyext`, `make pyext-dev`, `make pystubs`, `make testpython`, … — link Qiskit through `qiskit-pyo3-ffi` and **do not read** these vars at all.
-> - **C API and Rust-core builds (`cext`)** — `make cext`, `make testc`, **`make testrust`** (`cargo test -p qiskit-fermions-core --no-default-features --features cext`), and also `make lint`/`make docs` (which build the `cext` backend transitively) — link `qiskit-sys` against the Qiskit **C** library and read these vars. The Makefile defaults them via `?=` to the installed `qiskit` package's C artifacts (`qiskit.capi.get_lib()`/`get_include()`), which works when that package ships a usable C library. When it does not — or you want to build/test against a separately compiled Qiskit C API — **override them**, e.g. `QISKIT_LIB=$(find "$(pwd)"/build/qiskit/dist/c/lib/libqiskit.*) QISKIT_INCLUDE="$(pwd)"/build/qiskit/dist/c/include`. See `docs/install-c.rst` for building the Qiskit C API.
+> - **`cext`-compiling targets** — `make lint` (clippy over the `cext` backend) and `make docs` (generates the C header via `cbindgen`) — read the vars but only **compile** against them; they never link or load the real `libqiskit.so`. The Makefile's `?=` defaults (the installed `qiskit` package's C artifacts, `qiskit.capi.get_lib()`/`get_include()`) work here even when that package doesn't ship a *usable* C library, so these behave like the Python builds in practice: **no override needed**.
+> - **`cext`-linking targets** — `make cext`, `make testc`, and `make testrust` — actually **link** `qiskit-sys` against the Qiskit **C** library (and the test binaries **load it at runtime**). These need real, working values. The `?=` defaults suffice only when the installed `qiskit` package ships a usable C library; when it doesn't — or you want to build/test against a separately compiled Qiskit C API — **override them**, e.g. `QISKIT_LIB=$(find "$(pwd)"/build/qiskit/dist/c/lib/libqiskit.*) QISKIT_INCLUDE="$(pwd)"/build/qiskit/dist/c/include`. See `docs/install-c.rst` for building the Qiskit C API.
+>
+> When overriding against a separately compiled library, `make testrust` additionally needs the shared object on the **runtime loader path**, or the freshly built test binary aborts with `error while loading shared libraries: libqiskit.so`. Prepend it to `LD_LIBRARY_PATH`, e.g.:
+> ```
+> LD_LIBRARY_PATH="$(pwd)/build/qiskit/dist/c/lib:$LD_LIBRARY_PATH" \
+>   make testrust QISKIT_LIB="$(pwd)/build/qiskit/dist/c/lib/libqiskit.so" \
+>                 QISKIT_INCLUDE="$(pwd)/build/qiskit/dist/c/include"
+> ```
 
 | Task | Command |
 |------|---------|
 | Build Python extension (release) | `make pyext` |
 | Build Python extension (dev) | `make pyext-dev` |
 | Regenerate `.pyi` stubs | `make pystubs` / `make pystubs-dev` |
-| Build C lib + header | `make cext` (needs `QISKIT_LIB`/`QISKIT_INCLUDE` set) |
-| Run Rust tests | `make testrust` (core crate, `cext` backend; needs `QISKIT_LIB`/`QISKIT_INCLUDE` set) |
+| Build C lib + header | `make cext` (links Qiskit's C library; may need `QISKIT_LIB`/`QISKIT_INCLUDE` — see note above) |
+| Run Rust tests | `make testrust` (core crate, `cext` backend; links Qiskit's C library — see note above) |
 | Run Python tests | `make testpython` |
 | Run optional-dependency Python tests | `make testoptional` (needs the optional deps installed — `pip install -e ".[all]"`) |
-| Run C tests | `make testc` (needs `QISKIT_LIB`/`QISKIT_INCLUDE` set) |
-| Run guide doctests | `make doctest` (only the `docs/guides/` `.rst` files) |
+| Run C tests | `make testc` (links Qiskit's C library; may need `QISKIT_LIB`/`QISKIT_INCLUDE` — see note above) |
+| Run guide doctests | `make doctest` (all `docs/**/*.rst`; today only the `docs/guides/` guides carry any) |
 | Lint (rust + python + clang) | `make lint` |
 | Auto-fix formatting | `make style` |
 | Build docs | `make docs` (Python + C via Doxygen/breathe/Sphinx) |
@@ -74,7 +82,7 @@ Editable install for iterating on Python: `SETUPTOOLS_RUST_CARGO_PROFILE=release
 
 - **Python API docs** are pulled from `python/qiskit_fermions/` source and, for `pyext`-implemented components, from **docstrings written in the `pyext` Rust source** and surfaced through the `.pyi` stubs. Layout config is in `docs/pydoc/`. Docstring convention: **Google** (`ruff` pydocstyle).
 - **C API docs**: docstrings written in the `cext` Rust source (mix of Doxygen + Sphinx directives), extracted via Doxygen from the generated header, integrated with breathe. Layout in `docs/cdoc/`.
-- **Doctests** are collected by **Sybil** (`python/conftest.py`, `docs/conftest.py`) from `*.py`/`*.pyi`, with `ELLIPSIS | NORMALIZE_WHITESPACE | NUMBER` flags. They run in two places: the docstring and `.pyi`-stub doctests under `python/qiskit_fermions/` run as part of `make testpython` (a normal `pytest` run), while `make doctest` runs *only* the guide doctests in `docs/guides/*.rst` (via `pytest docs/`).
+- **Doctests** are collected by **Sybil** (`python/conftest.py`, `docs/conftest.py`) from `*.py`/`*.pyi`, with `ELLIPSIS | NORMALIZE_WHITESPACE | NUMBER` flags. They run in two places: the docstring and `.pyi`-stub doctests under `python/qiskit_fermions/` run as part of `make testpython` (a normal `pytest` run), while `make doctest` (via `pytest docs/`) collects all `docs/**/*.rst` — though today only the `docs/guides/*.rst` guides carry any doctests.
 
 ## Testing structure
 
