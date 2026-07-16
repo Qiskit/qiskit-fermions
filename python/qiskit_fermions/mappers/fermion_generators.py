@@ -14,12 +14,10 @@
 
 from collections.abc import Callable
 from operator import and_
-from typing import TypeVar
 
+from qiskit_fermions.mappers._typing import T
 from qiskit_fermions.operators import FermionOperator
 from qiskit_fermions.operators.fermion_action import FermionAction
-
-T = TypeVar("T")
 
 
 def map_fermion_action_generators(
@@ -79,7 +77,7 @@ def map_fermion_action_generators(
     if compose is None:
         compose = and_
 
-    mapped_operator: T = 0 * identity()  # type: ignore[assignment,operator]
+    mapped_operator: T = 0 * identity()
     for terms, coeff in operator.iter_terms():
         mapped_terms = identity()
 

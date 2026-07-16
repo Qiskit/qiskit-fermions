@@ -14,12 +14,10 @@
 
 from collections.abc import Callable
 from operator import and_
-from typing import TypeVar
 
+from qiskit_fermions.mappers._typing import T
 from qiskit_fermions.operators import TransferVertexOperator
 from qiskit_fermions.operators.transfer_action import TransferAction
-
-T = TypeVar("T")
 
 
 def map_transfer_vertex_generators(
@@ -90,7 +88,7 @@ def map_transfer_vertex_generators(
     if compose is None:
         compose = and_
 
-    mapped_operator: T = 0 * identity()  # type: ignore[assignment,operator]
+    mapped_operator: T = 0 * identity()
     for terms, coeff in operator.iter_terms():
         mapped_terms = identity()
 
