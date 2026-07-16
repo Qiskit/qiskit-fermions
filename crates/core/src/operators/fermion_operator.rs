@@ -288,6 +288,30 @@ impl FermionOperator {
     ) -> Result<Vec<Complex64>, crate::linalg::fci::FciMatvecError> {
         sector.matvec(self.iter().map(|t| (t.coeff, t.actions, t.modes)), vec)
     }
+
+    /// Compiles this operator into a reusable spinless scatter map for a precomputed sector.
+    ///
+    /// The returned [`crate::linalg::fci::CompiledSpinless`] captures the operator's vector-independent
+    /// action once; its `apply`/`apply_conj` then serve the many matvecs/rmatvecs of an evolution
+    /// (`expm_multiply`) without re-walking the ladder operators, re-checking conservation, or
+    /// re-ranking destinations on every call. See [`crate::linalg::fci::SpinlessSector::compile`].
+    pub fn compile_fci_spinless(
+        &self,
+        sector: &crate::linalg::fci::SpinlessSector,
+    ) -> Result<crate::linalg::fci::CompiledSpinless, crate::linalg::fci::FciMatvecError> {
+        sector.compile(self.iter().map(|t| (t.coeff, t.actions, t.modes)))
+    }
+
+    /// Compiles this operator into a reusable spinful scatter map for a precomputed sector.
+    ///
+    /// The spinful counterpart of [`Self::compile_fci_spinless`]; see
+    /// [`crate::linalg::fci::SpinfulSector::compile`].
+    pub fn compile_fci_spinful(
+        &self,
+        sector: &crate::linalg::fci::SpinfulSector,
+    ) -> Result<crate::linalg::fci::CompiledSpinful, crate::linalg::fci::FciMatvecError> {
+        sector.compile(self.iter().map(|t| (t.coeff, t.actions, t.modes)))
+    }
 }
 
 fn _normal_ordered_term(

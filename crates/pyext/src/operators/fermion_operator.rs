@@ -1160,34 +1160,36 @@ impl PyFermionOperator {
                 "norb={norb} exceeds the maximum of {MAX_ORBITALS} orbitals"
             )));
         }
-        // The adjoint backs `rmatvec` (the action of `A.H`), which SciPy's `expm_multiply` needs.
-        let adj = self.inner.adjoint();
         if let Ok(nocc) = nelec.extract::<u32>() {
-            // Precompute the sector geometry once and share it across both closures: `expm_multiply`
-            // calls `matvec`/`rmatvec` many times, and the binomial table and occupation strings
-            // depend only on the sector, not on the operator or the probe vector.
-            let sector = Arc::new(SpinlessSector::new(norb, nocc));
+            // Compile the operator once into a flat scatter map for this sector: `expm_multiply` calls
+            // `matvec`/`rmatvec` many times, and the map (the ladder walk, the conservation check, and
+            // the destination ranks) depends only on the operator and the sector -- not on the probe
+            // vector. The same map backs `rmatvec` via its conjugate transpose (`apply_conj`), so no
+            // separate adjoint operator is built or copied into the closures.
+            let sector = SpinlessSector::new(norb, nocc);
             let dim = sector.dim();
-            let (sector_mv, sector_rmv) = (Arc::clone(&sector), sector);
-            let op = self.inner.clone();
-            let matvec =
-                Box::new(move |vec: &[Complex64]| op.fci_matvec_on_spinless(&sector_mv, vec));
-            let rmatvec =
-                Box::new(move |vec: &[Complex64]| adj.fci_matvec_on_spinless(&sector_rmv, vec));
+            let compiled = Arc::new(
+                self.inner
+                    .compile_fci_spinless(&sector)
+                    .map_err(|e| PyValueError::new_err(e.to_string()))?,
+            );
+            let (compiled_mv, compiled_rmv) = (Arc::clone(&compiled), compiled);
+            let matvec = Box::new(move |vec: &[Complex64]| compiled_mv.apply(vec));
+            let rmatvec = Box::new(move |vec: &[Complex64]| compiled_rmv.apply_conj(vec));
             Ok(FciLinearOperator::new(dim, matvec, rmatvec))
         } else {
             let (n_alpha, n_beta) = nelec.extract::<(u32, u32)>()?;
-            let sector = Arc::new(
-                SpinfulSector::new(norb, n_alpha, n_beta)
+            let sector = SpinfulSector::new(norb, n_alpha, n_beta)
+                .map_err(|e| PyValueError::new_err(e.to_string()))?;
+            let dim = sector.dim();
+            let compiled = Arc::new(
+                self.inner
+                    .compile_fci_spinful(&sector)
                     .map_err(|e| PyValueError::new_err(e.to_string()))?,
             );
-            let dim = sector.dim();
-            let (sector_mv, sector_rmv) = (Arc::clone(&sector), sector);
-            let op = self.inner.clone();
-            let matvec =
-                Box::new(move |vec: &[Complex64]| op.fci_matvec_on_spinful(&sector_mv, vec));
-            let rmatvec =
-                Box::new(move |vec: &[Complex64]| adj.fci_matvec_on_spinful(&sector_rmv, vec));
+            let (compiled_mv, compiled_rmv) = (Arc::clone(&compiled), compiled);
+            let matvec = Box::new(move |vec: &[Complex64]| compiled_mv.apply(vec));
+            let rmatvec = Box::new(move |vec: &[Complex64]| compiled_rmv.apply_conj(vec));
             Ok(FciLinearOperator::new(dim, matvec, rmatvec))
         }
     }
