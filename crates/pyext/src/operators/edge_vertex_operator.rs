@@ -396,6 +396,12 @@ pub struct PyEdgeVertexOperator {
     pub inner: EdgeVertexOperator,
 }
 
+impl From<EdgeVertexOperator> for PyEdgeVertexOperator {
+    fn from(inner: EdgeVertexOperator) -> Self {
+        Self { inner }
+    }
+}
+
 crate::impl_operator_magic_methods!(PyEdgeVertexOperator);
 
 #[gen_stub_pymethods]

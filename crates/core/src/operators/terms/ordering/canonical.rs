@@ -22,12 +22,12 @@ use crate::operators::{OperatorTrait, TermSortKey};
 ///
 /// Any group indices are **not** preserved: the returned operator has `groups` set to `None`, since
 /// a canonical reordering does not respect group boundaries.
-pub fn canonical_order<OpType>(operator: OpType) -> OpType
+pub fn canonical_order<OpType>(operator: &OpType) -> OpType
 where
     OpType: OperatorTrait,
 {
-    // `operator` must outlive the borrowed term views collected below; it is dropped only after
-    // `from_terms` has copied their contents into the freshly-built result.
+    // We only read `operator` through borrowed term views and build a fresh owned result, so a
+    // shared borrow suffices — the caller keeps ownership and need not clone just to reorder.
     let mut terms: Vec<_> = operator.iter().collect();
     terms.sort_by(|a, b| a.sort_key().cmp(&b.sort_key()));
     OpType::from_terms(terms)
@@ -51,7 +51,7 @@ mod tests {
             groups: None,
         };
 
-        let ordered = canonical_order(op.clone());
+        let ordered = canonical_order(&op);
 
         // The round-trip preserves the operator up to simplification.
         assert!(op.equiv(&ordered, 1e-12));
@@ -66,7 +66,7 @@ mod tests {
             groups: None,
         };
 
-        let ordered = canonical_order(op.clone());
+        let ordered = canonical_order(&op);
 
         assert!(op.equiv(&ordered, 1e-12));
     }
@@ -74,9 +74,10 @@ mod tests {
     #[test]
     fn test_canonical_order_sorts_fermion_terms() {
         // Two terms deliberately stored out of canonical order:
-        //   term 0: a†_1 a_0  -> key [(1, true), (0, false)]
-        //   term 1: a†_0 a_1  -> key [(0, true), (1, false)]
-        // Canonically, term 1 (leading mode 0) must come before term 0 (leading mode 1).
+        //   term 0: a†_1 a_0  -> key [(true, 1), (false, 0)]
+        //   term 1: a†_0 a_1  -> key [(true, 0), (false, 1)]
+        // The key is (action, mode) per factor, matching `into_vec`. Both terms lead with a
+        // creation operator, so the tie breaks on mode: term 1 (mode 0) precedes term 0 (mode 1).
         let op = FermionOperator {
             coeffs: vec![Complex64::new(1.0, 0.0), Complex64::new(2.0, 0.0)],
             actions: vec![true, false, true, false],
@@ -85,7 +86,7 @@ mod tests {
             groups: None,
         };
 
-        let ordered = canonical_order(op.clone());
+        let ordered = canonical_order(&op);
 
         // The canonical order preserves the operator's value ...
         assert!(op.equiv(&ordered, 1e-12));
@@ -109,7 +110,7 @@ mod tests {
             groups: None,
         };
 
-        let ordered = canonical_order(op.clone());
+        let ordered = canonical_order(&op);
 
         assert!(op.equiv(&ordered, 1e-12));
         let terms: Vec<_> = ordered.iter().collect();
@@ -130,7 +131,7 @@ mod tests {
             groups: Some(vec![0, 1]),
         };
 
-        let ordered = canonical_order(op.clone());
+        let ordered = canonical_order(&op);
 
         assert!(ordered.groups.is_none());
     }

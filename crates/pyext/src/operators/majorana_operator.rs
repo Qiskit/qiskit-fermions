@@ -360,6 +360,12 @@ pub struct PyMajoranaOperator {
     pub inner: MajoranaOperator,
 }
 
+impl From<MajoranaOperator> for PyMajoranaOperator {
+    fn from(inner: MajoranaOperator) -> Self {
+        Self { inner }
+    }
+}
+
 crate::impl_operator_magic_methods!(PyMajoranaOperator);
 
 #[gen_stub_pymethods]

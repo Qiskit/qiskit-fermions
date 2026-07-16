@@ -27,7 +27,9 @@ use qiskit_fermions_core::operators::terms::ordering::canonical::canonical_order
 /// for a given set of terms regardless of how the operator was assembled. The terms themselves are
 /// left untouched — this only reorders them, it does not simplify or normal-order the operator.
 ///
-/// This works for every operator type; the returned operator is of the same type as the input.
+/// This works for any operator type implementing the
+/// :class:`~qiskit_fermions.operators.OperatorTrait` protocol; the returned operator is of the same
+/// type as the input.
 ///
 /// .. note::
 ///    Any group indices (see e.g.
@@ -55,39 +57,42 @@ use qiskit_fermions_core::operators::terms::ordering::canonical::canonical_order
 ///     A new operator of the same type with its terms in canonical order.
 ///
 /// Raises:
-///     TypeError: if ``op`` is not one of the supported operator types.
+///     TypeError: if ``op`` is not a supported operator type (see
+///         :class:`~qiskit_fermions.operators.OperatorTrait`).
 #[gen_stub_pyfunction(module = "qiskit_fermions.operators.terms.ordering.canonical")]
 #[pyfunction(name = "canonical_order")]
-pub fn py_canonical_order(op: &Bound<'_, PyAny>) -> PyResult<Py<PyAny>> {
+#[gen_stub(override_return_type(
+    type_repr = "OperatorTrait",
+    imports = ("qiskit_fermions.operators.protocol.OperatorTrait")
+))]
+pub fn py_canonical_order(
+    #[gen_stub(override_type(
+        type_repr = "OperatorTrait",
+        imports = ("qiskit_fermions.operators.protocol.OperatorTrait")
+    ))]
+    op: &Bound<'_, PyAny>,
+) -> PyResult<Py<PyAny>> {
     let py = op.py();
-    if let Ok(fer_op) = op.extract::<PyFermionOperator>() {
-        let inner = canonical_order(fer_op.inner);
-        return Ok(PyFermionOperator { inner }
-            .into_pyobject(py)?
-            .into_any()
-            .unbind());
+    // Dispatch on the concrete operator type. `cast` is a borrowing type check: on a miss it
+    // returns a borrowed error without allocating a `PyErr`, and on a hit it hands back a `&Bound`
+    // we borrow from. `canonical_order` reorders through a shared borrow and returns a fresh
+    // operator, so no clone of the input is needed.
+    macro_rules! dispatch {
+        ($($py_op:ty),+ $(,)?) => {
+            $(
+                if let Ok(op) = op.cast::<$py_op>() {
+                    let ordered = <$py_op>::from(canonical_order(&op.borrow().inner));
+                    return Ok(ordered.into_pyobject(py)?.into_any().unbind());
+                }
+            )+
+        };
     }
-    if let Ok(maj_op) = op.extract::<PyMajoranaOperator>() {
-        let inner = canonical_order(maj_op.inner);
-        return Ok(PyMajoranaOperator { inner }
-            .into_pyobject(py)?
-            .into_any()
-            .unbind());
-    }
-    if let Ok(edge_op) = op.extract::<PyEdgeVertexOperator>() {
-        let inner = canonical_order(edge_op.inner);
-        return Ok(PyEdgeVertexOperator { inner }
-            .into_pyobject(py)?
-            .into_any()
-            .unbind());
-    }
-    if let Ok(transfer_op) = op.extract::<PyTransferVertexOperator>() {
-        let inner = canonical_order(transfer_op.inner);
-        return Ok(PyTransferVertexOperator { inner }
-            .into_pyobject(py)?
-            .into_any()
-            .unbind());
-    }
+    dispatch!(
+        PyFermionOperator,
+        PyMajoranaOperator,
+        PyEdgeVertexOperator,
+        PyTransferVertexOperator,
+    );
     Err(PyTypeError::new_err(
         "canonical_order expects a fermionic, Majorana, edge-vertex or transfer-vertex operator",
     ))

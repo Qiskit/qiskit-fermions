@@ -401,6 +401,12 @@ pub struct PyTransferVertexOperator {
     pub inner: TransferVertexOperator,
 }
 
+impl From<TransferVertexOperator> for PyTransferVertexOperator {
+    fn from(inner: TransferVertexOperator) -> Self {
+        Self { inner }
+    }
+}
+
 crate::impl_operator_magic_methods!(PyTransferVertexOperator);
 
 #[gen_stub_pymethods]

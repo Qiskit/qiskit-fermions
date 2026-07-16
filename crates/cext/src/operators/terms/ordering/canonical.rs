@@ -57,7 +57,7 @@ pub unsafe extern "C" fn qf_ferm_op_canonical_order(
     // SAFETY: Per documentation, the pointers are non-null and aligned.
     let op = unsafe { const_ptr_as_ref(op) };
 
-    let result = canonical_order(op.clone());
+    let result = canonical_order(op);
     Box::into_raw(Box::new(result))
 }
 
@@ -88,6 +88,6 @@ pub unsafe extern "C" fn qf_maj_op_canonical_order(
     // SAFETY: Per documentation, the pointers are non-null and aligned.
     let op = unsafe { const_ptr_as_ref(op) };
 
-    let result = canonical_order(op.clone());
+    let result = canonical_order(op);
     Box::into_raw(Box::new(result))
 }

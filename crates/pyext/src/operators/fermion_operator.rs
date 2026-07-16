@@ -359,6 +359,12 @@ pub struct PyFermionOperator {
     pub inner: FermionOperator,
 }
 
+impl From<FermionOperator> for PyFermionOperator {
+    fn from(inner: FermionOperator) -> Self {
+        Self { inner }
+    }
+}
+
 crate::impl_operator_magic_methods!(PyFermionOperator);
 
 #[gen_stub_pymethods]
