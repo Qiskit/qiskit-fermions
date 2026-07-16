@@ -208,6 +208,36 @@ def test_evolution_apply_unitary_spinless_matches_exact_diagonalization():
     np.testing.assert_array_equal(vec0, vec0_before)
 
 
+def test_evolution_apply_unitary_rejects_non_conserving_operator():
+    """A term that leaves the (norb, nelec) sector is rejected rather than silently projected."""
+    norb = 2
+    vec = np.ones(4, dtype=complex)
+
+    # A bare creation does not conserve particle number.
+    raising = FermionOperator.from_dict({((True, 0),): 1.0})
+    with pytest.raises(ValueError, match="must preserve the particle number"):
+        Evolution(norb, raising, time=0.1)._apply_unitary_(vec, norb, (1, 1), copy=True)
+
+
+def test_evolution_apply_unitary_rejects_spin_non_conserving_operator():
+    """A number-conserving term that changes Sz is rejected in the spinful branch."""
+    norb = 2
+    vec = np.ones(4, dtype=complex)
+
+    # a†_{0 alpha} a_{0 beta}: modes 0 and norb+0=2. Conserves total number but moves a particle
+    # from the beta sector to the alpha sector, leaving the fixed (n_alpha, n_beta) = (1, 1) sector.
+    spin_flip = FermionOperator.from_dict({((True, 0), (False, 2)): 1.0})
+    with pytest.raises(ValueError, match="spin species"):
+        Evolution(2 * norb, spin_flip, time=0.1)._apply_unitary_(vec, norb, (1, 1), copy=True)
+
+    # Treated as a single spinless block of 4 orbitals the same operator conserves number, so it is
+    # accepted (C(4, 2) = 6 dimensional sector).
+    accepted = FermionOperator.from_dict({((True, 0), (False, 2)): 1.0})
+    Evolution(2 * norb, accepted, time=0.1)._apply_unitary_(
+        np.ones(6, dtype=complex), 2 * norb, 2, copy=True
+    )
+
+
 def test_evolution_apply_unitary_matches_ffsim_molecular_hamiltonian():
     """Evolving under a full FCIDump Hamiltonian matches ffsim's MolecularHamiltonian path."""
     fcidump_file = str(Path(__file__).parent / "../../../h2.fcidump")

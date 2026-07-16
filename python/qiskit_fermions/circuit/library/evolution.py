@@ -34,6 +34,9 @@ class _SupportsLinearOperator(Protocol):
     ) -> scipy.sparse.linalg.LinearOperator:
         """Returns a SciPy ``LinearOperator`` for the ``(norb, nelec)`` FCI sector."""
 
+    def conserves_sector(self, block_sizes: list[int]) -> bool:
+        """Returns whether every term conserves particle number within each mode block."""
+
 
 class Evolution(FermionicGate):
     r"""Implements the time evolution of an operator.
@@ -151,11 +154,14 @@ class Evolution(FermionicGate):
         Returns:
             The transformed vector.
 
-        .. note::
-            Unlike ``ffsim.linear_operator``, the native kernel does not reject operators that fail to
-            conserve particle number or the z-component of spin; such terms map amplitude out of the
-            fixed ``(norb, nelec)`` sector and are silently dropped. The caller is responsible for
-            supplying a Hamiltonian that preserves the sector.
+        Raises:
+            ValueError: if the operator does not conserve the ``(norb, nelec)`` sector. Evolving
+                under ``exp(-i * time * operator)`` only yields a unitary when ``operator`` maps the
+                sector to itself; a term that leaves the sector would be silently projected to zero by
+                the native kernel, producing a non-unitary, physically meaningless result. Such an
+                operator is therefore rejected rather than applied. For a pair ``nelec`` the alpha and
+                beta electron counts must *each* be conserved (particle number and the z-component of
+                spin), matching the fixed sector the kernel represents.
         """
         import scipy.sparse.linalg
 
@@ -163,6 +169,18 @@ class Evolution(FermionicGate):
             vec = vec.copy()
 
         operator = cast(_SupportsLinearOperator, self.operator.relabel_modes(freg_indices))
+        # A term that leaves the fixed (norb, nelec) sector is projected to zero by the native kernel,
+        # which would turn `exp(-i t H)` into a non-unitary map. Reject rather than silently produce a
+        # wrong state. Spinless: one block of `norb`; spinful: alpha [0, norb) and beta [norb, 2*norb)
+        # blocks, each of which must be conserved.
+        block_sizes = [norb] if isinstance(nelec, int) else [norb, norb]
+        if not operator.conserves_sector(block_sizes):
+            raise ValueError(
+                "Evolution requires an operator that conserves the (norb, nelec) sector: every term "
+                "must preserve the particle number"
+                + (" of each spin species" if not isinstance(nelec, int) else "")
+                + f" (norb={norb}, nelec={nelec})."
+            )
         linop = operator._linear_operator_(norb, nelec)
         # ``traceA`` is only a balancing hint for scipy (it factors out ``exp(traceA / n)`` to
         # improve conditioning), not a correctness input: an inexact value costs at most some
