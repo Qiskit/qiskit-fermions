@@ -494,16 +494,44 @@ class UCJ(FermionicGate):
     ) -> np.ndarray:
         """Applies the ansatz to an ffsim state vector, implementing ffsim's protocol.
 
+        See :meth:`_apply_unitary_placed_` for the details; this method assumes the gate acts on the
+        modes ``0..num_modes`` of the state vector (i.e. an identity mode placement).
+        """
+        return self._apply_unitary_placed_(vec, norb, nelec, copy, list(range(self.num_modes)))
+
+    def _apply_unitary_placed_(
+        self,
+        vec: np.ndarray | None,
+        norb: int,
+        nelec: int | tuple[int, int],
+        copy: bool,
+        freg_indices: list[int],
+    ) -> np.ndarray:
+        """Applies the ansatz after placing its modes onto the vector's global modes.
+
         This builds the gate's definition (an :class:`.InitializeModes` seeding the reference
         determinant, followed by the per-repetition orbital rotations and diagonal Coulomb
-        evolutions) and applies it. Because the definition opens with :class:`.InitializeModes`, an
-        incoming ``vec`` of ``None`` is supported: the reference determinant is seeded from no
-        incoming state.
+        evolutions) and applies it, with the definition circuit placed onto the global modes
+        ``freg_indices`` (each of its instructions is relabeled onto the corresponding absolute
+        modes). Because the definition opens with :class:`.InitializeModes`, an incoming ``vec`` of
+        ``None`` is supported: the reference determinant is seeded from no incoming state.
 
         This mirrors ffsim's own ``UCJOpSpin*._apply_unitary_``, which prepares the reference state
         and applies the ansatz layers. See :meth:`_define` for the exact gate sequence.
+
+        Args:
+            vec: the state vector to act on, or ``None`` to seed the reference determinant from no
+                incoming state.
+            norb: the number of spatial orbitals of the *global* state vector.
+            nelec: either a single integer for a spinless system, or a pair of integers storing the
+                numbers of spin alpha and spin beta fermions.
+            copy: whether to copy the vector before operating on it. Ignored when ``vec`` is ``None``.
+            freg_indices: the absolute (global) mode indices that this gate's local modes map onto.
+
+        Returns:
+            The transformed vector.
         """
-        return self._build_definition()._apply_unitary_(vec, norb, nelec, copy)
+        return self._build_definition()._apply_unitary_placed_(vec, norb, nelec, copy, freg_indices)
 
     def _build_definition(self) -> FermionicCircuit:
         """Builds the ansatz as a :class:`.FermionicCircuit` (shared by ``_define``)."""

@@ -128,6 +128,66 @@ def test_ucj_gate_through_circuit_matches_ffsim():
     np.testing.assert_allclose(result, expected, atol=1e-10)
 
 
+def test_ucj_gate_subset_placement_matches_global_embedding():
+    """A UCJ placed on a subset of a larger register is applied on its absolute (global) modes.
+
+    A spinless UCJ acting on ``norb_local`` orbitals is appended to a ``norb_global``-orbital
+    register on the non-identity mode subset ``placement``. The oracle is the *same* ansatz whose
+    tensors are embedded into ``norb_global``-sized tensors on exactly those orbitals (identity
+    rotations and zero diagonal Coulomb on the untouched orbitals), built and applied natively by
+    ffsim. This guards the ``_apply_unitary_placed_`` routing: with the placement ignored, the gate
+    would act on orbitals ``0..norb_local`` instead of ``placement`` and disagree.
+    """
+    norb_local = 2
+    norb_global = 4
+    nelec = 2  # spinless integer nelec on the global register
+    placement = [1, 3]  # global orbitals the local UCJ modes map onto (non-identity)
+
+    ucj_op = ffsim.random.random_ucj_op_spinless(
+        norb_local, n_reps=2, with_final_orbital_rotation=True, seed=909
+    )
+
+    # embed the local tensors onto the global orbitals: identity rotations everywhere except the
+    # placed rows/columns, zero diagonal Coulomb except the placed block
+    embed = np.ix_(placement, placement)
+    global_rotations = np.stack(
+        [np.eye(norb_global, dtype=complex) for _ in ucj_op.orbital_rotations]
+    )
+    for k, rot in enumerate(ucj_op.orbital_rotations):
+        global_rotations[k][embed] = rot
+    global_diag_coulomb = np.zeros((len(ucj_op.diag_coulomb_mats), norb_global, norb_global))
+    for k, mat in enumerate(ucj_op.diag_coulomb_mats):
+        global_diag_coulomb[k][embed] = mat
+    global_final = np.eye(norb_global, dtype=complex)
+    global_final[embed] = ucj_op.final_orbital_rotation
+
+    global_ucj = ffsim.UCJOpSpinless(
+        diag_coulomb_mats=global_diag_coulomb,
+        orbital_rotations=global_rotations,
+        final_orbital_rotation=global_final,
+    )
+    # the UCJ gate seeds its own reference determinant on the placed orbitals (both local modes
+    # occupied -> global orbitals ``placement``), so the oracle must transform that same determinant
+    reference = ffsim.slater_determinant(norb_global, placement)
+    expected = ffsim.apply_unitary(reference, global_ucj, norb=norb_global, nelec=nelec)
+
+    # our path: the local UCJ gate, placed on the global orbitals via ``placement`` in the circuit.
+    # the gate seeds its own reference determinant on the placed modes, so pass ``None`` through.
+    gate = UCJ(
+        norb_local,
+        nelec,
+        ucj_op.diag_coulomb_mats,
+        ucj_op.orbital_rotations,
+        final_orbital_rotation=ucj_op.final_orbital_rotation,
+        reference_occupation=[True, True],  # both local orbitals occupied -> global orbitals 1, 3
+    )
+    circ = FermionicCircuit(norb_global)
+    circ.append(gate, [circ.modes[p] for p in placement])
+    result = ffsim.apply_unitary(None, circ, norb=norb_global, nelec=nelec)
+
+    np.testing.assert_allclose(result, expected, atol=1e-10)
+
+
 def test_ucj_single_rep_matches_hand_composed_ffsim_primitives():
     """A single-rep UCJ matches a reference composed directly from ffsim's gate primitives.
 

@@ -120,6 +120,9 @@ class FermionicCircuit:
         subset of the register has its fermionic modes relabeled to their absolute (global) indices
         before being applied.
 
+        See :meth:`_apply_unitary_placed_` for the details; this method assumes the circuit's modes
+        are the vector's modes ``0..num_modes`` (i.e. an identity mode placement).
+
         Args:
             vec: the state vector to apply this circuit to. May be ``None`` to let the circuit's
                 first instruction seed the initial state (e.g. :class:`.InitializeModes`, which
@@ -131,6 +134,49 @@ class FermionicCircuit:
             nelec: either a single integer representing the number of fermions for a spinless system,
                 or a pair of integers storing the numbers of spin alpha and spin beta fermions.
             copy: whether to copy the vector before operating on it. Ignored when ``vec`` is ``None``.
+
+        Returns:
+            The transformed vector.
+
+        Raises:
+            TypeError: if a circuit instruction does not implement ffsim's
+                ``SupportsApplyUnitary`` protocol.
+            ValueError: if a circuit instruction declines to apply its unitary for the given
+                ``norb`` and ``nelec``.
+        """
+        return self._apply_unitary_placed_(vec, norb, nelec, copy, list(range(len(self.register))))
+
+    def _apply_unitary_placed_(
+        self,
+        vec: np.ndarray | None,
+        norb: int,
+        nelec: int | tuple[int, int],
+        copy: bool,
+        freg_indices: list[int],
+    ) -> np.ndarray:
+        """Applies this circuit after placing its modes onto the vector's global modes.
+
+        This walks the circuit in topological order and applies each instruction's unitary effect to
+        the state vector via ffsim's ``SupportsApplyUnitary`` protocol. Each instruction's own modes
+        are first mapped through this circuit's placement: a circuit-local mode ``m`` maps to the
+        global mode ``freg_indices[m]``, so a sub-instruction acting on circuit-local modes
+        ``[m0, m1, ...]`` is applied on the global modes ``[freg_indices[m0], freg_indices[m1], ...]``.
+        With the identity placement ``freg_indices == 0..num_modes`` this is exactly
+        :meth:`_apply_unitary_`; a subset placement lets this circuit act as the definition of a gate
+        placed on a subset of a larger register (e.g. :class:`.UCJ`).
+
+        Args:
+            vec: the state vector to apply this circuit to. May be ``None`` to let the circuit's
+                first instruction seed the initial state (e.g. :class:`.InitializeModes`, which
+                prepares an occupation determinant from no incoming state); the seeded vector is then
+                threaded through the remaining instructions. A ``None`` vector requires the first
+                instruction to be able to produce a state -- one that only transforms an incoming
+                vector will raise.
+            norb: the number of spatial orbitals of the *global* state vector.
+            nelec: either a single integer representing the number of fermions for a spinless system,
+                or a pair of integers storing the numbers of spin alpha and spin beta fermions.
+            copy: whether to copy the vector before operating on it. Ignored when ``vec`` is ``None``.
+            freg_indices: the absolute (global) mode indices that this circuit's modes map onto.
 
         Returns:
             The transformed vector.
@@ -159,14 +205,15 @@ class FermionicCircuit:
         for node in dag.topological_op_nodes():
             instr = node.op
 
-            # the absolute (global) mode indices this instruction acts on
-            freg_indices = [dag.find_bit(qubit).index for qubit in node.qargs]
+            # each instruction's circuit-local modes, mapped through this circuit's own placement:
+            # local mode ``m`` of this circuit sits at global mode ``freg_indices[m]``
+            node_freg_indices = [freg_indices[dag.find_bit(qubit).index] for qubit in node.qargs]
 
             # prefer the placement-aware variant so the instruction's operator is relabeled onto its
             # absolute modes; fall back to the plain protocol method otherwise (identity placement)
             placed_method = getattr(instr, "_apply_unitary_placed_", None)
             if placed_method is not None:
-                result = placed_method(vec, norb, nelec, False, freg_indices)
+                result = placed_method(vec, norb, nelec, False, node_freg_indices)
             else:
                 method = getattr(instr, "_apply_unitary_", None)
                 if method is None:
