@@ -81,7 +81,7 @@ use qiskit_pyo3_ffi as ffi;
 /// .. [1] P. Jordan and E. Wigner, Über das Paulische Äquivalenzverbot,
 ///        Zeitschrift für Physik 47, No. 9. (1928), pp. 631–651,
 ///        `doi:10.1007/BF01331938 <https://link.springer.com/article/10.1007/BF01331938>`_.
-#[gen_stub_pyfunction(module = "qiskit_fermions.mappers.library.jordan_wigner")]
+#[gen_stub_pyfunction(module = "qiskit_fermions._lib.mappers.mappers_library.jordan_wigner")]
 #[pyfunction(name = "jordan_wigner")]
 #[gen_stub(override_return_type(type_repr="qiskit.quantum_info.SparseObservable", imports=("qiskit.quantum_info")))]
 pub fn py_jordan_wigner(op: PyFermionOperator, num_qubits: u32) -> PyResult<Py<PyAny>> {

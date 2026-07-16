@@ -75,7 +75,7 @@ use qiskit_fermions_core::linalg::givens::{GivensRotation, givens_decomposition}
 /// .. [1] W. R. Clements et al., Optimal design for universal multiport interferometers,
 ///        Optica 3, 1460-1465 (2016),
 ///        `doi:10.1364/OPTICA.3.001460 <https://doi.org/10.1364/OPTICA.3.001460>`_.
-#[gen_stub_pyfunction(module = "qiskit_fermions.linalg.givens")]
+#[gen_stub_pyfunction(module = "qiskit_fermions._lib.linalg.givens")]
 #[pyfunction(name = "givens_decomposition")]
 pub fn py_givens_decomposition(
     unitary: PyReadonlyArray2<Complex64>,

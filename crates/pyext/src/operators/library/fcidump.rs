@@ -65,6 +65,7 @@ use qiskit_fermions_core::operators::library::fcidump::FCIDump;
 ///
 /// .. [1] P. J. Knowles and N. C. Handy, Computer Physics Communications 54 (1989) 75-83.
 #[gen_stub_pyclass]
+#[gen_stub(module = "qiskit_fermions._lib.operators.operators_library.fcidump")]
 #[pyclass(module = "qiskit_fermions.operators.library.fcidump", name = "FCIDump")]
 #[derive(Clone)]
 pub struct PyFCIDump {

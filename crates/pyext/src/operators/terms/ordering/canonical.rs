@@ -61,7 +61,7 @@ use qiskit_fermions_core::operators::terms::ordering::canonical::canonical_order
 /// Raises:
 ///     TypeError: if ``op`` is not a supported operator type (see
 ///         :class:`~qiskit_fermions.operators.OperatorTrait`).
-#[gen_stub_pyfunction(module = "qiskit_fermions.operators.terms.ordering.canonical")]
+#[gen_stub_pyfunction(module = "qiskit_fermions._lib.operators.operators_terms.ordering.canonical")]
 #[pyfunction(name = "canonical_order")]
 #[gen_stub(override_return_type(
     type_repr = "OperatorTrait",

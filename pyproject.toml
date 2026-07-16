@@ -26,6 +26,7 @@ classifiers = [
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
     "Topic :: Scientific/Engineering :: Physics",
+    "Typing :: Typed",
 ]
 
 requires-python = ">=3.10"
@@ -110,7 +111,10 @@ include-package-data = true
 version = { attr = "qiskit_fermions.version.__version__" }
 
 [tool.setuptools.package-data]
-qiskit_fermions = ["VERSION.txt", "py.typed"]
+# `py.typed` marks the package as typed (PEP 561); the `_lib/**/*.pyi` stubs are the
+# pyo3-stub-gen output for the compiled extension and must ship in the wheel so the
+# native API is typed for downstream consumers (the pure-Python API is typed inline).
+qiskit_fermions = ["VERSION.txt", "py.typed", "_lib/**/*.pyi"]
 
 [tool.setuptools.packages.find]
 where = ["python"]
@@ -143,6 +147,10 @@ testpaths = ["./python/qiskit_fermions/", "./tests/python/"]
 line-length = 100
 src = ["python/qiskit_fermions", "tests/python"]
 target-version = "py310"
+# The `_lib/**/*.pyi` stubs are verbatim `pyo3-stub-gen` output (see tests/README.md, "Type
+# stubs"); they are generated, never hand-edited, and follow the generator's own style rather than
+# ours, so we exclude them from both `ruff format` and `ruff check`.
+extend-exclude = ["python/qiskit_fermions/_lib"]
 
 [tool.ruff.lint]
 select = [

@@ -28,6 +28,7 @@ crate::declare_operator_iters!(
     FermionOperatorDataIter,
     FermionOperatorDataGroupIter,
     "qiskit_fermions.operators.fermion_operator",
+    "qiskit_fermions._lib.operators.fermion_operator",
     "FermionOperatorDataIter",
     "FermionOperatorDataGroupIter",
     PyFermionAction
@@ -316,6 +317,7 @@ crate::declare_operator_iters!(
 ///
 /// .. [1] https://en.wikipedia.org/wiki/Second_quantization#Fermion_creation_and_annihilation_operators
 #[gen_stub_pyclass]
+#[gen_stub(module = "qiskit_fermions._lib.operators.fermion_operator")]
 #[pyclass(
     module = "qiskit_fermions.operators.fermion_operator",
     name = "FermionOperator"

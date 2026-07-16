@@ -28,6 +28,7 @@ crate::declare_operator_iters!(
     TransferVertexOperatorDataIter,
     TransferVertexOperatorDataGroupIter,
     "qiskit_fermions.operators.transfer_vertex_operator",
+    "qiskit_fermions._lib.operators.transfer_vertex_operator",
     "TransferVertexOperatorDataIter",
     "TransferVertexOperatorDataGroupIter",
     PyTransferAction
@@ -358,6 +359,7 @@ crate::declare_operator_iters!(
 ///
 /// .. [1] Gandon et al., `arXiv:2512.11418 <https://arxiv.org/abs/2512.11418v2>`_.
 #[gen_stub_pyclass]
+#[gen_stub(module = "qiskit_fermions._lib.operators.transfer_vertex_operator")]
 #[pyclass(
     module = "qiskit_fermions.operators.transfer_vertex_operator",
     name = "TransferVertexOperator"

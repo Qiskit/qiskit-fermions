@@ -104,17 +104,24 @@ macro_rules! impl_operator_magic_methods {
 /// same `__iter__`/`__next__` protocol; only the element (action) type and the registered
 /// module/class names differ. The struct idents are passed explicitly (rather than derived from
 /// a prefix) so they remain greppable and no `paste`-style token pasting is required.
+///
+/// `$module` is the *public* module path used for `#[pyclass(module = ...)]` (so runtime
+/// `__module__`/`repr` stay user-facing), while `$stub_module` is the *physical* `_lib` runtime
+/// path used for `#[gen_stub(module = ...)]` so the generated stub lands under
+/// `python/qiskit_fermions/_lib/**` (see `tests/README.md`, "Type stubs").
 #[macro_export]
 macro_rules! declare_operator_iters {
     (
         $iter:ident,
         $group_iter:ident,
         $module:literal,
+        $stub_module:literal,
         $name:literal,
         $group_name:literal,
         $action:ty $(,)?
     ) => {
         #[gen_stub_pyclass]
+        #[gen_stub(module = $stub_module)]
         #[pyclass(module = $module, name = $name)]
         struct $iter {
             inner: std::vec::IntoIter<(Vec<$action>, Complex64)>,
@@ -133,6 +140,7 @@ macro_rules! declare_operator_iters {
         }
 
         #[gen_stub_pyclass]
+        #[gen_stub(module = $stub_module)]
         #[pyclass(module = $module, name = $group_name)]
         struct $group_iter {
             inner: std::vec::IntoIter<(Vec<$action>, Complex64, u32)>,

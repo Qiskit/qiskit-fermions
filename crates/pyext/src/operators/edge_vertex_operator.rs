@@ -28,6 +28,7 @@ crate::declare_operator_iters!(
     EdgeVertexOperatorDataIter,
     EdgeVertexOperatorDataGroupIter,
     "qiskit_fermions.operators.edge_vertex_operator",
+    "qiskit_fermions._lib.operators.edge_vertex_operator",
     "EdgeVertexOperatorDataIter",
     "EdgeVertexOperatorDataGroupIter",
     PyEdgeAction
@@ -353,6 +354,7 @@ crate::declare_operator_iters!(
 ///
 /// .. [1] Gandon et al., `arXiv:2512.11418 <https://arxiv.org/abs/2512.11418v2>`_.
 #[gen_stub_pyclass]
+#[gen_stub(module = "qiskit_fermions._lib.operators.edge_vertex_operator")]
 #[pyclass(
     module = "qiskit_fermions.operators.edge_vertex_operator",
     name = "EdgeVertexOperator"

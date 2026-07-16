@@ -14,20 +14,17 @@
 
 from collections.abc import Callable
 from operator import and_
-from typing import TYPE_CHECKING, TypeVar
+from typing import TypeVar
 
-if TYPE_CHECKING:
-    from qiskit_fermions._lib.operators.transfer_vertex_operator import (
-        TransferVertexOperator,
-    )
-    from qiskit_fermions.operators.transfer_action import TransferAction
+from qiskit_fermions.operators import TransferVertexOperator
+from qiskit_fermions.operators.transfer_action import TransferAction
 
 T = TypeVar("T")
 
 
 def map_transfer_vertex_generators(
-    operator: "TransferVertexOperator",
-    map_action: Callable[["TransferAction"], T],
+    operator: TransferVertexOperator,
+    map_action: Callable[[TransferAction], T],
     identity: Callable[[], T],
     compose: Callable[[T, T], T] | None = None,
 ) -> T:

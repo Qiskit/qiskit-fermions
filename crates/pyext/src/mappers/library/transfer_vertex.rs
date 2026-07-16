@@ -50,7 +50,7 @@ use qiskit_fermions_core::mappers::library::transfer_vertex::{
 ///       2.000000e0 -0.000000e0j * (+2 +1)
 ///
 /// ..
-#[gen_stub_pyfunction(module = "qiskit_fermions.mappers.library.transfer_vertex")]
+#[gen_stub_pyfunction(module = "qiskit_fermions._lib.mappers.mappers_library.transfer_vertex")]
 #[pyfunction(name = "transfer_vertex_to_fermion")]
 pub fn py_transfer_vertex_to_fermion(inter_op: PyTransferVertexOperator) -> PyFermionOperator {
     transfer_vertex_to_fermion(&inter_op.inner).into()
@@ -85,7 +85,7 @@ pub fn py_transfer_vertex_to_fermion(inter_op: PyTransferVertexOperator) -> PyFe
 ///      -0.000000e0 -1.000000e0j * (γ'2 γ1)
 ///
 /// ..
-#[gen_stub_pyfunction(module = "qiskit_fermions.mappers.library.transfer_vertex")]
+#[gen_stub_pyfunction(module = "qiskit_fermions._lib.mappers.mappers_library.transfer_vertex")]
 #[pyfunction(name = "transfer_vertex_to_majorana")]
 pub fn py_transfer_vertex_to_majorana(inter_op: PyTransferVertexOperator) -> PyMajoranaOperator {
     transfer_vertex_to_majorana(&inter_op.inner).into()
@@ -120,7 +120,7 @@ pub fn py_transfer_vertex_to_majorana(inter_op: PyTransferVertexOperator) -> PyM
 ///      -0.000000e0 -1.000000e0j * (E(1,2) V(2))
 ///
 /// ..
-#[gen_stub_pyfunction(module = "qiskit_fermions.mappers.library.transfer_vertex")]
+#[gen_stub_pyfunction(module = "qiskit_fermions._lib.mappers.mappers_library.transfer_vertex")]
 #[pyfunction(name = "transfer_vertex_to_edge_vertex")]
 pub fn py_transfer_vertex_to_edge_vertex(
     inter_op: PyTransferVertexOperator,

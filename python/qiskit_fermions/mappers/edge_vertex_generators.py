@@ -14,20 +14,17 @@
 
 from collections.abc import Callable
 from operator import and_
-from typing import TYPE_CHECKING, TypeVar
+from typing import TypeVar
 
-if TYPE_CHECKING:
-    from qiskit_fermions._lib.operators.edge_vertex_operator import (
-        EdgeVertexOperator,
-    )
-    from qiskit_fermions.operators.edge_action import EdgeAction
+from qiskit_fermions.operators import EdgeVertexOperator
+from qiskit_fermions.operators.edge_action import EdgeAction
 
 T = TypeVar("T")
 
 
 def map_edge_vertex_generators(
-    operator: "EdgeVertexOperator",
-    map_action: Callable[["EdgeAction"], T],
+    operator: EdgeVertexOperator,
+    map_action: Callable[[EdgeAction], T],
     identity: Callable[[], T],
     compose: Callable[[T, T], T] | None = None,
 ) -> T:

@@ -15,10 +15,9 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
-if TYPE_CHECKING:
-    from qiskit_fermions.operators.protocol import OperatorTrait
+from qiskit_fermions.operators.protocol import OperatorTrait
 
 
 def order_terms(

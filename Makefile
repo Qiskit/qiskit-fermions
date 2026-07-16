@@ -18,6 +18,7 @@ lint:
 	cargo clippy -p qiskit-fermions-pyext --all-targets -- -D warnings
 	tox -e lint
 	clang-format --dry-run -Werror --style="file:.clang-format" -i tests/c/*.c tests/c/*.h
+	$(MAKE) pystubs-check
 
 style:
 	cargo fmt
@@ -58,15 +59,30 @@ rustcoverage: testrust
 
 # `pystubs` and `pystubs-dev` are conflicting rules - they both attempt to
 # generate the Python stub files, but they differ between release and dev mode.
+#
+# `stub_gen` only ever *writes* stub files; it never deletes them.  So a stub for a
+# module that was renamed or removed on the Rust side would linger.  Both rules
+# therefore depend on `pystubs-clean` to wipe the tree first, making a plain
+# `make pystubs` a complete regenerate-from-scratch that cannot leave orphans behind.
 .PHONY: pystubs pystubs-dev pystubs-clean
-pystubs:
+pystubs: pystubs-clean
 	cargo run --release --bin stub_gen -p qiskit-fermions-pyext --no-default-features
 
-pystubs-dev:
+pystubs-dev: pystubs-clean
 	cargo run --bin stub_gen -p qiskit-fermions-pyext --no-default-features
 
 pystubs-clean:
 	find python/ -name '*.pyi' -delete
+
+# Verify the committed `_lib` stubs are exactly what `pystubs` regenerates: fail on any
+# drift or hand-edit.  This is what enforces "committed but always generator-fresh".
+# (We deliberately do not run `mypy.stubtest`: on this project it only emits benign
+# positional-only dunder notes and PyO3 nested-submodule false positives -- no real
+# findings -- so the drift guard here plus the downstream consumer type-check are the
+# authoritative gates.)
+.PHONY: pystubs-check
+pystubs-check: pystubs
+	git diff --exit-code -- 'python/qiskit_fermions/_lib/**/*.pyi'
 
 # `pyext` and `pyext-dev` are conflicting rules - they both attempt to "install"
 # the compiled Rust acceleration library, but they differ between release and

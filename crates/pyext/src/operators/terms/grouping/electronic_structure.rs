@@ -64,7 +64,9 @@ use qiskit_fermions_core::operators::terms::grouping::electronic_structure::grou
 ///
 /// Raises:
 ///     ValueError: if an unexpected term is encountered.
-#[gen_stub_pyfunction(module = "qiskit_fermions.operators.terms.grouping.electronic_structure")]
+#[gen_stub_pyfunction(
+    module = "qiskit_fermions._lib.operators.operators_terms.grouping.electronic_structure"
+)]
 #[pyfunction(name = "group_terms_by_electronic_structure")]
 #[pyo3(signature = (op, num_modes, *, two_body_physicist_order=false))]
 pub fn py_group_terms_by_electronic_structure(

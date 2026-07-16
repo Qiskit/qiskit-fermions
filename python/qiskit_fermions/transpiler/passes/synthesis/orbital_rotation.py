@@ -14,16 +14,11 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
 import numpy as np
 from qiskit.circuit.library import PhaseGate, XXPlusYYGate
 from qiskit.dagcircuit import DAGCircuit, DAGOpNode
 
-if TYPE_CHECKING:
-    from qiskit_fermions._lib.linalg.givens import givens_decomposition
-else:
-    from qiskit_fermions.linalg import givens_decomposition
+from qiskit_fermions.linalg import givens_decomposition
 
 from ... import F2QLayout
 from ..utils import map_node_single_register

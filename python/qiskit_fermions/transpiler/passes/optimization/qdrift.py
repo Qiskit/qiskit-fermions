@@ -15,19 +15,15 @@
 from __future__ import annotations
 
 import copy
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 import numpy as np
 
 from qiskit_fermions.circuit import FermionicDAGCircuit
 from qiskit_fermions.circuit.library import Evolution
+from qiskit_fermions.operators.terms.filtering import filter_diagonal_terms
 
 from ... import FermionicDAGCircuitPass
-
-if TYPE_CHECKING:
-    from qiskit_fermions._lib.operators.terms.filtering import filter_diagonal_terms
-else:
-    from qiskit_fermions.operators.terms.filtering import filter_diagonal_terms
 
 
 class QDriftTrotterization(FermionicDAGCircuitPass):

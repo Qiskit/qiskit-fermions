@@ -51,7 +51,7 @@ use qiskit_fermions_core::mappers::library::edge_vertex::{
 ///      -0.000000e0 +2.000000e0j * (+2 +1)
 ///
 /// ..
-#[gen_stub_pyfunction(module = "qiskit_fermions.mappers.library.edge_vertex")]
+#[gen_stub_pyfunction(module = "qiskit_fermions._lib.mappers.mappers_library.edge_vertex")]
 #[pyfunction(name = "edge_vertex_to_fermion")]
 pub fn py_edge_vertex_to_fermion(inter_op: PyEdgeVertexOperator) -> PyFermionOperator {
     edge_vertex_to_fermion(&inter_op.inner).into()
@@ -85,7 +85,7 @@ pub fn py_edge_vertex_to_fermion(inter_op: PyEdgeVertexOperator) -> PyFermionOpe
 ///       0.000000e0 +2.000000e0j * (γ2 γ1)
 ///
 /// ..
-#[gen_stub_pyfunction(module = "qiskit_fermions.mappers.library.edge_vertex")]
+#[gen_stub_pyfunction(module = "qiskit_fermions._lib.mappers.mappers_library.edge_vertex")]
 #[pyfunction(name = "edge_vertex_to_majorana")]
 pub fn py_edge_vertex_to_majorana(inter_op: PyEdgeVertexOperator) -> PyMajoranaOperator {
     edge_vertex_to_majorana(&inter_op.inner).into()
