@@ -69,6 +69,14 @@ impl MajoranaOperatorGroupTermView<'_> {
     }
 }
 
+impl TermSortKey for MajoranaOperatorGroupTermView<'_> {
+    fn sort_key(&self) -> impl Ord {
+        // Match the ungrouped `TermView` key exactly (ignoring `group`), so ordering a grouped
+        // operator agrees with ordering the same terms ungrouped.
+        self.into_vec()
+    }
+}
+
 #[derive(Clone, Debug, PartialEq)]
 pub struct MajoranaOperator {
     pub coeffs: Vec<Complex64>,
@@ -391,6 +399,10 @@ impl OperatorTrait for MajoranaOperator {
                 modes: &self.modes[start..end],
             }
         })
+    }
+
+    fn has_groups(&self) -> bool {
+        self.groups.is_some()
     }
 
     fn iter_with_groups(&self) -> impl ExactSizeIterator<Item = Self::GroupTermView<'_>> {

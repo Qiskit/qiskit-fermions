@@ -61,7 +61,11 @@ pub trait OperatorTrait {
 
     /// The borrowed view of a single term (together with its group index) yielded by
     /// [`OperatorTrait::iter_with_groups`].
-    type GroupTermView<'a>: PartialEq
+    ///
+    /// Its [`TermSortKey`] must match that of the corresponding [`Self::TermView`] (i.e. ignore the
+    /// group index), so that ordering a grouped operator agrees with ordering the same terms
+    /// ungrouped.
+    type GroupTermView<'a>: PartialEq + TermSortKey
     where
         Self: 'a;
 
@@ -71,6 +75,11 @@ pub trait OperatorTrait {
     /// Implementations must spell it the same way: returning the concrete view type would make the
     /// impl signature more specific than this one and trip the `refining_impl_trait` lint.
     fn iter(&self) -> impl ExactSizeIterator<Item = Self::TermView<'_>>;
+
+    /// Returns whether the operator tracks group indices (i.e. `groups` is `Some`).
+    ///
+    /// [`iter_with_groups`](Self::iter_with_groups) may only be called when this is `true`.
+    fn has_groups(&self) -> bool;
 
     /// Iterates over the terms of the operator together with their group index.
     ///
