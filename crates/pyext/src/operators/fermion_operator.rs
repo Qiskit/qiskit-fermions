@@ -15,7 +15,10 @@ use std::collections::HashSet;
 use num_complex::Complex64;
 use pyo3::prelude::*;
 use pyo3::types::PyType;
-use pyo3::{class::basic::CompareOp, exceptions::PyNotImplementedError};
+use pyo3::{
+    class::basic::CompareOp,
+    exceptions::{PyNotImplementedError, PyValueError},
+};
 use pyo3_stub_gen::derive::*;
 use std::collections::HashMap;
 
