@@ -303,6 +303,25 @@ def test_orbital_rotation_apply_unitary_rejects_spin_mixing(monkeypatch):
         OrbitalRotation(full)._apply_unitary_(vec0, norb, nelec, copy=True)
 
 
+def test_orbital_rotation_generator_sector_guard_catches_spin_mixing():
+    """The general path's generator sector guard rejects a spin-mixing embedded matrix.
+
+    ``_resolve_orbital_rotation`` normally rejects a spin-mixing rotation at the matrix level before
+    the generator is ever built, and ``logm`` preserves block-diagonal structure, so this internal
+    guard cannot fire for a rotation reaching it through the public API. Calling ``_apply_via_generator``
+    directly with a spin-mixing ``full`` (bypassing the matrix check) exercises the defense-in-depth
+    assertion that ties this path to the same ``conserves_sector`` contract Evolution uses -- guarding
+    against a future regression that would let a cross-block term slip into the generator.
+    """
+    norb = 3
+    nelec = (2, 1)
+    full = random_unitary(2 * norb, seed=11)  # dense: mixes the alpha/beta sectors
+    vec0 = ffsim.slater_determinant(norb, ([0, 1], [0]))
+
+    with pytest.raises(ValueError, match="generator does not conserve"):
+        OrbitalRotation._apply_via_generator(full, vec0, norb, nelec, copy=True)
+
+
 def test_orbital_rotation_apply_unitary_accepts_block_diagonal_with_float_noise():
     """A block-diagonal rotation carrying only float round-off in its off-blocks is accepted.
 

@@ -184,7 +184,8 @@ class OrbitalRotation(FermionicGate):
         if not np.allclose(full[:norb, norb:], 0.0) or not np.allclose(full[norb:, :norb], 0.0):
             raise ValueError(
                 "OrbitalRotation mixes the alpha and beta spin sectors, which does not conserve the "
-                "individual electron counts and cannot act on a fixed (n_alpha, n_beta) sector."
+                "individual electron counts and cannot act on a fixed (n_alpha, n_beta) sector "
+                f"(norb={norb}, nelec={nelec})."
             )
 
         return full[:norb, :norb], full[norb:, norb:]
@@ -226,6 +227,24 @@ class OrbitalRotation(FermionicGate):
             if abs(log_mat[i, j]) > tol
         }
         generator = FermionOperator.from_dict(terms)
+
+        # Defense-in-depth: the generator must conserve the same (norb, nelec) sector that
+        # Evolution checks via the same predicate. ``_resolve_orbital_rotation`` already rejected a
+        # spin-mixing ``full`` at the matrix level, and ``logm`` preserves block-diagonal structure,
+        # so a block-diagonal ``full`` yields a sector-conserving ``G`` -- this cannot fire for a
+        # rotation that passed the matrix check. It guards against a future regression (e.g. a
+        # ``logm``/tolerance change leaking a cross-block term into ``G``) that would otherwise let
+        # the native kernel silently project amplitude out of the sector, turning ``exp(G)`` into a
+        # non-unitary map. Spinless: one block of ``norb``; spinful: alpha/beta blocks of ``norb``.
+        block_sizes = [norb] if isinstance(nelec, int) else [norb, norb]
+        if not generator.conserves_sector(block_sizes):
+            raise ValueError(
+                "OrbitalRotation's generator does not conserve the (norb, nelec) sector: every term "
+                "must preserve the particle number"
+                + (" of each spin species" if not isinstance(nelec, int) else "")
+                + f" (norb={norb}, nelec={nelec}). This is an internal inconsistency -- the placed "
+                "rotation passed the spin-block check but its generator did not; please report it."
+            )
 
         linop = generator._linear_operator_(norb, nelec)
         # ``traceA=0.0`` mirrors Evolution._apply_unitary_placed_: it is only a scipy conditioning
