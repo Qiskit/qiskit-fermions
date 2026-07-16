@@ -84,6 +84,19 @@ pub unsafe extern "C" fn qf_ferm_op_canonical_order(
 ///    order. Terms of the same group are simply no longer contiguous afterwards. If the input has
 ///    no groups, neither does the result.
 ///
+/// .. code-block:: c
+///     :linenos:
+///
+///     QfMajoranaOperator *op = qf_maj_op_zero();
+///     uint32_t modes_a[2] = {1, 0};
+///     QkComplex64 coeff_a = {1.0, 0.0};
+///     qf_maj_op_add_term(op, 2, modes_a, &coeff_a);
+///     uint32_t modes_b[2] = {0, 1};
+///     QkComplex64 coeff_b = {2.0, 0.0};
+///     qf_maj_op_add_term(op, 2, modes_b, &coeff_b);
+///
+///     QfMajoranaOperator *ordered = qf_maj_op_canonical_order(op);
+///
 /// @endrst
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn qf_maj_op_canonical_order(
