@@ -39,6 +39,7 @@ type Matvec = Box<dyn Fn(&[Complex64]) -> Result<Vec<Complex64>, FciMatvecError>
 /// API; it is an internal wrapper returned by the ``_linear_operator_`` protocol methods on the
 /// operator classes and consumed by the simulation path.
 #[gen_stub_pyclass]
+#[gen_stub(module = "qiskit_fermions._lib.linalg.fci")]
 #[pyclass(module = "qiskit_fermions.linalg.fci", name = "FciLinearOperator")]
 pub struct FciLinearOperator {
     dim: usize,
@@ -158,7 +159,7 @@ impl FciLinearOperator {
 ///     ValueError: if ``norb`` exceeds the maximum number of orbitals the bitmask representation
 ///         supports (64), an occupation bit is set outside ``0..norb``, or the spinful FCI
 ///         dimension overflows the addressable range.
-#[gen_stub_pyfunction(module = "qiskit_fermions.linalg.fci")]
+#[gen_stub_pyfunction(module = "qiskit_fermions._lib.linalg.fci")]
 #[pyfunction(name = "slater_determinant_statevector", signature = (norb, alpha_str, beta_str=None))]
 pub fn py_slater_determinant_statevector(
     py: Python<'_>,

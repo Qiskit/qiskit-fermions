@@ -583,7 +583,10 @@ class UCJ(FermionicGate):
         ):
             diag_coulomb = self._diag_coulomb_operator(diag_coulomb_mat)
             self._append_orbital_rotation(definition, self._conj_transpose(orbital_rotation))
-            definition.append(Evolution(self.num_modes, diag_coulomb, time=-1.0), definition.modes)
+            definition.append(
+                Evolution(self.num_modes, diag_coulomb, time=-1.0),  # type: ignore[arg-type]
+                definition.modes,
+            )
             self._append_orbital_rotation(definition, orbital_rotation)
 
         if self.final_orbital_rotation is not None:
@@ -653,7 +656,7 @@ class UCJ(FermionicGate):
                     term = (cre(mode_i), ann(mode_i), cre(mode_j), ann(mode_j))
                     terms[term] = terms.get(term, 0.0) + coeff
 
-        return FermionOperator.from_dict(terms)
+        return FermionOperator.from_dict(terms)  # type: ignore[arg-type]
 
     def _resolve_diag_coulomb_blocks(
         self, diag_coulomb_mat: np.ndarray

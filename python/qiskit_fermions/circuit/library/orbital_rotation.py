@@ -15,6 +15,7 @@
 from __future__ import annotations
 
 import numbers
+from typing import cast
 
 import numpy as np
 
@@ -159,7 +160,7 @@ class OrbitalRotation(FermionicGate):
         if HAS_FFSIM:
             import ffsim
 
-            return ffsim.apply_orbital_rotation(vec, mat, norb=norb, nelec=nelec, copy=copy)
+            return ffsim.apply_orbital_rotation(vec, mat, norb=norb, nelec=nelec, copy=copy)  # type: ignore[arg-type]
 
         return self._apply_via_generator(full, vec, norb, nelec, copy)
 
@@ -226,7 +227,7 @@ class OrbitalRotation(FermionicGate):
             for j in range(full.shape[1])
             if abs(log_mat[i, j]) > tol
         }
-        generator = FermionOperator.from_dict(terms)
+        generator = FermionOperator.from_dict(terms)  # type: ignore[arg-type]
 
         # Defense-in-depth: the generator must conserve the same (norb, nelec) sector that
         # Evolution checks via the same predicate. ``_resolve_orbital_rotation`` already rejected a
@@ -246,7 +247,7 @@ class OrbitalRotation(FermionicGate):
                 "rotation passed the spin-block check but its generator did not; please report it."
             )
 
-        linop = generator._linear_operator_(norb, nelec)
+        linop = generator._linear_operator_(norb, nelec)  # type: ignore[attr-defined]
         # ``traceA=0.0`` mirrors Evolution._apply_unitary_placed_: it is only a scipy conditioning
         # hint (it factors out ``exp(traceA / n)``), not a correctness input.
-        return scipy.sparse.linalg.expm_multiply(linop, vec, traceA=0.0)
+        return cast(np.ndarray, scipy.sparse.linalg.expm_multiply(linop, vec, traceA=0.0))

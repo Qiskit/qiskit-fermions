@@ -77,4 +77,4 @@ class FermionicGate(Gate):
                 f"'{type(self).__name__}' does not implement '_apply_unitary_placed_' and so cannot "
                 "be applied to a state vector via ffsim's SupportsApplyUnitary protocol."
             )
-        return placed(vec, norb, nelec, copy, list(range(self.num_modes)))
+        return cast("np.ndarray", placed(vec, norb, nelec, copy, list(range(self.num_modes))))

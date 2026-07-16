@@ -176,7 +176,7 @@ def _fermion_operator_linear_operator(  # noqa: D417
 
 
 # Attach the ffsim ``_linear_operator_`` protocol method to the compiled ``FermionOperator`` type.
-FermionOperator._linear_operator_ = _fermion_operator_linear_operator
+FermionOperator._linear_operator_ = _fermion_operator_linear_operator  # type: ignore[attr-defined]
 
 __all__ = [
     "EdgeAction",

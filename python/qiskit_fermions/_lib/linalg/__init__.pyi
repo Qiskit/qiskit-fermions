@@ -2,9 +2,11 @@
 # ruff: noqa: E501, F401, F403, F405
 
 from . import double_factorized
+from . import fci
 from . import givens
 __all__ = [
     "double_factorized",
+    "fci",
     "givens",
 ]
 
