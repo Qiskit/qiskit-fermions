@@ -77,6 +77,60 @@ macro_rules! impl_operator_magic_methods {
     };
 }
 
+/// Declares the two data-iterator pyclasses for an operator type.
+///
+/// Every operator file needs a `<Op>DataIter` and a `<Op>DataGroupIter` pyclass exposing the
+/// same `__iter__`/`__next__` protocol; only the element (action) type and the registered
+/// module/class names differ. The struct idents are passed explicitly (rather than derived from
+/// a prefix) so they remain greppable and no `paste`-style token pasting is required.
+#[macro_export]
+macro_rules! declare_operator_iters {
+    (
+        $iter:ident,
+        $group_iter:ident,
+        $module:literal,
+        $name:literal,
+        $group_name:literal,
+        $action:ty $(,)?
+    ) => {
+        #[gen_stub_pyclass]
+        #[pyclass(module = $module, name = $name)]
+        struct $iter {
+            inner: std::vec::IntoIter<(Vec<$action>, Complex64)>,
+        }
+
+        #[gen_stub_pymethods]
+        #[pymethods]
+        impl $iter {
+            fn __iter__(slf: PyRef<'_, Self>) -> PyRef<'_, Self> {
+                slf
+            }
+
+            fn __next__(mut slf: PyRefMut<'_, Self>) -> Option<(Vec<$action>, Complex64)> {
+                slf.inner.next()
+            }
+        }
+
+        #[gen_stub_pyclass]
+        #[pyclass(module = $module, name = $group_name)]
+        struct $group_iter {
+            inner: std::vec::IntoIter<(Vec<$action>, Complex64, u32)>,
+        }
+
+        #[gen_stub_pymethods]
+        #[pymethods]
+        impl $group_iter {
+            fn __iter__(slf: PyRef<'_, Self>) -> PyRef<'_, Self> {
+                slf
+            }
+
+            fn __next__(mut slf: PyRefMut<'_, Self>) -> Option<(Vec<$action>, Complex64, u32)> {
+                slf.inner.next()
+            }
+        }
+    };
+}
+
 pub mod edge_vertex_operator;
 pub mod fermion_operator;
 pub mod library;

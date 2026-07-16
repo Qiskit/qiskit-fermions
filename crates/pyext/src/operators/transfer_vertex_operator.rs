@@ -24,47 +24,14 @@ use qiskit_fermions_core::operators::{OperatorMacro, OperatorTrait};
 
 pub type PyTransferAction = (u32, u32);
 
-#[gen_stub_pyclass]
-#[pyclass(
-    module = "qiskit_fermions.operators.transfer_vertex_operator",
-    name = "TransferVertexOperatorDataIter"
-)]
-struct TransferVertexOperatorDataIter {
-    inner: std::vec::IntoIter<(Vec<PyTransferAction>, Complex64)>,
-}
-
-#[gen_stub_pymethods]
-#[pymethods]
-impl TransferVertexOperatorDataIter {
-    fn __iter__(slf: PyRef<'_, Self>) -> PyRef<'_, Self> {
-        slf
-    }
-
-    fn __next__(mut slf: PyRefMut<'_, Self>) -> Option<(Vec<PyTransferAction>, Complex64)> {
-        slf.inner.next()
-    }
-}
-
-#[gen_stub_pyclass]
-#[pyclass(
-    module = "qiskit_fermions.operators.transfer_vertex_operator",
-    name = "TransferVertexOperatorDataGroupIter"
-)]
-struct TransferVertexOperatorDataGroupIter {
-    inner: std::vec::IntoIter<(Vec<PyTransferAction>, Complex64, u32)>,
-}
-
-#[gen_stub_pymethods]
-#[pymethods]
-impl TransferVertexOperatorDataGroupIter {
-    fn __iter__(slf: PyRef<'_, Self>) -> PyRef<'_, Self> {
-        slf
-    }
-
-    fn __next__(mut slf: PyRefMut<'_, Self>) -> Option<(Vec<PyTransferAction>, Complex64, u32)> {
-        slf.inner.next()
-    }
-}
+crate::declare_operator_iters!(
+    TransferVertexOperatorDataIter,
+    TransferVertexOperatorDataGroupIter,
+    "qiskit_fermions.operators.transfer_vertex_operator",
+    "TransferVertexOperatorDataIter",
+    "TransferVertexOperatorDataGroupIter",
+    PyTransferAction
+);
 
 /// A transfer-vertex operator.
 ///

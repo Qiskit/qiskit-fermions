@@ -24,47 +24,14 @@ use qiskit_fermions_core::operators::{OperatorMacro, OperatorTrait};
 
 pub type PyEdgeAction = (u32, u32);
 
-#[gen_stub_pyclass]
-#[pyclass(
-    module = "qiskit_fermions.operators.edge_vertex_operator",
-    name = "EdgeVertexOperatorDataIter"
-)]
-struct EdgeVertexOperatorDataIter {
-    inner: std::vec::IntoIter<(Vec<PyEdgeAction>, Complex64)>,
-}
-
-#[gen_stub_pymethods]
-#[pymethods]
-impl EdgeVertexOperatorDataIter {
-    fn __iter__(slf: PyRef<'_, Self>) -> PyRef<'_, Self> {
-        slf
-    }
-
-    fn __next__(mut slf: PyRefMut<'_, Self>) -> Option<(Vec<PyEdgeAction>, Complex64)> {
-        slf.inner.next()
-    }
-}
-
-#[gen_stub_pyclass]
-#[pyclass(
-    module = "qiskit_fermions.operators.edge_vertex_operator",
-    name = "EdgeVertexOperatorDataGroupIter"
-)]
-struct EdgeVertexOperatorDataGroupIter {
-    inner: std::vec::IntoIter<(Vec<PyEdgeAction>, Complex64, u32)>,
-}
-
-#[gen_stub_pymethods]
-#[pymethods]
-impl EdgeVertexOperatorDataGroupIter {
-    fn __iter__(slf: PyRef<'_, Self>) -> PyRef<'_, Self> {
-        slf
-    }
-
-    fn __next__(mut slf: PyRefMut<'_, Self>) -> Option<(Vec<PyEdgeAction>, Complex64, u32)> {
-        slf.inner.next()
-    }
-}
+crate::declare_operator_iters!(
+    EdgeVertexOperatorDataIter,
+    EdgeVertexOperatorDataGroupIter,
+    "qiskit_fermions.operators.edge_vertex_operator",
+    "EdgeVertexOperatorDataIter",
+    "EdgeVertexOperatorDataGroupIter",
+    PyEdgeAction
+);
 
 /// An edge-vertex operator.
 ///

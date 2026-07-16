@@ -24,47 +24,14 @@ use qiskit_fermions_core::operators::{OperatorMacro, OperatorTrait};
 
 pub type PyFermionAction = (bool, u32);
 
-#[gen_stub_pyclass]
-#[pyclass(
-    module = "qiskit_fermions.operators.fermion_operator",
-    name = "FermionOperatorDataIter"
-)]
-struct FermionOperatorDataIter {
-    inner: std::vec::IntoIter<(Vec<PyFermionAction>, Complex64)>,
-}
-
-#[gen_stub_pymethods]
-#[pymethods]
-impl FermionOperatorDataIter {
-    fn __iter__(slf: PyRef<'_, Self>) -> PyRef<'_, Self> {
-        slf
-    }
-
-    fn __next__(mut slf: PyRefMut<'_, Self>) -> Option<(Vec<PyFermionAction>, Complex64)> {
-        slf.inner.next()
-    }
-}
-
-#[gen_stub_pyclass]
-#[pyclass(
-    module = "qiskit_fermions.operators.fermion_operator",
-    name = "FermionOperatorDataGroupIter"
-)]
-struct FermionOperatorDataGroupIter {
-    inner: std::vec::IntoIter<(Vec<PyFermionAction>, Complex64, u32)>,
-}
-
-#[gen_stub_pymethods]
-#[pymethods]
-impl FermionOperatorDataGroupIter {
-    fn __iter__(slf: PyRef<'_, Self>) -> PyRef<'_, Self> {
-        slf
-    }
-
-    fn __next__(mut slf: PyRefMut<'_, Self>) -> Option<(Vec<PyFermionAction>, Complex64, u32)> {
-        slf.inner.next()
-    }
-}
+crate::declare_operator_iters!(
+    FermionOperatorDataIter,
+    FermionOperatorDataGroupIter,
+    "qiskit_fermions.operators.fermion_operator",
+    "FermionOperatorDataIter",
+    "FermionOperatorDataGroupIter",
+    PyFermionAction
+);
 
 /// A spin-less fermionic operator.
 ///

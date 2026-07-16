@@ -24,47 +24,14 @@ use qiskit_fermions_core::operators::{OperatorMacro, OperatorTrait};
 
 pub type PyMajoranaAction = u32;
 
-#[gen_stub_pyclass]
-#[pyclass(
-    module = "qiskit_fermions.operators.majorana_operator",
-    name = "MajoranaOperatorDataIter"
-)]
-struct MajoranaOperatorDataIter {
-    inner: std::vec::IntoIter<(Vec<PyMajoranaAction>, Complex64)>,
-}
-
-#[gen_stub_pymethods]
-#[pymethods]
-impl MajoranaOperatorDataIter {
-    fn __iter__(slf: PyRef<'_, Self>) -> PyRef<'_, Self> {
-        slf
-    }
-
-    fn __next__(mut slf: PyRefMut<'_, Self>) -> Option<(Vec<PyMajoranaAction>, Complex64)> {
-        slf.inner.next()
-    }
-}
-
-#[gen_stub_pyclass]
-#[pyclass(
-    module = "qiskit_fermions.operators.majorana_operator",
-    name = "MajoranaOperatorDataGroupIter"
-)]
-struct MajoranaOperatorDataGroupIter {
-    inner: std::vec::IntoIter<(Vec<PyMajoranaAction>, Complex64, u32)>,
-}
-
-#[gen_stub_pymethods]
-#[pymethods]
-impl MajoranaOperatorDataGroupIter {
-    fn __iter__(slf: PyRef<'_, Self>) -> PyRef<'_, Self> {
-        slf
-    }
-
-    fn __next__(mut slf: PyRefMut<'_, Self>) -> Option<(Vec<PyMajoranaAction>, Complex64, u32)> {
-        slf.inner.next()
-    }
-}
+crate::declare_operator_iters!(
+    MajoranaOperatorDataIter,
+    MajoranaOperatorDataGroupIter,
+    "qiskit_fermions.operators.majorana_operator",
+    "MajoranaOperatorDataIter",
+    "MajoranaOperatorDataGroupIter",
+    PyMajoranaAction
+);
 
 /// A Majorana fermion operator.
 ///
