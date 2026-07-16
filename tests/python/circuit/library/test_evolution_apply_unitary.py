@@ -249,6 +249,23 @@ def test_evolution_apply_unitary_rejects_non_conserving_operator():
         Evolution(norb, raising, time=0.1)._apply_unitary_(vec, norb, (1, 1), copy=True)
 
 
+def test_evolution_apply_unitary_rejects_non_fermion_operator():
+    """Evolving a non-FermionOperator on a state vector raises a clear NotImplementedError.
+
+    The simulation path is backed by the native FCI kernel, which only ``FermionOperator`` exposes
+    (via ``_linear_operator_``/``conserves_sector``). Any other operator type must be rejected up
+    front with a clear error rather than failing obscurely deeper in the apply path.
+    """
+    from qiskit_fermions.operators import MajoranaOperator
+
+    norb = 2
+    vec = np.ones(4, dtype=complex)
+
+    operator = MajoranaOperator.from_dict({(0, 1): 1.0})
+    with pytest.raises(NotImplementedError, match=r"only be applied .* when its operator is a"):
+        Evolution(2 * norb, operator, time=0.1)._apply_unitary_(vec, norb, (1, 1), copy=True)
+
+
 def test_evolution_apply_unitary_rejects_spin_non_conserving_operator():
     """A number-conserving term that changes Sz is rejected in the spinful branch."""
     norb = 2

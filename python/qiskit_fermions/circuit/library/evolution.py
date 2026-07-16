@@ -145,6 +145,10 @@ class Evolution(FermionicGate):
             The transformed vector.
 
         Raises:
+            NotImplementedError: if the gate's ``operator`` is not a
+                :class:`~qiskit_fermions.operators.FermionOperator`. The simulation path is currently
+                backed by the native FCI kernel, which only ``FermionOperator`` exposes (via
+                ``_linear_operator_``); evolving other operator types is not yet supported.
             ValueError: if the operator does not conserve the ``(norb, nelec)`` sector. Evolving
                 under ``exp(-i * time * operator)`` only yields a unitary when ``operator`` maps the
                 sector to itself; a term that leaves the sector would be silently projected to zero by
@@ -154,6 +158,21 @@ class Evolution(FermionicGate):
                 spin), matching the fixed sector the kernel represents.
         """
         import scipy.sparse.linalg
+
+        # ``FermionOperator`` is a runtime re-export from ``qiskit_fermions.operators``; the stubs do
+        # not yet surface it there (being addressed separately), so mypy needs the ignore for now.
+        from qiskit_fermions.operators import FermionOperator  # type: ignore[attr-defined]
+
+        # The simulation path relies on the operator exposing ``_linear_operator_`` (the native FCI
+        # kernel) and ``conserves_sector``, which today only ``FermionOperator`` provides. Until
+        # ``_linear_operator_`` is folded into ``OperatorTrait`` so any operator can be evolved, reject
+        # a non-``FermionOperator`` operator with a clear error rather than failing obscurely deeper in.
+        if not isinstance(self.operator, FermionOperator):
+            raise NotImplementedError(
+                "Evolution can only be applied to a state vector when its operator is a "
+                f"'FermionOperator'; got '{type(self.operator).__name__}'. Simulating the evolution "
+                "of other operator types is not yet supported."
+            )
 
         # normalize a numpy integer (e.g. ``np.int64``) to a plain ``int`` so the spinless sector is
         # classified correctly here and downstream (ffsim's kernels classify with ``isinstance(int)``)
