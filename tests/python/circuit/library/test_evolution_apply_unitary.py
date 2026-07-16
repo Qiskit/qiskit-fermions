@@ -261,11 +261,17 @@ def test_evolution_apply_unitary_rejects_spin_non_conserving_operator():
         Evolution(2 * norb, spin_flip, time=0.1)._apply_unitary_(vec, norb, (1, 1), copy=True)
 
     # Treated as a single spinless block of 4 orbitals the same operator conserves number, so it is
-    # accepted (C(4, 2) = 6 dimensional sector).
-    accepted = FermionOperator.from_dict({((True, 0), (False, 2)): 1.0})
-    Evolution(2 * norb, accepted, time=0.1)._apply_unitary_(
-        np.ones(6, dtype=complex), 2 * norb, 2, copy=True
+    # accepted (C(4, 2) = 6 dimensional sector) and must match an independent ED oracle.
+    pytest.importorskip("pyscf")
+    accepted_terms = {((True, 0), (False, 2)): 1.0}
+    accepted = FermionOperator.from_dict(accepted_terms)
+    rng = np.random.default_rng(1)
+    vec0 = rng.standard_normal(6) + 1j * rng.standard_normal(6)
+    expected = _spinless_evolution_oracle(accepted_terms, 2 * norb, 2, 0.1, vec0.copy())
+    result = Evolution(2 * norb, accepted, time=0.1)._apply_unitary_(
+        vec0.copy(), 2 * norb, 2, copy=True
     )
+    np.testing.assert_allclose(result, expected, atol=1e-10)
 
 
 def test_evolution_apply_unitary_matches_ffsim_molecular_hamiltonian():
