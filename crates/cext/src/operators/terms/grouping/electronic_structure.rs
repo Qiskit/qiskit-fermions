@@ -60,15 +60,15 @@ use qiskit_fermions_core::operators::terms::grouping::electronic_structure::grou
 ///     QfFCIDump *fcidump = qf_fcidump_from_file("molecule.fcidump");
 ///     QfFermionOperator *op = qf_ferm_op_from_fcidump(fcidump);
 ///
-///     uint32_t num_modes = 2 * fcidump.norb;
+///     uint32_t num_modes = 2 * qf_fcidump_norb(fcidump);
 ///
-///     QfFermionOperator *normal = qf_ferm_op_normal_ordered(op);
+///     QfFermionOperator *normal = qf_ferm_op_normal_ordered(op, NULL);
 ///
-///     QfExitCode exit = qf_group_terms_by_electronic_structure(normal, num_modes, false);
+///     QfExitCode exit = qf_ferm_op_group_terms_by_electronic_structure(normal, num_modes, false);
 ///
 /// @endrst
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn qf_group_terms_by_electronic_structure(
+pub unsafe extern "C" fn qf_ferm_op_group_terms_by_electronic_structure(
     op: *mut FermionOperator,
     num_modes: u32,
     two_body_physicist_order: bool,

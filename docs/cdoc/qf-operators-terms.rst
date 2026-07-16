@@ -29,9 +29,9 @@ information automatically.
 
 .. table::
 
-  ================================================ ==============================================================
-  :c:func:`qf_group_terms_by_electronic_structure` Groups the terms of an operator by their electronic structure.
-  ================================================ ==============================================================
+  ======================================================== ==============================================================
+  :c:func:`qf_ferm_op_group_terms_by_electronic_structure` Groups the terms of an operator by their electronic structure.
+  ======================================================== ==============================================================
 
 Filtering
 ---------
@@ -44,9 +44,9 @@ Members
 
 .. table::
 
-  ================================== =======================================================
-  :c:func:`qf_filter_diagonal_terms` Filters out the terms of an operator that are diagonal.
-  ================================== =======================================================
+  ============================================= =======================================================
+  :c:func:`qf_ferm_op_filter_diagonal_terms`    Filters out the terms of an operator that are diagonal.
+  ============================================= =======================================================
 
 .. doxygengroup:: qf_operator_terms
    :content-only:

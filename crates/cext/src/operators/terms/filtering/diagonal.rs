@@ -54,13 +54,13 @@ use qiskit_fermions_core::operators::terms::filtering::diagonal::filter_diagonal
 ///     QfFCIDump *fcidump = qf_fcidump_from_file("molecule.fcidump");
 ///     QfFermionOperator *op = qf_ferm_op_from_fcidump(fcidump);
 ///
-///     QfFermionOperator *normal = qf_ferm_op_normal_ordered(op);
+///     QfFermionOperator *normal = qf_ferm_op_normal_ordered(op, NULL);
 ///
-///     qf_filter_diagonal_terms(normal);
+///     qf_ferm_op_filter_diagonal_terms(normal);
 ///
 /// @endrst
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn qf_filter_diagonal_terms(op: *mut FermionOperator) {
+pub unsafe extern "C" fn qf_ferm_op_filter_diagonal_terms(op: *mut FermionOperator) {
     let op = unsafe { mut_ptr_as_ref(op) };
 
     filter_diagonal_terms(op);

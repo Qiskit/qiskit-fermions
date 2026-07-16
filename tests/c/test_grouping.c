@@ -25,7 +25,7 @@ static int test_grouping_error(void) {
     QfFermionOperator *op =
         qf_ferm_op_new(num_terms, num_actions, coeffs, actions, modes, boundaries);
 
-    QfExitCode exit = qf_group_terms_by_electronic_structure(op, 2, false);
+    QfExitCode exit = qf_ferm_op_group_terms_by_electronic_structure(op, 2, false);
 
     qf_ferm_op_free(op);
 
@@ -43,7 +43,7 @@ static int test_group_terms_by_electronic_structure(void) {
     QfFermionOperator *normal = qf_ferm_op_normal_ordered(op, NULL);
     qf_ferm_op_free(op);
 
-    QfExitCode exit = qf_group_terms_by_electronic_structure(normal, 4, false);
+    QfExitCode exit = qf_ferm_op_group_terms_by_electronic_structure(normal, 4, false);
     qf_ferm_op_free(normal);
 
     if (exit != QfExitCode_Success) {
