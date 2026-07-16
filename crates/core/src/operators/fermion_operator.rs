@@ -240,6 +240,19 @@ impl FermionOperator {
         )
     }
 
+    /// Applies this operator to a spinless FCI state vector using a precomputed sector: `self @ vec`.
+    ///
+    /// Identical to [`Self::fci_matvec_spinless`] but reuses a [`crate::linalg::fci::SpinlessSector`]
+    /// built once by the caller, avoiding the per-call rebuild of the binomial table and sector
+    /// strings across the repeated matvecs of an evolution (`expm_multiply`).
+    pub fn fci_matvec_on_spinless(
+        &self,
+        sector: &crate::linalg::fci::SpinlessSector,
+        vec: &[Complex64],
+    ) -> Result<Vec<Complex64>, crate::linalg::fci::FciMatvecError> {
+        sector.matvec(self.iter().map(|t| (t.coeff, t.actions, t.modes)), vec)
+    }
+
     /// Applies this operator to a spinful FCI state vector: returns `self @ vec`.
     ///
     /// The operator's `2 * norb` modes are spin-orbitals under the block-spin convention (mode
@@ -261,6 +274,19 @@ impl FermionOperator {
             self.iter().map(|t| (t.coeff, t.actions, t.modes)),
             vec,
         )
+    }
+
+    /// Applies this operator to a spinful FCI state vector using a precomputed sector: `self @ vec`.
+    ///
+    /// Identical to [`Self::fci_matvec_spinful`] but reuses a [`crate::linalg::fci::SpinfulSector`]
+    /// built once by the caller, avoiding the per-call rebuild of the binomial table and both spin
+    /// sectors' strings across the repeated matvecs of an evolution (`expm_multiply`).
+    pub fn fci_matvec_on_spinful(
+        &self,
+        sector: &crate::linalg::fci::SpinfulSector,
+        vec: &[Complex64],
+    ) -> Result<Vec<Complex64>, crate::linalg::fci::FciMatvecError> {
+        sector.matvec(self.iter().map(|t| (t.coeff, t.actions, t.modes)), vec)
     }
 }
 

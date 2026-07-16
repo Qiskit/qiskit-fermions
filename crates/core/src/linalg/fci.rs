@@ -404,6 +404,95 @@ fn apply_ops_to_string(string: u64, ops: &[(bool, u32)]) -> Option<(u64, i8)> {
     Some((string, sign))
 }
 
+/// A spinless FCI sector's precomputed geometry, reusable across many matvec calls.
+///
+/// Owns the [`BinomialTable`] and the sector's occupation [`sector_strings`], both of which depend
+/// only on `(norb, nocc)` -- not on the operator or the input vector. Building them once and reusing
+/// the context across the repeated matvecs of a single `expm_multiply` (the evolution path) avoids
+/// rebuilding this identical geometry on every call. [`spinless_matvec`] is the build-once-call-once
+/// convenience wrapper over this type.
+#[derive(Clone, Debug)]
+pub struct SpinlessSector {
+    norb: u32,
+    nocc: u32,
+    table: BinomialTable,
+    strings: Vec<u64>,
+}
+
+impl SpinlessSector {
+    /// Precomputes the `(norb, nocc)` sector geometry (binomial table + occupation strings).
+    pub fn new(norb: u32, nocc: u32) -> Self {
+        let table = BinomialTable::new(norb);
+        let strings = sector_strings(&table, norb, nocc);
+        Self {
+            norb,
+            nocc,
+            table,
+            strings,
+        }
+    }
+
+    /// The FCI dimension `C(norb, nocc)` of this sector.
+    #[inline]
+    pub fn dim(&self) -> usize {
+        self.table.num_strings(self.norb, self.nocc)
+    }
+
+    /// Applies an operator's terms to a spinless FCI state vector: `out = op @ vec`.
+    ///
+    /// The operator's modes must lie in `[0, norb)`, and the vector length must equal
+    /// [`Self::dim`]. Each term is supplied as `(coeff, actions, modes)` -- the native slice layout
+    /// of a [`crate::operators::fermion_operator::FermionOperatorTermView`] -- where `actions[k]` is
+    /// `true` for a creation and `modes[k]` is its orbital, in the term's written (left-to-right)
+    /// order. Returns the transformed vector, or an error on a dimension/mode mismatch.
+    pub fn matvec<'a>(
+        &self,
+        terms: impl IntoIterator<Item = (Complex64, &'a [bool], &'a [u32])>,
+        vec: &[Complex64],
+    ) -> Result<Vec<Complex64>, FciMatvecError> {
+        let (norb, nocc) = (self.norb, self.nocc);
+        let dim = self.dim();
+        if vec.len() != dim {
+            return Err(FciMatvecError::DimensionMismatch {
+                expected: dim,
+                actual: vec.len(),
+            });
+        }
+        let mut out = vec![Complex64::new(0.0, 0.0); dim];
+        let mut ops: Vec<(bool, u32)> = Vec::new();
+        for (coeff, actions, modes) in terms {
+            ops.clear();
+            for (&is_creation, &orb) in actions.iter().zip(modes) {
+                if orb >= norb {
+                    return Err(FciMatvecError::ModeOutOfRange {
+                        mode: orb,
+                        num_modes: norb,
+                    });
+                }
+                ops.push((is_creation, orb));
+            }
+            // Iterate over every source determinant, apply the term, and scatter to the destination.
+            for (src_addr, &string) in self.strings.iter().enumerate() {
+                let amp = vec[src_addr];
+                if amp == Complex64::new(0.0, 0.0) {
+                    continue;
+                }
+                if let Some((out_string, sign)) = apply_ops_to_string(string, &ops) {
+                    // A term that does not conserve particle number maps out of the fixed `nocc`
+                    // sector; `str2addr` would rank the wrong-popcount string past `dim`. Project
+                    // such terms to zero (drop them) rather than indexing out of bounds.
+                    if out_string.count_ones() != nocc {
+                        continue;
+                    }
+                    let dst_addr = str2addr(&self.table, norb, nocc, out_string);
+                    out[dst_addr] += coeff * f64::from(sign) * amp;
+                }
+            }
+        }
+        Ok(out)
+    }
+}
+
 /// Applies an operator's terms to a spinless FCI state vector: `out = op @ vec`.
 ///
 /// * `norb` is the number of orbitals; the operator's modes must lie in `[0, norb)`.
@@ -413,53 +502,170 @@ fn apply_ops_to_string(string: u64, ops: &[(bool, u32)]) -> Option<(u64, i8)> {
 /// [`crate::operators::fermion_operator::FermionOperatorTermView`] -- where `actions[k]` is `true`
 /// for a creation and `modes[k]` is its orbital, in the term's written (left-to-right) order.
 /// Returns the transformed vector, or an error on a dimension/mode mismatch.
+///
+/// This is a build-once-call-once convenience over [`SpinlessSector`]; to apply the same operator to
+/// many vectors of the same sector (e.g. across an `expm_multiply`), build a [`SpinlessSector`] once
+/// and reuse its [`SpinlessSector::matvec`].
 pub fn spinless_matvec<'a>(
     norb: u32,
     nocc: u32,
     terms: impl IntoIterator<Item = (Complex64, &'a [bool], &'a [u32])>,
     vec: &[Complex64],
 ) -> Result<Vec<Complex64>, FciMatvecError> {
-    let table = BinomialTable::new(norb);
-    let dim = table.num_strings(norb, nocc);
-    if vec.len() != dim {
-        return Err(FciMatvecError::DimensionMismatch {
-            expected: dim,
-            actual: vec.len(),
-        });
+    SpinlessSector::new(norb, nocc).matvec(terms, vec)
+}
+
+/// A spinful FCI sector's precomputed geometry, reusable across many matvec calls.
+///
+/// Owns the [`BinomialTable`], both spin sectors' occupation [`sector_strings`], and the derived
+/// dimensions -- all of which depend only on `(norb, n_alpha, n_beta)`. Building them once and
+/// reusing the context across the repeated matvecs of a single `expm_multiply` (the evolution path)
+/// avoids rebuilding this identical geometry on every call. [`spinful_matvec`] is the
+/// build-once-call-once convenience wrapper over this type.
+#[derive(Clone, Debug)]
+pub struct SpinfulSector {
+    norb: u32,
+    n_alpha: u32,
+    n_beta: u32,
+    table: BinomialTable,
+    dim: usize,
+    dim_b: usize,
+    alpha_strings: Vec<u64>,
+    beta_strings: Vec<u64>,
+}
+
+impl SpinfulSector {
+    /// Precomputes the `(norb, n_alpha, n_beta)` sector geometry.
+    ///
+    /// Returns [`FciMatvecError::DimensionOverflow`] if the spinful dimension
+    /// `C(norb, n_alpha) * C(norb, n_beta)` overflows `usize` (see [`spinful_dim`]).
+    pub fn new(norb: u32, n_alpha: u32, n_beta: u32) -> Result<Self, FciMatvecError> {
+        let table = BinomialTable::new(norb);
+        let dim_b = table.num_strings(norb, n_beta);
+        let dim = spinful_dim(&table, norb, n_alpha, n_beta)?;
+        let alpha_strings = sector_strings(&table, norb, n_alpha);
+        let beta_strings = sector_strings(&table, norb, n_beta);
+        Ok(Self {
+            norb,
+            n_alpha,
+            n_beta,
+            table,
+            dim,
+            dim_b,
+            alpha_strings,
+            beta_strings,
+        })
     }
-    let strings = sector_strings(&table, norb, nocc);
-    let mut out = vec![Complex64::new(0.0, 0.0); dim];
-    let mut ops: Vec<(bool, u32)> = Vec::new();
-    for (coeff, actions, modes) in terms {
-        ops.clear();
-        for (&is_creation, &orb) in actions.iter().zip(modes) {
-            if orb >= norb {
-                return Err(FciMatvecError::ModeOutOfRange {
-                    mode: orb,
-                    num_modes: norb,
-                });
-            }
-            ops.push((is_creation, orb));
+
+    /// The FCI dimension `C(norb, n_alpha) * C(norb, n_beta)` of this sector.
+    #[inline]
+    pub fn dim(&self) -> usize {
+        self.dim
+    }
+
+    /// Applies an operator's terms to a spinful FCI state vector: `out = op @ vec`.
+    ///
+    /// The operator's modes must lie in `[0, 2 * norb)` under the block-spin convention (mode
+    /// `m < norb` is alpha orbital `m`; mode `m >= norb` is beta orbital `m - norb`), and the vector
+    /// length must equal [`Self::dim`] with flat index `addr_a * dim_b + addr_b`. Each term is
+    /// supplied as `(coeff, actions, modes)` (see [`SpinlessSector::matvec`] for the layout). Each
+    /// beta operator additionally contributes `(-1)^{n_alpha}` because, under block-spin ordering,
+    /// all `n_alpha` occupied alpha orbitals precede every beta orbital in the Jordan-Wigner string.
+    pub fn matvec<'a>(
+        &self,
+        terms: impl IntoIterator<Item = (Complex64, &'a [bool], &'a [u32])>,
+        vec: &[Complex64],
+    ) -> Result<Vec<Complex64>, FciMatvecError> {
+        let (norb, n_alpha, n_beta) = (self.norb, self.n_alpha, self.n_beta);
+        let (dim, dim_b) = (self.dim, self.dim_b);
+        if vec.len() != dim {
+            return Err(FciMatvecError::DimensionMismatch {
+                expected: dim,
+                actual: vec.len(),
+            });
         }
-        // Iterate over every source determinant, apply the term, and scatter to the destination.
-        for (src_addr, &string) in strings.iter().enumerate() {
-            let amp = vec[src_addr];
-            if amp == Complex64::new(0.0, 0.0) {
-                continue;
+        let num_modes = 2 * norb;
+
+        // Whether an odd number of alpha electrons flips the sign of each beta operator.
+        let beta_alpha_parity: i8 = if n_alpha.is_multiple_of(2) { 1 } else { -1 };
+
+        let mut out = vec![Complex64::new(0.0, 0.0); dim];
+        let mut alpha_ops: Vec<(bool, u32)> = Vec::new();
+        let mut beta_ops: Vec<(bool, u32)> = Vec::new();
+        // Per beta-source address, the term's action on that beta string: (out_addr, sign), or
+        // `None` if it annihilates. Precomputed once per term so it is not recomputed for every
+        // alpha string.
+        let mut beta_action: Vec<Option<(usize, i8)>> = Vec::new();
+        for (coeff, actions, modes) in terms {
+            // Split the term's ops into alpha- and beta-sector sublists (order preserved),
+            // validating modes as we go.
+            alpha_ops.clear();
+            beta_ops.clear();
+            for (&is_creation, &mode) in actions.iter().zip(modes) {
+                if mode >= num_modes {
+                    return Err(FciMatvecError::ModeOutOfRange { mode, num_modes });
+                }
+                if mode < norb {
+                    alpha_ops.push((is_creation, mode));
+                } else {
+                    beta_ops.push((is_creation, mode - norb));
+                }
             }
-            if let Some((out_string, sign)) = apply_ops_to_string(string, &ops) {
-                // A term that does not conserve particle number maps out of the fixed `nocc` sector;
-                // `str2addr` would rank the wrong-popcount string past `dim`. Project such terms to
-                // zero (drop them) rather than indexing out of bounds.
-                if out_string.count_ones() != nocc {
+
+            // The cross-sector sign is `(-1)^{n_alpha}` once per beta operator. Because each beta op
+            // is applied while the alpha string still holds all `n_alpha` electrons (the alpha ops
+            // act on a different sector and do not change the alpha count within a
+            // particle-conserving term), the factor is constant across the term.
+            let cross_sign = if beta_ops.len().is_multiple_of(2) {
+                1
+            } else {
+                beta_alpha_parity
+            };
+
+            // Precompute the beta sector's action, folding in the cross-sector sign.
+            // A term whose beta (or alpha) sublist does not conserve that spin's electron count maps
+            // out of the fixed `(n_alpha, n_beta)` sector; `str2addr` would rank the wrong-popcount
+            // string past its dimension. Project such terms to zero (drop them) rather than indexing
+            // out of bounds. Each spin block is checked independently, so a term that changes
+            // `n_alpha` and `n_beta` in a compensating way (e.g. a†_{0a} a_{0b}) is still correctly
+            // dropped.
+            beta_action.clear();
+            beta_action.extend(self.beta_strings.iter().map(|&b_string| {
+                apply_ops_to_string(b_string, &beta_ops).and_then(|(b_out, b_sign)| {
+                    (b_out.count_ones() == n_beta).then(|| {
+                        (
+                            str2addr(&self.table, norb, n_beta, b_out),
+                            b_sign * cross_sign,
+                        )
+                    })
+                })
+            }));
+
+            for (a_addr, &a_string) in self.alpha_strings.iter().enumerate() {
+                let Some((a_out, a_sign)) = apply_ops_to_string(a_string, &alpha_ops) else {
+                    continue;
+                };
+                if a_out.count_ones() != n_alpha {
                     continue;
                 }
-                let dst_addr = str2addr(&table, norb, nocc, out_string);
-                out[dst_addr] += coeff * f64::from(sign) * amp;
+                let a_out_addr = str2addr(&self.table, norb, n_alpha, a_out);
+                let src_row = a_addr * dim_b;
+                let dst_row = a_out_addr * dim_b;
+                for (b_addr, beta) in beta_action.iter().enumerate() {
+                    let amp = vec[src_row + b_addr];
+                    if amp == Complex64::new(0.0, 0.0) {
+                        continue;
+                    }
+                    let Some((b_out_addr, b_sign)) = beta else {
+                        continue;
+                    };
+                    let sign = a_sign * b_sign;
+                    out[dst_row + b_out_addr] += coeff * f64::from(sign) * amp;
+                }
             }
         }
+        Ok(out)
     }
-    Ok(out)
 }
 
 /// Applies an operator's terms to a spinful FCI state vector: `out = op @ vec`.
@@ -473,6 +679,10 @@ pub fn spinless_matvec<'a>(
 /// Each term is supplied as `(coeff, actions, modes)` (see [`spinless_matvec`] for the layout).
 /// Each beta operator additionally contributes `(-1)^{n_alpha}` because, under block-spin ordering,
 /// all `n_alpha` occupied alpha orbitals precede every beta orbital in the Jordan-Wigner string.
+///
+/// This is a build-once-call-once convenience over [`SpinfulSector`]; to apply the same operator to
+/// many vectors of the same sector (e.g. across an `expm_multiply`), build a [`SpinfulSector`] once
+/// and reuse its [`SpinfulSector::matvec`].
 pub fn spinful_matvec<'a>(
     norb: u32,
     n_alpha: u32,
@@ -480,92 +690,7 @@ pub fn spinful_matvec<'a>(
     terms: impl IntoIterator<Item = (Complex64, &'a [bool], &'a [u32])>,
     vec: &[Complex64],
 ) -> Result<Vec<Complex64>, FciMatvecError> {
-    let table = BinomialTable::new(norb);
-    let dim_b = table.num_strings(norb, n_beta);
-    let dim = spinful_dim(&table, norb, n_alpha, n_beta)?;
-    if vec.len() != dim {
-        return Err(FciMatvecError::DimensionMismatch {
-            expected: dim,
-            actual: vec.len(),
-        });
-    }
-    let alpha_strings = sector_strings(&table, norb, n_alpha);
-    let beta_strings = sector_strings(&table, norb, n_beta);
-    let num_modes = 2 * norb;
-
-    // Whether an odd number of alpha electrons flips the sign of each beta operator.
-    let beta_alpha_parity: i8 = if n_alpha.is_multiple_of(2) { 1 } else { -1 };
-
-    let mut out = vec![Complex64::new(0.0, 0.0); dim];
-    let mut alpha_ops: Vec<(bool, u32)> = Vec::new();
-    let mut beta_ops: Vec<(bool, u32)> = Vec::new();
-    // Per beta-source address, the term's action on that beta string: (out_addr, sign), or `None`
-    // if it annihilates. Precomputed once per term so it is not recomputed for every alpha string.
-    let mut beta_action: Vec<Option<(usize, i8)>> = Vec::new();
-    for (coeff, actions, modes) in terms {
-        // Split the term's ops into alpha- and beta-sector sublists (order preserved), validating
-        // modes as we go.
-        alpha_ops.clear();
-        beta_ops.clear();
-        for (&is_creation, &mode) in actions.iter().zip(modes) {
-            if mode >= num_modes {
-                return Err(FciMatvecError::ModeOutOfRange { mode, num_modes });
-            }
-            if mode < norb {
-                alpha_ops.push((is_creation, mode));
-            } else {
-                beta_ops.push((is_creation, mode - norb));
-            }
-        }
-
-        // The cross-sector sign is `(-1)^{n_alpha}` once per beta operator. Because each beta op is
-        // applied while the alpha string still holds all `n_alpha` electrons (the alpha ops act on a
-        // different sector and do not change the alpha count within a particle-conserving term), the
-        // factor is constant across the term.
-        let cross_sign = if beta_ops.len().is_multiple_of(2) {
-            1
-        } else {
-            beta_alpha_parity
-        };
-
-        // Precompute the beta sector's action, folding in the cross-sector sign.
-        // A term whose beta (or alpha) sublist does not conserve that spin's electron count maps out
-        // of the fixed `(n_alpha, n_beta)` sector; `str2addr` would rank the wrong-popcount string
-        // past its dimension. Project such terms to zero (drop them) rather than indexing out of
-        // bounds. Each spin block is checked independently, so a term that changes `n_alpha` and
-        // `n_beta` in a compensating way (e.g. a†_{0a} a_{0b}) is still correctly dropped.
-        beta_action.clear();
-        beta_action.extend(beta_strings.iter().map(|&b_string| {
-            apply_ops_to_string(b_string, &beta_ops).and_then(|(b_out, b_sign)| {
-                (b_out.count_ones() == n_beta)
-                    .then(|| (str2addr(&table, norb, n_beta, b_out), b_sign * cross_sign))
-            })
-        }));
-
-        for (a_addr, &a_string) in alpha_strings.iter().enumerate() {
-            let Some((a_out, a_sign)) = apply_ops_to_string(a_string, &alpha_ops) else {
-                continue;
-            };
-            if a_out.count_ones() != n_alpha {
-                continue;
-            }
-            let a_out_addr = str2addr(&table, norb, n_alpha, a_out);
-            let src_row = a_addr * dim_b;
-            let dst_row = a_out_addr * dim_b;
-            for (b_addr, beta) in beta_action.iter().enumerate() {
-                let amp = vec[src_row + b_addr];
-                if amp == Complex64::new(0.0, 0.0) {
-                    continue;
-                }
-                let Some((b_out_addr, b_sign)) = beta else {
-                    continue;
-                };
-                let sign = a_sign * b_sign;
-                out[dst_row + b_out_addr] += coeff * f64::from(sign) * amp;
-            }
-        }
-    }
-    Ok(out)
+    SpinfulSector::new(norb, n_alpha, n_beta)?.matvec(terms, vec)
 }
 
 #[cfg(test)]
@@ -1238,6 +1363,96 @@ mod tests {
         )
         .unwrap();
         assert_vec_close(&got, &complex_vec(&vec![0.0; dim]));
+    }
+
+    #[test]
+    fn reused_sector_matches_fresh_matvec_across_calls() {
+        // A `SpinlessSector`/`SpinfulSector` built once and reused across several matvecs must give
+        // the same result as the build-once-call-once free functions -- the hoist of the binomial
+        // table and sector strings out of the per-call body must not change the arithmetic.
+        let split_iter = |ops: &[(bool, u32)]| -> (Vec<bool>, Vec<u32>) { split_ops(ops) };
+
+        // Spinless: reuse one sector for two different input vectors.
+        let (norb, nocc) = (5u32, 3u32);
+        let sector = SpinlessSector::new(norb, nocc);
+        let dim = sector.dim();
+        let terms = [
+            (Complex64::new(0.7, 0.2), vec![(true, 0), (false, 1)]),
+            (Complex64::new(0.5, 0.0), vec![(true, 2), (false, 2)]),
+        ];
+        let split: Vec<(Complex64, Vec<bool>, Vec<u32>)> = terms
+            .iter()
+            .map(|(c, ops)| {
+                let (a, m) = split_iter(ops);
+                (*c, a, m)
+            })
+            .collect();
+        for scale in [0.31f64, -1.7] {
+            let vec: Vec<Complex64> = (0..dim)
+                .map(|i| Complex64::new((i as f64 + 1.0) * scale, (i as f64) * 0.13))
+                .collect();
+            let via_sector = sector
+                .matvec(
+                    split
+                        .iter()
+                        .map(|(c, a, m)| (*c, a.as_slice(), m.as_slice())),
+                    &vec,
+                )
+                .unwrap();
+            let via_free = spinless_matvec(
+                norb,
+                nocc,
+                split
+                    .iter()
+                    .map(|(c, a, m)| (*c, a.as_slice(), m.as_slice())),
+                &vec,
+            )
+            .unwrap();
+            assert_vec_close(&via_sector, &via_free);
+        }
+
+        // Spinful: same, with a cross-spin term to exercise both string lists.
+        let (norb, n_a, n_b) = (3u32, 2u32, 1u32);
+        let sector = SpinfulSector::new(norb, n_a, n_b).unwrap();
+        let dim = sector.dim();
+        let terms = [
+            (Complex64::new(0.9, 0.0), vec![(true, 0), (false, 1)]),
+            (
+                Complex64::new(1.1, 0.0),
+                vec![(true, 0), (false, 0), (true, norb), (false, norb)],
+            ),
+        ];
+        let split: Vec<(Complex64, Vec<bool>, Vec<u32>)> = terms
+            .iter()
+            .map(|(c, ops)| {
+                let (a, m) = split_iter(ops);
+                (*c, a, m)
+            })
+            .collect();
+        for scale in [0.23f64, 0.91] {
+            let vec: Vec<Complex64> = (0..dim)
+                .map(|i| Complex64::new((i as f64 + 0.5) * scale, (i as f64) * 0.07))
+                .collect();
+            let via_sector = sector
+                .matvec(
+                    split
+                        .iter()
+                        .map(|(c, a, m)| (*c, a.as_slice(), m.as_slice())),
+                    &vec,
+                )
+                .unwrap();
+            let via_free = spinful_matvec(
+                norb,
+                n_a,
+                n_b,
+                split
+                    .iter()
+                    .map(|(c, a, m)| (*c, a.as_slice(), m.as_slice())),
+                &vec,
+            )
+            .unwrap();
+            assert_vec_close(&via_sector, &via_free);
+        }
     }
 
     #[test]

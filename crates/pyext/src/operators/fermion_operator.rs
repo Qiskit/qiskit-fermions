@@ -19,7 +19,9 @@ use pyo3::{class::basic::CompareOp, exceptions::PyNotImplementedError};
 use pyo3_stub_gen::derive::*;
 use std::collections::HashMap;
 
-use qiskit_fermions_core::linalg::fci::{BinomialTable, MAX_ORBITALS};
+use std::sync::Arc;
+
+use qiskit_fermions_core::linalg::fci::{MAX_ORBITALS, SpinfulSector, SpinlessSector};
 use qiskit_fermions_core::operators::fermion_operator::FermionOperator;
 use qiskit_fermions_core::operators::{OperatorMacro, OperatorTrait};
 
@@ -1155,27 +1157,34 @@ impl PyFermionOperator {
                 "norb={norb} exceeds the maximum of {MAX_ORBITALS} orbitals"
             )));
         }
-        let table = BinomialTable::new(norb);
         // The adjoint backs `rmatvec` (the action of `A.H`), which SciPy's `expm_multiply` needs.
         let adj = self.inner.adjoint();
         if let Ok(nocc) = nelec.extract::<u32>() {
-            let dim = table.num_strings(norb, nocc);
+            // Precompute the sector geometry once and share it across both closures: `expm_multiply`
+            // calls `matvec`/`rmatvec` many times, and the binomial table and occupation strings
+            // depend only on the sector, not on the operator or the probe vector.
+            let sector = Arc::new(SpinlessSector::new(norb, nocc));
+            let dim = sector.dim();
+            let (sector_mv, sector_rmv) = (Arc::clone(&sector), sector);
             let op = self.inner.clone();
-            let matvec = Box::new(move |vec: &[Complex64]| op.fci_matvec_spinless(norb, nocc, vec));
+            let matvec =
+                Box::new(move |vec: &[Complex64]| op.fci_matvec_on_spinless(&sector_mv, vec));
             let rmatvec =
-                Box::new(move |vec: &[Complex64]| adj.fci_matvec_spinless(norb, nocc, vec));
+                Box::new(move |vec: &[Complex64]| adj.fci_matvec_on_spinless(&sector_rmv, vec));
             Ok(FciLinearOperator::new(dim, matvec, rmatvec))
         } else {
             let (n_alpha, n_beta) = nelec.extract::<(u32, u32)>()?;
-            let dim = qiskit_fermions_core::linalg::fci::spinful_dim(&table, norb, n_alpha, n_beta)
-                .map_err(|e| PyValueError::new_err(e.to_string()))?;
+            let sector = Arc::new(
+                SpinfulSector::new(norb, n_alpha, n_beta)
+                    .map_err(|e| PyValueError::new_err(e.to_string()))?,
+            );
+            let dim = sector.dim();
+            let (sector_mv, sector_rmv) = (Arc::clone(&sector), sector);
             let op = self.inner.clone();
-            let matvec = Box::new(move |vec: &[Complex64]| {
-                op.fci_matvec_spinful(norb, n_alpha, n_beta, vec)
-            });
-            let rmatvec = Box::new(move |vec: &[Complex64]| {
-                adj.fci_matvec_spinful(norb, n_alpha, n_beta, vec)
-            });
+            let matvec =
+                Box::new(move |vec: &[Complex64]| op.fci_matvec_on_spinful(&sector_mv, vec));
+            let rmatvec =
+                Box::new(move |vec: &[Complex64]| adj.fci_matvec_on_spinful(&sector_rmv, vec));
             Ok(FciLinearOperator::new(dim, matvec, rmatvec))
         }
     }
