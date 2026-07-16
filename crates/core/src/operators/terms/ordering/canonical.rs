@@ -20,17 +20,25 @@ use crate::operators::{OperatorTrait, TermSortKey};
 /// untouched — this only reorders them, it does not simplify or normal-order the operator. This is
 /// generic over every operator type.
 ///
-/// Any group indices are **not** preserved: the returned operator has `groups` set to `None`, since
-/// a canonical reordering does not respect group boundaries.
+/// Group indices, if present, are preserved: each term carries its group index along as it moves,
+/// since a group index is a per-term tag and does not depend on term order. (Terms of the same
+/// group are simply no longer contiguous afterwards.) If the operator tracks no groups, the result
+/// tracks none either.
 pub fn canonical_order<OpType>(operator: &OpType) -> OpType
 where
     OpType: OperatorTrait,
 {
     // We only read `operator` through borrowed term views and build a fresh owned result, so a
     // shared borrow suffices — the caller keeps ownership and need not clone just to reorder.
-    let mut terms: Vec<_> = operator.iter().collect();
-    terms.sort_by(|a, b| a.sort_key().cmp(&b.sort_key()));
-    OpType::from_terms(terms)
+    if operator.has_groups() {
+        let mut terms: Vec<_> = operator.iter_with_groups().collect();
+        terms.sort_by(|a, b| a.sort_key().cmp(&b.sort_key()));
+        OpType::from_terms_with_groups(terms)
+    } else {
+        let mut terms: Vec<_> = operator.iter().collect();
+        terms.sort_by(|a, b| a.sort_key().cmp(&b.sort_key()));
+        OpType::from_terms(terms)
+    }
 }
 
 #[cfg(test)]
@@ -121,8 +129,8 @@ mod tests {
     }
 
     #[test]
-    fn test_canonical_order_drops_groups() {
-        // A canonical reordering does not respect group boundaries, so `groups` is cleared.
+    fn test_canonical_order_preserves_groups() {
+        // term 0: a†_1 a_0 in group 0; term 1: a†_0 a_1 in group 1.
         let op = FermionOperator {
             coeffs: vec![Complex64::new(1.0, 0.0), Complex64::new(2.0, 0.0)],
             actions: vec![true, false, true, false],
@@ -133,7 +141,14 @@ mod tests {
 
         let ordered = canonical_order(&op);
 
-        assert!(ordered.groups.is_none());
+        // Each group index travels with its term: a†_0 a_1 (group 1) now sorts first, a†_1 a_0
+        // (group 0) second, so the reordered `groups` is [1, 0] rather than being cleared.
+        assert_eq!(ordered.groups, Some(vec![1, 0]));
+        let terms: Vec<_> = ordered.iter_with_groups().collect();
+        assert_eq!(terms[0].modes, &[0, 1]);
+        assert_eq!(terms[0].group, 1);
+        assert_eq!(terms[1].modes, &[1, 0]);
+        assert_eq!(terms[1].group, 0);
     }
 
     #[test]

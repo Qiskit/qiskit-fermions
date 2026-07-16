@@ -84,10 +84,46 @@ static int test_maj_op_canonical_order_sorts_terms(void) {
     return Ok;
 }
 
+static int test_ferm_op_canonical_order_preserves_groups(void) {
+    // term 0: a†_1 a_0 in group 0; term 1: a†_0 a_1 in group 1.
+    uint64_t num_terms = 2;
+    uint64_t num_actions = 4;
+    bool actions[4] = {true, false, true, false};
+    uint32_t modes[4] = {1, 0, 0, 1};
+    QkComplex64 coeffs[2] = {{1.0, 0.0}, {2.0, 0.0}};
+    uint32_t boundaries[3] = {0, 2, 4};
+    QfFermionOperator *op =
+        qf_ferm_op_new(num_terms, num_actions, coeffs, actions, modes, boundaries);
+    uint32_t groups_in[2] = {0, 1};
+    qf_ferm_op_set_groups(op, groups_in, num_terms);
+
+    QfFermionOperator *ordered = qf_ferm_op_canonical_order(op);
+
+    // a†_0 a_1 (group 1) sorts first and a†_1 a_0 (group 0) second, so the group tags travel along
+    // to become {1, 0}.
+    int result = Ok;
+    if (!qf_ferm_op_has_groups(ordered)) {
+        result = EqualityError;
+    } else {
+        uint32_t *groups_out;
+        uint64_t groups_len;
+        qf_ferm_op_get_groups(ordered, &groups_out, &groups_len);
+        if (groups_len != 2 || groups_out[0] != 1 || groups_out[1] != 0) {
+            result = EqualityError;
+        }
+    }
+
+    qf_ferm_op_free(op);
+    qf_ferm_op_free(ordered);
+
+    return result;
+}
+
 int test_ordering(void) {
     int num_failed = 0;
     num_failed += RUN_TEST(test_ferm_op_canonical_order_sorts_terms);
     num_failed += RUN_TEST(test_maj_op_canonical_order_sorts_terms);
+    num_failed += RUN_TEST(test_ferm_op_canonical_order_preserves_groups);
 
     fflush(stderr);
     fprintf(stderr, "=== Number of failed subtests: %i\n", num_failed);

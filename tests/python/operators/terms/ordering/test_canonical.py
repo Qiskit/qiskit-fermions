@@ -54,18 +54,24 @@ def test_canonical_order_sorts_majorana_terms():
     assert list(ordered.iter_terms()) == [([0, 1], 2 + 0j), ([2, 3], 1 + 0j)]
 
 
-def test_canonical_order_drops_groups():
+def test_canonical_order_preserves_groups():
     op = FermionOperator.from_dict(
         {
             ((True, 1), (False, 0)): 1.0,
             ((True, 0), (False, 1)): 2.0,
         }
     )
+    # Give the two terms distinct group tags (term order out of from_dict is arbitrary, so tag by
+    # position — the term<->tag association is what must survive reordering, not the positions).
     op.groups = [0, 1]
+    before = {tuple(term): group for term, _, group in op.iter_terms_with_groups()}
 
     ordered = canonical_order(op)
 
-    assert ordered.groups is None
+    # Groups are preserved, and each term still carries the same group tag it had before.
+    assert ordered.groups is not None
+    after = {tuple(term): group for term, _, group in ordered.iter_terms_with_groups()}
+    assert after == before
 
 
 def test_canonical_order_supports_vertex_operators():

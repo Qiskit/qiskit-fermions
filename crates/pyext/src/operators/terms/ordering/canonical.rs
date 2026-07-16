@@ -33,8 +33,10 @@ use qiskit_fermions_core::operators::terms::ordering::canonical::canonical_order
 ///
 /// .. note::
 ///    Any group indices (see e.g.
-///    :attr:`~qiskit_fermions.operators.FermionOperator.groups`) are *not* preserved: the returned
-///    operator has no groups, since a canonical reordering does not respect group boundaries.
+///    :attr:`~qiskit_fermions.operators.FermionOperator.groups`) are preserved: each term carries
+///    its group index along as it moves, since a group index is a per-term tag independent of term
+///    order. Terms of the same group are simply no longer contiguous afterwards. If the input has
+///    no groups, neither does the result.
 ///
 /// .. doctest::
 ///

@@ -32,8 +32,10 @@ use qiskit_fermions_core::operators::terms::ordering::canonical::canonical_order
 /// left untouched — this only reorders them, it does not simplify or normal-order the operator.
 ///
 /// .. note::
-///    Any group indices (see :c:func:`qf_ferm_op_get_groups`) are *not* preserved: the returned
-///    operator has no groups, since a canonical reordering does not respect group boundaries.
+///    Any group indices (see :c:func:`qf_ferm_op_get_groups`) are preserved: each term carries its
+///    group index along as it moves, since a group index is a per-term tag independent of term
+///    order. Terms of the same group are simply no longer contiguous afterwards. If the input has
+///    no groups, neither does the result.
 ///
 /// .. code-block:: c
 ///     :linenos:
@@ -77,8 +79,10 @@ pub unsafe extern "C" fn qf_ferm_op_canonical_order(
 /// left untouched — this only reorders them, it does not simplify the operator.
 ///
 /// .. note::
-///    Any group indices (see :c:func:`qf_maj_op_get_groups`) are *not* preserved: the returned
-///    operator has no groups, since a canonical reordering does not respect group boundaries.
+///    Any group indices (see :c:func:`qf_maj_op_get_groups`) are preserved: each term carries its
+///    group index along as it moves, since a group index is a per-term tag independent of term
+///    order. Terms of the same group are simply no longer contiguous afterwards. If the input has
+///    no groups, neither does the result.
 ///
 /// @endrst
 #[unsafe(no_mangle)]
