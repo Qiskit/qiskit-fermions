@@ -28,9 +28,12 @@ crate::declare_operator_iters!(
     MajoranaOperatorDataIter,
     MajoranaOperatorDataGroupIter,
     "qiskit_fermions.operators.majorana_operator",
+    "qiskit_fermions._lib.operators.majorana_operator",
     "MajoranaOperatorDataIter",
     "MajoranaOperatorDataGroupIter",
-    PyMajoranaAction
+    PyMajoranaAction,
+    "tuple[list[int], complex]",
+    "tuple[list[int], complex, int]"
 );
 
 /// A Majorana fermion operator.
@@ -316,6 +319,7 @@ crate::declare_operator_iters!(
 ///
 /// .. [1] https://en.wikipedia.org/wiki/Majorana_fermion
 #[gen_stub_pyclass]
+#[gen_stub(module = "qiskit_fermions._lib.operators.majorana_operator")]
 #[pyclass(
     module = "qiskit_fermions.operators.majorana_operator",
     name = "MajoranaOperator",

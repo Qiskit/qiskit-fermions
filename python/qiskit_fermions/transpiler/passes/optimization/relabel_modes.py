@@ -22,10 +22,10 @@ from typing import TYPE_CHECKING, Any
 
 from qiskit import QuantumRegister
 
-from qiskit_fermions._lib.operators.fermion_operator import FermionOperator
 from qiskit_fermions.circuit import FermionicDAGCircuit, FermionicRegister
 from qiskit_fermions.circuit.library import Evolution
 from qiskit_fermions.mappers.optimization import build_excitation_span_minimization_model
+from qiskit_fermions.operators import FermionOperator
 from qiskit_fermions.utils.optionals import HAS_PYOMO
 
 from ... import FermionicDAGCircuitPass

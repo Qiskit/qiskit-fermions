@@ -38,6 +38,13 @@ The Python API documentation is structured as follows:
 - components implemented in the `pyext` Rust crate should write their docstrings directly there and
   expose them via the Python stub files (`.pyi`)
 
+The `.pyi` stub files are the *only* documentation surface for the compiled `pyext` components:
+since that code is native, the docstrings written in the Rust source are extracted by
+[`pyo3-stub-gen`](https://crates.io/crates/pyo3-stub-gen) into the stubs, from where Sphinx (and
+type checkers, and IDEs) read them. This is why the stubs must be regenerated whenever a `pyext`
+docstring changes — see [`tests/README.md`](../tests/README.md) for how they are generated,
+committed, and kept in sync.
+
 ## C
 
 The C API documentation gets parsed using [Doxygen](https://www.doxygen.nl/index.html) and then

@@ -104,17 +104,36 @@ macro_rules! impl_operator_magic_methods {
 /// same `__iter__`/`__next__` protocol; only the element (action) type and the registered
 /// module/class names differ. The struct idents are passed explicitly (rather than derived from
 /// a prefix) so they remain greppable and no `paste`-style token pasting is required.
+///
+/// `$module` is the *public* module path used for `#[pyclass(module = ...)]` (so runtime
+/// `__module__`/`repr` stay user-facing), while `$stub_module` is the *physical* `_lib` runtime
+/// path used for `#[gen_stub(module = ...)]` so the generated stub lands under
+/// `python/qiskit_fermions/_lib/**` (see `tests/README.md`, "Type stubs").
+///
+/// `$next_repr` and `$group_next_repr` are the Python return types of the two `__next__` methods
+/// (e.g. `"tuple[list[tuple[bool, int]], complex]"`), used to override what `pyo3-stub-gen`
+/// generates. `__next__` returns a Rust `Option` (whose `None` PyO3 turns into `StopIteration` at
+/// runtime — the iterator protocol never surfaces the `None` to Python), but the generator would
+/// mechanically render that as `typing.Optional[...]`, which makes `for term in op.iter_terms()` a
+/// type error for consumers. Overriding the stub to the non-`Optional` element type matches both
+/// typeshed's own `Iterator.__next__ -> T` convention and the actual runtime behaviour. They are
+/// passed as fully-formed literals (rather than `concat!`-ed from an element type) because the
+/// `#[gen_stub(override_return_type(...))]` attribute parser expects a plain string literal.
 #[macro_export]
 macro_rules! declare_operator_iters {
     (
         $iter:ident,
         $group_iter:ident,
         $module:literal,
+        $stub_module:literal,
         $name:literal,
         $group_name:literal,
-        $action:ty $(,)?
+        $action:ty,
+        $next_repr:literal,
+        $group_next_repr:literal $(,)?
     ) => {
         #[gen_stub_pyclass]
+        #[gen_stub(module = $stub_module)]
         #[pyclass(module = $module, name = $name)]
         struct $iter {
             inner: std::vec::IntoIter<(Vec<$action>, Complex64)>,
@@ -127,12 +146,14 @@ macro_rules! declare_operator_iters {
                 slf
             }
 
+            #[gen_stub(override_return_type(type_repr = $next_repr))]
             fn __next__(mut slf: PyRefMut<'_, Self>) -> Option<(Vec<$action>, Complex64)> {
                 slf.inner.next()
             }
         }
 
         #[gen_stub_pyclass]
+        #[gen_stub(module = $stub_module)]
         #[pyclass(module = $module, name = $group_name)]
         struct $group_iter {
             inner: std::vec::IntoIter<(Vec<$action>, Complex64, u32)>,
@@ -145,6 +166,7 @@ macro_rules! declare_operator_iters {
                 slf
             }
 
+            #[gen_stub(override_return_type(type_repr = $group_next_repr))]
             fn __next__(mut slf: PyRefMut<'_, Self>) -> Option<(Vec<$action>, Complex64, u32)> {
                 slf.inner.next()
             }

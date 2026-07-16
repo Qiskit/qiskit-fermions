@@ -12,8 +12,7 @@
 
 """The EdgeAction type."""
 
-from typing import NewType
+from typing import TypeAlias
 
-EdgeAction = NewType("EdgeAction", tuple[int, int])
-
-EdgeAction.__doc__ = """The EdgeAction type."""
+EdgeAction: TypeAlias = tuple[int, int]
+"""The EdgeAction type."""

@@ -15,19 +15,16 @@
 from __future__ import annotations
 
 import copy
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 import numpy as np
 
 from qiskit_fermions.circuit import FermionicDAGCircuit
 from qiskit_fermions.circuit.library import Evolution
+from qiskit_fermions.operators import FermionOperator
+from qiskit_fermions.operators.terms.filtering import filter_diagonal_terms
 
 from ... import FermionicDAGCircuitPass
-
-if TYPE_CHECKING:
-    from qiskit_fermions._lib.operators.terms.filtering import filter_diagonal_terms
-else:
-    from qiskit_fermions.operators.terms.filtering import filter_diagonal_terms
 
 
 class QDriftTrotterization(FermionicDAGCircuitPass):
@@ -73,7 +70,10 @@ class QDriftTrotterization(FermionicDAGCircuitPass):
                 affect the sampled bitstrings, so including them would only increase the sampling
                 overhead. This automates the manual filtering otherwise required when preparing a
                 Hamiltonian for SqDRIFT. The Hamiltonian is assumed to be normal-ordered. See also
-                :func:`~qiskit_fermions.operators.terms.filtering.filter_diagonal_terms`.
+                :func:`~qiskit_fermions.operators.terms.filtering.filter_diagonal_terms`. Because
+                diagonal-term filtering is defined in terms of fermionic number operators, it is
+                only supported for :class:`.Evolution` gates whose operator is a
+                :class:`.FermionOperator`; :meth:`run` raises :class:`TypeError` otherwise.
             rng: the random number generator (rng) to be used. When this is an ``int``, the internal
                 rng will be initialized with ``np.random.default_rng(seed=rng)``.
         """
@@ -102,6 +102,11 @@ class QDriftTrotterization(FermionicDAGCircuitPass):
 
         Returns:
             The output circuit which is still acting on a fermionic register.
+
+        Raises:
+            TypeError: if ``filter_diagonal_terms`` is ``True`` but an :class:`.Evolution` gate
+                carries an operator that is not a :class:`.FermionOperator` (diagonal-term filtering
+                is only defined for fermionic operators).
         """
         out_dag = dag.copy_empty_like()
 
@@ -115,6 +120,13 @@ class QDriftTrotterization(FermionicDAGCircuitPass):
             num_modes = len(node.qargs)
 
             if self.filter_diagonal_terms:
+                # Diagonal-term filtering is defined in terms of fermionic number operators, so it
+                # only applies to a `FermionOperator`; reject any other operator type up front.
+                if not isinstance(hamil, FermionOperator):
+                    raise TypeError(
+                        "filter_diagonal_terms=True is only supported for Evolution gates whose "
+                        f"operator is a FermionOperator, but got {type(hamil).__name__}."
+                    )
                 # Work on a copy so that the user's original operator (held by the Evolution gate)
                 # is left untouched. Filtering re-indexes any group information to a contiguous
                 # range, keeping the grouped branch below consistent.

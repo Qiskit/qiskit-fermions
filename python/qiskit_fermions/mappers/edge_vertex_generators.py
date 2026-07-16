@@ -14,20 +14,15 @@
 
 from collections.abc import Callable
 from operator import and_
-from typing import TYPE_CHECKING, TypeVar
 
-if TYPE_CHECKING:
-    from qiskit_fermions._lib.operators.edge_vertex_operator import (
-        EdgeVertexOperator,
-    )
-    from qiskit_fermions.operators.edge_action import EdgeAction
-
-T = TypeVar("T")
+from qiskit_fermions.mappers._typing import T
+from qiskit_fermions.operators import EdgeVertexOperator
+from qiskit_fermions.operators.edge_action import EdgeAction
 
 
 def map_edge_vertex_generators(
-    operator: "EdgeVertexOperator",
-    map_action: Callable[["EdgeAction"], T],
+    operator: EdgeVertexOperator,
+    map_action: Callable[[EdgeAction], T],
     identity: Callable[[], T],
     compose: Callable[[T, T], T] | None = None,
 ) -> T:
@@ -91,7 +86,7 @@ def map_edge_vertex_generators(
     if compose is None:
         compose = and_
 
-    mapped_operator: T = 0 * identity()  # type: ignore[assignment,operator]
+    mapped_operator: T = 0 * identity()
     for terms, coeff in operator.iter_terms():
         mapped_terms = identity()
 

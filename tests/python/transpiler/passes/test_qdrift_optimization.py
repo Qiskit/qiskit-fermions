@@ -17,9 +17,10 @@ from __future__ import annotations
 from pathlib import Path
 
 import numpy as np
+import pytest
 from qiskit_fermions.circuit import FermionicCircuit
 from qiskit_fermions.circuit.library import Evolution, InitializeModes
-from qiskit_fermions.operators import FermionOperator
+from qiskit_fermions.operators import FermionOperator, MajoranaOperator, gamma
 from qiskit_fermions.operators.library import FCIDump
 from qiskit_fermions.operators.terms.grouping import group_terms_by_electronic_structure
 from qiskit_fermions.transpiler.passes import QDriftTrotterization
@@ -167,6 +168,23 @@ def test_qdrift_optimization_filter_diagonal_terms():
     for instruction in qdrift_circ._inner.data:
         for term, _ in instruction.operation.operator.iter_terms():
             assert not _is_diagonal(term), "a diagonal term was sampled despite filtering"
+
+
+def test_qdrift_optimization_filter_diagonal_terms_rejects_non_fermion_operator():
+    """Diagonal-term filtering is only defined for fermionic number operators, so requesting it for
+    an Evolution gate carrying a non-FermionOperator must raise TypeError rather than passing the
+    wrong operator type into the fermion-specific filter."""
+    num_modes = 2
+    hamil = MajoranaOperator.from_dict({(gamma(0, False), gamma(1, False)): 1.0})
+
+    circ = FermionicCircuit(num_modes)
+    circ.append(Evolution(num_modes, hamil, time=1.5), circ.modes)
+
+    qdrift = QDriftTrotterization(5, filter_diagonal_terms=True, rng=42)
+    pm = FermionicPassManager(qdrift)
+
+    with pytest.raises(TypeError, match="only supported for Evolution gates"):
+        pm.run(circ)
 
 
 def test_qdrift_optimization_preserves_coefficient_sign():

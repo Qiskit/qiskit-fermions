@@ -113,7 +113,7 @@ fn dfab_term_from_py(
 /// Returns:
 ///     A list of :math:`(Z, U)` 2-tuples, where ``Z`` is the diagonal Coulomb matrix and ``U`` is
 ///     the orbital rotation.
-#[gen_stub_pyfunction(module = "qiskit_fermions.linalg.double_factorized")]
+#[gen_stub_pyfunction(module = "qiskit_fermions._lib.linalg.double_factorized")]
 #[pyfunction(name = "double_factorized_2body", signature = (two_body_tensor, tol, max_vecs=None, cholesky=true))]
 pub fn py_double_factorized_2body<'py>(
     py: Python<'py>,
@@ -147,7 +147,7 @@ pub fn py_double_factorized_2body<'py>(
 /// Returns:
 ///     A list of :math:`(Z, U)` 2-tuples, where ``Z`` is the diagonal Coulomb matrix and ``U`` is
 ///     the orbital rotation.
-#[gen_stub_pyfunction(module = "qiskit_fermions.linalg.double_factorized")]
+#[gen_stub_pyfunction(module = "qiskit_fermions._lib.linalg.double_factorized")]
 #[pyfunction(name = "double_factorized_t2", signature = (t2_amplitudes, tol, max_terms=None))]
 pub fn py_double_factorized_t2<'py>(
     py: Python<'py>,
@@ -173,7 +173,7 @@ pub fn py_double_factorized_t2<'py>(
 ///
 /// Returns:
 ///     The reconstructed :math:`t_2` amplitudes of shape ``(nocc, nocc, nvrt, nvrt)``.
-#[gen_stub_pyfunction(module = "qiskit_fermions.linalg.double_factorized")]
+#[gen_stub_pyfunction(module = "qiskit_fermions._lib.linalg.double_factorized")]
 #[pyfunction(name = "reconstruct_t2", signature = (terms, nocc))]
 pub fn py_reconstruct_t2<'py>(
     py: Python<'py>,
@@ -203,7 +203,7 @@ pub fn py_reconstruct_t2<'py>(
 ///
 ///     * a 3-tuple of the diagonal Coulomb matrices in the order ``(aa, ab, bb)``
 ///     * a 2-tuple of the orbital rotations in the order ``(alpha, beta)``
-#[gen_stub_pyfunction(module = "qiskit_fermions.linalg.double_factorized")]
+#[gen_stub_pyfunction(module = "qiskit_fermions._lib.linalg.double_factorized")]
 #[pyfunction(name = "double_factorized_t2_alpha_beta", signature = (t2_amplitudes, tol, max_terms=None))]
 pub fn py_double_factorized_t2_alpha_beta<'py>(
     py: Python<'py>,
@@ -230,7 +230,7 @@ pub fn py_double_factorized_t2_alpha_beta<'py>(
 /// Returns:
 ///     The reconstructed alpha-beta :math:`t_2` amplitudes of shape
 ///     ``(nocc_a, nocc_b, nvrt_a, nvrt_b)``.
-#[gen_stub_pyfunction(module = "qiskit_fermions.linalg.double_factorized")]
+#[gen_stub_pyfunction(module = "qiskit_fermions._lib.linalg.double_factorized")]
 #[pyfunction(name = "reconstruct_t2_alpha_beta", signature = (terms, norb, nocc_a, nocc_b))]
 pub fn py_reconstruct_t2_alpha_beta<'py>(
     py: Python<'py>,

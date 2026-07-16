@@ -14,18 +14,15 @@
 
 from collections.abc import Callable
 from operator import and_
-from typing import TYPE_CHECKING, TypeVar
 
-if TYPE_CHECKING:
-    from qiskit_fermions._lib.operators.majorana_operator import MajoranaOperator
-    from qiskit_fermions.operators.majorana_action import MajoranaAction
-
-T = TypeVar("T")
+from qiskit_fermions.mappers._typing import T
+from qiskit_fermions.operators import MajoranaOperator
+from qiskit_fermions.operators.majorana_action import MajoranaAction
 
 
 def map_majorana_action_generators(
-    operator: "MajoranaOperator",
-    map_action: Callable[["MajoranaAction"], T],
+    operator: MajoranaOperator,
+    map_action: Callable[[MajoranaAction], T],
     identity: Callable[[], T],
     compose: Callable[[T, T], T] | None = None,
 ) -> T:
@@ -83,7 +80,7 @@ def map_majorana_action_generators(
     if compose is None:
         compose = and_
 
-    mapped_operator: T = 0 * identity()  # type: ignore[assignment,operator]
+    mapped_operator: T = 0 * identity()
     for terms, coeff in operator.iter_terms():
         mapped_terms = identity()
 

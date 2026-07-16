@@ -62,7 +62,7 @@ use qiskit_fermions_core::operators::terms::filtering::diagonal::filter_diagonal
 ///
 /// Args:
 ///     op: the normal-ordered operator whose diagonal terms to filter out.
-#[gen_stub_pyfunction(module = "qiskit_fermions.operators.terms.filtering.diagonal")]
+#[gen_stub_pyfunction(module = "qiskit_fermions._lib.operators.operators_terms.filtering.diagonal")]
 #[pyfunction(name = "filter_diagonal_terms")]
 pub fn py_filter_diagonal_terms(op: &Bound<PyFermionOperator>) {
     filter_diagonal_terms(&mut op.borrow_mut().inner);
