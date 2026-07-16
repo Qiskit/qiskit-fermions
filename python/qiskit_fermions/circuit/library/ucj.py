@@ -134,7 +134,6 @@ class UCJ(FermionicGate):
         )
         """The optional final orbital rotation."""
 
-        self._spinless = isinstance(nelec, int)
         self._variant = self._infer_variant(norb)
         num_modes = norb if self._spinless else 2 * norb
 
@@ -150,6 +149,12 @@ class UCJ(FermionicGate):
             )
 
         super().__init__("UCJ", num_modes, [])
+
+    @property
+    def _spinless(self) -> bool:
+        """Whether this is a spinless system (integer ``nelec``, acting on ``norb`` modes)."""
+        # ``nelec`` is normalized to a plain ``int`` for the spinless case in ``__init__``.
+        return isinstance(self.nelec, int)
 
     @classmethod
     def from_t_amplitudes(
