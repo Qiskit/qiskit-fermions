@@ -413,6 +413,34 @@ class TestFermionOperator:
             op = cls.from_dict({((True, 0),): 1})
             assert not op.conserves_particle_number()
 
+    def test_conserves_sector(self, subtests):
+        cls = self.get_class()
+
+        with subtests.test("empty block_sizes matches conserves_particle_number"):
+            op = cls.from_dict({((True, 0), (False, 1)): 1})
+            assert op.conserves_sector([]) == op.conserves_particle_number()
+            op = cls.from_dict({((True, 0),): 1})
+            assert op.conserves_sector([]) == op.conserves_particle_number()
+
+        with subtests.test("spinless hop conserves single block"):
+            op = cls.from_dict({((True, 0), (False, 1)): 1})
+            assert op.conserves_sector([2])
+
+        with subtests.test("spin flip conserves number but not Sz split"):
+            # a†_0 a_2 moves a particle from the alpha block [0, 2) to the beta block [2, 4).
+            op = cls.from_dict({((True, 0), (False, 2)): 1})
+            assert op.conserves_particle_number()
+            assert op.conserves_sector([4])
+            assert not op.conserves_sector([2, 2])
+
+        with subtests.test("bare creation conserves nothing"):
+            op = cls.from_dict({((True, 2),): 1})
+            assert not op.conserves_sector([4])
+
+        with subtests.test("mode beyond the last block does not conserve"):
+            op = cls.from_dict({((True, 0), (False, 4)): 1})
+            assert not op.conserves_sector([2, 2])
+
     def test_commutator(self):
         cls = self.get_class()
 

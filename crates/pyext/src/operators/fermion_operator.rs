@@ -1048,6 +1048,38 @@ impl PyFermionOperator {
         self.inner.conserves_particle_number()
     }
 
+    /// Returns whether every term conserves particle number within each mode block.
+    ///
+    /// ``block_sizes`` partitions the mode range into consecutive, non-overlapping blocks: block
+    /// ``b`` spans modes ``[start_b, start_b + block_sizes[b])`` where ``start_b`` is the sum of the
+    /// preceding block sizes. A term conserves the sector if and only if, in *every* block, its
+    /// number of creation operators equals its number of annihilation operators. A term acting on a
+    /// mode beyond the final block does not conserve the sector.
+    ///
+    /// An empty ``block_sizes`` treats all modes as a single block, making this equivalent to
+    /// :meth:`conserves_particle_number`. A single block ``[norb]`` checks conservation for a
+    /// spinless FCI sector, while two equal blocks ``[norb, norb]`` check that the alpha modes
+    /// ``[0, norb)`` and beta modes ``[norb, 2 * norb)`` are each conserved -- i.e. conservation of
+    /// both particle number and the z-component of spin.
+    ///
+    /// .. doctest::
+    ///
+    ///     >>> from qiskit_fermions.operators import FermionOperator
+    ///     >>> op = FermionOperator.from_dict({((True, 0), (False, 2)): 1})
+    ///     >>> op.conserves_sector([4])  # one spinless block of 4 orbitals
+    ///     True
+    ///     >>> op.conserves_sector([2, 2])  # moves a particle from the alpha block to the beta block
+    ///     False
+    ///
+    /// Args:
+    ///     block_sizes: the sizes of the consecutive mode blocks that each must be conserved.
+    ///
+    /// Returns:
+    ///     Whether every term conserves particle number within each mode block.
+    fn conserves_sector(&self, block_sizes: Vec<u32>) -> bool {
+        self.inner.conserves_sector(&block_sizes)
+    }
+
     /// Returns a new operator with relabeled modes.
     ///
     /// .. doctest::
