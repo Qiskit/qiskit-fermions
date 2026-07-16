@@ -14,6 +14,7 @@
 
 from __future__ import annotations
 
+import numbers
 from typing import TYPE_CHECKING, Protocol, cast
 
 import numpy as np
@@ -164,6 +165,11 @@ class Evolution(FermionicGate):
                 spin), matching the fixed sector the kernel represents.
         """
         import scipy.sparse.linalg
+
+        # normalize a numpy integer (e.g. ``np.int64``) to a plain ``int`` so the spinless sector is
+        # classified correctly here and downstream (ffsim's kernels classify with ``isinstance(int)``)
+        if isinstance(nelec, numbers.Integral):
+            nelec = int(nelec)
 
         if copy:
             vec = vec.copy()

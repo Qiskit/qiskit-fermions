@@ -14,6 +14,8 @@
 
 from __future__ import annotations
 
+import numbers
+
 import numpy as np
 
 from qiskit_fermions.utils.optionals import HAS_FFSIM
@@ -151,6 +153,10 @@ class OrbitalRotation(FermionicGate):
             ValueError: if ``nelec`` is a spinful pair and the (placed) rotation mixes the alpha and
                 beta spin sectors.
         """
+        # normalize a numpy integer (e.g. ``np.int64``) to a plain ``int`` so the spinless sector is
+        # classified correctly here and downstream (ffsim's kernels classify with ``isinstance(int)``)
+        if isinstance(nelec, numbers.Integral):
+            nelec = int(nelec)
         num_modes = norb if isinstance(nelec, int) else 2 * norb
 
         # embed the local rotation onto its global modes: identity everywhere except the placed
@@ -181,7 +187,7 @@ class OrbitalRotation(FermionicGate):
         raises :class:`ValueError`. The result is also exactly the argument
         :func:`ffsim.apply_orbital_rotation` expects.
         """
-        if isinstance(nelec, int):
+        if isinstance(nelec, numbers.Integral):
             return full
 
         if np.any(full[:norb, norb:]) or np.any(full[norb:, :norb]):

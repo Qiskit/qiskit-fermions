@@ -51,6 +51,22 @@ def test_initialize_modes_apply_unitary_spinless_matches_ffsim():
     np.testing.assert_allclose(result, expected, atol=1e-12)
 
 
+def test_initialize_modes_apply_unitary_accepts_numpy_int_nelec():
+    """A numpy-integer (e.g. ``np.int64``) spinless nelec is treated as spinless, matching ``int``.
+
+    A numpy scalar is not a Python ``int``, so a naive ``isinstance(nelec, int)`` check would route
+    it to the spinful branch and fail to unpack it as a ``(n_alpha, n_beta)`` pair. The seed must
+    match the plain-``int`` spinless path.
+    """
+    norb = 5
+    occupation = [True, False, True, False, False]  # orbitals 0 and 2 occupied
+
+    expected = InitializeModes(occupation)._apply_unitary_(None, norb, 2, copy=True)
+    result = InitializeModes(occupation)._apply_unitary_(None, norb, np.int64(2), copy=True)
+
+    np.testing.assert_array_equal(result, expected)
+
+
 def test_initialize_modes_apply_unitary_vec_none_seeds_from_nothing():
     """The vec=None path produces the determinant for both spinful and spinless systems."""
     # spinful

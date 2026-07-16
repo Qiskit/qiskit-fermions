@@ -92,6 +92,38 @@ def test_ucj_spinless_on_spinless_sector_matches_ffsim():
     np.testing.assert_allclose(result, expected, atol=1e-10)
 
 
+def test_ucj_gate_accepts_numpy_int_nelec():
+    """A UCJ built with a numpy-integer (e.g. ``np.int64``) spinless nelec matches the ``int`` build.
+
+    A numpy scalar is not a Python ``int``, so a naive ``isinstance(nelec, int)`` check would infer
+    the spinful variant, build the wrong (aa/ab/bb) diagonal-Coulomb layer, and crash inside ffsim's
+    own ``isinstance(int)`` classification. The applied state must match the plain-``int`` build.
+    """
+    norb = 4
+    ucj_op = ffsim.random.random_ucj_op_spinless(
+        norb, n_reps=2, with_final_orbital_rotation=True, seed=5
+    )
+
+    def build(nelec):
+        return UCJ(
+            norb,
+            nelec,
+            ucj_op.diag_coulomb_mats,
+            ucj_op.orbital_rotations,
+            final_orbital_rotation=ucj_op.final_orbital_rotation,
+        )
+
+    gate_int = build(2)
+    gate_np = build(np.int64(2))
+    assert gate_int._spinless and gate_np._spinless
+    assert gate_int._variant == gate_np._variant == "spinless"
+
+    # the two builds are mathematically identical; they may differ only at floating-point rounding
+    expected = gate_int._apply_unitary_(None, norb, 2, copy=True)
+    result = gate_np._apply_unitary_(None, norb, np.int64(2), copy=True)
+    np.testing.assert_allclose(result, expected, atol=1e-12)
+
+
 def test_ucj_gate_apply_unitary_seeds_from_none():
     """The bare gate's _apply_unitary_ seeds the reference from a None vector and matches ffsim."""
     norb = 4

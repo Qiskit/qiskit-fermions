@@ -190,6 +190,24 @@ def test_orbital_rotation_apply_unitary_spinless_matches_oracle():
     np.testing.assert_array_equal(vec0, vec0_before)
 
 
+def test_orbital_rotation_apply_unitary_accepts_numpy_int_nelec():
+    """A numpy-integer (e.g. ``np.int64``) spinless nelec is treated as spinless, matching ``int``.
+
+    A numpy scalar is not a Python ``int``, so a naive ``isinstance(nelec, int)`` check would route
+    it to the spinful branch and crash inside ffsim's own ``isinstance(int)`` classification. The
+    result must match the plain-``int`` spinless path.
+    """
+    norb = 5
+    rot = random_unitary(norb, seed=3)
+    rng = np.random.default_rng(0)
+    vec0 = rng.standard_normal(10) + 1j * rng.standard_normal(10)
+
+    expected = OrbitalRotation(rot)._apply_unitary_(vec0.copy(), norb, 2, copy=True)
+    result = OrbitalRotation(rot)._apply_unitary_(vec0.copy(), norb, np.int64(2), copy=True)
+
+    np.testing.assert_array_equal(result, expected)
+
+
 def test_orbital_rotation_apply_unitary_matches_ffsim():
     """The spinful and spinless paths agree with ffsim.apply_orbital_rotation directly."""
     norb = 3

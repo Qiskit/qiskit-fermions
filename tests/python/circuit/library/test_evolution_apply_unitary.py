@@ -208,6 +208,36 @@ def test_evolution_apply_unitary_spinless_matches_exact_diagonalization():
     np.testing.assert_array_equal(vec0, vec0_before)
 
 
+def test_evolution_apply_unitary_accepts_numpy_int_nelec():
+    """A numpy-integer (e.g. ``np.int64``) spinless nelec is treated as spinless, matching ``int``.
+
+    A numpy scalar is not a Python ``int``; a naive ``isinstance(nelec, int)`` check would route it
+    to the spinful branch, splitting the conservation check into two spin blocks and disagreeing with
+    the native (spinless) kernel it feeds. The result must match the plain-``int`` spinless path.
+    """
+    norb = 5
+    nelec = 2  # spinless: C(5, 2) = 10
+    time = 0.37
+    terms = {
+        ((True, 0), (False, 1)): 0.7 + 0.2j,
+        ((True, 1), (False, 0)): 0.7 - 0.2j,
+        ((True, 2), (False, 2)): 0.5,
+    }
+    hamil = FermionOperator.from_dict(terms)
+
+    rng = np.random.default_rng(0)
+    vec0 = rng.standard_normal(10) + 1j * rng.standard_normal(10)
+
+    expected = Evolution(norb, hamil, time=time)._apply_unitary_(
+        vec0.copy(), norb, nelec, copy=True
+    )
+    result = Evolution(norb, hamil, time=time)._apply_unitary_(
+        vec0.copy(), norb, np.int64(nelec), copy=True
+    )
+
+    np.testing.assert_array_equal(result, expected)
+
+
 def test_evolution_apply_unitary_rejects_non_conserving_operator():
     """A term that leaves the (norb, nelec) sector is rejected rather than silently projected."""
     norb = 2

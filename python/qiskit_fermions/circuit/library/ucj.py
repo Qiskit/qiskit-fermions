@@ -14,6 +14,7 @@
 
 from __future__ import annotations
 
+import numbers
 from collections.abc import Sequence
 from typing import TYPE_CHECKING, cast
 
@@ -113,6 +114,11 @@ class UCJ(FermionicGate):
             ValueError: if the tensor shapes are inconsistent with each other, with ``norb``, or
                 with ``nelec``.
         """
+        # normalize a numpy integer (e.g. ``np.int64``) to a plain ``int`` so the spinless sector is
+        # classified correctly here and downstream (ffsim's kernels classify with ``isinstance(int)``)
+        if isinstance(nelec, numbers.Integral):
+            nelec = int(nelec)
+
         self.norb = norb
         """The number of spatial orbitals."""
         self.nelec = nelec
@@ -596,7 +602,7 @@ class UCJ(FermionicGate):
         mat_aa, mat_ab, mat_bb = self._resolve_diag_coulomb_blocks(diag_coulomb_mat)
 
         # a true spinless system has only the aa block on the norb spinless modes
-        if self._spinless and isinstance(self.nelec, int):
+        if self._spinless:
             blocks = {(0, 0): mat_aa}
         else:
             blocks = {(0, 0): mat_aa, (0, 1): mat_ab, (1, 0): mat_ab.T, (1, 1): mat_bb}
