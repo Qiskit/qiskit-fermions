@@ -14,9 +14,12 @@
 
 from __future__ import annotations
 
-from typing import cast
+from typing import TYPE_CHECKING, cast
 
 from qiskit.circuit import Gate
+
+if TYPE_CHECKING:
+    import numpy as np
 
 
 class FermionicGate(Gate):
@@ -51,3 +54,27 @@ class FermionicGate(Gate):
     def num_modes(self) -> int:
         """The number of fermionic modes that this gate acts upon."""
         return cast(int, self._num_qubits)
+
+    def _apply_unitary_(
+        self, vec: np.ndarray | None, norb: int, nelec: int | tuple[int, int], copy: bool
+    ) -> np.ndarray:
+        """Applies this gate to an ffsim state vector, implementing ffsim's protocol.
+
+        This is the identity-placement entry point of ffsim's ``SupportsApplyUnitary`` protocol: it
+        assumes the gate acts on the modes ``0..num_modes`` of the state vector and delegates to the
+        placement-aware :meth:`_apply_unitary_placed_`, which every concrete fermionic gate implements.
+        See that method for the semantics of ``vec`` (including whether a ``None`` vector is accepted),
+        ``norb``, ``nelec``, and ``copy``.
+
+        Raises:
+            NotImplementedError: if this gate does not implement ``_apply_unitary_placed_`` (a bare
+                :class:`.FermionicGate` used only as a type marker), and therefore cannot be applied to
+                a state vector.
+        """
+        placed = getattr(self, "_apply_unitary_placed_", None)
+        if placed is None:
+            raise NotImplementedError(
+                f"'{type(self).__name__}' does not implement '_apply_unitary_placed_' and so cannot "
+                "be applied to a state vector via ffsim's SupportsApplyUnitary protocol."
+            )
+        return placed(vec, norb, nelec, copy, list(range(self.num_modes)))

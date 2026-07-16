@@ -40,18 +40,36 @@ class _PlainProtocolGate(FermionicGate):
 
 
 def test_apply_unitary_raises_when_instruction_lacks_protocol():
-    """A circuit instruction that does not implement the protocol raises TypeError."""
+    """A bare FermionicGate cannot be applied to a state vector and raises a clear error.
+
+    A bare :class:`.FermionicGate` (a type marker) does not implement ``_apply_unitary_placed_``. It
+    does inherit the base ``_apply_unitary_`` -- the identity-placement delegator -- but that method
+    refuses, with a ``NotImplementedError`` naming the offending gate, rather than failing obscurely
+    when it finds nothing to delegate to.
+    """
     norb = 2
     nelec = (1, 1)
 
-    # a bare FermionicGate implements neither _apply_unitary_placed_ nor _apply_unitary_
     circ = FermionicCircuit(2 * norb)
     circ.append(FermionicGate("dummy", 2), [circ.modes[0], circ.modes[1]])
 
     vec0 = ffsim.slater_determinant(norb, ([0], [0]))
 
-    with pytest.raises(TypeError, match="does not implement"):
+    with pytest.raises(NotImplementedError, match="does not implement '_apply_unitary_placed_'"):
         circ._apply_unitary_(vec0, norb, nelec, copy=True)
+
+
+def test_bare_fermionic_gate_apply_unitary_raises_directly():
+    """Calling the inherited ``_apply_unitary_`` on a bare gate refuses with a clear error.
+
+    The base :meth:`.FermionicGate._apply_unitary_` is the identity-placement delegator shared by all
+    concrete gates; on a bare gate (no ``_apply_unitary_placed_`` to delegate to) it must raise a
+    ``NotImplementedError`` naming the gate rather than an obscure ``AttributeError``.
+    """
+    norb = 2
+    vec0 = ffsim.slater_determinant(norb, ([0], [0]))
+    with pytest.raises(NotImplementedError, match="'FermionicGate' does not implement"):
+        FermionicGate("dummy", 2 * norb)._apply_unitary_(vec0, norb, (1, 1), copy=True)
 
 
 def test_apply_unitary_raises_when_instruction_declines():

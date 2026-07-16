@@ -537,16 +537,6 @@ class UCJ(FermionicGate):
             occ[norb + i] = True
         return occ
 
-    def _apply_unitary_(
-        self, vec: np.ndarray | None, norb: int, nelec: int | tuple[int, int], copy: bool
-    ) -> np.ndarray:
-        """Applies the ansatz to an ffsim state vector, implementing ffsim's protocol.
-
-        See :meth:`_apply_unitary_placed_` for the details; this method assumes the gate acts on the
-        modes ``0..num_modes`` of the state vector (i.e. an identity mode placement).
-        """
-        return self._apply_unitary_placed_(vec, norb, nelec, copy, list(range(self.num_modes)))
-
     def _apply_unitary_placed_(
         self,
         vec: np.ndarray | None,

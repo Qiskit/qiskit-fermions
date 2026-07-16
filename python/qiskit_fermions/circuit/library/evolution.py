@@ -114,17 +114,6 @@ class Evolution(FermionicGate):
 
         self._definition = definition._inner
 
-    def _apply_unitary_(
-        self, vec: np.ndarray, norb: int, nelec: int | tuple[int, int], copy: bool
-    ) -> np.ndarray:
-        """Applies this gate's ``exp(-i * time * operator)`` to an ffsim state vector.
-
-        This implements ffsim's ``SupportsApplyUnitary`` protocol. See
-        :meth:`_apply_unitary_placed_` for the details; this method assumes the gate's operator is
-        already expressed in the space defined by ``(norb, nelec)`` (i.e. an identity mode placement).
-        """
-        return self._apply_unitary_placed_(vec, norb, nelec, copy, list(range(self.num_modes)))
-
     def _apply_unitary_placed_(
         self,
         vec: np.ndarray,
