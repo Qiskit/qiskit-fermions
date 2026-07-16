@@ -332,7 +332,7 @@ impl From<MajoranaOperator> for PyMajoranaOperator {
     }
 }
 
-crate::impl_operator_magic_methods!(PyMajoranaOperator);
+crate::impl_operator_magic_methods!(PyMajoranaOperator, "MajoranaOperator");
 
 #[gen_stub_pymethods]
 #[pymethods]
@@ -483,10 +483,6 @@ impl PyMajoranaOperator {
         self.inner.get_support()
     }
 
-    fn __deepcopy__(&self, _memo: &Bound<'_, PyAny>) -> Self {
-        self.clone()
-    }
-
     fn __richcmp__(&self, other: &Self, op: CompareOp, _py: Python<'_>) -> PyResult<bool> {
         let eq = self.inner.coeffs == other.inner.coeffs
             && self.inner.modes == other.inner.modes
@@ -515,10 +511,6 @@ impl PyMajoranaOperator {
             "MajoranaOperator.from_dict({{{}}})",
             items_str.join(", ")
         ))
-    }
-
-    fn __str__(&self) -> PyResult<String> {
-        Ok(format!("<MajoranaOperator with {} terms>", self.__len__()))
     }
 
     fn __format__(&self, _format_spec: &str) -> PyResult<String> {
@@ -571,17 +563,6 @@ impl PyMajoranaOperator {
     #[classmethod]
     fn one(_cls: &Bound<'_, PyType>) -> Self {
         MajoranaOperator::one().into()
-    }
-
-    fn __len__(&self) -> usize {
-        self.inner.boundaries.len() - 1
-    }
-
-    fn __pow__(&self, exponent: u32, modulo: Option<u32>) -> PyResult<Self> {
-        match modulo {
-            Some(_) => Err(PyNotImplementedError::new_err("mod argument not supported")),
-            None => Ok(self.inner.__pow__(exponent as usize).into()),
-        }
     }
 
     /// Returns an equivalent but simplified operator.

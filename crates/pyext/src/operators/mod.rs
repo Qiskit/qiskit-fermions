@@ -14,7 +14,7 @@ use pyo3::prelude::*;
 
 #[macro_export]
 macro_rules! impl_operator_magic_methods {
-    ($name:ty) => {
+    ($name:ty, $py_name:literal) => {
         #[gen_stub_pymethods]
         #[pymethods]
         impl $name {
@@ -72,6 +72,27 @@ macro_rules! impl_operator_magic_methods {
 
             fn __imatmul__(&mut self, other: &Self) {
                 self.inner.__imatmul__(&other.inner);
+            }
+
+            fn __len__(&self) -> usize {
+                self.inner.boundaries.len() - 1
+            }
+
+            fn __deepcopy__(&self, _memo: &Bound<'_, PyAny>) -> Self {
+                self.clone()
+            }
+
+            fn __pow__(&self, exponent: u32, modulo: Option<u32>) -> PyResult<Self> {
+                match modulo {
+                    Some(_) => Err(::pyo3::exceptions::PyNotImplementedError::new_err(
+                        "mod argument not supported",
+                    )),
+                    None => Ok(self.inner.__pow__(exponent as usize).into()),
+                }
+            }
+
+            fn __str__(&self) -> PyResult<String> {
+                Ok(format!("<{} with {} terms>", $py_name, self.__len__()))
             }
         }
     };

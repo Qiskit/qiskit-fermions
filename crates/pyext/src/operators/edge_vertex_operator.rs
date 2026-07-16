@@ -368,7 +368,7 @@ impl From<EdgeVertexOperator> for PyEdgeVertexOperator {
     }
 }
 
-crate::impl_operator_magic_methods!(PyEdgeVertexOperator);
+crate::impl_operator_magic_methods!(PyEdgeVertexOperator, "EdgeVertexOperator");
 
 #[gen_stub_pymethods]
 #[pymethods]
@@ -554,10 +554,6 @@ impl PyEdgeVertexOperator {
         self.inner.get_support()
     }
 
-    fn __deepcopy__(&self, _memo: &Bound<'_, PyAny>) -> Self {
-        self.clone()
-    }
-
     fn __richcmp__(&self, other: &Self, op: CompareOp, _py: Python<'_>) -> PyResult<bool> {
         let eq = self.inner.coeffs == other.inner.coeffs
             && self.inner.left_indices == other.inner.left_indices
@@ -591,13 +587,6 @@ impl PyEdgeVertexOperator {
         Ok(format!(
             "EdgeVertexOperator.from_dict({{{}}})",
             items_str.join(", ")
-        ))
-    }
-
-    fn __str__(&self) -> PyResult<String> {
-        Ok(format!(
-            "<EdgeVertexOperator with {} terms>",
-            self.__len__()
         ))
     }
 
@@ -657,17 +646,6 @@ impl PyEdgeVertexOperator {
     #[classmethod]
     fn one(_cls: &Bound<'_, PyType>) -> Self {
         EdgeVertexOperator::one().into()
-    }
-
-    fn __len__(&self) -> usize {
-        self.inner.boundaries.len() - 1
-    }
-
-    fn __pow__(&self, exponent: u32, modulo: Option<u32>) -> PyResult<Self> {
-        match modulo {
-            Some(_) => Err(PyNotImplementedError::new_err("mod argument not supported")),
-            None => Ok(self.inner.__pow__(exponent as usize).into()),
-        }
     }
 
     /// Returns an equivalent but simplified operator.
