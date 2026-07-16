@@ -117,6 +117,34 @@ def test_apply_unitary_empty_circuit_with_vec_returns_it():
     np.testing.assert_array_equal(result, vec0)
 
 
+def test_apply_unitary_transform_first_gate_with_none_vec_raises_clean_error():
+    """A transform-only first instruction fed ``vec=None`` raises a clear ValueError, not an opaque one.
+
+    A ``None`` incoming vector is only meaningful for a state-*producing* first instruction. A
+    transform-only gate has nothing to act on and, left unguarded, fails deep inside its numerics
+    with an opaque ``AttributeError`` on the ``None``. The walk must instead raise a ``ValueError``
+    naming the offending instruction, as the ``_apply_unitary_`` docstring promises.
+    """
+
+    class _TransformOnlyGate(FermionicGate):
+        """A transform-only gate that touches ``vec.shape`` -- the exact failure mode of the real
+        transform gates (Evolution/OrbitalRotation), which raise ``AttributeError`` on a None vec."""
+
+        def __init__(self, num_modes):
+            super().__init__("transform", num_modes)
+
+        def _apply_unitary_(self, vec, norb, nelec, copy):
+            return np.zeros(vec.shape, dtype=complex)  # AttributeError when vec is None
+
+    norb = 2
+    nelec = (1, 1)
+    circ = FermionicCircuit(2 * norb)
+    circ.append(_TransformOnlyGate(2 * norb), circ.modes)  # identity placement, transform-only
+
+    with pytest.raises(ValueError, match="cannot seed a state from a None vector"):
+        circ._apply_unitary_(None, norb, nelec, copy=True)
+
+
 def test_apply_unitary_accepts_plain_protocol_gate_on_identity_placement():
     """A plain-``_apply_unitary_`` gate on the identity placement ``[0, 1, ...]`` is applied as-is.
 

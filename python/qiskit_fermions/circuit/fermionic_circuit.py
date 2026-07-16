@@ -224,7 +224,9 @@ class FermionicCircuit:
             # absolute modes; fall back to the plain protocol method otherwise
             placed_method = getattr(instr, "_apply_unitary_placed_", None)
             if placed_method is not None:
-                result = placed_method(vec, norb, nelec, False, node_freg_indices)
+                result = self._call_apply_unitary(
+                    instr, placed_method, vec, norb, nelec, False, node_freg_indices
+                )
             else:
                 method = getattr(instr, "_apply_unitary_", None)
                 if method is None:
@@ -246,7 +248,7 @@ class FermionicCircuit:
                         f"{list(range(len(node.qargs)))}; implement '_apply_unitary_placed_' to "
                         "support subset placement."
                     )
-                result = method(vec, norb, nelec, False)
+                result = self._call_apply_unitary(instr, method, vec, norb, nelec, False)
 
             if result is NotImplemented:
                 raise ValueError(
@@ -266,3 +268,25 @@ class FermionicCircuit:
             )
 
         return vec
+
+    @staticmethod
+    def _call_apply_unitary(instr, method, vec, *args):
+        """Invokes an instruction's apply-unitary method, clarifying the ``vec is None`` failure.
+
+        A ``None`` incoming vector is only meaningful for a state-*producing* first instruction (e.g.
+        :class:`.InitializeModes`); a transform-only instruction (an :class:`.Evolution`, an
+        :class:`.OrbitalRotation`, ...) has no state to act on and fails deep inside ffsim/scipy with
+        an opaque ``AttributeError`` on the ``None``. Translate that into the clean ``ValueError`` the
+        ``_apply_unitary_``/``_apply_unitary_placed_`` docstrings promise, naming the instruction.
+        """
+        try:
+            return method(vec, *args)
+        except AttributeError as exc:
+            if vec is None:
+                raise ValueError(
+                    f"Circuit instruction of type '{type(instr)}' cannot seed a state from a None "
+                    "vector: it only transforms an incoming state. A None vector requires the "
+                    "circuit's first instruction to be a state producer (e.g. InitializeModes), or "
+                    "pass an explicit state vector for the circuit to act on."
+                ) from exc
+            raise
