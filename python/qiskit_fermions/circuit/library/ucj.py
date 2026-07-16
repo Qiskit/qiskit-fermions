@@ -491,9 +491,8 @@ class UCJ(FermionicGate):
                 f"An integer nelec selects the spinless variant, but the tensor shapes imply the "
                 f"{variant} variant."
             )
-        if not self._spinless and variant == "spinless":
-            # a spinless operator applied to a spinful sector is allowed (see class docstring)
-            pass
+        # note: the converse (a spinless operator applied to a spinful sector) is allowed and needs
+        # no branch here -- see the class docstring's spinless variant.
 
         return variant
 
