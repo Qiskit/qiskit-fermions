@@ -323,3 +323,41 @@ def test_ucj_from_t_amplitudes_unbalanced_matches_ffsim():
     gate = UCJ.from_t_amplitudes(nelec, ccsd.t2, t1=ccsd.t1, variant="unbalanced")
     result = ffsim.apply_unitary(reference, gate._build_definition(), norb=norb, nelec=nelec)
     np.testing.assert_allclose(result, expected, atol=1e-10)
+
+
+def test_ucj_from_t_amplitudes_unbalanced_with_same_spin_terms_matches_ffsim():
+    """UCJ.from_t_amplitudes (unbalanced) matches ffsim when the aa/bb blocks factorize non-trivially.
+
+    The OH/sto-3g system used above happens to have same-spin (aa/bb) blocks that factorize to zero
+    terms, so it never exercises ``_assemble_same_spin_unbalanced``. Here we use synthetic UCCSD-shaped
+    ``(t2aa, t2ab, t2bb)`` amplitudes with genuine same-spin correlation, which the double
+    factorization turns into complex same-spin orbital rotations. The rotation buffer must be complex:
+    truncating the imaginary part makes the rotations non-unitary and collapses the state norm.
+    """
+    rng = np.random.default_rng(1234)
+    nocc_a, nocc_b, nvrt_a, nvrt_b = 2, 1, 2, 3
+    norb = nocc_a + nvrt_a  # == nocc_b + nvrt_b == 4
+    nelec = (nocc_a, nocc_b)
+
+    def _rand(shape):
+        return rng.standard_normal(shape) + 0j
+
+    t2aa = _rand((nocc_a, nocc_a, nvrt_a, nvrt_a))
+    t2ab = _rand((nocc_a, nocc_b, nvrt_a, nvrt_b))
+    t2bb = _rand((nocc_b, nocc_b, nvrt_b, nvrt_b))
+    # UCCSD same-spin amplitudes are antisymmetric under occupied and virtual exchange
+    t2aa = t2aa - t2aa.transpose(1, 0, 2, 3)
+    t2aa = t2aa - t2aa.transpose(0, 1, 3, 2)
+    t2bb = t2bb - t2bb.transpose(1, 0, 2, 3)
+    t2bb = t2bb - t2bb.transpose(0, 1, 3, 2)
+    t2 = (t2aa, t2ab, t2bb)
+
+    reference = ffsim.hartree_fock_state(norb, nelec)
+    ucj_op = ffsim.UCJOpSpinUnbalanced.from_t_amplitudes(t2)
+    expected = ffsim.apply_unitary(reference, ucj_op, norb=norb, nelec=nelec)
+
+    gate = UCJ.from_t_amplitudes(nelec, t2, variant="unbalanced")
+    result = ffsim.apply_unitary(reference, gate._build_definition(), norb=norb, nelec=nelec)
+
+    np.testing.assert_allclose(np.linalg.norm(result), 1.0, atol=1e-10)
+    np.testing.assert_allclose(result, expected, atol=1e-10)

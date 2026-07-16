@@ -372,10 +372,18 @@ class UCJ(FermionicGate):
         """Combines separate aa and bb same-spin factorizations into stacked unbalanced tensors."""
         n = max(len(aa_terms), len(bb_terms))
         dc = np.zeros((n, 3, norb, norb))
+        # The rotations are generically complex (``double_factorized_t2`` returns complex ``U``
+        # even for real ``t2``); allocate complex so the in-place assignments below don't
+        # silently truncate the imaginary part and produce non-unitary rotations.
         rot = (
-            np.stack([np.stack([np.eye(norb), np.eye(norb)]) for _ in range(n)])
+            np.stack(
+                [
+                    np.stack([np.eye(norb, dtype=complex), np.eye(norb, dtype=complex)])
+                    for _ in range(n)
+                ]
+            )
             if n
-            else np.empty((0, 2, norb, norb))
+            else np.empty((0, 2, norb, norb), dtype=complex)
         )
         for k in range(len(aa_terms)):
             dc[k, 0] = aa_terms[k][0]
