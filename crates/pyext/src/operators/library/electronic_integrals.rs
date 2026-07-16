@@ -71,9 +71,7 @@ impl PyFermionOperator {
         one_body_a: PyReadonlyArray1<f64>,
         norb: u32,
     ) -> Self {
-        Self {
-            inner: FermionOperator::from_1body_tril_spin_sym(one_body_a.as_array(), norb),
-        }
+        FermionOperator::from_1body_tril_spin_sym(one_body_a.as_array(), norb).into()
     }
 
     /// Constructs an operator from separate spin-species triangular 1-body integrals.
@@ -132,13 +130,8 @@ impl PyFermionOperator {
         one_body_b: PyReadonlyArray1<f64>,
         norb: u32,
     ) -> Self {
-        Self {
-            inner: FermionOperator::from_1body_tril_spin(
-                one_body_a.as_array(),
-                one_body_b.as_array(),
-                norb,
-            ),
-        }
+        FermionOperator::from_1body_tril_spin(one_body_a.as_array(), one_body_b.as_array(), norb)
+            .into()
     }
 
     /// Constructs an operator from spin-symmetric triangular 2-body integrals.
@@ -199,9 +192,7 @@ impl PyFermionOperator {
         two_body_aa: PyReadonlyArray1<f64>,
         norb: u32,
     ) -> Self {
-        Self {
-            inner: FermionOperator::from_2body_tril_spin_sym(two_body_aa.as_array(), norb),
-        }
+        FermionOperator::from_2body_tril_spin_sym(two_body_aa.as_array(), norb).into()
     }
 
     /// Constructs an operator from separate spin-species triangular 2-body integrals.
@@ -278,13 +269,12 @@ impl PyFermionOperator {
         two_body_bb: PyReadonlyArray1<f64>,
         norb: u32,
     ) -> Self {
-        Self {
-            inner: FermionOperator::from_2body_tril_spin(
-                two_body_aa.as_array(),
-                two_body_ab.as_array(),
-                two_body_bb.as_array(),
-                norb,
-            ),
-        }
+        FermionOperator::from_2body_tril_spin(
+            two_body_aa.as_array(),
+            two_body_ab.as_array(),
+            two_body_bb.as_array(),
+            norb,
+        )
+        .into()
     }
 }

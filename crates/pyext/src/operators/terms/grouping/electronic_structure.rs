@@ -11,7 +11,7 @@
 // that they have been altered from the originals.
 
 use crate::operators::fermion_operator::PyFermionOperator;
-use pyo3::{exceptions::PyValueError, prelude::*};
+use pyo3::prelude::*;
 use pyo3_stub_gen::derive::*;
 use qiskit_fermions_core::operators::terms::grouping::electronic_structure::group_terms_by_electronic_structure;
 
@@ -72,15 +72,12 @@ pub fn py_group_terms_by_electronic_structure(
     num_modes: u32,
     two_body_physicist_order: bool,
 ) -> PyResult<()> {
-    let res = group_terms_by_electronic_structure(
+    group_terms_by_electronic_structure(
         &mut op.borrow_mut().inner,
         num_modes,
         two_body_physicist_order,
-    );
-    match res {
-        Ok(_) => Ok(()),
-        Err(e) => Err(PyValueError::new_err(e.to_string())),
-    }
+    )
+    .map_err(crate::value_err)
 }
 
 #[pymodule]

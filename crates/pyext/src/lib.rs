@@ -10,12 +10,21 @@
 // copyright notice, and modified files need to carry a notice indicating
 // that they have been altered from the originals.
 
+use std::fmt::Display;
+
 use pyo3::prelude::*;
 use pyo3_stub_gen::{Result, StubGenConfig, StubInfo};
 
 pub mod linalg;
 pub mod mappers;
 pub mod operators;
+
+/// Converts any displayable error into a [`PyValueError`](pyo3::exceptions::PyValueError).
+///
+/// Handy as a `.map_err(crate::value_err)` argument when surfacing a core error to Python.
+pub(crate) fn value_err<E: Display>(e: E) -> PyErr {
+    ::pyo3::exceptions::PyValueError::new_err(e.to_string())
+}
 
 #[pymodule]
 mod _lib {

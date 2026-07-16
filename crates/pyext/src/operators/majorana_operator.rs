@@ -13,7 +13,6 @@
 use std::collections::HashSet;
 
 use num_complex::Complex64;
-use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
 use pyo3::types::PyType;
 use pyo3::{class::basic::CompareOp, exceptions::PyNotImplementedError};
@@ -25,47 +24,14 @@ use qiskit_fermions_core::operators::{OperatorMacro, OperatorTrait};
 
 pub type PyMajoranaAction = u32;
 
-#[gen_stub_pyclass]
-#[pyclass(
-    module = "qiskit_fermions.operators.majorana_operator",
-    name = "MajoranaOperatorDataIter"
-)]
-struct MajoranaOperatorDataIter {
-    inner: std::vec::IntoIter<(Vec<PyMajoranaAction>, Complex64)>,
-}
-
-#[gen_stub_pymethods]
-#[pymethods]
-impl MajoranaOperatorDataIter {
-    fn __iter__(slf: PyRef<'_, Self>) -> PyRef<'_, Self> {
-        slf
-    }
-
-    fn __next__(mut slf: PyRefMut<'_, Self>) -> Option<(Vec<PyMajoranaAction>, Complex64)> {
-        slf.inner.next()
-    }
-}
-
-#[gen_stub_pyclass]
-#[pyclass(
-    module = "qiskit_fermions.operators.majorana_operator",
-    name = "MajoranaOperatorDataGroupIter"
-)]
-struct MajoranaOperatorDataGroupIter {
-    inner: std::vec::IntoIter<(Vec<PyMajoranaAction>, Complex64, u32)>,
-}
-
-#[gen_stub_pymethods]
-#[pymethods]
-impl MajoranaOperatorDataGroupIter {
-    fn __iter__(slf: PyRef<'_, Self>) -> PyRef<'_, Self> {
-        slf
-    }
-
-    fn __next__(mut slf: PyRefMut<'_, Self>) -> Option<(Vec<PyMajoranaAction>, Complex64, u32)> {
-        slf.inner.next()
-    }
-}
+crate::declare_operator_iters!(
+    MajoranaOperatorDataIter,
+    MajoranaOperatorDataGroupIter,
+    "qiskit_fermions.operators.majorana_operator",
+    "MajoranaOperatorDataIter",
+    "MajoranaOperatorDataGroupIter",
+    PyMajoranaAction
+);
 
 /// A Majorana fermion operator.
 ///
@@ -366,7 +332,7 @@ impl From<MajoranaOperator> for PyMajoranaOperator {
     }
 }
 
-crate::impl_operator_magic_methods!(PyMajoranaOperator);
+crate::impl_operator_magic_methods!(PyMajoranaOperator, "MajoranaOperator");
 
 #[gen_stub_pymethods]
 #[pymethods]
@@ -517,10 +483,6 @@ impl PyMajoranaOperator {
         self.inner.get_support()
     }
 
-    fn __deepcopy__(&self, _memo: &Bound<'_, PyAny>) -> Self {
-        self.clone()
-    }
-
     fn __richcmp__(&self, other: &Self, op: CompareOp, _py: Python<'_>) -> PyResult<bool> {
         let eq = self.inner.coeffs == other.inner.coeffs
             && self.inner.modes == other.inner.modes
@@ -549,10 +511,6 @@ impl PyMajoranaOperator {
             "MajoranaOperator.from_dict({{{}}})",
             items_str.join(", ")
         ))
-    }
-
-    fn __str__(&self) -> PyResult<String> {
-        Ok(format!("<MajoranaOperator with {} terms>", self.__len__()))
     }
 
     fn __format__(&self, _format_spec: &str) -> PyResult<String> {
@@ -586,9 +544,7 @@ impl PyMajoranaOperator {
     /// ..
     #[classmethod]
     fn zero(_cls: &Bound<'_, PyType>) -> Self {
-        Self {
-            inner: MajoranaOperator::zero(),
-        }
+        MajoranaOperator::zero().into()
     }
 
     /// Constructs the multiplicative identity operator.
@@ -606,25 +562,7 @@ impl PyMajoranaOperator {
     /// ..
     #[classmethod]
     fn one(_cls: &Bound<'_, PyType>) -> Self {
-        Self {
-            inner: MajoranaOperator::one(),
-        }
-    }
-
-    fn __len__(&self) -> usize {
-        self.inner.boundaries.len() - 1
-    }
-
-    fn __pow__(&self, exponent: u32, modulo: Option<u32>) -> PyResult<Self> {
-        match modulo {
-            Some(_) => Err(PyNotImplementedError::new_err("mod argument not supported")),
-            None => {
-                let result = Self {
-                    inner: self.inner.__pow__(exponent as usize),
-                };
-                Ok(result)
-            }
-        }
+        MajoranaOperator::one().into()
     }
 
     /// Returns an equivalent but simplified operator.
@@ -657,9 +595,7 @@ impl PyMajoranaOperator {
     ///     An equivalent but simplified operator.
     #[pyo3(signature = (atol=1e-8))]
     fn simplify(&self, atol: f64) -> Self {
-        Self {
-            inner: self.inner.simplify(atol),
-        }
+        self.inner.simplify(atol).into()
     }
 
     /// Removes terms whose coefficient magnitude lies below the provided threshold.
@@ -742,7 +678,7 @@ impl PyMajoranaOperator {
             inner._append_term(coeff, &term);
             Ok(())
         })?;
-        Ok(Self { inner })
+        Ok(inner.into())
     }
 
     /// An iterator over the operator's terms with their associated group index.
@@ -804,7 +740,7 @@ impl PyMajoranaOperator {
             Ok(())
         })?;
         inner.groups = Some(groups);
-        Ok(Self { inner })
+        Ok(inner.into())
     }
 
     /// An optional vector of `group indices` for each term.
@@ -876,8 +812,7 @@ impl PyMajoranaOperator {
             None => None,
             Some(g) => {
                 let mut out = Vec::with_capacity(g.len());
-                g.into_iter()
-                    .for_each(|group_op| out.push(Self { inner: group_op }));
+                g.into_iter().for_each(|group_op| out.push(group_op.into()));
                 Some(out)
             }
         }
@@ -901,9 +836,7 @@ impl PyMajoranaOperator {
     ///
     /// ..
     fn adjoint(&self) -> Self {
-        Self {
-            inner: self.inner.adjoint(),
-        }
+        self.inner.adjoint().into()
     }
 
     /// Checks this operator for equivalence with another operator.
@@ -968,9 +901,7 @@ impl PyMajoranaOperator {
     ///     An equivalent but normal-ordered operator.
     #[pyo3(signature = (ascending=false, reduce=true))]
     fn normal_ordered(&self, ascending: bool, reduce: bool) -> Self {
-        Self {
-            inner: self.inner.normal_ordered(ascending, reduce),
-        }
+        self.inner.normal_ordered(ascending, reduce).into()
     }
 
     /// Returns whether this operator is Hermitian.
@@ -1071,11 +1002,10 @@ impl PyMajoranaOperator {
     ///     ValueError: if ``permutation`` contains duplicate entries, or is too short to relabel
     ///         some mode the operator acts upon.
     fn relabel_modes(&self, permutation: Vec<u32>) -> PyResult<Self> {
-        let out = self.inner.relabel_modes(permutation);
-        match out {
-            Ok(op) => Ok(Self { inner: op }),
-            Err(e) => Err(PyValueError::new_err(e.to_string())),
-        }
+        self.inner
+            .relabel_modes(permutation)
+            .map(Into::into)
+            .map_err(crate::value_err)
     }
 }
 

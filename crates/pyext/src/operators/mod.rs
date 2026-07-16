@@ -14,14 +14,12 @@ use pyo3::prelude::*;
 
 #[macro_export]
 macro_rules! impl_operator_magic_methods {
-    ($name:ty) => {
+    ($name:ty, $py_name:literal) => {
         #[gen_stub_pymethods]
         #[pymethods]
         impl $name {
             fn __add__(&self, other: &Self) -> Self {
-                Self {
-                    inner: self.inner.__add__(&other.inner),
-                }
+                self.inner.__add__(&other.inner).into()
             }
 
             fn __iadd__(&mut self, other: &Self) {
@@ -29,9 +27,7 @@ macro_rules! impl_operator_magic_methods {
             }
 
             fn __sub__(&self, other: &Self) -> Self {
-                Self {
-                    inner: self.inner.__sub__(&other.inner),
-                }
+                self.inner.__sub__(&other.inner).into()
             }
 
             fn __isub__(&mut self, other: &Self) {
@@ -39,15 +35,11 @@ macro_rules! impl_operator_magic_methods {
             }
 
             fn __mul__(&self, other: Complex64) -> Self {
-                Self {
-                    inner: self.inner.__mul__(other),
-                }
+                self.inner.__mul__(other).into()
             }
 
             fn __rmul__(&self, other: Complex64) -> Self {
-                Self {
-                    inner: self.inner.__mul__(other),
-                }
+                self.inner.__mul__(other).into()
             }
 
             fn __imul__(&mut self, other: Complex64) {
@@ -55,9 +47,7 @@ macro_rules! impl_operator_magic_methods {
             }
 
             fn __truediv__(&self, other: Complex64) -> Self {
-                Self {
-                    inner: self.inner.__div__(other),
-                }
+                self.inner.__div__(other).into()
             }
 
             fn __itruediv__(&mut self, other: Complex64) {
@@ -65,15 +55,11 @@ macro_rules! impl_operator_magic_methods {
             }
 
             fn __neg__(&self) -> Self {
-                Self {
-                    inner: self.inner.__neg__(),
-                }
+                self.inner.__neg__().into()
             }
 
             fn __and__(&self, other: &Self) -> Self {
-                Self {
-                    inner: self.inner.__and__(&other.inner),
-                }
+                self.inner.__and__(&other.inner).into()
             }
 
             fn __iand__(&mut self, other: &Self) {
@@ -81,13 +67,86 @@ macro_rules! impl_operator_magic_methods {
             }
 
             fn __matmul__(&self, other: &Self) -> Self {
-                Self {
-                    inner: self.inner.__matmul__(&other.inner),
-                }
+                self.inner.__matmul__(&other.inner).into()
             }
 
             fn __imatmul__(&mut self, other: &Self) {
                 self.inner.__imatmul__(&other.inner);
+            }
+
+            fn __len__(&self) -> usize {
+                self.inner.boundaries.len() - 1
+            }
+
+            fn __deepcopy__(&self, _memo: &Bound<'_, PyAny>) -> Self {
+                self.clone()
+            }
+
+            fn __pow__(&self, exponent: u32, modulo: Option<u32>) -> PyResult<Self> {
+                match modulo {
+                    Some(_) => Err(::pyo3::exceptions::PyNotImplementedError::new_err(
+                        "mod argument not supported",
+                    )),
+                    None => Ok(self.inner.__pow__(exponent as usize).into()),
+                }
+            }
+
+            fn __str__(&self) -> PyResult<String> {
+                Ok(format!("<{} with {} terms>", $py_name, self.__len__()))
+            }
+        }
+    };
+}
+
+/// Declares the two data-iterator pyclasses for an operator type.
+///
+/// Every operator file needs a `<Op>DataIter` and a `<Op>DataGroupIter` pyclass exposing the
+/// same `__iter__`/`__next__` protocol; only the element (action) type and the registered
+/// module/class names differ. The struct idents are passed explicitly (rather than derived from
+/// a prefix) so they remain greppable and no `paste`-style token pasting is required.
+#[macro_export]
+macro_rules! declare_operator_iters {
+    (
+        $iter:ident,
+        $group_iter:ident,
+        $module:literal,
+        $name:literal,
+        $group_name:literal,
+        $action:ty $(,)?
+    ) => {
+        #[gen_stub_pyclass]
+        #[pyclass(module = $module, name = $name)]
+        struct $iter {
+            inner: std::vec::IntoIter<(Vec<$action>, Complex64)>,
+        }
+
+        #[gen_stub_pymethods]
+        #[pymethods]
+        impl $iter {
+            fn __iter__(slf: PyRef<'_, Self>) -> PyRef<'_, Self> {
+                slf
+            }
+
+            fn __next__(mut slf: PyRefMut<'_, Self>) -> Option<(Vec<$action>, Complex64)> {
+                slf.inner.next()
+            }
+        }
+
+        #[gen_stub_pyclass]
+        #[pyclass(module = $module, name = $group_name)]
+        struct $group_iter {
+            inner: std::vec::IntoIter<(Vec<$action>, Complex64, u32)>,
+        }
+
+        #[gen_stub_pymethods]
+        #[pymethods]
+        impl $group_iter {
+            fn __iter__(slf: PyRef<'_, Self>) -> PyRef<'_, Self> {
+                slf
+            }
+
+            fn __next__(mut slf: PyRefMut<'_, Self>) -> Option<(Vec<$action>, Complex64, u32)> {
+                slf.inner.next()
             }
         }
     };

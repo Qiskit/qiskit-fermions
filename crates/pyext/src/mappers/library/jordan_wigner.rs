@@ -11,7 +11,6 @@
 // that they have been altered from the originals.
 
 use crate::operators::fermion_operator::PyFermionOperator;
-use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
 use pyo3_stub_gen::derive::*;
 use qiskit_fermions_core::mappers::library::jordan_wigner::jordan_wigner;
@@ -86,8 +85,7 @@ use qiskit_pyo3_ffi as ffi;
 #[pyfunction(name = "jordan_wigner")]
 #[gen_stub(override_return_type(type_repr="qiskit.quantum_info.SparseObservable", imports=("qiskit.quantum_info")))]
 pub fn py_jordan_wigner(op: PyFermionOperator, num_qubits: u32) -> PyResult<Py<PyAny>> {
-    let obs =
-        jordan_wigner(&op.inner, num_qubits).map_err(|e| PyValueError::new_err(e.to_string()))?;
+    let obs = jordan_wigner(&op.inner, num_qubits).map_err(crate::value_err)?;
     unsafe {
         let py = Python::assume_attached();
         let py_obs = ffi::qk_obs_to_python(obs);

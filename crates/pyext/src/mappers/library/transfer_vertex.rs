@@ -53,9 +53,7 @@ use qiskit_fermions_core::mappers::library::transfer_vertex::{
 #[gen_stub_pyfunction(module = "qiskit_fermions.mappers.library.transfer_vertex")]
 #[pyfunction(name = "transfer_vertex_to_fermion")]
 pub fn py_transfer_vertex_to_fermion(inter_op: PyTransferVertexOperator) -> PyFermionOperator {
-    PyFermionOperator {
-        inner: transfer_vertex_to_fermion(&inter_op.inner),
-    }
+    transfer_vertex_to_fermion(&inter_op.inner).into()
 }
 
 /// Map a :class:`.TransferVertexOperator` to a :class:`.MajoranaOperator`.
@@ -90,9 +88,7 @@ pub fn py_transfer_vertex_to_fermion(inter_op: PyTransferVertexOperator) -> PyFe
 #[gen_stub_pyfunction(module = "qiskit_fermions.mappers.library.transfer_vertex")]
 #[pyfunction(name = "transfer_vertex_to_majorana")]
 pub fn py_transfer_vertex_to_majorana(inter_op: PyTransferVertexOperator) -> PyMajoranaOperator {
-    PyMajoranaOperator {
-        inner: transfer_vertex_to_majorana(&inter_op.inner),
-    }
+    transfer_vertex_to_majorana(&inter_op.inner).into()
 }
 
 /// Map a :class:`.TransferVertexOperator` to an :class:`.EdgeVertexOperator`.
@@ -129,9 +125,7 @@ pub fn py_transfer_vertex_to_majorana(inter_op: PyTransferVertexOperator) -> PyM
 pub fn py_transfer_vertex_to_edge_vertex(
     inter_op: PyTransferVertexOperator,
 ) -> PyEdgeVertexOperator {
-    PyEdgeVertexOperator {
-        inner: transfer_vertex_to_edge_vertex(&inter_op.inner),
-    }
+    transfer_vertex_to_edge_vertex(&inter_op.inner).into()
 }
 
 #[pymodule]
