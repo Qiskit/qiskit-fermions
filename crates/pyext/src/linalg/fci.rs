@@ -16,7 +16,9 @@ use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
 use pyo3_stub_gen::derive::*;
 
-use qiskit_fermions_core::linalg::fci::{FciMatvecError, slater_determinant_statevector};
+use qiskit_fermions_core::linalg::fci::{
+    FciMatvecError, MAX_ORBITALS, slater_determinant_statevector,
+};
 
 /// A matvec closure closing over an operator and a fixed FCI sector.
 ///
@@ -153,7 +155,9 @@ impl FciLinearOperator {
 ///     The one-hot Slater-determinant state vector as a ``complex128`` array.
 ///
 /// Raises:
-///     ValueError: if the spinful FCI dimension overflows the addressable range.
+///     ValueError: if ``norb`` exceeds the maximum number of orbitals the bitmask representation
+///         supports (64), an occupation bit is set outside ``0..norb``, or the spinful FCI
+///         dimension overflows the addressable range.
 #[gen_stub_pyfunction(module = "qiskit_fermions.linalg.fci")]
 #[pyfunction(name = "slater_determinant_statevector", signature = (norb, alpha_str, beta_str=None))]
 pub fn py_slater_determinant_statevector(
@@ -162,6 +166,11 @@ pub fn py_slater_determinant_statevector(
     alpha_str: u64,
     beta_str: Option<u64>,
 ) -> PyResult<Bound<'_, PyArray1<Complex64>>> {
+    if norb > MAX_ORBITALS {
+        return Err(PyValueError::new_err(format!(
+            "norb={norb} exceeds the maximum of {MAX_ORBITALS} orbitals"
+        )));
+    }
     let vec = slater_determinant_statevector(norb, alpha_str, beta_str)
         .map_err(|err| PyValueError::new_err(err.to_string()))?;
     Ok(vec.into_pyarray(py))
