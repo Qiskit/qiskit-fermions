@@ -107,6 +107,22 @@ impl BinomialTable {
     }
 }
 
+/// Returns the highest orbital index set in `string` if it lies outside `0..norb`, else `None`.
+///
+/// Used to validate occupation masks whose set bits must all address orbitals below `norb` before
+/// they are ranked by [`str2addr`] (an out-of-range bit would rank past the sector dimension).
+#[inline]
+fn mode_out_of_range(string: u64, norb: u32) -> Option<u32> {
+    // `1u64 << 64` would overflow; norb >= 64 admits every 64-bit mask (norb == 64 is the ceiling
+    // enforced by `BinomialTable::new`, and higher is rejected upstream).
+    if norb >= 64 || string >> norb == 0 {
+        None
+    } else {
+        // 63 minus the leading zeros is the highest set bit; it is `>= norb` by the check above.
+        Some(63 - string.leading_zeros())
+    }
+}
+
 /// Computes the combinatorial-number-system address of an occupation `string`.
 ///
 /// `string` must have exactly `nocc` bits set, all within ``0..norb``. The address is
@@ -308,6 +324,23 @@ pub fn slater_determinant_statevector(
     alpha_str: u64,
     beta_str: Option<u64>,
 ) -> Result<Vec<Complex64>, FciMatvecError> {
+    // Reject occupations that set a bit outside `0..norb`; such a string would rank past the sector
+    // dimension and index the output vector out of bounds. The highest set bit must be below `norb`.
+    if let Some(highest) = mode_out_of_range(alpha_str, norb) {
+        return Err(FciMatvecError::ModeOutOfRange {
+            mode: highest,
+            num_modes: norb,
+        });
+    }
+    if let Some(beta_str) = beta_str
+        && let Some(highest) = mode_out_of_range(beta_str, norb)
+    {
+        return Err(FciMatvecError::ModeOutOfRange {
+            mode: highest,
+            num_modes: norb,
+        });
+    }
+
     let table = BinomialTable::new(norb);
     let n_alpha = alpha_str.count_ones();
     let addr_a = str2addr(&table, norb, n_alpha, alpha_str);
@@ -415,6 +448,12 @@ pub fn spinless_matvec<'a>(
                 continue;
             }
             if let Some((out_string, sign)) = apply_ops_to_string(string, &ops) {
+                // A term that does not conserve particle number maps out of the fixed `nocc` sector;
+                // `str2addr` would rank the wrong-popcount string past `dim`. Project such terms to
+                // zero (drop them) rather than indexing out of bounds.
+                if out_string.count_ones() != nocc {
+                    continue;
+                }
                 let dst_addr = str2addr(&table, norb, nocc, out_string);
                 out[dst_addr] += coeff * f64::from(sign) * amp;
             }
@@ -490,16 +529,26 @@ pub fn spinful_matvec<'a>(
         };
 
         // Precompute the beta sector's action, folding in the cross-sector sign.
+        // A term whose beta (or alpha) sublist does not conserve that spin's electron count maps out
+        // of the fixed `(n_alpha, n_beta)` sector; `str2addr` would rank the wrong-popcount string
+        // past its dimension. Project such terms to zero (drop them) rather than indexing out of
+        // bounds. Each spin block is checked independently, so a term that changes `n_alpha` and
+        // `n_beta` in a compensating way (e.g. a†_{0a} a_{0b}) is still correctly dropped.
         beta_action.clear();
         beta_action.extend(beta_strings.iter().map(|&b_string| {
-            apply_ops_to_string(b_string, &beta_ops)
-                .map(|(b_out, b_sign)| (str2addr(&table, norb, n_beta, b_out), b_sign * cross_sign))
+            apply_ops_to_string(b_string, &beta_ops).and_then(|(b_out, b_sign)| {
+                (b_out.count_ones() == n_beta)
+                    .then(|| (str2addr(&table, norb, n_beta, b_out), b_sign * cross_sign))
+            })
         }));
 
         for (a_addr, &a_string) in alpha_strings.iter().enumerate() {
             let Some((a_out, a_sign)) = apply_ops_to_string(a_string, &alpha_ops) else {
                 continue;
             };
+            if a_out.count_ones() != n_alpha {
+                continue;
+            }
             let a_out_addr = str2addr(&table, norb, n_alpha, a_out);
             let src_row = a_addr * dim_b;
             let dst_row = a_out_addr * dim_b;
@@ -1125,5 +1174,97 @@ mod tests {
         // A representable product still succeeds and equals the plain product.
         let dim = spinful_dim(&table, 4, 2, 2).unwrap();
         assert_eq!(dim, table.num_strings(4, 2) * table.num_strings(4, 2));
+    }
+
+    #[test]
+    fn spinless_matvec_drops_non_conserving_terms() {
+        // norb=4, nocc=1: a bare creation a†_2 maps |0b0001> -> |0b0101> (popcount 2), which
+        // `str2addr` would rank at C(0,1)+C(2,2) = 1, but the two-electron string is outside the
+        // one-electron sector. Before the guard this indexed `out` out of bounds (str2addr of
+        // 0b1100 in a dim-4 vector is 5). It must now be dropped, leaving the zero vector.
+        let dim = BinomialTable::new(4).num_strings(4, 1); // C(4,1) = 4
+        let vec = complex_vec(&vec![1.0; dim]);
+        let got = spinless_matvec(
+            4,
+            1,
+            std::iter::once((
+                Complex64::new(1.0, 0.0),
+                [true].as_slice(),
+                [2u32].as_slice(),
+            )),
+            &vec,
+        )
+        .unwrap();
+        assert_vec_close(&got, &complex_vec(&vec![0.0; dim]));
+
+        // The number operator a†_2 a_2 (conserving) still acts: it keeps determinants occupying
+        // orbital 2 and zeros the rest, so the guard does not over-reject.
+        let got = spinless_matvec(
+            4,
+            1,
+            std::iter::once((
+                Complex64::new(1.0, 0.0),
+                [true, false].as_slice(),
+                [2u32, 2].as_slice(),
+            )),
+            &vec,
+        )
+        .unwrap();
+        // Only the determinant |0b0100> (orbital 2 occupied) survives; its address is C(2,1) = 2.
+        let mut expected = vec![Complex64::new(0.0, 0.0); dim];
+        expected[str2addr(&BinomialTable::new(4), 4, 1, 0b0100)] = Complex64::new(1.0, 0.0);
+        assert_vec_close(&got, &expected);
+    }
+
+    #[test]
+    fn spinful_matvec_drops_sector_changing_terms() {
+        // norb=2, (n_alpha, n_beta) = (1, 1). The spin-flip a†_{0a} a_{0b} (modes 0 and norb+0=2)
+        // conserves total particle number but moves an electron from beta to alpha, leaving the
+        // (1, 1) sector. Its alpha sublist raises to two alpha electrons (popcount 2 != n_alpha),
+        // so it must be dropped rather than ranked out of bounds.
+        let t = BinomialTable::new(2);
+        let dim = t.num_strings(2, 1) * t.num_strings(2, 1); // 2 * 2 = 4
+        let vec = complex_vec(&vec![1.0; dim]);
+        let got = spinful_matvec(
+            2,
+            1,
+            1,
+            std::iter::once((
+                Complex64::new(1.0, 0.0),
+                [true, false].as_slice(),
+                [0u32, 2].as_slice(),
+            )),
+            &vec,
+        )
+        .unwrap();
+        assert_vec_close(&got, &complex_vec(&vec![0.0; dim]));
+    }
+
+    #[test]
+    fn slater_determinant_rejects_out_of_range_bit() {
+        // A bit set at orbital 2 with norb=2 addresses a nonexistent orbital; it must error rather
+        // than rank past the sector dimension and panic on the vector write.
+        let err = slater_determinant_statevector(2, 0b100, None).unwrap_err();
+        assert!(matches!(
+            err,
+            FciMatvecError::ModeOutOfRange {
+                mode: 2,
+                num_modes: 2
+            }
+        ));
+
+        // The beta mask is validated too.
+        let err = slater_determinant_statevector(2, 0b01, Some(0b100)).unwrap_err();
+        assert!(matches!(
+            err,
+            FciMatvecError::ModeOutOfRange {
+                mode: 2,
+                num_modes: 2
+            }
+        ));
+
+        // A valid occupation still succeeds.
+        let vec = slater_determinant_statevector(2, 0b01, Some(0b10)).unwrap();
+        assert_eq!(vec.iter().filter(|c| c.norm() > 0.0).count(), 1);
     }
 }
