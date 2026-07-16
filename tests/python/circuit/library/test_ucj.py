@@ -105,6 +105,26 @@ def test_ucj_rejects_wrong_reference_length():
         UCJ(norb, (1, 1), mats, rotations, reference_occupation=[True, False])
 
 
+def test_ucj_rejects_spin_sector_exceeding_norb():
+    """A spin sector with more electrons than orbitals raises instead of spilling into the block."""
+    norb = 2
+    mats, rotations = _balanced_tensors(norb, 1, seed=11)
+    with pytest.raises(ValueError, match="exceeding the norb"):
+        UCJ(norb, (3, 0), mats, rotations)
+
+
+def test_ucj_rejects_spinless_nelec_exceeding_norb():
+    """A spinless electron count above ``norb`` raises rather than indexing out of range."""
+    norb = 2
+    n_reps = 1
+    rng = np.random.default_rng(12)
+    mats = rng.standard_normal((n_reps, norb, norb))
+    mats = mats + mats.transpose(0, 2, 1)
+    rotations = np.stack([random_unitary(norb, seed=12)])
+    with pytest.raises(ValueError, match="exceeds the norb"):
+        UCJ(norb, 3, mats, rotations)
+
+
 def test_ucj_define_gate_sequence():
     """The gate definition is InitializeModes + per-rep (rotation, evolution, rotation) + final."""
     norb = 3

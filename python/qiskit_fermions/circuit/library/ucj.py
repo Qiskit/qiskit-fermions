@@ -521,13 +521,24 @@ class UCJ(FermionicGate):
     def _hartree_fock_occupation(
         norb: int, nelec: int | tuple[int, int], spinless: bool
     ) -> list[bool]:
-        """Returns the Hartree-Fock reference occupation for ``(norb, nelec)``."""
+        """Returns the Hartree-Fock reference occupation for ``(norb, nelec)``.
+
+        Raises:
+            ValueError: if the electron count exceeds the ``norb`` spin-orbitals available in a
+                sector (which would otherwise silently spill into the wrong block).
+        """
         if spinless:
+            if nelec > norb:  # type: ignore[operator]
+                raise ValueError(f"nelec={nelec!r} exceeds the norb={norb} spinless modes.")
             occ = [False] * norb
             for i in range(nelec):  # type: ignore[arg-type]
                 occ[i] = True
             return occ
         n_alpha, n_beta = nelec  # type: ignore[misc]
+        if n_alpha > norb or n_beta > norb:
+            raise ValueError(
+                f"nelec={nelec!r} has a spin sector exceeding the norb={norb} available orbitals."
+            )
         occ = [False] * (2 * norb)
         for i in range(n_alpha):
             occ[i] = True
