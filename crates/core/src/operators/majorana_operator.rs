@@ -95,8 +95,15 @@ impl MajoranaOperator {
         &self.boundaries
     }
 
+    /// Appends a single term to the operator. Low-level building block for construction.
+    ///
+    /// # Warning
+    ///
+    /// This does **not** maintain `groups`: it pushes a coefficient and a boundary but no group
+    /// index. Only call it while `self.groups` is `None` (e.g. on a fresh [`Self::zero`]); calling
+    /// it on an operator that tracks groups leaves `coeffs.len()` out of sync with `groups.len()`,
+    /// after which [`iter_with_groups`](Self::iter_with_groups) silently drops the trailing terms.
     pub fn _append_term(&mut self, coeff: Complex64, modes: &[u32]) {
-        // WARNING: this does not handle `groups` by design!
         self.coeffs.push(coeff);
         self.modes.extend_from_slice(modes);
         self.boundaries.push(self.modes.len());
