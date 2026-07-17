@@ -930,7 +930,7 @@ class FermionOperator:
         but it is **not** itself a SciPy ``LinearOperator``. The public ``_linear_operator_`` method
         (added in Python, see :mod:`qiskit_fermions.operators`) wraps this into a genuine
         :class:`scipy.sparse.linalg.LinearOperator` -- which is what ffsim's ``_linear_operator_``
-        protocol (and ``ffsim.linear_operator``) require.
+        protocol (and :external:func:`ffsim.linear_operator`) require.
         
         The FCI sector is selected by ``nelec``:
         

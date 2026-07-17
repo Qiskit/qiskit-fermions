@@ -37,8 +37,10 @@ HAS_FFSIM = LazyImportTester(
     "ffsim", name="ffsim", install='pip install "qiskit-fermions[simulation]"'
 )
 """`ffsim <https://github.com/qiskit-community/ffsim>`__ is a high-performance simulator for
-fermionic quantum circuits that exploits particle-number and spin-Z conservation. It is the default
-simulation engine for :class:`~qiskit_fermions.circuit.FermionicCircuit`.
+fermionic quantum circuits that exploits particle-number and spin-Z conservation.
+
+:class:`~qiskit_fermions.circuit.FermionicCircuit` instances can be simulated using
+:external:func:`ffsim.apply_unitary`.
 
 .. note::
    ``ffsim`` does not support Windows, which is why it is an optional dependency.

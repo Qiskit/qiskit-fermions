@@ -77,9 +77,10 @@ class FermionicGate(Gate):
     ) -> np.ndarray:
         """Applies this gate to an ffsim state vector, implementing ffsim's protocol.
 
-        This is the identity-placement entry point of ffsim's ``SupportsApplyUnitary`` protocol: it
-        assumes the gate acts on the modes ``0..num_modes`` of the state vector and delegates to the
-        placement-aware :meth:`_apply_unitary_placed_`, which every concrete fermionic gate implements.
+        This is the identity-placement entry point of ffsim's
+        :external:class:`ffsim.SupportsApplyUnitary` protocol: it assumes the gate acts on the modes
+        ``0..num_modes`` of the state vector and delegates to the placement-aware
+        :meth:`_apply_unitary_placed_`, which every concrete fermionic gate implements.
         See that method for the semantics of ``vec`` (including whether a ``None`` vector is accepted),
         ``norb``, ``nelec``, and ``copy``.
 
