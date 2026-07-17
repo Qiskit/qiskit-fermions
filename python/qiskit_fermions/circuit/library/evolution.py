@@ -15,28 +15,12 @@
 from __future__ import annotations
 
 import numbers
-from typing import TYPE_CHECKING, Protocol, cast
 
 import numpy as np
 
 from qiskit_fermions.operators.protocol import OperatorTrait
 
 from .. import FermionicGate
-
-if TYPE_CHECKING:
-    import scipy.sparse.linalg
-
-
-class _SupportsLinearOperator(Protocol):
-    """An operator exposing ffsim's ``_linear_operator_`` protocol (currently ``FermionOperator``)."""
-
-    def _linear_operator_(
-        self, norb: int, nelec: int | tuple[int, int]
-    ) -> scipy.sparse.linalg.LinearOperator:
-        """Returns a SciPy ``LinearOperator`` for the ``(norb, nelec)`` FCI sector."""
-
-    def conserves_sector(self, block_sizes: list[int]) -> bool:
-        """Returns whether every term conserves particle number within each mode block."""
 
 
 class Evolution(FermionicGate):
@@ -159,9 +143,7 @@ class Evolution(FermionicGate):
         """
         import scipy.sparse.linalg
 
-        # ``FermionOperator`` is a runtime re-export from ``qiskit_fermions.operators``; the stubs do
-        # not yet surface it there (being addressed separately), so mypy needs the ignore for now.
-        from qiskit_fermions.operators import FermionOperator  # type: ignore[attr-defined]
+        from qiskit_fermions.operators import FermionOperator
 
         # The simulation path relies on the operator exposing ``_linear_operator_`` (the native FCI
         # kernel) and ``conserves_sector``, which today only ``FermionOperator`` provides. Until
@@ -182,7 +164,9 @@ class Evolution(FermionicGate):
         if copy:
             vec = vec.copy()
 
-        operator = cast(_SupportsLinearOperator, self.operator.relabel_modes(freg_indices))
+        # `self.operator` is narrowed to `FermionOperator` by the guard above, and `relabel_modes`
+        # preserves the type, so the relabeled operator exposes `conserves_sector`/`_linear_operator_`.
+        operator = self.operator.relabel_modes(freg_indices)
         # A term that leaves the fixed (norb, nelec) sector is projected to zero by the native kernel,
         # which would turn `exp(-i t H)` into a non-unitary map. Reject rather than silently produce a
         # wrong state. Spinless: one block of `norb`; spinful: alpha [0, norb) and beta [norb, 2*norb)
