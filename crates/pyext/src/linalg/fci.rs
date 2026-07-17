@@ -12,7 +12,6 @@
 
 use num_complex::Complex64;
 use numpy::{IntoPyArray, PyArray1, PyReadonlyArray1};
-use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
 use pyo3_stub_gen::derive::*;
 
@@ -73,7 +72,7 @@ impl FciLinearOperator {
         kernel: &Matvec,
         vec: PyReadonlyArray1<'py, Complex64>,
     ) -> PyResult<Bound<'py, PyArray1<Complex64>>> {
-        let out = kernel(vec.as_slice()?).map_err(|e| PyValueError::new_err(e.to_string()))?;
+        let out = kernel(vec.as_slice()?).map_err(crate::value_err)?;
         Ok(out.into_pyarray(py))
     }
 }
@@ -168,12 +167,12 @@ pub fn py_slater_determinant_statevector(
     beta_str: Option<u64>,
 ) -> PyResult<Bound<'_, PyArray1<Complex64>>> {
     if norb > MAX_ORBITALS {
-        return Err(PyValueError::new_err(format!(
+        return Err(crate::value_err(format!(
             "norb={norb} exceeds the maximum of {MAX_ORBITALS} orbitals"
         )));
     }
-    let vec = slater_determinant_statevector(norb, alpha_str, beta_str)
-        .map_err(|err| PyValueError::new_err(err.to_string()))?;
+    let vec =
+        slater_determinant_statevector(norb, alpha_str, beta_str).map_err(crate::value_err)?;
     Ok(vec.into_pyarray(py))
 }
 

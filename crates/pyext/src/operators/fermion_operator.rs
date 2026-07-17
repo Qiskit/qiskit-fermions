@@ -15,10 +15,7 @@ use std::collections::HashSet;
 use num_complex::Complex64;
 use pyo3::prelude::*;
 use pyo3::types::PyType;
-use pyo3::{
-    class::basic::CompareOp,
-    exceptions::{PyNotImplementedError, PyValueError},
-};
+use pyo3::{class::basic::CompareOp, exceptions::PyNotImplementedError};
 use pyo3_stub_gen::derive::*;
 use std::collections::HashMap;
 
@@ -1156,7 +1153,7 @@ impl PyFermionOperator {
         nelec: &Bound<'_, PyAny>,
     ) -> PyResult<FciLinearOperator> {
         if norb > MAX_ORBITALS {
-            return Err(PyValueError::new_err(format!(
+            return Err(crate::value_err(format!(
                 "norb={norb} exceeds the maximum of {MAX_ORBITALS} orbitals"
             )));
         }
@@ -1171,7 +1168,7 @@ impl PyFermionOperator {
             let compiled = Arc::new(
                 self.inner
                     .compile_fci_spinless(&sector)
-                    .map_err(|e| PyValueError::new_err(e.to_string()))?,
+                    .map_err(crate::value_err)?,
             );
             let (compiled_mv, compiled_rmv) = (Arc::clone(&compiled), compiled);
             let matvec = Box::new(move |vec: &[Complex64]| compiled_mv.apply(vec));
@@ -1179,13 +1176,12 @@ impl PyFermionOperator {
             Ok(FciLinearOperator::new(dim, matvec, rmatvec))
         } else {
             let (n_alpha, n_beta) = nelec.extract::<(u32, u32)>()?;
-            let sector = SpinfulSector::new(norb, n_alpha, n_beta)
-                .map_err(|e| PyValueError::new_err(e.to_string()))?;
+            let sector = SpinfulSector::new(norb, n_alpha, n_beta).map_err(crate::value_err)?;
             let dim = sector.dim();
             let compiled = Arc::new(
                 self.inner
                     .compile_fci_spinful(&sector)
-                    .map_err(|e| PyValueError::new_err(e.to_string()))?,
+                    .map_err(crate::value_err)?,
             );
             let (compiled_mv, compiled_rmv) = (Arc::clone(&compiled), compiled);
             let matvec = Box::new(move |vec: &[Complex64]| compiled_mv.apply(vec));
