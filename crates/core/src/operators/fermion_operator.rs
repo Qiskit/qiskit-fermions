@@ -189,12 +189,13 @@ impl FermionOperator {
     pub fn conserves_sector(&self, block_sizes: &[u32]) -> bool {
         // The exclusive upper bound of each block; the last entry is the total mode count. Empty
         // `block_sizes` yields no bounds, which the block lookup below treats as one unbounded block.
-        let mut bounds: Vec<u32> = Vec::with_capacity(block_sizes.len());
-        let mut acc: u32 = 0;
-        for &size in block_sizes {
-            acc += size;
-            bounds.push(acc);
-        }
+        let bounds: Vec<u32> = block_sizes
+            .iter()
+            .scan(0, |acc, size| {
+                *acc += size;
+                Some(*acc)
+            })
+            .collect();
         // Net (creations - annihilations) per block, reused across terms.
         let mut net = vec![0i64; block_sizes.len().max(1)];
         for term in self.iter() {
@@ -240,19 +241,6 @@ impl FermionOperator {
         )
     }
 
-    /// Applies this operator to a spinless FCI state vector using a precomputed sector: `self @ vec`.
-    ///
-    /// Identical to [`Self::fci_matvec_spinless`] but reuses a [`crate::linalg::fci::SpinlessSector`]
-    /// built once by the caller, avoiding the per-call rebuild of the binomial table and sector
-    /// strings across the repeated matvecs of an evolution (`expm_multiply`).
-    pub fn fci_matvec_on_spinless(
-        &self,
-        sector: &crate::linalg::fci::SpinlessSector,
-        vec: &[Complex64],
-    ) -> Result<Vec<Complex64>, crate::linalg::fci::FciMatvecError> {
-        sector.matvec(self.iter().map(|t| (t.coeff, t.actions, t.modes)), vec)
-    }
-
     /// Applies this operator to a spinful FCI state vector: returns `self @ vec`.
     ///
     /// The operator's `2 * norb` modes are spin-orbitals under the block-spin convention (mode
@@ -276,29 +264,16 @@ impl FermionOperator {
         )
     }
 
-    /// Applies this operator to a spinful FCI state vector using a precomputed sector: `self @ vec`.
-    ///
-    /// Identical to [`Self::fci_matvec_spinful`] but reuses a [`crate::linalg::fci::SpinfulSector`]
-    /// built once by the caller, avoiding the per-call rebuild of the binomial table and both spin
-    /// sectors' strings across the repeated matvecs of an evolution (`expm_multiply`).
-    pub fn fci_matvec_on_spinful(
-        &self,
-        sector: &crate::linalg::fci::SpinfulSector,
-        vec: &[Complex64],
-    ) -> Result<Vec<Complex64>, crate::linalg::fci::FciMatvecError> {
-        sector.matvec(self.iter().map(|t| (t.coeff, t.actions, t.modes)), vec)
-    }
-
     /// Compiles this operator into a reusable spinless scatter map for a precomputed sector.
     ///
-    /// The returned [`crate::linalg::fci::CompiledSpinless`] captures the operator's vector-independent
+    /// The returned [`crate::linalg::fci::CompiledSector`] captures the operator's vector-independent
     /// action once; its `apply`/`apply_conj` then serve the many matvecs/rmatvecs of an evolution
     /// (`expm_multiply`) without re-walking the ladder operators, re-checking conservation, or
     /// re-ranking destinations on every call. See [`crate::linalg::fci::SpinlessSector::compile`].
     pub fn compile_fci_spinless(
         &self,
         sector: &crate::linalg::fci::SpinlessSector,
-    ) -> Result<crate::linalg::fci::CompiledSpinless, crate::linalg::fci::FciMatvecError> {
+    ) -> Result<crate::linalg::fci::CompiledSector, crate::linalg::fci::FciMatvecError> {
         sector.compile(self.iter().map(|t| (t.coeff, t.actions, t.modes)))
     }
 
@@ -309,7 +284,7 @@ impl FermionOperator {
     pub fn compile_fci_spinful(
         &self,
         sector: &crate::linalg::fci::SpinfulSector,
-    ) -> Result<crate::linalg::fci::CompiledSpinful, crate::linalg::fci::FciMatvecError> {
+    ) -> Result<crate::linalg::fci::CompiledSector, crate::linalg::fci::FciMatvecError> {
         sector.compile(self.iter().map(|t| (t.coeff, t.actions, t.modes)))
     }
 }
