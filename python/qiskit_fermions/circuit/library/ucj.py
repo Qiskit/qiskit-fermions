@@ -261,7 +261,7 @@ class UCJ(FermionicGate):
                 variant,
                 cast("int | None", n_reps),
                 interaction_pairs,
-                tol,  # type: ignore[arg-type]
+                tol,
             )
 
         norb = orbital_rotations.shape[-1]

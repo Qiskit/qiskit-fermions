@@ -156,7 +156,7 @@ class OrbitalRotation(FermionicGate):
         if HAS_FFSIM:
             import ffsim
 
-            return ffsim.apply_orbital_rotation(vec, mat, norb=norb, nelec=nelec, copy=copy)  # type: ignore[arg-type]
+            return ffsim.apply_orbital_rotation(vec, mat, norb=norb, nelec=nelec, copy=copy)
 
         return self._apply_via_generator(full, vec, norb, nelec, copy)
 
