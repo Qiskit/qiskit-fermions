@@ -37,7 +37,7 @@ def test_ucj_infers_balanced_variant():
     mats, rotations = _balanced_tensors(norb, 2, seed=0)
     gate = UCJ(norb, (1, 1), mats, rotations)
     assert gate.num_modes == 2 * norb
-    assert gate._variant == "balanced"
+    assert gate._variant is UCJ.Variant.BALANCED
 
 
 def test_ucj_infers_unbalanced_variant():
@@ -54,7 +54,7 @@ def test_ucj_infers_unbalanced_variant():
     )
     gate = UCJ(norb, (2, 1), mats, rotations)
     assert gate.num_modes == 2 * norb
-    assert gate._variant == "unbalanced"
+    assert gate._variant is UCJ.Variant.UNBALANCED
 
 
 def test_ucj_infers_spinless_variant():
@@ -68,7 +68,7 @@ def test_ucj_infers_spinless_variant():
     assert UCJ(norb, (1, 1), mats, rotations).num_modes == 2 * norb
     spinless = UCJ(norb, 2, mats, rotations)
     assert spinless.num_modes == norb
-    assert spinless._variant == "spinless"
+    assert spinless._variant is UCJ.Variant.SPINLESS
 
 
 def test_ucj_rejects_inconsistent_shapes():

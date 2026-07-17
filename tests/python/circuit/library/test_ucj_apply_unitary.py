@@ -115,8 +115,7 @@ def test_ucj_gate_accepts_numpy_int_nelec():
 
     gate_int = build(2)
     gate_np = build(np.int64(2))
-    assert gate_int._spinless and gate_np._spinless
-    assert gate_int._variant == gate_np._variant == "spinless"
+    assert gate_int._variant is gate_np._variant is UCJ.Variant.SPINLESS
 
     # the two builds are mathematically identical; they may differ only at floating-point rounding
     expected = gate_int._apply_unitary_(None, norb, 2, copy=True)
