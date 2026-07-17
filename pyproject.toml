@@ -46,7 +46,9 @@ optimization = [
     "pyomo",
 ]
 simulation = [
-    "ffsim",
+    # ffsim (and its unconditional PySCF dependency) does not support Windows, so restrict it to
+    # non-Windows platforms; this is one reason the simulation backend is an optional dependency.
+    "ffsim; sys_platform != 'win32'",
 ]
 
 [dependency-groups]
@@ -75,9 +77,10 @@ doctest = [
     "pylatexenc",
     "sybil>=9.3.0",
     # the LUCJ guide (docs/guides/lucj.rst) renders and evaluates a UCJ ansatz, which requires the
-    # simulation backend and PySCF for the underlying quantum chemistry
-    "ffsim",
-    "pyscf",
+    # simulation backend (ffsim, which pulls in PySCF for the underlying quantum chemistry). Neither
+    # supports Windows, so both are gated to non-Windows platforms and the guide's doctest is
+    # skipped there (see docs/guides/lucj.rst).
+    "ffsim; sys_platform != 'win32'",
 ]
 test = [
     {include-group = "basetest"},

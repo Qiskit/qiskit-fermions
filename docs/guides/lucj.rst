@@ -38,6 +38,12 @@ The (L)UCJ ansatz can be initialized from the amplitudes of a coupled-cluster si
 doubles (CCSD) calculation. Here we run restricted Hartree-Fock followed by CCSD for a hydrogen
 molecule in the ``6-31g`` basis, using `PySCF <https://pyscf.org/>`_ for the quantum chemistry.
 
+.. invisible-code-block: python
+
+   >>> from qiskit_fermions.utils.optionals import HAS_FFSIM
+
+.. skip: start if(not HAS_FFSIM)
+
 .. plot::
    :context:
    :nofigs:
@@ -227,6 +233,8 @@ two repetitions:
    Hartree-Fock: -1.12675532 Hartree
    >>> print(f"CCSD:         {ccsd.e_tot:.8f} Hartree")
    CCSD:         -1.15167268 Hartree
+
+.. skip: end
 
 .. note::
    The :class:`.UCJ` gate is initialized here from an *exact* double factorization of the
