@@ -19,8 +19,6 @@ from collections.abc import Sequence
 
 import numpy as np
 
-from qiskit_fermions.utils.optionals import HAS_FFSIM
-
 from .. import FermionicGate
 
 logger = logging.getLogger(__name__)
@@ -57,12 +55,19 @@ class InitializeModes(FermionicGate):
     ) -> np.ndarray:
         r"""Produces the occupation determinant, placing it onto the vector's global modes.
 
-        Unlike :class:`.OrbitalRotation` or :class:`.Evolution`, this gate is a state *producer*, not
-        a transform: it prepares the occupation determinant a Jordan-Wigner occupation would create
-        from the vacuum. Because seeding a determinant *defines* the fixed ``(norb, nelec)`` particle
-        number sector (the vacuum lives in a different sector), it cannot be expressed as a
-        same-length linear map of an incoming vector -- so this method returns a freshly built state
-        vector rather than transforming ``vec``.
+        Unlike most other fermionic gates, this gate is a state *producer*, not a transform: it
+        prepares the occupation determinant a Jordan-Wigner occupation would create from the vacuum.
+        Because seeding a determinant *defines* the fixed ``(norb, nelec)`` particle number sector
+        (the vacuum lives in a different sector), it cannot be expressed as a same-length linear map
+        of an incoming vector -- so this method returns a freshly built state vector rather than
+        transforming ``vec``.
+
+        .. warning::
+           Because this gate defines the whole ``(norb, nelec)`` sector at once, two
+           :class:`InitializeModes` gates cannot be placed in parallel to seed the alpha and beta
+           spin sectors independently: each seeds a full state vector for its own placement and the
+           second would discard the first. Seed a spinful determinant with a single gate covering all
+           ``2 * norb`` modes instead.
 
         The gate's local :attr:`occupation` (one flag per local mode) is placed onto the global
         register via ``freg_indices``: local mode ``i`` occupies global mode ``freg_indices[i]``. The
@@ -74,9 +79,8 @@ class InitializeModes(FermionicGate):
           alpha orbitals and modes ``norb..2*norb`` are beta orbitals; the seed is a one-hot at the
           flat index ``addr_a * dim_b + addr_b`` (alpha slow, beta fast).
 
-        The determinant is built via :func:`ffsim.slater_determinant` when ``ffsim`` is installed, and
-        otherwise via the native ``slater_determinant_statevector`` kernel (both produce the same
-        one-hot, since a position-indexed occupation is inherently sorted and carries no sign).
+        The determinant is built via the native ``slater_determinant_statevector`` kernel (a
+        position-indexed occupation is inherently sorted, so the one-hot carries no sign).
 
         Args:
             vec: the state vector to act on, or ``None`` to seed from no incoming state. When a real
@@ -167,18 +171,11 @@ class InitializeModes(FermionicGate):
     ) -> np.ndarray:
         """Builds the one-hot occupation determinant for the given per-sector occupied orbitals.
 
-        For a spinless system ``beta_orbitals`` is empty and ignored. Uses
-        :func:`ffsim.slater_determinant` when ``ffsim`` is installed, and otherwise the native
-        ``slater_determinant_statevector`` kernel. Both return the same one-hot at the determinant's
-        FCI address; the occupied-orbital lists are already sorted, so the determinant carries no
-        sign.
+        For a spinless system ``beta_orbitals`` is empty and ignored. Uses the native
+        ``slater_determinant_statevector`` kernel: it produces the one-hot at the determinant's FCI
+        address (the occupied-orbital lists are already sorted, so the determinant carries no sign),
+        matching :func:`ffsim.slater_determinant` bit-for-bit while being consistently faster.
         """
-        if HAS_FFSIM:
-            import ffsim
-
-            occupied = alpha_orbitals if spinless else (alpha_orbitals, beta_orbitals)
-            return ffsim.slater_determinant(norb, occupied)
-
         from qiskit_fermions._lib.linalg.fci import slater_determinant_statevector
 
         alpha_str = sum(1 << orb for orb in alpha_orbitals)

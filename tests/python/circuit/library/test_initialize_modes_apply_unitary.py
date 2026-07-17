@@ -164,12 +164,8 @@ def test_initialize_modes_apply_unitary_via_ffsim_apply_unitary_with_real_vec():
     np.testing.assert_allclose(result, expected, atol=1e-10)
 
 
-def test_initialize_modes_apply_unitary_native_fallback_matches_ffsim(monkeypatch):
-    """With ffsim disabled the native seed kernel matches ffsim.slater_determinant."""
-    import qiskit_fermions.circuit.library.initialize_modes as initialize_modes_module
-
-    monkeypatch.setattr(initialize_modes_module, "HAS_FFSIM", False)
-
+def test_initialize_modes_apply_unitary_native_seed_matches_ffsim():
+    """The native seed kernel matches ffsim.slater_determinant bit-for-bit."""
     # spinful, non-trivial ranks
     norb = 6
     nelec = (3, 2)
@@ -190,18 +186,12 @@ def test_initialize_modes_apply_unitary_native_fallback_matches_ffsim(monkeypatc
     np.testing.assert_allclose(result_s, expected_s, atol=1e-12)
 
 
-def test_initialize_modes_apply_unitary_rejects_sector_mismatch(monkeypatch):
-    """An occupation whose electron counts disagree with nelec is rejected, with or without ffsim."""
-    import qiskit_fermions.circuit.library.initialize_modes as initialize_modes_module
-
+def test_initialize_modes_apply_unitary_rejects_sector_mismatch():
+    """An occupation whose electron counts disagree with nelec is rejected."""
     # spinful: occupation sets 3 alpha but nelec asks for 2
     norb = 3
     nelec = (2, 1)
     occupation = [True, True, True, True, False, False]  # 3 alpha, 1 beta
-    with pytest.raises(ValueError, match="do not match the requested nelec"):
-        InitializeModes(occupation)._apply_unitary_(None, norb, nelec, copy=False)
-
-    monkeypatch.setattr(initialize_modes_module, "HAS_FFSIM", False)
     with pytest.raises(ValueError, match="do not match the requested nelec"):
         InitializeModes(occupation)._apply_unitary_(None, norb, nelec, copy=False)
 
