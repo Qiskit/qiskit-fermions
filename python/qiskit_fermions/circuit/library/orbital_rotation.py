@@ -247,6 +247,9 @@ class OrbitalRotation(FermionicGate):
                 "rotation passed the spin-block check but its generator did not; please report it."
             )
 
+        # ``_linear_operator_`` is monkeypatched onto ``FermionOperator`` at import time (in
+        # ``qiskit_fermions.operators``); the stubs type ``from_dict``'s result as the compiled
+        # ``_lib`` type, which does not carry the patched method, so mypy still needs the ignore.
         linop = generator._linear_operator_(norb, nelec)  # type: ignore[attr-defined]
         # ``traceA=0.0`` mirrors Evolution._apply_unitary_placed_: it is only a scipy conditioning
         # hint (it factors out ``exp(traceA / n)``), not a correctness input.
