@@ -14,6 +14,7 @@
 
 from __future__ import annotations
 
+import numbers
 from typing import TYPE_CHECKING, cast
 
 from qiskit.circuit import Gate
@@ -55,6 +56,22 @@ class FermionicGate(Gate):
         """The number of fermionic modes that this gate acts upon."""
         return cast(int, self._num_qubits)
 
+    @staticmethod
+    def _normalize_nelec(nelec: int | tuple[int, int]) -> int | tuple[int, int]:
+        """Normalizes an integral ``nelec`` to a plain :class:`int`.
+
+        ffsim (and the native FCI kernels) classify the spinless vs. spinful sector with
+        ``isinstance(nelec, int)``, which a numpy integer (e.g. ``np.int64``) fails -- it would be
+        misrouted to the spinful path and crash deeper in. Coercing integral values to ``int`` at the
+        entry points keeps the classification correct; a ``(n_alpha, n_beta)`` tuple is passed through
+        unchanged. Applied at both apply-unitary entry points (this method and
+        :meth:`.FermionicCircuit._apply_unitary_placed_`) since the DAG walk bypasses
+        :meth:`_apply_unitary_`.
+        """
+        if isinstance(nelec, numbers.Integral):
+            return int(nelec)
+        return nelec
+
     def _apply_unitary_(
         self, vec: np.ndarray | None, norb: int, nelec: int | tuple[int, int], copy: bool
     ) -> np.ndarray:
@@ -77,4 +94,5 @@ class FermionicGate(Gate):
                 f"'{type(self).__name__}' does not implement '_apply_unitary_placed_' and so cannot "
                 "be applied to a state vector via ffsim's SupportsApplyUnitary protocol."
             )
+        nelec = self._normalize_nelec(nelec)
         return cast("np.ndarray", placed(vec, norb, nelec, copy, list(range(self.num_modes))))

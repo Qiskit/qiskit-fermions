@@ -15,7 +15,6 @@
 from __future__ import annotations
 
 import logging
-import numbers
 from collections.abc import Sequence
 
 import numpy as np
@@ -103,10 +102,6 @@ class InitializeModes(FermionicGate):
                 occupied mode falls outside the range implied by ``norb``, or if a non-``None`` ``vec``
                 does not match the ``(norb, nelec)`` sector dimension.
         """
-        # normalize a numpy integer (e.g. ``np.int64``) to a plain ``int`` so the spinless sector is
-        # classified correctly here and downstream (ffsim's kernels classify with ``isinstance(int)``)
-        if isinstance(nelec, numbers.Integral):
-            nelec = int(nelec)
         spinless = isinstance(nelec, int)
         num_modes = norb if spinless else 2 * norb
 

@@ -14,8 +14,6 @@
 
 from __future__ import annotations
 
-import numbers
-
 import numpy as np
 
 from qiskit_fermions.operators.protocol import OperatorTrait
@@ -155,11 +153,6 @@ class Evolution(FermionicGate):
                 f"'FermionOperator'; got '{type(self.operator).__name__}'. Simulating the evolution "
                 "of other operator types is not yet supported."
             )
-
-        # normalize a numpy integer (e.g. ``np.int64``) to a plain ``int`` so the spinless sector is
-        # classified correctly here and downstream (ffsim's kernels classify with ``isinstance(int)``)
-        if isinstance(nelec, numbers.Integral):
-            nelec = int(nelec)
 
         if copy:
             vec = vec.copy()

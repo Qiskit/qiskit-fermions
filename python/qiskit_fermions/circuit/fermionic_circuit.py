@@ -207,6 +207,12 @@ class FermionicCircuit:
         # (a correctness hazard on a mutable circuit). Revisit if a repeated-call use case arises.
         dag = FermionicCircuitToDAG().run(self)
 
+        # Normalize a numpy-integer ``nelec`` to a plain ``int`` here too: this DAG walk calls each
+        # instruction's ``_apply_unitary_placed_`` directly, bypassing ``FermionicGate._apply_unitary_``
+        # (the other choke-point that normalizes), so without this a ``np.int64`` would reach the
+        # instructions un-normalized and be misclassified as spinful.
+        nelec = FermionicGate._normalize_nelec(nelec)
+
         # ``vec`` may be None to let the first instruction seed the state (e.g. InitializeModes);
         # only copy a real array. The gate-to-gate loop below then threads whatever the first
         # instruction returns into the rest of the circuit.
