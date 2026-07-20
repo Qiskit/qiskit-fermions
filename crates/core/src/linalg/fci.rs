@@ -526,6 +526,46 @@ struct ScaledTransitions {
     scale: Vec<Complex64>,
 }
 
+/// One spin block of the mixed terms, as a CSR-segmented list of phased transitions.
+///
+/// Mixed terms (acting non-trivially on both spins) are kept *factored*: rather than materializing
+/// the full `|alpha_trans| * |beta_trans|` cross product of block-spin flat entries, each term stores
+/// its alpha transitions here and its beta transitions in a parallel [`PhasedTransitions`], and the
+/// two are contracted at apply-time. Term `t` owns the transitions `indptr[t]..indptr[t + 1]`; entry
+/// `k` in that range is `(src[k], dst[k])` with fermionic phase `phase[k]` (always +/-1, so an `i8`).
+/// The per-term complex coefficient (with the cross-sector sign folded in) lives alongside in
+/// [`CompiledKind::Spinful::mixed_coeffs`]. This trades the dense product's memory/time for a
+/// per-term double loop, iterating the shorter block outer.
+#[derive(Clone, Debug, Default)]
+struct PhasedTransitions {
+    indptr: Vec<usize>,
+    src: Vec<usize>,
+    dst: Vec<usize>,
+    phase: Vec<i8>,
+}
+
+impl PhasedTransitions {
+    /// Starts a fresh CSR built term-by-term. `indptr` begins with the single boundary `[0]`.
+    fn new() -> Self {
+        Self {
+            indptr: vec![0],
+            ..Default::default()
+        }
+    }
+
+    /// Appends one transition to the segment currently being built (before [`Self::finish_term`]).
+    fn push(&mut self, src: usize, dst: usize, phase: i8) {
+        self.src.push(src);
+        self.dst.push(dst);
+        self.phase.push(phase);
+    }
+
+    /// Closes the current term's segment, recording its end boundary in `indptr`.
+    fn finish_term(&mut self) {
+        self.indptr.push(self.src.len());
+    }
+}
+
 /// Coalesces raw `(src, dst, weight)` transitions, summing the weights of every pair sharing the same
 /// `(src, dst)` key into a single [`ScaledTransitions`] entry.
 ///
@@ -573,22 +613,33 @@ fn coalesce(mut raw: Vec<(usize, usize, Complex64)>) -> ScaledTransitions {
 ///   `out += scalar * vec`).
 /// * `alpha_only` / `beta_only` -- terms that are the identity on the *other* spin, kept as coalesced
 ///   single-block transitions and applied with an inner sweep over the untouched block.
-/// * `mixed` -- terms acting non-trivially on both spins, kept as a flat `(src, dst, weight)` scatter
-///   over the block-spin flat index `addr_a * dim_b + addr_b`. (This dense cross product is the one
-///   remaining ffsim #663 win to port; see the `Gap A` note in `SpinfulSector::compile`.)
+/// * `mixed` -- terms acting non-trivially on both spins, kept *factored* into per-block CSR
+///   transitions (`mixed_alpha` / `mixed_beta`) plus a per-term coefficient (`mixed_coeffs`), and
+///   contracted at apply-time. This avoids materializing the `|alpha_trans| * |beta_trans|` dense
+///   cross product per term. See [`PhasedTransitions`].
 #[derive(Clone, Debug)]
 enum CompiledKind {
     Spinless {
         entries: Vec<(usize, usize, Complex64)>,
     },
-    Spinful {
-        dim_a: usize,
-        dim_b: usize,
-        scalar: Complex64,
-        alpha_only: ScaledTransitions,
-        beta_only: ScaledTransitions,
-        mixed: Vec<(usize, usize, Complex64)>,
-    },
+    // Boxed to keep the two variants close in size (the spinful payload carries several vectors);
+    // the box is dereferenced once per `contract` call, never in the hot loop.
+    Spinful(Box<SpinfulCompiled>),
+}
+
+/// The compiled spinful payload (see [`CompiledKind::Spinful`]).
+#[derive(Clone, Debug)]
+struct SpinfulCompiled {
+    dim_a: usize,
+    dim_b: usize,
+    scalar: Complex64,
+    alpha_only: ScaledTransitions,
+    beta_only: ScaledTransitions,
+    /// One complex coefficient per mixed term (with the cross-sector sign folded in), parallel to
+    /// the per-term segments of `mixed_alpha` / `mixed_beta`.
+    mixed_coeffs: Vec<Complex64>,
+    mixed_alpha: PhasedTransitions,
+    mixed_beta: PhasedTransitions,
 }
 
 /// An operator compiled into a reusable scatter map for a fixed sector.
@@ -631,8 +682,8 @@ impl CompiledSector {
 
     /// Shared contraction for [`Self::apply`] (`conj = false`) and [`Self::apply_conj`]
     /// (`conj = true`). When `conj`, every scatter runs `src -> dst` reversed with the weight
-    /// conjugated (single-block phases are real +/-1 folded into the complex `scale`, so conjugating
-    /// the `scale` conjugates the whole weight).
+    /// conjugated. Fermionic phases are real +/-1, so conjugation only touches the complex parts:
+    /// the folded `scale` of the single-block paths and the per-term `mixed_coeffs` of the mixed path.
     fn contract(&self, vec: &[Complex64], conj: bool) -> Result<Vec<Complex64>, FciMatvecError> {
         if vec.len() != self.dim {
             return Err(FciMatvecError::DimensionMismatch {
@@ -650,14 +701,17 @@ impl CompiledSector {
                     out[dst] += weight * vec[src];
                 }
             }
-            CompiledKind::Spinful {
-                dim_a,
-                dim_b,
-                scalar,
-                alpha_only,
-                beta_only,
-                mixed,
-            } => {
+            CompiledKind::Spinful(spinful) => {
+                let SpinfulCompiled {
+                    dim_a,
+                    dim_b,
+                    scalar,
+                    alpha_only,
+                    beta_only,
+                    mixed_coeffs,
+                    mixed_alpha,
+                    mixed_beta,
+                } = spinful.as_ref();
                 // Scalar (identity on both spins): a single diagonal scale over the whole vector.
                 let scalar = if conj { scalar.conj() } else { *scalar };
                 if scalar != zero {
@@ -699,11 +753,56 @@ impl CompiledSector {
                         out[row + db] += scale * vec[row + sb];
                     }
                 }
-                // Mixed (both spins active): dense flat scatter over the block-spin flat index.
-                for &(src, dst, weight) in mixed {
-                    let weight = if conj { weight.conj() } else { weight };
-                    let (src, dst) = if conj { (dst, src) } else { (src, dst) };
-                    out[dst] += weight * vec[src];
+                // Mixed (both spins active): contract each term's factored alpha/beta blocks.
+                // `out[a_dst*dim_b + b_dst] += coeff * a_phase * b_phase * vec[a_src*dim_b + b_src]`,
+                // where the alpha and beta transitions are the term's CSR segments. The `conj` /
+                // shorter-block dispatch is resolved once per term (not per inner iteration), and the
+                // inner block's +/-1 phase is applied by conditional negation rather than a complex
+                // multiply -- both keep the innermost loop a single fused-multiply-add.
+                for (t, &coeff) in mixed_coeffs.iter().enumerate() {
+                    let coeff = if conj { coeff.conj() } else { coeff };
+                    let (a0, a1) = (mixed_alpha.indptr[t], mixed_alpha.indptr[t + 1]);
+                    let (b0, b1) = (mixed_beta.indptr[t], mixed_beta.indptr[t + 1]);
+                    // Iterate the shorter block outer so `coeff * outer_phase` is hoisted for the
+                    // smaller factor and the inner loop runs over the longer one. `(o_block, i_block)`
+                    // and the `(outer, inner) -> (alpha, beta)` remap are chosen once per term.
+                    let dim_b = *dim_b;
+                    let alpha_outer = a1 - a0 <= b1 - b0;
+                    let (o0, o1, i0, i1) = if alpha_outer {
+                        (a0, a1, b0, b1)
+                    } else {
+                        (b0, b1, a0, a1)
+                    };
+                    let (o_block, i_block) = if alpha_outer {
+                        (mixed_alpha, mixed_beta)
+                    } else {
+                        (mixed_beta, mixed_alpha)
+                    };
+                    for o in o0..o1 {
+                        let (o_src, o_dst) = if conj {
+                            (o_block.dst[o], o_block.src[o])
+                        } else {
+                            (o_block.src[o], o_block.dst[o])
+                        };
+                        // Fold the outer block's +/-1 phase into the coefficient once per outer entry.
+                        let scale = coeff * f64::from(o_block.phase[o]);
+                        for i in i0..i1 {
+                            let (i_src, i_dst) = if conj {
+                                (i_block.dst[i], i_block.src[i])
+                            } else {
+                                (i_block.src[i], i_block.dst[i])
+                            };
+                            // Remap (outer, inner) back to (alpha, beta) for the block-spin flat index
+                            // `alpha_addr * dim_b + beta_addr`.
+                            let (a_src, b_src, a_dst, b_dst) = if alpha_outer {
+                                (o_src, i_src, o_dst, i_dst)
+                            } else {
+                                (i_src, o_src, i_dst, o_dst)
+                            };
+                            out[a_dst * dim_b + b_dst] +=
+                                scale * f64::from(i_block.phase[i]) * vec[a_src * dim_b + b_src];
+                        }
+                    }
                 }
             }
         }
@@ -827,12 +926,14 @@ impl SpinfulSector {
         let mut scalar = Complex64::new(0.0, 0.0);
         let mut alpha_only_raw: Vec<(usize, usize, Complex64)> = Vec::new();
         let mut beta_only_raw: Vec<(usize, usize, Complex64)> = Vec::new();
-        let mut mixed: Vec<(usize, usize, Complex64)> = Vec::new();
+        let mut mixed_coeffs: Vec<Complex64> = Vec::new();
+        let mut mixed_alpha = PhasedTransitions::new();
+        let mut mixed_beta = PhasedTransitions::new();
         let mut alpha_ops: Vec<(bool, u32)> = Vec::new();
         let mut beta_ops: Vec<(bool, u32)> = Vec::new();
-        // Reused per term: the surviving transitions of each spin block, as `(src, dst, scale)`.
-        let mut alpha_trans: Vec<(usize, usize, Complex64)> = Vec::new();
-        let mut beta_trans: Vec<(usize, usize, Complex64)> = Vec::new();
+        // Reused per term: the surviving alpha transitions of a mixed term, as `(src, dst, phase)`.
+        // (Beta transitions are appended straight into `mixed_beta`.)
+        let mut alpha_trans: Vec<(usize, usize, i8)> = Vec::new();
         for (coeff, actions, modes) in terms {
             alpha_ops.clear();
             beta_ops.clear();
@@ -887,13 +988,11 @@ impl SpinfulSector {
                         ));
                     }
                 }
-                // Mixed: both spins active. Build each block's surviving transitions, then emit the
-                // dense cross product `out[a_out*dim_b + b_out] += coeff * a_sign * (cross*b_sign) *
-                // vec[a_src*dim_b + b_src]`.
-                //
-                // Gap A (deferred, see the plan): keep the two blocks factored -- store `alpha_trans`
-                // and `beta_trans` as separate CSR segments and contract them at apply-time -- to avoid
-                // this `|alpha_trans| * |beta_trans|` materialization for molecular Hamiltonians.
+                // Mixed: both spins active. Keep the two blocks *factored* -- one CSR segment of alpha
+                // transitions and one of beta transitions -- instead of materializing the
+                // `|alpha_trans| * |beta_trans|` dense cross product. The `cross_sign` (a per-term
+                // constant) is folded into the coefficient, so the alpha phase is `a_sign` and the beta
+                // phase is `b_sign`; the apply-time contraction recombines them.
                 (false, false) => {
                     alpha_trans.clear();
                     for (a_addr, &a_string) in self.alpha_strings.iter().enumerate() {
@@ -904,13 +1003,14 @@ impl SpinfulSector {
                         if a_out.count_ones() != n_alpha {
                             continue;
                         }
-                        let a_out_addr = str2addr(&self.table, a_out);
-                        alpha_trans.push((a_addr, a_out_addr, Complex64::from(f64::from(a_sign))));
+                        alpha_trans.push((a_addr, str2addr(&self.table, a_out), a_sign));
                     }
+                    // A block with no surviving transitions annihilates the sector: drop the whole term
+                    // (emit no alpha or beta segment) rather than a segment that never contributes.
                     if alpha_trans.is_empty() {
                         continue;
                     }
-                    beta_trans.clear();
+                    let beta_start = mixed_beta.src.len();
                     for (b_addr, &b_string) in self.beta_strings.iter().enumerate() {
                         let Some((b_out, b_sign)) = apply_ops_to_string(b_string, &beta_ops) else {
                             continue;
@@ -918,34 +1018,34 @@ impl SpinfulSector {
                         if b_out.count_ones() != n_beta {
                             continue;
                         }
-                        let b_out_addr = str2addr(&self.table, b_out);
-                        beta_trans.push((
-                            b_addr,
-                            b_out_addr,
-                            Complex64::from(f64::from(b_sign * cross_sign)),
-                        ));
+                        mixed_beta.push(b_addr, str2addr(&self.table, b_out), b_sign);
                     }
-                    for &(a_src, a_dst, a_scale) in &alpha_trans {
-                        let (src_row, dst_row) = (a_src * dim_b, a_dst * dim_b);
-                        let weight = coeff * a_scale;
-                        for &(b_src, b_dst, b_scale) in &beta_trans {
-                            mixed.push((src_row + b_src, dst_row + b_dst, weight * b_scale));
-                        }
+                    if mixed_beta.src.len() == beta_start {
+                        // Beta annihilates the sector; roll back nothing (we appended none) and skip.
+                        continue;
                     }
+                    for &(a_src, a_dst, a_phase) in &alpha_trans {
+                        mixed_alpha.push(a_src, a_dst, a_phase);
+                    }
+                    mixed_alpha.finish_term();
+                    mixed_beta.finish_term();
+                    mixed_coeffs.push(coeff * f64::from(cross_sign));
                 }
             }
         }
         Ok(CompiledSector {
             dim: self.dim,
-            kind: CompiledKind::Spinful {
+            kind: CompiledKind::Spinful(Box::new(SpinfulCompiled {
                 dim_a: self.alpha_strings.len(),
                 dim_b,
                 scalar,
                 // Coalesce transitions sharing a `(src, dst)` key into one fused multiply per matvec.
                 alpha_only: coalesce(alpha_only_raw),
                 beta_only: coalesce(beta_only_raw),
-                mixed,
-            },
+                mixed_coeffs,
+                mixed_alpha,
+                mixed_beta,
+            })),
         })
     }
 }
@@ -1897,14 +1997,10 @@ mod tests {
             &compiled.apply(&vec).unwrap(),
             &reference_matvec(norb, n_a, Some(n_b), &terms, &vec),
         );
-        let CompiledKind::Spinful {
-            alpha_only,
-            beta_only,
-            ..
-        } = &compiled.kind
-        else {
+        let CompiledKind::Spinful(spinful) = &compiled.kind else {
             panic!("expected a spinful compiled kind");
         };
+        let (alpha_only, beta_only) = (&spinful.alpha_only, &spinful.beta_only);
         // Two alpha-number terms fused into one alpha_only family per surviving determinant, and two
         // beta-hop terms fused into one beta_only family -- each strictly fewer than the 2x raw pushes.
         let alpha_survivors = sector.alpha_strings.iter().filter(|&&s| s & 1 != 0).count();
@@ -1955,5 +2051,79 @@ mod tests {
                 &reference_matvec(norb, n_a, Some(n_b), &terms, &vec),
             );
         }
+    }
+
+    #[test]
+    fn mixed_factored_contraction_exercises_both_shorter_block_branches() {
+        // The factored mixed contraction iterates whichever spin block has fewer transitions in the
+        // outer loop. On an asymmetric sector (n_alpha != n_beta), a term whose alpha block is a hop
+        // (few survivors) and beta block is a number operator (many survivors) drives one branch; a
+        // term with the roles reversed drives the other. Both must reproduce the naive JW reference for
+        // `apply` and `apply_conj`, and we assert the two branches are genuinely both taken.
+        let norb = 4u32;
+        let (n_a, n_b) = (3u32, 1u32); // asymmetric: a number operator has many survivors in the
+        // 3-electron block but a hop has few in the 1-electron block, so the shorter block flips with
+        // which spin carries the number operator.
+        let sector = SpinfulSector::new(norb, n_a, n_b).unwrap();
+        let dim = sector.dim();
+        let terms: Vec<(Complex64, Vec<(bool, u32)>)> = vec![
+            // alpha number operator n^a_0 (n_a = 3: many alpha survivors) with a beta hop 1->2 (n_b = 1:
+            // 1 beta survivor). Expect alpha_len > beta_len -> beta-outer branch.
+            (
+                Complex64::new(0.8, 0.2),
+                vec![(true, 0), (false, 0), (true, norb + 2), (false, norb + 1)],
+            ),
+            // alpha hop 1->2 (n_a = 3: few alpha survivors) with a beta number operator n^b_0 (n_b = 1:
+            // 1 beta survivor). Expect alpha_len <= beta_len -> alpha-outer branch.
+            (
+                Complex64::new(0.5, -0.4),
+                vec![(true, 2), (false, 1), (true, norb), (false, norb)],
+            ),
+        ];
+        let split = split_terms(&terms);
+        let compiled = sector.compile(term_views(&split)).unwrap();
+
+        // White-box: confirm both the alpha-outer (a_len <= b_len) and beta-outer (a_len > b_len)
+        // branches are represented across the compiled mixed terms.
+        let CompiledKind::Spinful(spinful) = &compiled.kind else {
+            panic!("expected a spinful compiled kind");
+        };
+        let (mixed_alpha, mixed_beta, mixed_coeffs) = (
+            &spinful.mixed_alpha,
+            &spinful.mixed_beta,
+            &spinful.mixed_coeffs,
+        );
+        assert_eq!(mixed_coeffs.len(), 2, "both mixed terms should compile");
+        let mut saw_alpha_outer = false;
+        let mut saw_beta_outer = false;
+        for t in 0..mixed_coeffs.len() {
+            let a_len = mixed_alpha.indptr[t + 1] - mixed_alpha.indptr[t];
+            let b_len = mixed_beta.indptr[t + 1] - mixed_beta.indptr[t];
+            if a_len <= b_len {
+                saw_alpha_outer = true;
+            } else {
+                saw_beta_outer = true;
+            }
+        }
+        assert!(
+            saw_alpha_outer && saw_beta_outer,
+            "expected both shorter-block branches to be exercised (alpha-outer={saw_alpha_outer}, \
+             beta-outer={saw_beta_outer})"
+        );
+
+        let vec: Vec<Complex64> = (0..dim)
+            .map(|i| Complex64::new((i as f64 + 0.5) * 0.19, (i as f64) * 0.13))
+            .collect();
+        assert_vec_close(
+            &compiled.apply(&vec).unwrap(),
+            &reference_matvec(norb, n_a, Some(n_b), &terms, &vec),
+        );
+        // apply_conj against the adjoint operator's forward reference.
+        let adj_terms: Vec<(Complex64, Vec<(bool, u32)>)> =
+            terms.iter().map(|(c, ops)| adjoint_term(*c, ops)).collect();
+        assert_vec_close(
+            &compiled.apply_conj(&vec).unwrap(),
+            &reference_matvec(norb, n_a, Some(n_b), &adj_terms, &vec),
+        );
     }
 }
