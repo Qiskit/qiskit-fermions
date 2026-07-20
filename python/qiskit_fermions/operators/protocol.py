@@ -16,12 +16,28 @@ from __future__ import annotations
 
 import sys
 from collections.abc import Iterable, Iterator
-from typing import Protocol
+from typing import TYPE_CHECKING, Protocol
 
 if sys.version_info >= (3, 11):
     from typing import Self
 else:
     from typing_extensions import Self
+
+if TYPE_CHECKING:
+    from qiskit_fermions._lib.linalg.fci import FciLinearOperator
+
+
+class SupportsFciLinearOperator(Protocol):
+    """A protocol for operators carrying a native FCI matrix-vector kernel.
+
+    This is the internal contract behind the public ``_linear_operator_`` protocol method attached to
+    such operators in :mod:`qiskit_fermions.operators`: the Python wrapper depends only on this
+    ``_fci_linear_operator_`` carrier, not on any concrete operator type. Today only
+    :class:`~qiskit_fermions.operators.FermionOperator` implements it.
+    """
+
+    def _fci_linear_operator_(self, norb: int, nelec: int | tuple[int, int]) -> FciLinearOperator:
+        """Returns a native FCI matrix-vector view of this operator on the ``(norb, nelec)`` sector."""
 
 
 class OperatorTrait(Protocol):
