@@ -18,6 +18,7 @@ import numpy as np
 import pytest
 from qiskit_fermions.circuit import FermionicCircuit
 from qiskit_fermions.circuit.fermionic_gate import FermionicGate
+from qiskit_fermions.circuit.library import InitializeModes
 
 ffsim = pytest.importorskip("ffsim")
 
@@ -133,6 +134,40 @@ def test_apply_unitary_empty_circuit_with_vec_returns_it():
 
     result = circ._apply_unitary_(vec0, norb, nelec, copy=True)
     np.testing.assert_array_equal(result, vec0)
+
+
+def test_apply_unitary_seeds_from_none_vec_via_producer_first_instruction():
+    """A circuit whose first instruction is a state producer seeds from a None vec with copy=True.
+
+    Regression: the DAG walk must let a producer (:class:`.InitializeModes`) seed the state from a
+    ``None`` incoming vector without tripping the ``copy`` handling.
+    """
+    norb = 2
+    nelec = (1, 1)
+    circ = FermionicCircuit(2 * norb)
+    circ.append(InitializeModes([True, False, True, False]), circ.modes)
+
+    result = circ._apply_unitary_(None, norb, nelec, copy=True)
+    expected = ffsim.slater_determinant(norb, ([0], [0]))
+    np.testing.assert_allclose(result, expected, atol=1e-12)
+
+
+def test_apply_unitary_normalizes_numpy_int_nelec_in_dag_walk():
+    """A numpy-integer spinless nelec is normalized inside the circuit's DAG walk, matching ``int``.
+
+    The DAG walk calls each instruction's ``_apply_unitary_placed_`` directly, bypassing the
+    gate-level ``FermionicGate._apply_unitary_`` choke-point that normalizes ``nelec``. It therefore
+    normalizes the ``nelec`` itself (:meth:`.FermionicCircuit._apply_unitary_placed_`); without that a
+    ``np.int64`` would reach the instructions un-normalized and be misclassified as spinful. The
+    ``np.int64`` result must match the plain-``int`` spinless path.
+    """
+    norb = 5
+    circ = FermionicCircuit(norb)
+    circ.append(InitializeModes([True, False, True, False, False]), circ.modes)
+
+    expected = circ._apply_unitary_(None, norb, 2, copy=True)
+    result = circ._apply_unitary_(None, norb, np.int64(2), copy=True)
+    np.testing.assert_array_equal(result, expected)
 
 
 def test_apply_unitary_transform_first_gate_with_none_vec_raises_clean_error():

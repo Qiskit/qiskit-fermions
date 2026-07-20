@@ -214,6 +214,10 @@ def test_evolution_apply_unitary_accepts_numpy_int_nelec():
     A numpy scalar is not a Python ``int``; a naive ``isinstance(nelec, int)`` check would route it
     to the spinful branch, splitting the conservation check into two spin blocks and disagreeing with
     the native (spinless) kernel it feeds. The result must match the plain-``int`` spinless path.
+
+    This exercises the shared gate-level normalization choke-point
+    (:meth:`.FermionicGate._apply_unitary_` -> ``_normalize_nelec``) common to all concrete gates; the
+    circuit DAG walk's own normalization is covered separately in the FermionicCircuit apply tests.
     """
     norb = 5
     nelec = 2  # spinless: C(5, 2) = 10
@@ -267,7 +271,12 @@ def test_evolution_apply_unitary_rejects_non_fermion_operator():
 
 
 def test_evolution_apply_unitary_rejects_spin_non_conserving_operator():
-    """A number-conserving term that changes Sz is rejected in the spinful branch."""
+    """A number-conserving term that changes Sz is rejected in the spinful branch.
+
+    The same ``a†_{0 alpha} a_{0 beta}`` term *is* number-conserving when the ``2 * norb`` modes are
+    read as a single spinless block; the spinless-acceptance of such a term is covered by the ED-oracle
+    test above, so here we only assert the spinful rejection.
+    """
     norb = 2
     vec = np.ones(4, dtype=complex)
 
@@ -276,19 +285,6 @@ def test_evolution_apply_unitary_rejects_spin_non_conserving_operator():
     spin_flip = FermionOperator.from_dict({((True, 0), (False, 2)): 1.0})
     with pytest.raises(ValueError, match="spin species"):
         Evolution(2 * norb, spin_flip, time=0.1)._apply_unitary_(vec, norb, (1, 1), copy=True)
-
-    # Treated as a single spinless block of 4 orbitals the same operator conserves number, so it is
-    # accepted (C(4, 2) = 6 dimensional sector) and must match an independent ED oracle.
-    pytest.importorskip("pyscf")
-    accepted_terms = {((True, 0), (False, 2)): 1.0}
-    accepted = FermionOperator.from_dict(accepted_terms)
-    rng = np.random.default_rng(1)
-    vec0 = rng.standard_normal(6) + 1j * rng.standard_normal(6)
-    expected = _spinless_evolution_oracle(accepted_terms, 2 * norb, 2, 0.1, vec0.copy())
-    result = Evolution(2 * norb, accepted, time=0.1)._apply_unitary_(
-        vec0.copy(), 2 * norb, 2, copy=True
-    )
-    np.testing.assert_allclose(result, expected, atol=1e-10)
 
 
 def test_evolution_apply_unitary_matches_ffsim_molecular_hamiltonian():

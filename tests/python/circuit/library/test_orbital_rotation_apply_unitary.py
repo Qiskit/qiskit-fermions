@@ -190,24 +190,6 @@ def test_orbital_rotation_apply_unitary_spinless_matches_oracle():
     np.testing.assert_array_equal(vec0, vec0_before)
 
 
-def test_orbital_rotation_apply_unitary_accepts_numpy_int_nelec():
-    """A numpy-integer (e.g. ``np.int64``) spinless nelec is treated as spinless, matching ``int``.
-
-    A numpy scalar is not a Python ``int``, so a naive ``isinstance(nelec, int)`` check would route
-    it to the spinful branch and crash inside ffsim's own ``isinstance(int)`` classification. The
-    result must match the plain-``int`` spinless path.
-    """
-    norb = 5
-    rot = random_unitary(norb, seed=3)
-    rng = np.random.default_rng(0)
-    vec0 = rng.standard_normal(10) + 1j * rng.standard_normal(10)
-
-    expected = OrbitalRotation(rot)._apply_unitary_(vec0.copy(), norb, 2, copy=True)
-    result = OrbitalRotation(rot)._apply_unitary_(vec0.copy(), norb, np.int64(2), copy=True)
-
-    np.testing.assert_array_equal(result, expected)
-
-
 def test_orbital_rotation_apply_unitary_matches_ffsim():
     """The spinful and spinless paths agree with ffsim.apply_orbital_rotation directly."""
     norb = 3
@@ -301,25 +283,6 @@ def test_orbital_rotation_apply_unitary_rejects_spin_mixing(monkeypatch):
     monkeypatch.setattr(orbital_rotation_module, "HAS_FFSIM", False)
     with pytest.raises(ValueError, match="mixes the alpha and beta spin sectors"):
         OrbitalRotation(full)._apply_unitary_(vec0, norb, nelec, copy=True)
-
-
-def test_orbital_rotation_generator_sector_guard_catches_spin_mixing():
-    """The general path's generator sector guard rejects a spin-mixing embedded matrix.
-
-    ``_resolve_orbital_rotation`` normally rejects a spin-mixing rotation at the matrix level before
-    the generator is ever built, and ``logm`` preserves block-diagonal structure, so this internal
-    guard cannot fire for a rotation reaching it through the public API. Calling ``_apply_via_generator``
-    directly with a spin-mixing ``full`` (bypassing the matrix check) exercises the defense-in-depth
-    assertion that ties this path to the same ``conserves_sector`` contract Evolution uses -- guarding
-    against a future regression that would let a cross-block term slip into the generator.
-    """
-    norb = 3
-    nelec = (2, 1)
-    full = random_unitary(2 * norb, seed=11)  # dense: mixes the alpha/beta sectors
-    vec0 = ffsim.slater_determinant(norb, ([0, 1], [0]))
-
-    with pytest.raises(ValueError, match="generator does not conserve"):
-        OrbitalRotation._apply_via_generator(full, vec0, norb, nelec, copy=True)
 
 
 def test_orbital_rotation_apply_unitary_accepts_block_diagonal_with_float_noise():

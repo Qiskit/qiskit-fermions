@@ -29,7 +29,12 @@ ffsim = pytest.importorskip("ffsim")
 
 
 def _apply_ours(ucj_op, norb, nelec, reference):
-    """Rebuilds an ffsim UCJ operator with our UCJ gate and applies it to ``reference``."""
+    """Rebuilds an ffsim UCJ operator with our UCJ gate and applies it to ``reference``.
+
+    Applies the :class:`.UCJ` gate itself (via ffsim's ``SupportsApplyUnitary`` protocol), so these
+    correctness checks exercise the gate's public :meth:`.UCJ._apply_unitary_placed_` path -- which
+    delegates to its ``_build_definition()`` -- rather than the definition circuit directly.
+    """
     gate = UCJ(
         norb,
         nelec,
@@ -37,7 +42,7 @@ def _apply_ours(ucj_op, norb, nelec, reference):
         ucj_op.orbital_rotations,
         final_orbital_rotation=ucj_op.final_orbital_rotation,
     )
-    return ffsim.apply_unitary(reference, gate._build_definition(), norb=norb, nelec=nelec)
+    return ffsim.apply_unitary(reference, gate, norb=norb, nelec=nelec)
 
 
 def test_ucj_spin_balanced_matches_ffsim():
@@ -93,11 +98,13 @@ def test_ucj_spinless_on_spinless_sector_matches_ffsim():
 
 
 def test_ucj_gate_accepts_numpy_int_nelec():
-    """A UCJ built with a numpy-integer (e.g. ``np.int64``) spinless nelec matches the ``int`` build.
+    """A UCJ built with a numpy-integer (e.g. ``np.int64``) spinless nelec infers the spinless variant.
 
-    A numpy scalar is not a Python ``int``, so a naive ``isinstance(nelec, int)`` check would infer
-    the spinful variant, build the wrong (aa/ab/bb) diagonal-Coulomb layer, and crash inside ffsim's
-    own ``isinstance(int)`` classification. The applied state must match the plain-``int`` build.
+    A numpy scalar is not a Python ``int``, so a naive ``isinstance(nelec, int)`` check at
+    construction time would infer the spinful variant and build the wrong (aa/ab/bb) diagonal-Coulomb
+    layer. This is a UCJ-specific *construction*-time concern (variant inference), distinct from the
+    shared apply-path ``_normalize_nelec`` covered by the other gates' apply tests: the ``np.int64``
+    build must select the same spinless variant as the plain-``int`` build.
     """
     norb = 4
     ucj_op = ffsim.random.random_ucj_op_spinless(
@@ -113,14 +120,7 @@ def test_ucj_gate_accepts_numpy_int_nelec():
             final_orbital_rotation=ucj_op.final_orbital_rotation,
         )
 
-    gate_int = build(2)
-    gate_np = build(np.int64(2))
-    assert gate_int._variant is gate_np._variant is UCJ.Variant.SPINLESS
-
-    # the two builds are mathematically identical; they may differ only at floating-point rounding
-    expected = gate_int._apply_unitary_(None, norb, 2, copy=True)
-    result = gate_np._apply_unitary_(None, norb, np.int64(2), copy=True)
-    np.testing.assert_allclose(result, expected, atol=1e-12)
+    assert build(2)._variant is build(np.int64(2))._variant is UCJ.Variant.SPINLESS
 
 
 def test_ucj_gate_apply_unitary_seeds_from_none():
@@ -276,7 +276,7 @@ def test_ucj_from_t_amplitudes_balanced_matches_ffsim():
         expected = ffsim.apply_unitary(reference, ucj_op, norb=norb, nelec=nelec)
 
         gate = UCJ.from_t_amplitudes(nelec, t2, t1=t1, variant="balanced", **kwargs_ours)
-        result = ffsim.apply_unitary(reference, gate._build_definition(), norb=norb, nelec=nelec)
+        result = ffsim.apply_unitary(reference, gate, norb=norb, nelec=nelec)
         np.testing.assert_allclose(result, expected, atol=1e-10)
 
 
@@ -299,7 +299,7 @@ def test_ucj_from_t_amplitudes_spinless_matches_ffsim():
     expected = ffsim.apply_unitary(reference, ucj_op, norb=norb, nelec=nelec)
 
     gate = UCJ.from_t_amplitudes(nelec, ccsd.t2, t1=ccsd.t1, variant="spinless")
-    result = ffsim.apply_unitary(reference, gate._build_definition(), norb=norb, nelec=nelec)
+    result = ffsim.apply_unitary(reference, gate, norb=norb, nelec=nelec)
     np.testing.assert_allclose(result, expected, atol=1e-10)
 
 
@@ -320,7 +320,7 @@ def test_ucj_from_t_amplitudes_unbalanced_matches_ffsim():
     expected = ffsim.apply_unitary(reference, ucj_op, norb=norb, nelec=nelec)
 
     gate = UCJ.from_t_amplitudes(nelec, ccsd.t2, t1=ccsd.t1, variant="unbalanced")
-    result = ffsim.apply_unitary(reference, gate._build_definition(), norb=norb, nelec=nelec)
+    result = ffsim.apply_unitary(reference, gate, norb=norb, nelec=nelec)
     np.testing.assert_allclose(result, expected, atol=1e-10)
 
 
@@ -356,7 +356,7 @@ def test_ucj_from_t_amplitudes_unbalanced_with_same_spin_terms_matches_ffsim():
     expected = ffsim.apply_unitary(reference, ucj_op, norb=norb, nelec=nelec)
 
     gate = UCJ.from_t_amplitudes(nelec, t2, variant="unbalanced")
-    result = ffsim.apply_unitary(reference, gate._build_definition(), norb=norb, nelec=nelec)
+    result = ffsim.apply_unitary(reference, gate, norb=norb, nelec=nelec)
 
     np.testing.assert_allclose(np.linalg.norm(result), 1.0, atol=1e-10)
     np.testing.assert_allclose(result, expected, atol=1e-10)

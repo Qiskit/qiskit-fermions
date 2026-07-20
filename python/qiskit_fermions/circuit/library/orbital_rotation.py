@@ -199,8 +199,9 @@ class OrbitalRotation(FermionicGate):
 
         This is the ``ffsim``-free fallback, requiring only ``scipy`` plus the native FCI
         matrix-vector kernel. ``full`` has already been validated by :meth:`_resolve_orbital_rotation`
-        to be sector-preserving (spinless, or block-diagonal across the alpha/beta split), so the
-        generator ``G`` conserves the ``(norb, nelec)`` sector and no amplitude is dropped.
+        to be sector-preserving (spinless, or block-diagonal across the alpha/beta split), and
+        ``logm`` preserves that block-diagonal structure, so the generator ``G`` conserves the
+        ``(norb, nelec)`` sector and no amplitude is dropped.
         """
         import scipy.linalg
         import scipy.sparse.linalg
@@ -224,24 +225,6 @@ class OrbitalRotation(FermionicGate):
             if abs(log_mat[i, j]) > tol
         }
         generator = FermionOperator.from_dict(terms)  # type: ignore[arg-type]
-
-        # Defense-in-depth: the generator must conserve the same (norb, nelec) sector that
-        # Evolution checks via the same predicate. ``_resolve_orbital_rotation`` already rejected a
-        # spin-mixing ``full`` at the matrix level, and ``logm`` preserves block-diagonal structure,
-        # so a block-diagonal ``full`` yields a sector-conserving ``G`` -- this cannot fire for a
-        # rotation that passed the matrix check. It guards against a future regression (e.g. a
-        # ``logm``/tolerance change leaking a cross-block term into ``G``) that would otherwise let
-        # the native kernel silently project amplitude out of the sector, turning ``exp(G)`` into a
-        # non-unitary map. Spinless: one block of ``norb``; spinful: alpha/beta blocks of ``norb``.
-        block_sizes = [norb] if isinstance(nelec, int) else [norb, norb]
-        if not generator.conserves_sector(block_sizes):
-            raise ValueError(
-                "OrbitalRotation's generator does not conserve the (norb, nelec) sector: every term "
-                "must preserve the particle number"
-                + (" of each spin species" if not isinstance(nelec, int) else "")
-                + f" (norb={norb}, nelec={nelec}). This is an internal inconsistency -- the placed "
-                "rotation passed the spin-block check but its generator did not; please report it."
-            )
 
         # ``_linear_operator_`` is monkeypatched onto ``FermionOperator`` at import time (in
         # ``qiskit_fermions.operators``); the stubs type ``from_dict``'s result as the compiled

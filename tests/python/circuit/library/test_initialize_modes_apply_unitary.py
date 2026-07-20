@@ -26,62 +26,36 @@ from ...utils import random_unitary
 ffsim = pytest.importorskip("ffsim")
 
 
-def test_initialize_modes_apply_unitary_spinful_matches_ffsim():
-    """A spinful occupation seeds the same determinant as ffsim.slater_determinant."""
-    norb = 3
-    nelec = (2, 1)
-    # block-spin occupation: alpha orbitals 0,1 (modes 0,1); beta orbital 0 (mode norb + 0)
-    occupation = [True, True, False, True, False, False]
+@pytest.mark.parametrize(
+    "norb, nelec, occupation, ffsim_occ",
+    [
+        # spinful, block-spin occupation: alpha orbitals 0,1 (modes 0,1); beta orbital 0 (mode norb)
+        (3, (2, 1), [True, True, False, True, False, False], ([0, 1], [0])),
+        # spinless: orbitals 0 and 2 occupied
+        (5, 2, [True, False, True, False, False], [0, 2]),
+        # spinless, a different placement
+        (4, 2, [True, False, False, True], [0, 3]),
+        # spinful, higher ranks: alpha modes 1,3,5 | beta modes norb+0, norb+4 (orbitals 0,4)
+        (
+            6,
+            (3, 2),
+            [False, True, False, True, False, True, True, False, False, False, True, False],
+            ([1, 3, 5], [0, 4]),
+        ),
+        # spinless, higher rank
+        (6, 3, [False, True, False, True, False, True], [1, 3, 5]),
+    ],
+)
+def test_initialize_modes_apply_unitary_seed_matches_ffsim(norb, nelec, occupation, ffsim_occ):
+    """Seeding a vec=None state produces the same determinant as ffsim.slater_determinant.
 
-    result = InitializeModes(occupation)._apply_unitary_(None, norb, nelec, copy=True)
-    expected = ffsim.slater_determinant(norb, ([0, 1], [0]))
-
-    np.testing.assert_allclose(result, expected, atol=1e-12)
-
-
-def test_initialize_modes_apply_unitary_spinless_matches_ffsim():
-    """A spinless occupation seeds the same determinant as ffsim.slater_determinant."""
-    norb = 5
-    nelec = 2
-    occupation = [True, False, True, False, False]  # orbitals 0 and 2 occupied
-
-    result = InitializeModes(occupation)._apply_unitary_(None, norb, nelec, copy=True)
-    expected = ffsim.slater_determinant(norb, [0, 2])
-
-    np.testing.assert_allclose(result, expected, atol=1e-12)
-
-
-def test_initialize_modes_apply_unitary_accepts_numpy_int_nelec():
-    """A numpy-integer (e.g. ``np.int64``) spinless nelec is treated as spinless, matching ``int``.
-
-    A numpy scalar is not a Python ``int``, so a naive ``isinstance(nelec, int)`` check would route
-    it to the spinful branch and fail to unpack it as a ``(n_alpha, n_beta)`` pair. The seed must
-    match the plain-``int`` spinless path.
+    Covers the spinful and spinless mode conventions across several ranks and placements; the native
+    ``slater_determinant_statevector`` seed must match ffsim's determinant bit-for-bit in every case.
     """
-    norb = 5
-    occupation = [True, False, True, False, False]  # orbitals 0 and 2 occupied
+    result = InitializeModes(occupation)._apply_unitary_(None, norb, nelec, copy=True)
+    expected = ffsim.slater_determinant(norb, ffsim_occ)
 
-    expected = InitializeModes(occupation)._apply_unitary_(None, norb, 2, copy=True)
-    result = InitializeModes(occupation)._apply_unitary_(None, norb, np.int64(2), copy=True)
-
-    np.testing.assert_array_equal(result, expected)
-
-
-def test_initialize_modes_apply_unitary_vec_none_seeds_from_nothing():
-    """The vec=None path produces the determinant for both spinful and spinless systems."""
-    # spinful
-    norb = 3
-    nelec = (2, 1)
-    occupation = [True, True, False, True, False, False]
-    result = InitializeModes(occupation)._apply_unitary_(None, norb, nelec, copy=False)
-    np.testing.assert_allclose(result, ffsim.slater_determinant(norb, ([0, 1], [0])), atol=1e-12)
-
-    # spinless
-    norb_s = 4
-    nelec_s = 2
-    occ_s = [True, False, False, True]
-    result_s = InitializeModes(occ_s)._apply_unitary_(None, norb_s, nelec_s, copy=False)
-    np.testing.assert_allclose(result_s, ffsim.slater_determinant(norb_s, [0, 3]), atol=1e-12)
+    np.testing.assert_allclose(result, expected, atol=1e-12)
 
 
 def test_initialize_modes_apply_unitary_agreeing_vec_logs_and_seeds(caplog):
@@ -164,28 +138,6 @@ def test_initialize_modes_apply_unitary_via_ffsim_apply_unitary_with_real_vec():
     np.testing.assert_allclose(result, expected, atol=1e-10)
 
 
-def test_initialize_modes_apply_unitary_native_seed_matches_ffsim():
-    """The native seed kernel matches ffsim.slater_determinant bit-for-bit."""
-    # spinful, non-trivial ranks
-    norb = 6
-    nelec = (3, 2)
-    # alpha orbitals 1,3,5 (modes 1,3,5); beta orbitals 0,4 (modes norb+0, norb+4)
-    alpha_occ = [False, True, False, True, False, True]
-    beta_occ = [True, False, False, False, True, False]
-    occupation = alpha_occ + beta_occ
-    result = InitializeModes(occupation)._apply_unitary_(None, norb, nelec, copy=False)
-    expected = ffsim.slater_determinant(norb, ([1, 3, 5], [0, 4]))
-    np.testing.assert_allclose(result, expected, atol=1e-12)
-
-    # spinless
-    norb_s = 6
-    nelec_s = 3
-    occ_s = [False, True, False, True, False, True]
-    result_s = InitializeModes(occ_s)._apply_unitary_(None, norb_s, nelec_s, copy=False)
-    expected_s = ffsim.slater_determinant(norb_s, [1, 3, 5])
-    np.testing.assert_allclose(result_s, expected_s, atol=1e-12)
-
-
 def test_initialize_modes_apply_unitary_rejects_sector_mismatch():
     """An occupation whose electron counts disagree with nelec is rejected."""
     # spinful: occupation sets 3 alpha but nelec asks for 2
@@ -208,15 +160,3 @@ def test_initialize_modes_apply_unitary_rejects_wrong_length_vec():
     wrong = np.zeros(5, dtype=complex)  # sector dim is C(3,2)*C(3,1) = 9
     with pytest.raises(ValueError, match="does not match the dimension"):
         InitializeModes(occupation)._apply_unitary_(wrong, norb, nelec, copy=True)
-
-
-def test_fermionic_circuit_apply_unitary_accepts_none_vec():
-    """Regression: FermionicCircuit._apply_unitary_ does not crash on a None vec with copy=True."""
-    norb = 2
-    nelec = (1, 1)
-    circ = FermionicCircuit(2 * norb)
-    circ.append(InitializeModes([True, False, True, False]), circ.modes)
-
-    result = circ._apply_unitary_(None, norb, nelec, copy=True)
-    expected = ffsim.slater_determinant(norb, ([0], [0]))
-    np.testing.assert_allclose(result, expected, atol=1e-12)
