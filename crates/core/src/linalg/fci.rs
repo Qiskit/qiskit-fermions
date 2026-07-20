@@ -501,26 +501,108 @@ impl SpinlessSector {
                 }
             }
         }
+        // Coalesce transitions sharing a `(src, dst)` key so each is one fused multiply per matvec.
+        let coalesced = coalesce(entries);
+        let entries = (0..coalesced.scale.len())
+            .map(|k| (coalesced.src[k], coalesced.dst[k], coalesced.scale[k]))
+            .collect();
         Ok(CompiledSector {
             dim: self.dim(),
-            entries,
+            kind: CompiledKind::Spinless { entries },
         })
     }
 }
 
-/// An operator compiled into a flat scatter map for a fixed sector: `out[dst] += w * vec[src]`.
+/// A coalesced list of single-block transitions `out[dst] += scale * vec[src]`.
 ///
-/// Each entry `(src, dst, weight)` records that the operator maps the amplitude at source address
-/// `src` to destination address `dst` with the (coefficient x fermionic sign) `weight`. Built once by
-/// [`SpinlessSector::compile`] or [`SpinfulSector::compile`] and reused across the repeated matvecs
-/// (and rmatvecs, via [`Self::apply_conj`]) of a single `expm_multiply`, this replaces the per-call
-/// ladder walk / conservation check / `str2addr` rank with a plain gather-scatter. The addresses are
-/// sector-local: for the spinless case they are `str2addr` ranks; for the spinful case they are the
-/// block-spin flat index `addr_a * dim_b + addr_b`.
+/// The three arrays are parallel: entry `k` is `(src[k], dst[k], scale[k])`. Produced by
+/// [`coalesce`], which sums the `scale` of every raw transition sharing a `(src, dst)` key, so no two
+/// entries here repeat a `(src, dst)` pair. Used for the spinful [`CompiledKind::Spinful`] fast paths
+/// where one spin block is the identity (`alpha_only` / `beta_only`).
+#[derive(Clone, Debug, Default)]
+struct ScaledTransitions {
+    src: Vec<usize>,
+    dst: Vec<usize>,
+    scale: Vec<Complex64>,
+}
+
+/// Coalesces raw `(src, dst, weight)` transitions, summing the weights of every pair sharing the same
+/// `(src, dst)` key into a single [`ScaledTransitions`] entry.
+///
+/// This is the Rust analog of ffsim's `lexsort` + `add.reduceat`: distinct operator terms (or distinct
+/// source determinants) that scatter into the same `(src, dst)` slot contribute one fused float
+/// multiply per matvec instead of one each. Entries whose fused weight is exactly zero are dropped.
+fn coalesce(mut raw: Vec<(usize, usize, Complex64)>) -> ScaledTransitions {
+    raw.sort_unstable_by_key(|&(src, dst, _)| (src, dst));
+    let mut out = ScaledTransitions::default();
+    for (src, dst, weight) in raw {
+        if let (Some(&last_src), Some(&last_dst)) = (out.src.last(), out.dst.last())
+            && last_src == src
+            && last_dst == dst
+        {
+            *out.scale.last_mut().unwrap() += weight;
+        } else {
+            out.src.push(src);
+            out.dst.push(dst);
+            out.scale.push(weight);
+        }
+    }
+    // Drop exactly-zero fused weights (e.g. `n_0 - n_0`); they contribute nothing to any matvec.
+    let mut k = 0;
+    for i in 0..out.scale.len() {
+        if out.scale[i] != Complex64::new(0.0, 0.0) {
+            out.src[k] = out.src[i];
+            out.dst[k] = out.dst[i];
+            out.scale[k] = out.scale[i];
+            k += 1;
+        }
+    }
+    out.src.truncate(k);
+    out.dst.truncate(k);
+    out.scale.truncate(k);
+    out
+}
+
+/// The compiled scatter data, specialized by sector kind.
+///
+/// The spinless case is a single coalesced flat scatter. The spinful case is *categorized* by which
+/// spin blocks a term acts on non-trivially, so that identity blocks are swept cheaply rather than
+/// materialized as dense diagonal entries:
+///
+/// * `scalar` -- terms that are the identity on both spins, summed into one coefficient (applied as
+///   `out += scalar * vec`).
+/// * `alpha_only` / `beta_only` -- terms that are the identity on the *other* spin, kept as coalesced
+///   single-block transitions and applied with an inner sweep over the untouched block.
+/// * `mixed` -- terms acting non-trivially on both spins, kept as a flat `(src, dst, weight)` scatter
+///   over the block-spin flat index `addr_a * dim_b + addr_b`. (This dense cross product is the one
+///   remaining ffsim #663 win to port; see the `Gap A` note in `SpinfulSector::compile`.)
+#[derive(Clone, Debug)]
+enum CompiledKind {
+    Spinless {
+        entries: Vec<(usize, usize, Complex64)>,
+    },
+    Spinful {
+        dim_a: usize,
+        dim_b: usize,
+        scalar: Complex64,
+        alpha_only: ScaledTransitions,
+        beta_only: ScaledTransitions,
+        mixed: Vec<(usize, usize, Complex64)>,
+    },
+}
+
+/// An operator compiled into a reusable scatter map for a fixed sector.
+///
+/// Built once by [`SpinlessSector::compile`] or [`SpinfulSector::compile`] and reused across the
+/// repeated matvecs (and rmatvecs, via [`Self::apply_conj`]) of a single `expm_multiply`, this
+/// replaces the per-call ladder walk / conservation check / `str2addr` rank with a plain
+/// gather-scatter. Addresses are sector-local: for the spinless case they are `str2addr` ranks; for
+/// the spinful case they are the block-spin flat index `addr_a * dim_b + addr_b`. See [`CompiledKind`]
+/// for how spinful terms are categorized so identity spin blocks cost a cheap sweep.
 #[derive(Clone, Debug)]
 pub struct CompiledSector {
     dim: usize,
-    entries: Vec<(usize, usize, Complex64)>,
+    kind: CompiledKind,
 }
 
 impl CompiledSector {
@@ -535,34 +617,95 @@ impl CompiledSector {
     /// `vec` must have length [`Self::dim`]. Equivalent to (and validated bit-for-bit against)
     /// the corresponding sector's `matvec` with the same operator and sector.
     pub fn apply(&self, vec: &[Complex64]) -> Result<Vec<Complex64>, FciMatvecError> {
-        if vec.len() != self.dim {
-            return Err(FciMatvecError::DimensionMismatch {
-                expected: self.dim,
-                actual: vec.len(),
-            });
-        }
-        let mut out = vec![Complex64::new(0.0, 0.0); self.dim];
-        for &(src, dst, weight) in &self.entries {
-            out[dst] += weight * vec[src];
-        }
-        Ok(out)
+        self.contract(vec, false)
     }
 
     /// Applies the compiled operator's conjugate transpose to a state vector: `out = op^H @ vec`.
     ///
     /// The conjugate transpose of a scatter `src -> dst` with weight `w` is `dst -> src` with weight
-    /// `conj(w)`, so the same entry list backs both `matvec` and `rmatvec` -- no separate adjoint
+    /// `conj(w)`, so the same compiled data backs both `matvec` and `rmatvec` -- no separate adjoint
     /// operator need be built or held. `vec` must have length [`Self::dim`].
     pub fn apply_conj(&self, vec: &[Complex64]) -> Result<Vec<Complex64>, FciMatvecError> {
+        self.contract(vec, true)
+    }
+
+    /// Shared contraction for [`Self::apply`] (`conj = false`) and [`Self::apply_conj`]
+    /// (`conj = true`). When `conj`, every scatter runs `src -> dst` reversed with the weight
+    /// conjugated (single-block phases are real +/-1 folded into the complex `scale`, so conjugating
+    /// the `scale` conjugates the whole weight).
+    fn contract(&self, vec: &[Complex64], conj: bool) -> Result<Vec<Complex64>, FciMatvecError> {
         if vec.len() != self.dim {
             return Err(FciMatvecError::DimensionMismatch {
                 expected: self.dim,
                 actual: vec.len(),
             });
         }
-        let mut out = vec![Complex64::new(0.0, 0.0); self.dim];
-        for &(src, dst, weight) in &self.entries {
-            out[src] += weight.conj() * vec[dst];
+        let zero = Complex64::new(0.0, 0.0);
+        let mut out = vec![zero; self.dim];
+        match &self.kind {
+            CompiledKind::Spinless { entries } => {
+                for &(src, dst, weight) in entries {
+                    let weight = if conj { weight.conj() } else { weight };
+                    let (src, dst) = if conj { (dst, src) } else { (src, dst) };
+                    out[dst] += weight * vec[src];
+                }
+            }
+            CompiledKind::Spinful {
+                dim_a,
+                dim_b,
+                scalar,
+                alpha_only,
+                beta_only,
+                mixed,
+            } => {
+                // Scalar (identity on both spins): a single diagonal scale over the whole vector.
+                let scalar = if conj { scalar.conj() } else { *scalar };
+                if scalar != zero {
+                    for (o, v) in out.iter_mut().zip(vec) {
+                        *o += scalar * v;
+                    }
+                }
+                // Alpha-only (beta identity): each alpha transition sweeps the untouched beta block.
+                for k in 0..alpha_only.scale.len() {
+                    let scale = if conj {
+                        alpha_only.scale[k].conj()
+                    } else {
+                        alpha_only.scale[k]
+                    };
+                    let (sa, da) = if conj {
+                        (alpha_only.dst[k], alpha_only.src[k])
+                    } else {
+                        (alpha_only.src[k], alpha_only.dst[k])
+                    };
+                    let (src_off, dst_off) = (sa * dim_b, da * dim_b);
+                    for b in 0..*dim_b {
+                        out[dst_off + b] += scale * vec[src_off + b];
+                    }
+                }
+                // Beta-only (alpha identity): sweep the untouched alpha rows, applying beta transitions.
+                for a in 0..*dim_a {
+                    let row = a * dim_b;
+                    for k in 0..beta_only.scale.len() {
+                        let scale = if conj {
+                            beta_only.scale[k].conj()
+                        } else {
+                            beta_only.scale[k]
+                        };
+                        let (sb, db) = if conj {
+                            (beta_only.dst[k], beta_only.src[k])
+                        } else {
+                            (beta_only.src[k], beta_only.dst[k])
+                        };
+                        out[row + db] += scale * vec[row + sb];
+                    }
+                }
+                // Mixed (both spins active): dense flat scatter over the block-spin flat index.
+                for &(src, dst, weight) in mixed {
+                    let weight = if conj { weight.conj() } else { weight };
+                    let (src, dst) = if conj { (dst, src) } else { (src, dst) };
+                    out[dst] += weight * vec[src];
+                }
+            }
         }
         Ok(out)
     }
@@ -674,10 +817,22 @@ impl SpinfulSector {
         let num_modes = 2 * norb;
         let beta_alpha_parity: i8 = if n_alpha.is_multiple_of(2) { 1 } else { -1 };
 
-        let mut entries: Vec<(usize, usize, Complex64)> = Vec::new();
+        // We categorize each term by which spin blocks it touches, without normal-ordering the
+        // operator first. Normal ordering is unnecessary here: `apply_ops_to_string` applies a term's
+        // ladder ops right-to-left and computes the exact Jordan-Wigner sign regardless of the written
+        // order, and the alpha/beta split below is purely by mode index. A mixed term's weight
+        // factorizes as `coeff * a_sign(a) * (cross_sign * b_sign(b))` -- `a_sign` depends only on the
+        // alpha transition, `b_sign` only on the beta transition, and `cross_sign` is a per-term
+        // constant -- so each block can be compiled independently.
+        let mut scalar = Complex64::new(0.0, 0.0);
+        let mut alpha_only_raw: Vec<(usize, usize, Complex64)> = Vec::new();
+        let mut beta_only_raw: Vec<(usize, usize, Complex64)> = Vec::new();
+        let mut mixed: Vec<(usize, usize, Complex64)> = Vec::new();
         let mut alpha_ops: Vec<(bool, u32)> = Vec::new();
         let mut beta_ops: Vec<(bool, u32)> = Vec::new();
-        let mut beta_action: Vec<Option<(usize, i8)>> = Vec::new();
+        // Reused per term: the surviving transitions of each spin block, as `(src, dst, scale)`.
+        let mut alpha_trans: Vec<(usize, usize, Complex64)> = Vec::new();
+        let mut beta_trans: Vec<(usize, usize, Complex64)> = Vec::new();
         for (coeff, actions, modes) in terms {
             alpha_ops.clear();
             beta_ops.clear();
@@ -698,40 +853,99 @@ impl SpinfulSector {
                 beta_alpha_parity
             };
 
-            beta_action.clear();
-            beta_action.extend(self.beta_strings.iter().map(|&b_string| {
-                apply_ops_to_string(b_string, &beta_ops).and_then(|(b_out, b_sign)| {
-                    (b_out.count_ones() == n_beta)
-                        .then(|| (str2addr(&self.table, b_out), b_sign * cross_sign))
-                })
-            }));
-
-            for (a_addr, &a_string) in self.alpha_strings.iter().enumerate() {
-                let Some((a_out, a_sign)) = apply_ops_to_string(a_string, &alpha_ops) else {
-                    continue;
-                };
-                if a_out.count_ones() != n_alpha {
-                    continue;
+            match (alpha_ops.is_empty(), beta_ops.is_empty()) {
+                // Identity on both spins: fold into the scalar diagonal.
+                (true, true) => scalar += coeff,
+                // Beta identity: an alpha-only term. Weight = coeff * a_sign.
+                (false, true) => {
+                    for (a_addr, &a_string) in self.alpha_strings.iter().enumerate() {
+                        let Some((a_out, a_sign)) = apply_ops_to_string(a_string, &alpha_ops)
+                        else {
+                            continue;
+                        };
+                        if a_out.count_ones() != n_alpha {
+                            continue;
+                        }
+                        let a_out_addr = str2addr(&self.table, a_out);
+                        alpha_only_raw.push((a_addr, a_out_addr, coeff * f64::from(a_sign)));
+                    }
                 }
-                let a_out_addr = str2addr(&self.table, a_out);
-                let src_row = a_addr * dim_b;
-                let dst_row = a_out_addr * dim_b;
-                for (b_addr, beta) in beta_action.iter().enumerate() {
-                    let Some((b_out_addr, b_sign)) = beta else {
+                // Alpha identity: a beta-only term. Weight = coeff * cross_sign * b_sign.
+                (true, false) => {
+                    for (b_addr, &b_string) in self.beta_strings.iter().enumerate() {
+                        let Some((b_out, b_sign)) = apply_ops_to_string(b_string, &beta_ops) else {
+                            continue;
+                        };
+                        if b_out.count_ones() != n_beta {
+                            continue;
+                        }
+                        let b_out_addr = str2addr(&self.table, b_out);
+                        beta_only_raw.push((
+                            b_addr,
+                            b_out_addr,
+                            coeff * f64::from(b_sign * cross_sign),
+                        ));
+                    }
+                }
+                // Mixed: both spins active. Build each block's surviving transitions, then emit the
+                // dense cross product `out[a_out*dim_b + b_out] += coeff * a_sign * (cross*b_sign) *
+                // vec[a_src*dim_b + b_src]`.
+                //
+                // Gap A (deferred, see the plan): keep the two blocks factored -- store `alpha_trans`
+                // and `beta_trans` as separate CSR segments and contract them at apply-time -- to avoid
+                // this `|alpha_trans| * |beta_trans|` materialization for molecular Hamiltonians.
+                (false, false) => {
+                    alpha_trans.clear();
+                    for (a_addr, &a_string) in self.alpha_strings.iter().enumerate() {
+                        let Some((a_out, a_sign)) = apply_ops_to_string(a_string, &alpha_ops)
+                        else {
+                            continue;
+                        };
+                        if a_out.count_ones() != n_alpha {
+                            continue;
+                        }
+                        let a_out_addr = str2addr(&self.table, a_out);
+                        alpha_trans.push((a_addr, a_out_addr, Complex64::from(f64::from(a_sign))));
+                    }
+                    if alpha_trans.is_empty() {
                         continue;
-                    };
-                    let sign = a_sign * b_sign;
-                    entries.push((
-                        src_row + b_addr,
-                        dst_row + b_out_addr,
-                        coeff * f64::from(sign),
-                    ));
+                    }
+                    beta_trans.clear();
+                    for (b_addr, &b_string) in self.beta_strings.iter().enumerate() {
+                        let Some((b_out, b_sign)) = apply_ops_to_string(b_string, &beta_ops) else {
+                            continue;
+                        };
+                        if b_out.count_ones() != n_beta {
+                            continue;
+                        }
+                        let b_out_addr = str2addr(&self.table, b_out);
+                        beta_trans.push((
+                            b_addr,
+                            b_out_addr,
+                            Complex64::from(f64::from(b_sign * cross_sign)),
+                        ));
+                    }
+                    for &(a_src, a_dst, a_scale) in &alpha_trans {
+                        let (src_row, dst_row) = (a_src * dim_b, a_dst * dim_b);
+                        let weight = coeff * a_scale;
+                        for &(b_src, b_dst, b_scale) in &beta_trans {
+                            mixed.push((src_row + b_src, dst_row + b_dst, weight * b_scale));
+                        }
+                    }
                 }
             }
         }
         Ok(CompiledSector {
             dim: self.dim,
-            entries,
+            kind: CompiledKind::Spinful {
+                dim_a: self.alpha_strings.len(),
+                dim_b,
+                scalar,
+                // Coalesce transitions sharing a `(src, dst)` key into one fused multiply per matvec.
+                alpha_only: coalesce(alpha_only_raw),
+                beta_only: coalesce(beta_only_raw),
+                mixed,
+            },
         })
     }
 }
@@ -1606,5 +1820,140 @@ mod tests {
         // A valid occupation still succeeds.
         let vec = slater_determinant_statevector(2, 0b01, Some(0b10)).unwrap();
         assert_eq!(vec.iter().filter(|c| c.norm() > 0.0).count(), 1);
+    }
+
+    #[test]
+    fn coalescing_preserves_result() {
+        // Terms that scatter into the same `(src, dst)` slot are fused by `coalesce`. The fused map
+        // must reproduce the naive reference bit-for-bit (linearity), and the fused entry count must
+        // be smaller than the raw count -- otherwise coalescing bought nothing.
+
+        // --- Spinless: three number operators on orbital 0 collapse to one diagonal entry per
+        // occupied determinant (n_0 written three times), plus a hop written twice. ---
+        let (norb, nocc) = (5u32, 3u32);
+        let sector = SpinlessSector::new(norb, nocc);
+        let dim = sector.dim();
+        let terms: Vec<(Complex64, Vec<(bool, u32)>)> = vec![
+            (Complex64::new(1.0, 0.0), vec![(true, 0), (false, 0)]),
+            (Complex64::new(0.5, 0.0), vec![(true, 0), (false, 0)]),
+            (Complex64::new(-0.25, 0.3), vec![(true, 0), (false, 0)]),
+            (Complex64::new(0.7, 0.2), vec![(true, 1), (false, 2)]),
+            (Complex64::new(0.1, -0.4), vec![(true, 1), (false, 2)]),
+        ];
+        let split = split_terms(&terms);
+        let compiled = sector.compile(term_views(&split)).unwrap();
+        let vec: Vec<Complex64> = (0..dim)
+            .map(|i| Complex64::new(i as f64 + 0.5, (i as f64) * 0.11))
+            .collect();
+        assert_vec_close(
+            &compiled.apply(&vec).unwrap(),
+            &reference_matvec(norb, nocc, None, &terms, &vec),
+        );
+        // Coalesced entries (<= 2 distinct (src,dst) families) vs the raw scatter count.
+        let CompiledKind::Spinless { entries } = &compiled.kind else {
+            panic!("expected a spinless compiled kind");
+        };
+        let raw_spinless = terms
+            .iter()
+            .map(|(_, ops)| {
+                sector
+                    .strings
+                    .iter()
+                    .filter(|&&s| {
+                        apply_ops_to_string(s, ops).is_some_and(|(out, _)| out.count_ones() == nocc)
+                    })
+                    .count()
+            })
+            .sum::<usize>();
+        assert!(
+            entries.len() < raw_spinless,
+            "coalescing did not shrink the spinless scatter: {} !< {raw_spinless}",
+            entries.len()
+        );
+
+        // --- Spinful: the same fusion applies to the alpha-only bucket (a repeated alpha number
+        // operator) and the beta-only bucket (a repeated beta hop). ---
+        let (norb, n_a, n_b) = (3u32, 2u32, 1u32);
+        let sector = SpinfulSector::new(norb, n_a, n_b).unwrap();
+        let dim = sector.dim();
+        let terms: Vec<(Complex64, Vec<(bool, u32)>)> = vec![
+            (Complex64::new(1.0, 0.0), vec![(true, 0), (false, 0)]),
+            (Complex64::new(0.5, 0.2), vec![(true, 0), (false, 0)]),
+            (
+                Complex64::new(0.9, 0.0),
+                vec![(true, norb), (false, norb + 1)],
+            ),
+            (
+                Complex64::new(0.3, -0.1),
+                vec![(true, norb), (false, norb + 1)],
+            ),
+        ];
+        let split = split_terms(&terms);
+        let compiled = sector.compile(term_views(&split)).unwrap();
+        let vec: Vec<Complex64> = (0..dim)
+            .map(|i| Complex64::new(i as f64 + 0.3, (i as f64) * 0.07))
+            .collect();
+        assert_vec_close(
+            &compiled.apply(&vec).unwrap(),
+            &reference_matvec(norb, n_a, Some(n_b), &terms, &vec),
+        );
+        let CompiledKind::Spinful {
+            alpha_only,
+            beta_only,
+            ..
+        } = &compiled.kind
+        else {
+            panic!("expected a spinful compiled kind");
+        };
+        // Two alpha-number terms fused into one alpha_only family per surviving determinant, and two
+        // beta-hop terms fused into one beta_only family -- each strictly fewer than the 2x raw pushes.
+        let alpha_survivors = sector.alpha_strings.iter().filter(|&&s| s & 1 != 0).count();
+        assert_eq!(alpha_only.scale.len(), alpha_survivors);
+        assert!(beta_only.scale.len() < 2 * sector.beta_strings.len());
+    }
+
+    #[test]
+    fn categories_match_reference_without_normal_ordering() {
+        // A spinful operator mixing all four term categories -- identity/scalar, alpha-only,
+        // beta-only, and cross-spin mixed -- with a term written in a NON-normal order (annihilation
+        // before creation on distinct alpha modes). Categorization + the factored fast paths must
+        // reproduce the naive JW reference across a symmetric and an asymmetric sector, proving the
+        // kernel needs no normal-ordering pre-pass.
+        let norb = 3u32;
+        let terms: Vec<(Complex64, Vec<(bool, u32)>)> = vec![
+            // scalar / identity on both spins.
+            (Complex64::new(1.3, -0.2), vec![]),
+            // alpha-only, deliberately NON-normal-ordered: a_1 a†_0 (annihilation first).
+            (Complex64::new(0.7, 0.4), vec![(false, 1), (true, 0)]),
+            // beta-only hop a†_{0b} a_{1b}.
+            (
+                Complex64::new(0.5, 0.0),
+                vec![(true, norb), (false, norb + 1)],
+            ),
+            // cross-spin density-density n^a_2 n^b_2.
+            (
+                Complex64::new(1.1, 0.0),
+                vec![(true, 2), (false, 2), (true, norb + 2), (false, norb + 2)],
+            ),
+            // cross-spin, interleaved and non-normal-ordered: a_{1b} a†_{0a} a†_{1a}(no) -- use a real
+            // spin exchange a†_{0a} a†_{2b} a_{0b} a_{2a} written interleaved.
+            (
+                Complex64::new(0.6, -0.3),
+                vec![(true, 0), (true, norb + 2), (false, norb), (false, 2)],
+            ),
+        ];
+        let split = split_terms(&terms);
+        for &(n_a, n_b) in &[(2u32, 2u32), (2, 1)] {
+            let sector = SpinfulSector::new(norb, n_a, n_b).unwrap();
+            let dim = sector.dim();
+            let vec: Vec<Complex64> = (0..dim)
+                .map(|i| Complex64::new((i as f64 + 0.5) * 0.23, (i as f64) * 0.11))
+                .collect();
+            let compiled = sector.compile(term_views(&split)).unwrap();
+            assert_vec_close(
+                &compiled.apply(&vec).unwrap(),
+                &reference_matvec(norb, n_a, Some(n_b), &terms, &vec),
+            );
+        }
     }
 }

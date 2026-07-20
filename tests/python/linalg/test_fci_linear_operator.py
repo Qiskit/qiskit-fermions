@@ -63,6 +63,39 @@ def test_fci_linear_operator_matvec_matches_ffsim():
     np.testing.assert_allclose(ours.matvec(vec), ff_linop.matvec(vec), atol=1e-12)
 
 
+def test_fci_linear_operator_matvec_cross_spin_matches_ffsim():
+    """A cross-spin (mixed alpha-and-beta) term matches ffsim for both matvec and rmatvec.
+
+    The other oracle tests only exercise same-spin (alpha-only) hops. This covers the mixed path,
+    where a term acts non-trivially on *both* spin blocks -- a spin exchange plus a cross-spin
+    density-density -- and checks it against ffsim's linear operator and its adjoint.
+    """
+    norb, nelec = 3, (2, 1)
+    # Block-spin modes: m < norb is alpha orbital m; m >= norb is beta orbital m - norb.
+    hamil = FermionOperator.from_dict(
+        {
+            # spin exchange a^dag_{0a} a^dag_{2b} a_{0b} a_{2a}
+            ((True, 0), (True, norb + 2), (False, norb + 0), (False, 2)): 0.6 - 0.3j,
+            # cross-spin density-density n^a_1 n^b_1
+            ((True, 1), (False, 1), (True, norb + 1), (False, norb + 1)): 1.1,
+        }
+    )
+    ffsim_op = ffsim.FermionOperator(
+        {
+            (ffsim.cre_a(0), ffsim.cre_b(2), ffsim.des_b(0), ffsim.des_a(2)): 0.6 - 0.3j,
+            (ffsim.cre_a(1), ffsim.des_a(1), ffsim.cre_b(1), ffsim.des_b(1)): 1.1,
+        }
+    )
+    ff_linop = ffsim.linear_operator(ffsim_op, norb=norb, nelec=nelec)
+    ours = hamil._linear_operator_(norb, nelec)
+
+    dim = ff_linop.shape[0]
+    rng = np.random.default_rng(3)
+    vec = rng.standard_normal(dim) + 1j * rng.standard_normal(dim)
+    np.testing.assert_allclose(ours.matvec(vec), ff_linop.matvec(vec), atol=1e-12)
+    np.testing.assert_allclose(ours.rmatvec(vec), ff_linop.rmatvec(vec), atol=1e-12)
+
+
 def test_fci_linear_operator_rmatvec_is_adjoint():
     """``rmatvec`` applies the operator's adjoint (``A.H @ v``)."""
     hamil = FermionOperator.from_dict(
