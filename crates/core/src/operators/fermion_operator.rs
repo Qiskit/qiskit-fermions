@@ -221,49 +221,6 @@ impl FermionOperator {
         true
     }
 
-    /// Applies this operator to a spinless FCI state vector: returns `self @ vec`.
-    ///
-    /// The operator's `norb` modes are treated as spinless orbitals. `vec` is a state vector of the
-    /// `nocc`-particle sector, of length `C(norb, nocc)`, addressed by the combinatorial-number-system
-    /// convention of [`crate::linalg::fci`] (matching `pyscf.fci.cistring`, hence `ffsim`). This is the
-    /// operator-specific entry point; the addressing and sign arithmetic live in [`crate::linalg::fci`].
-    pub fn fci_matvec_spinless(
-        &self,
-        norb: u32,
-        nocc: u32,
-        vec: &[Complex64],
-    ) -> Result<Vec<Complex64>, crate::linalg::fci::FciMatvecError> {
-        crate::linalg::fci::spinless_matvec(
-            norb,
-            nocc,
-            self.iter().map(|t| (t.coeff, t.actions, t.modes)),
-            vec,
-        )
-    }
-
-    /// Applies this operator to a spinful FCI state vector: returns `self @ vec`.
-    ///
-    /// The operator's `2 * norb` modes are spin-orbitals under the block-spin convention (mode
-    /// `m < norb` is alpha orbital `m`; mode `m >= norb` is beta orbital `m - norb`). `vec` is a state
-    /// vector of the `(n_alpha, n_beta)` sector, of length `C(norb, n_alpha) * C(norb, n_beta)`, with
-    /// flat index `addr_a * C(norb, n_beta) + addr_b`. See [`crate::linalg::fci`] for the addressing
-    /// and sign conventions.
-    pub fn fci_matvec_spinful(
-        &self,
-        norb: u32,
-        n_alpha: u32,
-        n_beta: u32,
-        vec: &[Complex64],
-    ) -> Result<Vec<Complex64>, crate::linalg::fci::FciMatvecError> {
-        crate::linalg::fci::spinful_matvec(
-            norb,
-            n_alpha,
-            n_beta,
-            self.iter().map(|t| (t.coeff, t.actions, t.modes)),
-            vec,
-        )
-    }
-
     /// Compiles this operator into a reusable spinless scatter map for a precomputed sector.
     ///
     /// The returned [`crate::linalg::fci::CompiledSector`] captures the operator's vector-independent
@@ -1523,70 +1480,5 @@ mod tests {
         let round_trip = FermionOperator::from_terms_with_groups(op.iter_with_groups());
 
         assert_eq!(round_trip, op);
-    }
-
-    #[test]
-    fn fci_matvec_spinless_delegates_to_kernel() {
-        // a†_0 a_1 + a†_1 a_0 + 0.5 n_2 on norb=4 spinless orbitals, nocc=2.
-        let op = FermionOperator {
-            coeffs: vec![
-                Complex64::new(1.0, 0.0),
-                Complex64::new(1.0, 0.0),
-                Complex64::new(0.5, 0.0),
-            ],
-            actions: vec![true, false, true, false, true, false],
-            modes: vec![0, 1, 1, 0, 2, 2],
-            boundaries: vec![0, 2, 4, 6],
-            groups: None,
-        };
-        let norb = 4u32;
-        let nocc = 2u32;
-        let dim = crate::linalg::fci::BinomialTable::new(norb).num_strings(norb, nocc);
-        let vec: Vec<Complex64> = (0..dim)
-            .map(|i| Complex64::new(i as f64 + 1.0, 0.0))
-            .collect();
-
-        // The method must equal a direct kernel call fed from the same term views.
-        let expected = crate::linalg::fci::spinless_matvec(
-            norb,
-            nocc,
-            op.iter().map(|t| (t.coeff, t.actions, t.modes)),
-            &vec,
-        )
-        .unwrap();
-        let got = op.fci_matvec_spinless(norb, nocc, &vec).unwrap();
-        assert_eq!(got, expected);
-        assert_eq!(got.len(), dim);
-    }
-
-    #[test]
-    fn fci_matvec_spinful_delegates_to_kernel() {
-        // Cross-spin density-density a†_0 a_0 a†_{norb} a_{norb} plus an alpha hop, norb=3.
-        let norb = 3u32;
-        let op = FermionOperator {
-            coeffs: vec![Complex64::new(1.1, 0.0), Complex64::new(0.7, 0.0)],
-            actions: vec![true, false, true, false, true, false],
-            modes: vec![0, 0, norb, norb, 0, 1],
-            boundaries: vec![0, 4, 6],
-            groups: None,
-        };
-        let (n_a, n_b) = (2u32, 1u32);
-        let table = crate::linalg::fci::BinomialTable::new(norb);
-        let dim = table.num_strings(norb, n_a) * table.num_strings(norb, n_b);
-        let vec: Vec<Complex64> = (0..dim)
-            .map(|i| Complex64::new(i as f64 + 0.5, i as f64 * 0.2))
-            .collect();
-
-        let expected = crate::linalg::fci::spinful_matvec(
-            norb,
-            n_a,
-            n_b,
-            op.iter().map(|t| (t.coeff, t.actions, t.modes)),
-            &vec,
-        )
-        .unwrap();
-        let got = op.fci_matvec_spinful(norb, n_a, n_b, &vec).unwrap();
-        assert_eq!(got, expected);
-        assert_eq!(got.len(), dim);
     }
 }

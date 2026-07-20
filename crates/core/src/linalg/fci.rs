@@ -228,24 +228,6 @@ pub fn apply_ladder_op(string: u64, p: u32, is_creation: bool) -> LadderResult {
     }
 }
 
-/// Applies a creation operator on orbital `p` to `string`.
-///
-/// Returns [`LadderResult::Vanishes`] if orbital `p` is already occupied. Thin wrapper over
-/// [`apply_ladder_op`] with `is_creation == true`.
-#[inline]
-pub fn apply_creation(string: u64, p: u32) -> LadderResult {
-    apply_ladder_op(string, p, true)
-}
-
-/// Applies an annihilation operator on orbital `p` to `string`.
-///
-/// Returns [`LadderResult::Vanishes`] if orbital `p` is empty. Thin wrapper over [`apply_ladder_op`]
-/// with `is_creation == false`.
-#[inline]
-pub fn apply_annihilation(string: u64, p: u32) -> LadderResult {
-    apply_ladder_op(string, p, false)
-}
-
 // -------------------------------------------------------------------------------------------------
 // Matrix-vector kernel
 // -------------------------------------------------------------------------------------------------
@@ -263,11 +245,11 @@ pub fn apply_annihilation(string: u64, p: u32) -> LadderResult {
 //   vector has length `C(norb, n_alpha)` indexed by `str2addr` of the occupation string.
 //
 // Within a spin sector the fermionic sign of a single ladder operator matches `pyscf`'s
-// `gen_cre_str_index`/`gen_des_str_index` (see [`apply_creation`]/[`apply_annihilation`]), so
-// composing the per-op maps of a term right-to-left reproduces ffsim's per-sector sign. The only
-// cross-sector contribution is that, under block-spin ordering, every occupied alpha orbital sits
-// below every beta orbital: hence each *beta* ladder operator additionally carries `(-1)^{n_alpha}`
-// (the current alpha electron count, which is invariant across a particle-conserving term).
+// `gen_cre_str_index`/`gen_des_str_index` (see [`apply_ladder_op`]), so composing the per-op maps
+// of a term right-to-left reproduces ffsim's per-sector sign. The only cross-sector contribution is
+// that, under block-spin ordering, every occupied alpha orbital sits below every beta orbital:
+// hence each *beta* ladder operator additionally carries `(-1)^{n_alpha}` (the current alpha
+// electron count, which is invariant across a particle-conserving term).
 
 /// Errors that can arise while applying a `FermionOperator` to an FCI state vector.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -406,111 +388,6 @@ fn apply_ops_to_string(string: u64, ops: &[(bool, u32)]) -> Option<(u64, i8)> {
         }
     }
     Some((string, sign))
-}
-
-/// A spinless FCI sector's precomputed geometry, reusable across many matvec calls.
-///
-/// Owns the [`BinomialTable`] and the sector's occupation [`sector_strings`], both of which depend
-/// only on `(norb, nocc)` -- not on the operator or the input vector. Building them once and reusing
-/// the context across the repeated matvecs of a single `expm_multiply` (the evolution path) avoids
-/// rebuilding this identical geometry on every call. [`spinless_matvec`] is the build-once-call-once
-/// convenience wrapper over this type.
-#[derive(Clone, Debug)]
-pub struct SpinlessSector {
-    norb: u32,
-    nocc: u32,
-    table: BinomialTable,
-    strings: Vec<u64>,
-}
-
-impl SpinlessSector {
-    /// Precomputes the `(norb, nocc)` sector geometry (binomial table + occupation strings).
-    pub fn new(norb: u32, nocc: u32) -> Self {
-        let table = BinomialTable::new(norb);
-        let strings = table.sector_strings(norb, nocc);
-        Self {
-            norb,
-            nocc,
-            table,
-            strings,
-        }
-    }
-
-    /// The FCI dimension `C(norb, nocc)` of this sector.
-    #[inline]
-    pub fn dim(&self) -> usize {
-        self.table.num_strings(self.norb, self.nocc)
-    }
-
-    /// Applies an operator's terms to a spinless FCI state vector: `out = op @ vec`.
-    ///
-    /// The operator's modes must lie in `[0, norb)`, and the vector length must equal
-    /// [`Self::dim`]. Each term is supplied as `(coeff, actions, modes)` -- the native slice layout
-    /// of a [`crate::operators::fermion_operator::FermionOperatorTermView`] -- where `actions[k]` is
-    /// `true` for a creation and `modes[k]` is its orbital, in the term's written (left-to-right)
-    /// order. Returns the transformed vector, or an error on a dimension/mode mismatch.
-    ///
-    /// This builds the [`CompiledSector`] scatter map and applies it in one shot. When the same
-    /// operator is applied to many vectors (e.g. the repeated matvecs of an `expm_multiply`), compile
-    /// once via [`Self::compile`] and reuse the map instead.
-    pub fn matvec<'a>(
-        &self,
-        terms: impl IntoIterator<Item = (Complex64, &'a [bool], &'a [u32])>,
-        vec: &[Complex64],
-    ) -> Result<Vec<Complex64>, FciMatvecError> {
-        self.compile(terms)?.apply(vec)
-    }
-
-    /// Compiles an operator's terms into a reusable [`CompiledSector`] scatter map.
-    ///
-    /// The `(source, destination, weight)` scatter produced by [`Self::matvec`] is a pure function of
-    /// the operator and the sector -- it does not depend on the input vector -- yet `matvec` recomputes
-    /// it (the ladder walk, the conservation check, and the `str2addr` rank of each destination) on
-    /// every call. Compiling it once lets the many matvecs of a single `expm_multiply` reuse the flat
-    /// scatter, replacing the per-call combinatorics with a plain gather-scatter. Terms and errors are
-    /// exactly as in [`Self::matvec`]; non-conserving terms are silently dropped (they contribute no
-    /// entries), matching the kernel's in-sector projection.
-    pub fn compile<'a>(
-        &self,
-        terms: impl IntoIterator<Item = (Complex64, &'a [bool], &'a [u32])>,
-    ) -> Result<CompiledSector, FciMatvecError> {
-        let (norb, nocc) = (self.norb, self.nocc);
-        let mut entries: Vec<(usize, usize, Complex64)> = Vec::new();
-        let mut ops: Vec<(bool, u32)> = Vec::new();
-        for (coeff, actions, modes) in terms {
-            ops.clear();
-            for (&is_creation, &orb) in actions.iter().zip(modes) {
-                if orb >= norb {
-                    return Err(FciMatvecError::ModeOutOfRange {
-                        mode: orb,
-                        num_modes: norb,
-                    });
-                }
-                ops.push((is_creation, orb));
-            }
-            // Record, for every source determinant, the destination and weight the term produces --
-            // independent of any input vector, so the whole map is built once here.
-            for (src_addr, &string) in self.strings.iter().enumerate() {
-                if let Some((out_string, sign)) = apply_ops_to_string(string, &ops) {
-                    // Drop terms that leave the fixed `nocc` sector, exactly as `matvec` does.
-                    if out_string.count_ones() != nocc {
-                        continue;
-                    }
-                    let dst_addr = str2addr(&self.table, out_string);
-                    entries.push((src_addr, dst_addr, coeff * f64::from(sign)));
-                }
-            }
-        }
-        // Coalesce transitions sharing a `(src, dst)` key so each is one fused multiply per matvec.
-        let coalesced = coalesce(entries);
-        let entries = (0..coalesced.scale.len())
-            .map(|k| (coalesced.src[k], coalesced.dst[k], coalesced.scale[k]))
-            .collect();
-        Ok(CompiledSector {
-            dim: self.dim(),
-            kind: CompiledKind::Spinless { entries },
-        })
-    }
 }
 
 /// A coalesced list of single-block transitions `out[dst] += scale * vec[src]`.
@@ -810,26 +687,108 @@ impl CompiledSector {
     }
 }
 
-/// Applies an operator's terms to a spinless FCI state vector: `out = op @ vec`.
+/// A spinless FCI sector's precomputed geometry, reusable across many matvec calls.
 ///
-/// * `norb` is the number of orbitals; the operator's modes must lie in `[0, norb)`.
-/// * `nocc` is the (integer) electron count; the vector length must equal `C(norb, nocc)`.
-///
-/// Each term is supplied as `(coeff, actions, modes)` -- the native slice layout of a
-/// [`crate::operators::fermion_operator::FermionOperatorTermView`] -- where `actions[k]` is `true`
-/// for a creation and `modes[k]` is its orbital, in the term's written (left-to-right) order.
-/// Returns the transformed vector, or an error on a dimension/mode mismatch.
-///
-/// This is a build-once-call-once convenience over [`SpinlessSector`]; to apply the same operator to
-/// many vectors of the same sector (e.g. across an `expm_multiply`), build a [`SpinlessSector`] once
-/// and reuse its [`SpinlessSector::matvec`].
-pub fn spinless_matvec<'a>(
+/// Owns the [`BinomialTable`] and the sector's occupation [`sector_strings`], both of which depend
+/// only on `(norb, nocc)` -- not on the operator or the input vector. Building them once and reusing
+/// the context across the repeated matvecs of a single `expm_multiply` (the evolution path) avoids
+/// rebuilding this identical geometry on every call.
+#[derive(Clone, Debug)]
+pub struct SpinlessSector {
     norb: u32,
     nocc: u32,
-    terms: impl IntoIterator<Item = (Complex64, &'a [bool], &'a [u32])>,
-    vec: &[Complex64],
-) -> Result<Vec<Complex64>, FciMatvecError> {
-    SpinlessSector::new(norb, nocc).matvec(terms, vec)
+    table: BinomialTable,
+    strings: Vec<u64>,
+}
+
+impl SpinlessSector {
+    /// Precomputes the `(norb, nocc)` sector geometry (binomial table + occupation strings).
+    pub fn new(norb: u32, nocc: u32) -> Self {
+        let table = BinomialTable::new(norb);
+        let strings = table.sector_strings(norb, nocc);
+        Self {
+            norb,
+            nocc,
+            table,
+            strings,
+        }
+    }
+
+    /// The FCI dimension `C(norb, nocc)` of this sector.
+    #[inline]
+    pub fn dim(&self) -> usize {
+        self.table.num_strings(self.norb, self.nocc)
+    }
+
+    /// Applies an operator's terms to a spinless FCI state vector: `out = op @ vec`.
+    ///
+    /// The operator's modes must lie in `[0, norb)`, and the vector length must equal
+    /// [`Self::dim`]. Each term is supplied as `(coeff, actions, modes)` -- the native slice layout
+    /// of a [`crate::operators::fermion_operator::FermionOperatorTermView`] -- where `actions[k]` is
+    /// `true` for a creation and `modes[k]` is its orbital, in the term's written (left-to-right)
+    /// order. Returns the transformed vector, or an error on a dimension/mode mismatch.
+    ///
+    /// This builds the [`CompiledSector`] scatter map and applies it in one shot. When the same
+    /// operator is applied to many vectors (e.g. the repeated matvecs of an `expm_multiply`), compile
+    /// once via [`Self::compile`] and reuse the map instead.
+    pub fn matvec<'a>(
+        &self,
+        terms: impl IntoIterator<Item = (Complex64, &'a [bool], &'a [u32])>,
+        vec: &[Complex64],
+    ) -> Result<Vec<Complex64>, FciMatvecError> {
+        self.compile(terms)?.apply(vec)
+    }
+
+    /// Compiles an operator's terms into a reusable [`CompiledSector`] scatter map.
+    ///
+    /// The `(source, destination, weight)` scatter produced by [`Self::matvec`] is a pure function of
+    /// the operator and the sector -- it does not depend on the input vector -- yet `matvec` recomputes
+    /// it (the ladder walk, the conservation check, and the `str2addr` rank of each destination) on
+    /// every call. Compiling it once lets the many matvecs of a single `expm_multiply` reuse the flat
+    /// scatter, replacing the per-call combinatorics with a plain gather-scatter. Terms and errors are
+    /// exactly as in [`Self::matvec`]; non-conserving terms are silently dropped (they contribute no
+    /// entries), matching the kernel's in-sector projection.
+    pub fn compile<'a>(
+        &self,
+        terms: impl IntoIterator<Item = (Complex64, &'a [bool], &'a [u32])>,
+    ) -> Result<CompiledSector, FciMatvecError> {
+        let (norb, nocc) = (self.norb, self.nocc);
+        let mut entries: Vec<(usize, usize, Complex64)> = Vec::new();
+        let mut ops: Vec<(bool, u32)> = Vec::new();
+        for (coeff, actions, modes) in terms {
+            ops.clear();
+            for (&is_creation, &orb) in actions.iter().zip(modes) {
+                if orb >= norb {
+                    return Err(FciMatvecError::ModeOutOfRange {
+                        mode: orb,
+                        num_modes: norb,
+                    });
+                }
+                ops.push((is_creation, orb));
+            }
+            // Record, for every source determinant, the destination and weight the term produces --
+            // independent of any input vector, so the whole map is built once here.
+            for (src_addr, &string) in self.strings.iter().enumerate() {
+                if let Some((out_string, sign)) = apply_ops_to_string(string, &ops) {
+                    // Drop terms that leave the fixed `nocc` sector, exactly as `matvec` does.
+                    if out_string.count_ones() != nocc {
+                        continue;
+                    }
+                    let dst_addr = str2addr(&self.table, out_string);
+                    entries.push((src_addr, dst_addr, coeff * f64::from(sign)));
+                }
+            }
+        }
+        // Coalesce transitions sharing a `(src, dst)` key so each is one fused multiply per matvec.
+        let coalesced = coalesce(entries);
+        let entries = (0..coalesced.scale.len())
+            .map(|k| (coalesced.src[k], coalesced.dst[k], coalesced.scale[k]))
+            .collect();
+        Ok(CompiledSector {
+            dim: self.dim(),
+            kind: CompiledKind::Spinless { entries },
+        })
+    }
 }
 
 /// A spinful FCI sector's precomputed geometry, reusable across many matvec calls.
@@ -837,8 +796,7 @@ pub fn spinless_matvec<'a>(
 /// Owns the [`BinomialTable`], both spin sectors' occupation [`sector_strings`], and the derived
 /// dimensions -- all of which depend only on `(norb, n_alpha, n_beta)`. Building them once and
 /// reusing the context across the repeated matvecs of a single `expm_multiply` (the evolution path)
-/// avoids rebuilding this identical geometry on every call. [`spinful_matvec`] is the
-/// build-once-call-once convenience wrapper over this type.
+/// avoids rebuilding this identical geometry on every call.
 #[derive(Clone, Debug)]
 pub struct SpinfulSector {
     norb: u32,
@@ -1050,31 +1008,6 @@ impl SpinfulSector {
     }
 }
 
-/// Applies an operator's terms to a spinful FCI state vector: `out = op @ vec`.
-///
-/// * `norb` is the number of spatial orbitals; the operator's modes must lie in `[0, 2 * norb)`
-///   under the block-spin convention (mode `m < norb` is alpha orbital `m`; mode `m >= norb` is beta
-///   orbital `m - norb`).
-/// * `n_alpha`, `n_beta` are the per-spin electron counts; the vector length must equal
-///   `C(norb, n_alpha) * C(norb, n_beta)` with flat index `addr_a * dim_b + addr_b`.
-///
-/// Each term is supplied as `(coeff, actions, modes)` (see [`spinless_matvec`] for the layout).
-/// Each beta operator additionally contributes `(-1)^{n_alpha}` because, under block-spin ordering,
-/// all `n_alpha` occupied alpha orbitals precede every beta orbital in the Jordan-Wigner string.
-///
-/// This is a build-once-call-once convenience over [`SpinfulSector`]; to apply the same operator to
-/// many vectors of the same sector (e.g. across an `expm_multiply`), build a [`SpinfulSector`] once
-/// and reuse its [`SpinfulSector::matvec`].
-pub fn spinful_matvec<'a>(
-    norb: u32,
-    n_alpha: u32,
-    n_beta: u32,
-    terms: impl IntoIterator<Item = (Complex64, &'a [bool], &'a [u32])>,
-    vec: &[Complex64],
-) -> Result<Vec<Complex64>, FciMatvecError> {
-    SpinfulSector::new(norb, n_alpha, n_beta)?.matvec(terms, vec)
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1252,7 +1185,7 @@ mod tests {
             for string in enumerate_strings(norb, nocc) {
                 for p in 0..norb {
                     let occupied = string & (1u64 << p) != 0;
-                    match apply_creation(string, p) {
+                    match apply_ladder_op(string, p, true) {
                         LadderResult::Vanishes => {
                             assert!(occupied, "cre should vanish only if occupied")
                         }
@@ -1265,7 +1198,7 @@ mod tests {
                             let _ = str2addr(&table, out);
                         }
                     }
-                    match apply_annihilation(string, p) {
+                    match apply_ladder_op(string, p, false) {
                         LadderResult::Vanishes => {
                             assert!(!occupied, "des should vanish only if empty")
                         }
@@ -1298,7 +1231,7 @@ mod tests {
             (2, 0b0110, 3, 3, 1),
         ];
         for &(nocc, src, orb, tgt, sign) in golden {
-            match apply_creation(src, orb) {
+            match apply_ladder_op(src, orb, true) {
                 LadderResult::Maps {
                     string: out,
                     sign: s,
@@ -1329,7 +1262,7 @@ mod tests {
             (2, 0b1100, 3, 2, 1),
         ];
         for &(nocc, src, orb, tgt, sign) in golden {
-            match apply_annihilation(src, orb) {
+            match apply_ladder_op(src, orb, false) {
                 LadderResult::Maps {
                     string: out,
                     sign: s,
@@ -1510,7 +1443,9 @@ mod tests {
                 .collect();
             let expected = reference_matvec(norb, nocc, None, &terms, &vec);
             let split = split_terms(&terms);
-            let got = spinless_matvec(norb, nocc, term_views(&split), &vec).unwrap();
+            let got = SpinlessSector::new(norb, nocc)
+                .matvec(term_views(&split), &vec)
+                .unwrap();
             assert_vec_close(&got, &expected);
         }
     }
@@ -1553,7 +1488,10 @@ mod tests {
                 .collect();
             let expected = reference_matvec(norb, n_a, Some(n_b), &terms, &vec);
             let split = split_terms(&terms);
-            let got = spinful_matvec(norb, n_a, n_b, term_views(&split), &vec).unwrap();
+            let got = SpinfulSector::new(norb, n_a, n_b)
+                .unwrap()
+                .matvec(term_views(&split), &vec)
+                .unwrap();
             assert_vec_close(&got, &expected);
         }
     }
@@ -1575,7 +1513,10 @@ mod tests {
                 .collect();
             let expected = reference_matvec(norb, n_a, Some(n_b), &terms, &vec);
             let split = split_terms(&terms);
-            let got = spinful_matvec(norb, n_a, n_b, term_views(&split), &vec).unwrap();
+            let got = SpinfulSector::new(norb, n_a, n_b)
+                .unwrap()
+                .matvec(term_views(&split), &vec)
+                .unwrap();
             assert_vec_close(&got, &expected);
         }
     }
@@ -1584,33 +1525,31 @@ mod tests {
     fn matvec_dimension_and_mode_errors() {
         // Wrong vector length.
         let bad = complex_vec(&[1.0, 2.0]);
-        let err = spinless_matvec(
-            4,
-            2,
-            std::iter::once((
-                Complex64::new(1.0, 0.0),
-                [true, false].as_slice(),
-                [0u32, 0].as_slice(),
-            )),
-            &bad,
-        )
-        .unwrap_err();
+        let err = SpinlessSector::new(4, 2)
+            .matvec(
+                std::iter::once((
+                    Complex64::new(1.0, 0.0),
+                    [true, false].as_slice(),
+                    [0u32, 0].as_slice(),
+                )),
+                &bad,
+            )
+            .unwrap_err();
         assert!(matches!(err, FciMatvecError::DimensionMismatch { .. }));
 
         // Mode out of range (spinless: mode must be < norb).
         let dim = BinomialTable::new(4).num_strings(4, 2);
         let vec = complex_vec(&vec![1.0; dim]);
-        let err = spinless_matvec(
-            4,
-            2,
-            std::iter::once((
-                Complex64::new(1.0, 0.0),
-                [true, false].as_slice(),
-                [9u32, 0].as_slice(),
-            )),
-            &vec,
-        )
-        .unwrap_err();
+        let err = SpinlessSector::new(4, 2)
+            .matvec(
+                std::iter::once((
+                    Complex64::new(1.0, 0.0),
+                    [true, false].as_slice(),
+                    [9u32, 0].as_slice(),
+                )),
+                &vec,
+            )
+            .unwrap_err();
         assert!(matches!(
             err,
             FciMatvecError::ModeOutOfRange {
@@ -1625,18 +1564,17 @@ mod tests {
             t.num_strings(3, 1) * t.num_strings(3, 1)
         };
         let vec = complex_vec(&vec![1.0; dim]);
-        let err = spinful_matvec(
-            3,
-            1,
-            1,
-            std::iter::once((
-                Complex64::new(1.0, 0.0),
-                [true].as_slice(),
-                [6u32].as_slice(),
-            )),
-            &vec,
-        )
-        .unwrap_err();
+        let err = SpinfulSector::new(3, 1, 1)
+            .unwrap()
+            .matvec(
+                std::iter::once((
+                    Complex64::new(1.0, 0.0),
+                    [true].as_slice(),
+                    [6u32].as_slice(),
+                )),
+                &vec,
+            )
+            .unwrap_err();
         assert!(matches!(
             err,
             FciMatvecError::ModeOutOfRange {
@@ -1666,32 +1604,30 @@ mod tests {
         // 0b1100 in a dim-4 vector is 5). It must now be dropped, leaving the zero vector.
         let dim = BinomialTable::new(4).num_strings(4, 1); // C(4,1) = 4
         let vec = complex_vec(&vec![1.0; dim]);
-        let got = spinless_matvec(
-            4,
-            1,
-            std::iter::once((
-                Complex64::new(1.0, 0.0),
-                [true].as_slice(),
-                [2u32].as_slice(),
-            )),
-            &vec,
-        )
-        .unwrap();
+        let got = SpinlessSector::new(4, 1)
+            .matvec(
+                std::iter::once((
+                    Complex64::new(1.0, 0.0),
+                    [true].as_slice(),
+                    [2u32].as_slice(),
+                )),
+                &vec,
+            )
+            .unwrap();
         assert_vec_close(&got, &complex_vec(&vec![0.0; dim]));
 
         // The number operator a†_2 a_2 (conserving) still acts: it keeps determinants occupying
         // orbital 2 and zeros the rest, so the guard does not over-reject.
-        let got = spinless_matvec(
-            4,
-            1,
-            std::iter::once((
-                Complex64::new(1.0, 0.0),
-                [true, false].as_slice(),
-                [2u32, 2].as_slice(),
-            )),
-            &vec,
-        )
-        .unwrap();
+        let got = SpinlessSector::new(4, 1)
+            .matvec(
+                std::iter::once((
+                    Complex64::new(1.0, 0.0),
+                    [true, false].as_slice(),
+                    [2u32, 2].as_slice(),
+                )),
+                &vec,
+            )
+            .unwrap();
         // Only the determinant |0b0100> (orbital 2 occupied) survives; its address is C(2,1) = 2.
         let mut expected = vec![Complex64::new(0.0, 0.0); dim];
         expected[str2addr(&BinomialTable::new(4), 0b0100)] = Complex64::new(1.0, 0.0);
@@ -1707,26 +1643,25 @@ mod tests {
         let t = BinomialTable::new(2);
         let dim = t.num_strings(2, 1) * t.num_strings(2, 1); // 2 * 2 = 4
         let vec = complex_vec(&vec![1.0; dim]);
-        let got = spinful_matvec(
-            2,
-            1,
-            1,
-            std::iter::once((
-                Complex64::new(1.0, 0.0),
-                [true, false].as_slice(),
-                [0u32, 2].as_slice(),
-            )),
-            &vec,
-        )
-        .unwrap();
+        let got = SpinfulSector::new(2, 1, 1)
+            .unwrap()
+            .matvec(
+                std::iter::once((
+                    Complex64::new(1.0, 0.0),
+                    [true, false].as_slice(),
+                    [0u32, 2].as_slice(),
+                )),
+                &vec,
+            )
+            .unwrap();
         assert_vec_close(&got, &complex_vec(&vec![0.0; dim]));
     }
 
     #[test]
     fn reused_sector_matches_fresh_matvec_across_calls() {
         // A `SpinlessSector`/`SpinfulSector` built once and reused across several matvecs must give
-        // the same result as the build-once-call-once free functions -- the hoist of the binomial
-        // table and sector strings out of the per-call body must not change the arithmetic.
+        // the same result as a sector rebuilt fresh for each call -- the hoist of the binomial table
+        // and sector strings out of the per-call body must not change the arithmetic.
 
         // Spinless: reuse one sector for two different input vectors.
         let (norb, nocc) = (5u32, 3u32);
@@ -1741,9 +1676,11 @@ mod tests {
             let vec: Vec<Complex64> = (0..dim)
                 .map(|i| Complex64::new((i as f64 + 1.0) * scale, (i as f64) * 0.13))
                 .collect();
-            let via_sector = sector.matvec(term_views(&split), &vec).unwrap();
-            let via_free = spinless_matvec(norb, nocc, term_views(&split), &vec).unwrap();
-            assert_vec_close(&via_sector, &via_free);
+            let via_reused = sector.matvec(term_views(&split), &vec).unwrap();
+            let via_fresh = SpinlessSector::new(norb, nocc)
+                .matvec(term_views(&split), &vec)
+                .unwrap();
+            assert_vec_close(&via_reused, &via_fresh);
         }
 
         // Spinful: same, with a cross-spin term to exercise both string lists.
@@ -1762,9 +1699,12 @@ mod tests {
             let vec: Vec<Complex64> = (0..dim)
                 .map(|i| Complex64::new((i as f64 + 0.5) * scale, (i as f64) * 0.07))
                 .collect();
-            let via_sector = sector.matvec(term_views(&split), &vec).unwrap();
-            let via_free = spinful_matvec(norb, n_a, n_b, term_views(&split), &vec).unwrap();
-            assert_vec_close(&via_sector, &via_free);
+            let via_reused = sector.matvec(term_views(&split), &vec).unwrap();
+            let via_fresh = SpinfulSector::new(norb, n_a, n_b)
+                .unwrap()
+                .matvec(term_views(&split), &vec)
+                .unwrap();
+            assert_vec_close(&via_reused, &via_fresh);
         }
     }
 
