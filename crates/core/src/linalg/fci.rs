@@ -390,6 +390,32 @@ fn apply_ops_to_string(string: u64, ops: &[(bool, u32)]) -> Option<(u64, i8)> {
     Some((string, sign))
 }
 
+/// Walks one spin sector's occupation strings, applying `ops` to each, and collects the
+/// surviving in-sector transitions as `(src_addr, dst_addr, sign)`.
+///
+/// A determinant that the term annihilates (`apply_ops_to_string` returns `None`) or that leaves
+/// the fixed `nocc` sector is dropped, matching the kernel's in-sector projection. `strings[addr]`
+/// is the occupation string with [`str2addr`] equal to `addr`, so the source address is just the
+/// enumeration index; the destination address is ranked from the resulting string.
+fn block_transitions(
+    strings: &[u64],
+    ops: &[(bool, u32)],
+    table: &BinomialTable,
+    nocc: u32,
+) -> Vec<(usize, usize, i8)> {
+    let mut trans = Vec::new();
+    for (src_addr, &string) in strings.iter().enumerate() {
+        let Some((out_string, sign)) = apply_ops_to_string(string, ops) else {
+            continue;
+        };
+        if out_string.count_ones() != nocc {
+            continue;
+        }
+        trans.push((src_addr, str2addr(table, out_string), sign));
+    }
+    trans
+}
+
 /// A coalesced list of single-block transitions `out[dst] += scale * vec[src]`.
 ///
 /// The three arrays are parallel: entry `k` is `(src[k], dst[k], scale[k])`. Produced by
@@ -533,6 +559,29 @@ pub struct CompiledSector {
     kind: CompiledKind,
 }
 
+/// Resolves a scatter entry for a forward (`conj = false`) or adjoint (`conj = true`) apply.
+///
+/// The conjugate transpose of a scatter `src -> dst` with weight `w` is `dst -> src` with weight
+/// `conj(w)`, so the same compiled entry backs both directions. Used at every complex-weight
+/// scatter site in [`CompiledSector::contract`] to resolve the orientation once instead of
+/// re-deriving the `if conj { ... }` swap inline. (Fermionic ±1 phases are real, so the mixed
+/// path swaps addresses via [`swap_if`] and conjugates only its per-term coefficient.)
+#[inline]
+fn oriented(src: usize, dst: usize, weight: Complex64, conj: bool) -> (usize, usize, Complex64) {
+    if conj {
+        (dst, src, weight.conj())
+    } else {
+        (src, dst, weight)
+    }
+}
+
+/// Returns `(a, b)` swapped when `swap` is set, else in order. The address-only counterpart of
+/// [`oriented`], for the mixed path whose blocks carry real ±1 phases rather than complex weights.
+#[inline]
+fn swap_if(swap: bool, a: usize, b: usize) -> (usize, usize) {
+    if swap { (b, a) } else { (a, b) }
+}
+
 impl CompiledSector {
     /// The FCI dimension of the sector this map was compiled for.
     #[inline]
@@ -574,8 +623,7 @@ impl CompiledSector {
         match &self.kind {
             CompiledKind::Spinless { entries } => {
                 for &(src, dst, weight) in entries {
-                    let weight = if conj { weight.conj() } else { weight };
-                    let (src, dst) = if conj { (dst, src) } else { (src, dst) };
+                    let (src, dst, weight) = oriented(src, dst, weight, conj);
                     out[dst] += weight * vec[src];
                 }
             }
@@ -599,16 +647,12 @@ impl CompiledSector {
                 }
                 // Alpha-only (beta identity): each alpha transition sweeps the untouched beta block.
                 for k in 0..alpha_only.scale.len() {
-                    let scale = if conj {
-                        alpha_only.scale[k].conj()
-                    } else {
-                        alpha_only.scale[k]
-                    };
-                    let (sa, da) = if conj {
-                        (alpha_only.dst[k], alpha_only.src[k])
-                    } else {
-                        (alpha_only.src[k], alpha_only.dst[k])
-                    };
+                    let (sa, da, scale) = oriented(
+                        alpha_only.src[k],
+                        alpha_only.dst[k],
+                        alpha_only.scale[k],
+                        conj,
+                    );
                     let (src_off, dst_off) = (sa * dim_b, da * dim_b);
                     for b in 0..*dim_b {
                         out[dst_off + b] += scale * vec[src_off + b];
@@ -618,16 +662,8 @@ impl CompiledSector {
                 for a in 0..*dim_a {
                     let row = a * dim_b;
                     for k in 0..beta_only.scale.len() {
-                        let scale = if conj {
-                            beta_only.scale[k].conj()
-                        } else {
-                            beta_only.scale[k]
-                        };
-                        let (sb, db) = if conj {
-                            (beta_only.dst[k], beta_only.src[k])
-                        } else {
-                            (beta_only.src[k], beta_only.dst[k])
-                        };
+                        let (sb, db, scale) =
+                            oriented(beta_only.src[k], beta_only.dst[k], beta_only.scale[k], conj);
                         out[row + db] += scale * vec[row + sb];
                     }
                 }
@@ -657,19 +693,11 @@ impl CompiledSector {
                         (mixed_beta, mixed_alpha)
                     };
                     for o in o0..o1 {
-                        let (o_src, o_dst) = if conj {
-                            (o_block.dst[o], o_block.src[o])
-                        } else {
-                            (o_block.src[o], o_block.dst[o])
-                        };
+                        let (o_src, o_dst) = swap_if(conj, o_block.src[o], o_block.dst[o]);
                         // Fold the outer block's +/-1 phase into the coefficient once per outer entry.
                         let scale = coeff * f64::from(o_block.phase[o]);
                         for i in i0..i1 {
-                            let (i_src, i_dst) = if conj {
-                                (i_block.dst[i], i_block.src[i])
-                            } else {
-                                (i_block.src[i], i_block.dst[i])
-                            };
+                            let (i_src, i_dst) = swap_if(conj, i_block.src[i], i_block.dst[i]);
                             // Remap (outer, inner) back to (alpha, beta) for the block-spin flat index
                             // `alpha_addr * dim_b + beta_addr`.
                             let (a_src, b_src, a_dst, b_dst) = if alpha_outer {
@@ -865,9 +893,6 @@ impl SpinfulSector {
         let mut mixed_beta = PhasedTransitions::new();
         let mut alpha_ops: Vec<(bool, u32)> = Vec::new();
         let mut beta_ops: Vec<(bool, u32)> = Vec::new();
-        // Reused per term: the surviving alpha transitions of a mixed term, as `(src, dst, phase)`.
-        // (Beta transitions are appended straight into `mixed_beta`.)
-        let mut alpha_trans: Vec<(usize, usize, i8)> = Vec::new();
         for (coeff, actions, modes) in terms {
             alpha_ops.clear();
             beta_ops.clear();
@@ -893,33 +918,18 @@ impl SpinfulSector {
                 (true, true) => scalar += coeff,
                 // Beta identity: an alpha-only term. Weight = coeff * a_sign.
                 (false, true) => {
-                    for (a_addr, &a_string) in self.alpha_strings.iter().enumerate() {
-                        let Some((a_out, a_sign)) = apply_ops_to_string(a_string, &alpha_ops)
-                        else {
-                            continue;
-                        };
-                        if a_out.count_ones() != n_alpha {
-                            continue;
-                        }
-                        let a_out_addr = str2addr(&self.table, a_out);
-                        alpha_only_raw.push((a_addr, a_out_addr, coeff * f64::from(a_sign)));
+                    for (src, dst, sign) in
+                        block_transitions(&self.alpha_strings, &alpha_ops, &self.table, n_alpha)
+                    {
+                        alpha_only_raw.push((src, dst, coeff * f64::from(sign)));
                     }
                 }
                 // Alpha identity: a beta-only term. Weight = coeff * cross_sign * b_sign.
                 (true, false) => {
-                    for (b_addr, &b_string) in self.beta_strings.iter().enumerate() {
-                        let Some((b_out, b_sign)) = apply_ops_to_string(b_string, &beta_ops) else {
-                            continue;
-                        };
-                        if b_out.count_ones() != n_beta {
-                            continue;
-                        }
-                        let b_out_addr = str2addr(&self.table, b_out);
-                        beta_only_raw.push((
-                            b_addr,
-                            b_out_addr,
-                            coeff * f64::from(b_sign * cross_sign),
-                        ));
+                    for (src, dst, sign) in
+                        block_transitions(&self.beta_strings, &beta_ops, &self.table, n_beta)
+                    {
+                        beta_only_raw.push((src, dst, coeff * f64::from(sign * cross_sign)));
                     }
                 }
                 // Mixed: both spins active. Keep the two blocks *factored* -- one CSR segment of alpha
@@ -928,38 +938,20 @@ impl SpinfulSector {
                 // constant) is folded into the coefficient, so the alpha phase is `a_sign` and the beta
                 // phase is `b_sign`; the apply-time contraction recombines them.
                 (false, false) => {
-                    alpha_trans.clear();
-                    for (a_addr, &a_string) in self.alpha_strings.iter().enumerate() {
-                        let Some((a_out, a_sign)) = apply_ops_to_string(a_string, &alpha_ops)
-                        else {
-                            continue;
-                        };
-                        if a_out.count_ones() != n_alpha {
-                            continue;
-                        }
-                        alpha_trans.push((a_addr, str2addr(&self.table, a_out), a_sign));
-                    }
-                    // A block with no surviving transitions annihilates the sector: drop the whole term
-                    // (emit no alpha or beta segment) rather than a segment that never contributes.
-                    if alpha_trans.is_empty() {
+                    let alpha_trans =
+                        block_transitions(&self.alpha_strings, &alpha_ops, &self.table, n_alpha);
+                    let beta_trans =
+                        block_transitions(&self.beta_strings, &beta_ops, &self.table, n_beta);
+                    // If either block has no surviving transitions it annihilates the sector, so the
+                    // whole term contributes nothing: emit no segment for it at all.
+                    if alpha_trans.is_empty() || beta_trans.is_empty() {
                         continue;
                     }
-                    let beta_start = mixed_beta.src.len();
-                    for (b_addr, &b_string) in self.beta_strings.iter().enumerate() {
-                        let Some((b_out, b_sign)) = apply_ops_to_string(b_string, &beta_ops) else {
-                            continue;
-                        };
-                        if b_out.count_ones() != n_beta {
-                            continue;
-                        }
-                        mixed_beta.push(b_addr, str2addr(&self.table, b_out), b_sign);
+                    for (src, dst, phase) in alpha_trans {
+                        mixed_alpha.push(src, dst, phase);
                     }
-                    if mixed_beta.src.len() == beta_start {
-                        // Beta annihilates the sector; roll back nothing (we appended none) and skip.
-                        continue;
-                    }
-                    for &(a_src, a_dst, a_phase) in &alpha_trans {
-                        mixed_alpha.push(a_src, a_dst, a_phase);
+                    for (src, dst, phase) in beta_trans {
+                        mixed_beta.push(src, dst, phase);
                     }
                     mixed_alpha.finish_term();
                     mixed_beta.finish_term();
