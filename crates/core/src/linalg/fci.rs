@@ -542,8 +542,8 @@ impl CompiledSector {
 
     /// Applies the compiled operator to a state vector: `out = op @ vec`.
     ///
-    /// `vec` must have length [`Self::dim`]. Equivalent to (and validated bit-for-bit against)
-    /// the corresponding sector's `matvec` with the same operator and sector.
+    /// `vec` must have length [`Self::dim`]. Validated bit-for-bit in the tests against an
+    /// independent naive Jordan-Wigner reference matvec for the same operator and sector.
     pub fn apply(&self, vec: &[Complex64]) -> Result<Vec<Complex64>, FciMatvecError> {
         self.contract(vec, false)
     }
@@ -551,8 +551,9 @@ impl CompiledSector {
     /// Applies the compiled operator's conjugate transpose to a state vector: `out = op^H @ vec`.
     ///
     /// The conjugate transpose of a scatter `src -> dst` with weight `w` is `dst -> src` with weight
-    /// `conj(w)`, so the same compiled data backs both `matvec` and `rmatvec` -- no separate adjoint
-    /// operator need be built or held. `vec` must have length [`Self::dim`].
+    /// `conj(w)`, so the same compiled data backs both the forward apply and this adjoint apply
+    /// (`matvec` and `rmatvec`) -- no separate adjoint operator need be built or held. `vec` must
+    /// have length [`Self::dim`].
     pub fn apply_conj(&self, vec: &[Complex64]) -> Result<Vec<Complex64>, FciMatvecError> {
         self.contract(vec, true)
     }
@@ -720,34 +721,21 @@ impl SpinlessSector {
         self.table.num_strings(self.norb, self.nocc)
     }
 
-    /// Applies an operator's terms to a spinless FCI state vector: `out = op @ vec`.
+    /// Compiles an operator's terms into a reusable [`CompiledSector`] scatter map: `out = op @ vec`
+    /// via [`CompiledSector::apply`].
     ///
-    /// The operator's modes must lie in `[0, norb)`, and the vector length must equal
-    /// [`Self::dim`]. Each term is supplied as `(coeff, actions, modes)` -- the native slice layout
-    /// of a [`crate::operators::fermion_operator::FermionOperatorTermView`] -- where `actions[k]` is
+    /// The operator's modes must lie in `[0, norb)`. Each term is supplied as `(coeff, actions,
+    /// modes)` -- the native slice layout of a
+    /// [`crate::operators::fermion_operator::FermionOperatorTermView`] -- where `actions[k]` is
     /// `true` for a creation and `modes[k]` is its orbital, in the term's written (left-to-right)
-    /// order. Returns the transformed vector, or an error on a dimension/mode mismatch.
+    /// order.
     ///
-    /// This builds the [`CompiledSector`] scatter map and applies it in one shot. When the same
-    /// operator is applied to many vectors (e.g. the repeated matvecs of an `expm_multiply`), compile
-    /// once via [`Self::compile`] and reuse the map instead.
-    pub fn matvec<'a>(
-        &self,
-        terms: impl IntoIterator<Item = (Complex64, &'a [bool], &'a [u32])>,
-        vec: &[Complex64],
-    ) -> Result<Vec<Complex64>, FciMatvecError> {
-        self.compile(terms)?.apply(vec)
-    }
-
-    /// Compiles an operator's terms into a reusable [`CompiledSector`] scatter map.
-    ///
-    /// The `(source, destination, weight)` scatter produced by [`Self::matvec`] is a pure function of
-    /// the operator and the sector -- it does not depend on the input vector -- yet `matvec` recomputes
-    /// it (the ladder walk, the conservation check, and the `str2addr` rank of each destination) on
-    /// every call. Compiling it once lets the many matvecs of a single `expm_multiply` reuse the flat
-    /// scatter, replacing the per-call combinatorics with a plain gather-scatter. Terms and errors are
-    /// exactly as in [`Self::matvec`]; non-conserving terms are silently dropped (they contribute no
-    /// entries), matching the kernel's in-sector projection.
+    /// The `(source, destination, weight)` scatter is a pure function of the operator and the sector
+    /// -- it does not depend on the input vector -- so compiling it once lets the many matvecs of a
+    /// single `expm_multiply` reuse the flat scatter, replacing the per-call combinatorics (the
+    /// ladder walk, the conservation check, and the `str2addr` rank of each destination) with a plain
+    /// gather-scatter. Non-conserving terms are silently dropped (they contribute no entries),
+    /// matching the kernel's in-sector projection. Returns an error on a mode out of range.
     pub fn compile<'a>(
         &self,
         terms: impl IntoIterator<Item = (Complex64, &'a [bool], &'a [u32])>,
@@ -770,7 +758,7 @@ impl SpinlessSector {
             // independent of any input vector, so the whole map is built once here.
             for (src_addr, &string) in self.strings.iter().enumerate() {
                 if let Some((out_string, sign)) = apply_ops_to_string(string, &ops) {
-                    // Drop terms that leave the fixed `nocc` sector, exactly as `matvec` does.
+                    // Drop terms that leave the fixed `nocc` sector (the kernel's in-sector projection).
                     if out_string.count_ones() != nocc {
                         continue;
                     }
@@ -838,33 +826,21 @@ impl SpinfulSector {
         self.dim
     }
 
-    /// Applies an operator's terms to a spinful FCI state vector: `out = op @ vec`.
+    /// Compiles an operator's terms into a reusable [`CompiledSector`] scatter map: `out = op @ vec`
+    /// via [`CompiledSector::apply`].
     ///
     /// The operator's modes must lie in `[0, 2 * norb)` under the block-spin convention (mode
-    /// `m < norb` is alpha orbital `m`; mode `m >= norb` is beta orbital `m - norb`), and the vector
-    /// length must equal [`Self::dim`] with flat index `addr_a * dim_b + addr_b`. Each term is
-    /// supplied as `(coeff, actions, modes)` (see [`SpinlessSector::matvec`] for the layout). Each
+    /// `m < norb` is alpha orbital `m`; mode `m >= norb` is beta orbital `m - norb`), and the applied
+    /// vector length must equal [`Self::dim`] with flat index `addr_a * dim_b + addr_b`. Each term is
+    /// supplied as `(coeff, actions, modes)` (see [`SpinlessSector::compile`] for the layout). Each
     /// beta operator additionally contributes `(-1)^{n_alpha}` because, under block-spin ordering,
     /// all `n_alpha` occupied alpha orbitals precede every beta orbital in the Jordan-Wigner string.
     ///
-    /// This builds the [`CompiledSector`] scatter map and applies it in one shot. When the same
-    /// operator is applied to many vectors (e.g. the repeated matvecs of an `expm_multiply`), compile
-    /// once via [`Self::compile`] and reuse the map instead.
-    pub fn matvec<'a>(
-        &self,
-        terms: impl IntoIterator<Item = (Complex64, &'a [bool], &'a [u32])>,
-        vec: &[Complex64],
-    ) -> Result<Vec<Complex64>, FciMatvecError> {
-        self.compile(terms)?.apply(vec)
-    }
-
-    /// Compiles an operator's terms into a reusable [`CompiledSector`] scatter map.
-    ///
-    /// As with [`SpinlessSector::compile`], the flat `(source, destination, weight)` scatter that
-    /// [`Self::matvec`] rebuilds on every call is a pure function of the operator and the sector.
-    /// Compiling it once lets an `expm_multiply`'s many matvecs reuse it. The per-term construction
-    /// (alpha/beta split, the `(-1)^{n_alpha}` cross-sector sign folded into the beta action, and the
-    /// per-spin conservation drops) mirrors [`Self::matvec`] exactly.
+    /// As with [`SpinlessSector::compile`], the flat `(source, destination, weight)` scatter is a pure
+    /// function of the operator and the sector, so compiling it once lets an `expm_multiply`'s many
+    /// matvecs reuse it. The per-term construction (alpha/beta split, the `(-1)^{n_alpha}`
+    /// cross-sector sign folded into the beta action, and the per-spin conservation drops) is
+    /// described inline below.
     pub fn compile<'a>(
         &self,
         terms: impl IntoIterator<Item = (Complex64, &'a [bool], &'a [u32])>,
@@ -1386,7 +1362,7 @@ mod tests {
 
     /// Splits a list of `(coeff, pairs)` terms into the owned `(coeff, actions, modes)` layout the
     /// kernels consume. Pair with [`term_views`] to feed the `(coeff, &[bool], &[u32])` iterator the
-    /// `matvec`/`compile` entry points expect; keeping the owned split alive across the call.
+    /// `compile` entry point expects; keeping the owned split alive across the call.
     fn split_terms(
         terms: &[(Complex64, Vec<(bool, u32)>)],
     ) -> Vec<(Complex64, Vec<bool>, Vec<u32>)> {
@@ -1444,7 +1420,9 @@ mod tests {
             let expected = reference_matvec(norb, nocc, None, &terms, &vec);
             let split = split_terms(&terms);
             let got = SpinlessSector::new(norb, nocc)
-                .matvec(term_views(&split), &vec)
+                .compile(term_views(&split))
+                .unwrap()
+                .apply(&vec)
                 .unwrap();
             assert_vec_close(&got, &expected);
         }
@@ -1490,7 +1468,9 @@ mod tests {
             let split = split_terms(&terms);
             let got = SpinfulSector::new(norb, n_a, n_b)
                 .unwrap()
-                .matvec(term_views(&split), &vec)
+                .compile(term_views(&split))
+                .unwrap()
+                .apply(&vec)
                 .unwrap();
             assert_vec_close(&got, &expected);
         }
@@ -1515,7 +1495,9 @@ mod tests {
             let split = split_terms(&terms);
             let got = SpinfulSector::new(norb, n_a, n_b)
                 .unwrap()
-                .matvec(term_views(&split), &vec)
+                .compile(term_views(&split))
+                .unwrap()
+                .apply(&vec)
                 .unwrap();
             assert_vec_close(&got, &expected);
         }
@@ -1523,32 +1505,27 @@ mod tests {
 
     #[test]
     fn matvec_dimension_and_mode_errors() {
-        // Wrong vector length.
+        // Wrong vector length is caught by `apply` (dimension is a property of the vector, not the
+        // compiled map).
         let bad = complex_vec(&[1.0, 2.0]);
         let err = SpinlessSector::new(4, 2)
-            .matvec(
-                std::iter::once((
-                    Complex64::new(1.0, 0.0),
-                    [true, false].as_slice(),
-                    [0u32, 0].as_slice(),
-                )),
-                &bad,
-            )
+            .compile(std::iter::once((
+                Complex64::new(1.0, 0.0),
+                [true, false].as_slice(),
+                [0u32, 0].as_slice(),
+            )))
+            .unwrap()
+            .apply(&bad)
             .unwrap_err();
         assert!(matches!(err, FciMatvecError::DimensionMismatch { .. }));
 
-        // Mode out of range (spinless: mode must be < norb).
-        let dim = BinomialTable::new(4).num_strings(4, 2);
-        let vec = complex_vec(&vec![1.0; dim]);
+        // Mode out of range (spinless: mode must be < norb) is caught at compile time.
         let err = SpinlessSector::new(4, 2)
-            .matvec(
-                std::iter::once((
-                    Complex64::new(1.0, 0.0),
-                    [true, false].as_slice(),
-                    [9u32, 0].as_slice(),
-                )),
-                &vec,
-            )
+            .compile(std::iter::once((
+                Complex64::new(1.0, 0.0),
+                [true, false].as_slice(),
+                [9u32, 0].as_slice(),
+            )))
             .unwrap_err();
         assert!(matches!(
             err,
@@ -1559,21 +1536,13 @@ mod tests {
         ));
 
         // Spinful: mode must be < 2*norb.
-        let dim = {
-            let t = BinomialTable::new(3);
-            t.num_strings(3, 1) * t.num_strings(3, 1)
-        };
-        let vec = complex_vec(&vec![1.0; dim]);
         let err = SpinfulSector::new(3, 1, 1)
             .unwrap()
-            .matvec(
-                std::iter::once((
-                    Complex64::new(1.0, 0.0),
-                    [true].as_slice(),
-                    [6u32].as_slice(),
-                )),
-                &vec,
-            )
+            .compile(std::iter::once((
+                Complex64::new(1.0, 0.0),
+                [true].as_slice(),
+                [6u32].as_slice(),
+            )))
             .unwrap_err();
         assert!(matches!(
             err,
@@ -1605,28 +1574,26 @@ mod tests {
         let dim = BinomialTable::new(4).num_strings(4, 1); // C(4,1) = 4
         let vec = complex_vec(&vec![1.0; dim]);
         let got = SpinlessSector::new(4, 1)
-            .matvec(
-                std::iter::once((
-                    Complex64::new(1.0, 0.0),
-                    [true].as_slice(),
-                    [2u32].as_slice(),
-                )),
-                &vec,
-            )
+            .compile(std::iter::once((
+                Complex64::new(1.0, 0.0),
+                [true].as_slice(),
+                [2u32].as_slice(),
+            )))
+            .unwrap()
+            .apply(&vec)
             .unwrap();
         assert_vec_close(&got, &complex_vec(&vec![0.0; dim]));
 
         // The number operator a†_2 a_2 (conserving) still acts: it keeps determinants occupying
         // orbital 2 and zeros the rest, so the guard does not over-reject.
         let got = SpinlessSector::new(4, 1)
-            .matvec(
-                std::iter::once((
-                    Complex64::new(1.0, 0.0),
-                    [true, false].as_slice(),
-                    [2u32, 2].as_slice(),
-                )),
-                &vec,
-            )
+            .compile(std::iter::once((
+                Complex64::new(1.0, 0.0),
+                [true, false].as_slice(),
+                [2u32, 2].as_slice(),
+            )))
+            .unwrap()
+            .apply(&vec)
             .unwrap();
         // Only the determinant |0b0100> (orbital 2 occupied) survives; its address is C(2,1) = 2.
         let mut expected = vec![Complex64::new(0.0, 0.0); dim];
@@ -1645,73 +1612,22 @@ mod tests {
         let vec = complex_vec(&vec![1.0; dim]);
         let got = SpinfulSector::new(2, 1, 1)
             .unwrap()
-            .matvec(
-                std::iter::once((
-                    Complex64::new(1.0, 0.0),
-                    [true, false].as_slice(),
-                    [0u32, 2].as_slice(),
-                )),
-                &vec,
-            )
+            .compile(std::iter::once((
+                Complex64::new(1.0, 0.0),
+                [true, false].as_slice(),
+                [0u32, 2].as_slice(),
+            )))
+            .unwrap()
+            .apply(&vec)
             .unwrap();
         assert_vec_close(&got, &complex_vec(&vec![0.0; dim]));
-    }
-
-    #[test]
-    fn reused_sector_matches_fresh_matvec_across_calls() {
-        // A `SpinlessSector`/`SpinfulSector` built once and reused across several matvecs must give
-        // the same result as a sector rebuilt fresh for each call -- the hoist of the binomial table
-        // and sector strings out of the per-call body must not change the arithmetic.
-
-        // Spinless: reuse one sector for two different input vectors.
-        let (norb, nocc) = (5u32, 3u32);
-        let sector = SpinlessSector::new(norb, nocc);
-        let dim = sector.dim();
-        let terms = [
-            (Complex64::new(0.7, 0.2), vec![(true, 0), (false, 1)]),
-            (Complex64::new(0.5, 0.0), vec![(true, 2), (false, 2)]),
-        ];
-        let split = split_terms(&terms);
-        for scale in [0.31f64, -1.7] {
-            let vec: Vec<Complex64> = (0..dim)
-                .map(|i| Complex64::new((i as f64 + 1.0) * scale, (i as f64) * 0.13))
-                .collect();
-            let via_reused = sector.matvec(term_views(&split), &vec).unwrap();
-            let via_fresh = SpinlessSector::new(norb, nocc)
-                .matvec(term_views(&split), &vec)
-                .unwrap();
-            assert_vec_close(&via_reused, &via_fresh);
-        }
-
-        // Spinful: same, with a cross-spin term to exercise both string lists.
-        let (norb, n_a, n_b) = (3u32, 2u32, 1u32);
-        let sector = SpinfulSector::new(norb, n_a, n_b).unwrap();
-        let dim = sector.dim();
-        let terms = [
-            (Complex64::new(0.9, 0.0), vec![(true, 0), (false, 1)]),
-            (
-                Complex64::new(1.1, 0.0),
-                vec![(true, 0), (false, 0), (true, norb), (false, norb)],
-            ),
-        ];
-        let split = split_terms(&terms);
-        for scale in [0.23f64, 0.91] {
-            let vec: Vec<Complex64> = (0..dim)
-                .map(|i| Complex64::new((i as f64 + 0.5) * scale, (i as f64) * 0.07))
-                .collect();
-            let via_reused = sector.matvec(term_views(&split), &vec).unwrap();
-            let via_fresh = SpinfulSector::new(norb, n_a, n_b)
-                .unwrap()
-                .matvec(term_views(&split), &vec)
-                .unwrap();
-            assert_vec_close(&via_reused, &via_fresh);
-        }
     }
 
     /// The adjoint of a term: reverse the ladder-operator order, swap creation/annihilation, and
     /// conjugate the coefficient. `(c * o_1 o_2 ... o_k)^H = conj(c) * o_k^H ... o_1^H`, and a single
     /// ladder operator's adjoint just flips creation<->annihilation on the same orbital. Used to build
-    /// an independent oracle for `apply_conj` (op^H @ vec) from the lazy `matvec`.
+    /// an independent oracle for `apply_conj` (op^H @ vec): compiling the adjoint terms and applying
+    /// them forward must reproduce `apply_conj` of the original.
     fn adjoint_term(coeff: Complex64, ops: &[(bool, u32)]) -> (Complex64, Vec<(bool, u32)>) {
         let adj_ops = ops
             .iter()
@@ -1722,12 +1638,14 @@ mod tests {
     }
 
     #[test]
-    fn compiled_matches_lazy_matvec_across_calls() {
-        // A compiled scatter map must reproduce the lazy `matvec` bit-for-bit across several vectors,
-        // and `apply_conj` must reproduce the adjoint operator's `matvec` -- the compile step only
-        // hoists the vector-independent scatter out of the per-call body, changing nothing numerically.
-        // Sector-changing terms are included: they must compile to *dropped* entries (no contribution),
-        // matching the kernel's in-sector projection.
+    fn compiled_apply_conj_matches_adjoint_oracle() {
+        // `apply_conj` (op^H @ vec) must reproduce the *forward* apply of the compiled adjoint
+        // operator across several vectors -- the reversed-scatter/conjugated-weight rmatvec must equal
+        // building and applying op^H directly. This is an independent oracle for `apply_conj`; the
+        // forward `apply` is validated against the naive `reference_matvec` in the `*_matches_reference`
+        // tests. Sector-changing terms are included: they compile to *dropped* entries (no
+        // contribution) on both the original and its adjoint, matching the kernel's in-sector
+        // projection.
 
         // --- Spinless ---
         let (norb, nocc) = (5u32, 3u32);
@@ -1744,19 +1662,16 @@ mod tests {
             terms.iter().map(|(c, ops)| adjoint_term(*c, ops)).collect();
         let adj_split = split_terms(&adj_terms);
         let compiled = sector.compile(term_views(&split)).unwrap();
+        let compiled_adj = sector.compile(term_views(&adj_split)).unwrap();
         assert_eq!(compiled.dim(), dim);
         for scale in [0.31f64, -1.7] {
             let vec: Vec<Complex64> = (0..dim)
                 .map(|i| Complex64::new((i as f64 + 1.0) * scale, (i as f64) * 0.13))
                 .collect();
-            // apply == lazy matvec
-            let via_compiled = compiled.apply(&vec).unwrap();
-            let via_lazy = sector.matvec(term_views(&split), &vec).unwrap();
-            assert_vec_close(&via_compiled, &via_lazy);
-            // apply_conj == adjoint-operator lazy matvec
+            // apply_conj == forward apply of the compiled adjoint operator
             let via_conj = compiled.apply_conj(&vec).unwrap();
-            let via_adj_lazy = sector.matvec(term_views(&adj_split), &vec).unwrap();
-            assert_vec_close(&via_conj, &via_adj_lazy);
+            let via_adj = compiled_adj.apply(&vec).unwrap();
+            assert_vec_close(&via_conj, &via_adj);
         }
 
         // --- Spinful ---
@@ -1778,17 +1693,15 @@ mod tests {
             terms.iter().map(|(c, ops)| adjoint_term(*c, ops)).collect();
         let adj_split = split_terms(&adj_terms);
         let compiled = sector.compile(term_views(&split)).unwrap();
+        let compiled_adj = sector.compile(term_views(&adj_split)).unwrap();
         assert_eq!(compiled.dim(), dim);
         for scale in [0.23f64, 0.91] {
             let vec: Vec<Complex64> = (0..dim)
                 .map(|i| Complex64::new((i as f64 + 0.5) * scale, (i as f64) * 0.07))
                 .collect();
-            let via_compiled = compiled.apply(&vec).unwrap();
-            let via_lazy = sector.matvec(term_views(&split), &vec).unwrap();
-            assert_vec_close(&via_compiled, &via_lazy);
             let via_conj = compiled.apply_conj(&vec).unwrap();
-            let via_adj_lazy = sector.matvec(term_views(&adj_split), &vec).unwrap();
-            assert_vec_close(&via_conj, &via_adj_lazy);
+            let via_adj = compiled_adj.apply(&vec).unwrap();
+            assert_vec_close(&via_conj, &via_adj);
         }
     }
 
