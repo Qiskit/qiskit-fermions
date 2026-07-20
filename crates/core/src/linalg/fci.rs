@@ -1269,7 +1269,7 @@ mod tests {
         norb: u32,
         n_alpha: u32,
         n_beta: Option<u32>,
-        terms: &[(Complex64, Vec<(bool, u32)>)],
+        terms: &[(Complex64, Vec<bool>, Vec<u32>)],
         vec: &[Complex64],
     ) -> Vec<Complex64> {
         let table = BinomialTable::new(norb);
@@ -1315,7 +1315,7 @@ mod tests {
         };
 
         let mut out = vec![Complex64::new(0.0, 0.0); dim];
-        for (coeff, ops) in terms {
+        for (coeff, actions, modes) in terms {
             for (src_addr, &amp) in vec.iter().enumerate() {
                 if amp == Complex64::new(0.0, 0.0) {
                     continue;
@@ -1323,7 +1323,9 @@ mod tests {
                 let mut mask = to_mask(src_addr);
                 let mut sign: i8 = 1;
                 let mut ok = true;
-                for &(is_creation, mode) in ops.iter().rev() {
+                // ladder ops act right-to-left; `actions`/`modes` are parallel slices (a term's
+                // native split layout), so zip and reverse them together.
+                for (&is_creation, &mode) in actions.iter().zip(modes).rev() {
                     let bit = 1u64 << mode;
                     let occupied = mask & bit != 0;
                     if is_creation == occupied {
@@ -1351,35 +1353,13 @@ mod tests {
         reals.iter().map(|&r| Complex64::new(r, 0.0)).collect()
     }
 
-    /// Splits `(is_creation, orbital)` pairs into the parallel `(actions, modes)` slices that the
-    /// production kernels consume, mirroring a `FermionOperatorTermView`'s native layout.
-    fn split_ops(ops: &[(bool, u32)]) -> (Vec<bool>, Vec<u32>) {
-        (
-            ops.iter().map(|&(a, _)| a).collect(),
-            ops.iter().map(|&(_, m)| m).collect(),
-        )
-    }
-
-    /// Splits a list of `(coeff, pairs)` terms into the owned `(coeff, actions, modes)` layout the
-    /// kernels consume. Pair with [`term_views`] to feed the `(coeff, &[bool], &[u32])` iterator the
-    /// `compile` entry point expects; keeping the owned split alive across the call.
-    fn split_terms(
-        terms: &[(Complex64, Vec<(bool, u32)>)],
-    ) -> Vec<(Complex64, Vec<bool>, Vec<u32>)> {
-        terms
-            .iter()
-            .map(|(c, ops)| {
-                let (a, m) = split_ops(ops);
-                (*c, a, m)
-            })
-            .collect()
-    }
-
-    /// Borrows a [`split_terms`] result as the `(coeff, &[bool], &[u32])` iterator the kernels take.
+    /// Borrows owned `(coeff, actions, modes)` terms (a term's native split layout, mirroring
+    /// `FermionOperatorTermView`) as the `(coeff, &[bool], &[u32])` iterator the `compile` entry point
+    /// takes. The owned terms must outlive the borrowed views.
     fn term_views(
-        split: &[(Complex64, Vec<bool>, Vec<u32>)],
+        terms: &[(Complex64, Vec<bool>, Vec<u32>)],
     ) -> impl Iterator<Item = (Complex64, &[bool], &[u32])> {
-        split
+        terms
             .iter()
             .map(|(c, a, m)| (*c, a.as_slice(), m.as_slice()))
     }
@@ -1398,17 +1378,20 @@ mod tests {
     fn spinless_matvec_matches_reference() {
         // Cover a range of orbital counts / fillings and several kinds of terms.
         let cases: &[(u32, u32)] = &[(3, 1), (4, 2), (5, 2), (5, 3), (6, 3)];
-        let terms: Vec<(Complex64, Vec<(bool, u32)>)> = vec![
+        // Terms are in the native split `(coeff, actions, modes)` layout (parallel actions/modes
+        // slices), the same shape `compile` consumes; `actions[k]` is `true` for a creation.
+        let terms: Vec<(Complex64, Vec<bool>, Vec<u32>)> = vec![
             // hopping a†_0 a_1
-            (Complex64::new(0.7, 0.2), vec![(true, 0), (false, 1)]),
+            (Complex64::new(0.7, 0.2), vec![true, false], vec![0, 1]),
             // its conjugate a†_1 a_0
-            (Complex64::new(0.7, -0.2), vec![(true, 1), (false, 0)]),
+            (Complex64::new(0.7, -0.2), vec![true, false], vec![1, 0]),
             // number operator n_2 = a†_2 a_2
-            (Complex64::new(0.5, 0.0), vec![(true, 2), (false, 2)]),
+            (Complex64::new(0.5, 0.0), vec![true, false], vec![2, 2]),
             // density-density n_0 n_2 (written interleaved to exercise sign)
             (
                 Complex64::new(1.3, 0.0),
-                vec![(true, 0), (false, 0), (true, 2), (false, 2)],
+                vec![true, false, true, false],
+                vec![0, 0, 2, 2],
             ),
         ];
         for &(norb, nocc) in cases {
@@ -1418,9 +1401,8 @@ mod tests {
                 .map(|i| Complex64::new((i as f64 + 1.0) * 0.31, (i as f64) * -0.17))
                 .collect();
             let expected = reference_matvec(norb, nocc, None, &terms, &vec);
-            let split = split_terms(&terms);
             let got = SpinlessSector::new(norb, nocc)
-                .compile(term_views(&split))
+                .compile(term_views(&terms))
                 .unwrap()
                 .apply(&vec)
                 .unwrap();
@@ -1435,25 +1417,29 @@ mod tests {
         let cases: &[(u32, u32)] = &[(1, 1), (2, 1), (1, 2), (2, 2)];
         // A mixture of same-spin and cross-spin terms, some written interleaved so the block-spin
         // reordering sign is genuinely exercised.
-        let make_terms = |norb: u32| -> Vec<(Complex64, Vec<(bool, u32)>)> {
+        // Split `(coeff, actions, modes)` layout; beta modes are `norb + orbital`.
+        let make_terms = |norb: u32| -> Vec<(Complex64, Vec<bool>, Vec<u32>)> {
             vec![
                 // alpha hopping a†_0 a_1
-                (Complex64::new(0.9, 0.0), vec![(true, 0), (false, 1)]),
+                (Complex64::new(0.9, 0.0), vec![true, false], vec![0, 1]),
                 // beta hopping a†_0 a_1  (beta modes are norb + orbital)
                 (
                     Complex64::new(0.4, 0.1),
-                    vec![(true, norb), (false, norb + 1)],
+                    vec![true, false],
+                    vec![norb, norb + 1],
                 ),
                 // cross-spin density-density n^a_0 n^b_0 = a†_0 a_0 a†_{norb} a_{norb}
                 (
                     Complex64::new(1.1, 0.0),
-                    vec![(true, 0), (false, 0), (true, norb), (false, norb)],
+                    vec![true, false, true, false],
+                    vec![0, 0, norb, norb],
                 ),
                 // interleaved cross-spin: a†_0(a) a†_{norb+2}(b) a_{norb}(b) a_2(a)  -- spin exchange
                 // pattern that moves an alpha 2->0 and a beta 0->2, ops interleaved a,b,b,a.
                 (
                     Complex64::new(0.6, -0.3),
-                    vec![(true, 0), (true, norb + 2), (false, norb), (false, 2)],
+                    vec![true, true, false, false],
+                    vec![0, norb + 2, norb, 2],
                 ),
             ]
         };
@@ -1465,10 +1451,9 @@ mod tests {
                 .map(|i| Complex64::new((i as f64 + 0.5) * 0.23, (i as f64) * 0.11))
                 .collect();
             let expected = reference_matvec(norb, n_a, Some(n_b), &terms, &vec);
-            let split = split_terms(&terms);
             let got = SpinfulSector::new(norb, n_a, n_b)
                 .unwrap()
-                .compile(term_views(&split))
+                .compile(term_views(&terms))
                 .unwrap()
                 .apply(&vec)
                 .unwrap();
@@ -1486,16 +1471,18 @@ mod tests {
         for &(n_a, n_b) in &[(1u32, 1u32), (2, 1)] {
             let table = BinomialTable::new(norb);
             let dim = table.num_strings(norb, n_a) * table.num_strings(norb, n_b);
-            let terms: Vec<(Complex64, Vec<(bool, u32)>)> =
-                vec![(Complex64::new(1.0, 0.0), vec![(true, norb), (false, norb)])];
+            let terms: Vec<(Complex64, Vec<bool>, Vec<u32>)> = vec![(
+                Complex64::new(1.0, 0.0),
+                vec![true, false],
+                vec![norb, norb],
+            )];
             let vec: Vec<Complex64> = (0..dim)
                 .map(|i| Complex64::new(i as f64 + 1.0, 0.0))
                 .collect();
             let expected = reference_matvec(norb, n_a, Some(n_b), &terms, &vec);
-            let split = split_terms(&terms);
             let got = SpinfulSector::new(norb, n_a, n_b)
                 .unwrap()
-                .compile(term_views(&split))
+                .compile(term_views(&terms))
                 .unwrap()
                 .apply(&vec)
                 .unwrap();
@@ -1623,18 +1610,20 @@ mod tests {
         assert_vec_close(&got, &complex_vec(&vec![0.0; dim]));
     }
 
-    /// The adjoint of a term: reverse the ladder-operator order, swap creation/annihilation, and
-    /// conjugate the coefficient. `(c * o_1 o_2 ... o_k)^H = conj(c) * o_k^H ... o_1^H`, and a single
-    /// ladder operator's adjoint just flips creation<->annihilation on the same orbital. Used to build
-    /// an independent oracle for `apply_conj` (op^H @ vec): compiling the adjoint terms and applying
-    /// them forward must reproduce `apply_conj` of the original.
-    fn adjoint_term(coeff: Complex64, ops: &[(bool, u32)]) -> (Complex64, Vec<(bool, u32)>) {
-        let adj_ops = ops
+    /// The adjoint of a split `(coeff, actions, modes)` term: reverse the ladder-operator order, swap
+    /// creation/annihilation, and conjugate the coefficient. `(c * o_1 o_2 ... o_k)^H = conj(c) *
+    /// o_k^H ... o_1^H`, and a single ladder operator's adjoint just flips creation<->annihilation on
+    /// the same orbital. Used to build an independent oracle for `apply_conj` (op^H @ vec): compiling
+    /// the adjoint terms and applying them forward must reproduce `apply_conj` of the original.
+    fn adjoint_term(term: &(Complex64, Vec<bool>, Vec<u32>)) -> (Complex64, Vec<bool>, Vec<u32>) {
+        let (coeff, actions, modes) = term;
+        let adj_actions = actions
             .iter()
             .rev()
-            .map(|&(is_creation, orb)| (!is_creation, orb))
+            .map(|&is_creation| !is_creation)
             .collect();
-        (coeff.conj(), adj_ops)
+        let adj_modes = modes.iter().rev().copied().collect();
+        (coeff.conj(), adj_actions, adj_modes)
     }
 
     #[test]
@@ -1651,18 +1640,16 @@ mod tests {
         let (norb, nocc) = (5u32, 3u32);
         let sector = SpinlessSector::new(norb, nocc);
         let dim = sector.dim();
-        let terms: Vec<(Complex64, Vec<(bool, u32)>)> = vec![
-            (Complex64::new(0.7, 0.2), vec![(true, 0), (false, 1)]),
-            (Complex64::new(0.5, 0.0), vec![(true, 2), (false, 2)]),
+        let terms: Vec<(Complex64, Vec<bool>, Vec<u32>)> = vec![
+            (Complex64::new(0.7, 0.2), vec![true, false], vec![0, 1]),
+            (Complex64::new(0.5, 0.0), vec![true, false], vec![2, 2]),
             // sector-changing (raises particle number): must be dropped on compile.
-            (Complex64::new(1.3, -0.4), vec![(true, 4)]),
+            (Complex64::new(1.3, -0.4), vec![true], vec![4]),
         ];
-        let split = split_terms(&terms);
-        let adj_terms: Vec<(Complex64, Vec<(bool, u32)>)> =
-            terms.iter().map(|(c, ops)| adjoint_term(*c, ops)).collect();
-        let adj_split = split_terms(&adj_terms);
-        let compiled = sector.compile(term_views(&split)).unwrap();
-        let compiled_adj = sector.compile(term_views(&adj_split)).unwrap();
+        let adj_terms: Vec<(Complex64, Vec<bool>, Vec<u32>)> =
+            terms.iter().map(adjoint_term).collect();
+        let compiled = sector.compile(term_views(&terms)).unwrap();
+        let compiled_adj = sector.compile(term_views(&adj_terms)).unwrap();
         assert_eq!(compiled.dim(), dim);
         for scale in [0.31f64, -1.7] {
             let vec: Vec<Complex64> = (0..dim)
@@ -1678,22 +1665,21 @@ mod tests {
         let (norb, n_a, n_b) = (3u32, 2u32, 1u32);
         let sector = SpinfulSector::new(norb, n_a, n_b).unwrap();
         let dim = sector.dim();
-        let terms: Vec<(Complex64, Vec<(bool, u32)>)> = vec![
-            (Complex64::new(0.9, 0.0), vec![(true, 0), (false, 1)]),
+        let terms: Vec<(Complex64, Vec<bool>, Vec<u32>)> = vec![
+            (Complex64::new(0.9, 0.0), vec![true, false], vec![0, 1]),
             (
                 Complex64::new(1.1, 0.3),
-                vec![(true, 0), (false, 0), (true, norb), (false, norb)],
+                vec![true, false, true, false],
+                vec![0, 0, norb, norb],
             ),
             // sector-changing spin flip a†_{0a} a_{0b}: conserves total N but leaves the (2,1) sector;
             // must be dropped on compile.
-            (Complex64::new(0.5, 0.0), vec![(true, 0), (false, norb)]),
+            (Complex64::new(0.5, 0.0), vec![true, false], vec![0, norb]),
         ];
-        let split = split_terms(&terms);
-        let adj_terms: Vec<(Complex64, Vec<(bool, u32)>)> =
-            terms.iter().map(|(c, ops)| adjoint_term(*c, ops)).collect();
-        let adj_split = split_terms(&adj_terms);
-        let compiled = sector.compile(term_views(&split)).unwrap();
-        let compiled_adj = sector.compile(term_views(&adj_split)).unwrap();
+        let adj_terms: Vec<(Complex64, Vec<bool>, Vec<u32>)> =
+            terms.iter().map(adjoint_term).collect();
+        let compiled = sector.compile(term_views(&terms)).unwrap();
+        let compiled_adj = sector.compile(term_views(&adj_terms)).unwrap();
         assert_eq!(compiled.dim(), dim);
         for scale in [0.23f64, 0.91] {
             let vec: Vec<Complex64> = (0..dim)
@@ -1786,15 +1772,14 @@ mod tests {
         let (norb, nocc) = (5u32, 3u32);
         let sector = SpinlessSector::new(norb, nocc);
         let dim = sector.dim();
-        let terms: Vec<(Complex64, Vec<(bool, u32)>)> = vec![
-            (Complex64::new(1.0, 0.0), vec![(true, 0), (false, 0)]),
-            (Complex64::new(0.5, 0.0), vec![(true, 0), (false, 0)]),
-            (Complex64::new(-0.25, 0.3), vec![(true, 0), (false, 0)]),
-            (Complex64::new(0.7, 0.2), vec![(true, 1), (false, 2)]),
-            (Complex64::new(0.1, -0.4), vec![(true, 1), (false, 2)]),
+        let terms: Vec<(Complex64, Vec<bool>, Vec<u32>)> = vec![
+            (Complex64::new(1.0, 0.0), vec![true, false], vec![0, 0]),
+            (Complex64::new(0.5, 0.0), vec![true, false], vec![0, 0]),
+            (Complex64::new(-0.25, 0.3), vec![true, false], vec![0, 0]),
+            (Complex64::new(0.7, 0.2), vec![true, false], vec![1, 2]),
+            (Complex64::new(0.1, -0.4), vec![true, false], vec![1, 2]),
         ];
-        let split = split_terms(&terms);
-        let compiled = sector.compile(term_views(&split)).unwrap();
+        let compiled = sector.compile(term_views(&terms)).unwrap();
         let vec: Vec<Complex64> = (0..dim)
             .map(|i| Complex64::new(i as f64 + 0.5, (i as f64) * 0.11))
             .collect();
@@ -1808,12 +1793,15 @@ mod tests {
         };
         let raw_spinless = terms
             .iter()
-            .map(|(_, ops)| {
+            .map(|(_, actions, modes)| {
+                let ops: Vec<(bool, u32)> =
+                    actions.iter().copied().zip(modes.iter().copied()).collect();
                 sector
                     .strings
                     .iter()
                     .filter(|&&s| {
-                        apply_ops_to_string(s, ops).is_some_and(|(out, _)| out.count_ones() == nocc)
+                        apply_ops_to_string(s, &ops)
+                            .is_some_and(|(out, _)| out.count_ones() == nocc)
                     })
                     .count()
             })
@@ -1829,20 +1817,21 @@ mod tests {
         let (norb, n_a, n_b) = (3u32, 2u32, 1u32);
         let sector = SpinfulSector::new(norb, n_a, n_b).unwrap();
         let dim = sector.dim();
-        let terms: Vec<(Complex64, Vec<(bool, u32)>)> = vec![
-            (Complex64::new(1.0, 0.0), vec![(true, 0), (false, 0)]),
-            (Complex64::new(0.5, 0.2), vec![(true, 0), (false, 0)]),
+        let terms: Vec<(Complex64, Vec<bool>, Vec<u32>)> = vec![
+            (Complex64::new(1.0, 0.0), vec![true, false], vec![0, 0]),
+            (Complex64::new(0.5, 0.2), vec![true, false], vec![0, 0]),
             (
                 Complex64::new(0.9, 0.0),
-                vec![(true, norb), (false, norb + 1)],
+                vec![true, false],
+                vec![norb, norb + 1],
             ),
             (
                 Complex64::new(0.3, -0.1),
-                vec![(true, norb), (false, norb + 1)],
+                vec![true, false],
+                vec![norb, norb + 1],
             ),
         ];
-        let split = split_terms(&terms);
-        let compiled = sector.compile(term_views(&split)).unwrap();
+        let compiled = sector.compile(term_views(&terms)).unwrap();
         let vec: Vec<Complex64> = (0..dim)
             .map(|i| Complex64::new(i as f64 + 0.3, (i as f64) * 0.07))
             .collect();
@@ -1869,36 +1858,38 @@ mod tests {
         // reproduce the naive JW reference across a symmetric and an asymmetric sector, proving the
         // kernel needs no normal-ordering pre-pass.
         let norb = 3u32;
-        let terms: Vec<(Complex64, Vec<(bool, u32)>)> = vec![
+        let terms: Vec<(Complex64, Vec<bool>, Vec<u32>)> = vec![
             // scalar / identity on both spins.
-            (Complex64::new(1.3, -0.2), vec![]),
+            (Complex64::new(1.3, -0.2), vec![], vec![]),
             // alpha-only, deliberately NON-normal-ordered: a_1 a†_0 (annihilation first).
-            (Complex64::new(0.7, 0.4), vec![(false, 1), (true, 0)]),
+            (Complex64::new(0.7, 0.4), vec![false, true], vec![1, 0]),
             // beta-only hop a†_{0b} a_{1b}.
             (
                 Complex64::new(0.5, 0.0),
-                vec![(true, norb), (false, norb + 1)],
+                vec![true, false],
+                vec![norb, norb + 1],
             ),
             // cross-spin density-density n^a_2 n^b_2.
             (
                 Complex64::new(1.1, 0.0),
-                vec![(true, 2), (false, 2), (true, norb + 2), (false, norb + 2)],
+                vec![true, false, true, false],
+                vec![2, 2, norb + 2, norb + 2],
             ),
             // cross-spin, interleaved and non-normal-ordered: a_{1b} a†_{0a} a†_{1a}(no) -- use a real
             // spin exchange a†_{0a} a†_{2b} a_{0b} a_{2a} written interleaved.
             (
                 Complex64::new(0.6, -0.3),
-                vec![(true, 0), (true, norb + 2), (false, norb), (false, 2)],
+                vec![true, true, false, false],
+                vec![0, norb + 2, norb, 2],
             ),
         ];
-        let split = split_terms(&terms);
         for &(n_a, n_b) in &[(2u32, 2u32), (2, 1)] {
             let sector = SpinfulSector::new(norb, n_a, n_b).unwrap();
             let dim = sector.dim();
             let vec: Vec<Complex64> = (0..dim)
                 .map(|i| Complex64::new((i as f64 + 0.5) * 0.23, (i as f64) * 0.11))
                 .collect();
-            let compiled = sector.compile(term_views(&split)).unwrap();
+            let compiled = sector.compile(term_views(&terms)).unwrap();
             assert_vec_close(
                 &compiled.apply(&vec).unwrap(),
                 &reference_matvec(norb, n_a, Some(n_b), &terms, &vec),
@@ -1919,22 +1910,23 @@ mod tests {
         // which spin carries the number operator.
         let sector = SpinfulSector::new(norb, n_a, n_b).unwrap();
         let dim = sector.dim();
-        let terms: Vec<(Complex64, Vec<(bool, u32)>)> = vec![
+        let terms: Vec<(Complex64, Vec<bool>, Vec<u32>)> = vec![
             // alpha number operator n^a_0 (n_a = 3: many alpha survivors) with a beta hop 1->2 (n_b = 1:
             // 1 beta survivor). Expect alpha_len > beta_len -> beta-outer branch.
             (
                 Complex64::new(0.8, 0.2),
-                vec![(true, 0), (false, 0), (true, norb + 2), (false, norb + 1)],
+                vec![true, false, true, false],
+                vec![0, 0, norb + 2, norb + 1],
             ),
             // alpha hop 1->2 (n_a = 3: few alpha survivors) with a beta number operator n^b_0 (n_b = 1:
             // 1 beta survivor). Expect alpha_len <= beta_len -> alpha-outer branch.
             (
                 Complex64::new(0.5, -0.4),
-                vec![(true, 2), (false, 1), (true, norb), (false, norb)],
+                vec![true, false, true, false],
+                vec![2, 1, norb, norb],
             ),
         ];
-        let split = split_terms(&terms);
-        let compiled = sector.compile(term_views(&split)).unwrap();
+        let compiled = sector.compile(term_views(&terms)).unwrap();
 
         // White-box: confirm both the alpha-outer (a_len <= b_len) and beta-outer (a_len > b_len)
         // branches are represented across the compiled mixed terms.
@@ -1972,8 +1964,8 @@ mod tests {
             &reference_matvec(norb, n_a, Some(n_b), &terms, &vec),
         );
         // apply_conj against the adjoint operator's forward reference.
-        let adj_terms: Vec<(Complex64, Vec<(bool, u32)>)> =
-            terms.iter().map(|(c, ops)| adjoint_term(*c, ops)).collect();
+        let adj_terms: Vec<(Complex64, Vec<bool>, Vec<u32>)> =
+            terms.iter().map(adjoint_term).collect();
         assert_vec_close(
             &compiled.apply_conj(&vec).unwrap(),
             &reference_matvec(norb, n_a, Some(n_b), &adj_terms, &vec),
