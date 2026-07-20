@@ -100,7 +100,8 @@ protocol below:
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+import numpy as np
+import scipy.sparse.linalg
 
 from qiskit_fermions._lib.operators.edge_vertex_operator import (
     EdgeVertexOperator,
@@ -114,9 +115,6 @@ from .fermion_action import FermionAction, ann, cre
 from .majorana_action import MajoranaAction, gamma
 from .protocol import OperatorTrait
 from .transfer_action import TransferAction
-
-if TYPE_CHECKING:
-    import scipy.sparse.linalg
 
 
 def _fermion_operator_linear_operator(  # noqa: D417
@@ -150,9 +148,6 @@ def _fermion_operator_linear_operator(  # noqa: D417
     Returns:
         A :class:`scipy.sparse.linalg.LinearOperator` applying this operator on the requested sector.
     """
-    import numpy as np
-    import scipy.sparse.linalg
-
     kernel = self._fci_linear_operator_(norb, nelec)
 
     # Bind the coercion handles once per operator (not once per matvec): SciPy hands a

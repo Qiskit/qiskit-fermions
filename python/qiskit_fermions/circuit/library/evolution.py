@@ -14,11 +14,16 @@
 
 from __future__ import annotations
 
-import numpy as np
+from typing import TYPE_CHECKING
+
+import scipy.sparse.linalg
 
 from qiskit_fermions.operators.protocol import OperatorTrait
 
 from .. import FermionicGate
+
+if TYPE_CHECKING:
+    import numpy as np
 
 
 class Evolution(FermionicGate):
@@ -139,8 +144,6 @@ class Evolution(FermionicGate):
                 beta electron counts must *each* be conserved (particle number and the z-component of
                 spin), matching the fixed sector the kernel represents.
         """
-        import scipy.sparse.linalg
-
         from qiskit_fermions.operators import FermionOperator
 
         # The simulation path relies on the operator exposing ``_linear_operator_`` (the native FCI

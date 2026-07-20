@@ -18,7 +18,7 @@ from pathlib import Path
 
 import numpy as np
 import pytest
-import scipy.sparse.linalg as ssl
+import scipy.sparse.linalg
 from qiskit_fermions.circuit import FermionicCircuit
 from qiskit_fermions.circuit.library import Evolution
 from qiskit_fermions.operators import FermionOperator
@@ -50,7 +50,7 @@ def test_evolution_apply_unitary_matches_ffsim_oracle():
         }
     )
     linop = ffsim.linear_operator(ffsim_op, norb=norb, nelec=nelec)
-    expected = ssl.expm_multiply(-1j * time * linop, vec0, traceA=0.0)
+    expected = scipy.sparse.linalg.expm_multiply(-1j * time * linop, vec0, traceA=0.0)
 
     vec0_before = vec0.copy()
     result = Evolution(2, hamil, time=time)._apply_unitary_(vec0, norb, nelec, copy=True)
@@ -87,7 +87,7 @@ def test_evolution_apply_unitary_through_circuit_with_placement():
         }
     )
     linop = ffsim.linear_operator(ffsim_op, norb=norb, nelec=nelec)
-    expected = ssl.expm_multiply(-1j * time * linop, vec0, traceA=0.0)
+    expected = scipy.sparse.linalg.expm_multiply(-1j * time * linop, vec0, traceA=0.0)
 
     result = circ._apply_unitary_(vec0, norb, nelec, copy=True)
 
@@ -276,6 +276,6 @@ def test_evolution_apply_unitary_matches_ffsim_molecular_hamiltonian():
     # reference: load the same FCIDump into ffsim's native MolecularHamiltonian and evolve directly
     mol_hamiltonian = ffsim.MolecularData.from_fcidump(fcidump_file).hamiltonian
     linop = ffsim.linear_operator(mol_hamiltonian, norb=norb, nelec=nelec)
-    expected = ssl.expm_multiply(-1j * time * linop, initial, traceA=0.0)
+    expected = scipy.sparse.linalg.expm_multiply(-1j * time * linop, initial, traceA=0.0)
 
     np.testing.assert_allclose(result, expected, atol=1e-10)

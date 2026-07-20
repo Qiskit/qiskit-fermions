@@ -18,6 +18,8 @@ import numbers
 from typing import cast
 
 import numpy as np
+import scipy.linalg
+import scipy.sparse.linalg
 
 from qiskit_fermions.utils.optionals import HAS_FFSIM
 
@@ -81,8 +83,6 @@ class OrbitalRotation(FermionicGate):
             An :class:`.OrbitalRotation` acting on :math:`n = n_\text{occ} + n_\text{virt}` modes,
             whose ``rotation_unitary`` is :math:`\exp(t_1 - t_1^\dagger)`.
         """
-        import scipy.linalg
-
         nocc, nvrt = t1.shape
         norb = nocc + nvrt
         generator = np.zeros((norb, norb), dtype=complex)
@@ -203,9 +203,6 @@ class OrbitalRotation(FermionicGate):
         ``logm`` preserves that block-diagonal structure, so the generator ``G`` conserves the
         ``(norb, nelec)`` sector and no amplitude is dropped.
         """
-        import scipy.linalg
-        import scipy.sparse.linalg
-
         from qiskit_fermions._lib.operators.fermion_operator import FermionOperator
 
         if copy:
