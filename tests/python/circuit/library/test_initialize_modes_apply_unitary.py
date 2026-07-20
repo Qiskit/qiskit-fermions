@@ -119,25 +119,6 @@ def test_initialize_modes_apply_unitary_end_to_end_full_circuit():
     np.testing.assert_allclose(result, expected, atol=1e-10)
 
 
-def test_initialize_modes_apply_unitary_via_ffsim_apply_unitary_with_real_vec():
-    """ffsim.apply_unitary (which always passes a real array) drives a circuit starting with the seed."""
-    norb = 3
-    nelec = (2, 1)
-    occupation = [True, True, False, True, False, False]
-    rot = random_unitary(norb, seed=5)
-
-    circ = FermionicCircuit(2 * norb)
-    circ.append(InitializeModes(occupation), circ.modes)
-    circ.append(OrbitalRotation(rot), [circ.modes[i] for i in range(norb)])
-
-    # a correctly sized (arbitrary) vector in the target sector; InitializeModes overwrites it
-    vec0 = ffsim.slater_determinant(norb, ([0, 1], [0]))
-    result = ffsim.apply_unitary(vec0, circ, norb=norb, nelec=nelec)
-
-    expected = ffsim.apply_orbital_rotation(vec0.copy(), (rot, None), norb=norb, nelec=nelec)
-    np.testing.assert_allclose(result, expected, atol=1e-10)
-
-
 def test_initialize_modes_apply_unitary_rejects_sector_mismatch():
     """An occupation whose electron counts disagree with nelec is rejected."""
     # spinful: occupation sets 3 alpha but nelec asks for 2

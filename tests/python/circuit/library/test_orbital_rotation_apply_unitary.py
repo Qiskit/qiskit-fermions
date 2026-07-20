@@ -236,21 +236,6 @@ def test_orbital_rotation_apply_unitary_through_circuit_with_placement():
     np.testing.assert_allclose(result_beta, expected_beta, atol=1e-10)
 
 
-def test_orbital_rotation_apply_unitary_via_ffsim_apply_unitary():
-    """The public ffsim.apply_unitary entry point works on a FermionicCircuit."""
-    norb = 3
-    nelec = (2, 1)
-    rot = random_unitary(norb, seed=5)
-    vec0 = ffsim.slater_determinant(norb, ([0, 1], [0]))
-
-    circ = FermionicCircuit(2 * norb)
-    circ.append(OrbitalRotation(rot), [circ.modes[i] for i in range(norb)])
-
-    result = ffsim.apply_unitary(vec0, circ, norb=norb, nelec=nelec)
-    expected = ffsim.apply_orbital_rotation(vec0.copy(), (rot, None), norb=norb, nelec=nelec)
-    np.testing.assert_allclose(result, expected, atol=1e-10)
-
-
 def test_orbital_rotation_apply_unitary_general_path_matches_fast_path(monkeypatch):
     """With ffsim disabled the native generator path matches the ffsim fast path."""
     import qiskit_fermions.circuit.library.orbital_rotation as orbital_rotation_module

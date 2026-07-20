@@ -18,7 +18,9 @@ import numpy as np
 import pytest
 from qiskit_fermions.circuit import FermionicCircuit
 from qiskit_fermions.circuit.fermionic_gate import FermionicGate
-from qiskit_fermions.circuit.library import InitializeModes
+from qiskit_fermions.circuit.library import InitializeModes, OrbitalRotation
+
+from ..utils import random_unitary
 
 ffsim = pytest.importorskip("ffsim")
 
@@ -213,3 +215,30 @@ def test_apply_unitary_accepts_plain_protocol_gate_on_identity_placement():
 
     result = circ._apply_unitary_(vec0, norb, nelec, copy=True)
     np.testing.assert_array_equal(result, _PlainProtocolGate.SCALE * vec0)
+
+
+def test_public_ffsim_apply_unitary_drives_a_fermionic_circuit():
+    """The public ``ffsim.apply_unitary`` entry point drives a FermionicCircuit end to end.
+
+    ``ffsim.apply_unitary`` calls the object's ``_apply_unitary_`` with ``norb``/``nelec``/``copy`` as
+    *keyword* arguments (and honors a ``NotImplemented`` return). Driving a real (seed-then-rotate)
+    circuit through it -- rather than calling ``circ._apply_unitary_`` positionally as the other tests
+    do -- is the one place that guards this public-protocol contract: a reordered signature would pass
+    the positional tests yet break actual ffsim usage. One such check suffices for all gates, since
+    ffsim's dispatch is gate-agnostic; the per-gate correctness lives in the gate apply-unitary tests.
+    """
+    norb = 3
+    nelec = (2, 1)
+    occupation = [True, True, False, True, False, False]
+    rot = random_unitary(norb, seed=5)
+
+    circ = FermionicCircuit(2 * norb)
+    circ.append(InitializeModes(occupation), circ.modes)
+    circ.append(OrbitalRotation(rot), [circ.modes[i] for i in range(norb)])
+
+    # public entry point: ffsim.apply_unitary invokes circ._apply_unitary_ with keyword args
+    result = ffsim.apply_unitary(None, circ, norb=norb, nelec=nelec)
+
+    vec0 = ffsim.slater_determinant(norb, ([0, 1], [0]))
+    expected = ffsim.apply_orbital_rotation(vec0, (rot, None), norb=norb, nelec=nelec)
+    np.testing.assert_allclose(result, expected, atol=1e-10)

@@ -94,37 +94,6 @@ def test_evolution_apply_unitary_through_circuit_with_placement():
     np.testing.assert_allclose(result, expected, atol=1e-10)
 
 
-def test_evolution_apply_unitary_via_ffsim_apply_unitary():
-    """The public ffsim.apply_unitary entry point works on a FermionicCircuit."""
-    norb = 2
-    nelec = (1, 1)
-    time = 0.37
-
-    hamil = FermionOperator.from_dict(
-        {
-            ((True, 0), (False, 1)): 1.0,
-            ((True, 1), (False, 0)): 1.0,
-        }
-    )
-    circ = FermionicCircuit(2 * norb)
-    circ.append(Evolution(2 * norb, hamil, time=time), circ.modes)
-
-    vec0 = ffsim.slater_determinant(norb, ([0], [0]))
-
-    ffsim_op = ffsim.FermionOperator(
-        {
-            (ffsim.cre_a(0), ffsim.des_a(1)): 1.0,
-            (ffsim.cre_a(1), ffsim.des_a(0)): 1.0,
-        }
-    )
-    linop = ffsim.linear_operator(ffsim_op, norb=norb, nelec=nelec)
-    expected = ssl.expm_multiply(-1j * time * linop, vec0, traceA=0.0)
-
-    result = ffsim.apply_unitary(vec0, circ, norb=norb, nelec=nelec)
-
-    np.testing.assert_allclose(result, expected, atol=1e-10)
-
-
 def _spinless_evolution_oracle(terms, norb, nelec, time, vec0):
     """Independent exact-diagonalization reference for a spinless evolution ``exp(-i t H) |vec0>``.
 
