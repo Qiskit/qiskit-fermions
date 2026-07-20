@@ -167,21 +167,82 @@ impl FermionOperator {
     }
 
     pub fn conserves_particle_number(&self) -> bool {
+        // Particle-number conservation is sector conservation with all modes in one block.
+        self.conserves_sector(&[])
+    }
+
+    /// Returns whether every term conserves particle number within each mode block.
+    ///
+    /// `block_sizes` partitions the mode range into consecutive, non-overlapping blocks: block `b`
+    /// spans modes `[start_b, start_b + block_sizes[b])` where `start_b = sum(block_sizes[..b])`. A
+    /// term conserves the sector iff, in *every* block, its number of creation operators equals its
+    /// number of annihilation operators. A term touching a mode that lies beyond the last block does
+    /// not conserve the sector (there is no block whose count it could balance).
+    ///
+    /// An empty `block_sizes` treats all modes as a single unbounded block, making this equivalent to
+    /// [`Self::conserves_particle_number`].
+    ///
+    /// This underlies the fixed-sector FCI kernel: `[norb]` checks plain particle-number conservation
+    /// (spinless), while `[norb, norb]` checks that the alpha block `[0, norb)` and beta block
+    /// `[norb, 2 * norb)` are *each* conserved, i.e. strict conservation of both particle number and
+    /// the z-component of spin.
+    pub fn conserves_sector(&self, block_sizes: &[u32]) -> bool {
+        // The exclusive upper bound of each block; the last entry is the total mode count. Empty
+        // `block_sizes` yields no bounds, which the block lookup below treats as one unbounded block.
+        let bounds: Vec<u32> = block_sizes
+            .iter()
+            .scan(0, |acc, size| {
+                *acc += size;
+                Some(*acc)
+            })
+            .collect();
+        // Net (creations - annihilations) per block, reused across terms.
+        let mut net = vec![0i64; block_sizes.len().max(1)];
         for term in self.iter() {
-            let (create_count, destroy_count) =
-                term.iter()
-                    .fold((0, 0), |(create_acc, destroy_acc), (action, _)| {
-                        if *action {
-                            (create_acc + 1, destroy_acc)
-                        } else {
-                            (create_acc, destroy_acc + 1)
-                        }
-                    });
-            if create_count != destroy_count {
+            net.iter_mut().for_each(|n| *n = 0);
+            let mut in_range = true;
+            for (&action, &mode) in term.iter() {
+                // The block containing `mode`: the first bound strictly greater than it. With no
+                // bounds every mode falls into the single block 0.
+                let block = match bounds.iter().position(|&b| mode < b) {
+                    Some(b) => b,
+                    None if bounds.is_empty() => 0,
+                    None => {
+                        in_range = false;
+                        break;
+                    }
+                };
+                net[block] += if action { 1 } else { -1 };
+            }
+            if !in_range || net.iter().any(|&n| n != 0) {
                 return false;
             }
         }
         true
+    }
+
+    /// Compiles this operator into a reusable spinless scatter map for a precomputed sector.
+    ///
+    /// The returned [`crate::linalg::fci::CompiledSector`] captures the operator's vector-independent
+    /// action once; its `apply`/`apply_conj` then serve the many matvecs/rmatvecs of an evolution
+    /// (`expm_multiply`) without re-walking the ladder operators, re-checking conservation, or
+    /// re-ranking destinations on every call. See [`crate::linalg::fci::SpinlessSector::compile`].
+    pub fn compile_fci_spinless(
+        &self,
+        sector: &crate::linalg::fci::SpinlessSector,
+    ) -> Result<crate::linalg::fci::CompiledSector, crate::linalg::fci::FciMatvecError> {
+        sector.compile(self.iter().map(|t| (t.coeff, t.actions, t.modes)))
+    }
+
+    /// Compiles this operator into a reusable spinful scatter map for a precomputed sector.
+    ///
+    /// The spinful counterpart of [`Self::compile_fci_spinless`]; see
+    /// [`crate::linalg::fci::SpinfulSector::compile`].
+    pub fn compile_fci_spinful(
+        &self,
+        sector: &crate::linalg::fci::SpinfulSector,
+    ) -> Result<crate::linalg::fci::CompiledSector, crate::linalg::fci::FciMatvecError> {
+        sector.compile(self.iter().map(|t| (t.coeff, t.actions, t.modes)))
     }
 }
 
@@ -1155,6 +1216,55 @@ mod tests {
         };
 
         assert!(!op2.conserves_particle_number());
+    }
+
+    #[test]
+    fn test_conserves_sector() {
+        // a†_0 a_1: hopping within a single 2-orbital spinless block -> conserves.
+        let hop = FermionOperator {
+            coeffs: vec![Complex64::new(1.0, 0.0)],
+            actions: vec![true, false],
+            modes: vec![0, 1],
+            boundaries: vec![0, 2],
+            groups: None,
+        };
+        assert!(hop.conserves_sector(&[2]));
+        // Empty block_sizes reduces to plain particle-number conservation.
+        assert!(hop.conserves_sector(&[]));
+
+        // a†_0 a_2 with a spinful split [2, 2]: moves a particle from the alpha block [0, 2) to the
+        // beta block [2, 4) -> conserves total number but NOT the per-block (Sz) counts.
+        let spin_flip = FermionOperator {
+            coeffs: vec![Complex64::new(1.0, 0.0)],
+            actions: vec![true, false],
+            modes: vec![0, 2],
+            boundaries: vec![0, 2],
+            groups: None,
+        };
+        assert!(spin_flip.conserves_particle_number());
+        assert!(!spin_flip.conserves_sector(&[2, 2]));
+        // Treated as one 4-orbital spinless block, the same term conserves.
+        assert!(spin_flip.conserves_sector(&[4]));
+
+        // a†_2 (bare creation): does not conserve any sector.
+        let raise = FermionOperator {
+            coeffs: vec![Complex64::new(1.0, 0.0)],
+            actions: vec![true],
+            modes: vec![2],
+            boundaries: vec![0, 1],
+            groups: None,
+        };
+        assert!(!raise.conserves_sector(&[4]));
+
+        // A mode beyond the last block (mode 4 with blocks summing to 4) cannot conserve.
+        let out_of_range = FermionOperator {
+            coeffs: vec![Complex64::new(1.0, 0.0)],
+            actions: vec![true, false],
+            modes: vec![0, 4],
+            boundaries: vec![0, 2],
+            groups: None,
+        };
+        assert!(!out_of_range.conserves_sector(&[2, 2]));
     }
 
     #[test]

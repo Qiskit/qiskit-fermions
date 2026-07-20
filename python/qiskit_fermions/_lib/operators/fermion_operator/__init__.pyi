@@ -4,6 +4,7 @@
 import builtins
 import numpy
 import numpy.typing
+from qiskit_fermions._lib.linalg import fci
 from qiskit_fermions._lib.operators.operators_library import fcidump
 import typing
 __all__ = [
@@ -857,6 +858,37 @@ class FermionOperator:
         Returns:
             Whether this operator is particle-number conserving.
         """
+    def conserves_sector(self, block_sizes: typing.Sequence[builtins.int]) -> builtins.bool:
+        r"""
+        Returns whether every term conserves particle number within each mode block.
+        
+        ``block_sizes`` partitions the mode range into consecutive, non-overlapping blocks: block
+        ``b`` spans modes ``[start_b, start_b + block_sizes[b])`` where ``start_b`` is the sum of the
+        preceding block sizes. A term conserves the sector if and only if, in *every* block, its
+        number of creation operators equals its number of annihilation operators. A term acting on a
+        mode beyond the final block does not conserve the sector.
+        
+        An empty ``block_sizes`` treats all modes as a single block, making this equivalent to
+        :meth:`conserves_particle_number`. A single block ``[norb]`` checks conservation for a
+        spinless FCI sector, while two equal blocks ``[norb, norb]`` check that the alpha modes
+        ``[0, norb)`` and beta modes ``[norb, 2 * norb)`` are each conserved -- i.e. conservation of
+        both particle number and the z-component of spin.
+        
+        .. doctest::
+        
+            >>> from qiskit_fermions.operators import FermionOperator
+            >>> op = FermionOperator.from_dict({((True, 0), (False, 2)): 1})
+            >>> op.conserves_sector([4])  # one spinless block of 4 orbitals
+            True
+            >>> op.conserves_sector([2, 2])  # moves a particle from the alpha block to the beta block
+            False
+        
+        Args:
+            block_sizes: the sizes of the consecutive mode blocks that each must be conserved.
+        
+        Returns:
+            Whether every term conserves particle number within each mode block.
+        """
     def relabel_modes(self, permutation: typing.Sequence[builtins.int]) -> FermionOperator:
         r"""
         Returns a new operator with relabeled modes.
@@ -886,6 +918,40 @@ class FermionOperator:
         Raises:
             ValueError: if ``permutation`` contains duplicate entries, or is too short to relabel
                 some mode the operator acts upon.
+        """
+    def _fci_linear_operator_(self, norb: builtins.int, nelec: typing.Any) -> fci.FciLinearOperator:
+        r"""
+        Returns a native FCI matrix-vector view of this operator on a fixed sector.
+        
+        This is the native kernel carrier behind the public ``_linear_operator_`` protocol method:
+        it applies this operator to a state vector via a native matrix-vector kernel, avoiding any
+        conversion to an intermediate representation. The returned object duck-types the subset of
+        the SciPy ``LinearOperator`` interface that :func:`scipy.sparse.linalg.expm_multiply` needs,
+        but it is **not** itself a SciPy ``LinearOperator``. The public ``_linear_operator_`` method
+        (added in Python, see :mod:`qiskit_fermions.operators`) wraps this into a genuine
+        :class:`scipy.sparse.linalg.LinearOperator` -- which is what ffsim's ``_linear_operator_``
+        protocol (and :external:func:`ffsim.linear_operator`) require.
+        
+        The FCI sector is selected by ``nelec``:
+        
+        * an ``int`` treats the operator's ``norb`` modes as spinless orbitals; the state vector has
+          length :math:`\binom{norb}{nelec}`.
+        * a ``(n_alpha, n_beta)`` tuple treats the operator's ``2 * norb`` modes as spin-orbitals
+          under the block-spin convention; the state vector has length
+          :math:`\binom{norb}{n_\alpha} \binom{norb}{n_\beta}`.
+        
+        Args:
+            norb: the number of (spatial) orbitals.
+            nelec: the electron count -- an ``int`` for a spinless sector, or a ``(n_alpha, n_beta)``
+                tuple for a spinful one.
+        
+        Returns:
+            A native ``LinearOperator``-compatible object for the requested sector.
+        
+        Raises:
+            TypeError: if ``nelec`` is neither an ``int`` nor a ``(int, int)`` tuple.
+            ValueError: if ``norb`` exceeds the maximum number of orbitals the bitmask
+                representation supports (64).
         """
     @staticmethod
     def _commutator_(op_a: FermionOperator, op_b: FermionOperator) -> FermionOperator: ...
