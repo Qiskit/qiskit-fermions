@@ -14,7 +14,7 @@
 
 import numpy as np
 import pytest
-from qiskit_fermions.linalg import givens_decomposition
+from qiskit_fermions.linalg import givens_decomposition, givens_decomposition_slater
 
 from ..utils import random_unitary
 
@@ -34,3 +34,32 @@ def test_givens_decomposition(dim: int):
         reconstructed @= givens_mat.conj()
 
     np.testing.assert_allclose(unitary, reconstructed)
+
+
+def _reconstruct_slater(rotations, m: int, n: int) -> np.ndarray:
+    """Reconstruct the occupied orbitals by applying the rotations to ``[I_m | 0]``."""
+    reconstructed = np.eye(m, n, dtype=complex)
+    for c, s, i, j in rotations:
+        col_i = reconstructed[:, i].copy()
+        col_j = reconstructed[:, j].copy()
+        reconstructed[:, i] = c * col_i + s.conjugate() * col_j
+        reconstructed[:, j] = c * col_j - s * col_i
+    return reconstructed
+
+
+@pytest.mark.parametrize("norb, nocc", [(6, 3), (7, 2), (5, 4), (4, 4), (5, 1), (8, 4)])
+def test_givens_decomposition_slater(norb: int, nocc: int):
+    # occupied-orbital coefficients: nocc rows of a random unitary, in a basis of norb orbitals
+    coeffs = random_unitary(norb, seed=norb * 100 + nocc).T[list(range(nocc))]
+    max_full = nocc * (norb - nocc)
+
+    rotations = givens_decomposition_slater(coeffs)
+
+    # diamond-pattern bound and adjacency
+    assert len(rotations) <= max_full
+    assert all(abs(i - j) == 1 for _, _, i, j in rotations)
+
+    # the reconstructed occupied space matches the target Slater determinant (fidelity 1)
+    reconstructed = _reconstruct_slater(rotations, nocc, norb)
+    overlap = abs(np.linalg.det(reconstructed @ coeffs.conj().T)) ** 2
+    assert overlap == pytest.approx(1.0)

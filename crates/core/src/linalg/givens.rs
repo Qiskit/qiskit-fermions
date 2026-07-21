@@ -185,10 +185,73 @@ pub fn givens_decomposition(unitary: Array2<Complex64>) -> (Vec<GivensRotation>,
     (right_rotations, diagonal_phases)
 }
 
+/// Decomposes the occupied-orbital coefficients of a Slater determinant into Givens rotations.
+///
+/// This is the rectangular counterpart of [`givens_decomposition`], specialized for Slater
+/// determinant `state preparation`. The input `orbital_coeffs` is an :math:`m \times n` matrix whose
+/// :math:`m` rows are the occupied orbitals expressed in a basis of :math:`n` spatial orbitals
+/// (:math:`m \le n`); its rows are assumed to be orthonormal.
+///
+/// Applying the returned rotations, in order, to the reference configuration in which the first
+/// :math:`m` orbitals are occupied prepares the target Slater determinant. Because preparing a
+/// Slater determinant only requires realizing the :math:`m` occupied orbitals -- rather than a full
+/// :math:`n \times n` orbital rotation -- this uses at most :math:`m (n - m)` Givens rotations
+/// arranged in a diamond-shaped pattern (versus the brick-wall :math:`n (n - 1) / 2` of the square
+/// decomposition). The decomposition carries `no` diagonal phases: a global phase and any rotation
+/// within the occupied space leave the prepared Slater determinant unchanged, so both are discarded.
+///
+/// # Arguments
+///
+/// * `orbital_coeffs` - the :math:`m \times n` matrix of occupied-orbital coefficients.
+///
+/// # Returns
+///
+/// A vector of Givens rotations, each given as (real cosine, complex sine, index i, index j) acting
+/// on the adjacent indices i and j.
+pub fn givens_decomposition_slater(orbital_coeffs: Array2<Complex64>) -> Vec<GivensRotation> {
+    let m = orbital_coeffs.nrows();
+    let n = orbital_coeffs.ncols();
+    let mut matrix = orbital_coeffs;
+
+    // Zero out the top-right corner by rotating rows; this is a no-op on the prepared determinant
+    // (it mixes only unoccupied orbitals) but brings the matrix into the shape the column sweep
+    // below expects.
+    if n > m {
+        let n_minus_m = n - m;
+        for j in (n_minus_m + 1..n).rev() {
+            // zero out the entries in column j from the top down
+            for i in 0..(j - n_minus_m) {
+                if matrix[[i, j]].norm() > EPSILON {
+                    let (c, s) = zrotg(matrix[[i + 1, j]], matrix[[i, j]]);
+                    zrot(&mut matrix, &(c, s, i + 1, i), SliceType::Row);
+                }
+            }
+        }
+    }
+
+    // Decompose the matrix into Givens rotations, zeroing each row's trailing entries by rotating
+    // adjacent columns.
+    let mut rotations: Vec<GivensRotation> = Vec::new();
+    for i in 0..m {
+        let j_max = n - m + i;
+        for j in (i + 1..=j_max).rev() {
+            if matrix[[i, j]].norm() > EPSILON {
+                let (c, s) = zrotg(matrix[[i, j - 1]], matrix[[i, j]]);
+                rotations.push((c, s, j, j - 1));
+                zrot(&mut matrix, &(c, s, j - 1, j), SliceType::Column);
+            }
+        }
+    }
+
+    rotations.reverse();
+    rotations
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
 
+    use nalgebra::DMatrix;
     use ndarray::arr1;
 
     use crate::random::random_unitary;
@@ -233,6 +296,71 @@ mod tests {
                 matrices_approx_equal(&mat, &reconstructed, 1e-8),
                 "Givens decomposition and reconstruction failed for dimension {}",
                 dim
+            );
+        }
+    }
+
+    /// Reconstructs the `m x n` occupied-orbital coefficients from a Slater decomposition.
+    ///
+    /// Starting from the reference configuration (the first `m` of `n` orbitals occupied, i.e. the
+    /// `m x n` truncated identity), the rotations are applied in order to the columns. This is the
+    /// forward of the elimination performed by [`givens_decomposition_slater`].
+    fn reconstruct_slater(rotations: &[GivensRotation], m: usize, n: usize) -> Array2<Complex64> {
+        let mut reconstructed = Array2::eye(n);
+        reconstructed = reconstructed.slice(s![..m, ..]).to_owned();
+
+        for &(c, s, i, j) in rotations {
+            for row in 0..m {
+                let col_i = reconstructed[[row, i]];
+                let col_j = reconstructed[[row, j]];
+                reconstructed[[row, j]] = c * col_j - s * col_i;
+                reconstructed[[row, i]] = c * col_i + s.conj() * col_j;
+            }
+        }
+
+        reconstructed
+    }
+
+    /// Squared overlap `|det(A B^dagger)|^2` between two sets of occupied orbitals `A` and `B`.
+    ///
+    /// Both are `m x n` matrices with orthonormal rows; the overlap is 1 iff they span the same
+    /// occupied space (i.e. define the same Slater determinant up to a global phase).
+    fn slater_fidelity(a: &Array2<Complex64>, b: &Array2<Complex64>) -> f64 {
+        let m = a.nrows();
+        // gram = A * B^dagger, an m x m matrix
+        let gram = DMatrix::from_fn(m, m, |i, j| {
+            (0..a.ncols())
+                .map(|k| a[[i, k]] * b[[j, k]].conj())
+                .sum::<Complex64>()
+        });
+        gram.determinant().norm().powi(2)
+    }
+
+    #[test]
+    fn test_givens_decomposition_slater() {
+        for (n, m) in [(6, 3), (7, 2), (5, 4), (4, 4), (5, 1), (8, 4)] {
+            // draw a random unitary and take m of its columns (as rows) for the occupied orbitals
+            let unitary = random_unitary(n);
+            let target = unitary.t().slice(s![..m, ..]).to_owned();
+
+            let rotations = givens_decomposition_slater(target.clone());
+
+            assert!(
+                rotations.len() <= m * (n - m),
+                "Slater decomposition for (n={n}, m={m}) used {} rotations, exceeding the m(n-m)={} bound",
+                rotations.len(),
+                m * (n - m),
+            );
+            assert!(
+                rotations.iter().all(|&(_, _, i, j)| i.abs_diff(j) == 1),
+                "Slater decomposition for (n={n}, m={m}) contains a non-adjacent rotation",
+            );
+
+            let reconstructed = reconstruct_slater(&rotations, m, n);
+            let fidelity = slater_fidelity(&reconstructed, &target);
+            assert!(
+                (fidelity - 1.0).abs() < 1e-8,
+                "Slater decomposition for (n={n}, m={m}) reconstructed with fidelity {fidelity}",
             );
         }
     }
