@@ -92,6 +92,34 @@ def test_fci_linear_operator_matvec_cross_spin_matches_ffsim():
     np.testing.assert_allclose(ours.rmatvec(vec), ff_linop.rmatvec(vec), atol=1e-12)
 
 
+def test_fci_linear_operator_matvec_interleaved_cross_spin_matches_ffsim():
+    """An *interleaved* cross-spin term matches ffsim, guarding a fixed cross-sign bug.
+
+    ``test_..._cross_spin_matches_ffsim`` above already covers the mixed (both-spins) path, but its
+    spin-exchange term happens to leave the running alpha parity equal at both beta operators, so it
+    was blind to a cross-sign bug in which the kernel used the coarse ``(-1)^{n_alpha * k_beta}``
+    cross-sign instead of tracking the alpha count at each beta operator. This term --
+    ``a^dag_{b1} a^dag_{a0} a_{b0} a_{a1}`` -- straddles an odd number of alpha operators between its
+    two betas, so the two formulas disagree; before the fix qiskit-fermions returned ``+1`` where
+    ffsim returns ``-1``.
+    """
+    norb, nelec = 2, (1, 1)
+    hamil = FermionOperator.from_dict(
+        {((True, norb + 1), (True, 0), (False, norb + 0), (False, 1)): 1.0}
+    )
+    ffsim_op = ffsim.FermionOperator(
+        {(ffsim.cre_b(1), ffsim.cre_a(0), ffsim.des_b(0), ffsim.des_a(1)): 1.0}
+    )
+    ff_linop = ffsim.linear_operator(ffsim_op, norb=norb, nelec=nelec)
+    ours = hamil._linear_operator_(norb, nelec)
+
+    dim = ff_linop.shape[0]
+    rng = np.random.default_rng(4)
+    vec = rng.standard_normal(dim) + 1j * rng.standard_normal(dim)
+    np.testing.assert_allclose(ours.matvec(vec), ff_linop.matvec(vec), atol=1e-12)
+    np.testing.assert_allclose(ours.rmatvec(vec), ff_linop.rmatvec(vec), atol=1e-12)
+
+
 def test_fci_linear_operator_rmatvec_is_adjoint():
     """``rmatvec`` applies the operator's adjoint (``A.H @ v``)."""
     hamil = FermionOperator.from_dict(

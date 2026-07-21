@@ -248,8 +248,11 @@ pub fn apply_ladder_op(string: u64, p: u32, is_creation: bool) -> LadderResult {
 // `gen_cre_str_index`/`gen_des_str_index` (see [`apply_ladder_op`]), so composing the per-op maps
 // of a term right-to-left reproduces ffsim's per-sector sign. The only cross-sector contribution is
 // that, under block-spin ordering, every occupied alpha orbital sits below every beta orbital:
-// hence each *beta* ladder operator additionally carries `(-1)^{n_alpha}` (the current alpha
-// electron count, which is invariant across a particle-conserving term).
+// hence each *beta* ladder operator additionally hops over the alpha electrons occupied when it acts,
+// carrying `(-1)^{n_alpha at that step}`. The *net* alpha count is invariant across a
+// particle-conserving term, but interleaved alpha operators change it between beta operators, so this
+// running sign is accumulated in written (right-to-left) order rather than collapsed to
+// `(-1)^{n_alpha * k_beta}` (see the derivation in [`SpinfulSector::compile`]).
 
 /// Errors that can arise while applying a `FermionOperator` to an FCI state vector.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -861,14 +864,16 @@ impl SpinfulSector {
     /// `m < norb` is alpha orbital `m`; mode `m >= norb` is beta orbital `m - norb`), and the applied
     /// vector length must equal [`Self::dim`] with flat index `addr_a * dim_b + addr_b`. Each term is
     /// supplied as `(coeff, actions, modes)` (see [`SpinlessSector::compile`] for the layout). Each
-    /// beta operator additionally contributes `(-1)^{n_alpha}` because, under block-spin ordering,
-    /// all `n_alpha` occupied alpha orbitals precede every beta orbital in the Jordan-Wigner string.
+    /// beta operator additionally hops over the alpha electrons present when it acts (under block-spin
+    /// ordering all occupied alpha orbitals precede every beta orbital), contributing a per-term
+    /// cross-sign; because interleaved alpha operators change the alpha count between beta operators,
+    /// this is the running `(-1)^{alpha count at each beta op}` accumulated in written order, *not* the
+    /// coarser `(-1)^{n_alpha * k_beta}` (see the inline derivation).
     ///
     /// As with [`SpinlessSector::compile`], the flat `(source, destination, weight)` scatter is a pure
     /// function of the operator and the sector, so compiling it once lets an `expm_multiply`'s many
-    /// matvecs reuse it. The per-term construction (alpha/beta split, the `(-1)^{n_alpha}`
-    /// cross-sector sign folded into the beta action, and the per-spin conservation drops) is
-    /// described inline below.
+    /// matvecs reuse it. The per-term construction (alpha/beta split, the cross-sector sign folded into
+    /// the beta action, and the per-spin conservation drops) is described inline below.
     pub fn compile<'a>(
         &self,
         terms: impl IntoIterator<Item = (Complex64, &'a [bool], &'a [u32])>,
@@ -876,15 +881,22 @@ impl SpinfulSector {
         let (norb, n_alpha, n_beta) = (self.norb, self.n_alpha, self.n_beta);
         let dim_b = self.dim_b;
         let num_modes = 2 * norb;
-        let beta_alpha_parity: i8 = if n_alpha.is_multiple_of(2) { 1 } else { -1 };
 
         // We categorize each term by which spin blocks it touches, without normal-ordering the
-        // operator first. Normal ordering is unnecessary here: `apply_ops_to_string` applies a term's
-        // ladder ops right-to-left and computes the exact Jordan-Wigner sign regardless of the written
-        // order, and the alpha/beta split below is purely by mode index. A mixed term's weight
-        // factorizes as `coeff * a_sign(a) * (cross_sign * b_sign(b))` -- `a_sign` depends only on the
-        // alpha transition, `b_sign` only on the beta transition, and `cross_sign` is a per-term
-        // constant -- so each block can be compiled independently.
+        // operator first. A term's written order is honored exactly, in two independent parts:
+        //
+        //   * *Within* each spin block, `apply_ops_to_string` applies that block's ladder ops
+        //     right-to-left and computes the exact Jordan-Wigner sign regardless of their written
+        //     order, so no intra-block normal ordering is needed.
+        //   * *Across* the two blocks, the phase from moving all beta ops past all alpha ops into
+        //     block form is captured by `cross_sign` below. This is the subtle part: it is NOT
+        //     order-independent -- an interleaved term picks up a different cross-sign than the same
+        //     ladder ops written in block order -- which is exactly why `cross_sign` is computed from
+        //     the written interleaving rather than a coarse `(-1)^{n_alpha * k_beta}`.
+        //
+        // A mixed term's weight then factorizes as `coeff * a_sign(a) * (cross_sign * b_sign(b))` --
+        // `a_sign` depends only on the alpha transition, `b_sign` only on the beta transition, and
+        // `cross_sign` is a per-term constant -- so each block can be compiled independently.
         let mut scalar = Complex64::new(0.0, 0.0);
         let mut alpha_only_raw: Vec<(usize, usize, Complex64)> = Vec::new();
         let mut beta_only_raw: Vec<(usize, usize, Complex64)> = Vec::new();
@@ -896,22 +908,39 @@ impl SpinfulSector {
         for (coeff, actions, modes) in terms {
             alpha_ops.clear();
             beta_ops.clear();
-            for (&is_creation, &mode) in actions.iter().zip(modes) {
+            // The cross-sign is the fermionic sign from commuting the term's beta ladder operators
+            // past its alpha ones to reach block form (all alpha ops, then all beta ops), so the two
+            // blocks can be walked independently. Under block-spin ordering every occupied alpha
+            // orbital sits below every beta orbital, so a beta operator hops over the alpha electrons
+            // present *at the instant it acts* in the right-to-left walk, contributing `(-1)^{n_alpha
+            // at that step}`. That count is `n_alpha` plus the number of alpha ladder operators lying
+            // to the operator's right (already applied), so it is a per-term constant, not
+            // determinant-dependent. We accumulate it here in the same right-to-left order
+            // `apply_ops_to_string` uses; `alpha_seen` counts alpha ops encountered so far in that
+            // pass. NB this is *not* `(-1)^{n_alpha * k_beta}`: interleaved alpha ops flip the running
+            // parity between beta ops, which that shortcut misses.
+            let mut cross_sign: i8 = 1;
+            let mut alpha_seen: u32 = 0;
+            for &mode in modes.iter().rev() {
                 if mode >= num_modes {
                     return Err(FciMatvecError::ModeOutOfRange { mode, num_modes });
                 }
+                if mode < norb {
+                    alpha_seen += 1;
+                } else if !(n_alpha + alpha_seen).is_multiple_of(2) {
+                    cross_sign = -cross_sign;
+                }
+            }
+            // Re-split in written (left-to-right) order for the per-block walks; the cross-sign above
+            // has already captured the block-reordering phase, so each block walk needs only its own
+            // in-block Jordan-Wigner sign.
+            for (&is_creation, &mode) in actions.iter().zip(modes) {
                 if mode < norb {
                     alpha_ops.push((is_creation, mode));
                 } else {
                     beta_ops.push((is_creation, mode - norb));
                 }
             }
-
-            let cross_sign = if beta_ops.len().is_multiple_of(2) {
-                1
-            } else {
-                beta_alpha_parity
-            };
 
             match (alpha_ops.is_empty(), beta_ops.is_empty()) {
                 // Identity on both spins: fold into the scalar diagonal.
@@ -1483,6 +1512,109 @@ mod tests {
     }
 
     #[test]
+    fn spinful_matvec_interleaved_cross_spin_sign() {
+        // Regression for the cross-sign bug: a mixed term whose alpha and beta ladder operators are
+        // *interleaved* so that the alpha electron count differs at the two beta operators. The old
+        // kernel used a term-constant `(-1)^{n_alpha * k_beta}` cross-sign, which (k_beta = 2 here)
+        // collapsed to +1 and dropped a genuine sign. The correct value tracks the alpha count at each
+        // beta op in the right-to-left walk.
+        //
+        // Term a†_{b1} a†_{a0} a_{b0} a_{a1} on norb=2, (n_alpha, n_beta) = (1, 1), block-spin modes
+        // alpha0=0, alpha1=1, beta0=2, beta1=3. Applied to the determinant {alpha1, beta0} it maps to
+        // {alpha0, beta1} with amplitude -1 (verified against ffsim.linear_operator and an independent
+        // full block-spin Jordan-Wigner matrix). The independent `reference_matvec` oracle -- a single
+        // JW walk over the whole 2*norb register -- is the in-crate stand-in for that check.
+        let norb = 2u32;
+        let (n_a, n_b) = (1u32, 1u32);
+        let table = BinomialTable::new(norb);
+        let dim = table.num_strings(norb, n_a) * table.num_strings(norb, n_b); // 2 * 2 = 4
+        let terms: Vec<(Complex64, Vec<bool>, Vec<u32>)> = vec![(
+            Complex64::new(1.0, 0.0),
+            vec![true, true, false, false],
+            vec![3, 0, 2, 1], // a†_{b1} a†_{a0} a_{b0} a_{a1}
+        )];
+        let compiled = SpinfulSector::new(norb, n_a, n_b)
+            .unwrap()
+            .compile(term_views(&terms))
+            .unwrap();
+
+        // Full-sector agreement with the independent JW-walk reference across a non-trivial vector.
+        let vec: Vec<Complex64> = (0..dim)
+            .map(|i| Complex64::new((i as f64 + 0.5) * 0.23, (i as f64) * 0.11))
+            .collect();
+        assert_vec_close(
+            &compiled.apply(&vec).unwrap(),
+            &reference_matvec(norb, n_a, Some(n_b), &terms, &vec),
+        );
+
+        // Pin the exact amplitude: seed the one-hot determinant {alpha1, beta0} and require it to map
+        // to {alpha0, beta1} with amplitude exactly -1 (the ffsim-verified value). The flat index is
+        // addr_a * dim_b + addr_b with alpha slow, beta fast; here dim_b = C(2, 1) = 2.
+        let dim_b = table.num_strings(norb, n_b);
+        let src = str2addr(&table, 0b10) * dim_b + str2addr(&table, 0b01); // {alpha1, beta0}
+        let dst = str2addr(&table, 0b01) * dim_b + str2addr(&table, 0b10); // {alpha0, beta1}
+        let mut seed = vec![Complex64::new(0.0, 0.0); dim];
+        seed[src] = Complex64::new(1.0, 0.0);
+        let out = compiled.apply(&seed).unwrap();
+        let mut expected = vec![Complex64::new(0.0, 0.0); dim];
+        expected[dst] = Complex64::new(-1.0, 0.0);
+        assert_vec_close(&out, &expected);
+    }
+
+    #[test]
+    fn spinful_matvec_reordering_a_term_changes_the_sign() {
+        // Complements the interleaved regression above: writing the *same* physical operator in a
+        // different order is a genuinely different signed term, and the kernel must honor the written
+        // order rather than silently normal-ordering it. The old kernel returned the same (wrong) sign
+        // for both orderings; against the JW-walk reference each ordering must now match its own sign.
+        let norb = 2u32;
+        let (n_a, n_b) = (1u32, 1u32);
+        let table = BinomialTable::new(norb);
+        let dim = table.num_strings(norb, n_a) * table.num_strings(norb, n_b);
+        let vec: Vec<Complex64> = (0..dim)
+            .map(|i| Complex64::new(i as f64 + 1.0, (i as f64) * 0.3))
+            .collect();
+        // The interleaved order and a swapped-leading-pair order (a†_{a0} a†_{b1} ...) differ by one
+        // transposition of two same-type ops on different spins, hence by an overall sign.
+        let interleaved: Vec<(Complex64, Vec<bool>, Vec<u32>)> = vec![(
+            Complex64::new(1.0, 0.0),
+            vec![true, true, false, false],
+            vec![3, 0, 2, 1],
+        )];
+        let swapped: Vec<(Complex64, Vec<bool>, Vec<u32>)> = vec![(
+            Complex64::new(1.0, 0.0),
+            vec![true, true, false, false],
+            vec![0, 3, 2, 1],
+        )];
+        let sector = SpinfulSector::new(norb, n_a, n_b).unwrap();
+        let out_interleaved = sector
+            .compile(term_views(&interleaved))
+            .unwrap()
+            .apply(&vec)
+            .unwrap();
+        let out_swapped = sector
+            .compile(term_views(&swapped))
+            .unwrap()
+            .apply(&vec)
+            .unwrap();
+        assert_vec_close(
+            &out_interleaved,
+            &reference_matvec(norb, n_a, Some(n_b), &interleaved, &vec),
+        );
+        assert_vec_close(
+            &out_swapped,
+            &reference_matvec(norb, n_a, Some(n_b), &swapped, &vec),
+        );
+        // And the two orderings genuinely disagree (they differ by a sign), so this is not a vacuous
+        // check: on the surviving determinant the amplitudes are negatives of each other.
+        let differ = out_interleaved
+            .iter()
+            .zip(&out_swapped)
+            .any(|(x, y)| (x - y).norm() > 1e-9);
+        assert!(differ, "reordering the term should have changed the result");
+    }
+
+    #[test]
     fn matvec_dimension_and_mode_errors() {
         // Wrong vector length is caught by `apply` (dimension is a property of the vector, not the
         // compiled map).
@@ -1867,8 +1999,12 @@ mod tests {
                 vec![true, false, true, false],
                 vec![2, 2, norb + 2, norb + 2],
             ),
-            // cross-spin, interleaved and non-normal-ordered: a_{1b} a†_{0a} a†_{1a}(no) -- use a real
-            // spin exchange a†_{0a} a†_{2b} a_{0b} a_{2a} written interleaved.
+            // cross-spin, interleaved and non-normal-ordered: a spin exchange
+            // a†_{0a} a†_{2b} a_{0b} a_{2a} written interleaved. NB this interleaving does NOT probe
+            // the cross-sign bug fixed for interleaved terms: its two beta ops act at the same running
+            // alpha parity, so the (now-corrected) written-order cross-sign and the old coarse
+            // `(-1)^{n_alpha * k_beta}` coincide here. The straddling case that distinguishes them is
+            // covered by `spinful_matvec_interleaved_cross_spin_sign`.
             (
                 Complex64::new(0.6, -0.3),
                 vec![true, true, false, false],
