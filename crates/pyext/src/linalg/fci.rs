@@ -201,7 +201,7 @@ pub fn py_slater_determinant_statevector(
 ///         constrained to be both occupied and empty; or if the constraint is unsatisfiable (more
 ///         than ``nocc`` orbitals forced occupied, or too few free orbitals left to reach ``nocc``).
 #[gen_stub_pyfunction(module = "qiskit_fermions._lib.linalg.fci")]
-#[pyfunction(name = "occupation_axis_mask", signature = (norb, nocc, occupied, empty))]
+#[pyfunction(name = "occupation_axis_mask")]
 // `pyo3-stub-gen` has no NumPyScalar impl for `bool`, so the array return type cannot be derived;
 // spell it out to match the `numpy.typing.NDArray[...]` convention the sibling functions render.
 #[gen_stub(override_return_type(
