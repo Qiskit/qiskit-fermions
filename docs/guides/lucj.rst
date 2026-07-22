@@ -163,10 +163,10 @@ halving the number of layers.
 
 The :class:`.UCJ` gate is a pure unitary carrying no reference of its own, so we prepend an
 :class:`.InitializeModes` gate (built with
-:meth:`~qiskit_fermions.circuit.library.InitializeModes.from_hartree_fock`) to certify the
+:meth:`~qiskit_fermions.circuit.library.InitializeModes.from_hartree_fock`) to supply the
 Hartree-Fock reference the ansatz is applied to. Decomposing the circuit reveals its anatomy: the
-:class:`.InitializeModes` gate validates the reference, and each ansatz layer contributes an
-:class:`.OrbitalRotation` :math:`\mathcal{U}_k^\dagger`, then :math:`e^{i\mathcal{J}_k}` (an
+:class:`.InitializeModes` gate prepares the reference determinant, and each ansatz layer contributes
+an :class:`.OrbitalRotation` :math:`\mathcal{U}_k^\dagger`, then :math:`e^{i\mathcal{J}_k}` (an
 :class:`.Evolution` of the diagonal Coulomb operator :math:`\mathcal{J}_k`), then
 :math:`\mathcal{U}_k`, with a final :class:`.OrbitalRotation` at the end. The orbital rotations act
 per spin sector, so each is placed on the alpha modes ``0..norb`` and the beta modes

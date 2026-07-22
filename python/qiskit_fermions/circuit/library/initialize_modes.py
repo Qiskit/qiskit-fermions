@@ -14,12 +14,18 @@
 
 from __future__ import annotations
 
+import sys
 from collections.abc import Sequence
 from math import comb
 
 import numpy as np
 
 from .. import FermionicGate
+
+if sys.version_info >= (3, 11):
+    from typing import Self
+else:
+    from typing_extensions import Self
 
 # The absolute tolerance for the subspace-confinement check. There is no project-wide tolerance
 # constant; this is the de-facto convention (numpy's ``allclose`` default, matching the Rust
@@ -28,19 +34,25 @@ _ATOL = 1e-8
 
 
 class InitializeModes(FermionicGate):
-    """Asserts that a state vector matches a fermionic mode occupation.
+    """Prepares (or, under simulation, certifies) a fermionic mode occupation.
 
-    This gate is a *validator*, not a state producer: applied to a state vector it checks that the
-    vector's amplitude is confined to the subspace its :attr:`occupation` defines, then returns the
-    vector unchanged. Placing it at the start of a circuit therefore certifies -- without mutating --
-    that the incoming state is the intended reference; the transforms that follow act on that same
-    vector.
+    This gate declares an intended occupation of the modes it is placed on. Its behavior depends on
+    how the circuit is consumed:
 
-    Because the check constrains only the orbitals the occupation names (and, per spin sector, only
-    along that sector's axis), several :class:`InitializeModes` gates can be placed **in parallel** to
-    certify disjoint fragments of a state independently -- e.g. one gate per spin sector, or one per
-    orbital group. A spinful gate may cover a single sector (any fragment of it) or fully specify both
-    sectors, but a partial straddle of both is rejected (see :meth:`_apply_unitary_placed_`).
+    - **Transpiled** (synthesized to qubit gates): it *produces* the state -- the synthesis plugin
+      emits the gates that set the named modes to their occupation, as one would expect of an
+      initialization gate.
+    - **Simulated** (:meth:`_apply_unitary_`): it acts as a *validator* rather than a producer. Given
+      a state vector it checks that the vector's amplitude is confined to the subspace its
+      :attr:`occupation` defines and returns the vector unchanged, certifying -- without mutating --
+      that the incoming state is the intended reference so the transforms that follow act on it.
+
+    In both modes the gate constrains only the orbitals the occupation names (and, per spin sector,
+    only along that sector's axis), so several :class:`InitializeModes` gates can be placed **in
+    parallel** to seed disjoint fragments of a state independently -- e.g. one gate per spin sector,
+    or one per orbital group. A spinful gate may cover a single sector (any fragment of it) or fully
+    specify both sectors, but a partial straddle of both is rejected (see
+    :meth:`_apply_unitary_placed_`).
 
     Use :meth:`from_hartree_fock` to construct the occupation of a Hartree-Fock reference.
 
@@ -63,7 +75,7 @@ class InitializeModes(FermionicGate):
         super().__init__("InitializeModes", len(self.occupation), [])
 
     @classmethod
-    def from_hartree_fock(cls, norb: int, nelec: int | tuple[int, int]) -> InitializeModes:
+    def from_hartree_fock(cls, norb: int, nelec: int | tuple[int, int]) -> Self:
         """Builds the gate for the Hartree-Fock reference occupation of ``(norb, nelec)``.
 
         The Hartree-Fock determinant fills the lowest-indexed orbitals of each spin sector. Whether
