@@ -52,10 +52,6 @@ class UCJ(FermionicGate):
     and :math:`\mathcal{U}_\text{final}` is an optional final orbital rotation. The number of terms
     :math:`L` is the number of ansatz repetitions.
 
-    This gate is a pure unitary (matching ffsim's UCJ operators): it carries no reference state.
-    Prepare the reference separately -- e.g. place an :class:`.InitializeModes` gate (see
-    :meth:`.InitializeModes.from_hartree_fock`) ahead of this one -- and apply the ansatz to it.
-
     This gate supports three spin variants (see :class:`.UCJ.Variant`), selected by the shapes of the
     supplied tensors and by ``nelec`` (mirroring ffsim's
     :external:class:`~ffsim.UCJOpSpinBalanced`, :external:class:`~ffsim.UCJOpSpinUnbalanced` and
@@ -529,9 +525,7 @@ class UCJ(FermionicGate):
         This builds the gate's definition (the per-repetition orbital rotations and diagonal Coulomb
         evolutions) and applies it to ``vec``, with the definition circuit placed onto the global
         modes ``freg_indices`` (each of its instructions is relabeled onto the corresponding absolute
-        modes). UCJ is a pure unitary carrying no reference state, mirroring ffsim's own
-        ``UCJOpSpin*._apply_unitary_``; prepare the reference separately (see the class docstring).
-        See :meth:`_define` for the exact gate sequence.
+        modes). See :meth:`_define` for the exact gate sequence.
 
         Args:
             vec: the state vector to act on.
