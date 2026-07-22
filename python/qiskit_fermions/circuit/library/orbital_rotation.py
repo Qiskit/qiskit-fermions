@@ -54,7 +54,7 @@ class OrbitalRotation(FermionicGate):
                 rotation via :math:`a^\dagger_i \mapsto \sum_j U_{ji} a^\dagger_j`. It must be
                 square and unitary; this is the caller's responsibility and is not verified.
         """
-        self.rotation_unitary = rotation_unitary
+        self.rotation_unitary = np.asarray(rotation_unitary, dtype=complex)
         """The unitary matrix representing the orbital rotation coefficients."""
 
         super().__init__("OrbitalRotation", self.rotation_unitary.shape[0], [])
