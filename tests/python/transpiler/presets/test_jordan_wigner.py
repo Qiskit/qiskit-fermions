@@ -19,10 +19,17 @@ from qiskit import QuantumCircuit
 from qiskit.circuit.library import PauliEvolutionGate, XXPlusYYGate
 from qiskit.quantum_info import Statevector
 from qiskit_fermions.circuit import FermionicCircuit
-from qiskit_fermions.circuit.library import Evolution, InitializeModes, OrbitalRotation
+from qiskit_fermions.circuit.library import (
+    Evolution,
+    InitializeModes,
+    OrbitalRotation,
+    PrepareSlaterDeterminant,
+)
 from qiskit_fermions.mappers.library import jordan_wigner
 from qiskit_fermions.operators import FermionOperator
 from qiskit_fermions.transpiler.presets import generate_preset_jw_pass_manager
+
+from ...utils import random_unitary
 
 
 def test_preset_jordan_wigner():
@@ -99,3 +106,30 @@ def test_preset_jordan_wigner_identity_rotation():
     expected = Statevector(reference)
 
     assert Statevector(generate_preset_jw_pass_manager().run(orbital)) == expected
+
+
+def test_preset_jordan_wigner_prepare_slater_determinant():
+    """The preset lowers a PrepareSlaterDeterminant to the reduced Slater synthesis.
+
+    The prepared state must agree (up to a global phase, which the reduced decomposition drops) with
+    the equivalent separate InitializeModes + OrbitalRotation lowered by the same preset.
+    """
+    num_modes = 6
+    occupation = [True, True, True, False, False, False]
+    rotation = random_unitary(num_modes, seed=42)
+
+    slater = FermionicCircuit(num_modes)
+    slater.append(PrepareSlaterDeterminant(occupation, rotation), slater.modes)
+
+    unmerged = FermionicCircuit(num_modes)
+    unmerged.append(InitializeModes(occupation), unmerged.modes)
+    unmerged.append(OrbitalRotation(rotation), unmerged.modes)
+
+    pm = generate_preset_jw_pass_manager()
+    sv_slater = Statevector(pm.run(slater)).data
+    sv_unmerged = Statevector(pm.run(unmerged)).data
+
+    # align the global phase on the largest-magnitude amplitude, then compare
+    k = int(np.argmax(np.abs(sv_unmerged)))
+    phase = sv_slater[k] / sv_unmerged[k]
+    np.testing.assert_allclose(sv_slater, phase * sv_unmerged, atol=1e-10)
