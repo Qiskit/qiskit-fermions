@@ -146,11 +146,12 @@ halving the number of layers.
          :include-source:
 
          >>> from qiskit_fermions.circuit import FermionicCircuit
-         >>> from qiskit_fermions.circuit.library import UCJ
+         >>> from qiskit_fermions.circuit.library import InitializeModes, UCJ
          >>>
          >>> ansatz = UCJ.from_t_amplitudes(nelec, t2, t1=t1, n_reps=2)
          >>>
          >>> circuit = FermionicCircuit(2 * norb)
+         >>> circuit.append(InitializeModes.from_hartree_fock(norb, nelec), circuit.modes)
          >>> circuit.append(ansatz, circuit.modes)
 
    .. tab-item:: C
@@ -160,12 +161,16 @@ halving the number of layers.
 
          // The C API for FermionicCircuit is not available yet.
 
-Decomposing the gate reveals its anatomy: an :class:`.InitializeModes` gate prepares the
-Hartree-Fock reference determinant, and each ansatz layer contributes an :class:`.OrbitalRotation`
-:math:`\mathcal{U}_k^\dagger`, then :math:`e^{i\mathcal{J}_k}` (an :class:`.Evolution` of the
-diagonal Coulomb operator :math:`\mathcal{J}_k`), then :math:`\mathcal{U}_k`, with a final
-:class:`.OrbitalRotation` at the end. The orbital rotations act per spin sector, so each is placed
-on the alpha modes ``0..norb`` and the beta modes ``norb..2*norb`` independently.
+The :class:`.UCJ` gate is a pure unitary carrying no reference of its own, so we prepend an
+:class:`.InitializeModes` gate (built with
+:meth:`~qiskit_fermions.circuit.library.InitializeModes.from_hartree_fock`) to certify the
+Hartree-Fock reference the ansatz is applied to. Decomposing the circuit reveals its anatomy: the
+:class:`.InitializeModes` gate validates the reference, and each ansatz layer contributes an
+:class:`.OrbitalRotation` :math:`\mathcal{U}_k^\dagger`, then :math:`e^{i\mathcal{J}_k}` (an
+:class:`.Evolution` of the diagonal Coulomb operator :math:`\mathcal{J}_k`), then
+:math:`\mathcal{U}_k`, with a final :class:`.OrbitalRotation` at the end. The orbital rotations act
+per spin sector, so each is placed on the alpha modes ``0..norb`` and the beta modes
+``norb..2*norb`` independently.
 
 .. plot::
    :alt: The gates that the UCJ ansatz decomposes into.
