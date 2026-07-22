@@ -32,6 +32,7 @@ These passes provide different kinds of optimization of :class:`.FermionicDAGCir
    :toctree: ../stubs/
 
    MergeOrbitalRotations
+   MergeSlaterDeterminantPreparation
    QDriftTrotterization
    RelabelModes
 
@@ -75,6 +76,7 @@ The main logic for mapping a :class:`.FermionicDAGCircuit` to a
 from .layout import CustomF2QLayout, TrivialF2QLayout
 from .optimization import (
     MergeOrbitalRotations,
+    MergeSlaterDeterminantPreparation,
     QDriftTrotterization,
     RelabelModes,
 )
@@ -99,6 +101,7 @@ __all__ = [
     "GivensDecompositionSlaterDeterminantSynthesis",
     "MapperFnEvolutionSynthesis",
     "MergeOrbitalRotations",
+    "MergeSlaterDeterminantPreparation",
     "QDriftTrotterization",
     "RelabelModes",
     "TrivialF2QLayout",
