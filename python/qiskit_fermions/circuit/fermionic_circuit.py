@@ -111,7 +111,7 @@ class FermionicCircuit:
         return self._inner.draw(*args, **kwargs)
 
     def _apply_unitary_(
-        self, vec: np.ndarray | None, norb: int, nelec: int | tuple[int, int], copy: bool
+        self, vec: np.ndarray, norb: int, nelec: int | tuple[int, int], copy: bool
     ) -> np.ndarray:
         """Applies this circuit to an ffsim state vector, implementing ffsim's protocol.
 
@@ -124,16 +124,11 @@ class FermionicCircuit:
         are the vector's modes ``0..num_modes`` (i.e. an identity mode placement).
 
         Args:
-            vec: the state vector to apply this circuit to. May be ``None`` to let the circuit's
-                first instruction seed the initial state (e.g. :class:`.InitializeModes`, which
-                prepares an occupation determinant from no incoming state); the seeded vector is then
-                threaded through the remaining instructions. A ``None`` vector requires the first
-                instruction to be able to produce a state -- one that only transforms an incoming
-                vector will raise.
+            vec: the state vector to apply this circuit to. An empty circuit returns it unchanged.
             norb: the number of spatial orbitals.
             nelec: either a single integer representing the number of fermions for a spinless system,
                 or a pair of integers storing the numbers of spin alpha and spin beta fermions.
-            copy: whether to copy the vector before operating on it. Ignored when ``vec`` is ``None``.
+            copy: whether to copy the vector before operating on it.
 
         Returns:
             The transformed vector.
@@ -142,15 +137,14 @@ class FermionicCircuit:
             TypeError: if a circuit instruction does not implement ffsim's
                 :external:class:`ffsim.SupportsApplyUnitary` protocol.
             ValueError: if a circuit instruction declines to apply its unitary for the given
-                ``norb`` and ``nelec``; if an instruction implementing only the plain
-                ``_apply_unitary_`` protocol is placed on a non-identity mode subset; or if the
-                circuit is empty and ``vec`` is ``None`` (there is no state to return).
+                ``norb`` and ``nelec``; or if an instruction implementing only the plain
+                ``_apply_unitary_`` protocol is placed on a non-identity mode subset.
         """
         return self._apply_unitary_placed_(vec, norb, nelec, copy, list(range(len(self.register))))
 
     def _apply_unitary_placed_(
         self,
-        vec: np.ndarray | None,
+        vec: np.ndarray,
         norb: int,
         nelec: int | tuple[int, int],
         copy: bool,
@@ -176,16 +170,11 @@ class FermionicCircuit:
         silently applied on the wrong modes.
 
         Args:
-            vec: the state vector to apply this circuit to. May be ``None`` to let the circuit's
-                first instruction seed the initial state (e.g. :class:`.InitializeModes`, which
-                prepares an occupation determinant from no incoming state); the seeded vector is then
-                threaded through the remaining instructions. A ``None`` vector requires the first
-                instruction to be able to produce a state -- one that only transforms an incoming
-                vector will raise.
+            vec: the state vector to apply this circuit to. An empty circuit returns it unchanged.
             norb: the number of spatial orbitals of the *global* state vector.
             nelec: either a single integer representing the number of fermions for a spinless system,
                 or a pair of integers storing the numbers of spin alpha and spin beta fermions.
-            copy: whether to copy the vector before operating on it. Ignored when ``vec`` is ``None``.
+            copy: whether to copy the vector before operating on it.
             freg_indices: the absolute (global) mode indices that this circuit's modes map onto.
 
         Returns:
@@ -195,9 +184,8 @@ class FermionicCircuit:
             TypeError: if a circuit instruction does not implement ffsim's
                 :external:class:`ffsim.SupportsApplyUnitary` protocol.
             ValueError: if a circuit instruction declines to apply its unitary for the given
-                ``norb`` and ``nelec``; if an instruction implementing only the plain
-                ``_apply_unitary_`` protocol is placed on a non-identity mode subset; or if the
-                circuit is empty and ``vec`` is ``None`` (there is no state to return).
+                ``norb`` and ``nelec``; or if an instruction implementing only the plain
+                ``_apply_unitary_`` protocol is placed on a non-identity mode subset.
         """
         from qiskit_fermions.transpiler.converters import FermionicCircuitToDAG
 
@@ -214,10 +202,9 @@ class FermionicCircuit:
         # instructions un-normalized and be misclassified as spinful.
         nelec = FermionicGate._normalize_nelec(nelec)
 
-        # ``vec`` may be None to let the first instruction seed the state (e.g. InitializeModes);
-        # only copy a real array. The gate-to-gate loop below then threads whatever the first
-        # instruction returns into the rest of the circuit.
-        if copy and vec is not None:
+        # The gate-to-gate loop below threads whatever each instruction returns into the next; only
+        # copy the incoming array once up front so the caller's vector is left untouched.
+        if copy:
             vec = vec.copy()
 
         for node in dag.topological_op_nodes():
@@ -231,9 +218,7 @@ class FermionicCircuit:
             # absolute modes; fall back to the plain protocol method otherwise
             placed_method = getattr(instr, "_apply_unitary_placed_", None)
             if placed_method is not None:
-                result = self._call_apply_unitary(
-                    instr, placed_method, vec, norb, nelec, False, node_freg_indices
-                )
+                result = placed_method(vec, norb, nelec, False, node_freg_indices)
             else:
                 method = getattr(instr, "_apply_unitary_", None)
                 if method is None:
@@ -255,7 +240,7 @@ class FermionicCircuit:
                         f"{list(range(len(node.qargs)))}; implement '_apply_unitary_placed_' to "
                         "support subset placement."
                     )
-                result = self._call_apply_unitary(instr, method, vec, norb, nelec, False)
+                result = method(vec, norb, nelec, False)
 
             if result is NotImplemented:
                 raise ValueError(
@@ -265,35 +250,6 @@ class FermionicCircuit:
 
             vec = result
 
-        if vec is None:
-            # no instruction ran (an empty circuit) and no incoming vector was supplied, so there is
-            # no state to return. The protocol must yield an array, not ``None``; a caller wanting an
-            # identity here must pass the vector to act on.
-            raise ValueError(
-                "Cannot apply an empty circuit to a vector of None: there is no incoming state and "
-                "no instruction to seed one. Pass a state vector for the circuit to act on."
-            )
-
+        # An empty circuit ran no instruction, so the (already-copied) incoming vector is returned
+        # unchanged -- the identity.
         return vec
-
-    @staticmethod
-    def _call_apply_unitary(instr, method, vec, *args):
-        """Invokes an instruction's apply-unitary method, clarifying the ``vec is None`` failure.
-
-        A ``None`` incoming vector is only meaningful for a state-*producing* first instruction (e.g.
-        :class:`.InitializeModes`); a transform-only instruction (an :class:`.Evolution`, an
-        :class:`.OrbitalRotation`, ...) has no state to act on and fails deep inside ffsim/scipy with
-        an opaque ``AttributeError`` on the ``None``. Translate that into the clean ``ValueError`` the
-        ``_apply_unitary_``/``_apply_unitary_placed_`` docstrings promise, naming the instruction.
-        """
-        try:
-            return method(vec, *args)
-        except AttributeError as exc:
-            if vec is None:
-                raise ValueError(
-                    f"Circuit instruction of type '{type(instr)}' cannot seed a state from a None "
-                    "vector: it only transforms an incoming state. A None vector requires the "
-                    "circuit's first instruction to be a state producer (e.g. InitializeModes), or "
-                    "pass an explicit state vector for the circuit to act on."
-                ) from exc
-            raise
