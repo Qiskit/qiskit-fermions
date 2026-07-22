@@ -14,18 +14,35 @@
 
 from __future__ import annotations
 
-import logging
 from collections.abc import Sequence
+from math import comb
 
 import numpy as np
 
 from .. import FermionicGate
 
-logger = logging.getLogger(__name__)
+# The absolute tolerance for the subspace-confinement check. There is no project-wide tolerance
+# constant; this is the de-facto convention (numpy's ``allclose`` default, matching the Rust
+# operator-method default) applied consistently across the apply-unitary stack.
+_ATOL = 1e-8
 
 
 class InitializeModes(FermionicGate):
-    """Implements the fermionic mode initialization.
+    """Asserts that a state vector matches a fermionic mode occupation.
+
+    This gate is a *validator*, not a state producer: applied to a state vector it checks that the
+    vector's amplitude is confined to the subspace its :attr:`occupation` defines, then returns the
+    vector unchanged. Placing it at the start of a circuit therefore certifies -- without mutating --
+    that the incoming state is the intended reference; the transforms that follow act on that same
+    vector.
+
+    Because the check constrains only the orbitals the occupation names (and, per spin sector, only
+    along that sector's axis), several :class:`InitializeModes` gates can be placed **in parallel** to
+    certify disjoint fragments of a state independently -- e.g. one gate per spin sector, or one per
+    orbital group. A spinful gate may cover a single sector (any fragment of it) or fully specify both
+    sectors, but a partial straddle of both is rejected (see :meth:`_apply_unitary_placed_`).
+
+    Use :meth:`from_hartree_fock` to construct the occupation of a Hartree-Fock reference.
 
     .. caution::
        This is an early development prototype. Beware of changes to its interface without warning
@@ -45,139 +62,188 @@ class InitializeModes(FermionicGate):
 
         super().__init__("InitializeModes", len(self.occupation), [])
 
+    @classmethod
+    def from_hartree_fock(cls, norb: int, nelec: int | tuple[int, int]) -> InitializeModes:
+        """Builds the gate for the Hartree-Fock reference occupation of ``(norb, nelec)``.
+
+        The Hartree-Fock determinant fills the lowest-indexed orbitals of each spin sector. Whether
+        the reference is spinless or spinful is inferred from ``nelec`` (an ``int`` selects the
+        spinless interpretation of the ``norb`` modes; a ``(n_alpha, n_beta)`` pair selects the
+        spinful block-spin interpretation of the ``2 * norb`` modes). Place the returned gate on the
+        matching register to certify a Hartree-Fock reference state.
+
+        Args:
+            norb: the number of spatial orbitals.
+            nelec: either a single integer for a spinless system, or a pair of integers storing the
+                numbers of spin alpha and spin beta fermions.
+
+        Returns:
+            An :class:`InitializeModes` gate whose occupation is the Hartree-Fock determinant.
+
+        Raises:
+            ValueError: if the electron count exceeds the ``norb`` orbitals available in a sector.
+        """
+        nelec = cls._normalize_nelec(nelec)
+        if isinstance(nelec, int):
+            if nelec > norb:
+                raise ValueError(f"nelec={nelec!r} exceeds the norb={norb} spinless modes.")
+            occ = [i < nelec for i in range(norb)]
+            return cls(occ)
+
+        n_alpha, n_beta = nelec
+        if n_alpha > norb or n_beta > norb:
+            raise ValueError(
+                f"nelec={nelec!r} has a spin sector exceeding the norb={norb} available orbitals."
+            )
+        occ = [False] * (2 * norb)
+        for i in range(n_alpha):
+            occ[i] = True
+        for i in range(n_beta):
+            occ[norb + i] = True
+        return cls(occ)
+
     def _apply_unitary_placed_(
         self,
-        vec: np.ndarray | None,
+        vec: np.ndarray,
         norb: int,
         nelec: int | tuple[int, int],
         copy: bool,
         freg_indices: list[int],
     ) -> np.ndarray:
-        r"""Produces the occupation determinant, placing it onto the vector's global modes.
+        r"""Asserts that ``vec`` is confined to this gate's occupation subspace, returning it unchanged.
 
-        Unlike most other fermionic gates, this gate is a state *producer*, not a transform: it
-        prepares the occupation determinant a Jordan-Wigner occupation would create from the vacuum.
-        Because seeding a determinant *defines* the fixed ``(norb, nelec)`` particle number sector
-        (the vacuum lives in a different sector), it cannot be expressed as a same-length linear map
-        of an incoming vector -- so this method returns a freshly built state vector rather than
-        transforming ``vec``.
-
-        .. warning::
-           Because this gate defines the whole ``(norb, nelec)`` sector at once, two
-           :class:`InitializeModes` gates cannot be placed in parallel to seed the alpha and beta
-           spin sectors independently: each seeds a full state vector for its own placement and the
-           second would discard the first. Seed a spinful determinant with a single gate covering all
-           ``2 * norb`` modes instead.
+        Unlike a transform gate, this gate does not modify the state: it *checks* that ``vec``'s
+        amplitude lives entirely in the subspace its :attr:`occupation` defines, and if so returns
+        ``vec`` untouched. The subspace is the set of determinants whose occupation agrees with this
+        gate on the orbitals it names, with every unnamed orbital left free -- so a partial occupation
+        (a fragment of a sector) accepts a whole family of determinants and the check composes with
+        other parallel :class:`InitializeModes` gates.
 
         The gate's local :attr:`occupation` (one flag per local mode) is placed onto the global
-        register via ``freg_indices``: local mode ``i`` occupies global mode ``freg_indices[i]``. The
-        occupied global modes are then interpreted under the ``(norb, nelec)`` convention:
+        register via ``freg_indices``: local mode ``i`` constrains global mode ``freg_indices[i]``.
+        The global modes are then interpreted under the ``(norb, nelec)`` convention:
 
-        - **Spinless** (``nelec`` is an ``int``): the ``norb`` modes are orbitals directly; the seed
-          is a one-hot at the determinant's address in the ``C(norb, nelec)``-dimensional space.
+        - **Spinless** (``nelec`` is an ``int``): the ``norb`` modes are orbitals directly; the check
+          is over the ``C(norb, nelec)``-dimensional space.
         - **Spinful** (``nelec`` is a pair): under the block-spin convention modes ``0..norb`` are
-          alpha orbitals and modes ``norb..2*norb`` are beta orbitals; the seed is a one-hot at the
-          flat index ``addr_a * dim_b + addr_b`` (alpha slow, beta fast).
+          alpha orbitals and modes ``norb..2*norb`` are beta orbitals. A gate touching a single
+          sector constrains that sector's axis of the ``(dim_a, dim_b)`` state (a set of full rows
+          for an alpha gate, or full columns for a beta gate) and leaves the other axis free, so it
+          composes with parallel gates on the other sector. A gate may also cover *both* sectors, but
+          only when it pins a complete determinant (every orbital of both sectors named, none left
+          free); a *partial* straddle -- constraining some orbitals of both sectors while leaving
+          others free -- is rejected, since it is not a product of per-axis subspaces and cannot
+          compose (use one gate per sector instead).
 
-        The determinant is built via the native ``slater_determinant_statevector`` kernel (a
-        position-indexed occupation is inherently sorted, so the one-hot carries no sign).
+        The check is on *confinement*, not equality: an incoming amplitude may carry any phase and
+        any magnitude within the subspace (a global phase or normalization is physically irrelevant),
+        so this validates the reference without pinning it to a specific determinant vector.
 
         Args:
-            vec: the state vector to act on, or ``None`` to seed from no incoming state. When a real
-                array is passed it must *agree* with the occupation -- same ``(norb, nelec)`` sector
-                dimension -- in which case a warning is logged and the freshly seeded determinant is
-                returned (the incoming amplitudes are replaced, since this gate defines the initial
-                state; placing it mid-circuit therefore drops the preceding gates' effect). A vector
-                of the wrong length is rejected.
+            vec: the state vector to validate. Its length must match the ``(norb, nelec)`` sector
+                dimension.
             norb: the number of spatial orbitals of the *global* state vector.
             nelec: either a single integer for a spinless system, or a pair of integers storing the
                 numbers of spin alpha and spin beta fermions. An integer selects the spinless mode
                 interpretation (the ``norb`` modes are orbitals); a pair selects the spinful
                 ``(orb, spin)`` block-spin interpretation of the ``2 * norb`` modes.
-            copy: accepted for protocol conformance but has no effect -- a fresh state vector is
-                always returned, so any incoming ``vec`` is inherently left untouched.
+            copy: accepted for protocol conformance but has no effect -- this gate does not mutate the
+                state, so ``vec`` is returned as-is regardless.
             freg_indices: the absolute (global) mode indices that this gate's local modes map onto.
 
         Returns:
-            The seeded occupation determinant as a state vector.
+            The input ``vec``, unchanged, once its confinement to the occupation subspace is verified.
 
         Raises:
-            ValueError: if the occupation's per-sector electron counts do not match ``nelec``, if an
-                occupied mode falls outside the range implied by ``norb``, or if a non-``None`` ``vec``
-                does not match the ``(norb, nelec)`` sector dimension.
+            ValueError: if an occupied mode falls outside the range implied by ``norb``; if a spinful
+                gate partially straddles both spin sectors (without pinning a full determinant); if
+                ``vec``'s length does not match the ``(norb, nelec)`` sector dimension; or if ``vec``
+                has amplitude outside the subspace the occupation defines.
         """
-        spinless = isinstance(nelec, int)
-        num_modes = norb if spinless else 2 * norb
+        from qiskit_fermions._lib.linalg.fci import occupation_axis_mask
 
-        # place the local occupation onto its global modes
-        global_occ = sorted(
-            int(g) for g, occ in zip(freg_indices, self.occupation, strict=True) if occ
+        num_modes = norb if isinstance(nelec, int) else 2 * norb
+
+        # place the local occupation onto its global modes, keeping the occupied/empty split
+        placed = sorted(
+            (int(g), bool(occ)) for g, occ in zip(freg_indices, self.occupation, strict=True)
         )
+        global_modes = [g for g, _ in placed]
 
-        if global_occ and (global_occ[0] < 0 or global_occ[-1] >= num_modes):
+        if global_modes and (global_modes[0] < 0 or global_modes[-1] >= num_modes):
             raise ValueError(
-                f"InitializeModes places an occupied mode outside the range [0, {num_modes}) "
+                f"InitializeModes places a mode outside the range [0, {num_modes}) "
                 f"implied by norb={norb} and nelec={nelec!r}."
             )
 
-        # split the occupied global modes into per-sector occupied orbital lists and validate that
-        # their electron counts define the requested (norb, nelec) sector
-        if spinless:
-            alpha_orbitals = global_occ
-            beta_orbitals: list[int] = []
-            counts: tuple[int, ...] = (len(alpha_orbitals),)
-            expected: tuple[int, ...] = (nelec,)  # type: ignore[assignment]
-        else:
-            alpha_orbitals = [m for m in global_occ if m < norb]
-            beta_orbitals = [m - norb for m in global_occ if m >= norb]
-            counts = (len(alpha_orbitals), len(beta_orbitals))
-            expected = nelec  # type: ignore[assignment]
-
-        if counts != tuple(expected):
-            raise ValueError(
-                f"InitializeModes occupation defines the electron counts {counts}, which do not "
-                f"match the requested nelec={nelec!r}; the occupation determinant is not in the "
-                "target particle-number sector."
-            )
-
-        seed = self._seed_statevector(norb, spinless, alpha_orbitals, beta_orbitals)
-
-        if vec is not None:
-            # a real vector must agree with the occupation's own sector; the per-sector counts were
-            # already validated above, so a matching length confirms agreement
-            if len(vec) != len(seed):
+        if isinstance(nelec, int):
+            occupied_bits = sum(1 << g for g, occ in placed if occ)
+            empty_bits = sum(1 << g for g, occ in placed if not occ)
+            mask = occupation_axis_mask(norb, nelec, occupied_bits, empty_bits)
+            # the sole axis: amplitude on any determinant outside the mask must vanish
+            if len(vec) != len(mask):
                 raise ValueError(
                     f"InitializeModes received a state vector of length {len(vec)}, which does not "
-                    f"match the dimension {len(seed)} of the (norb={norb}, nelec={nelec!r}) sector "
-                    "defined by its occupation."
+                    f"match the dimension {len(mask)} of the (norb={norb}, nelec={nelec!r}) sector."
                 )
-            logger.warning(
-                "InitializeModes: discarding the incoming state vector and reseeding the "
-                "occupation determinant for the (norb=%s, nelec=%r) sector. This gate is a state "
-                "producer, not a transform, so any accumulated amplitudes are replaced -- placing "
-                "it after other gates (rather than at the circuit start) drops their effect.",
-                norb,
-                nelec,
+            if not np.allclose(vec[~mask], 0.0, atol=_ATOL):
+                raise ValueError(
+                    "InitializeModes: the state vector has amplitude outside the subspace defined by "
+                    f"its occupation for the (norb={norb}, nelec={nelec!r}) sector."
+                )
+            return vec
+
+        # Spinful: split the placed modes into the two spin sectors. A gate constrains one axis of the
+        # (dim_a, dim_b) state per sector it touches -- an alpha gate fixes rows, a beta gate columns.
+        n_alpha, n_beta = nelec
+        alpha = [(g, occ) for g, occ in placed if g < norb]
+        beta = [(g - norb, occ) for g, occ in placed if g >= norb]
+
+        # A gate touching *both* sectors is a joint constraint. It is a well-defined per-axis product
+        # only when it pins a complete determinant -- every orbital of both sectors named, none left
+        # free (i.e. it covers all 2*norb modes). A partial straddle (some orbitals free in a sector)
+        # is not a product of per-axis subspaces and cannot compose with parallel gates, so reject it.
+        if alpha and beta and not (len(alpha) == norb and len(beta) == norb):
+            raise ValueError(
+                "InitializeModes straddles both spin sectors without pinning a full determinant "
+                f"(some orbitals are left free) under norb={norb}. A spinful InitializeModes must "
+                "either lie entirely within one spin sector or fully specify both; place a separate "
+                "gate per sector to seed disjoint fragments in parallel."
             )
 
-        return seed
+        dim_a = comb(norb, n_alpha)
+        dim_b = comb(norb, n_beta)
+        if len(vec) != dim_a * dim_b:
+            raise ValueError(
+                f"InitializeModes received a state vector of length {len(vec)}, which does not match "
+                f"the dimension {dim_a * dim_b} of the (norb={norb}, nelec={nelec!r}) sector."
+            )
+        vec_2d = np.asarray(vec).reshape(dim_a, dim_b)
 
-    @staticmethod
-    def _seed_statevector(
-        norb: int,
-        spinless: bool,
-        alpha_orbitals: list[int],
-        beta_orbitals: list[int],
-    ) -> np.ndarray:
-        """Builds the one-hot occupation determinant for the given per-sector occupied orbitals.
-
-        For a spinless system ``beta_orbitals`` is empty and ignored. Uses the native
-        ``slater_determinant_statevector`` kernel: it produces the one-hot at the determinant's FCI
-        address (the occupied-orbital lists are already sorted, so the determinant carries no sign),
-        matching :func:`ffsim.slater_determinant` bit-for-bit while being consistently faster.
-        """
-        from qiskit_fermions._lib.linalg.fci import slater_determinant_statevector
-
-        alpha_str = sum(1 << orb for orb in alpha_orbitals)
-        beta_str = None if spinless else sum(1 << orb for orb in beta_orbitals)
-        return slater_determinant_statevector(norb, alpha_str, beta_str)
+        # Constrain each touched axis. A sector the gate does not touch is left free (its mask is the
+        # whole axis), so a single-sector gate constrains only its own axis and the other stays open.
+        if alpha:
+            mask_a = occupation_axis_mask(
+                norb,
+                n_alpha,
+                sum(1 << g for g, occ in alpha if occ),
+                sum(1 << g for g, occ in alpha if not occ),
+            )
+            if not np.allclose(vec_2d[~mask_a, :], 0.0, atol=_ATOL):
+                raise ValueError(
+                    "InitializeModes: the state vector has amplitude outside the alpha-sector "
+                    f"subspace defined by its occupation for the (norb={norb}, nelec={nelec!r}) sector."
+                )
+        if beta:
+            mask_b = occupation_axis_mask(
+                norb,
+                n_beta,
+                sum(1 << g for g, occ in beta if occ),
+                sum(1 << g for g, occ in beta if not occ),
+            )
+            if not np.allclose(vec_2d[:, ~mask_b], 0.0, atol=_ATOL):
+                raise ValueError(
+                    "InitializeModes: the state vector has amplitude outside the beta-sector "
+                    f"subspace defined by its occupation for the (norb={norb}, nelec={nelec!r}) sector."
+                )
+        return vec
