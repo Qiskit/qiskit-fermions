@@ -168,6 +168,103 @@ def test_ucj_from_t_amplitudes_empty_interaction_pairs_zeros_layer():
     assert np.any(gate_none.diag_coulomb_mats != 0.0)
 
 
+def _unbalanced_t2(nocc, nvrt, *, seed):
+    """Returns nontrivial ``(t2aa, t2ab, t2bb)`` amplitudes for the unbalanced variant.
+
+    The same-spin blocks are symmetrized so their (aa, bb) double factorizations are non-empty,
+    which exercises the same-spin assembly path.
+    """
+    rng = np.random.default_rng(seed)
+
+    def _sym(a):
+        return a + a.transpose(1, 0, 3, 2)
+
+    t2aa = _sym(rng.standard_normal((nocc, nocc, nvrt, nvrt)))
+    t2ab = rng.standard_normal((nocc, nocc, nvrt, nvrt))
+    t2bb = _sym(rng.standard_normal((nocc, nocc, nvrt, nvrt)))
+    return t2aa, t2ab, t2bb
+
+
+def test_ucj_from_t_amplitudes_rejects_unknown_variant():
+    """An unrecognized variant string raises a ValueError naming the accepted variants."""
+    t2 = np.zeros((1, 1, 2, 2))
+    with pytest.raises(ValueError, match="Unknown UCJ variant"):
+        UCJ.from_t_amplitudes((1, 1), t2, variant="nonsense")
+
+
+def test_ucj_from_t_amplitudes_unbalanced_tuple_n_reps_and_interaction_pairs():
+    """A tuple ``n_reps`` and per-block interaction_pairs drive the unbalanced factorization path.
+
+    This exercises the ``(n_reps_ab, n_reps_same)`` tuple split, the per-block masking (symmetric
+    aa/bb, non-symmetric ab), and the same-spin (aa, bb) assembly.
+    """
+    nocc, nvrt = 1, 2
+    t2 = _unbalanced_t2(nocc, nvrt, seed=21)
+    gate = UCJ.from_t_amplitudes(
+        (1, 1),
+        t2,
+        variant="unbalanced",
+        n_reps=(2, 1),
+        interaction_pairs=([(0, 0)], [(0, 0)], [(0, 0)]),
+    )
+    assert gate._variant is UCJ.Variant.UNBALANCED
+    norb = nocc + nvrt
+    assert gate.diag_coulomb_mats.shape == (3, 3, norb, norb)
+    # every diagonal-Coulomb block keeps only the whitelisted (0, 0) entry
+    for block in gate.diag_coulomb_mats.reshape(-1, norb, norb):
+        off_diagonal = block.copy()
+        off_diagonal[0, 0] = 0.0
+        np.testing.assert_array_equal(off_diagonal, 0.0)
+
+
+def test_ucj_from_t_amplitudes_unbalanced_int_n_reps_truncates():
+    """An integer ``n_reps`` smaller than the factorization truncates the unbalanced tensors."""
+    nocc, nvrt = 1, 2
+    t2 = _unbalanced_t2(nocc, nvrt, seed=22)
+    full = UCJ.from_t_amplitudes((1, 1), t2, variant="unbalanced")
+    assert full.diag_coulomb_mats.shape[0] >= 2
+    truncated = UCJ.from_t_amplitudes((1, 1), t2, variant="unbalanced", n_reps=1)
+    assert truncated.diag_coulomb_mats.shape[0] == 1
+    assert truncated.orbital_rotations.shape[0] == 1
+
+
+def test_ucj_from_t_amplitudes_unbalanced_int_n_reps_pads():
+    """An integer ``n_reps`` larger than the factorization pads with identity/zero layers."""
+    nocc, nvrt = 1, 2
+    t2 = _unbalanced_t2(nocc, nvrt, seed=23)
+    full = UCJ.from_t_amplitudes((1, 1), t2, variant="unbalanced")
+    n_have = full.diag_coulomb_mats.shape[0]
+    padded = UCJ.from_t_amplitudes((1, 1), t2, variant="unbalanced", n_reps=n_have + 2)
+    assert padded.diag_coulomb_mats.shape[0] == n_have + 2
+    # the padding layers are zero diagonal-Coulomb matrices and identity rotations
+    np.testing.assert_array_equal(padded.diag_coulomb_mats[n_have:], 0.0)
+    norb = nocc + nvrt
+    for rot_pair in padded.orbital_rotations[n_have:]:
+        for rot in rot_pair:
+            np.testing.assert_allclose(rot, np.eye(norb), atol=1e-12)
+
+
+def test_ucj_rejects_uninferable_tensor_shapes():
+    """Tensor shapes matching no variant raise a ValueError explaining the expected layouts."""
+    norb = 3
+    # a 4-D diag-Coulomb tensor with an unrecognized second axis (neither 2 nor 3)
+    mats = np.zeros((1, 4, norb, norb))
+    rotations = np.zeros((1, norb, norb))
+    with pytest.raises(ValueError, match="Could not infer the UCJ spin variant"):
+        UCJ(norb, (1, 1), mats, rotations)
+
+
+def test_ucj_rejects_mismatched_repetition_counts():
+    """Differing repetition counts between the diag-Coulomb and rotation tensors are rejected."""
+    norb = 3
+    mats = np.zeros((2, 2, norb, norb))  # 2 reps
+    rotations = np.stack([random_unitary(norb, seed=50), random_unitary(norb, seed=51)])[
+        :1
+    ]  # 1 rep
+    with pytest.raises(ValueError, match="same number of repetitions"):
+        UCJ(norb, (1, 1), mats, rotations)
+
+
 def test_orbital_rotation_from_t1_amplitudes_is_unitary():
     """OrbitalRotation.from_t1_amplitudes builds a unitary of the right size."""
     t1 = np.array([[0.1, 0.2], [0.3, -0.1]])  # 2 occ, 2 virt
