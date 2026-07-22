@@ -15,7 +15,6 @@
 from __future__ import annotations
 
 import numbers
-from collections.abc import Sequence
 from enum import Enum
 from typing import TYPE_CHECKING, cast
 
@@ -26,7 +25,6 @@ from qiskit_fermions.operators.fermion_action import ann, cre
 
 from .. import FermionicGate
 from .evolution import Evolution
-from .initialize_modes import InitializeModes
 from .orbital_rotation import OrbitalRotation
 
 if TYPE_CHECKING:
@@ -43,9 +41,8 @@ class UCJ(FermionicGate):
         \left(\prod_{k=1}^{L} \mathcal{U}_k\, e^{i \mathcal{J}_k}\, \mathcal{U}_k^\dagger\right)
         \mathcal{U}_\text{final}
 
-    applied to a reference state (by default the Hartree-Fock determinant), where each
-    :math:`\mathcal{U}_k` is an :class:`.OrbitalRotation`, each :math:`\mathcal{J}_k` is a diagonal
-    Coulomb operator
+    where each :math:`\mathcal{U}_k` is an :class:`.OrbitalRotation`, each :math:`\mathcal{J}_k` is a
+    diagonal Coulomb operator
 
     .. math::
 
@@ -105,7 +102,6 @@ class UCJ(FermionicGate):
         orbital_rotations: np.ndarray,
         *,
         final_orbital_rotation: np.ndarray | None = None,
-        reference_occupation: Sequence[bool] | None = None,
     ) -> None:
         r"""Initializing an instance of this gate can be done with the arguments listed below.
 
@@ -121,10 +117,6 @@ class UCJ(FermionicGate):
                 spinless) or ``(L, 2, norb, norb)`` (spin-unbalanced).
             final_orbital_rotation: an optional final orbital rotation, of shape ``(norb, norb)``
                 (spin-balanced or spinless) or ``(2, norb, norb)`` (spin-unbalanced).
-            reference_occupation: the occupation (one boolean per mode) of the reference determinant
-                the ansatz is applied to. Defaults to the Hartree-Fock determinant implied by
-                ``nelec`` (the first ``n_alpha`` alpha modes and first ``n_beta`` beta modes
-                occupied).
 
         Raises:
             ValueError: if the tensor shapes are inconsistent with each other, with ``norb``, or
@@ -153,17 +145,6 @@ class UCJ(FermionicGate):
         self._variant = self._infer_variant(norb)
         num_modes = norb if self._spinless else 2 * norb
 
-        if reference_occupation is None:
-            reference_occupation = self._hartree_fock_occupation(norb, nelec, self._spinless)
-        self.reference_occupation = np.asarray(reference_occupation, dtype=bool)
-        """The occupation of the reference determinant the ansatz is applied to."""
-
-        if len(self.reference_occupation) != num_modes:
-            raise ValueError(
-                f"reference_occupation has length {len(self.reference_occupation)}, expected "
-                f"{num_modes} for norb={norb} and nelec={nelec!r}."
-            )
-
         super().__init__("UCJ", num_modes, [])
 
     @property
@@ -191,7 +172,6 @@ class UCJ(FermionicGate):
             list[tuple[int, int]] | tuple[list[tuple[int, int]] | None, ...] | None
         ) = None,
         tol: float = 1e-8,
-        reference_occupation: Sequence[bool] | None = None,
     ) -> UCJ:
         r"""Constructs a UCJ ansatz from coupled-cluster :math:`t_2` (and optional :math:`t_1`) amplitudes.
 
@@ -230,8 +210,6 @@ class UCJ(FermionicGate):
                 a ``None`` element (or the whole argument being ``None``) leaves the block untouched,
                 whereas an empty list allows no interactions and so zeros the entire block.
             tol: the double-factorization truncation tolerance.
-            reference_occupation: forwarded to :class:`.UCJ`; defaults to the Hartree-Fock
-                determinant.
 
         Returns:
             The constructed :class:`.UCJ` gate.
@@ -273,7 +251,6 @@ class UCJ(FermionicGate):
             diag_coulomb_mats,
             orbital_rotations,
             final_orbital_rotation=final_orbital_rotation,
-            reference_occupation=reference_occupation,
         )
 
     @staticmethod
@@ -535,38 +512,9 @@ class UCJ(FermionicGate):
             arr = arr.real
         return np.asarray(arr, dtype=float)
 
-    @staticmethod
-    def _hartree_fock_occupation(
-        norb: int, nelec: int | tuple[int, int], spinless: bool
-    ) -> list[bool]:
-        """Returns the Hartree-Fock reference occupation for ``(norb, nelec)``.
-
-        Raises:
-            ValueError: if the electron count exceeds the ``norb`` spin-orbitals available in a
-                sector (which would otherwise silently spill into the wrong block).
-        """
-        if spinless:
-            if nelec > norb:  # type: ignore[operator]
-                raise ValueError(f"nelec={nelec!r} exceeds the norb={norb} spinless modes.")
-            occ = [False] * norb
-            for i in range(nelec):  # type: ignore[arg-type]
-                occ[i] = True
-            return occ
-        n_alpha, n_beta = nelec  # type: ignore[misc]
-        if n_alpha > norb or n_beta > norb:
-            raise ValueError(
-                f"nelec={nelec!r} has a spin sector exceeding the norb={norb} available orbitals."
-            )
-        occ = [False] * (2 * norb)
-        for i in range(n_alpha):
-            occ[i] = True
-        for i in range(n_beta):
-            occ[norb + i] = True
-        return occ
-
     def _apply_unitary_placed_(
         self,
-        vec: np.ndarray | None,
+        vec: np.ndarray,
         norb: int,
         nelec: int | tuple[int, int],
         copy: bool,
@@ -574,23 +522,17 @@ class UCJ(FermionicGate):
     ) -> np.ndarray:
         """Applies the ansatz after placing its modes onto the vector's global modes.
 
-        This builds the gate's definition (an :class:`.InitializeModes` seeding the reference
-        determinant, followed by the per-repetition orbital rotations and diagonal Coulomb
-        evolutions) and applies it, with the definition circuit placed onto the global modes
-        ``freg_indices`` (each of its instructions is relabeled onto the corresponding absolute
-        modes). Because the definition opens with :class:`.InitializeModes`, an incoming ``vec`` of
-        ``None`` is supported: the reference determinant is seeded from no incoming state.
-
-        This mirrors ffsim's own ``UCJOpSpin*._apply_unitary_``, which prepares the reference state
-        and applies the ansatz layers. See :meth:`_define` for the exact gate sequence.
+        This builds the gate's definition (the per-repetition orbital rotations and diagonal Coulomb
+        evolutions) and applies it to ``vec``, with the definition circuit placed onto the global
+        modes ``freg_indices`` (each of its instructions is relabeled onto the corresponding absolute
+        modes). See :meth:`_define` for the exact gate sequence.
 
         Args:
-            vec: the state vector to act on, or ``None`` to seed the reference determinant from no
-                incoming state.
+            vec: the state vector to act on.
             norb: the number of spatial orbitals of the *global* state vector.
             nelec: either a single integer for a spinless system, or a pair of integers storing the
                 numbers of spin alpha and spin beta fermions.
-            copy: whether to copy the vector before operating on it. Ignored when ``vec`` is ``None``.
+            copy: whether to copy the vector before operating on it.
             freg_indices: the absolute (global) mode indices that this gate's local modes map onto.
 
         Returns:
@@ -603,7 +545,6 @@ class UCJ(FermionicGate):
         from qiskit_fermions.circuit import FermionicCircuit
 
         definition = FermionicCircuit(self.num_modes)
-        definition.append(InitializeModes(self.reference_occupation.tolist()), definition.modes)
 
         for diag_coulomb_mat, orbital_rotation in zip(
             self.diag_coulomb_mats, self.orbital_rotations, strict=True

@@ -116,17 +116,6 @@ def test_apply_unitary_rejects_plain_protocol_gate_on_non_identity_placement():
         circ._apply_unitary_(vec0, norb, nelec, copy=True)
 
 
-def test_apply_unitary_empty_circuit_with_none_vec_raises():
-    """An empty circuit applied to ``vec=None`` raises rather than returning ``None``.
-
-    With no instruction to seed a state and no incoming vector, there is nothing to return; the
-    protocol requires an array, so this is rejected instead of silently yielding ``None``.
-    """
-    circ = FermionicCircuit(4)
-    with pytest.raises(ValueError, match="empty circuit"):
-        circ._apply_unitary_(None, 2, (1, 1), copy=True)
-
-
 def test_apply_unitary_empty_circuit_with_vec_returns_it():
     """An empty circuit applied to a real vector returns that vector unchanged (identity)."""
     norb = 2
@@ -136,22 +125,6 @@ def test_apply_unitary_empty_circuit_with_vec_returns_it():
 
     result = circ._apply_unitary_(vec0, norb, nelec, copy=True)
     np.testing.assert_array_equal(result, vec0)
-
-
-def test_apply_unitary_seeds_from_none_vec_via_producer_first_instruction():
-    """A circuit whose first instruction is a state producer seeds from a None vec with copy=True.
-
-    Regression: the DAG walk must let a producer (:class:`.InitializeModes`) seed the state from a
-    ``None`` incoming vector without tripping the ``copy`` handling.
-    """
-    norb = 2
-    nelec = (1, 1)
-    circ = FermionicCircuit(2 * norb)
-    circ.append(InitializeModes([True, False, True, False]), circ.modes)
-
-    result = circ._apply_unitary_(None, norb, nelec, copy=True)
-    expected = ffsim.slater_determinant(norb, ([0], [0]))
-    np.testing.assert_allclose(result, expected, atol=1e-12)
 
 
 def test_apply_unitary_normalizes_numpy_int_nelec_in_dag_walk():
@@ -165,39 +138,36 @@ def test_apply_unitary_normalizes_numpy_int_nelec_in_dag_walk():
     """
     norb = 5
     circ = FermionicCircuit(norb)
+    # a validator gate that only accepts the spinless interpretation of nelec: without normalizing
+    # the np.int64 it would be routed to the spinful path and behave differently.
     circ.append(InitializeModes([True, False, True, False, False]), circ.modes)
+    vec = ffsim.slater_determinant(norb, [0, 2])
 
-    expected = circ._apply_unitary_(None, norb, 2, copy=True)
-    result = circ._apply_unitary_(None, norb, np.int64(2), copy=True)
+    expected = circ._apply_unitary_(vec, norb, 2, copy=True)
+    result = circ._apply_unitary_(vec, norb, np.int64(2), copy=True)
     np.testing.assert_array_equal(result, expected)
 
 
-def test_apply_unitary_transform_first_gate_with_none_vec_raises_clean_error():
-    """A transform-only first instruction fed ``vec=None`` raises a clear ValueError, not an opaque one.
+def test_apply_unitary_parallel_seed_then_rotate():
+    """Two parallel per-sector InitializeModes gates then an OrbitalRotation, driven with a real vec.
 
-    A ``None`` incoming vector is only meaningful for a state-*producing* first instruction. A
-    transform-only gate has nothing to act on and, left unguarded, fails deep inside its numerics
-    with an opaque ``AttributeError`` on the ``None``. The walk must instead raise a ``ValueError``
-    naming the offending instruction, as the ``_apply_unitary_`` docstring promises.
+    The seed gates validate the incoming Hartree-Fock reference per spin sector (the placement the old
+    producer could not express); a following alpha-sector rotation transforms it. The result must
+    match applying the same rotation directly to the reference.
     """
+    norb = 3
+    nelec = (2, 1)
+    rot = random_unitary(norb, seed=7)
+    vec0 = ffsim.slater_determinant(norb, ([0, 1], [0]))
 
-    class _TransformOnlyGate(FermionicGate):
-        """A transform-only gate that touches ``vec.shape`` -- the exact failure mode of the real
-        transform gates (Evolution/OrbitalRotation), which raise ``AttributeError`` on a None vec."""
-
-        def __init__(self, num_modes):
-            super().__init__("transform", num_modes)
-
-        def _apply_unitary_(self, vec, norb, nelec, copy):
-            return np.zeros(vec.shape, dtype=complex)  # AttributeError when vec is None
-
-    norb = 2
-    nelec = (1, 1)
     circ = FermionicCircuit(2 * norb)
-    circ.append(_TransformOnlyGate(2 * norb), circ.modes)  # identity placement, transform-only
+    circ.append(InitializeModes([True, True, False]), [circ.modes[i] for i in range(norb)])
+    circ.append(InitializeModes([True, False, False]), [circ.modes[norb + i] for i in range(norb)])
+    circ.append(OrbitalRotation(rot), [circ.modes[i] for i in range(norb)])
 
-    with pytest.raises(ValueError, match="cannot seed a state from a None vector"):
-        circ._apply_unitary_(None, norb, nelec, copy=True)
+    result = circ._apply_unitary_(vec0, norb, nelec, copy=True)
+    expected = ffsim.apply_orbital_rotation(vec0.copy(), (rot, None), norb=norb, nelec=nelec)
+    np.testing.assert_allclose(result, expected, atol=1e-10)
 
 
 def test_apply_unitary_accepts_plain_protocol_gate_on_identity_placement():
@@ -236,9 +206,9 @@ def test_public_ffsim_apply_unitary_drives_a_fermionic_circuit():
     circ.append(InitializeModes(occupation), circ.modes)
     circ.append(OrbitalRotation(rot), [circ.modes[i] for i in range(norb)])
 
-    # public entry point: ffsim.apply_unitary invokes circ._apply_unitary_ with keyword args
-    result = ffsim.apply_unitary(None, circ, norb=norb, nelec=nelec)
-
     vec0 = ffsim.slater_determinant(norb, ([0, 1], [0]))
+    # public entry point: ffsim.apply_unitary invokes circ._apply_unitary_ with keyword args
+    result = ffsim.apply_unitary(vec0, circ, norb=norb, nelec=nelec)
+
     expected = ffsim.apply_orbital_rotation(vec0, (rot, None), norb=norb, nelec=nelec)
     np.testing.assert_allclose(result, expected, atol=1e-10)

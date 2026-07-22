@@ -200,5 +200,10 @@ iz = "iz"
 ket = "ket"
 thr = "thr"
 
+[tool.typos.default.extend-identifiers]
+# numpy's array type; `ND` trips the "should be AND" heuristic. Spelled out verbatim in the
+# `occupation_axis_mask` stub-type override in crates/pyext (the generated `.pyi` are excluded).
+NDArray = "NDArray"
+
 [tool.typos.files]
 extend-exclude = ["crates/qiskit-pyo3-ffi"]

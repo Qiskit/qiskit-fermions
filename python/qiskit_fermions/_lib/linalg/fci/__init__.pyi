@@ -7,6 +7,7 @@ import numpy.typing
 import typing
 __all__ = [
     "FciLinearOperator",
+    "occupation_axis_mask",
     "slater_determinant_statevector",
 ]
 
@@ -65,6 +66,34 @@ class FciLinearOperator:
             ValueError: if ``vec`` has the wrong length, or the underlying operator acts on a mode
                 index outside the sector.
         """
+
+def occupation_axis_mask(norb: builtins.int, nocc: builtins.int, occupied: builtins.int, empty: builtins.int) -> numpy.typing.NDArray[numpy.bool_]:
+    r"""
+    Builds a boolean mask over an FCI sector's addresses selecting a partial-occupation subspace.
+    
+    The mask has length ``C(norb, nocc)``; entry ``addr`` is ``True`` iff the determinant at that
+    address has **all** orbitals in the ``occupied`` bitmask set **and all** orbitals in the ``empty``
+    bitmask clear. Orbitals in neither mask are unconstrained, so a partial constraint selects a whole
+    family of determinants (fixing only some orbitals accepts every determinant that agrees there,
+    whatever the free orbitals do). This is the per-axis subspace test behind
+    :class:`.InitializeModes`'s validator: an incoming state passes iff its amplitude is confined to
+    the ``True`` entries of this mask along the constrained spin axis.
+    
+    Args:
+        norb: the number of spatial orbitals.
+        nocc: the number of occupied orbitals of the sector (its address space is ``C(norb, nocc)``).
+        occupied: a bitmask over ``0..norb`` whose set bits mark orbitals forced to be occupied.
+        empty: a bitmask over ``0..norb`` whose set bits mark orbitals forced to be empty.
+    
+    Returns:
+        A one-dimensional ``bool`` array of length ``C(norb, nocc)``.
+    
+    Raises:
+        ValueError: if ``norb`` exceeds the maximum number of orbitals the bitmask representation
+            supports (64); if a constraint bit is set outside ``0..norb``; if an orbital is
+            constrained to be both occupied and empty; or if the constraint is unsatisfiable (more
+            than ``nocc`` orbitals forced occupied, or too few free orbitals left to reach ``nocc``).
+    """
 
 def slater_determinant_statevector(norb: builtins.int, alpha_str: builtins.int, beta_str: typing.Optional[builtins.int] = None) -> numpy.typing.NDArray[numpy.complex128]:
     r"""

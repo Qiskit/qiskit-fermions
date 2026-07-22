@@ -123,8 +123,12 @@ def test_ucj_gate_accepts_numpy_int_nelec():
     assert build(2)._variant is build(np.int64(2))._variant is UCJ.Variant.SPINLESS
 
 
-def test_ucj_gate_apply_unitary_seeds_from_none():
-    """The bare gate's _apply_unitary_ seeds the reference from a None vector and matches ffsim."""
+def test_ucj_gate_apply_unitary_matches_ffsim():
+    """The bare gate's _apply_unitary_ applied to the HF reference matches ffsim's UCJ operator.
+
+    UCJ is a pure unitary carrying no reference: the caller supplies the reference state, exactly as
+    ffsim's own operator does.
+    """
     norb = 4
     nelec = (2, 2)
     ucj_op = ffsim.random.random_ucj_op_spin_balanced(
@@ -140,7 +144,7 @@ def test_ucj_gate_apply_unitary_seeds_from_none():
         ucj_op.orbital_rotations,
         final_orbital_rotation=ucj_op.final_orbital_rotation,
     )
-    result = gate._apply_unitary_(None, norb, nelec, copy=True)
+    result = gate._apply_unitary_(reference.copy(), norb, nelec, copy=True)
     np.testing.assert_allclose(result, expected, atol=1e-10)
 
 
@@ -197,24 +201,23 @@ def test_ucj_gate_subset_placement_matches_global_embedding():
         orbital_rotations=global_rotations,
         final_orbital_rotation=global_final,
     )
-    # the UCJ gate seeds its own reference determinant on the placed orbitals (both local modes
-    # occupied -> global orbitals ``placement``), so the oracle must transform that same determinant
+    # a reference determinant occupying exactly the placed orbitals; both the oracle and our path
+    # transform this same state (UCJ is a pure unitary and carries no reference of its own)
     reference = ffsim.slater_determinant(norb_global, placement)
     expected = ffsim.apply_unitary(reference, global_ucj, norb=norb_global, nelec=nelec)
 
-    # our path: the local UCJ gate, placed on the global orbitals via ``placement`` in the circuit.
-    # the gate seeds its own reference determinant on the placed modes, so pass ``None`` through.
+    # our path: the local UCJ gate, placed on the global orbitals via ``placement`` in the circuit,
+    # applied to the same reference.
     gate = UCJ(
         norb_local,
         nelec,
         ucj_op.diag_coulomb_mats,
         ucj_op.orbital_rotations,
         final_orbital_rotation=ucj_op.final_orbital_rotation,
-        reference_occupation=[True, True],  # both local orbitals occupied -> global orbitals 1, 3
     )
     circ = FermionicCircuit(norb_global)
     circ.append(gate, [circ.modes[p] for p in placement])
-    result = ffsim.apply_unitary(None, circ, norb=norb_global, nelec=nelec)
+    result = ffsim.apply_unitary(reference, circ, norb=norb_global, nelec=nelec)
 
     np.testing.assert_allclose(result, expected, atol=1e-10)
 
