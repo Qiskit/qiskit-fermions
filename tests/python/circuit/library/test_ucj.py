@@ -87,46 +87,12 @@ def test_ucj_rejects_integer_nelec_for_balanced_tensors():
         UCJ(norb, 2, mats, rotations)
 
 
-def test_ucj_default_reference_is_hartree_fock():
-    """The default reference occupation is the Hartree-Fock determinant."""
-    norb = 3
-    mats, rotations = _balanced_tensors(norb, 1, seed=5)
-    gate = UCJ(norb, (2, 1), mats, rotations)
-    # block-spin order: alpha modes 0..3 (first 2 occupied), beta modes 3..6 (first 1 occupied)
-    expected = [True, True, False, True, False, False]
-    np.testing.assert_array_equal(gate.reference_occupation, expected)
-
-
-def test_ucj_rejects_wrong_reference_length():
-    """A reference occupation whose length does not match the mode count raises ValueError."""
-    norb = 3
-    mats, rotations = _balanced_tensors(norb, 1, seed=6)
-    with pytest.raises(ValueError, match="reference_occupation has length"):
-        UCJ(norb, (1, 1), mats, rotations, reference_occupation=[True, False])
-
-
-def test_ucj_rejects_spin_sector_exceeding_norb():
-    """A spin sector with more electrons than orbitals raises instead of spilling into the block."""
-    norb = 2
-    mats, rotations = _balanced_tensors(norb, 1, seed=11)
-    with pytest.raises(ValueError, match="exceeding the norb"):
-        UCJ(norb, (3, 0), mats, rotations)
-
-
-def test_ucj_rejects_spinless_nelec_exceeding_norb():
-    """A spinless electron count above ``norb`` raises rather than indexing out of range."""
-    norb = 2
-    n_reps = 1
-    rng = np.random.default_rng(12)
-    mats = rng.standard_normal((n_reps, norb, norb))
-    mats = mats + mats.transpose(0, 2, 1)
-    rotations = np.stack([random_unitary(norb, seed=12)])
-    with pytest.raises(ValueError, match="exceeds the norb"):
-        UCJ(norb, 3, mats, rotations)
-
-
 def test_ucj_define_gate_sequence():
-    """The gate definition is InitializeModes + per-rep (rotation, evolution, rotation) + final."""
+    """The gate definition is per-rep (rotation, evolution, rotation) + optional final rotation.
+
+    UCJ is a pure unitary carrying no reference state, so its definition contains only the ansatz
+    layers -- no opening :class:`.InitializeModes`.
+    """
     norb = 3
     n_reps = 2
     mats, rotations = _balanced_tensors(norb, n_reps, seed=7)
@@ -137,7 +103,7 @@ def test_ucj_define_gate_sequence():
     circ.append(gate, circ.modes)
     ops = circ.decompose().count_ops()
 
-    assert ops["InitializeModes"] == 1
+    assert "InitializeModes" not in ops
     assert ops["Evolution"] == n_reps
     # per rep: U^dagger (2 local) + U (2 local) = 4; plus a final rotation (2 local)
     assert ops["OrbitalRotation"] == 4 * n_reps + 2
@@ -155,7 +121,7 @@ def test_ucj_spinless_true_uses_norb_modes():
     circ = FermionicCircuit(gate.num_modes)
     circ.append(gate, circ.modes)
     ops = circ.decompose().count_ops()
-    assert ops["InitializeModes"] == 1
+    assert "InitializeModes" not in ops
     assert ops["Evolution"] == n_reps
     # spinless places a single rotation on all norb modes: U^dagger + U = 2 per rep
     assert ops["OrbitalRotation"] == 2 * n_reps
