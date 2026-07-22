@@ -44,3 +44,4 @@ this package:
    mappers
    circuit
    transpilation
+   merge_slater_determinant
