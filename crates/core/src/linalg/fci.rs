@@ -287,6 +287,50 @@ impl std::fmt::Display for FciMatvecError {
 
 impl std::error::Error for FciMatvecError {}
 
+/// Errors that can arise while building an [`occupation_axis_mask`].
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum OccupationMaskError {
+    /// An `occupied`/`empty` constraint bit is set outside `0..norb`.
+    BitOutOfRange { bit: u32, norb: u32 },
+    /// An orbital is constrained to be both occupied and empty (`occupied & empty != 0`).
+    Overlap { bit: u32 },
+    /// The constraints cannot be satisfied by any `nocc`-electron determinant: either more than
+    /// `nocc` orbitals are forced occupied, or too few orbitals are left free to reach `nocc`.
+    Unsatisfiable {
+        norb: u32,
+        nocc: u32,
+        num_occupied: u32,
+        num_empty: u32,
+    },
+}
+
+impl std::fmt::Display for OccupationMaskError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            OccupationMaskError::BitOutOfRange { bit, norb } => write!(
+                f,
+                "constraint bit {bit} is outside the range [0, {norb}) implied by the number of orbitals"
+            ),
+            OccupationMaskError::Overlap { bit } => write!(
+                f,
+                "orbital {bit} is constrained to be both occupied and empty"
+            ),
+            OccupationMaskError::Unsatisfiable {
+                norb,
+                nocc,
+                num_occupied,
+                num_empty,
+            } => write!(
+                f,
+                "no {nocc}-electron determinant on {norb} orbitals can have {num_occupied} orbitals \
+                 occupied and {num_empty} orbitals empty"
+            ),
+        }
+    }
+}
+
+impl std::error::Error for OccupationMaskError {}
+
 /// Computes the spinful FCI dimension `C(norb, n_alpha) * C(norb, n_beta)`, checking for overflow.
 ///
 /// The per-sector dimensions each fit in `usize`, but their product need not; a silent wrap could
@@ -367,6 +411,66 @@ pub fn slater_determinant_statevector(
             Ok(vec)
         }
     }
+}
+
+/// Builds a boolean mask over the `(norb, nocc)` sector's addresses selecting the determinants that
+/// satisfy a partial occupation constraint.
+///
+/// The result has length `C(norb, nocc)`; entry `addr` is `true` iff the determinant at that address
+/// (see [`addr2str`]) has **all** orbitals in the `occupied` bitmask set **and all** orbitals in the
+/// `empty` bitmask clear. Orbitals in neither mask are unconstrained ("free"), so a partial
+/// constraint selects a whole family of determinants -- e.g. fixing only the alpha occupation of a
+/// spin sector accepts every determinant that agrees there, whatever the free orbitals do. This is
+/// the per-axis subspace test behind :class:`.InitializeModes`'s validator: an incoming state passes
+/// iff its amplitude is confined to the `true` entries of this mask along the constrained axis.
+///
+/// `occupied` and `empty` are bitmasks over `0..norb` (bit `p` set iff orbital `p` is constrained).
+/// Errors ([`OccupationMaskError`]) are raised for a constraint bit outside `0..norb`, an orbital
+/// constrained both occupied and empty, or an unsatisfiable constraint (more than `nocc` orbitals
+/// forced occupied, or too few free orbitals left to reach `nocc`) -- so an impossible constraint is
+/// a clear error rather than a silently all-`false` mask.
+pub fn occupation_axis_mask(
+    norb: u32,
+    nocc: u32,
+    occupied: u64,
+    empty: u64,
+) -> Result<Vec<bool>, OccupationMaskError> {
+    // Constraint bits must address real orbitals: an out-of-range bit could never be matched and
+    // signals a caller error, not an empty selection.
+    for mask in [occupied, empty] {
+        if let Some(bit) = mode_out_of_range(mask, norb) {
+            return Err(OccupationMaskError::BitOutOfRange { bit, norb });
+        }
+    }
+    // An orbital cannot be both forced occupied and forced empty.
+    let overlap = occupied & empty;
+    if overlap != 0 {
+        return Err(OccupationMaskError::Overlap {
+            bit: overlap.trailing_zeros(),
+        });
+    }
+    // The constraint must be satisfiable by *some* `nocc`-electron determinant: no more than `nocc`
+    // orbitals may be forced occupied, and enough orbitals must remain free to fill up to `nocc`.
+    let num_occupied = occupied.count_ones();
+    let num_empty = empty.count_ones();
+    let num_free = norb - num_occupied - num_empty;
+    if num_occupied > nocc || nocc - num_occupied > num_free {
+        return Err(OccupationMaskError::Unsatisfiable {
+            norb,
+            nocc,
+            num_occupied,
+            num_empty,
+        });
+    }
+
+    let table = BinomialTable::new(norb);
+    let mask = (0..table.num_strings(norb, nocc))
+        .map(|addr| {
+            let string = addr2str(&table, norb, nocc, addr);
+            string & occupied == occupied && string & empty == 0
+        })
+        .collect();
+    Ok(mask)
 }
 
 /// Applies a single term's ladder operators (right-to-left) to one sector's occupation `string`.
@@ -1136,6 +1240,78 @@ mod tests {
                 }
             }
         }
+    }
+
+    #[test]
+    fn occupation_axis_mask_matches_brute_force() {
+        // The mask selects the determinants whose bitmask has all `occupied` bits set and all `empty`
+        // bits clear. Cross-check against a brute-force scan over the enumerated sector strings for a
+        // spread of constraints, including a fully-pinned occupation (a single `true`) and a
+        // no-constraint case (all `true`).
+        let cases: &[(u32, u32, u64, u64)] = &[
+            // no constraint: every determinant of the sector qualifies.
+            (4, 2, 0b0000, 0b0000),
+            // fully pinned: exactly one determinant qualifies.
+            (4, 2, 0b0011, 0b1100),
+            // partial: fix orbital 0 occupied, leave the rest free.
+            (5, 3, 0b00001, 0b00000),
+            // partial: fix orbital 4 empty, leave the rest free.
+            (5, 3, 0b00000, 0b10000),
+            // mixed partial: orbital 1 occupied, orbital 3 empty.
+            (5, 2, 0b00010, 0b01000),
+            // higher rank, several fixed bits.
+            (6, 3, 0b000101, 0b100000),
+        ];
+        for &(norb, nocc, occupied, empty) in cases {
+            let mask = occupation_axis_mask(norb, nocc, occupied, empty).unwrap();
+            let strings = enumerate_strings(norb, nocc);
+            assert_eq!(mask.len(), strings.len(), "norb={norb} nocc={nocc}");
+            for (addr, &string) in strings.iter().enumerate() {
+                let want = string & occupied == occupied && string & empty == 0;
+                assert_eq!(
+                    mask[addr], want,
+                    "norb={norb} nocc={nocc} occ={occupied:b} emp={empty:b} string={string:b}"
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn occupation_axis_mask_full_and_empty_constraints() {
+        // A fully-pinned occupation selects exactly the one determinant at its address; an empty
+        // constraint selects the whole sector.
+        let full = occupation_axis_mask(3, 2, 0b011, 0b100).unwrap();
+        assert_eq!(full.iter().filter(|&&b| b).count(), 1);
+        // The single survivor sits at str2addr(0b011) = 0.
+        assert!(full[str2addr(&BinomialTable::new(3), 0b011)]);
+
+        let none = occupation_axis_mask(3, 2, 0, 0).unwrap();
+        assert_eq!(none.len(), BinomialTable::new(3).num_strings(3, 2));
+        assert!(none.iter().all(|&b| b));
+    }
+
+    #[test]
+    fn occupation_axis_mask_rejects_invalid_constraints() {
+        // A constraint bit outside 0..norb.
+        assert!(matches!(
+            occupation_axis_mask(3, 1, 0b1000, 0).unwrap_err(),
+            OccupationMaskError::BitOutOfRange { bit: 3, norb: 3 }
+        ));
+        // An orbital constrained both occupied and empty.
+        assert!(matches!(
+            occupation_axis_mask(3, 1, 0b010, 0b010).unwrap_err(),
+            OccupationMaskError::Overlap { bit: 1 }
+        ));
+        // More orbitals forced occupied than there are electrons.
+        assert!(matches!(
+            occupation_axis_mask(4, 1, 0b0011, 0).unwrap_err(),
+            OccupationMaskError::Unsatisfiable { .. }
+        ));
+        // Too few free orbitals left to reach nocc (3 of 4 forced empty, need 2 electrons).
+        assert!(matches!(
+            occupation_axis_mask(4, 2, 0, 0b1110).unwrap_err(),
+            OccupationMaskError::Unsatisfiable { .. }
+        ));
     }
 
     #[test]
