@@ -16,7 +16,7 @@ use pyo3::prelude::*;
 use pyo3_stub_gen::derive::*;
 
 use qiskit_fermions_core::linalg::fci::{
-    FciMatvecError, MAX_ORBITALS, slater_determinant_statevector,
+    FciMatvecError, MAX_ORBITALS, occupation_axis_mask, slater_determinant_statevector,
 };
 
 /// A matvec closure closing over an operator and a fixed FCI sector.
@@ -176,10 +176,60 @@ pub fn py_slater_determinant_statevector(
     Ok(vec.into_pyarray(py))
 }
 
+/// Builds a boolean mask over an FCI sector's addresses selecting a partial-occupation subspace.
+///
+/// The mask has length ``C(norb, nocc)``; entry ``addr`` is ``True`` iff the determinant at that
+/// address has **all** orbitals in the ``occupied`` bitmask set **and all** orbitals in the ``empty``
+/// bitmask clear. Orbitals in neither mask are unconstrained, so a partial constraint selects a whole
+/// family of determinants (fixing only some orbitals accepts every determinant that agrees there,
+/// whatever the free orbitals do). This is the per-axis subspace test behind
+/// :class:`.InitializeModes`'s validator: an incoming state passes iff its amplitude is confined to
+/// the ``True`` entries of this mask along the constrained spin axis.
+///
+/// Args:
+///     norb: the number of spatial orbitals.
+///     nocc: the number of occupied orbitals of the sector (its address space is ``C(norb, nocc)``).
+///     occupied: a bitmask over ``0..norb`` whose set bits mark orbitals forced to be occupied.
+///     empty: a bitmask over ``0..norb`` whose set bits mark orbitals forced to be empty.
+///
+/// Returns:
+///     A one-dimensional ``bool`` array of length ``C(norb, nocc)``.
+///
+/// Raises:
+///     ValueError: if ``norb`` exceeds the maximum number of orbitals the bitmask representation
+///         supports (64); if a constraint bit is set outside ``0..norb``; if an orbital is
+///         constrained to be both occupied and empty; or if the constraint is unsatisfiable (more
+///         than ``nocc`` orbitals forced occupied, or too few free orbitals left to reach ``nocc``).
+#[gen_stub_pyfunction(module = "qiskit_fermions._lib.linalg.fci")]
+#[pyfunction(name = "occupation_axis_mask", signature = (norb, nocc, occupied, empty))]
+// `pyo3-stub-gen` has no NumPyScalar impl for `bool`, so the array return type cannot be derived;
+// spell it out to match the `numpy.typing.NDArray[...]` convention the sibling functions render.
+#[gen_stub(override_return_type(
+    type_repr = "numpy.typing.NDArray[numpy.bool_]",
+    imports = ("numpy", "numpy.typing")
+))]
+pub fn py_occupation_axis_mask(
+    py: Python<'_>,
+    norb: u32,
+    nocc: u32,
+    occupied: u64,
+    empty: u64,
+) -> PyResult<Bound<'_, PyArray1<bool>>> {
+    if norb > MAX_ORBITALS {
+        return Err(crate::value_err(format!(
+            "norb={norb} exceeds the maximum of {MAX_ORBITALS} orbitals"
+        )));
+    }
+    let mask = occupation_axis_mask(norb, nocc, occupied, empty).map_err(crate::value_err)?;
+    Ok(mask.into_pyarray(py))
+}
+
 #[pymodule]
 pub mod fci {
     #[pymodule_export]
     use super::FciLinearOperator;
+    #[pymodule_export]
+    use super::py_occupation_axis_mask;
     #[pymodule_export]
     use super::py_slater_determinant_statevector;
 }
