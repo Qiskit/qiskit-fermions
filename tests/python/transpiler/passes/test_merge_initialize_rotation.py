@@ -151,15 +151,15 @@ def test_no_merge_when_not_adjacent():
     ]
 
 
-def test_no_merge_when_mode_sets_mismatch():
-    """A single rotation covering fewer modes than the init does not fuse."""
-    circ = FermionicCircuit(4)
+def test_no_merge_when_rotation_is_not_a_spin_half():
+    """A single rotation on a partial sub-range that is not a contiguous spin half does not fuse."""
+    circ = FermionicCircuit(4)  # norb = 2: the only valid halves are [0, 1] and [2, 3]
     circ.append(InitializeModes([1, 1, 0, 0]), circ.modes)
-    circ.append(OrbitalRotation(random_unitary(2, seed=1)), circ.modes[:2])
+    circ.append(OrbitalRotation(random_unitary(3, seed=1)), circ.modes[:3])
 
     assert _merge(circ) == [
         ("InitializeModes", [0, 1, 2, 3]),
-        ("OrbitalRotation", [0, 1]),
+        ("OrbitalRotation", [0, 1, 2]),
     ]
 
 
@@ -171,20 +171,62 @@ def test_no_merge_rotation_without_init():
     assert _merge(circ) == [("OrbitalRotation", [0, 1])]
 
 
-def test_no_merge_only_one_per_spin_rotation():
-    """A full-register init followed by only one per-spin rotation does not fuse.
+def test_merge_only_one_per_spin_rotation():
+    """A full-register init with only one per-spin rotation fuses, identity-padding the other half.
 
-    Fusing here would drop the init's validation on the beta half, so the pass conservatively
-    leaves the whole pattern untouched.
+    The unrotated (beta) half is prepared with an identity rotation, which synthesizes to just its
+    reference X gates -- so the fusion still emits two :class:`.PrepareSlaterDeterminant` gates at no
+    extra gate cost while unlocking the reduced Slater synthesis on the rotated (alpha) half.
     """
     circ = FermionicCircuit(4)
     circ.append(InitializeModes([1, 0, 1, 0]), circ.modes)
     circ.append(OrbitalRotation(random_unitary(2, seed=1)), circ.modes[:2])
 
     assert _merge(circ) == [
-        ("InitializeModes", [0, 1, 2, 3]),
-        ("OrbitalRotation", [0, 1]),
+        ("PrepareSlaterDeterminant", [0, 1]),
+        ("PrepareSlaterDeterminant", [2, 3]),
     ]
+
+
+def test_merge_only_one_per_spin_rotation_beta():
+    """The single-rotation fusion also works when it is the beta half that is rotated."""
+    circ = FermionicCircuit(4)
+    circ.append(InitializeModes([1, 0, 1, 0]), circ.modes)
+    circ.append(OrbitalRotation(random_unitary(2, seed=1)), circ.modes[2:])
+
+    assert _merge(circ) == [
+        ("PrepareSlaterDeterminant", [0, 1]),
+        ("PrepareSlaterDeterminant", [2, 3]),
+    ]
+
+
+def test_merge_single_rotation_identity_pad_preserves_state():
+    """Identity-padding the unrotated half preserves the state up to a global phase, no phase gates.
+
+    Compares the merged circuit (one reduced Slater prep + one identity-padded prep) against the
+    unmerged InitializeModes + single OrbitalRotation reference lowered by the same square path.
+    """
+    circ = FermionicCircuit(4)
+    circ.append(InitializeModes([1, 0, 1, 0]), circ.modes)
+    circ.append(OrbitalRotation(random_unitary(2, seed=3)), circ.modes[:2])
+
+    reference = MultiStagePassManager(
+        input=FermionicCircuitToDAG(),
+        layout=TrivialF2QLayout(),
+        synthesis=_reference_synth(),
+        output=QuantumDAGToCircuit(),
+    ).run(circ)
+    merged = MultiStagePassManager(
+        input=FermionicCircuitToDAG(),
+        optimization=MergeSlaterDeterminantPreparation(),
+        layout=TrivialF2QLayout(),
+        synthesis=_merged_synth(),
+        output=QuantumDAGToCircuit(),
+    ).run(circ)
+
+    _assert_equal_up_to_global_phase(reference, merged)
+    # the identity-padded half adds no gates; the reduced decomposition carries no phase gates
+    assert "p" not in merged.count_ops()
 
 
 # --- equivalence + payoff -----------------------------------------------------------------------

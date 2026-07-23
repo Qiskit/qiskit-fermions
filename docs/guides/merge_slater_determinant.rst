@@ -110,6 +110,23 @@ follow the initialization once the ansatz is decomposed.
    PrepareSlaterDeterminant on modes [0, 1, 2]
    PrepareSlaterDeterminant on modes [3, 4, 5]
 
+This pattern also fires when only *one* spin half is rotated by a gate directly following the
+initialization -- the shape produced when just one spin sector's orbital rotation happens to sit at
+the front of the circuit. The rotated half becomes a :class:`.PrepareSlaterDeterminant` with its
+rotation, and the other half is prepared with an *identity* rotation. The identity preparation
+synthesizes to nothing more than the reference X gates the :class:`.InitializeModes` would have
+emitted for that half anyway, so padding it costs no extra gates while still unlocking the reduced
+Slater synthesis on the rotated half:
+
+.. doctest::
+
+   >>> circuit = FermionicCircuit(6)
+   >>> circuit.append(InitializeModes.from_hartree_fock(3, (2, 1)), circuit.modes)
+   >>> circuit.append(OrbitalRotation(np.eye(3)), circuit.modes[:3])
+   >>> show_merged(circuit)
+   PrepareSlaterDeterminant on modes [0, 1, 2]
+   PrepareSlaterDeterminant on modes [3, 4, 5]
+
 What is left untouched
 ----------------------
 
@@ -139,36 +156,22 @@ into a bare preparation, so nothing is merged:
    Evolution on modes [0, 1, 2, 3]
    OrbitalRotation on modes [0, 1, 2, 3]
 
-Mismatched mode sets
-~~~~~~~~~~~~~~~~~~~~~
+A partial rotation that is not a spin half
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-A rotation covering fewer modes than the initialization is not a full preparation of those modes.
-Merging it would silently drop the initialization's role on the modes the rotation leaves out, so
-the pass leaves both gates in place:
+A rotation covering exactly one contiguous spin half of a full-register initialization *does* fuse
+(see the previous section). But a rotation on any *other* partial mode set -- fewer modes than the
+initialization and not one of its two spin halves, such as a sub-range straddling the sector
+boundary -- is not a per-sector preparation. Merging it would silently drop the initialization's
+role on the modes it leaves out, so the pass leaves both gates in place:
 
 .. doctest::
 
-   >>> circuit = FermionicCircuit(4)
+   >>> circuit = FermionicCircuit(4)  # norb = 2: the only spin halves are modes [0, 1] and [2, 3]
    >>> circuit.append(InitializeModes([1, 1, 0, 0]), circuit.modes)
-   >>> circuit.append(OrbitalRotation(np.eye(2)), circuit.modes[:2])
-   >>> show_merged(circuit)
-   InitializeModes on modes [0, 1, 2, 3]
-   OrbitalRotation on modes [0, 1]
-
-Only one of the two per-spin rotations
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-For the global-initialization pattern, the pass fires only when *both* spin halves are rotated by
-gates that directly follow the initialization. With only one half rotated, fusing would drop the
-initialization's validation on the other half, so the whole pattern is left untouched:
-
-.. doctest::
-
-   >>> circuit = FermionicCircuit(6)
-   >>> circuit.append(InitializeModes.from_hartree_fock(3, (2, 1)), circuit.modes)
    >>> circuit.append(OrbitalRotation(np.eye(3)), circuit.modes[:3])
    >>> show_merged(circuit)
-   InitializeModes on modes [0, 1, 2, 3, 4, 5]
+   InitializeModes on modes [0, 1, 2, 3]
    OrbitalRotation on modes [0, 1, 2]
 
 Why it matters: the synthesis payoff

@@ -14,6 +14,7 @@
 
 from __future__ import annotations
 
+import numpy as np
 from qiskit.dagcircuit import DAGOpNode
 
 from qiskit_fermions.circuit import FermionicDAGCircuit
@@ -51,18 +52,21 @@ class MergeSlaterDeterminantPreparation(FermionicDAGCircuitPass):
     2. **Per-sector** -- the same shape as pattern 1 but on a single spin half; it fuses into one
        :class:`.PrepareSlaterDeterminant` per sector.
     3. **Global init + per-spin rotations** -- a full-register (``2*norb``) :class:`.InitializeModes`
-       immediately followed by two :class:`.OrbitalRotation`\ s, one on each contiguous spin half
-       (in either order), splits the occupation per sector and emits **two**
-       :class:`.PrepareSlaterDeterminant` gates. This is the shape produced by placing an
-       :class:`.InitializeModes` (e.g. :meth:`.InitializeModes.from_hartree_fock`) at the front of a
-       circuit and appending a decomposed :class:`.UCJ`, whose first two per-spin rotations directly
-       follow the initialization.
+       immediately followed by an :class:`.OrbitalRotation` on *either or both* contiguous spin halves
+       (in either order) splits the occupation per sector and emits **two**
+       :class:`.PrepareSlaterDeterminant` gates. A half that has no rotation is prepared with an
+       identity rotation, which synthesizes to only the reference X gates -- exactly what the
+       :class:`.InitializeModes` would have emitted for that half anyway -- so padding it costs no
+       extra gates while still unlocking the reduced Slater synthesis on the rotated half. This is the
+       shape produced by placing an :class:`.InitializeModes` (e.g.
+       :meth:`.InitializeModes.from_hartree_fock`) at the front of a circuit and appending a decomposed
+       :class:`.UCJ`, whose first per-spin rotations directly follow the initialization.
 
     "Immediately followed" is understood over the DAG: an :class:`.OrbitalRotation` node fuses only
     when the :class:`.InitializeModes` is its *sole* predecessor across all of its modes, i.e. no
     other operation intervenes on those wires. Any arrangement not matching one of the three shapes
-    above -- non-adjacent gates, mismatched mode sets, an :class:`.OrbitalRotation` with no preceding
-    :class:`.InitializeModes`, or only one of the two per-spin rotations present -- is left untouched.
+    above -- non-adjacent gates, mismatched mode sets, or an :class:`.OrbitalRotation` with no
+    preceding :class:`.InitializeModes` -- is left untouched.
 
     .. caution::
        This is an early development prototype. Beware of changes to its interface without warning
@@ -148,6 +152,10 @@ class MergeSlaterDeterminantPreparation(FermionicDAGCircuitPass):
             and self._immediately_follows(dag, init_node, succ)
         ]
 
+        if not rotations:
+            # a bare InitializeModes with no rotation immediately following it: nothing to fuse
+            return None
+
         occupation = init_node.op.occupation
 
         # Pattern 1 / 2: a single rotation on exactly the initialized modes.
@@ -156,31 +164,44 @@ class MergeSlaterDeterminantPreparation(FermionicDAGCircuitPass):
             if self._modes(dag, rotation) == init_modes:
                 gate = PrepareSlaterDeterminant(occupation, rotation.op.rotation_unitary)
                 return [(gate, init_modes)], [rotation._node_id]
+            # otherwise fall through: it may be a per-spin rotation on one half of a full register
+
+        # Pattern 3: a full-register init whose two contiguous spin halves are rotated by per-spin
+        # OrbitalRotations. Fires with one *or* both halves rotated -- an unrotated half is prepared
+        # with an identity rotation, which synthesizes to just the reference X gates (no extra gates),
+        # so padding the missing half costs nothing while still unlocking the reduced Slater synthesis
+        # on the rotated half.
+        num_modes = len(init_modes)
+        if num_modes % 2 != 0 or init_modes != list(range(num_modes)):
+            return None
+        norb = num_modes // 2
+        alpha_modes = list(range(norb))
+        beta_modes = list(range(norb, num_modes))
+
+        by_modes = {tuple(self._modes(dag, rot)): rot for rot in rotations}
+        alpha_rot = by_modes.get(tuple(alpha_modes))
+        beta_rot = by_modes.get(tuple(beta_modes))
+        # every gathered rotation must sit on exactly one of the two halves -- otherwise this is not
+        # the per-spin shape (e.g. a rotation on a partial sub-range straddling the sector boundary).
+        # At least one rotation exists here (bare inits returned above), so this also guarantees at
+        # least one half is rotated.
+        if len(rotations) != (alpha_rot is not None) + (beta_rot is not None):
             return None
 
-        # Pattern 3: a full-register init split by two per-spin rotations on the two contiguous halves.
-        if len(rotations) == 2:
-            num_modes = len(init_modes)
-            if num_modes % 2 != 0 or init_modes != list(range(num_modes)):
-                return None
-            norb = num_modes // 2
-            alpha_modes = list(range(norb))
-            beta_modes = list(range(norb, num_modes))
+        gates: list[tuple[PrepareSlaterDeterminant, list[int]]] = []
+        consumed: list[int] = []
+        for rot, modes, occ in (
+            (alpha_rot, alpha_modes, occupation[:norb]),
+            (beta_rot, beta_modes, occupation[norb:]),
+        ):
+            if rot is None:
+                unitary = np.eye(norb, dtype=complex)
+            else:
+                unitary = rot.op.rotation_unitary
+                consumed.append(rot._node_id)
+            gates.append((PrepareSlaterDeterminant(occ, unitary), modes))
 
-            by_modes = {tuple(self._modes(dag, rot)): rot for rot in rotations}
-            alpha_rot = by_modes.get(tuple(alpha_modes))
-            beta_rot = by_modes.get(tuple(beta_modes))
-            if alpha_rot is None or beta_rot is None:
-                return None
-
-            alpha_gate = PrepareSlaterDeterminant(occupation[:norb], alpha_rot.op.rotation_unitary)
-            beta_gate = PrepareSlaterDeterminant(occupation[norb:], beta_rot.op.rotation_unitary)
-            return (
-                [(alpha_gate, alpha_modes), (beta_gate, beta_modes)],
-                [alpha_rot._node_id, beta_rot._node_id],
-            )
-
-        return None
+        return gates, consumed
 
     @staticmethod
     def _modes(dag: FermionicDAGCircuit, node: DAGOpNode) -> list[int]:
