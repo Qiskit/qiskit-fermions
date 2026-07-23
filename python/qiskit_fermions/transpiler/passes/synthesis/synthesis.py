@@ -157,12 +157,19 @@ class F2QSynthesis(GenericPass[FermionicDAGCircuit, DAGCircuit]):
         """
         f2q_layout = cast(F2QLayout, self.property_set["f2q_layout"])
 
-        out_dag = dag.copy_empty_like()
-
-        for freg, qreg in f2q_layout.items():
+        # Build the qubit-based output DAG from scratch rather than copying the fermionic input and
+        # deleting its mode wires: ``copy_empty_like`` followed by ``remove_qregs``/``remove_qubits``
+        # leaves the DAG's internal wire graph in a state that intermittently trips a spurious
+        # ``not a DAG`` panic in downstream analysis (e.g. Qiskit's ``Depth`` pass). Starting fresh
+        # and only adding the mapped qubit registers keeps the graph consistent.
+        out_dag = DAGCircuit()
+        out_dag.name = dag.name
+        out_dag.global_phase = dag.global_phase
+        out_dag.metadata = dag.metadata
+        for qreg in f2q_layout.values():
             out_dag.add_qreg(qreg)
-            out_dag.remove_qregs(freg)
-            out_dag.remove_qubits(*freg)
+        for creg in dag.cregs.values():
+            out_dag.add_creg(creg)
 
         for node in dag.op_nodes():
             op_type = type(node.op)

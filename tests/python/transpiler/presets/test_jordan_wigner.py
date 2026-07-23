@@ -68,3 +68,34 @@ def test_preset_jordan_wigner():
     )
 
     assert Statevector(qu_circ) == Statevector(expected)
+
+
+def test_preset_jordan_wigner_identity_rotation():
+    """The preset lowers rotation-free circuits (only X gates, idle qubits) to the correct state.
+
+    Smoke test for the ``F2QSynthesis`` output-DAG construction. The pass used to build its output by
+    copying the fermionic input DAG and deleting the mode wires (``copy_empty_like`` +
+    ``remove_qubits``), which left the DAG's internal wire graph inconsistent. A circuit synthesizing
+    to only single-qubit gates on a subset of qubits -- an identity ``OrbitalRotation`` lowers to
+    just ``X`` gates with idle qubits -- surfaced this as a ``not a DAG`` panic in the downstream
+    ``Depth`` analysis pass.
+
+    Note this is a *smoke* test, not a deterministic reproducer: the panic originates in Qiskit's
+    rustworkx-backed DAG and its reproducibility depends on process memory layout, so it cannot be
+    triggered on demand. The test therefore only asserts that the path used to fail now lowers
+    cleanly to the expected state; see the pull request for the standalone ``depth()`` reducer that
+    reproduces the underlying corruption deterministically.
+    """
+    num_modes = 4
+    occupation = [True, True, False, False]
+    identity = np.eye(num_modes, dtype=complex)
+
+    orbital = FermionicCircuit(num_modes)
+    orbital.append(InitializeModes(occupation), orbital.modes)
+    orbital.append(OrbitalRotation(identity), orbital.modes)
+
+    reference = QuantumCircuit(num_modes)
+    reference.x((0, 1))
+    expected = Statevector(reference)
+
+    assert Statevector(generate_preset_jw_pass_manager().run(orbital)) == expected
