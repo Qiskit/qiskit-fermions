@@ -119,9 +119,10 @@ class MergeSlaterDeterminantPreparation(FermionicDAGCircuitPass):
 
         # Plan the rewrites before emitting anything: map each matched InitializeModes node to the
         # replacement gate(s) it produces, and collect the OrbitalRotation nodes those replacements
-        # consume so they are not re-emitted when the topological walk reaches them.
-        replacements: dict[int, list[tuple[PrepareSlaterDeterminant, list[int]]]] = {}
-        consumed: set[int] = set()
+        # consume so they are not re-emitted when the topological walk reaches them. DAG nodes are
+        # hashable and compare by identity (node id), so we key on the nodes directly.
+        replacements: dict[DAGOpNode, list[tuple[PrepareSlaterDeterminant, list[int]]]] = {}
+        consumed: set[DAGOpNode] = set()
         for node in dag.topological_op_nodes():
             if not isinstance(node.op, InitializeModes):
                 continue
@@ -129,17 +130,17 @@ class MergeSlaterDeterminantPreparation(FermionicDAGCircuitPass):
             if match is None:
                 continue
             gates, consumed_rotations = match
-            replacements[node._node_id] = gates
+            replacements[node] = gates
             consumed.update(consumed_rotations)
 
         out_dag = dag.copy_empty_like()
         (register,) = out_dag.qregs.values()
         for node in dag.topological_op_nodes():
-            if node._node_id in consumed:
+            if node in consumed:
                 # an OrbitalRotation already folded into a PrepareSlaterDeterminant at its init
                 continue
-            if node._node_id in replacements:
-                for gate, modes in replacements[node._node_id]:
+            if node in replacements:
+                for gate, modes in replacements[node]:
                     out_dag.apply_operation_back(gate, qargs=[register[m] for m in modes])
                 continue
             out_dag.apply_operation_back(node.op, qargs=node.qargs)
@@ -148,13 +149,12 @@ class MergeSlaterDeterminantPreparation(FermionicDAGCircuitPass):
 
     def _match(
         self, dag: FermionicDAGCircuit, init_node: DAGOpNode
-    ) -> tuple[list[tuple[PrepareSlaterDeterminant, list[int]]], list[int]] | None:
+    ) -> tuple[list[tuple[PrepareSlaterDeterminant, list[int]]], list[DAGOpNode]] | None:
         """Matches one of the three fusion patterns rooted at an ``InitializeModes`` node.
 
         Returns ``None`` when nothing matches. Otherwise returns a pair ``(gates, consumed)`` where
         ``gates`` is the list of ``(PrepareSlaterDeterminant, modes)`` replacements to emit in place
-        of the initialization and ``consumed`` the node ids of the ``OrbitalRotation`` nodes folded
-        into them.
+        of the initialization and ``consumed`` the ``OrbitalRotation`` nodes folded into them.
         """
         init_modes = self._modes(dag, init_node)
 
@@ -179,7 +179,7 @@ class MergeSlaterDeterminantPreparation(FermionicDAGCircuitPass):
             (rotation,) = rotations
             if self._modes(dag, rotation) == init_modes:
                 gate = PrepareSlaterDeterminant(occupation, rotation.op.rotation_unitary)
-                return [(gate, init_modes)], [rotation._node_id]
+                return [(gate, init_modes)], [rotation]
             # otherwise fall through: it may be a per-spin rotation on one half of a full register
 
         # Pattern 3: a full-register init whose two contiguous spin halves are rotated by per-spin
@@ -205,7 +205,7 @@ class MergeSlaterDeterminantPreparation(FermionicDAGCircuitPass):
             return None
 
         gates: list[tuple[PrepareSlaterDeterminant, list[int]]] = []
-        consumed: list[int] = []
+        consumed: list[DAGOpNode] = []
         for rot, modes, occ in (
             (alpha_rot, alpha_modes, occupation[:norb]),
             (beta_rot, beta_modes, occupation[norb:]),
@@ -214,7 +214,7 @@ class MergeSlaterDeterminantPreparation(FermionicDAGCircuitPass):
                 unitary = np.eye(norb, dtype=complex)
             else:
                 unitary = rot.op.rotation_unitary
-                consumed.append(rot._node_id)
+                consumed.append(rot)
             gates.append((PrepareSlaterDeterminant(occ, unitary), modes))
 
         return gates, consumed
@@ -241,4 +241,6 @@ class MergeSlaterDeterminantPreparation(FermionicDAGCircuitPass):
         predecessors = [
             pred for pred in dag.quantum_predecessors(rotation) if isinstance(pred, DAGOpNode)
         ]
-        return len(predecessors) == 1 and predecessors[0]._node_id == init_node._node_id
+        # DAG nodes compare by identity (node id), so `==` matches the same node even when the DAG
+        # hands back a distinct wrapper instance for it.
+        return len(predecessors) == 1 and predecessors[0] == init_node
