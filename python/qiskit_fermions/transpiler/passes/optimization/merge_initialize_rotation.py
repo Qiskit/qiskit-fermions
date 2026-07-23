@@ -123,7 +123,7 @@ class MergeSlaterDeterminantPreparation(FermionicDAGCircuitPass):
         replacements: dict[int, list[tuple[PrepareSlaterDeterminant, list[int]]]] = {}
         consumed: set[int] = set()
         for node in dag.topological_op_nodes():
-            if not isinstance(node.op, InitializeModes) or node._node_id in consumed:
+            if not isinstance(node.op, InitializeModes):
                 continue
             match = self._match(dag, node)
             if match is None:
@@ -228,12 +228,15 @@ class MergeSlaterDeterminantPreparation(FermionicDAGCircuitPass):
     def _immediately_follows(
         dag: FermionicDAGCircuit, init_node: DAGOpNode, rotation: DAGOpNode
     ) -> bool:
-        """Whether ``rotation`` directly follows ``init_node`` on every one of its wires.
+        """Whether ``init_node`` is the sole operation feeding ``rotation``, nothing intervening.
 
-        This holds exactly when the only quantum predecessor of ``rotation`` is ``init_node``: any
-        intervening operation on one of ``rotation``'s modes would appear as a different predecessor,
-        so requiring a single predecessor guarantees the initialization feeds the rotation directly
-        and covers all of its modes.
+        This holds exactly when the only quantum-predecessor *op node* of ``rotation`` is
+        ``init_node``: any operation intervening on one of ``rotation``'s modes would appear as a
+        different predecessor. (Register-boundary ``DAGInNode`` predecessors are filtered out first,
+        so a rotation wire that the initialization does not cover contributes no op-predecessor
+        rather than a disqualifying one -- this check therefore does *not* by itself guarantee the
+        initialization covers all of the rotation's modes; :meth:`_match` enforces that separately
+        via its per-pattern mode-set checks before fusing.)
         """
         predecessors = [
             pred for pred in dag.quantum_predecessors(rotation) if isinstance(pred, DAGOpNode)
