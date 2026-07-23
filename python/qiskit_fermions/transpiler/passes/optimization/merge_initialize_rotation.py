@@ -70,12 +70,26 @@ class MergeSlaterDeterminantPreparation(FermionicDAGCircuitPass):
     above -- non-adjacent gates, mismatched mode sets, or an :class:`.OrbitalRotation` with no
     preceding :class:`.InitializeModes` -- is left untouched.
 
+    .. important::
+       Run this pass **after** :class:`.MergeOrbitalRotations`. The fusion contracts a *single*
+       :class:`.OrbitalRotation` immediately following the :class:`.InitializeModes`. Faced with an
+       initialization followed by a *run* of two or more consecutive rotations, this pass only sees
+       the first rotation immediately following the initialization -- it fuses that one into a
+       :class:`.PrepareSlaterDeterminant` but leaves the remaining rotations of the run as separate
+       trailing :class:`.OrbitalRotation` gates, which synthesize with their full (phase-carrying)
+       square decomposition. Running :class:`.MergeOrbitalRotations` first collapses the whole run
+       into one rotation, so this pass can then contract the entire run into a single
+       :class:`.PrepareSlaterDeterminant` and the cheaper Slater synthesis covers all of it. The
+       preset Jordan-Wigner pipeline (:func:`.generate_preset_jw_pass_manager`) wires the two passes
+       in this order.
+
     .. caution::
        This is an early development prototype. Beware of changes to its interface without warning
        during the pre-release development of this package.
 
     .. seealso::
-       :class:`.PrepareSlaterDeterminant`, :class:`.InitializeModes`, :class:`.OrbitalRotation`, and
+       :class:`.PrepareSlaterDeterminant`, :class:`.InitializeModes`, :class:`.OrbitalRotation`,
+       :class:`.MergeOrbitalRotations`, and
        :class:`.GivensDecompositionSlaterDeterminantSynthesis`.
     """
 

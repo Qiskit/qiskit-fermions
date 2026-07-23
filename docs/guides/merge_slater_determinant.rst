@@ -223,6 +223,15 @@ The preset Jordan-Wigner pass manager runs :class:`.MergeSlaterDeterminantPrepar
 optimization stage, so this reduction happens automatically. Here we transpile a two-electron,
 six-orbital preparation all the way to a :class:`~qiskit.circuit.QuantumCircuit` and count its gates:
 
+.. note::
+   The preset runs :class:`.MergeOrbitalRotations` immediately before
+   :class:`.MergeSlaterDeterminantPreparation`. This matters when a *run* of consecutive
+   :class:`.OrbitalRotation` gates follows the initialization: the earlier pass first collapses the
+   run into a single rotation, which :class:`.MergeSlaterDeterminantPreparation` then contracts with
+   the initialization into one :class:`.PrepareSlaterDeterminant`. Without that ordering only the
+   first rotation of the run would be absorbed and the rest would synthesize with the full square
+   decomposition.
+
 .. plot::
    :context:
    :nofigs:
@@ -282,6 +291,7 @@ preparation -- which is exactly what the phase gates would have fixed.
 
 .. seealso::
    :class:`.PrepareSlaterDeterminant`, :class:`.InitializeModes`, :class:`.OrbitalRotation`,
+   :class:`.MergeOrbitalRotations`,
    :class:`.GivensDecompositionSlaterDeterminantSynthesis`, and the
    :ref:`LUCJ guide <lucj_getting_started>` for the workflow that produces the global-initialization
    pattern.
