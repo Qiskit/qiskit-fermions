@@ -12,12 +12,14 @@
 
 """Optimization passes."""
 
+from .merge_initialize_rotation import MergeSlaterDeterminantPreparation
 from .merge_orbital_rotations import MergeOrbitalRotations
 from .qdrift import QDriftTrotterization
 from .relabel_modes import RelabelModes
 
 __all__ = [
     "MergeOrbitalRotations",
+    "MergeSlaterDeterminantPreparation",
     "QDriftTrotterization",
     "RelabelModes",
 ]

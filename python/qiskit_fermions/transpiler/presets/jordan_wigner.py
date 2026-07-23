@@ -22,6 +22,7 @@ from ..passes import (
     F2QSynthesis,
     F2QSynthesisConfig,
     MergeOrbitalRotations,
+    MergeSlaterDeterminantPreparation,
     TrivialF2QLayout,
 )
 
@@ -37,9 +38,15 @@ def generate_preset_jw_pass_manager(**kwargs) -> MultiStagePassManager:
     Returns:
         The preset staged fermion-to-qubit transpiler pipeline.
     """
-    # merge any run of consecutive OrbitalRotation gates into a single rotation, so the synthesis
-    # stage below lowers one decomposition per run rather than one per gate
-    optimization = FermionicPassManager(MergeOrbitalRotations())
+    # First merge any run of consecutive OrbitalRotation gates into a single rotation, so the
+    # synthesis stage below lowers one decomposition per run rather than one per gate. Then fuse an
+    # InitializeModes followed by an OrbitalRotation into a single PrepareSlaterDeterminant so that
+    # synthesis can lower it with the reduced Slater decomposition rather than the full square
+    # orbital rotation. The order matters: merging the rotations first exposes the single rotation
+    # immediately following the initialization, which the Slater-prep fusion then contracts into it.
+    optimization = FermionicPassManager(
+        [MergeOrbitalRotations(), MergeSlaterDeterminantPreparation()]
+    )
 
     layout = FermionicPassManager(TrivialF2QLayout())
 

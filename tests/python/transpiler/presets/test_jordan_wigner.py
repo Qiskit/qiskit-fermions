@@ -172,3 +172,120 @@ def test_preset_jordan_wigner_merges_rotation_run():
     assert merged.count_ops().get("xx_plus_yy", 0) == lowered_reference.count_ops().get(
         "xx_plus_yy", 0
     )
+
+
+def test_preset_jordan_wigner_merges_initialize_rotation():
+    """The preset's optimization stage fuses InitializeModes + OrbitalRotation.
+
+    An InitializeModes immediately followed by an OrbitalRotation is merged into a
+    PrepareSlaterDeterminant and lowered with the reduced Slater synthesis, so the preset yields
+    the same state (up to a global phase) as the unmerged pair but with fewer gates and no phases.
+    """
+    num_modes = 6
+    occupation = [True, True, True, False, False, False]
+    rotation = random_unitary(num_modes, seed=17)
+
+    circ = FermionicCircuit(num_modes)
+    circ.append(InitializeModes(occupation), circ.modes)
+    circ.append(OrbitalRotation(rotation), circ.modes)
+
+    pm = generate_preset_jw_pass_manager()
+    merged = pm.run(circ)
+
+    # the reduced decomposition drops the diagonal phase gates the full orbital rotation would emit
+    assert "p" not in merged.count_ops()
+
+    # equivalent reference lowered without the merge (a bare OrbitalRotation keeps its phases)
+    reference = FermionicCircuit(num_modes)
+    reference.append(OrbitalRotation(rotation), reference.modes)
+    ref_ops = pm.run(reference).count_ops()
+    assert merged.count_ops().get("xx_plus_yy", 0) < ref_ops.get("xx_plus_yy", 0)
+
+
+def test_preset_jordan_wigner_merges_single_per_spin_rotation():
+    """The preset fuses a global init with a single per-spin rotation, identity-padding the rest.
+
+    A full-register InitializeModes followed by an OrbitalRotation on only one spin half fuses into
+    two PrepareSlaterDeterminant gates (the rotated half plus an identity-padded half). The result
+    matches the state of the equivalent block-diagonal OrbitalRotation (up to a global phase) while
+    emitting strictly fewer two-qubit rotations and no phase gates.
+    """
+    norb = 3
+    rotation = random_unitary(norb, seed=7)
+
+    circ = FermionicCircuit(2 * norb)
+    circ.append(InitializeModes.from_hartree_fock(norb, (2, 1)), circ.modes)
+    circ.append(OrbitalRotation(rotation), circ.modes[:norb])
+
+    pm = generate_preset_jw_pass_manager()
+    merged = pm.run(circ)
+
+    # equivalent reference: the same rotation as a full-register block-diagonal OrbitalRotation
+    # (alpha half rotated, beta half identity), with nothing to merge into so it takes the square path
+    block_diag = np.eye(2 * norb, dtype=complex)
+    block_diag[:norb, :norb] = rotation
+    reference = FermionicCircuit(2 * norb)
+    reference.append(InitializeModes.from_hartree_fock(norb, (2, 1)), reference.modes)
+    reference.append(OrbitalRotation(block_diag), reference.modes)
+    lowered_reference = pm.run(reference)
+
+    sv_merged = Statevector(merged).data
+    sv_reference = Statevector(lowered_reference).data
+    k = int(np.argmax(np.abs(sv_reference)))
+    phase = sv_merged[k] / sv_reference[k]
+    np.testing.assert_allclose(sv_merged, phase * sv_reference, atol=1e-10)
+
+    assert "p" not in merged.count_ops()
+    assert merged.count_ops().get("xx_plus_yy", 0) < lowered_reference.count_ops().get(
+        "xx_plus_yy", 0
+    )
+
+
+def test_preset_jordan_wigner_merges_rotation_run_then_slater_prep():
+    """The preset merges a rotation run first, then contracts it into a Slater determinant prep.
+
+    This exercises the ordering of the two optimization passes: for an InitializeModes followed by a
+    *run* of consecutive OrbitalRotations, MergeSlaterDeterminantPreparation on its own would only
+    contract the first rotation and leave the rest of the run as trailing OrbitalRotation gates
+    (which synthesize with their phase-carrying square decomposition). Running MergeOrbitalRotations
+    first collapses the whole run into a single rotation, which MergeSlaterDeterminantPreparation
+    then contracts with the initialization into a single PrepareSlaterDeterminant. The preset wires
+    the passes in exactly that order, so the run must lower entirely with the reduced Slater
+    synthesis (no diagonal phase gates) while matching the state of the equivalent pre-composed
+    InitializeModes + single OrbitalRotation (up to a global phase).
+    """
+    num_modes = 6
+    occupation = [True, True, True, False, False, False]
+    u1 = random_unitary(num_modes, seed=21)
+    u2 = random_unitary(num_modes, seed=22)
+
+    circ = FermionicCircuit(num_modes)
+    circ.append(InitializeModes(occupation), circ.modes)
+    circ.append(OrbitalRotation(u1), circ.modes)
+    circ.append(OrbitalRotation(u2), circ.modes)
+
+    pm = generate_preset_jw_pass_manager()
+    merged = pm.run(circ)
+
+    # the run was merged and then contracted into a PrepareSlaterDeterminant, so it lowers with the
+    # reduced Slater synthesis, which drops the diagonal phase gates a full orbital rotation emits
+    assert "p" not in merged.count_ops()
+
+    # equivalent reference: the run pre-composed into a single rotation directly following the init,
+    # i.e. exactly the shape the two passes produce -- it fuses into the same PrepareSlaterDeterminant
+    reference = FermionicCircuit(num_modes)
+    reference.append(InitializeModes(occupation), reference.modes)
+    reference.append(OrbitalRotation(u2 @ u1), reference.modes)
+    lowered_reference = pm.run(reference)
+
+    sv_merged = Statevector(merged).data
+    sv_reference = Statevector(lowered_reference).data
+    k = int(np.argmax(np.abs(sv_reference)))
+    phase = sv_merged[k] / sv_reference[k]
+    np.testing.assert_allclose(sv_merged, phase * sv_reference, atol=1e-10)
+
+    # the run + Slater-prep fusion lowers to the same gate count as the pre-composed reference,
+    # rather than the two separate decompositions two unmerged rotations would require
+    assert merged.count_ops().get("xx_plus_yy", 0) == lowered_reference.count_ops().get(
+        "xx_plus_yy", 0
+    )
