@@ -114,6 +114,7 @@ dev = [
 "Evolution.MapperFn" = "qiskit_fermions.transpiler.passes.synthesis:MapperFnEvolutionSynthesis"
 "InitializeModes.TrivialOccupation" = "qiskit_fermions.transpiler.passes.synthesis:TrivialOccupationInitializeModesSynthesis"
 "OrbitalRotation.GivensDecomposition" = "qiskit_fermions.transpiler.passes.synthesis:GivensDecompositionOrbitalRotationSynthesis"
+"PrepareSlaterDeterminant.GivensDecompositionSlater" = "qiskit_fermions.transpiler.passes.synthesis:GivensDecompositionSlaterDeterminantSynthesis"
 
 [tool.setuptools]
 include-package-data = true

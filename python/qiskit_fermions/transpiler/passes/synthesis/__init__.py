@@ -16,6 +16,7 @@ from .evolution import MapperFnEvolutionSynthesis
 from .initialize_modes import TrivialOccupationInitializeModesSynthesis
 from .orbital_rotation import GivensDecompositionOrbitalRotationSynthesis
 from .plugin import F2QSynthesisPlugin, F2QSynthesisPluginManager
+from .prepare_slater_determinant import GivensDecompositionSlaterDeterminantSynthesis
 from .synthesis import F2QSynthesis, F2QSynthesisConfig
 
 __all__ = [
@@ -24,6 +25,7 @@ __all__ = [
     "F2QSynthesisPlugin",
     "F2QSynthesisPluginManager",
     "GivensDecompositionOrbitalRotationSynthesis",
+    "GivensDecompositionSlaterDeterminantSynthesis",
     "MapperFnEvolutionSynthesis",
     "TrivialOccupationInitializeModesSynthesis",
 ]

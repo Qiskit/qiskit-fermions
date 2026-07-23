@@ -33,20 +33,23 @@ they act upon:
 
 .. table:: An overview of the builtin ``qiskit_fermions.transpiler.synthesis`` entry-points.
 
-   +---------------------------+-------------------------+------------------------------------------------------+
-   | Circuit instruction name  | Plugin method name      | Reference                                            |
-   +===========================+=========================+======================================================+
-   | :class:`.Evolution`       | ``MapperFn``            | :class:`MapperFnEvolutionSynthesis`                  |
-   +---------------------------+-------------------------+------------------------------------------------------+
-   | :class:`.InitializeModes` | ``TrivialOccupation``   | :class:`TrivialOccupationInitializeModesSynthesis`   |
-   +---------------------------+-------------------------+------------------------------------------------------+
-   | :class:`.OrbitalRotation` | ``GivensDecomposition`` | :class:`GivensDecompositionOrbitalRotationSynthesis` |
-   +---------------------------+-------------------------+------------------------------------------------------+
+   +------------------------------------+-------------------------------+--------------------------------------------------------+
+   | Circuit instruction name           | Plugin method name            | Reference                                              |
+   +====================================+===============================+========================================================+
+   | :class:`.Evolution`                | ``MapperFn``                  | :class:`MapperFnEvolutionSynthesis`                    |
+   +------------------------------------+-------------------------------+--------------------------------------------------------+
+   | :class:`.InitializeModes`          | ``TrivialOccupation``         | :class:`TrivialOccupationInitializeModesSynthesis`     |
+   +------------------------------------+-------------------------------+--------------------------------------------------------+
+   | :class:`.OrbitalRotation`          | ``GivensDecomposition``       | :class:`GivensDecompositionOrbitalRotationSynthesis`   |
+   +------------------------------------+-------------------------------+--------------------------------------------------------+
+   | :class:`.PrepareSlaterDeterminant` | ``GivensDecompositionSlater`` | :class:`GivensDecompositionSlaterDeterminantSynthesis` |
+   +------------------------------------+-------------------------------+--------------------------------------------------------+
 
 .. autosummary::
    :toctree: ../stubs/
    :class: sd-d-none
 
    GivensDecompositionOrbitalRotationSynthesis
+   GivensDecompositionSlaterDeterminantSynthesis
    MapperFnEvolutionSynthesis
    TrivialOccupationInitializeModesSynthesis

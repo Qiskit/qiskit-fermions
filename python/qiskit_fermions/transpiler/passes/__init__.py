@@ -79,6 +79,7 @@ from .synthesis import (
     F2QSynthesisPlugin,
     F2QSynthesisPluginManager,
     GivensDecompositionOrbitalRotationSynthesis,
+    GivensDecompositionSlaterDeterminantSynthesis,
     MapperFnEvolutionSynthesis,
     TrivialOccupationInitializeModesSynthesis,
 )
@@ -90,6 +91,7 @@ __all__ = [
     "F2QSynthesisPlugin",
     "F2QSynthesisPluginManager",
     "GivensDecompositionOrbitalRotationSynthesis",
+    "GivensDecompositionSlaterDeterminantSynthesis",
     "MapperFnEvolutionSynthesis",
     "QDriftTrotterization",
     "RelabelModes",
