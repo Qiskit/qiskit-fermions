@@ -31,6 +31,9 @@ from qiskit_fermions.transpiler.passes import (
     TrivialF2QLayout,
     TrivialOccupationInitializeModesSynthesis,
 )
+from qiskit_fermions.transpiler.passes.synthesis.prepare_slater_determinant import (
+    _peel_disjoint_unit_orbitals,
+)
 
 from ...utils import random_unitary
 
@@ -274,3 +277,133 @@ def test_prepare_slater_determinant_synthesis_full_occupation():
     # m == n: the occupied space is the whole space, so any rotation within it is discarded
     assert ops.get("x", 0) == num_modes
     assert ops.get("xx_plus_yy", 0) == 0
+
+
+def _block_rotation(num_modes: int, mixing_modes: list[int], *, seed: int) -> np.ndarray:
+    """Identity except for a random unitary block on ``mixing_modes`` (which may be non-adjacent).
+
+    Unlike :func:`_givens_2mode` (which only ever mixes an *adjacent* pair), this places a genuine
+    mixing block across arbitrary -- possibly non-contiguous -- modes. Occupying a peeled unit-orbital
+    on a mode strictly between two of the mixing modes is what drives a sweep ``XXPlusYYGate`` onto
+    physically non-adjacent qubits, exercising the Jordan-Wigner Z-string compensation.
+    """
+    rotation = np.eye(num_modes, dtype=complex)
+    block = random_unitary(len(mixing_modes), seed=seed)
+    for a, mode_a in enumerate(mixing_modes):
+        for b, mode_b in enumerate(mixing_modes):
+            rotation[mode_a, mode_b] = block[a, b]
+    return rotation
+
+
+def test_prepare_slater_determinant_synthesis_interleaved_peel_odd_parity():
+    """A single peeled unit-orbital between two mixing modes still prepares the correct state.
+
+    This is the regression case for the Jordan-Wigner Z-string bug: the rotation mixes the
+    *non-adjacent* modes 0 and 2 (occupying column 0 keeps a genuine two-mode rotation), while mode 1
+    is an occupied disjoint unit-orbital that peels. The reduced sweep emits an ``XXPlusYYGate`` on the
+    physically non-adjacent qubits (0, 2); the occupied peeled mode 1 sits strictly between them, so
+    its Jordan-Wigner Z-string (odd parity) must be folded in as a ``pi`` phase shift. Without that
+    compensation the prepared state is wrong (overlap ~0.078 vs. the faithful reference).
+    """
+    num_modes = 3
+    occupation = [True, True, False]
+    rotation = _block_rotation(num_modes, [0, 2], seed=3)
+
+    slater = FermionicCircuit(num_modes)
+    slater.append(PrepareSlaterDeterminant(occupation, rotation), slater.modes)
+    qc_slater = _synthesize(slater, _slater_synth())
+    ops = qc_slater.count_ops()
+
+    # mode 1 peels; the genuine 0-2 mixing emits a single XXPlusYYGate on non-adjacent qubits
+    assert ops.get("xx_plus_yy", 0) == 1
+    assert ops.get("x", 0) == 2
+
+    reference = FermionicCircuit(num_modes)
+    reference.append(InitializeModes(occupation), reference.modes)
+    reference.append(OrbitalRotation(rotation), reference.modes)
+    qc_reference = _synthesize(reference, _reference_synth())
+    _assert_equal_up_to_global_phase(qc_slater, qc_reference)
+
+
+def test_prepare_slater_determinant_synthesis_interleaved_peel_even_parity():
+    """Two peeled unit-orbitals between the mixing endpoints leave the sweep uncompensated.
+
+    Guards against a naive "flip whenever any peel is between the endpoints" fix: the rotation mixes
+    the non-adjacent modes 0 and 3, with occupied unit-orbitals on *both* modes 1 and 2 (even parity).
+    Their two Jordan-Wigner Z-strings cancel, so the ``XXPlusYYGate`` must be emitted with its base
+    phase -- the compensation must stay inert. The prepared state must match the faithful reference.
+    """
+    num_modes = 4
+    occupation = [True, True, True, False]
+    rotation = _block_rotation(num_modes, [0, 3], seed=5)
+
+    slater = FermionicCircuit(num_modes)
+    slater.append(PrepareSlaterDeterminant(occupation, rotation), slater.modes)
+    qc_slater = _synthesize(slater, _slater_synth())
+    ops = qc_slater.count_ops()
+
+    # modes 1 and 2 peel; a single XXPlusYYGate on the non-adjacent mixing pair (0, 3)
+    assert ops.get("xx_plus_yy", 0) == 1
+    assert ops.get("x", 0) == 3
+
+    reference = FermionicCircuit(num_modes)
+    reference.append(InitializeModes(occupation), reference.modes)
+    reference.append(OrbitalRotation(rotation), reference.modes)
+    qc_reference = _synthesize(reference, _reference_synth())
+    _assert_equal_up_to_global_phase(qc_slater, qc_reference)
+
+
+def test_prepare_slater_determinant_synthesis_interleaved_peel_randomized():
+    """Randomized stress test of the interleaved-peel Z-string compensation.
+
+    Builds many occupied spaces that factor into a genuine mixing block on arbitrary (often
+    non-adjacent) modes plus disjoint unit-orbitals -- some of which land *between* the mixing modes,
+    forcing sweep ``XXPlusYYGate``\\ s onto physically non-adjacent qubits. Each synthesized state is
+    checked against the faithful ``InitializeModes + OrbitalRotation`` reference (the trusted square
+    path is Z-string-correct because it never peels). Only *peeled* occupied modes need the
+    compensation: any *kept* mode between a rotation's endpoints is itself swept, so its Z-string is
+    already carried implicitly by the nearest-neighbor chain in reduced-local space.
+
+    The seed is fixed for determinism and chosen so many trials exhibit an interleaved peel (the
+    load-bearing regime); a broken emission that drops the parity term fails a large fraction of them.
+    """
+    rng = np.random.default_rng(20260724)
+    trials = 0
+    interleaved = 0
+    for _ in range(200):
+        num_modes = int(rng.integers(3, 8))
+        perm = rng.permutation(num_modes)
+        block_size = int(rng.integers(2, min(4, num_modes) + 1))
+        mixing_modes = sorted(perm[:block_size].tolist())
+        rest = sorted(perm[block_size:].tolist())
+        # occupy fewer than all mixing columns so the block stays a genuine rotation (occupying every
+        # column would fill the subspace and collapse to a plain permutation), plus some isolated units
+        num_mixing_occ = int(rng.integers(1, len(mixing_modes)))
+        unit_occ = [mode for mode in rest if rng.random() < 0.5]
+        rotation = _block_rotation(num_modes, mixing_modes, seed=int(rng.integers(0, 10**6)))
+        occupied_cols = mixing_modes[:num_mixing_occ] + unit_occ
+        occupation = [i in occupied_cols for i in range(num_modes)]
+        if not any(occupation) or all(occupation):
+            continue
+        trials += 1
+
+        orbital_coeffs = rotation[:, np.nonzero(occupation)[0]].T
+        peel_modes, kept_modes, _ = _peel_disjoint_unit_orbitals(orbital_coeffs)
+        if peel_modes and any(min(kept_modes) < p < max(kept_modes) for p in peel_modes):
+            interleaved += 1
+
+        slater = FermionicCircuit(num_modes)
+        slater.append(PrepareSlaterDeterminant(occupation, rotation), slater.modes)
+        qc_slater = _synthesize(slater, _slater_synth())
+
+        reference = FermionicCircuit(num_modes)
+        reference.append(InitializeModes(occupation), reference.modes)
+        reference.append(OrbitalRotation(rotation), reference.modes)
+        qc_reference = _synthesize(reference, _reference_synth())
+
+        _assert_equal_up_to_global_phase(qc_slater, qc_reference)
+
+    # sanity: the seed actually stresses the load-bearing regime (interleaved peels), so this test
+    # genuinely guards the compensation rather than trivially passing on non-interleaved cases
+    assert trials > 100
+    assert interleaved > 20
