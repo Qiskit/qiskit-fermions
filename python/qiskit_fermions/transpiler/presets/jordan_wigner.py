@@ -18,7 +18,12 @@ from qiskit.transpiler import generate_preset_pass_manager
 from qiskit_fermions.mappers.library import jordan_wigner
 
 from .. import FermionicCircuitToDAG, FermionicPassManager, QuantumDAGToCircuit
-from ..passes import F2QSynthesis, F2QSynthesisConfig, TrivialF2QLayout
+from ..passes import (
+    F2QSynthesis,
+    F2QSynthesisConfig,
+    MergeOrbitalRotations,
+    TrivialF2QLayout,
+)
 
 
 def generate_preset_jw_pass_manager(**kwargs) -> MultiStagePassManager:
@@ -32,7 +37,9 @@ def generate_preset_jw_pass_manager(**kwargs) -> MultiStagePassManager:
     Returns:
         The preset staged fermion-to-qubit transpiler pipeline.
     """
-    optimization = FermionicPassManager()
+    # merge any run of consecutive OrbitalRotation gates into a single rotation, so the synthesis
+    # stage below lowers one decomposition per run rather than one per gate
+    optimization = FermionicPassManager(MergeOrbitalRotations())
 
     layout = FermionicPassManager(TrivialF2QLayout())
 
