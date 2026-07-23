@@ -12,10 +12,12 @@
 
 """Optimization passes."""
 
+from .merge_orbital_rotations import MergeOrbitalRotations
 from .qdrift import QDriftTrotterization
 from .relabel_modes import RelabelModes
 
 __all__ = [
+    "MergeOrbitalRotations",
     "QDriftTrotterization",
     "RelabelModes",
 ]

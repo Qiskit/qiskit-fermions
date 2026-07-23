@@ -133,3 +133,42 @@ def test_preset_jordan_wigner_prepare_slater_determinant():
     k = int(np.argmax(np.abs(sv_unmerged)))
     phase = sv_slater[k] / sv_unmerged[k]
     np.testing.assert_allclose(sv_slater, phase * sv_unmerged, atol=1e-10)
+
+
+def test_preset_jordan_wigner_merges_rotation_run():
+    """The preset's optimization stage merges a run of consecutive OrbitalRotation gates.
+
+    A run of two OrbitalRotations on the same modes is collapsed by MergeOrbitalRotations into a
+    single rotation before synthesis, so the preset yields the same state (up to a global phase) as
+    the equivalent pre-composed single rotation while lowering only one decomposition.
+    """
+    num_modes = 6
+    occupation = [True, True, True, False, False, False]
+    u1 = random_unitary(num_modes, seed=11)
+    u2 = random_unitary(num_modes, seed=12)
+
+    circ = FermionicCircuit(num_modes)
+    circ.append(InitializeModes(occupation), circ.modes)
+    circ.append(OrbitalRotation(u1), circ.modes)
+    circ.append(OrbitalRotation(u2), circ.modes)
+
+    pm = generate_preset_jw_pass_manager()
+    merged = pm.run(circ)
+
+    # equivalent unmerged reference: the two rotations pre-composed into one full OrbitalRotation
+    reference = FermionicCircuit(num_modes)
+    reference.append(InitializeModes(occupation), reference.modes)
+    reference.append(OrbitalRotation(u2 @ u1), reference.modes)
+    lowered_reference = pm.run(reference)
+
+    sv_merged = Statevector(merged).data
+    sv_reference = Statevector(lowered_reference).data
+    k = int(np.argmax(np.abs(sv_reference)))
+    phase = sv_merged[k] / sv_reference[k]
+    np.testing.assert_allclose(sv_merged, phase * sv_reference, atol=1e-10)
+
+    # the run collapses to a single rotation, so it lowers to the same gate count as the
+    # pre-composed reference -- rather than twice the decomposition two separate rotations require
+    assert merged.count_ops().get("xx_plus_yy", 0) == lowered_reference.count_ops().get(
+        "xx_plus_yy", 0
+    )
