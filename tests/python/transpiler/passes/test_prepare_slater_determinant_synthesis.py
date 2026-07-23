@@ -135,6 +135,132 @@ def test_prepare_slater_determinant_synthesis_reduced_gate_count():
     assert ops.get("xx_plus_yy", 0) < ref_ops.get("xx_plus_yy", 0)
 
 
+def _givens_2mode(theta: float, p: int, q: int, num_modes: int) -> np.ndarray:
+    """A real orbital rotation mixing only modes ``p`` and ``q`` (identity elsewhere).
+
+    Used to build occupied spaces that factor into disjoint unit-orbitals plus a genuinely-mixing
+    block, exercising the peel-off fast path.
+    """
+    rot = np.eye(num_modes, dtype=complex)
+    rot[p, p] = np.cos(theta)
+    rot[p, q] = -np.sin(theta)
+    rot[q, p] = np.sin(theta)
+    rot[q, q] = np.cos(theta)
+    return rot
+
+
+def test_prepare_slater_determinant_synthesis_peels_disjoint_unit_orbital():
+    """A disjoint unit-orbital is placed directly, not transported out with bare SWAPs.
+
+    The rotation mixes only modes 0 and 1; occupying column 3 (a bare basis vector on mode 3) and
+    column 1 (a superposition of modes 0 and 1) factors the occupied space into the disjoint
+    unit-orbital ``e_3`` plus one genuine two-mode rotation. The reduced sweep therefore needs a
+    single ``XXPlusYYGate`` -- the two transport SWAPs the leading-reference sweep would emit for
+    ``e_3`` are peeled away -- while the prepared state is unchanged.
+    """
+    num_modes = 4
+    occupation = [False, True, False, True]
+    rotation = _givens_2mode(0.6, 0, 1, num_modes)
+
+    slater = FermionicCircuit(num_modes)
+    slater.append(PrepareSlaterDeterminant(occupation, rotation), slater.modes)
+    qc_slater = _synthesize(slater, _slater_synth())
+    ops = qc_slater.count_ops()
+
+    # only the genuine 0-1 mixing survives; no bare-SWAP transport of the e_3 orbital
+    assert ops.get("xx_plus_yy", 0) == 1
+    assert ops.get("x", 0) == 2
+
+    reference = FermionicCircuit(num_modes)
+    reference.append(InitializeModes(occupation), reference.modes)
+    reference.append(OrbitalRotation(rotation), reference.modes)
+    qc_reference = _synthesize(reference, _reference_synth())
+    _assert_equal_up_to_global_phase(qc_slater, qc_reference)
+
+
+def test_prepare_slater_determinant_synthesis_permutation_no_two_qubit_gates():
+    """A pure permutation rotation (here the identity) emits only X gates, no ``XXPlusYYGate``.
+
+    With ``rotation`` the identity and a non-leading, non-contiguous occupation the entire occupied
+    space is a signed permutation, so every occupied orbital peels: the state is prepared with X
+    gates placed directly on the occupied modes and zero two-qubit gates.
+    """
+    num_modes = 4
+    occupation = [False, True, False, True]
+    rotation = np.eye(num_modes, dtype=complex)
+
+    slater = FermionicCircuit(num_modes)
+    slater.append(PrepareSlaterDeterminant(occupation, rotation), slater.modes)
+    qc_slater = _synthesize(slater, _slater_synth())
+    ops = qc_slater.count_ops()
+
+    assert ops.get("xx_plus_yy", 0) == 0
+    assert ops.get("x", 0) == 2
+    assert "p" not in ops
+
+    reference = FermionicCircuit(num_modes)
+    reference.append(InitializeModes(occupation), reference.modes)
+    reference.append(OrbitalRotation(rotation), reference.modes)
+    qc_reference = _synthesize(reference, _reference_synth())
+    _assert_equal_up_to_global_phase(qc_slater, qc_reference)
+
+
+def test_prepare_slater_determinant_synthesis_multiple_disjoint_units():
+    """Several disjoint unit-orbitals peel independently around a single mixing block.
+
+    The rotation mixes only the adjacent modes 0 and 1; occupying modes 0, 4, 5 gives two disjoint
+    unit-orbitals (``e_4``, ``e_5``) plus a single occupied orbital spanning the adjacent pair {0, 1}.
+    (Occupying *both* mixed columns 0 and 1 would fill the whole {0, 1} subspace and reduce to a plain
+    permutation -- selecting only column 0 keeps a genuine two-mode rotation.) The two disjoint units
+    peel to direct X gates, leaving a single ``XXPlusYYGate`` on the adjacent mixing pair.
+    """
+    num_modes = 6
+    occupation = [True, False, False, False, True, True]
+    rotation = _givens_2mode(0.5, 0, 1, num_modes)
+
+    slater = FermionicCircuit(num_modes)
+    slater.append(PrepareSlaterDeterminant(occupation, rotation), slater.modes)
+    qc_slater = _synthesize(slater, _slater_synth())
+    ops = qc_slater.count_ops()
+
+    assert ops.get("xx_plus_yy", 0) == 1
+    assert ops.get("x", 0) == 3
+
+    reference = FermionicCircuit(num_modes)
+    reference.append(InitializeModes(occupation), reference.modes)
+    reference.append(OrbitalRotation(rotation), reference.modes)
+    qc_reference = _synthesize(reference, _reference_synth())
+    _assert_equal_up_to_global_phase(qc_slater, qc_reference)
+
+
+def test_prepare_slater_determinant_synthesis_generic_rotation_not_peeled():
+    """A generic entangled rotation has nothing to peel; the sweep is unchanged.
+
+    This guards the fast path against regressing the common case: a fully-mixing occupied space must
+    still be synthesized by the ordinary reduced Givens sweep (its ``m(n-m)`` bound intact) and
+    prepare the correct state.
+    """
+    num_modes = 6
+    nocc = 3
+    occupation = [i < nocc for i in range(num_modes)]
+    rotation = random_unitary(num_modes, seed=42)
+
+    slater = FermionicCircuit(num_modes)
+    slater.append(PrepareSlaterDeterminant(occupation, rotation), slater.modes)
+    qc_slater = _synthesize(slater, _slater_synth())
+    ops = qc_slater.count_ops()
+
+    # nothing peels: the full leading-reference sweep runs (up to m(n-m) two-qubit gates, m X gates)
+    assert ops.get("x", 0) == nocc
+    assert 0 < ops.get("xx_plus_yy", 0) <= nocc * (num_modes - nocc)
+
+    reference = FermionicCircuit(num_modes)
+    reference.append(InitializeModes(occupation), reference.modes)
+    reference.append(OrbitalRotation(rotation), reference.modes)
+    qc_reference = _synthesize(reference, _reference_synth())
+    _assert_equal_up_to_global_phase(qc_slater, qc_reference)
+
+
 def test_prepare_slater_determinant_synthesis_full_occupation():
     """A fully occupied reference (m == n) needs no Givens rotations, only the X gates."""
     num_modes = 4
