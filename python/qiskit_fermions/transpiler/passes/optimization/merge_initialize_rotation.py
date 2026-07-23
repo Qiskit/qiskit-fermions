@@ -38,10 +38,8 @@ class MergeSlaterDeterminantPreparation(FermionicDAGCircuitPass):
     :class:`.GivensDecompositionSlaterDeterminantSynthesis`) rather than the full square orbital
     rotation.
 
-    Because :class:`.PrepareSlaterDeterminant` is *validate-then-rotate* under simulation -- it
-    validates the reference occupation and then applies the rotation, exactly as the separate
-    :class:`.InitializeModes` and :class:`.OrbitalRotation` gates do -- the rewrite leaves the
-    simulated state vector unchanged; it only unlocks the cheaper synthesis.
+    The rewrite is state-preserving: it only unlocks the cheaper synthesis and leaves the prepared
+    state unchanged (see the *validate-then-rotate* semantics of :class:`.PrepareSlaterDeterminant`).
 
     Three patterns are recognized, all keyed off the block-spin mode convention
     (modes ``0..norb`` are the alpha sector, ``norb..2*norb`` the beta sector):
@@ -61,6 +59,10 @@ class MergeSlaterDeterminantPreparation(FermionicDAGCircuitPass):
        shape produced by placing an :class:`.InitializeModes` (e.g.
        :meth:`.InitializeModes.from_hartree_fock`) at the front of a circuit and appending a decomposed
        :class:`.UCJ`, whose first per-spin rotations directly follow the initialization.
+
+    .. seealso::
+       The :ref:`Slater determinant preparation guide <merge_slater_determinant_explanation>` walks
+       through each of these patterns with before/after circuit drawings.
 
     "Immediately followed" is understood over the DAG: an :class:`.OrbitalRotation` node fuses only
     when the :class:`.InitializeModes` is its *sole* predecessor across all of its modes, i.e. no

@@ -1,7 +1,7 @@
 .. _merge_slater_determinant_explanation:
 
-Merge a mode initialization and rotation into a Slater determinant preparation
-==============================================================================
+Optimize Slater determinant preparation
+=======================================
 
 .. important::
 
@@ -25,21 +25,48 @@ reduced decomposition automatically. Under simulation the rewrite is a no-op on 
 and then applies the rotation, exactly as the two separate gates do), so the merge only unlocks the
 cheaper synthesis without changing the prepared state.
 
-Throughout this guide we inspect a circuit by listing its fermionic gates and the modes they act on,
-before and after the pass. This small helper does that by running the pass on a copy of the circuit
-and walking the resulting :class:`.FermionicDAGCircuit`:
+Throughout this guide we draw a circuit before and after the pass, side by side: the input on the
+left, and on the right the result of running the pass on it. These two helpers do that -- ``merge``
+runs the pass on a copy of the circuit (via its :class:`.FermionicDAGCircuit`) and converts the
+result back to a drawable :class:`.FermionicCircuit`, and ``draw_merge`` draws both halves into a
+single before/after figure:
 
-.. doctest::
+.. plot::
+   :context:
+   :nofigs:
+   :include-source:
 
+   >>> import matplotlib.pyplot as plt
+   >>> import numpy as np
+   >>>
+   >>> from qiskit_fermions.circuit import FermionicCircuit
+   >>> from qiskit_fermions.circuit.library import InitializeModes, OrbitalRotation
    >>> from qiskit_fermions.transpiler import FermionicCircuitToDAG
+   >>> from qiskit_fermions.transpiler.converters import FermionicDAGToCircuit
    >>> from qiskit_fermions.transpiler.passes import MergeSlaterDeterminantPreparation
    >>>
-   >>> def show_merged(circuit):
+   >>> def merge(circuit):
    ...     dag = FermionicCircuitToDAG().run(circuit)
    ...     merged = MergeSlaterDeterminantPreparation().run(dag)
-   ...     for node in merged.topological_op_nodes():
-   ...         modes = sorted(merged.find_bit(qubit).index for qubit in node.qargs)
-   ...         print(f"{node.op.name} on modes {modes}")
+   ...     return FermionicDAGToCircuit().run(merged)
+   >>>
+   >>> def natural_size(circuit):
+   ...     # the figure size Qiskit picks for a circuit on its own (discard the probe figure)
+   ...     probe = circuit.draw("mpl")
+   ...     size = probe.get_size_inches()
+   ...     plt.close(probe)
+   ...     return size
+   >>>
+   >>> def draw_merge(circuit):
+   ...     merged = merge(circuit)
+   ...     # let Qiskit size each half naturally, then lay them out side by side
+   ...     (bw, bh), (aw, ah) = natural_size(circuit), natural_size(merged)
+   ...     fig, (before, after) = plt.subplots(1, 2, figsize=(bw + aw, max(bh, ah)))
+   ...     circuit.draw("mpl", ax=before)
+   ...     merged.draw("mpl", ax=after)
+   ...     before.set_title("before")
+   ...     after.set_title("after")
+   ...     return fig
 
 What gets merged
 ----------------
@@ -55,19 +82,19 @@ Full-register (or spinless)
 
 The simplest pattern: an :class:`.InitializeModes` immediately followed by an
 :class:`.OrbitalRotation` on the *same* modes. This is the spinless case (one determinant over all
-modes) and also a spinful circuit whose rotation spans both sectors at once.
+modes) and also a spinful circuit whose rotation spans both sectors at once. The two gates fuse into
+a single :class:`.PrepareSlaterDeterminant`:
 
-.. doctest::
+.. plot::
+   :alt: A mode initialization and rotation fusing into one Slater determinant preparation.
+   :context: close-figs
+   :include-source:
 
-   >>> import numpy as np
-   >>> from qiskit_fermions.circuit import FermionicCircuit
-   >>> from qiskit_fermions.circuit.library import InitializeModes, OrbitalRotation
-   >>>
    >>> circuit = FermionicCircuit(4)
    >>> circuit.append(InitializeModes([1, 1, 0, 0]), circuit.modes)
    >>> circuit.append(OrbitalRotation(np.eye(4)), circuit.modes)
-   >>> show_merged(circuit)
-   PrepareSlaterDeterminant on modes [0, 1, 2, 3]
+   >>> draw_merge(circuit)
+   <Figure size ... with 2 Axes>
 
 Per spin sector
 ~~~~~~~~~~~~~~~
@@ -75,16 +102,18 @@ Per spin sector
 The same shape restricted to one spin half. Here two independent initialize-then-rotate pairs, one
 per sector, each fuse on their own into a :class:`.PrepareSlaterDeterminant`:
 
-.. doctest::
+.. plot::
+   :alt: Two per-sector initialize-and-rotate pairs, each fusing into its own preparation.
+   :context: close-figs
+   :include-source:
 
    >>> circuit = FermionicCircuit(6)  # norb = 3: alpha modes 0..3, beta modes 3..6
    >>> circuit.append(InitializeModes([1, 1, 0]), circuit.modes[:3])
    >>> circuit.append(OrbitalRotation(np.eye(3)), circuit.modes[:3])
    >>> circuit.append(InitializeModes([1, 0, 0]), circuit.modes[3:])
    >>> circuit.append(OrbitalRotation(np.eye(3)), circuit.modes[3:])
-   >>> show_merged(circuit)
-   PrepareSlaterDeterminant on modes [0, 1, 2]
-   PrepareSlaterDeterminant on modes [3, 4, 5]
+   >>> draw_merge(circuit)
+   <Figure size ... with 2 Axes>
 
 Global initialization, per-spin rotations
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -100,15 +129,17 @@ a user places an :class:`.InitializeModes` -- typically the Hartree-Fock referen
 circuit and appends a :class:`.UCJ` ansatz, whose first two per-spin orbital rotations directly
 follow the initialization once the ansatz is decomposed.
 
-.. doctest::
+.. plot::
+   :alt: A global initialization with two per-spin rotations fusing into two preparations.
+   :context: close-figs
+   :include-source:
 
    >>> circuit = FermionicCircuit(6)  # norb = 3, nelec = (2, 1)
    >>> circuit.append(InitializeModes.from_hartree_fock(3, (2, 1)), circuit.modes)
    >>> circuit.append(OrbitalRotation(np.eye(3)), circuit.modes[:3])
    >>> circuit.append(OrbitalRotation(np.eye(3)), circuit.modes[3:])
-   >>> show_merged(circuit)
-   PrepareSlaterDeterminant on modes [0, 1, 2]
-   PrepareSlaterDeterminant on modes [3, 4, 5]
+   >>> draw_merge(circuit)
+   <Figure size ... with 2 Axes>
 
 This pattern also fires when only *one* spin half is rotated by a gate directly following the
 initialization -- the shape produced when just one spin sector's orbital rotation happens to sit at
@@ -118,14 +149,16 @@ synthesizes to nothing more than the reference X gates the :class:`.InitializeMo
 emitted for that half anyway, so padding it costs no extra gates while still unlocking the reduced
 Slater synthesis on the rotated half:
 
-.. doctest::
+.. plot::
+   :alt: A global initialization with a single per-spin rotation fusing into two preparations.
+   :context: close-figs
+   :include-source:
 
    >>> circuit = FermionicCircuit(6)
    >>> circuit.append(InitializeModes.from_hartree_fock(3, (2, 1)), circuit.modes)
    >>> circuit.append(OrbitalRotation(np.eye(3)), circuit.modes[:3])
-   >>> show_merged(circuit)
-   PrepareSlaterDeterminant on modes [0, 1, 2]
-   PrepareSlaterDeterminant on modes [3, 4, 5]
+   >>> draw_merge(circuit)
+   <Figure size ... with 2 Axes>
 
 What is left untouched
 ----------------------
@@ -133,7 +166,8 @@ What is left untouched
 The pass is deliberately conservative: it only fuses when the two gates genuinely compose into a
 Slater determinant preparation, and copies everything else through unchanged. "Immediately
 followed" is understood over the circuit's data-flow graph -- the :class:`.OrbitalRotation` fuses
-only when the :class:`.InitializeModes` is its *sole* predecessor across all of its modes.
+only when the :class:`.InitializeModes` is its *sole* predecessor across all of its modes. In the
+figures below the before and after are identical: nothing fused.
 
 An operation in between
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -141,7 +175,10 @@ An operation in between
 If any gate touches the modes between the initialization and the rotation, they no longer compose
 into a bare preparation, so nothing is merged:
 
-.. doctest::
+.. plot::
+   :alt: An operation between the initialization and rotation blocks the merge.
+   :context: close-figs
+   :include-source:
 
    >>> from qiskit_fermions.circuit.library import Evolution
    >>> from qiskit_fermions.operators import FermionOperator, ann, cre
@@ -151,10 +188,8 @@ into a bare preparation, so nothing is merged:
    >>> number_op = FermionOperator.from_dict({(cre(0), ann(0)): 1.0})
    >>> circuit.append(Evolution(4, number_op, time=0.5), circuit.modes)
    >>> circuit.append(OrbitalRotation(np.eye(4)), circuit.modes)
-   >>> show_merged(circuit)
-   InitializeModes on modes [0, 1, 2, 3]
-   Evolution on modes [0, 1, 2, 3]
-   OrbitalRotation on modes [0, 1, 2, 3]
+   >>> draw_merge(circuit)
+   <Figure size ... with 2 Axes>
 
 A partial rotation that is not a spin half
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -165,14 +200,16 @@ initialization and not one of its two spin halves, such as a sub-range straddlin
 boundary -- is not a per-sector preparation. Merging it would silently drop the initialization's
 role on the modes it leaves out, so the pass leaves both gates in place:
 
-.. doctest::
+.. plot::
+   :alt: A partial rotation that is not a spin half is left unmerged.
+   :context: close-figs
+   :include-source:
 
    >>> circuit = FermionicCircuit(4)  # norb = 2: the only spin halves are modes [0, 1] and [2, 3]
    >>> circuit.append(InitializeModes([1, 1, 0, 0]), circuit.modes)
    >>> circuit.append(OrbitalRotation(np.eye(3)), circuit.modes[:3])
-   >>> show_merged(circuit)
-   InitializeModes on modes [0, 1, 2, 3]
-   OrbitalRotation on modes [0, 1, 2]
+   >>> draw_merge(circuit)
+   <Figure size ... with 2 Axes>
 
 Why it matters: the synthesis payoff
 -------------------------------------
@@ -186,7 +223,10 @@ The preset Jordan-Wigner pass manager runs :class:`.MergeSlaterDeterminantPrepar
 optimization stage, so this reduction happens automatically. Here we transpile a two-electron,
 six-orbital preparation all the way to a :class:`~qiskit.circuit.QuantumCircuit` and count its gates:
 
-.. doctest::
+.. plot::
+   :context:
+   :nofigs:
+   :include-source:
 
    >>> from qiskit_fermions.transpiler.presets import generate_preset_jw_pass_manager
    >>>
@@ -201,19 +241,40 @@ six-orbital preparation all the way to a :class:`~qiskit.circuit.QuantumCircuit`
    >>> circuit.append(OrbitalRotation(rotation), circuit.modes)
    >>>
    >>> pm = generate_preset_jw_pass_manager()
-   >>> print(dict(sorted(pm.run(circuit).count_ops().items())))
+   >>> prepared = pm.run(circuit)
+   >>> print(dict(sorted(prepared.count_ops().items())))
    {'x': 2, 'xx_plus_yy': 8}
+
+.. plot::
+   :alt: The synthesized merged Slater determinant preparation.
+   :context: close-figs
+   :include-source:
+
+   >>> prepared.draw("mpl", fold=-1)
+   <Figure size ... with 1 Axes>
 
 Compare that to synthesizing the same orbital rotation on its own -- with no preceding
 initialization there is nothing to merge, so the preset falls back to the full square
 decomposition, which is both deeper and carries diagonal phase gates:
 
-.. doctest::
+.. plot::
+   :context:
+   :nofigs:
+   :include-source:
 
    >>> reference = FermionicCircuit(6)
    >>> reference.append(OrbitalRotation(rotation), reference.modes)
-   >>> print(dict(sorted(pm.run(reference).count_ops().items())))
+   >>> reference_prepared = pm.run(reference)
+   >>> print(dict(sorted(reference_prepared.count_ops().items())))
    {'p': 6, 'xx_plus_yy': 15}
+
+.. plot::
+   :alt: The synthesized bare orbital rotation, with its extra phase gates.
+   :context: close-figs
+   :include-source:
+
+   >>> reference_prepared.draw("mpl", fold=-1)
+   <Figure size ... with 1 Axes>
 
 The reduced decomposition drops all six phase gates and nearly halves the two-qubit rotation count.
 The prepared determinant is correct up to a global phase -- physically irrelevant for state

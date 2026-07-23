@@ -44,4 +44,18 @@ this package:
    mappers
    circuit
    transpilation
+
+How-Tos
+=======
+
+This section lists goal-oriented guides for accomplishing specific tasks with
+particular components of this package:
+
+Transpiler passes
+-----------------
+
+.. toctree::
+   :maxdepth: 1
+   :glob:
+
    merge_slater_determinant
