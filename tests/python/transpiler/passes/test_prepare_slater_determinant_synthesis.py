@@ -54,8 +54,12 @@ def _synthesize(circ: FermionicCircuit, synth: F2QSynthesis):
 
 
 def _slater_synth() -> F2QSynthesis:
+    # most tests below assert the peeling (minimize-2q-gate-count) behavior, which is *not* the
+    # default; request it explicitly. The peel-free default path is covered by its own tests.
     synth = F2QSynthesis()
-    synth.methods["PrepareSlaterDeterminant"] = GivensDecompositionSlaterDeterminantSynthesis()
+    synth.methods["PrepareSlaterDeterminant"] = GivensDecompositionSlaterDeterminantSynthesis(
+        minimize_2q_gate_count=True
+    )
     return synth
 
 
@@ -693,3 +697,105 @@ def test_prepare_slater_determinant_synthesis_negative_control_no_z_string():
 
     qc_wrong = _synthesize_without_z_string(num_modes, occupation, rotation)
     assert not np.isclose(_overlap(qc_wrong, num_modes, occupation, rotation), 1.0, atol=1e-8)
+
+
+# --- minimize_2q_gate_count toggle -----------------------------------------------------------------
+#
+# The default synthesis uses the full leading-reference sweep (block splitting retained): every
+# emitted rotation is nearest-neighbor along the mode order, minimizing the routed two-qubit *depth*.
+# Setting ``minimize_2q_gate_count=True`` peels disjoint unit-orbitals instead, minimizing the
+# two-qubit gate *count* but potentially stranding a residual mixing orbital across a wide window (a
+# long-range gate that inflates the routed depth). The two are a non-dominated trade-off; both prepare
+# the same state (up to a global phase). ``_slater_synth`` above requests the peeling (count-min) path
+# explicitly; the plain default plugin below exercises the depth-min path.
+
+
+def _slater_synth_default() -> F2QSynthesis:
+    synth = F2QSynthesis()
+    synth.methods["PrepareSlaterDeterminant"] = GivensDecompositionSlaterDeterminantSynthesis()
+    return synth
+
+
+def test_prepare_slater_determinant_minimize_2q_gate_count_keyword_only():
+    """``minimize_2q_gate_count`` is keyword-only and defaults to ``False`` (peeling off)."""
+    assert GivensDecompositionSlaterDeterminantSynthesis().minimize_2q_gate_count is False
+    assert (
+        GivensDecompositionSlaterDeterminantSynthesis(
+            minimize_2q_gate_count=True
+        ).minimize_2q_gate_count
+        is True
+    )
+    with pytest.raises(TypeError):
+        GivensDecompositionSlaterDeterminantSynthesis(True)  # type: ignore[misc]
+
+
+@pytest.mark.parametrize(
+    "label,num_modes,occupied_columns,build_rotation",
+    _STRUCTURE_CASES,
+    ids=[case[0] for case in _STRUCTURE_CASES],
+)
+def test_prepare_slater_determinant_default_matches_reference(
+    label, num_modes, occupied_columns, build_rotation
+):
+    """The default (peel-free) synthesis prepares the correct state for every occupied-space structure.
+
+    Runs the same structural cases as the peeling path against the faithful ``InitializeModes +
+    OrbitalRotation`` reference. The ``minimize_2q_gate_count`` setting only changes *how* the state is
+    synthesized (full leading-reference sweep vs peel + direct X gates), never *which* state -- so the
+    reference comparison must hold for both settings.
+    """
+    rotation = build_rotation()
+    occupation = [i in occupied_columns for i in range(num_modes)]
+
+    slater = FermionicCircuit(num_modes)
+    slater.append(PrepareSlaterDeterminant(occupation, rotation), slater.modes)
+    qc_default = _synthesize(slater, _slater_synth_default())
+    _assert_equal_up_to_global_phase(
+        qc_default, _reference_circuit(num_modes, occupation, rotation)
+    )
+
+
+def _xx_plus_yy_spans(qc) -> list[int]:
+    """The physical qubit-index spans ``|i - j|`` of every emitted ``XXPlusYYGate``."""
+    spans = []
+    for instruction in qc.data:
+        if instruction.operation.name != "xx_plus_yy":
+            continue
+        i, j = (qc.find_bit(qubit).index for qubit in instruction.qubits)
+        spans.append(abs(i - j))
+    return spans
+
+
+def test_prepare_slater_determinant_default_avoids_long_range_gate():
+    """The default (depth-minimizing) synthesis emits a nearest-neighbor chain where peeling strands.
+
+    This is the routing motivation for the default: a dense occupation with one disjoint mixing orbital
+    spanning the whole window peels its interior modes to X gates and strands the residual as a single
+    long-range ``XXPlusYYGate`` on the block extremes (``minimize_2q_gate_count=True``). The default
+    instead emits the Clements brickwork -- every rotation mode-adjacent (``|i - j| == 1``) -- while
+    preparing the identical state.
+
+    The rotation mixes only the block *extremes* (modes 0 and ``num_modes - 1``) and is the identity on
+    the interior; occupying columns ``0 .. num_modes - 2`` (all but the last mode) makes the interior
+    modes 1..num_modes-2 disjoint unit-orbitals that peel, leaving one mixing orbital on ``{0,
+    num_modes - 1}``. This is exactly the N2 LUCJ HF state-prep shape (all-but-one mode occupied) that
+    motivated the toggle.
+    """
+    num_modes = 6
+    rotation = _givens_2mode(0.6, 0, num_modes - 1, num_modes)
+    occupation = [i < num_modes - 1 for i in range(num_modes)]
+
+    slater = FermionicCircuit(num_modes)
+    slater.append(PrepareSlaterDeterminant(occupation, rotation), slater.modes)
+
+    qc_count_min = _synthesize(slater, _slater_synth())  # minimize_2q_gate_count=True
+    qc_default = _synthesize(slater, _slater_synth_default())
+
+    # peeling (count-min) strands a single long-range gate on the block extremes; the default keeps
+    # every rotation nearest-neighbor
+    assert max(_xx_plus_yy_spans(qc_count_min)) == num_modes - 1
+    default_spans = _xx_plus_yy_spans(qc_default)
+    assert default_spans and max(default_spans) == 1
+
+    # ... and both prepare the same state (up to a global phase)
+    _assert_equal_up_to_global_phase(qc_count_min, qc_default)

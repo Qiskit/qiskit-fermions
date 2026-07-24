@@ -193,12 +193,13 @@ class GivensDecompositionSlaterDeterminantSynthesis:
        or not.
 
     .. note::
-       Occupied orbitals that are basis vectors on a mode disjoint from every other occupied orbital
-       are *peeled off* before the decomposition: their ``XGate`` is placed directly on the target
-       mode and they are excluded from the Givens sweep. This avoids the chain of bare ``SWAP``\ s
-       (``XXPlusYYGate`` with ``c = 0``) that the leading-reference sweep would otherwise emit to
-       transport such an orbital out to its mode. Only the genuinely-mixing remainder is decomposed.
-       When the whole occupied space is a signed permutation every orbital peels and no
+       *Optionally* (when :attr:`minimize_2q_gate_count` is set; it is **off** by default -- see the
+       caution below) occupied orbitals that are basis vectors on a mode disjoint from every other
+       occupied orbital are *peeled off* before the decomposition: their ``XGate`` is placed directly
+       on the target mode and they are excluded from the Givens sweep. This avoids the chain of bare
+       ``SWAP``\ s (``XXPlusYYGate`` with ``c = 0``) that the leading-reference sweep would otherwise
+       emit to transport such an orbital out to its mode. Only the genuinely-mixing remainder is then
+       decomposed; when the whole occupied space is a signed permutation every orbital peels and no
        ``XXPlusYYGate`` is emitted at all.
 
        A peeled mode may sit *between* the physical endpoints of a sweep rotation, making that
@@ -209,13 +210,29 @@ class GivensDecompositionSlaterDeterminantSynthesis:
        the mixing space.
 
     .. note::
-       The genuinely-mixing remainder that survives peeling is further partitioned into
-       disjoint-support **blocks**, each synthesized on its own contiguous mode window. When the
-       occupied space splits into several mixing clusters
-       separated by empty (or peeled) modes, this drops the bare ``SWAP``\ s (``XXPlusYYGate`` with
-       ``c = 0``) the single leading-reference sweep would otherwise emit to transport occupation
-       across the gaps between clusters. A single mixing cluster spanning all kept modes is one block
-       and reproduces the plain leading-reference sweep exactly.
+       The occupied space (the genuinely-mixing remainder that survives peeling, when
+       :attr:`minimize_2q_gate_count` is set; the full occupied space otherwise) is further
+       partitioned into disjoint-support **blocks**, each synthesized on its own contiguous mode
+       window. When it splits into several mixing clusters separated by empty (or peeled) modes, this
+       drops the bare ``SWAP``\ s (``XXPlusYYGate`` with ``c = 0``) the single leading-reference sweep
+       would otherwise emit to transport occupation across the gaps between clusters. A single mixing
+       cluster spanning all kept modes is one block and reproduces the plain leading-reference sweep
+       exactly. This block splitting runs regardless of :attr:`minimize_2q_gate_count`.
+
+    .. caution::
+       The unit-orbital peeling above trades circuit metrics: it minimizes the emitted two-qubit gate
+       *count* (replacing a swept orbital by a direct ``XGate``), but only under free (all-to-all)
+       connectivity. On a constrained coupling map it can *increase* the two-qubit gate *depth* after
+       routing -- peeling occupied modes that the leading-reference sweep would have used as
+       nearest-neighbor stepping-stones can strand the residual mixing orbital across a wide,
+       physically non-adjacent window (a single long-range ``XXPlusYYGate`` that routing must then
+       bridge with many ``SWAP``\ s). The full leading-reference sweep instead keeps every emitted
+       rotation nearest-neighbor along the mode order -- more two-qubit gates, but no routing overhead.
+       The two are a genuine, non-dominated trade-off (neither ever beats the other on both metrics),
+       so which is preferable depends on the target: minimizing two-qubit *depth* generally matters
+       more than raw gate *count*, both on hardware and in simulation, so peeling is **off** by
+       default. Enable it via :attr:`minimize_2q_gate_count` when raw gate count is the bottleneck
+       (e.g. richly-connected hardware). Both settings prepare the same state (up to a global phase).
 
     .. warning::
        This transpilation pass plugin makes the following assumptions:
@@ -224,6 +241,27 @@ class GivensDecompositionSlaterDeterminantSynthesis:
        - a trivial fermion-to-qubit layout (i.e. no change in their register lengths)
        - a 1-to-1 mapping of fermionic mode indices to qubit indices
     """
+
+    def __init__(self, *, minimize_2q_gate_count: bool = False) -> None:
+        """Initializing this plugin can be done with the arguments listed below.
+
+        Args:
+            minimize_2q_gate_count: which of two equivalent syntheses to emit, selected by the circuit
+                metric to optimize. When ``False`` (the default), the full leading-reference Givens
+                sweep is used: every emitted two-qubit rotation is nearest-neighbor along the mode
+                order, minimizing the post-routing two-qubit *depth* on a constrained coupling map at
+                the cost of more two-qubit gates. When ``True``, disjoint unit-orbitals (occupied
+                orbitals that are basis vectors on a mode disjoint from all other occupied orbitals)
+                are peeled out of the decomposition and realized with a direct ``XGate``, minimizing
+                the two-qubit gate *count* but potentially emitting long-range rotations that inflate
+                the routed depth (see the caution in the class docstring). Both settings prepare the
+                same state (up to a global phase); the default favors depth because it generally
+                matters more than gate count, both on hardware and in simulation.
+        """
+        self.minimize_2q_gate_count = minimize_2q_gate_count
+        """Whether to peel disjoint unit-orbitals to minimize the two-qubit gate count (see
+        ``__init__``). When ``False`` (default), the nearest-neighbor leading-reference sweep is used
+        instead, minimizing the routed two-qubit depth."""
 
     def run(self, in_node: DAGOpNode, out_dag: DAGCircuit, *, f2q_layout: F2QLayout) -> None:
         """Runs this transpilation plugin.
@@ -254,10 +292,22 @@ class GivensDecompositionSlaterDeterminantSynthesis:
         occupied = np.nonzero(occupation)[0]
         orbital_coeffs = rotation_unitary[:, occupied].T
 
-        # peel off occupied orbitals that are disjoint unit-orbitals: seed their XGate directly on the
-        # target mode and hand only the genuinely-mixing remainder to the decomposition. ``kept_modes``
-        # maps the reduced decomposition's local indices back to physical mode indices.
-        peel_modes, kept_modes, reduced = _peel_disjoint_unit_orbitals(orbital_coeffs)
+        # to minimize the two-qubit gate count (see ``minimize_2q_gate_count``), peel off occupied
+        # orbitals that are disjoint unit-orbitals: seed their XGate directly on the target mode and
+        # hand only the genuinely-mixing remainder to the decomposition. ``kept_modes`` maps the
+        # reduced decomposition's local indices back to physical mode indices. Otherwise (the default),
+        # keep the entire occupied space in the sweep so the block splitting below reduces to the full
+        # leading-reference sweep -- every emitted rotation then stays nearest-neighbor along the mode
+        # order (at the cost of more two-qubit gates), which routes far cheaper on a constrained
+        # coupling map.
+        if self.minimize_2q_gate_count:
+            peel_modes, kept_modes, reduced = _peel_disjoint_unit_orbitals(orbital_coeffs)
+        else:
+            peel_modes, kept_modes, reduced = (
+                [],
+                list(range(orbital_coeffs.shape[1])),
+                orbital_coeffs,
+            )
 
         for mode in peel_modes:
             out_dag.apply_operation_back(XGate(), (qreg[freg_indices[mode]],))
