@@ -273,3 +273,114 @@ def test_orbital_rotation_from_t1_amplitudes_is_unitary():
     assert gate.num_modes == 4
     u = gate.rotation_unitary
     np.testing.assert_allclose(u.conj().T @ u, np.eye(4), atol=1e-12)
+
+
+def _term_supports(operator):
+    """Returns each term's support (its set of modes) in iteration order."""
+    return [{mode for _, mode in term} for term, _ in operator.iter_terms()]
+
+
+def _reference_diag_coulomb_terms(gate, diag_coulomb_mat):
+    """The ungrouped ``{term: coeff}`` reference for one repetition's diagonal Coulomb operator."""
+    norb = gate.norb
+    mat_aa, mat_ab, mat_bb = gate._resolve_diag_coulomb_blocks(diag_coulomb_mat)
+    if gate._spinless:
+        blocks = {(0, 0): mat_aa}
+    else:
+        blocks = {(0, 0): mat_aa, (0, 1): mat_ab, (1, 0): mat_ab.T, (1, 1): mat_bb}
+    terms: dict[tuple, complex] = {}
+    for (sigma, tau), block in blocks.items():
+        for i in range(norb):
+            for j in range(norb):
+                coeff = 0.5 * block[i, j]
+                if coeff == 0.0:
+                    continue
+                mode_i, mode_j = sigma * norb + i, tau * norb + j
+                key = ((True, mode_i), (False, mode_i), (True, mode_j), (False, mode_j))
+                terms[key] = terms.get(key, 0.0) + coeff
+    return terms
+
+
+@pytest.mark.parametrize("norb", [1, 2, 3, 4, 5])
+def test_diag_coulomb_grouping_preserves_operator(norb):
+    """Grouping the diagonal Coulomb terms leaves the operator itself unchanged (balanced variant)."""
+    from qiskit_fermions.operators import FermionOperator
+
+    mats, rotations = _balanced_tensors(norb, 1, seed=100 + norb)
+    gate = UCJ(norb, (1, 1), mats, rotations)
+    operator = gate._diag_coulomb_operator(gate.diag_coulomb_mats[0])
+
+    reference = FermionOperator.from_dict(
+        _reference_diag_coulomb_terms(gate, gate.diag_coulomb_mats[0])
+    )
+    assert operator.equiv(reference, 1e-12)
+
+
+@pytest.mark.parametrize(
+    ("variant", "nelec", "norb"),
+    [
+        ("balanced", (1, 1), 4),
+        ("spinless", 2, 4),  # spinful sector: 2*norb block-spin modes
+        ("spinless", 3, 5),  # true spinless sector: norb modes
+    ],
+)
+def test_diag_coulomb_groups_have_disjoint_support(variant, nelec, norb):
+    """Every diagonal Coulomb group's terms act on mutually disjoint modes (one parallel layer)."""
+    rng = np.random.default_rng(hash((variant, norb)) % (2**32))
+    if variant == "balanced":
+        mats = rng.standard_normal((1, 2, norb, norb))
+        mats = mats + mats.transpose(0, 1, 3, 2)
+    else:
+        mats = rng.standard_normal((1, norb, norb))
+        mats = mats + mats.transpose(0, 2, 1)
+    rotations = np.stack([random_unitary(norb, seed=7)])
+    gate = UCJ(norb, nelec, mats, rotations)
+
+    operator = gate._diag_coulomb_operator(gate.diag_coulomb_mats[0])
+    assert operator.groups is not None
+    for group in operator.split_out_groups():
+        seen: set[int] = set()
+        for support in _term_supports(group):
+            assert not (support & seen), "group has overlapping term supports"
+            seen |= support
+
+
+@pytest.mark.parametrize(
+    ("variant", "nelec", "norb"),
+    [
+        ("balanced", (1, 1), 3),  # spinful sector: even num_modes = 2*norb
+        ("balanced", (1, 1), 4),
+        ("balanced", (1, 1), 5),
+        ("spinless", 3, 3),  # true spinless sector: odd num_modes = norb (odd)
+        ("spinless", 4, 4),  # true spinless sector: even num_modes = norb (even)
+        ("spinless", 5, 5),  # true spinless sector: odd num_modes = norb (odd)
+    ],
+)
+def test_diag_coulomb_group_count_is_optimal(variant, nelec, norb):
+    """The group (layer) count matches the provable optimum of the closed-form circle coloring.
+
+    Every term sharing a mode must land in a distinct group, so the count is bounded below by the
+    maximum mode degree. For an even mode count that lower bound is achievable and hit exactly; for
+    an odd mode count (an odd complete graph) the chromatic index is one higher and unavoidable. The
+    circle-method coloring attains this optimum in both cases.
+    """
+    rng = np.random.default_rng(hash((variant, norb)) % (2**32))
+    if variant == "balanced":
+        mats = rng.standard_normal((1, 2, norb, norb))
+        mats = mats + mats.transpose(0, 1, 3, 2)
+    else:
+        mats = rng.standard_normal((1, norb, norb))
+        mats = mats + mats.transpose(0, 2, 1)
+    rotations = np.stack([random_unitary(norb, seed=7)])
+    gate = UCJ(norb, nelec, mats, rotations)
+    operator = gate._diag_coulomb_operator(gate.diag_coulomb_mats[0])
+
+    degree: dict[int, int] = {}
+    for support in _term_supports(operator):
+        for mode in support:
+            degree[mode] = degree.get(mode, 0) + 1
+    max_degree = max(degree.values())
+
+    # even mode count -> optimum == max degree; odd -> the unavoidable max degree + 1
+    optimum = max_degree if gate.num_modes % 2 == 0 else max_degree + 1
+    assert operator.num_groups() == optimum
