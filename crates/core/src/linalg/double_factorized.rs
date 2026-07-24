@@ -770,4 +770,58 @@ mod tests {
         }
         t2
     }
+
+    /// Directly pins the numpy-`searchsorted(side="left")` semantics reproduced by
+    /// [`cumulative_discard_count`]. The round-trip tests use tolerances far below where truncation
+    /// bites, so the discard count itself (and its strict-`<` boundary) is otherwise unexercised;
+    /// an off-by-one here would silently drop or keep one factor too many.
+    #[test]
+    fn test_cumulative_discard_count() {
+        // Running sums: 0.1, 0.3, 0.8. With tol=0.35 the first two stay strictly below tol and are
+        // discarded; the third (0.8) is not, so counting stops at 2.
+        assert_eq!(
+            cumulative_discard_count([0.1, 0.2, 0.5].into_iter(), 0.35),
+            2
+        );
+
+        // Strict `<` boundary: running sums 0.1, 0.3. With tol exactly 0.3 the second sum is *not*
+        // strictly less than tol, so only the first entry is discarded (matches `side="left"`).
+        assert_eq!(cumulative_discard_count([0.1, 0.2].into_iter(), 0.3), 1);
+
+        // tol below the smallest partial sum discards nothing; tol above the total discards all.
+        assert_eq!(
+            cumulative_discard_count([0.1, 0.2, 0.5].into_iter(), 0.05),
+            0
+        );
+        assert_eq!(
+            cumulative_discard_count([0.1, 0.2, 0.5].into_iter(), 1.0),
+            3
+        );
+
+        // An empty spectrum discards nothing.
+        assert_eq!(cumulative_discard_count(std::iter::empty(), 1.0), 0);
+    }
+
+    /// The empty-orbital edge (`norb == 0`) is an explicit early-return guard in
+    /// [`double_factorized_2body`]; exercise it on both the Cholesky and eigh paths.
+    #[test]
+    fn test_double_factorized_2body_empty() {
+        let tensor: Array4<f64> = Array4::zeros((0, 0, 0, 0));
+        for cholesky in [true, false] {
+            let terms = double_factorized_2body(&tensor, 1e-10, None, cholesky);
+            assert!(
+                terms.is_empty(),
+                "empty two-body tensor produced {} terms (cholesky={cholesky})",
+                terms.len(),
+            );
+        }
+    }
+
+    /// [`reconstruct_t2`] has an explicit empty-`terms` guard yielding a zero-sized tensor. With no
+    /// occupied orbitals the result is an all-empty `(0, 0, 0, 0)` amplitude tensor.
+    #[test]
+    fn test_reconstruct_t2_empty() {
+        let reconstructed = reconstruct_t2(&[], 0);
+        assert_eq!(reconstructed.shape(), &[0, 0, 0, 0]);
+    }
 }

@@ -15,12 +15,14 @@
 from __future__ import annotations
 
 import pytest
+from qiskit import QuantumRegister
 from qiskit.circuit.library import PauliEvolutionGate
+from qiskit.dagcircuit import DAGCircuit
 from qiskit.passmanager import MultiStagePassManager
 from qiskit_fermions.circuit import FermionicCircuit
 from qiskit_fermions.circuit.library import Evolution, InitializeModes
 from qiskit_fermions.mappers.library import jordan_wigner
-from qiskit_fermions.operators import FermionOperator
+from qiskit_fermions.operators import FermionOperator, MajoranaOperator
 from qiskit_fermions.transpiler import FermionicCircuitToDAG, QuantumDAGToCircuit
 from qiskit_fermions.transpiler.passes import (
     F2QSynthesis,
@@ -29,6 +31,7 @@ from qiskit_fermions.transpiler.passes import (
     TrivialF2QLayout,
     TrivialOccupationInitializeModesSynthesis,
 )
+from qiskit_fermions.transpiler.passes.optimization import relabel_modes as relabel_modes_module
 from qiskit_fermions.utils.optionals import HAS_PYOMO
 
 if HAS_PYOMO:
@@ -158,3 +161,64 @@ def test_relabel_modes_pyomo_optimization():
 
     qu_circ_decomp = qu_circ.decompose(reps=2)
     assert qu_circ_decomp.depth(lambda instr: len(instr.qubits) == 2) == 4
+
+
+def _single_evolution_dag(operator, num_modes=4, time=1.5):
+    """Builds a one-register FermionicDAGCircuit holding a single Evolution gate."""
+    circ = FermionicCircuit(num_modes)
+    circ.append(Evolution(num_modes, operator, time=time), circ.modes)
+    return FermionicCircuitToDAG().run(circ)
+
+
+def test_run_rejects_multiple_registers():
+    """``run`` only supports a single fermionic register."""
+    dag = DAGCircuit()
+    dag.add_qreg(QuantumRegister(2, "a"))
+    dag.add_qreg(QuantumRegister(2, "b"))
+
+    relabel = RelabelModes([0, 1, 2, 3])
+    with pytest.raises(NotImplementedError, match="more than a single register"):
+        relabel.run(dag)
+
+
+def test_find_permutation_warns_without_pyomo(monkeypatch):
+    """Without the optional pyomo dependency the pass warns and has no effect."""
+    monkeypatch.setattr(relabel_modes_module, "HAS_PYOMO", False)
+    hamil = FermionOperator.from_dict({((True, 0), (False, 2)): 2.0, ((True, 2), (False, 0)): 2.0})
+    dag = _single_evolution_dag(hamil)
+
+    relabel = RelabelModes(solver=object())  # a solver is set so pyomo is the only thing missing
+    with pytest.warns(UserWarning, match="requires the optional 'pyomo' dependency"):
+        permutation, result = relabel.find_permutation(dag)
+    assert permutation is None
+    assert result is None
+
+    # ``run`` should then return the DAG unchanged, with no permutation metadata.
+    out = relabel.run(dag)
+    assert out is dag
+    assert "permutation" not in out.metadata
+
+
+@pytest.mark.skipif(not HAS_PYOMO, reason="Pyomo is required to reach the solver check")
+def test_find_permutation_warns_without_solver():
+    """With pyomo available but no solver set, the pass warns and has no effect."""
+    hamil = FermionOperator.from_dict({((True, 0), (False, 2)): 2.0, ((True, 2), (False, 0)): 2.0})
+    dag = _single_evolution_dag(hamil)
+
+    relabel = RelabelModes()  # permutation=None, solver=None
+    with pytest.warns(UserWarning, match=r"requires the .*solver.* attribute to be defined"):
+        permutation, result = relabel.find_permutation(dag)
+    assert permutation is None
+    assert result is None
+
+
+def test_find_permutation_rejects_non_fermion_operator(monkeypatch):
+    """The optimization model only supports FermionOperator evolutions."""
+    # Ensure we get past the pyomo/solver guards regardless of whether pyomo is installed.
+    monkeypatch.setattr(relabel_modes_module, "HAS_PYOMO", True)
+    maj = MajoranaOperator.from_dict({(0, 1): 1.0})
+    dag = _single_evolution_dag(maj)
+
+    relabel = RelabelModes(solver=object())
+    with pytest.raises(NotImplementedError, match="build_excitation_span_minimization_model"):
+        relabel.find_permutation(dag)

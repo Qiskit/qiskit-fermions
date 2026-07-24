@@ -1449,6 +1449,15 @@ mod tests {
     }
 
     #[test]
+    #[should_panic(expected = "This method can only be called when groups are present!")]
+    fn test_iter_with_groups_panics_without_groups() {
+        // The documented contract is that `iter_with_groups` panics on an operator that carries no
+        // group indices (see `has_groups`). `zero()` produces exactly such an operator.
+        let op = FermionOperator::zero();
+        let _ = op.iter_with_groups();
+    }
+
+    #[test]
     fn test_iter_from_terms_round_trip() {
         let op = FermionOperator {
             coeffs: vec![Complex64::new(1.0, 0.0), Complex64::new(2.0, 0.0)],

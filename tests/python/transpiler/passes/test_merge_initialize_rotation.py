@@ -15,6 +15,9 @@
 from __future__ import annotations
 
 import numpy as np
+import pytest
+from qiskit import QuantumRegister
+from qiskit.dagcircuit import DAGCircuit
 from qiskit.passmanager import MultiStagePassManager
 from qiskit.quantum_info import Statevector
 from qiskit_fermions.circuit import FermionicCircuit
@@ -161,6 +164,33 @@ def test_no_merge_when_rotation_is_not_a_spin_half():
         ("InitializeModes", [0, 1, 2, 3]),
         ("OrbitalRotation", [0, 1, 2]),
     ]
+
+
+def test_no_merge_when_odd_number_of_modes():
+    """An odd-mode register cannot be split into two spin halves, so Pattern 3 does not fire.
+
+    The single rotation on modes ``[0, 1]`` does not cover the full init range ``[0, 1, 2]``, so
+    Pattern 1/2 falls through to the Pattern 3 spin-half check, which bails out on the odd mode
+    count and leaves the circuit unchanged.
+    """
+    circ = FermionicCircuit(3)
+    circ.append(InitializeModes([1, 1, 0]), circ.modes)
+    circ.append(OrbitalRotation(random_unitary(2, seed=1)), circ.modes[:2])
+
+    assert _merge(circ) == [
+        ("InitializeModes", [0, 1, 2]),
+        ("OrbitalRotation", [0, 1]),
+    ]
+
+
+def test_run_rejects_multiple_registers():
+    """``run`` only supports a single fermionic register."""
+    dag = DAGCircuit()
+    dag.add_qreg(QuantumRegister(2, "a"))
+    dag.add_qreg(QuantumRegister(2, "b"))
+
+    with pytest.raises(NotImplementedError, match=r"more than .*a single register"):
+        MergeSlaterDeterminantPreparation().run(dag)
 
 
 def test_no_merge_rotation_without_init():

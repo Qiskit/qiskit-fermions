@@ -591,4 +591,62 @@ mod tests {
 
         assert_eq!(op, expected);
     }
+
+    /// Writes `contents` to a uniquely-named temporary file and returns its path. The name is
+    /// derived from the process id and a caller-supplied `tag` (no wall-clock, so it is
+    /// deterministic within a run and unique across the concurrent test binary).
+    fn write_temp_fcidump(tag: &str, contents: &str) -> String {
+        use std::io::Write;
+        let path = std::env::temp_dir().join(format!(
+            "qf_fcidump_test_{}_{tag}.fcidump",
+            std::process::id(),
+        ));
+        let mut file = std::fs::File::create(&path).expect("could not create temp fixture");
+        file.write_all(contents.as_bytes())
+            .expect("could not write temp fixture");
+        path.to_string_lossy().into_owned()
+    }
+
+    #[test]
+    #[should_panic(expected = "Could not open")]
+    fn test_from_file_missing_file() {
+        // A path that does not exist must surface the open failure rather than silently succeed.
+        FCIDump::from_file(String::from("../../tests/does_not_exist.fcidump"));
+    }
+
+    #[test]
+    #[should_panic(expected = "Could not find of HEADER")]
+    fn test_from_file_missing_namelist() {
+        // No `/` or `&END` terminator: the header regex finds nothing.
+        let path = write_temp_fcidump("no_namelist", " 0.5   1   1   1   1\n");
+        FCIDump::from_file(path);
+    }
+
+    #[test]
+    #[should_panic(expected = "Missing norb!")]
+    fn test_from_file_missing_norb() {
+        // A well-formed namelist that omits NORB must fail the `expect` on the required field.
+        let path = write_temp_fcidump("no_norb", "&FCI NELEC=   2,MS2= 0,\n /\n");
+        FCIDump::from_file(path);
+    }
+
+    #[test]
+    #[should_panic(expected = "Missing nelec!")]
+    fn test_from_file_missing_nelec() {
+        let path = write_temp_fcidump("no_nelec", "&FCI NORB=   2,MS2= 0,\n /\n");
+        FCIDump::from_file(path);
+    }
+
+    #[test]
+    #[should_panic(expected = "MO energy value")]
+    fn test_from_file_mo_energy_integral_unsupported() {
+        // An integral line of the form `(i, a, j, 0)` with `i, a, j` all nonzero hits the
+        // not-yet-implemented `(_, _, _, 0)` arm. Pin the current behaviour (a panic) so the gap
+        // is visible and any future support is a deliberate change.
+        let path = write_temp_fcidump(
+            "mo_energy",
+            "&FCI NORB=   2,NELEC=   2,MS2= 0,\n /\n 0.5   1   1   2   0\n",
+        );
+        FCIDump::from_file(path);
+    }
 }
