@@ -125,6 +125,13 @@ class GivensDecompositionSlaterDeterminantSynthesis:
        When the whole occupied space is a signed permutation every orbital peels and no
        ``XXPlusYYGate`` is emitted at all.
 
+       A peeled mode may sit *between* the physical endpoints of a sweep rotation, making that
+       ``XXPlusYYGate`` act on physically non-adjacent qubits. Because a peeled mode is an occupied
+       unit-orbital, the Jordan-Wigner Z-string it would contribute is folded back into the sign of
+       the ``XXPlusYYGate`` phase when an odd number of peeled modes lies strictly between the
+       endpoints, so the prepared state stays correct regardless of how the peeled modes interleave
+       the mixing space.
+
     .. warning::
        This transpilation pass plugin makes the following assumptions:
 
@@ -187,10 +194,25 @@ class GivensDecompositionSlaterDeterminantSynthesis:
         # remapping each local sweep index through ``kept_modes`` to its physical mode. No phase
         # gates: the reduced decomposition carries none, so the state is prepared up to a global phase
         # (physically irrelevant for state preparation).
+        #
+        # Jordan-Wigner Z-string compensation. A bare ``XXPlusYYGate`` on adjacent qubits is the
+        # correct JW fermionic hop only when the two modes are physically adjacent; the framework
+        # relies on this (no explicit Z-string is emitted). The reduced sweep guarantees adjacency in
+        # *reduced-local* (kept-mode) indexing, but the ``kept_modes`` remap can place a rotation's
+        # physical endpoints across one or more *peeled* modes. Every peeled mode is an occupied
+        # unit-orbital, so each one strictly between the endpoints contributes a JW sign; the missing
+        # Z-string over an odd number of them flips the hop's sign. We fold that sign back into the
+        # ``XXPlusYYGate`` phase, which is ``-pi/2`` for an even Z-string parity and ``+pi/2`` for an
+        # odd one (the two differ by ``pi``, and the gate is ``2 pi``-periodic in its phase). Only
+        # *peeled* modes need counting: any *kept* mode between the endpoints is itself swept, so its
+        # Z-string is already carried implicitly by the nearest-neighbor chain in reduced-local space.
         for c, s, i, j in givens_decomposition_slater(reduced):
             c_angle = np.acos(c)
             if not np.isclose(c_angle, 0.0):
+                mode_i, mode_j = kept_modes[i], kept_modes[j]
+                lo, hi = min(mode_i, mode_j), max(mode_i, mode_j)
+                z_string_sign = -1 if sum(1 for p in peel_modes if lo < p < hi) % 2 == 0 else 1
                 out_dag.apply_operation_back(
-                    XXPlusYYGate(2 * c_angle, np.angle(s) - 0.5 * np.pi),
-                    (qreg[freg_indices[kept_modes[i]]], qreg[freg_indices[kept_modes[j]]]),
+                    XXPlusYYGate(2 * c_angle, np.angle(s) + z_string_sign * 0.5 * np.pi),
+                    (qreg[freg_indices[mode_i]], qreg[freg_indices[mode_j]]),
                 )
