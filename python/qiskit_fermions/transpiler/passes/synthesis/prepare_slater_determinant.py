@@ -93,6 +93,83 @@ def _peel_disjoint_unit_orbitals(
     return peel_modes, kept_modes, reduced
 
 
+def _split_mixing_blocks(
+    reduced: np.ndarray,
+    kept_modes: list[int],
+) -> list[tuple[list[int], list[int], np.ndarray]]:
+    r"""Partition the mixing remainder into disjoint-support blocks, one Givens sweep each.
+
+    The leading-reference sweep of :func:`~qiskit_fermions.linalg.givens_decomposition_slater` seeds
+    the occupation on the block's leading modes and transports it out to the physical support; when
+    two mixing orbitals live on *disjoint* mode windows, the modes between their windows (and any
+    empty leading/trailing modes) carry no occupation, and the sweep would spend bare ``SWAP``\ s
+    (``XXPlusYYGate`` with ``c = 0``) shuttling occupation across them. Synthesizing each disjoint
+    cluster on its own contiguous mode window instead drops that inter-cluster transport entirely.
+    (This complements the disjoint-unit-orbital peeling of :func:`_peel_disjoint_unit_orbitals`, which
+    is the degenerate single-mode-window case and is handled *before* this split -- so ``reduced`` is
+    the genuinely-mixing remainder only.)
+
+    Blocks are formed by a classic interval merge on each orbital's **physical-mode window**
+    :math:`[\min\text{-support}, \max\text{-support}]` (mapped through ``kept_modes``): sort by window
+    start, and merge an orbital into the running block whenever its window overlaps. This *must* group
+    on the mode-index window, not the raw support: two orbitals with disjoint support but
+    nested/interleaved windows (e.g. support ``{0, 3}`` and ``{1, 2}``) must share a block, since the
+    window ``[0, 3]`` spans the occupied modes ``1, 2`` -- splitting them would emit a rotation across
+    an occupied mode. The window merge guarantees each block occupies a **contiguous** window whose
+    only occupied modes are the block's own swept modes, so every emitted rotation is physically
+    mode-adjacent within the block and the framework's no-Z-string hop recipe stays valid. (A
+    *peeled* mode may still fall inside a block's window; that Z-string is compensated at emission
+    time by the caller -- see :meth:`GivensDecompositionSlaterDeterminantSynthesis.run`.)
+
+    Args:
+        reduced: the :math:`(m - p) \times k` orthonormal mixing-remainder matrix from
+            :func:`_peel_disjoint_unit_orbitals` (rows in kept-mode-local column space).
+        kept_modes: the length-:math:`k` list mapping each ``reduced`` column to its physical mode.
+
+    Returns:
+        One 3-tuple ``(block_rows, block_modes, sub)`` per block, where ``block_rows`` are the
+        ``reduced`` row indices in the block, ``block_modes`` are the physical modes spanning the
+        block's contiguous window (in ascending order; the first ``len(block_rows)`` of them are the
+        block's leading reference modes), and ``sub`` is the C-contiguous
+        ``len(block_rows) x len(block_modes)`` sub-matrix ready to hand to
+        :func:`~qiskit_fermions.linalg.givens_decomposition_slater`.
+    """
+    num_mixing = reduced.shape[0]
+
+    # each mixing orbital's physical-mode support window [lo, hi]
+    windows: list[tuple[int, int]] = []
+    for row in range(num_mixing):
+        support = [kept_modes[col] for col in np.nonzero(np.abs(reduced[row]) > _PEEL_ATOL)[0]]
+        windows.append((min(support), max(support)))
+
+    # interval merge: sort orbitals by window start, coalesce overlapping windows into one block
+    order = sorted(range(num_mixing), key=lambda row: windows[row][0])
+    grouped_rows: list[list[int]] = [[order[0]]]
+    running_hi = windows[order[0]][1]
+    for row in order[1:]:
+        lo, hi = windows[row]
+        if lo <= running_hi:
+            grouped_rows[-1].append(row)
+            running_hi = max(running_hi, hi)
+        else:
+            grouped_rows.append([row])
+            running_hi = hi
+
+    blocks: list[tuple[list[int], list[int], np.ndarray]] = []
+    for block_rows in grouped_rows:
+        window_lo = min(windows[row][0] for row in block_rows)
+        window_hi = max(windows[row][1] for row in block_rows)
+        # the kept-local columns and physical modes spanning this block's contiguous window
+        local_cols = [
+            col for col in range(len(kept_modes)) if window_lo <= kept_modes[col] <= window_hi
+        ]
+        block_modes = [kept_modes[col] for col in local_cols]
+        # ``np.ascontiguousarray`` guards the FFI boundary (see ``_peel_disjoint_unit_orbitals``).
+        sub = np.ascontiguousarray(reduced[np.ix_(block_rows, local_cols)])
+        blocks.append((block_rows, block_modes, sub))
+    return blocks
+
+
 class GivensDecompositionSlaterDeterminantSynthesis:
     r"""A :class:`.F2QSynthesisPlugin` for transpiling :class:`.PrepareSlaterDeterminant`.
 
@@ -118,8 +195,7 @@ class GivensDecompositionSlaterDeterminantSynthesis:
     .. note::
        Occupied orbitals that are basis vectors on a mode disjoint from every other occupied orbital
        are *peeled off* before the decomposition: their ``XGate`` is placed directly on the target
-       mode and they are excluded from the Givens sweep (see
-       :func:`_peel_disjoint_unit_orbitals`). This avoids the chain of bare ``SWAP``\ s
+       mode and they are excluded from the Givens sweep. This avoids the chain of bare ``SWAP``\ s
        (``XXPlusYYGate`` with ``c = 0``) that the leading-reference sweep would otherwise emit to
        transport such an orbital out to its mode. Only the genuinely-mixing remainder is decomposed.
        When the whole occupied space is a signed permutation every orbital peels and no
@@ -131,6 +207,15 @@ class GivensDecompositionSlaterDeterminantSynthesis:
        the ``XXPlusYYGate`` phase when an odd number of peeled modes lies strictly between the
        endpoints, so the prepared state stays correct regardless of how the peeled modes interleave
        the mixing space.
+
+    .. note::
+       The genuinely-mixing remainder that survives peeling is further partitioned into
+       disjoint-support **blocks**, each synthesized on its own contiguous mode window. When the
+       occupied space splits into several mixing clusters
+       separated by empty (or peeled) modes, this drops the bare ``SWAP``\ s (``XXPlusYYGate`` with
+       ``c = 0``) the single leading-reference sweep would otherwise emit to transport occupation
+       across the gaps between clusters. A single mixing cluster spanning all kept modes is one block
+       and reproduces the plain leading-reference sweep exactly.
 
     .. warning::
        This transpilation pass plugin makes the following assumptions:
@@ -177,42 +262,45 @@ class GivensDecompositionSlaterDeterminantSynthesis:
         for mode in peel_modes:
             out_dag.apply_operation_back(XGate(), (qreg[freg_indices[mode]],))
 
-        # the reduced decomposition prepares the mixing remainder from the reference in which the
-        # first ``m - p`` *kept* modes are occupied (``reduced`` has ``m - p`` rows); seed that
-        # reference. The Givens sweep below then moves the occupation onto the physical target
-        # orbitals within the kept modes.
-        num_mixing = reduced.shape[0]
-        for i in range(num_mixing):
-            out_dag.apply_operation_back(XGate(), (qreg[freg_indices[kept_modes[i]]],))
-
         # a fully-peeled occupied space (e.g. a permutation rotation) leaves no mixing remainder to
         # decompose; the direct X gates above already prepare the state.
-        if num_mixing == 0:
+        if reduced.shape[0] == 0:
             return
 
-        # apply the Givens rotations in order (same XXPlusYYGate convention as the square plugin),
-        # remapping each local sweep index through ``kept_modes`` to its physical mode. No phase
-        # gates: the reduced decomposition carries none, so the state is prepared up to a global phase
-        # (physically irrelevant for state preparation).
-        #
-        # Jordan-Wigner Z-string compensation. A bare ``XXPlusYYGate`` on adjacent qubits is the
-        # correct JW fermionic hop only when the two modes are physically adjacent; the framework
-        # relies on this (no explicit Z-string is emitted). The reduced sweep guarantees adjacency in
-        # *reduced-local* (kept-mode) indexing, but the ``kept_modes`` remap can place a rotation's
-        # physical endpoints across one or more *peeled* modes. Every peeled mode is an occupied
-        # unit-orbital, so each one strictly between the endpoints contributes a JW sign; the missing
-        # Z-string over an odd number of them flips the hop's sign. We fold that sign back into the
-        # ``XXPlusYYGate`` phase, which is ``-pi/2`` for an even Z-string parity and ``+pi/2`` for an
-        # odd one (the two differ by ``pi``, and the gate is ``2 pi``-periodic in its phase). Only
-        # *peeled* modes need counting: any *kept* mode between the endpoints is itself swept, so its
-        # Z-string is already carried implicitly by the nearest-neighbor chain in reduced-local space.
-        for c, s, i, j in givens_decomposition_slater(reduced):
-            c_angle = np.acos(c)
-            if not np.isclose(c_angle, 0.0):
-                mode_i, mode_j = kept_modes[i], kept_modes[j]
-                lo, hi = min(mode_i, mode_j), max(mode_i, mode_j)
-                z_string_sign = -1 if sum(1 for p in peel_modes if lo < p < hi) % 2 == 0 else 1
-                out_dag.apply_operation_back(
-                    XXPlusYYGate(2 * c_angle, np.angle(s) + z_string_sign * 0.5 * np.pi),
-                    (qreg[freg_indices[mode_i]], qreg[freg_indices[mode_j]]),
-                )
+        # partition the genuinely-mixing remainder into disjoint-support blocks and synthesize each on
+        # its own contiguous mode window, dropping the transport SWAPs a single leading sweep would
+        # emit across the gaps between clusters (see ``_split_mixing_blocks``).
+        for block_rows, block_modes, sub in _split_mixing_blocks(reduced, kept_modes):
+            # the reduced decomposition of this block prepares its mixing subspace from the reference
+            # in which the first ``len(block_rows)`` modes of the block's window are occupied (``sub``
+            # has ``len(block_rows)`` rows); seed that reference. The Givens sweep below then moves the
+            # occupation onto the physical target orbitals within the block's window.
+            for i in range(len(block_rows)):
+                out_dag.apply_operation_back(XGate(), (qreg[freg_indices[block_modes[i]]],))
+
+            # apply the block's Givens rotations in order (same XXPlusYYGate convention as the square
+            # plugin), remapping each block-local sweep index through ``block_modes`` to its physical
+            # mode. No phase gates: the reduced decomposition carries none, so the state is prepared up
+            # to a global phase (physically irrelevant for state preparation).
+            #
+            # Jordan-Wigner Z-string compensation. A bare ``XXPlusYYGate`` on adjacent qubits is the
+            # correct JW fermionic hop only when the two modes are physically adjacent; the framework
+            # relies on this (no explicit Z-string is emitted). The sweep is adjacent within the
+            # block's contiguous window, but a *peeled* mode (excluded from ``reduced``) may fall
+            # strictly between a rotation's physical endpoints. Every peeled mode is an occupied
+            # unit-orbital, so each one between the endpoints contributes a JW sign; the missing
+            # Z-string over an odd number of them flips the hop's sign. We fold that sign back into the
+            # ``XXPlusYYGate`` phase, which is ``-pi/2`` for an even Z-string parity and ``+pi/2`` for
+            # an odd one (the two differ by ``pi``, and the gate is ``2 pi``-periodic in its phase).
+            # Only *peeled* modes need counting: any occupied mode inside the block's window is itself
+            # swept, so its Z-string is already carried implicitly by the nearest-neighbor chain.
+            for c, s, i, j in givens_decomposition_slater(sub):
+                c_angle = np.acos(c)
+                if not np.isclose(c_angle, 0.0):
+                    mode_i, mode_j = block_modes[i], block_modes[j]
+                    lo, hi = min(mode_i, mode_j), max(mode_i, mode_j)
+                    z_string_sign = -1 if sum(1 for p in peel_modes if lo < p < hi) % 2 == 0 else 1
+                    out_dag.apply_operation_back(
+                        XXPlusYYGate(2 * c_angle, np.angle(s) + z_string_sign * 0.5 * np.pi),
+                        (qreg[freg_indices[mode_i]], qreg[freg_indices[mode_j]]),
+                    )

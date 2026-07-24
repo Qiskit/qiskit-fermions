@@ -27,6 +27,7 @@ from qiskit_fermions.circuit.library import (
 )
 from qiskit_fermions.mappers.library import jordan_wigner
 from qiskit_fermions.operators import FermionOperator
+from qiskit_fermions.transpiler import FermionicPassManager
 from qiskit_fermions.transpiler.presets import generate_preset_jw_pass_manager
 
 from ...utils import random_unitary
@@ -203,12 +204,13 @@ def test_preset_jordan_wigner_merges_initialize_rotation():
 
 
 def test_preset_jordan_wigner_merges_single_per_spin_rotation():
-    """The preset fuses a global init with a single per-spin rotation, identity-padding the rest.
+    """The preset fuses a global init with a single per-spin rotation into a Slater preparation.
 
     A full-register InitializeModes followed by an OrbitalRotation on only one spin half fuses into
-    two PrepareSlaterDeterminant gates (the rotated half plus an identity-padded half). The result
-    matches the state of the equivalent block-diagonal OrbitalRotation (up to a global phase) while
-    emitting strictly fewer two-qubit rotations and no phase gates.
+    a PrepareSlaterDeterminant, which lowers with the reduced Slater decomposition. The result
+    matches the state of lowering the same circuit *without* the merge -- where the rotation lowers
+    via its full square Givens decomposition -- up to a global phase, while emitting strictly fewer
+    two-qubit rotations and no phase gates.
     """
     norb = 3
     rotation = random_unitary(norb, seed=7)
@@ -220,25 +222,25 @@ def test_preset_jordan_wigner_merges_single_per_spin_rotation():
     pm = generate_preset_jw_pass_manager()
     merged = pm.run(circ)
 
-    # equivalent reference: the same rotation as a full-register block-diagonal OrbitalRotation
-    # (alpha half rotated, beta half identity), with nothing to merge into so it takes the square path
-    block_diag = np.eye(2 * norb, dtype=complex)
-    block_diag[:norb, :norb] = rotation
-    reference = FermionicCircuit(2 * norb)
-    reference.append(InitializeModes.from_hartree_fock(norb, (2, 1)), reference.modes)
-    reference.append(OrbitalRotation(block_diag), reference.modes)
-    lowered_reference = pm.run(reference)
+    # baseline: lower the *same* circuit without the merge optimization stage, so the initialization
+    # lowers via TrivialOccupation and the rotation via its full square Givens decomposition (which
+    # carries diagonal phase gates and a denser rotation pattern). This isolates what the fusion into
+    # a PrepareSlaterDeterminant buys -- a reference fed back through the merging preset would be
+    # fused (and block-split) too, flattening the comparison.
+    pm.optimization = FermionicPassManager()
+    unmerged = pm.run(circ)
 
     sv_merged = Statevector(merged).data
-    sv_reference = Statevector(lowered_reference).data
-    k = int(np.argmax(np.abs(sv_reference)))
-    phase = sv_merged[k] / sv_reference[k]
-    np.testing.assert_allclose(sv_merged, phase * sv_reference, atol=1e-10)
+    sv_unmerged = Statevector(unmerged).data
+    k = int(np.argmax(np.abs(sv_unmerged)))
+    phase = sv_merged[k] / sv_unmerged[k]
+    np.testing.assert_allclose(sv_merged, phase * sv_unmerged, atol=1e-10)
 
+    # the fusion drops the diagonal phase gates the square rotation would emit ...
     assert "p" not in merged.count_ops()
-    assert merged.count_ops().get("xx_plus_yy", 0) < lowered_reference.count_ops().get(
-        "xx_plus_yy", 0
-    )
+    assert "p" in unmerged.count_ops()
+    # ... and emits strictly fewer two-qubit rotations than the un-fused square decomposition
+    assert merged.count_ops().get("xx_plus_yy", 0) < unmerged.count_ops().get("xx_plus_yy", 0)
 
 
 def test_preset_jordan_wigner_merges_rotation_run_then_slater_prep():
