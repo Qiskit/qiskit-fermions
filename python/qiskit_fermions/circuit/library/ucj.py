@@ -600,8 +600,17 @@ class UCJ(FermionicGate):
         mode convention (mode ``p`` is alpha orbital ``p``, mode ``norb + p`` is beta orbital ``p``).
         The alpha-alpha/alpha-beta/beta-beta blocks are resolved per spin variant. All terms commute,
         so the resulting :class:`.Evolution` is exact.
+
+        Every term is a number-operator product ``n_{i sigma} n_{j tau}`` acting on the (at most two)
+        modes ``{i + sigma*norb, j + tau*norb}``. Each ``(block, i, j)`` triple maps to a distinct
+        term (no coefficient accumulation into a shared key is ever needed), so the terms are built
+        directly with a :attr:`~qiskit_fermions.operators.FermionOperator.groups` index each, such
+        that all same-group terms have mutually disjoint support and :class:`.Evolution` synthesis
+        emits one parallel layer of two-mode gates per group. The group index is a closed-form edge
+        coloring of the interaction graph (see :meth:`_term_group`), assigned on the fly.
         """
         norb = self.norb
+        num_modes = norb if self._spinless else 2 * norb
         mat_aa, mat_ab, mat_bb = self._resolve_diag_coulomb_blocks(diag_coulomb_mat)
 
         # a true spinless system has only the aa block on the norb spinless modes
@@ -610,7 +619,8 @@ class UCJ(FermionicGate):
         else:
             blocks = {(0, 0): mat_aa, (0, 1): mat_ab, (1, 0): mat_ab.T, (1, 1): mat_bb}
 
-        terms: dict[tuple, complex] = {}
+        # each (block, i, j) is a distinct term, so build them directly -- no collision-handling dict.
+        terms_with_groups: list[tuple[tuple, complex, int]] = []
         for (sigma, tau), block in blocks.items():
             offset_i = sigma * norb
             offset_j = tau * norb
@@ -622,9 +632,54 @@ class UCJ(FermionicGate):
                     mode_i = offset_i + i
                     mode_j = offset_j + j
                     term = (cre(mode_i), ann(mode_i), cre(mode_j), ann(mode_j))
-                    terms[term] = terms.get(term, 0.0) + coeff
+                    group = self._term_group(num_modes, mode_i, mode_j)
+                    terms_with_groups.append((term, coeff, group))
 
-        return FermionOperator.from_dict(terms)  # type: ignore[arg-type]
+        return FermionOperator.from_terms_with_groups(terms_with_groups)
+
+    @staticmethod
+    def _term_group(num_modes: int, mode_i: int, mode_j: int) -> int:
+        r"""Returns the disjoint-support group index for the term ``n_{mode_i} n_{mode_j}``.
+
+        The diagonal Coulomb terms form a *doubled* complete graph on the ``num_modes`` modes: every
+        unordered off-diagonal pair ``{p, q}`` carries two terms (the ``(i, j)`` and ``(j, i)``
+        orderings) and every mode carries one on-site number term ``n_p`` (the ``i == j`` case). This
+        assigns each term a color -- one :class:`.Evolution` group -- so that same-color terms share
+        no mode, hence each group synthesizes as a single parallel layer of (at most two-mode) gates.
+
+        The coloring is the closed-form *circle method* (round-robin) edge coloring of the complete
+        graph, doubled to carry both orderings of each pair, so it needs no per-term state and is
+        layer-**optimal**: it uses exactly the maximum mode degree ``2*num_modes - 1`` colors for even
+        ``num_modes`` (always the case for a spinful register), and ``2*num_modes`` for odd
+        ``num_modes`` -- the latter being unavoidable (an odd complete graph cannot be edge-colored in
+        fewer than ``num_modes`` colors, i.e. degree ``+ 1``).
+
+        Args:
+            num_modes: the number of modes the diagonal Coulomb operator acts on.
+            mode_i: the first mode of the term (its outer number operator).
+            mode_j: the second mode of the term (its inner number operator).
+
+        Returns:
+            The group index (color) for this term.
+        """
+        n = num_modes
+        # on-site term n_p (a self-loop at mode p): take the one color the circle method leaves free
+        # at p. For odd n that free pair-color is (2p) mod n (doubled to its lower slot); for even n
+        # every pair-color is occupied at every mode, so on-site terms share one extra top color.
+        if mode_i == mode_j:
+            return 2 * ((2 * mode_i) % n) if n % 2 else 2 * (n - 1)
+
+        # off-diagonal pair {p, q}: circle-method color of the edge, doubled to fit both orderings.
+        # The ordering copy index r (0 for i < j, 1 for i > j) separates the two same-spin terms that
+        # share this support; cross-spin orderings land on different supports and never collide.
+        p, q = (mode_i, mode_j) if mode_i < mode_j else (mode_j, mode_i)
+        copy = 0 if mode_i < mode_j else 1
+        if n % 2:
+            edge_color = (p + q) % n
+        else:
+            m = n - 1
+            edge_color = (2 * p) % m if q == m else (p + q) % m
+        return 2 * edge_color + copy
 
     def _resolve_diag_coulomb_blocks(
         self, diag_coulomb_mat: np.ndarray
