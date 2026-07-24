@@ -5,10 +5,10 @@ import builtins
 import qiskit.quantum_info
 from qiskit_fermions._lib.operators import fermion_operator
 __all__ = [
-    "jordan_wigner",
+    "fermion_jordan_wigner",
 ]
 
-def jordan_wigner(op: fermion_operator.FermionOperator, num_qubits: builtins.int) -> qiskit.quantum_info.SparseObservable:
+def fermion_jordan_wigner(op: fermion_operator.FermionOperator, num_qubits: builtins.int) -> qiskit.quantum_info.SparseObservable:
     r"""
     Map a :class:`.FermionOperator` to a :class:`~qiskit.quantum_info.SparseObservable` under the
     Jordan-Wigner transformation. [1]_
@@ -59,7 +59,7 @@ def jordan_wigner(op: fermion_operator.FermionOperator, num_qubits: builtins.int
     
     .. doctest::
     
-        >>> from qiskit_fermions.mappers.library import jordan_wigner
+        >>> from qiskit_fermions.mappers.library import fermion_jordan_wigner
         >>> from qiskit_fermions.operators import FermionOperator
         >>> fop = FermionOperator.from_dict(
         ...     {
@@ -68,7 +68,7 @@ def jordan_wigner(op: fermion_operator.FermionOperator, num_qubits: builtins.int
         ...         ((True, 1), (False, 2), (True, 2), (False, 1)): -1.0j,
         ...     }
         ... )
-        >>> qop = jordan_wigner(fop, 4)
+        >>> qop = fermion_jordan_wigner(fop, 4)
         >>> qop.simplify()
         <SparseObservable with 5 terms on 4 qubits: (2.05-0.25j)() + (-0.05+0j)(Z_0) + (0+0.25j)(Z_1) + (0+0.25j)(Z_2 Z_1) + (0-0.25j)(Z_2)>
     

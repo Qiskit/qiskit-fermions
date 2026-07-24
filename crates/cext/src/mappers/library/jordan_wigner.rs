@@ -13,7 +13,7 @@
 use crate::exit_codes::ExitCode;
 use crate::pointers::const_ptr_as_ref;
 
-use qiskit_fermions_core::mappers::library::jordan_wigner::jordan_wigner;
+use qiskit_fermions_core::mappers::library::jordan_wigner::fermion_jordan_wigner;
 use qiskit_fermions_core::operators::fermion_operator::FermionOperator;
 
 /// @ingroup qf_mapper_library
@@ -70,13 +70,13 @@ use qiskit_fermions_core::operators::fermion_operator::FermionOperator;
 ///
 ///     // and map it to a qubit operator
 ///     QkObs *result;
-///     QfExitCode exit = qf_jordan_wigner(hamil, 4, &result);
+///     QfExitCode exit = qf_ferm_op_jordan_wigner(hamil, 4, &result);
 ///
 ///     assert(exit == QfExitCode_Success);
 ///
 /// @endrst
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn qf_jordan_wigner(
+pub unsafe extern "C" fn qf_ferm_op_jordan_wigner(
     op: *const FermionOperator,
     num_qubits: u32,
     out: *mut *mut qiskit_sys::QkObs,
@@ -84,7 +84,7 @@ pub unsafe extern "C" fn qf_jordan_wigner(
     // SAFETY: Per documentation, the pointers are non-null and aligned.
     let op = unsafe { const_ptr_as_ref(op) };
 
-    match jordan_wigner(op, num_qubits) {
+    match fermion_jordan_wigner(op, num_qubits) {
         Ok(obs) => {
             // SAFETY: Per documentation, `out` is non-null and aligned.
             unsafe { out.write(obs) };

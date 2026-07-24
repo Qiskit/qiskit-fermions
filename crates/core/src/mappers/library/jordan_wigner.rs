@@ -78,7 +78,7 @@ unsafe impl Send for Wrapper {}
 
 // TODO: can we clean up the coding pattern of overwriting a data structure in-place to avoid the
 // repetitive re-allocations?
-pub fn jordan_wigner(
+pub fn fermion_jordan_wigner(
     fer_op: &FermionOperator,
     num_qubits: u32,
 ) -> Result<*mut ffi::QkObs, CoherenceError> {
@@ -259,7 +259,7 @@ mod tests {
             ],
             groups: None,
         };
-        let qb_op = jordan_wigner(&fer_op, 4).unwrap();
+        let qb_op = fermion_jordan_wigner(&fer_op, 4).unwrap();
 
         let mut coeffs: Vec<QkComplex64> = vec![
             QkComplex64 {
@@ -378,7 +378,7 @@ mod tests {
         };
 
         // too few qubits must be reported instead of aborting the process
-        let err = jordan_wigner(&fer_op, 3).unwrap_err();
+        let err = fermion_jordan_wigner(&fer_op, 3).unwrap_err();
         assert!(matches!(
             err,
             CoherenceError::NumQubitsTooSmall {
@@ -388,6 +388,6 @@ mod tests {
         ));
 
         // exactly enough qubits succeeds
-        assert!(jordan_wigner(&fer_op, 4).is_ok());
+        assert!(fermion_jordan_wigner(&fer_op, 4).is_ok());
     }
 }
