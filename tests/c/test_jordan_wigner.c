@@ -48,7 +48,7 @@ static int test_mapping(void) {
     }
 
     QkObs *result;
-    if (qf_jordan_wigner(hamil, 4, &result) != QfExitCode_Success) {
+    if (qf_ferm_op_jordan_wigner(hamil, 4, &result) != QfExitCode_Success) {
         qf_ferm_op_free(hamil);
         return RuntimeError;
     }
@@ -103,7 +103,7 @@ static int test_num_qubits_too_small(void) {
 
     // too few qubits must be reported instead of aborting the process
     QkObs *result = NULL;
-    QfExitCode exit = qf_jordan_wigner(op, 3, &result);
+    QfExitCode exit = qf_ferm_op_jordan_wigner(op, 3, &result);
 
     qf_ferm_op_free(op);
 

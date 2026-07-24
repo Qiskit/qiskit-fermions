@@ -13,7 +13,7 @@
 use crate::operators::fermion_operator::PyFermionOperator;
 use pyo3::prelude::*;
 use pyo3_stub_gen::derive::*;
-use qiskit_fermions_core::mappers::library::jordan_wigner::jordan_wigner;
+use qiskit_fermions_core::mappers::library::jordan_wigner::fermion_jordan_wigner;
 use qiskit_pyo3_ffi as ffi;
 
 /// Map a :class:`.FermionOperator` to a :class:`~qiskit.quantum_info.SparseObservable` under the
@@ -65,7 +65,7 @@ use qiskit_pyo3_ffi as ffi;
 ///
 /// .. doctest::
 ///
-///     >>> from qiskit_fermions.mappers.library import jordan_wigner
+///     >>> from qiskit_fermions.mappers.library import fermion_jordan_wigner
 ///     >>> from qiskit_fermions.operators import FermionOperator
 ///     >>> fop = FermionOperator.from_dict(
 ///     ...     {
@@ -74,7 +74,7 @@ use qiskit_pyo3_ffi as ffi;
 ///     ...         ((True, 1), (False, 2), (True, 2), (False, 1)): -1.0j,
 ///     ...     }
 ///     ... )
-///     >>> qop = jordan_wigner(fop, 4)
+///     >>> qop = fermion_jordan_wigner(fop, 4)
 ///     >>> qop.simplify()
 ///     <SparseObservable with 5 terms on 4 qubits: (2.05-0.25j)() + (-0.05+0j)(Z_0) + (0+0.25j)(Z_1) + (0+0.25j)(Z_2 Z_1) + (0-0.25j)(Z_2)>
 ///
@@ -82,10 +82,10 @@ use qiskit_pyo3_ffi as ffi;
 ///        Zeitschrift für Physik 47, No. 9. (1928), pp. 631–651,
 ///        `doi:10.1007/BF01331938 <https://link.springer.com/article/10.1007/BF01331938>`_.
 #[gen_stub_pyfunction(module = "qiskit_fermions._lib.mappers.mappers_library.jordan_wigner")]
-#[pyfunction(name = "jordan_wigner")]
+#[pyfunction(name = "fermion_jordan_wigner")]
 #[gen_stub(override_return_type(type_repr="qiskit.quantum_info.SparseObservable", imports=("qiskit.quantum_info")))]
-pub fn py_jordan_wigner(op: PyFermionOperator, num_qubits: u32) -> PyResult<Py<PyAny>> {
-    let obs = jordan_wigner(&op.inner, num_qubits).map_err(crate::value_err)?;
+pub fn py_fermion_jordan_wigner(op: PyFermionOperator, num_qubits: u32) -> PyResult<Py<PyAny>> {
+    let obs = fermion_jordan_wigner(&op.inner, num_qubits).map_err(crate::value_err)?;
     unsafe {
         let py = Python::assume_attached();
         let py_obs = ffi::qk_obs_to_python(obs);
@@ -96,5 +96,5 @@ pub fn py_jordan_wigner(op: PyFermionOperator, num_qubits: u32) -> PyResult<Py<P
 #[pymodule]
 pub mod jordan_wigner {
     #[pymodule_export]
-    use super::py_jordan_wigner;
+    use super::py_fermion_jordan_wigner;
 }

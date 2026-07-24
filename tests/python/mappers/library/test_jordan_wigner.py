@@ -12,11 +12,11 @@
 
 import pytest
 from qiskit.quantum_info import SparseObservable
-from qiskit_fermions.mappers.library import jordan_wigner
-from qiskit_fermions.operators import FermionOperator
+from qiskit_fermions.mappers.library import fermion_jordan_wigner, jordan_wigner
+from qiskit_fermions.operators import FermionOperator, MajoranaOperator
 
 
-def test_jordan_wigner():
+def test_fermion_jordan_wigner():
     num_qubits = 4
     op = FermionOperator.from_dict(
         {
@@ -36,7 +36,7 @@ def test_jordan_wigner():
             ((True, 3), (False, 3)): -0.4718960072811406,
         }
     )
-    qop = jordan_wigner(op, num_qubits)
+    qop = fermion_jordan_wigner(op, num_qubits)
     assert isinstance(qop, SparseObservable)
     expected = SparseObservable.from_sparse_list(
         [
@@ -62,12 +62,28 @@ def test_jordan_wigner():
     assert diff == SparseObservable.zero(num_qubits)
 
 
-def test_jordan_wigner_num_qubits_too_small():
+def test_fermion_jordan_wigner_num_qubits_too_small():
     # an operator acting on mode index 3 requires at least 4 qubits; too few qubits must raise a
     # catchable ValueError instead of aborting the interpreter
     op = FermionOperator.from_dict({((True, 3),): 1.0})
     with pytest.raises(ValueError):
-        jordan_wigner(op, 3)
+        fermion_jordan_wigner(op, 3)
 
     # exactly enough qubits succeeds
-    assert isinstance(jordan_wigner(op, 4), SparseObservable)
+    assert isinstance(fermion_jordan_wigner(op, 4), SparseObservable)
+
+
+def test_jordan_wigner_dispatches_fermion():
+    # the type-agnostic entry point must delegate FermionOperator inputs to fermion_jordan_wigner
+    op = FermionOperator.from_dict({((True, 0), (False, 0)): 0.1, ((True, 1), (False, 1)): -0.2})
+    dispatched = jordan_wigner(op, 3)
+    direct = fermion_jordan_wigner(op, 3)
+    assert isinstance(dispatched, SparseObservable)
+    assert (dispatched - direct).simplify() == SparseObservable.zero(3)
+
+
+def test_jordan_wigner_unsupported_type_raises():
+    # any operator type without a direct implementation must raise TypeError (not silently fail)
+    maj_op = MajoranaOperator.from_dict({(0, 1): 1.0})
+    with pytest.raises(TypeError, match="MajoranaOperator"):
+        jordan_wigner(maj_op, 2)
