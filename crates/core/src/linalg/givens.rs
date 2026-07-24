@@ -300,6 +300,43 @@ mod tests {
         }
     }
 
+    /// Builds an `n x n` permutation matrix from `perm`, where row `i` has its single `1` in
+    /// column `perm[i]`.
+    fn permutation_matrix(perm: &[usize]) -> Array2<Complex64> {
+        let n = perm.len();
+        let mut mat = Array2::zeros((n, n));
+        for (i, &j) in perm.iter().enumerate() {
+            mat[[i, j]] = Complex64::new(1.0, 0.0);
+        }
+        mat
+    }
+
+    /// Structured unitaries whose entries are exact zeros drive the degenerate `zrotg` branches
+    /// (`a == 0` and `b == 0`), which Haar-random inputs in [`test_givens_decomposition`] never
+    /// reach. The identity exercises the `b == 0` branch on every column pair, while permutation
+    /// matrices additionally exercise the `a == 0` branch.
+    #[test]
+    fn test_givens_decomposition_structured() {
+        let cases: [Array2<Complex64>; 4] = [
+            Array2::eye(1),
+            Array2::eye(5),
+            permutation_matrix(&[1, 0, 3, 2]),
+            permutation_matrix(&[2, 0, 3, 1, 4]),
+        ];
+
+        for mat in cases {
+            let (rotations, phases) = givens_decomposition(mat.clone());
+            let reconstructed = reconstruct_from_decomposition(&rotations, &phases);
+
+            assert!(
+                matrices_approx_equal(&mat, &reconstructed, 1e-8),
+                "Givens decomposition and reconstruction failed for a structured unitary of \
+                 dimension {}",
+                mat.nrows(),
+            );
+        }
+    }
+
     /// Reconstructs the `m x n` occupied-orbital coefficients from a Slater decomposition.
     ///
     /// Starting from the reference configuration (the first `m` of `n` orbitals occupied, i.e. the
@@ -361,6 +398,23 @@ mod tests {
             assert!(
                 (fidelity - 1.0).abs() < 1e-8,
                 "Slater decomposition for (n={n}, m={m}) reconstructed with fidelity {fidelity}",
+            );
+        }
+    }
+
+    /// The vacuum sector (`m = 0`, zero occupied orbitals) is a legitimate input: the occupied
+    /// coefficient matrix has no rows, so there is nothing to eliminate. Guards the `n - m` /
+    /// slicing arithmetic against an off-by-one panic on the empty-occupied edge and confirms an
+    /// empty rotation list is returned.
+    #[test]
+    fn test_givens_decomposition_slater_vacuum() {
+        for n in 1..=5 {
+            let target: Array2<Complex64> = Array2::zeros((0, n));
+            let rotations = givens_decomposition_slater(target);
+            assert!(
+                rotations.is_empty(),
+                "Slater decomposition of the vacuum (n={n}, m=0) produced {} rotations",
+                rotations.len(),
             );
         }
     }
