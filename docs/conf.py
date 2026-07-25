@@ -119,6 +119,8 @@ intersphinx_mapping = {
     "pyomo": ("https://pyomo.readthedocs.io/en/stable/", None),
     "ffsim": ("https://qiskit-community.github.io/ffsim/", None),
     "scipy": ("https://docs.scipy.org/doc/scipy/", None),
+    "pyscf": ("https://pyscf.org/", None),
+    "qiskit_addon_sqd": ("https://quantum.cloud.ibm.com/docs/api/qiskit-addon-sqd/", None),
 }
 
 plot_working_directory = "."
