@@ -64,16 +64,19 @@ detail in :ref:`this guide <grouping_explanation>`.
     .. code-block:: python
 
        >>> from qiskit_fermions.operators.terms.grouping import group_terms_by_electronic_structure
+       >>> from qiskit_fermions.operators.terms.ordering import canonical_order
        >>>
-       >>> normal = hamil.normal_ordered().simplify(atol=1e-16)
-       >>> exit_code = group_terms_by_electronic_structure(normal, num_modes, two_body_physicist_order=False)
+       >>> canon = canonical_order(hamil.normal_ordered().simplify(atol=1e-16))
+       >>> exit_code = group_terms_by_electronic_structure(canon, num_modes, two_body_physicist_order=False)
        >>> assert exit_code is None
-       >>> print(normal.groups)  # the groups attribute now contains some list of group indices
+       >>> print(canon.groups)  # the groups attribute now contains some list of group indices
        [0, ...]
 
     .. code-block:: c
 
+       QfFermionOperator* normal;
        QfExitCode exit = qf_ferm_op_group_terms_by_electronic_structure(normal, num_modes, false);
+       QfFermionOperator* canon = qf_ferm_op_canonical_order(normal);
 
 3. Prepare the time evolution circuit
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -91,7 +94,7 @@ components to do so, in compliance with Qiskit conventions.
        >>> from qiskit_fermions.circuit.library import Evolution
        >>>
        >>> time = 1.0  # you can choose a desired scaling factor here
-       >>> evo_gate = Evolution(num_modes, normal, time)
+       >>> evo_gate = Evolution(num_modes, canon, time)
        >>>
        >>> circ = FermionicCircuit(num_modes)
        >>> circ.append(evo_gate, circ.modes)
@@ -168,7 +171,7 @@ ensemble of circuits to generate:
        >>> from qiskit_fermions.transpiler.passes import QDriftTrotterization
        >>>
        >>> num_groups = 10
-       >>> qdrift = QDriftTrotterization(num_groups, filter_diagonal_terms=True, rng=42)
+       >>> qdrift = QDriftTrotterization(num_groups, filter_diagonal_terms=True, rng=19)
        >>>
        >>> pm = generate_preset_jw_pass_manager()
        >>> pm.optimization = FermionicPassManager([qdrift])
@@ -215,7 +218,7 @@ pass:
        >>> solver = SolverFactory("appsi_highs")
        >>> solver.options["time_limit"] = 10
        >>>
-       >>> qdrift = QDriftTrotterization(5, rng=42)
+       >>> qdrift = QDriftTrotterization(5, rng=19)
        >>> relabel = RelabelModes(solver=solver)
        >>>
        >>> pm.optimization = FermionicPassManager([qdrift, relabel])
