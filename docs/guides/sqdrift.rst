@@ -192,6 +192,104 @@ ensemble of circuits to generate:
    generator used inside of the :class:`.QDriftTrotterization` transpilation
    pass.
 
+5. Filter out trivial excitations
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Beyond the diagonal terms filtered out in the previous step, a sampled
+excitation can *still* fail to affect the sampled bitstrings: whenever it acts
+entirely within a set of modes whose occupation is already fixed (all occupied
+or all unoccupied), it cannot move a particle from one to the other, so it
+leaves the state -- and thus the eventual measurement outcome -- unchanged.
+Setting ``filter_trivial=True`` on the :class:`.QDriftTrotterization` pass
+rejects such terms as they are sampled and re-draws a replacement, so that
+every one of the ``num_groups`` slots of the resulting circuit contributes a
+non-trivial excitation.
+
+This filtering needs to know which modes start out occupied. It therefore
+requires an :class:`.InitializeModes` gate preceding the :class:`.Evolution`
+gate(s) in the circuit; :meth:`.InitializeModes.from_hartree_fock` is a
+convenient way to construct one. We add one here for the N2 Hartree-Fock
+reference (7 alpha and 7 beta electrons in 14 spatial orbitals) and compare the
+sampled excitations with and without ``filter_trivial=True``:
+
+.. tab-set-code::
+
+    .. code-block:: python
+
+       >>> from qiskit_fermions.circuit.library import InitializeModes
+       >>>
+       >>> init = InitializeModes.from_hartree_fock(fcidump.norb, (7, 7))
+       >>>
+       >>> hf_circ = FermionicCircuit(num_modes)
+       >>> hf_circ.append(init, hf_circ.modes)
+       >>> hf_circ.append(Evolution(num_modes, canon, time), hf_circ.modes)
+       >>>
+       >>> num_groups = 5
+       >>> qdrift_unfiltered = QDriftTrotterization(
+       ...     num_groups, filter_diagonal_terms=True, rng=3480
+       ... )
+       >>> qdrift_trivial = QDriftTrotterization(
+       ...     num_groups, filter_diagonal_terms=True, filter_trivial=True, rng=3480
+       ... )
+       >>>
+       >>> for instruction in FermionicPassManager(qdrift_unfiltered).run(hf_circ)._inner.data:
+       ...     if instruction.operation.name == "Evolution":
+       ...         print(sorted(instruction.operation.operator.get_support()))
+       [2, 4]
+       [41, 45, 52]
+       [15, 45, 55]
+       [41, 52, 53]
+       [10, 16, 37, 38]
+       >>>
+       >>> for instruction in FermionicPassManager(qdrift_trivial).run(hf_circ)._inner.data:
+       ...     if instruction.operation.name == "Evolution":
+       ...         print(sorted(instruction.operation.operator.get_support()))
+       [0, 1, 6, 7]
+       [0, 1, 28, 29]
+       [4, 13, 55]
+       [13, 20, 40, 41]
+       [0, 1, 28, 29]
+
+    .. code-block:: c
+
+       // WARNING: Qiskit's C API does not yet allow us to implement circuits
+       // with custom gate definitions, which we therefore also cannot transpile
+       // via this API.
+
+None of the excitations sampled without filtering touch the occupied set
+(``0-6`` and ``28-34``) at all, so none of them can move a particle between an
+occupied and an unoccupied mode -- every single one is trivial and would have
+no effect on the sampled bitstrings. With ``filter_trivial=True``, all five are
+rejected and replaced by excitations that do couple an occupied mode with an
+unoccupied one, e.g. the first accepted excitation ``[0, 1, 6, 7]`` moves a
+particle between occupied modes ``0``, ``1``, and ``6`` and unoccupied mode
+``7``.
+
+Once an excitation is accepted, every mode in its support becomes
+"uncertain" and, thus, eligible to play either role for later samples --
+so the occupied and unoccupied mode sets keep growing as more excitations
+get accepted. This is what makes the second accepted excitation,
+``[0, 1, 28, 29]``, acceptable at all: all four of its modes are among the
+*originally* occupied ones, so it does not couple to any originally
+unoccupied mode. It is only accepted because modes ``0`` and ``1`` became
+uncertain -- and thus eligible as the "unoccupied" side of the coupling --
+once the first excitation touched them.
+
+.. note::
+   Without a preceding :class:`.InitializeModes` gate, ``filter_trivial=True``
+   has no occupation information to filter against: it emits a
+   :class:`UserWarning` and leaves the sampling unfiltered for that
+   :class:`.Evolution` gate.
+
+.. note::
+   ``filter_diagonal_terms=True`` remains worth keeping enabled even alongside
+   ``filter_trivial=True``. The two act at different stages: diagonal-term
+   filtering shrinks the Hamiltonian *before* sampling begins, while
+   ``filter_trivial`` only rejects already-sampled terms one draw at a time.
+   Removing the (always-trivial) diagonal terms up front reduces how often
+   ``filter_trivial`` has to reject and re-draw, lowering the runtime cost of
+   filling all ``num_groups`` slots.
+
 (Optional) Optimize the fermionic mode indexing
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

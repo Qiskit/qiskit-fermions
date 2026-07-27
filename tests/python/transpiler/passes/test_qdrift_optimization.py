@@ -19,7 +19,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 from qiskit_fermions.circuit import FermionicCircuit
-from qiskit_fermions.circuit.library import Evolution, InitializeModes
+from qiskit_fermions.circuit.library import Evolution, InitializeModes, OrbitalRotation
 from qiskit_fermions.operators import FermionOperator, MajoranaOperator, gamma
 from qiskit_fermions.operators.library import FCIDump
 from qiskit_fermions.operators.terms.grouping import group_terms_by_electronic_structure
@@ -239,3 +239,200 @@ def test_qdrift_preserves_non_evolution_gates():
 
     qdrift_circ = pm.run(circ)
     assert qdrift_circ.count_ops() == {"InitializeModes": 1, "Evolution": num_terms}
+
+
+def test_qdrift_filter_trivial_only_emits_coupling_terms():
+    """Every sampled term must have support intersecting both, the (dynamically growing) occupied
+    and unoccupied mode sets -- a term entirely confined to one side cannot change the sampled
+    bitstring and must never survive the filtering."""
+    num_modes = 4
+    init = InitializeModes([True, True, False, False])
+    hamil = FermionOperator.from_terms(
+        [
+            (((True, 0), (False, 0)), 1.0),  # n_0: trivial (within occupied)
+            (((True, 0), (True, 1), (False, 1), (False, 0)), 1.0),  # n_0 n_1: trivial
+            (((True, 2), (False, 0)), 1.0),  # 0 -> 2: couples occupied/unoccupied
+            (((True, 3), (False, 1)), 1.0),  # 1 -> 3: couples occupied/unoccupied
+            (((True, 3), (False, 2)), 1.0),  # 2 -> 3: trivial (within unoccupied)
+        ]
+    )
+    hamil.groups = None
+
+    circ = FermionicCircuit(num_modes)
+    circ.append(init, circ.modes)
+    circ.append(Evolution(num_modes, hamil, time=1.0), circ.modes)
+
+    num_terms = 30
+    qdrift = QDriftTrotterization(num_terms, filter_trivial=True, rng=42)
+    pm = FermionicPassManager(qdrift)
+
+    qdrift_circ = pm.run(circ)
+    assert qdrift_circ.count_ops() == {"InitializeModes": 1, "Evolution": num_terms}
+
+    occupied = {0, 1}
+    unoccupied = {2, 3}
+    for instruction in qdrift_circ._inner.data:
+        if instruction.operation.name != "Evolution":
+            continue
+        support = instruction.operation.operator.get_support()
+        assert support & occupied and support & unoccupied, (
+            f"sampled a trivial term with support {support}"
+        )
+        occupied |= support
+        unoccupied |= support
+
+
+def test_qdrift_filter_trivial_orbital_rotation_marks_modes_uncertain():
+    """An OrbitalRotation between InitializeModes and Evolution mixes creation operators across the
+    modes it acts on, so every one of those modes must become "uncertain" (added to both the
+    occupied and unoccupied sets) exactly like a mode touched by an accepted qDRIFT term -- a term
+    that would otherwise be trivially confined to one side must be accepted once one of its modes
+    has been marked uncertain this way."""
+    num_modes = 4
+    init = InitializeModes([True, True, False, False])  # occupied={0,1}, unoccupied={2,3}
+    # mixes mode 0 (occupied) with mode 2 (unoccupied), marking both "uncertain"
+    rotation = OrbitalRotation(np.array([[0.0, 1.0], [1.0, 0.0]], dtype=complex))
+
+    # entirely confined to the original occupied set {0, 1} -- trivial unless mode 0 is uncertain
+    hamil = FermionOperator.from_terms([(((True, 1), (False, 0)), 1.0)])
+    hamil.groups = None
+
+    circ = FermionicCircuit(num_modes)
+    circ.append(init, circ.modes)
+    circ.append(rotation, [circ.modes[0], circ.modes[2]])
+    circ.append(Evolution(num_modes, hamil, time=1.0), circ.modes)
+
+    num_terms = 5
+    qdrift = QDriftTrotterization(num_terms, filter_trivial=True, rng=42)
+    pm = FermionicPassManager(qdrift)
+
+    qdrift_circ = pm.run(circ)
+    assert qdrift_circ.count_ops() == {
+        "InitializeModes": 1,
+        "OrbitalRotation": 1,
+        "Evolution": num_terms,
+    }
+
+    for instruction in qdrift_circ._inner.data:
+        if instruction.operation.name == "Evolution":
+            assert instruction.operation.operator.get_support() == {0, 1}
+
+
+def test_qdrift_filter_trivial_rejects_purely_diagonal_hamiltonian():
+    """When every term is diagonal (i.e. never couples the occupied/unoccupied sets), filtering can
+    never find a non-trivial term, so sampling must exhaust its retry budget and raise."""
+    num_modes = 2
+    init = InitializeModes([True, False])
+    hamil = FermionOperator.from_terms([(((True, 0), (False, 0)), 1.0)])
+    hamil.groups = None
+
+    circ = FermionicCircuit(num_modes)
+    circ.append(init, circ.modes)
+    circ.append(Evolution(num_modes, hamil, time=1.0), circ.modes)
+
+    qdrift = QDriftTrotterization(3, filter_trivial=True, rng=1)
+    qdrift.MAX_SAMPLE_RETRIES = 100
+    pm = FermionicPassManager(qdrift)
+
+    with pytest.raises(RuntimeError, match="non-trivial term"):
+        pm.run(circ)
+
+
+def test_qdrift_filter_trivial_warns_without_initialize_modes():
+    """filter_trivial requires occupation information from a preceding InitializeModes gate; without
+    one, filtering cannot be applied and a UserWarning must be emitted instead of silently ignoring
+    the flag or raising."""
+    num_modes = 2
+    hamil = FermionOperator.from_terms([(((True, 0), (False, 1)), 1.0)])
+    hamil.groups = None
+
+    circ = FermionicCircuit(num_modes)
+    circ.append(Evolution(num_modes, hamil, time=1.0), circ.modes)
+
+    num_terms = 3
+    qdrift = QDriftTrotterization(num_terms, filter_trivial=True, rng=1)
+    pm = FermionicPassManager(qdrift)
+
+    with pytest.warns(UserWarning, match="not preceded by an InitializeModes gate"):
+        qdrift_circ = pm.run(circ)
+
+    assert qdrift_circ.count_ops() == {"Evolution": num_terms}
+
+
+def test_qdrift_filter_trivial_warns_when_all_modes_occupied():
+    """When the preceding InitializeModes gate(s) mark every mode as occupied, there is no
+    unoccupied mode left to couple against, so filtering cannot be applied and a UserWarning must
+    be emitted instead of silently ignoring the flag or raising."""
+    num_modes = 2
+    circ = FermionicCircuit(num_modes)
+    circ.append(InitializeModes([True, True]), circ.modes)
+
+    hamil = FermionOperator.from_terms([(((True, 0), (False, 1)), 1.0)])
+    hamil.groups = None
+    circ.append(Evolution(num_modes, hamil, time=1.0), circ.modes)
+
+    num_terms = 3
+    qdrift = QDriftTrotterization(num_terms, filter_trivial=True, rng=1)
+    pm = FermionicPassManager(qdrift)
+
+    with pytest.warns(UserWarning, match="marked every mode as occupied"):
+        qdrift_circ = pm.run(circ)
+
+    assert qdrift_circ.count_ops() == {"InitializeModes": 1, "Evolution": num_terms}
+
+
+def test_qdrift_filter_trivial_warns_when_all_modes_unoccupied():
+    """When the preceding InitializeModes gate(s) mark every mode as unoccupied, there is no
+    occupied mode left to couple against, so filtering cannot be applied and a UserWarning must be
+    emitted instead of silently ignoring the flag or raising."""
+    num_modes = 2
+    circ = FermionicCircuit(num_modes)
+    circ.append(InitializeModes([False, False]), circ.modes)
+
+    hamil = FermionOperator.from_terms([(((True, 0), (False, 1)), 1.0)])
+    hamil.groups = None
+    circ.append(Evolution(num_modes, hamil, time=1.0), circ.modes)
+
+    num_terms = 3
+    qdrift = QDriftTrotterization(num_terms, filter_trivial=True, rng=1)
+    pm = FermionicPassManager(qdrift)
+
+    with pytest.warns(UserWarning, match="marked every mode as unoccupied"):
+        qdrift_circ = pm.run(circ)
+
+    assert qdrift_circ.count_ops() == {"InitializeModes": 1, "Evolution": num_terms}
+
+
+def test_qdrift_filter_trivial_accumulates_parallel_initialize_modes():
+    """Several InitializeModes gates placed in parallel (e.g. one per spin sector) must have their
+    occupation information accumulated together, correctly mapped onto *global* mode indices rather
+    than assumed to start at index 0."""
+    num_modes = 4
+    circ = FermionicCircuit(num_modes)
+    # alpha sector (modes 0, 1): mode 0 occupied, mode 1 unoccupied
+    circ.append(InitializeModes([True, False]), [circ.modes[0], circ.modes[1]])
+    # beta sector (modes 2, 3): mode 2 unoccupied, mode 3 occupied
+    circ.append(InitializeModes([False, True]), [circ.modes[2], circ.modes[3]])
+
+    hamil = FermionOperator.from_terms(
+        [
+            (((True, 1), (False, 0)), 1.0),  # 0 -> 1: occupied -> unoccupied (non-trivial)
+            (((True, 2), (False, 3)), 1.0),  # 3 -> 2: occupied -> unoccupied (non-trivial)
+        ]
+    )
+    hamil.groups = None
+    circ.append(Evolution(num_modes, hamil, time=1.0), circ.modes)
+
+    num_terms = 10
+    qdrift = QDriftTrotterization(num_terms, filter_trivial=True, rng=7)
+    pm = FermionicPassManager(qdrift)
+
+    qdrift_circ = pm.run(circ)
+    assert qdrift_circ.count_ops() == {"InitializeModes": 2, "Evolution": num_terms}
+
+    # both terms already couple occupied with unoccupied modes from the start, so every sample must
+    # be accepted immediately -- exercising this confirms the occupation was read from the correct
+    # (global) mode indices rather than e.g. both gates being wrongly assumed to start at 0.
+    for instruction in qdrift_circ._inner.data:
+        if instruction.operation.name == "Evolution":
+            assert instruction.operation.operator.get_support() in ({0, 1}, {2, 3})

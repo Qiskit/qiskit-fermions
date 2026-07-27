@@ -15,16 +15,23 @@
 from __future__ import annotations
 
 import copy
+import warnings
 from typing import Any
 
 import numpy as np
+from qiskit.dagcircuit import DAGOpNode
 
 from qiskit_fermions.circuit import FermionicDAGCircuit
-from qiskit_fermions.circuit.library import Evolution
+from qiskit_fermions.circuit.library import Evolution, InitializeModes, OrbitalRotation
 from qiskit_fermions.operators import FermionOperator
 from qiskit_fermions.operators.terms.filtering import filter_diagonal_terms
 
 from ... import FermionicDAGCircuitPass
+
+
+def _global_modes(dag: FermionicDAGCircuit, node: DAGOpNode) -> np.ndarray:
+    """Returns the global mode indices that ``node`` acts on, in the order of its ``qargs``."""
+    return np.array([dag.find_bit(qubit).index for qubit in node.qargs])
 
 
 class QDriftTrotterization(FermionicDAGCircuitPass):
@@ -51,11 +58,19 @@ class QDriftTrotterization(FermionicDAGCircuitPass):
        The qDRIFT protocol was introduced in `arXiv:1811.08017 <https://arxiv.org/abs/1811.08017>`_.
     """
 
+    MAX_SAMPLE_RETRIES = 1_000_000
+    """The maximum number of consecutive rejected samples tolerated by ``filter_trivial`` before
+    :meth:`run` gives up and raises :class:`RuntimeError`. This guards against an infinite loop when
+    the Hamiltonian's remaining terms cannot bridge the tracked occupied/unoccupied mode sets — for
+    example, when both sets remain small and disjoint (few modes have been marked occupied or
+    unoccupied, and none have yet become "uncertain") and no remaining term's support touches both."""
+
     def __init__(
         self,
         num_terms: int,
         *,
         filter_diagonal_terms: bool = False,
+        filter_trivial: bool = False,
         rng: np.random.Generator | int | None = None,
     ) -> None:
         """Initializing this transpiler pass can be done with the arguments listed below.
@@ -73,7 +88,26 @@ class QDriftTrotterization(FermionicDAGCircuitPass):
                 :func:`~qiskit_fermions.operators.terms.filtering.filter_diagonal_terms`. Because
                 diagonal-term filtering is defined in terms of fermionic number operators, it is
                 only supported for :class:`.Evolution` gates whose operator is a
-                :class:`.FermionOperator`; :meth:`run` raises :class:`TypeError` otherwise.
+                :class:`.FermionOperator`; :meth:`run` raises :class:`TypeError` otherwise. This
+                remains worthwhile even in combination with ``filter_trivial=True``: it shrinks the
+                pool of terms being sampled from *before* the sampling starts, whereas
+                ``filter_trivial`` can only reject terms one draw at a time, after they have already
+                been sampled. Removing the (always-trivial) diagonal terms up front therefore lowers
+                the average number of rejected draws that ``filter_trivial`` has to make, reducing
+                the runtime cost of reaching ``num_terms`` accepted samples.
+            filter_trivial: when set to ``True``, the sampling loop rejects a sampled term unless it
+                couples a mode known to be occupied with a mode known to be unoccupied. Any term
+                acting only within one of these two sets cannot change the occupation and, thus, has
+                no effect on a sampled bitstring, so re-drawing avoids wasting one of the
+                ``num_terms`` slots on it. This requires an :class:`.InitializeModes` gate to precede
+                the :class:`.Evolution` gates being Trotterized (to seed the initial occupied and
+                unoccupied mode sets); if none is found, or if the mode sets it seeds turn out to be
+                entirely occupied or entirely unoccupied, filtering is skipped for that gate and a
+                :class:`UserWarning` is emitted instead. Any :class:`.OrbitalRotation` gate
+                encountered before or between the :class:`.Evolution` gates also updates these sets:
+                every mode it acts on becomes "uncertain" (since the rotation may mix it with any
+                other mode it touches), just like a mode touched by an accepted qDRIFT term. See the
+                :meth:`run` docstring for the precise acceptance rule.
             rng: the random number generator (rng) to be used. When this is an ``int``, the internal
                 rng will be initialized with ``np.random.default_rng(seed=rng)``.
         """
@@ -85,6 +119,10 @@ class QDriftTrotterization(FermionicDAGCircuitPass):
         self.filter_diagonal_terms = filter_diagonal_terms
         """Whether to filter out diagonal terms before the qDRIFT sampling."""
 
+        self.filter_trivial = filter_trivial
+        """Whether to reject sampled terms that cannot affect the sampled bitstring (see the
+        class docstring for the ``filter_trivial`` argument)."""
+
         self._rng = rng if isinstance(rng, np.random.Generator) else np.random.default_rng(rng)
 
     def run(self, dag: FermionicDAGCircuit) -> FermionicDAGCircuit:
@@ -94,6 +132,18 @@ class QDriftTrotterization(FermionicDAGCircuitPass):
         :class:`.Evolution` gates (see the class docstring). Nodes that are not :class:`.Evolution`
         gates are copied to the output unchanged. Since the sampling is random, the output varies
         between runs unless the ``rng`` was seeded.
+
+        When :attr:`filter_trivial` is set, this method tracks the sets of modes that are known to
+        be occupied or unoccupied, seeded from any :class:`.InitializeModes` gate(s) preceding the
+        :class:`.Evolution` gates in the circuit (several such gates placed in parallel, e.g. one per
+        spin sector, are accumulated together). A sampled term is only accepted if its support
+        intersects *both* sets, i.e. it couples a known-occupied mode with a known-unoccupied one;
+        otherwise it is discarded and re-sampled, since it cannot affect the sampled bitstring. Once a
+        term is accepted, every mode in its support becomes "uncertain" and is added to *both* sets,
+        making it eligible to participate in either role for subsequent samples. Any
+        :class:`.OrbitalRotation` gate found in the circuit updates these sets the same way: every
+        mode it acts on becomes "uncertain" too, since the rotation may mix it with any other mode
+        in its support.
 
         Args:
             dag: the input circuit with fermion-based instructions. Only
@@ -107,10 +157,40 @@ class QDriftTrotterization(FermionicDAGCircuitPass):
             TypeError: if ``filter_diagonal_terms`` is ``True`` but an :class:`.Evolution` gate
                 carries an operator that is not a :class:`.FermionOperator` (diagonal-term filtering
                 is only defined for fermionic operators).
+            RuntimeError: if ``filter_trivial`` is ``True`` and :attr:`MAX_SAMPLE_RETRIES`
+                consecutive samples are rejected without finding a non-trivial term to emit.
         """
         out_dag = dag.copy_empty_like()
 
+        # The sets of modes that are currently known to be occupied/unoccupied, respectively. Seeded
+        # by any preceding `InitializeModes` gate(s); both remain empty until the first one is
+        # encountered, which is how we distinguish "no InitializeModes seen yet" from "seeded, but
+        # every mode landed in the same set" (see the two warnings below). `filter_trivial` uses these
+        # sets to reject sampled terms that cannot change the occupation. Once a term is accepted, the
+        # modes it touches move into "uncertain" (see below), so they end up in *both* sets going
+        # forward.
+        occupied: set[int] = set()
+        unoccupied: set[int] = set()
+
         for node in dag.op_nodes():
+            if isinstance(node.op, InitializeModes):
+                modes = _global_modes(dag, node)
+                occupation = node.op.occupation
+                # Several `InitializeModes` gates may be placed in parallel (e.g. one per spin
+                # sector), so accumulate rather than overwrite.
+                occupied |= set(modes[occupation].tolist())
+                unoccupied |= set(modes[~occupation].tolist())
+
+            elif isinstance(node.op, OrbitalRotation):
+                # An `OrbitalRotation` mixes creation operators across all of the modes it acts
+                # on (its `rotation_unitary` carries no per-mode sparsity information we could use
+                # to do better - see the `OrbitalRotation` docstring), so every mode it touches
+                # becomes "uncertain" just like an accepted qDRIFT term below: no longer known to
+                # be occupied or unoccupied, and thus eligible for both roles going forward.
+                modes = set(_global_modes(dag, node).tolist())
+                occupied |= modes
+                unoccupied |= modes
+
             if not isinstance(node.op, Evolution):
                 out_dag.apply_operation_back(node.op, qargs=node.qargs)
                 continue
@@ -154,30 +234,98 @@ class QDriftTrotterization(FermionicDAGCircuitPass):
                 # term actually gets sampled.
                 terms = hamil.split_out_groups()
 
+            def _unit_terms(term):
+                if isinstance(term, tuple):
+                    # in this case, we have already normalized the coefficient to its sign
+                    return [term]
+
+                # NOTE: as per the comment earlier, we have not yet normalized the coefficients
+                # of grouped operator terms. Keep each term's sign (dropping only its magnitude)
+                # so that the sampled rotation points in the correct direction.
+                return [(actions, np.sign(coeff)) for actions, coeff in term.iter_terms()]
+
             lambd = np.sum(weights)
             delta = (lambd * time) / self.num_terms
+            probabilities = weights / lambd
 
-            sampled_indices = self._rng.choice(
-                np.arange(len(weights)),
-                size=self.num_terms,
-                p=weights / lambd,
-            )
+            filter_trivial = self.filter_trivial and (bool(occupied) and bool(unoccupied))
+            if self.filter_trivial and not filter_trivial:
+                match (bool(occupied), bool(unoccupied)):
+                    case (True, False):
+                        reason = (
+                            "the preceding InitializeModes gate(s) marked every mode as occupied, "
+                            "so no unoccupied mode is available to filter against"
+                        )
+                    case (False, True):
+                        reason = (
+                            "the preceding InitializeModes gate(s) marked every mode as "
+                            "unoccupied, so no occupied mode is available to filter against"
+                        )
+                    case _:
+                        reason = (
+                            "it is not preceded by an InitializeModes gate, so no occupation "
+                            "information is available to filter against"
+                        )
+                warnings.warn(
+                    f"filter_trivial=True has no effect on this Evolution gate because {reason}.",
+                    category=UserWarning,
+                    stacklevel=2,
+                )
 
-            for ind in sampled_indices:
-                sampled_term = terms[ind]
-                if isinstance(sampled_term, tuple):
-                    # in this case, we have already normalized the coefficient to its sign
-                    unit_terms = [sampled_term]
-                else:
-                    # NOTE: as per the comment earlier, we have not yet normalized the coefficients
-                    # of grouped operator terms. Keep each term's sign (dropping only its magnitude)
-                    # so that the sampled rotation points in the correct direction.
-                    unit_terms = [
-                        (actions, np.sign(coeff)) for actions, coeff in sampled_term.iter_terms()
-                    ]
+            if not filter_trivial:
+                # No rejection sampling is needed, so we can draw every index for this gate in a
+                # single batched call instead of `num_terms` separate scalar draws, which is
+                # considerably faster (each scalar `choice()` call rebuilds the cumulative-
+                # probability structure from scratch, whereas a batched call builds it once).
+                sampled_indices = self._rng.choice(
+                    np.arange(len(weights)), size=self.num_terms, p=probabilities
+                )
+                for sampled_idx in sampled_indices:
+                    unit_terms = _unit_terms(terms[sampled_idx])
+                    op = hamil.__class__.from_terms(unit_terms)
+                    evo = Evolution(num_modes, op, time=delta)
+                    out_dag.apply_operation_back(evo, qargs=out_dag.qubits)
+                continue
 
+            # Precomputed once here (only reached once rejection sampling is actually needed) so
+            # the loop below can draw against it directly via `searchsorted` instead of calling
+            # `rng.choice(..., p=probabilities)`, which would rebuild this same cumulative sum from
+            # scratch on every single draw.
+            cdf = np.cumsum(probabilities)
+            cdf /= cdf[-1]  # guards against float-sum drift from 1.0, matching numpy's own choice()
+
+            added_terms = 0
+            failed_attempts = 0
+            while added_terms < self.num_terms:
+                # Equivalent to `self._rng.choice(np.arange(len(weights)), p=probabilities)`:
+                # this is numpy's own implementation of weighted sampling (see `Generator.choice`),
+                # just reusing the `cdf` precomputed above instead of rebuilding it on every draw.
+                sampled_idx = cdf.searchsorted(self._rng.random(), side="right")
+                unit_terms = _unit_terms(terms[sampled_idx])
                 op = hamil.__class__.from_terms(unit_terms)
+
+                term_support = op.get_support()
+                # The term is non-trivial exactly when it couples a known-occupied mode with a
+                # known-unoccupied one; otherwise it cannot change which bitstring gets sampled.
+                if not (term_support & occupied and term_support & unoccupied):
+                    failed_attempts += 1
+                    if failed_attempts > self.MAX_SAMPLE_RETRIES:
+                        raise RuntimeError(
+                            f"Failed to sample a non-trivial term after "
+                            f"{self.MAX_SAMPLE_RETRIES} consecutive attempts. The remaining "
+                            "Hamiltonian terms may no longer be able to couple the tracked "
+                            "occupied and unoccupied mode sets."
+                        )
+                    continue
+                failed_attempts = 0
+                # The modes touched by an accepted term become "uncertain": we no longer know
+                # whether they end up occupied or not, so they must be considered eligible for
+                # both roles by subsequent samples.
+                occupied |= term_support
+                unoccupied |= term_support
+
                 evo = Evolution(num_modes, op, time=delta)
                 out_dag.apply_operation_back(evo, qargs=out_dag.qubits)
+                added_terms += 1
 
         return out_dag
