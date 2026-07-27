@@ -143,3 +143,6 @@ Next steps
   how to construct fermionic Hamiltonians that you can use with fermionic circuits.
 - Review the :ref:`SQDRIFT <sqdrift_getting_started>` getting-started guide for a practical
   end-to-end example.
+- Read the :ref:`ffsim backend guide <ffsim_backend_explanation>` to understand how a
+  :class:`.FermionicCircuit` can be simulated directly, and how these generic mode indices take on
+  spin semantics only at simulation time.

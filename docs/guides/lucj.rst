@@ -416,6 +416,9 @@ Next steps
   construct fermionic Hamiltonians such as the diagonal Coulomb operator used above.
 - See how a fermionic circuit is mapped to qubits in the
   :ref:`transpilation guide <transpilation_explanation>`.
+- Read the :ref:`ffsim backend guide <ffsim_backend_explanation>` to understand why
+  :func:`ffsim.apply_unitary` and :func:`ffsim.linear_operator` work natively on this ansatz, and how
+  to evaluate its energy without ffsim installed.
 
 .. _LUCJ: https://pubs.rsc.org/en/content/articlelanding/2023/sc/d3sc02516k
 .. _ffsim: https://qiskit-community.github.io/ffsim/

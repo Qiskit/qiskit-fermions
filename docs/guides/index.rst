@@ -45,6 +45,7 @@ this package:
    mappers
    circuit
    transpilation
+   ffsim
 
 How-Tos
 =======
