@@ -85,6 +85,13 @@ Each substantial improvement, breaking change, or deprecation will be documented
 
 ----------------------------------------------------------------------------------------------------
 
+### Citing this package
+
+If you use this package in your research, use the [CITATION.bib](CITATION.bib) file in this
+project’s repository to cite the appropriate reference(s).
+
+----------------------------------------------------------------------------------------------------
+
 ### Contributing
 
 The source code is available [on GitHub](https://github.com/Qiskit/qiskit-fermions).

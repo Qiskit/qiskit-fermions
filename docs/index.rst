@@ -49,6 +49,14 @@ By participating, you are expected to uphold Qiskit's `code of conduct <https://
 We use `GitHub issues <https://github.com/Qiskit/qiskit-fermions/issues/new/choose>`_ for tracking requests and bugs.
 
 
+Citing this package
+-------------------
+
+If you use this package in your research, use the `CITATION.bib
+<https://github.com/Qiskit/qiskit-fermions/blob/main/CITATION.bib>`_ file in
+this project's repository to cite the appropriate reference(s).
+
+
 License
 -------
 
