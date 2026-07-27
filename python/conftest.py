@@ -10,6 +10,8 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
+"""Configuration of Sybil doctests integration for pytest."""
+
 from doctest import ELLIPSIS, NORMALIZE_WHITESPACE
 
 from sybil import Sybil
