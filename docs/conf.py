@@ -10,9 +10,14 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
+import logging
 import os
 import sys
 from importlib.metadata import version as metadata_version
+
+# Reduce logging level to WARNING for the `qiskit` package to avoid unnecessary verbosity during
+# documentation generation.
+logging.getLogger("qiskit").setLevel(logging.WARNING)
 
 # The following line is required for autodoc to be able to find and import the code whose API should
 # be documented.
@@ -114,11 +119,14 @@ modindex_common_prefix = ["qiskit_fermions."]
 
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),
+    "numpy": ("https://numpy.org/doc/stable/", None),
+    "scipy": ("https://docs.scipy.org/doc/scipy/", None),
     "qiskit": ("https://quantum.cloud.ibm.com/docs/api/qiskit/", None),
     "cqiskit": ("https://quantum.cloud.ibm.com/docs/api/qiskit-c/", None),
+    "qiskit_addon_sqd": ("https://quantum.cloud.ibm.com/docs/api/qiskit-addon-sqd/", None),
     "pyomo": ("https://pyomo.readthedocs.io/en/stable/", None),
     "ffsim": ("https://qiskit-community.github.io/ffsim/", None),
-    "scipy": ("https://docs.scipy.org/doc/scipy/", None),
+    "pyscf": ("https://pyscf.org/", None),
 }
 
 plot_working_directory = "."

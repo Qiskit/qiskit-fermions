@@ -81,6 +81,11 @@ doctest = [
     # supports Windows, so both are gated to non-Windows platforms and the guide's doctest is
     # skipped there (see docs/guides/lucj.rst).
     "ffsim; sys_platform != 'win32'",
+    # the SKQD guide (docs/guides/skqd.rst) closes its final section by diagonalizing the sampled
+    # subspace with qiskit-addon-sqd (configuration recovery). It pulls in PySCF and, like ffsim,
+    # does not support Windows, so it is gated to non-Windows platforms and that step's doctest is
+    # skipped there (see docs/guides/skqd.rst).
+    "qiskit-addon-sqd; sys_platform != 'win32'",
 ]
 test = [
     {include-group = "basetest"},

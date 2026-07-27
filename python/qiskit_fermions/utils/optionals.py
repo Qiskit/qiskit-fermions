@@ -29,6 +29,7 @@ Available Testers
 
 .. autodata:: HAS_FFSIM
 .. autodata:: HAS_PYOMO
+.. autodata:: HAS_QISKIT_ADDON_SQD
 """
 
 from qiskit.utils import LazyImportTester
@@ -55,6 +56,22 @@ HAS_PYOMO = LazyImportTester(
 )
 """`Pyomo <https://www.pyomo.org/>`__ is a Python-based optimization modeling language used to build
 linear and mixed-integer programs (LP/MILP) for classical solvers.
+
+.. seealso::
+   :external:class:`~qiskit.utils.LazyDependencyManager` for usage examples and the available
+   methods of this object.
+"""
+
+HAS_QISKIT_ADDON_SQD = LazyImportTester(
+    "qiskit_addon_sqd", name="qiskit-addon-sqd", install='pip install "qiskit-addon-sqd"'
+)
+"""`qiskit-addon-sqd <https://github.com/Qiskit/qiskit-addon-sqd>`__ implements sample-based quantum
+diagonalization (SQD): it projects a Hamiltonian onto the subspace spanned by measured computational-
+basis configurations and iteratively refines that subspace via *configuration recovery*.
+
+.. note::
+   ``qiskit-addon-sqd`` pulls in PySCF, which does not support Windows, which is why it is an optional
+   dependency.
 
 .. seealso::
    :external:class:`~qiskit.utils.LazyDependencyManager` for usage examples and the available
