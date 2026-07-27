@@ -189,19 +189,21 @@ is exactly the operator the Trotter step evolves in step 4.
    >>> from qiskit_fermions.operators import FermionOperator, ann, cre
    >>>
    >>> # U n_imp_up n_imp_down: the impurity's up/down modes sit at `imp` and `imp + norb` in the
-   >>> # block-spin layout (the impurity is orbital 0 in the position basis, orbital 3 in the momentum
-   >>> # basis -- the single relocated index found above)
-   >>> imp_position, imp_momentum = 0, 3
+   >>> # block-spin layout (the impurity is orbital 0 in the position basis, orbital 3 in the
+   >>> # momentum basis -- the single relocated index found above)
+   >>> imp_pos, imp_mom = 0, 3
    >>>
-   >>> one_body_position = FermionOperator.from_1body_tril_spin_sym(h1e[np.tril_indices(norb)], norb)
+   >>> one_body_position = FermionOperator.from_1body_tril_spin_sym(
+   ...     h1e[np.tril_indices(norb)], norb
+   ... )
    >>> two_body_position = FermionOperator.from_dict(
-   ...     {(cre(imp_position), ann(imp_position), cre(imp_position + norb), ann(imp_position + norb)): onsite}
+   ...     {(cre(imp_pos), ann(imp_pos), cre(imp_pos + norb), ann(imp_pos + norb)): onsite}
    ... )
    >>> one_body_momentum = FermionOperator.from_1body_tril_spin_sym(
    ...     h1e_momentum[np.tril_indices(norb)], norb
    ... )
    >>> two_body_momentum = FermionOperator.from_dict(
-   ...     {(cre(imp_momentum), ann(imp_momentum), cre(imp_momentum + norb), ann(imp_momentum + norb)): onsite}
+   ...     {(cre(imp_mom), ann(imp_mom), cre(imp_mom + norb), ann(imp_mom + norb)): onsite}
    ... )
    >>>
    >>> hamiltonian_position = (
@@ -374,27 +376,27 @@ state only) up to :math:`D - 1`.
    >>> num_modes = 2 * norb
    >>> time_step = 0.2
    >>>
+   >>> half_exp_h2 = Evolution(num_modes, two_body_momentum, time_step / 2)
+   >>> full_exp_h1 = OrbitalRotation(scipy.linalg.expm(-1j * time_step * h1e_momentum))
+   >>>
    >>> def krylov_circuit(dim):
-   ...     # closes over the `reference_preparation` gate (step 3) and the `two_body_momentum`
-   ...     # operator (step 2), both built once above and reused for every Krylov dimension
+   ...     # closes over the fermionic gates defined in the outer scope:
+   ...     # `reference_preparation`, `half_exp_h2` and `full_exp_h1`
    ...     circuit = FermionicCircuit(num_modes)
    ...     circuit.append(reference_preparation, range(norb))
    ...     circuit.append(reference_preparation, range(norb, num_modes))
-   ...     if dim > 0:
-   ...         # the free-fermion evolution exp(-i t H_1) as a single-particle orbital rotation
-   ...         full_step = OrbitalRotation(scipy.linalg.expm(-1j * time_step * h1e_momentum))
-   ...         half_evolution = Evolution(num_modes, two_body_momentum, time_step / 2)
-   ...         for _ in range(dim):  # second-order Trotter product of `dim` steps
-   ...             circuit.append(half_evolution, circuit.modes)
-   ...             circuit.append(full_step, range(norb))
-   ...             circuit.append(full_step, range(norb, num_modes))
-   ...             circuit.append(half_evolution, circuit.modes)
+   ...     for _ in range(dim):  # second-order Trotter product of `dim` steps
+   ...         circuit.append(half_exp_h2, circuit.modes)
+   ...         circuit.append(full_exp_h1, range(norb))
+   ...         circuit.append(full_exp_h1, range(norb, num_modes))
+   ...         circuit.append(half_exp_h2, circuit.modes)
    ...     return circuit
 
 .. note::
    The fermionic circuit carries no measurements: measurement is a qubit-level concept, so we add it
    after transpilation, once the fermionic gates have been synthesized onto qubits. Convenience
-   ``measure`` instructions on :class:`.FermionicCircuit` may be introduced in the future.
+   ``measure`` instructions on :class:`.FermionicCircuit` may be introduced in the
+   `future <https://github.com/Qiskit/qiskit-fermions/issues/219>`_.
 
 5. Transpile to qubit circuits
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -405,12 +407,12 @@ brickwork of Givens rotations, and the single-term :class:`.Evolution` lowers to
 interaction gate.
 
 Because every fermionic gate here has a default synthesis, we can use the ready-made
-:func:`.generate_preset_jw_pass_manager` directly rather than hand-assembling the stages. Any keyword arguments are forwarded to the qubit stage; we pass
-``optimization_level=0`` for a faithful, unoptimized picture of the synthesized depth. Generating the
-full family of Krylov circuits is then a loop over the Krylov dimension. We keep the untranspiled
-:class:`.FermionicCircuit`\ s alongside the transpiled qubit circuits: the fermionic ones drive the
-exact (statevector) simulation in step 6, while the transpiled ones -- with measurements added -- are
-what a backend would execute.
+:func:`.generate_preset_jw_pass_manager` directly rather than hand-assembling the stages. Any
+keyword arguments are forwarded to the qubit stage; we pass ``optimization_level=0`` for a faithful,
+unoptimized picture of the synthesized depth. Generating the full family of Krylov circuits is then
+a loop over the Krylov dimension. We keep the untranspiled :class:`.FermionicCircuit`\ s alongside
+the transpiled qubit circuits: the fermionic ones drive the exact (statevector) simulation in step
+6, while the transpiled ones -- with measurements added -- are what a backend would execute.
 
 .. plot::
    :context:
@@ -419,14 +421,15 @@ what a backend would execute.
 
    >>> from qiskit_fermions.transpiler.presets import generate_preset_jw_pass_manager
    >>>
+   >>> pass_manager = generate_preset_jw_pass_manager(optimization_level=0)
+   >>>
    >>> def krylov_circuits(krylov_dim):
-   ...     pass_manager = generate_preset_jw_pass_manager(optimization_level=0)
    ...     fermionic_circuits, circuits = [], []
    ...     for dim in range(krylov_dim):
    ...         fermionic_circuit = krylov_circuit(dim)
+   ...         fermionic_circuits.append(fermionic_circuit)
    ...         circuit = pass_manager.run(fermionic_circuit)
    ...         circuit.measure_all()
-   ...         fermionic_circuits.append(fermionic_circuit)
    ...         circuits.append(circuit)
    ...     return fermionic_circuits, circuits
    ...
@@ -457,7 +460,7 @@ of the time-evolution operator.
    couplings and inflating the depth by an order of magnitude.
 
 The first circuit prepares only the reference determinant, while the last carries the most Trotter
-steps:
+steps (4 in this case):
 
 .. plot::
    :alt: The reference-state preparation circuit (Krylov dimension 0).
@@ -501,17 +504,13 @@ rotation. The gate applies ``reference_rotation`` itself.
    ... )
    >>>
    >>> shots = 1000
-   >>> counts_per_dim = []
+   >>> counts = Counter()
    >>> for dim, fermionic_circuit in enumerate(fermionic_circuits):
    ...     statevector = ffsim.apply_unitary(reference, fermionic_circuit, norb=norb, nelec=nelec)
    ...     samples = ffsim.sample_state_vector(
    ...         statevector, norb=norb, nelec=nelec, shots=shots, seed=dim
    ...     )
-   ...     counts_per_dim.append(Counter(samples))
-   >>>
-   >>> # the diagonalization in step 7 works from all sampled configurations together, so we also
-   >>> # keep the pooled counts across every Krylov circuit
-   >>> counts = sum(counts_per_dim, Counter())
+   ...     counts += Counter(samples)
 
 Pooling the samples from all five Krylov circuits, the support is tiny: a few hundred distinct
 bitstrings out of the :math:`\binom{8}{4}^2 = 4900` determinants in the ``(4, 4)`` sector. This
@@ -519,10 +518,7 @@ concentration -- a direct consequence of the momentum-basis sparsity established
 exactly what makes the subsequent classical diagonalization tractable.
 
 Plotting the counts with :func:`qiskit.visualization.plot_histogram` makes the sparsity visible -- a
-handful of configurations dominate, led by the reference determinant. Keeping the counts separate for
-each Krylov circuit (one colored series per dimension) shows the support broaden with the Krylov
-dimension: the shallowest circuit concentrates most tightly on the reference, while deeper circuits,
-carrying more Trotter evolution, spread amplitude into more configurations:
+handful of configurations dominate, led by the reference determinant.
 
 .. plot::
    :alt: Histogram of the bitstrings sampled from the Krylov circuits, showing a small support.
@@ -531,13 +527,7 @@ carrying more Trotter evolution, spread amplitude into more configurations:
 
    >>> from qiskit.visualization import plot_histogram
    >>>
-   >>> legend = [f"dim {dim}" for dim in range(len(counts_per_dim))]
-   >>> plot_histogram(
-   ...     [dict(counts) for counts in counts_per_dim],
-   ...     legend=legend,
-   ...     number_to_keep=10,
-   ...     bar_labels=False,
-   ... )
+   >>> plot_histogram(dict(counts), number_to_keep=25)
    <Figure size ... with 1 Axes>
 
 .. skip: end
@@ -599,8 +589,8 @@ occupancy of each spatial orbital in the recovered ground state. The per-iterati
 lowest across that iteration's batches, and the occupancy sums the ``orbital_occupancies`` over the
 two spin sectors. Even without noise to correct, the energy still decreases from iteration to
 iteration: each iteration diagonalizes within ``num_batches`` batches of only ``samples_per_batch``
-configurations subsampled from the pool, and the iterative refinement steadily improves which
-configurations land in those batches -- so the recovered energy tightens toward the exact value:
+configurations subsampled from the pool, and the iterative refinement due to bitstring carryover
+steadily improves which configurations land in those batches -- so the recovered energy improves:
 
 .. plot::
    :alt: SQD energy convergence and the average occupancy per spatial orbital.
@@ -640,9 +630,10 @@ This guide ran the whole SKQD pipeline on a noiseless statevector simulator. On 
 transpiled ``circuits`` would be executed and measured in place of the statevector sampling of step
 6, with the resulting counts feeding the same step-7 diagonalization unchanged. Refer to the `Qiskit
 documentation <https://quantum.cloud.ibm.com/docs/guides/intro-to-patterns>`_ for running circuits,
-and to the `SQD addon tutorials <https://qiskit.github.io/qiskit-addon-sqd/tutorials/index.html>`_
-for more on the subspace-diagonalization post-processing -- including its behavior on noisy samples,
-where configuration recovery does the most work.
+and to the `SQD addon tutorials
+<https://quantum.cloud.ibm.com/docs/en/addons/qiskit-addon-sqd/guides/overview>`_ for more on the
+subspace-diagonalization post-processing -- including its behavior on noisy samples, where
+configuration recovery does the most work.
 
 
 .. _SQD: https://arxiv.org/abs/2405.05068
