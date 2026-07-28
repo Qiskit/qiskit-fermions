@@ -101,6 +101,14 @@ impl PyEdgeVertexOperator {
     fn _fermion_operator_(&self) -> PyFermionOperator {
         py_edge_vertex_to_fermion(self.clone())
     }
+
+    /// Converts this operator into a :class:`.MajoranaOperator`.
+    ///
+    /// This implements the :class:`.SupportsMajoranaOperator` protocol by delegating to
+    /// :func:`.edge_vertex_to_majorana`.
+    fn _majorana_operator_(&self) -> PyMajoranaOperator {
+        py_edge_vertex_to_majorana(self.clone())
+    }
 }
 
 #[pymodule]

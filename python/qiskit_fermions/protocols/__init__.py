@@ -26,6 +26,7 @@ This module provides various protocols used throughout the package.
    SupportsCommutators
    SupportsFermionOperator
    SupportsLinearOperator
+   SupportsMajoranaOperator
 
 """
 
@@ -34,9 +35,11 @@ from __future__ import annotations
 from .commutators import SupportsCommutators
 from .fermion_operator import SupportsFermionOperator
 from .linear_operator import SupportsLinearOperator
+from .majorana_operator import SupportsMajoranaOperator
 
 __all__ = [
     "SupportsCommutators",
     "SupportsFermionOperator",
     "SupportsLinearOperator",
+    "SupportsMajoranaOperator",
 ]

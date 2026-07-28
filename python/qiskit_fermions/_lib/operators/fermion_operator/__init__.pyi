@@ -5,6 +5,7 @@ import builtins
 import numpy
 import numpy.typing
 from qiskit_fermions._lib.linalg import fci
+from qiskit_fermions._lib.operators import majorana_operator
 from qiskit_fermions._lib.operators.operators_library import fcidump
 import typing
 __all__ = [
@@ -310,6 +311,13 @@ class FermionOperator:
     def groups(self, value: typing.Optional[typing.Sequence[builtins.int]]) -> None:
         r"""
         Sets the :attr:`groups` attribute.
+        """
+    def _majorana_operator_(self) -> majorana_operator.MajoranaOperator:
+        r"""
+        Converts this operator into a :class:`.MajoranaOperator`.
+        
+        This implements the :class:`.SupportsMajoranaOperator` protocol by delegating to
+        :func:`.fermion_to_majorana`.
         """
     def __add__(self, other: FermionOperator) -> FermionOperator: ...
     def __iadd__(self, other: FermionOperator) -> None: ...

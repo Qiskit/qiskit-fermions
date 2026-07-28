@@ -26,6 +26,7 @@ routines.
 
    fermion_operator
    jordan_wigner
+   majorana_operator
    fermion_jordan_wigner
    fermion_to_majorana
    majorana_to_fermion
@@ -57,6 +58,7 @@ from qiskit_fermions._lib.mappers.mappers_library.transfer_vertex import (
 
 from .fermion_operator import fermion_operator
 from .jordan_wigner import jordan_wigner
+from .majorana_operator import majorana_operator
 
 __all__ = [
     "edge_vertex_to_fermion",
@@ -65,6 +67,7 @@ __all__ = [
     "fermion_operator",
     "fermion_to_majorana",
     "jordan_wigner",
+    "majorana_operator",
     "majorana_to_fermion",
     "transfer_vertex_to_edge_vertex",
     "transfer_vertex_to_fermion",

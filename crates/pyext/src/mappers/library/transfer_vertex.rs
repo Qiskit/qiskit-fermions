@@ -138,6 +138,14 @@ impl PyTransferVertexOperator {
     fn _fermion_operator_(&self) -> PyFermionOperator {
         py_transfer_vertex_to_fermion(self.clone())
     }
+
+    /// Converts this operator into a :class:`.MajoranaOperator`.
+    ///
+    /// This implements the :class:`.SupportsMajoranaOperator` protocol by delegating to
+    /// :func:`.transfer_vertex_to_majorana`.
+    fn _majorana_operator_(&self) -> PyMajoranaOperator {
+        py_transfer_vertex_to_majorana(self.clone())
+    }
 }
 
 #[pymodule]

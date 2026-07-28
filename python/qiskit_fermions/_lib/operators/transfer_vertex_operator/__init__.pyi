@@ -3,6 +3,7 @@
 
 import builtins
 from qiskit_fermions._lib.operators import fermion_operator
+from qiskit_fermions._lib.operators import majorana_operator
 import typing
 __all__ = [
     "TransferVertexOperator",
@@ -356,6 +357,13 @@ class TransferVertexOperator:
         
         This implements the :class:`.SupportsFermionOperator` protocol by delegating to
         :func:`.transfer_vertex_to_fermion`.
+        """
+    def _majorana_operator_(self) -> majorana_operator.MajoranaOperator:
+        r"""
+        Converts this operator into a :class:`.MajoranaOperator`.
+        
+        This implements the :class:`.SupportsMajoranaOperator` protocol by delegating to
+        :func:`.transfer_vertex_to_majorana`.
         """
     @staticmethod
     def _commutator_(op_a: TransferVertexOperator, op_b: TransferVertexOperator) -> TransferVertexOperator: ...
