@@ -332,7 +332,7 @@ keeping our own fermion-to-qubit synthesis:
    >>>
    >>> pm = generate_preset_jw_pass_manager()
    >>> pm.qubit, allowed_pairs_ab = generate_lucj_pass_manager(
-   ...     backend, norb, "heavy-hex", (pairs_aa, None), optimization_level=3
+   ...     backend, norb, "heavy-hex", (pairs_aa, None), optimization_level=3, seed_transpiler=0
    ... )
    >>>
    >>> # the alpha-beta interactions the heavy-hex connectivity can implement
