@@ -46,7 +46,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          python -m pip install -U pip build
+          python -m pip install -U pip build uv
 
       - name: Compile Qiskit from source
         shell: bash
@@ -81,8 +81,13 @@ jobs:
       - name: Install Python package
         shell: bash
         run: |
-          pip install --group build --group test "qiskit @ file:$(echo build/qiskit/dist/*.whl)"
-          SETUPTOOLS_RUST_CARGO_PROFILE=release pip install -e .
+          # `build`/`test` pin `qiskit` to a single minor (see `pyproject.toml`, tied to the
+          # vendored `qiskit-pyo3-ffi` snapshot), which conflicts with the dev wheel built here.
+          # Excluding `qiskit` from `uv`'s resolution means that pin is never checked against the
+          # already-installed dev version.
+          pip install "qiskit @ file:$(echo build/qiskit/dist/*.whl)"
+          uv pip install --system --exclude <(echo qiskit) --group build --group test
+          SETUPTOOLS_RUST_CARGO_PROFILE=release uv pip install --system --exclude <(echo qiskit) -e .
 
       - name: Python tests
         shell: bash
@@ -92,7 +97,7 @@ jobs:
       - name: Optional tests
         shell: bash
         run: |
-          SETUPTOOLS_RUST_CARGO_PROFILE=release pip install -e ".[all]"
+          SETUPTOOLS_RUST_CARGO_PROFILE=release uv pip install --system --exclude <(echo qiskit) -e ".[all]"
           make testoptional
 
       - name: Documentation tests

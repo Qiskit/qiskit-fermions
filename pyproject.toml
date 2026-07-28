@@ -3,7 +3,7 @@
 requires = [
     "setuptools>=77.0.1",
     "setuptools-rust",
-    "qiskit>=2.5",
+    "qiskit~=2.5.0",
 ]
 build-backend = "setuptools.build_meta"
 
@@ -32,7 +32,10 @@ classifiers = [
 requires-python = ">=3.10"
 
 dependencies = [
-    "qiskit>=2.5.0, <3",
+    # Pinned to a single minor: `crates/qiskit-pyo3-ffi` is a pre-generated FFI snapshot tied to
+    # this Qiskit release, and its stability across Qiskit minors is not yet guaranteed. Widen
+    # this once a new minor has been verified against the vendored FFI.
+    "qiskit~=2.5.0",
     "scipy>=1.10",
     "stevedore>=3.0.0",
     "typing-extensions",
@@ -55,7 +58,7 @@ simulation = [
 build = [
     "setuptools>=77.0.1",
     "setuptools-rust",
-    "qiskit>=2.5",
+    "qiskit~=2.5.0",
 ]
 style = [
     "ruff==0.16.1",
@@ -216,3 +219,36 @@ NDArray = "NDArray"
 
 [tool.typos.files]
 extend-exclude = ["crates/qiskit-pyo3-ffi"]
+
+# `pyext` is built abi3 (see `crates/pyext/Cargo.toml`'s `pyo3` feature `abi3-py310` and
+# `setup.py`'s `py_limited_api="cp310"`), so cibuildwheel collapses each platform down to a
+# single `cp310-abi3` wheel.
+[tool.cibuildwheel]
+manylinux-x86_64-image = "manylinux_2_28"
+manylinux-aarch64-image = "manylinux_2_28"
+build = ["cp3??-*"]
+skip = ["*-win32", "*_i686", "*_universal2", "*-musllinux_*"]
+# Run straight from the source checkout: passing an explicit path (`{project}/tests/python`) on
+# the command line makes pytest ignore `[tool.pytest.ini_options].testpaths`, so it never walks
+# into `python/qiskit_fermions/` and picks up the Sybil-collected doctests there (those need the
+# `doctest` dependency group and stay owned by `test_latest_versions.yml`; here we only want the
+# plain `tests/python` suite against the installed wheel). Deliberately narrower than the full
+# `test` dependency group for the same reason: doctests aren't run here (`-p no:doctest`).
+# Both the `--group` and the test path are qualified with `{project}` rather than relying on a
+# `cd`, since cibuildwheel runs the test command from its own scratch directory (not the source
+# checkout) and, on Windows, a `cd ... &&`-chained command does not reliably carry its directory
+# change through to the rest of the chain.
+test-command = "pip install --group {project}/pyproject.toml:basetest && python -m pytest -p no:doctest -s {project}/tests/python"
+environment = 'RUSTUP_TOOLCHAIN="stable"'
+
+[tool.cibuildwheel.linux]
+before-all = "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y"
+environment = 'PATH="$PATH:$HOME/.cargo/bin" CARGO_NET_GIT_FETCH_WITH_CLI="true" RUSTUP_TOOLCHAIN="stable"'
+repair-wheel-command = "auditwheel repair -w {dest_dir} {wheel} && pipx run abi3audit --strict --report {wheel}"
+
+[tool.cibuildwheel.macos]
+environment = "MACOSX_DEPLOYMENT_TARGET='11.0' RUSTUP_TOOLCHAIN=stable"
+repair-wheel-command = "delocate-wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel} && pipx run abi3audit --strict --report {wheel}"
+
+[tool.cibuildwheel.windows]
+repair-wheel-command = "cp {wheel} {dest_dir}/. && pipx run abi3audit --strict --report {wheel}"

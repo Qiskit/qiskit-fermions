@@ -46,7 +46,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          python -m pip install -U pip
+          python -m pip install -U pip uv
 
       - name: Compile Qiskit C API (minimum version)
         shell: bash
@@ -82,7 +82,7 @@ jobs:
 
       - name: Install Python dependencies (minimum versions)
         run: |
-          pip install --group build --group test qiskit uv
+          pip install --group build --group test qiskit
           uv sync --active --resolution lowest-direct
 
       - name: Install Python package
