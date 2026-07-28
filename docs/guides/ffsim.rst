@@ -156,6 +156,7 @@ add an explicit guard before ever calling it:
    :include-source:
 
    >>> from qiskit_fermions.circuit.library import Evolution
+   >>> from qiskit_fermions.linalg import apply_unitary
    >>>
    >>> non_conserving = FermionOperator.from_terms([([cre(0), cre(1)], 1.0)])  # creates 2 particles
    >>> gate = Evolution(2 * norb, non_conserving, time=1.0)
@@ -165,7 +166,7 @@ add an explicit guard before ever calling it:
    ...     reference = np.asarray([1, 0, 0, 0], dtype=complex)
    >>>
    >>> try:
-   ...     gate._apply_unitary_(reference, norb, nelec, copy=True)
+   ...     apply_unitary(reference, gate, norb, nelec, copy=True)
    ... except ValueError as exc:
    ...     print("rejected:", exc)
    rejected: Evolution requires an operator that conserves the (norb, nelec) sector: every term must preserve the particle number of each spin species (norb=2, nelec=(1, 1)).

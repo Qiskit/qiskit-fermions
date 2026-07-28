@@ -116,9 +116,10 @@ class FermionicCircuit:
         """Applies this circuit to an ffsim state vector, implementing ffsim's protocol.
 
         This walks the circuit in topological order and applies each instruction's unitary effect to
-        the state vector via ffsim's :external:class:`ffsim.SupportsApplyUnitary` protocol. Each
-        instruction acting on a subset of the register has its fermionic modes relabeled to their
-        absolute (global) indices before being applied.
+        the state vector via ffsim's :external:class:`ffsim.SupportsApplyUnitary` protocol (mirrored
+        locally as :class:`.SupportsApplyUnitary`). Each instruction acting on a subset of the
+        register has its fermionic modes relabeled to their absolute (global) indices before being
+        applied.
 
         See :meth:`_apply_unitary_placed_` for the details; this method assumes the circuit's modes
         are the vector's modes ``0..num_modes`` (i.e. an identity mode placement).
@@ -160,14 +161,17 @@ class FermionicCircuit:
         ``[m0, m1, ...]`` is applied on the global modes ``[freg_indices[m0], freg_indices[m1], ...]``.
         With the identity placement ``freg_indices == 0..num_modes`` this is exactly
         :meth:`_apply_unitary_`; a subset placement lets this circuit act as the definition of a gate
-        placed on a subset of a larger register (e.g. :class:`.UCJ`).
+        placed on a subset of a larger register (e.g. :class:`.UCJ`). This placement-aware extension
+        is documented as :class:`.SupportsApplyUnitaryPlaced` -- a package-specific protocol with no
+        ffsim equivalent.
 
         An instruction is placed onto its absolute modes only if it implements the placement-aware
-        ``_apply_unitary_placed_`` extension. An instruction implementing only ffsim's plain
-        ``_apply_unitary_`` -- which has no mode argument and therefore acts on modes ``0..k`` of the
-        vector -- can only be honored when its placement is the identity ``[0, 1, ..., k-1]``; on any
-        other subset the placement cannot be expressed and the instruction is rejected rather than
-        silently applied on the wrong modes.
+        ``_apply_unitary_placed_`` extension (:class:`.SupportsApplyUnitaryPlaced`). An instruction
+        implementing only ffsim's plain ``_apply_unitary_`` (:class:`.SupportsApplyUnitary`) -- which
+        has no mode argument and therefore acts on modes ``0..k`` of the vector -- can only be honored
+        when its placement is the identity ``[0, 1, ..., k-1]``; on any other subset the placement
+        cannot be expressed and the instruction is rejected rather than silently applied on the wrong
+        modes.
 
         Args:
             vec: the state vector to apply this circuit to. An empty circuit returns it unchanged.

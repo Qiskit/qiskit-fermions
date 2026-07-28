@@ -50,6 +50,12 @@ that dispatches to the protocol method on whatever object it is given:
    * - :class:`.SupportsLinearOperator`
      - ``_linear_operator_(self, norb, nelec)``
      - :func:`.linear_operator`
+   * - :class:`.SupportsApplyUnitary`
+     - ``_apply_unitary_(self, vec, norb, nelec, copy)``
+     - :func:`.apply_unitary`
+   * - :class:`.SupportsApplyUnitaryPlaced`
+     - ``_apply_unitary_placed_(self, vec, norb, nelec, copy, freg_indices)``
+     - --
    * - :class:`.SupportsCommutators`
      - ``_commutator_``, ``_anti_commutator_``, ``_double_commutator_`` (all ``@staticmethod``)
      - :func:`.commutator`, :func:`.anti_commutator`, :func:`.double_commutator`
@@ -58,6 +64,8 @@ that dispatches to the protocol method on whatever object it is given:
    :toctree: ../stubs/
    :class: sd-d-none
 
+   SupportsApplyUnitary
+   SupportsApplyUnitaryPlaced
    SupportsCommutators
    SupportsFermionOperator
    SupportsLinearOperator
@@ -67,12 +75,15 @@ that dispatches to the protocol method on whatever object it is given:
 
 from __future__ import annotations
 
+from .apply_unitary import SupportsApplyUnitary, SupportsApplyUnitaryPlaced
 from .commutators import SupportsCommutators
 from .fermion_operator import SupportsFermionOperator
 from .linear_operator import SupportsLinearOperator
 from .majorana_operator import SupportsMajoranaOperator
 
 __all__ = [
+    "SupportsApplyUnitary",
+    "SupportsApplyUnitaryPlaced",
     "SupportsCommutators",
     "SupportsFermionOperator",
     "SupportsLinearOperator",
