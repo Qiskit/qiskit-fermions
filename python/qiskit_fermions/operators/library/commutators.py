@@ -22,10 +22,6 @@ class SupportsCommutators(Protocol[T]):
     """A runtime-checkable Protocol indicating support for efficient commutator generation.
 
     Implementation of this protocol requires the three methods below.
-
-    .. automethod:: _commutator_
-    .. automethod:: _anti_commutator_
-    .. automethod:: _double_commutator_
     """
 
     @staticmethod

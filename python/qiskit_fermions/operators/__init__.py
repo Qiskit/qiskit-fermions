@@ -122,24 +122,25 @@ def _scipy_linear_operator_from_fci(  # noqa: D417
 ) -> scipy.sparse.linalg.LinearOperator:
     """Returns a SciPy ``LinearOperator`` for this operator on the ``(norb, nelec)`` FCI sector.
 
-    This implements ffsim's ``_linear_operator_`` protocol, so an operator carrying a native FCI
-    kernel can be passed directly to :func:`scipy.sparse.linalg.expm_multiply` or to
-    ``ffsim.linear_operator``. It depends only on the internal
+    This implements the :class:`ffsim.SupportsLinearOperator` protocol, so an operator carrying a
+    native FCI kernel can be passed directly to :func:`scipy.sparse.linalg.expm_multiply` or to
+    :func:`ffsim.linear_operator`. It depends only on the internal
     :class:`~qiskit_fermions.operators.protocol.SupportsFciLinearOperator` contract -- the
     ``_fci_linear_operator_`` carrier -- rather than on any concrete operator type, and wraps that
     native matrix-vector kernel in a genuine :class:`scipy.sparse.linalg.LinearOperator`;
-    ``expm_multiply`` requires the adjoint action, so both ``matvec`` and ``rmatvec`` are supplied.
+    :func:`~scipy.sparse.linalg.expm_multiply` requires the adjoint action, so both ``matvec`` and
+    ``rmatvec`` are supplied.
 
     The native kernel requires a contiguous one-dimensional ``complex128`` vector, whereas SciPy's
-    machinery may feed a ``LinearOperator`` real probe vectors (from its one-norm estimator) or
-    non-contiguous ``(dim, 1)`` column slices. The ``matvec``/``rmatvec`` wrappers coerce the input
-    with ``numpy.ascontiguousarray(v, complex128).reshape(-1)``; the numpy handles are bound once
-    here (per operator) rather than re-resolved on every matvec inside the ``expm_multiply`` loop.
+    machinery may feed a :class:`~scipy.sparse.linalg.LinearOperator` real probe vectors (from its
+    one-norm estimator) or non-contiguous ``(dim, 1)`` column slices. The ``matvec``/``rmatvec``
+    wrappers coerce the input with ``numpy.ascontiguousarray(v, complex128).reshape(-1)``; the numpy
+    handles are bound once here (per operator) rather than re-resolved on every matvec inside the
+    :func:`~scipy.sparse.linalg.expm_multiply` loop.
 
     This is attached to :class:`FermionOperator` as ``_linear_operator_`` at import time: the native
-    :class:`~qiskit_fermions._lib.operators.fermion_operator.FermionOperator` is a compiled type whose
-    instances cannot itself subclass SciPy's ``LinearOperator``, so the protocol method is provided in
-    Python.
+    :class:`.FermionOperator` is a compiled type whose instances cannot itself subclass SciPy's
+    :class:`~scipy.sparse.linalg.LinearOperator`, so the protocol method is provided in Python.
 
     Args:
         norb: the number of spatial orbitals.

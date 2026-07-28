@@ -635,6 +635,11 @@ and to the `SQD addon tutorials
 subspace-diagonalization post-processing -- including its behavior on noisy samples, where
 configuration recovery does the most work.
 
+Read the :ref:`ffsim backend guide <ffsim_backend_explanation>` to understand why
+:func:`ffsim.apply_unitary` and :func:`ffsim.sample_state_vector` work natively on this package's
+fermionic circuits, and why the fixed-particle-number sector used in step 6 is what makes the
+momentum-basis sparsity established in step 2 sample-efficient in the first place.
+
 
 .. _SQD: https://arxiv.org/abs/2405.05068
 .. _SKQD: https://arxiv.org/abs/2501.09702

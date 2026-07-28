@@ -30,10 +30,10 @@ if TYPE_CHECKING:
 class SupportsFciLinearOperator(Protocol):
     """A protocol for operators carrying a native FCI matrix-vector kernel.
 
-    This is the internal contract behind the public ``_linear_operator_`` protocol method attached to
-    such operators in :mod:`qiskit_fermions.operators`: the Python wrapper depends only on this
-    ``_fci_linear_operator_`` carrier, not on any concrete operator type. Today only
-    :class:`~qiskit_fermions.operators.FermionOperator` implements it.
+    This is the internal contract behind the public :meth:`~.FermionOperator._linear_operator_`
+    protocol method attached to such operators in :mod:`qiskit_fermions.operators`: the Python
+    wrapper depends only on this ``_fci_linear_operator_`` carrier, not on any concrete operator
+    type. Today only :class:`~qiskit_fermions.operators.FermionOperator` implements it.
     """
 
     def _fci_linear_operator_(self, norb: int, nelec: int | tuple[int, int]) -> FciLinearOperator:
