@@ -21,7 +21,7 @@ from qiskit.circuit.library import PauliEvolutionGate
 from qiskit.dagcircuit import DAGCircuit, DAGOpNode
 from qiskit.quantum_info import SparseObservable
 
-from qiskit_fermions.operators.protocol import OperatorTrait
+from qiskit_fermions.operators import OperatorTrait
 
 from ... import F2QLayout
 from ..utils import map_node_single_register

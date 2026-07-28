@@ -16,13 +16,11 @@ from qiskit_fermions.operators.library import (
     commutator,
     double_commutator,
 )
-from qiskit_fermions.operators.library.commutators import SupportsCommutators
 
 
 def test_commutator():
     op1 = FermionOperator.from_dict({((True, 0), (False, 0)): 1})
     op2 = FermionOperator.from_dict({((False, 0), (True, 0)): 2})
-    assert isinstance(op1, SupportsCommutators)
     comm = commutator(op1, op2)
     canon = comm.normal_ordered()
     canon.ichop()
@@ -32,7 +30,6 @@ def test_commutator():
 def test_anti_commutator():
     op1 = FermionOperator.from_dict({((True, 0), (False, 0)): 1})
     op2 = FermionOperator.from_dict({((False, 0), (True, 0)): 2})
-    assert isinstance(op1, SupportsCommutators)
     comm = anti_commutator(op1, op2)
     canon = comm.normal_ordered()
     canon.ichop()
@@ -43,7 +40,6 @@ def test_double_commutator():
     op1 = FermionOperator.from_dict({((True, 0), (False, 0)): 1})
     op2 = FermionOperator.from_dict({((False, 0), (True, 0)): 2})
     op3 = FermionOperator.from_dict({((True, 0), (False, 0)): 1, ((False, 0), (True, 0)): 2 + 0.5j})
-    assert isinstance(op1, SupportsCommutators)
     comm = double_commutator(op1, op2, op3, False)
     canon = comm.normal_ordered()
     canon.ichop()

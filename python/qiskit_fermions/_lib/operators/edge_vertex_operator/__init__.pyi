@@ -2,6 +2,8 @@
 # ruff: noqa: E501, F401, F403, F405
 
 import builtins
+from qiskit_fermions._lib.operators import fermion_operator
+from qiskit_fermions._lib.operators import majorana_operator
 import typing
 __all__ = [
     "EdgeVertexOperator",
@@ -343,6 +345,20 @@ class EdgeVertexOperator:
     def groups(self, value: typing.Optional[typing.Sequence[builtins.int]]) -> None:
         r"""
         Sets the :attr:`groups` attribute.
+        """
+    def _fermion_operator_(self) -> fermion_operator.FermionOperator:
+        r"""
+        Converts this operator into a :class:`.FermionOperator`.
+        
+        This implements the :class:`.SupportsFermionOperator` protocol by delegating to
+        :func:`.edge_vertex_to_fermion`.
+        """
+    def _majorana_operator_(self) -> majorana_operator.MajoranaOperator:
+        r"""
+        Converts this operator into a :class:`.MajoranaOperator`.
+        
+        This implements the :class:`.SupportsMajoranaOperator` protocol by delegating to
+        :func:`.edge_vertex_to_majorana`.
         """
     def __add__(self, other: EdgeVertexOperator) -> EdgeVertexOperator: ...
     def __iadd__(self, other: EdgeVertexOperator) -> None: ...

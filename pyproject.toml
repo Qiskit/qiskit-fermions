@@ -195,6 +195,9 @@ ignore = [
     "E402", # module level import not at top of file
     "D",    # pydocstyle
 ]
+"python/qiskit_fermions/**/majorana_operator.py" = [
+    "RUF002", # ambiguous unicode character in docstring: γ is a Majorana-operator symbol, not a typo
+]
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"

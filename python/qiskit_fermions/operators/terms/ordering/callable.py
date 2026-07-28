@@ -17,7 +17,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from typing import Any
 
-from qiskit_fermions.operators.protocol import OperatorTrait
+from qiskit_fermions.operators import OperatorTrait
 
 
 def order_terms(

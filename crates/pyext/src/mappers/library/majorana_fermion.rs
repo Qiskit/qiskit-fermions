@@ -103,6 +103,30 @@ pub fn py_majorana_to_fermion(maj_op: PyMajoranaOperator) -> PyFermionOperator {
     majorana_to_fermion(&maj_op.inner).into()
 }
 
+#[gen_stub_pymethods]
+#[pymethods]
+impl PyMajoranaOperator {
+    /// Converts this operator into a :class:`.FermionOperator`.
+    ///
+    /// This implements the :class:`.SupportsFermionOperator` protocol by delegating to
+    /// :func:`.majorana_to_fermion`.
+    fn _fermion_operator_(&self) -> PyFermionOperator {
+        py_majorana_to_fermion(self.clone())
+    }
+}
+
+#[gen_stub_pymethods]
+#[pymethods]
+impl PyFermionOperator {
+    /// Converts this operator into a :class:`.MajoranaOperator`.
+    ///
+    /// This implements the :class:`.SupportsMajoranaOperator` protocol by delegating to
+    /// :func:`.fermion_to_majorana`.
+    fn _majorana_operator_(&self) -> PyMajoranaOperator {
+        py_fermion_to_majorana(self.clone())
+    }
+}
+
 #[pymodule]
 pub mod majorana_fermion {
     #[pymodule_export]

@@ -317,7 +317,9 @@ Arithmetic and mathematical operations
 
 All operators implement the :class:`.OperatorTrait` protocol, which provides
 a unified set of operations across different operator types. This ensures that code
-written for one operator representation works uniformly with others.
+written for one operator representation works uniformly with others. See
+:mod:`qiskit_fermions.protocols` for how this protocol relates to the others this
+package defines.
 
 The protocol includes arithmetic operations (such as addition, multiplication,
 and composition), structural operations (term iteration, mode support analysis,

@@ -21,6 +21,11 @@ Operator Representations
 This module provides various data structures for representing fermionic operators in different
 bases.
 
+.. autosummary::
+   :toctree: ../stubs/
+
+   OperatorTrait
+
 Fermion Operator
 ----------------
 
@@ -82,102 +87,28 @@ Hermitian generators:
    EdgeVertexOperator
    TransferVertexOperator
 
-Protocol
---------
-
-All operator classes provides by this submodule implement at least those methods specified by the
-protocol below:
-
-.. autoclass:: OperatorTrait
-   :member-order: bysource
-   :show-inheritance:
-   :members:
-   :exclude-members: __init__, __subclasshook__, __weakref__
-   :no-inherited-members:
-   :special-members:
-
 """
 
 from __future__ import annotations
 
-import numpy as np
-import scipy.sparse.linalg
-
-from qiskit_fermions._lib.operators.edge_vertex_operator import (
-    EdgeVertexOperator,
-)
+from qiskit_fermions._lib.operators.edge_vertex_operator import EdgeVertexOperator
 from qiskit_fermions._lib.operators.fermion_operator import FermionOperator
 from qiskit_fermions._lib.operators.majorana_operator import MajoranaOperator
 from qiskit_fermions._lib.operators.transfer_vertex_operator import TransferVertexOperator
+from qiskit_fermions.protocols.linear_operator import scipy_linear_operator_from_fci
 
 from .edge_action import EdgeAction
 from .fermion_action import FermionAction, ann, cre
 from .majorana_action import MajoranaAction, gamma
-from .protocol import OperatorTrait, SupportsFciLinearOperator
+from .operator_trait import OperatorTrait
 from .transfer_action import TransferAction
-
-
-def _scipy_linear_operator_from_fci(  # noqa: D417
-    self: SupportsFciLinearOperator, norb: int, nelec: int | tuple[int, int]
-) -> scipy.sparse.linalg.LinearOperator:
-    """Returns a SciPy ``LinearOperator`` for this operator on the ``(norb, nelec)`` FCI sector.
-
-    This implements the :class:`ffsim.SupportsLinearOperator` protocol, so an operator carrying a
-    native FCI kernel can be passed directly to :func:`scipy.sparse.linalg.expm_multiply` or to
-    :func:`ffsim.linear_operator`. It depends only on the internal
-    :class:`~qiskit_fermions.operators.protocol.SupportsFciLinearOperator` contract -- the
-    ``_fci_linear_operator_`` carrier -- rather than on any concrete operator type, and wraps that
-    native matrix-vector kernel in a genuine :class:`scipy.sparse.linalg.LinearOperator`;
-    :func:`~scipy.sparse.linalg.expm_multiply` requires the adjoint action, so both ``matvec`` and
-    ``rmatvec`` are supplied.
-
-    The native kernel requires a contiguous one-dimensional ``complex128`` vector, whereas SciPy's
-    machinery may feed a :class:`~scipy.sparse.linalg.LinearOperator` real probe vectors (from its
-    one-norm estimator) or non-contiguous ``(dim, 1)`` column slices. The ``matvec``/``rmatvec``
-    wrappers coerce the input with ``numpy.ascontiguousarray(v, complex128).reshape(-1)``; the numpy
-    handles are bound once here (per operator) rather than re-resolved on every matvec inside the
-    :func:`~scipy.sparse.linalg.expm_multiply` loop.
-
-    This is attached to :class:`FermionOperator` as ``_linear_operator_`` at import time: the native
-    :class:`.FermionOperator` is a compiled type whose instances cannot itself subclass SciPy's
-    :class:`~scipy.sparse.linalg.LinearOperator`, so the protocol method is provided in Python.
-
-    Args:
-        norb: the number of spatial orbitals.
-        nelec: the electron count -- an integer for a spinless sector, or an ``(n_alpha, n_beta)``
-            pair for a spinful one.
-
-    Returns:
-        A :class:`scipy.sparse.linalg.LinearOperator` applying this operator on the requested sector.
-    """
-    kernel = self._fci_linear_operator_(norb, nelec)
-
-    # Bind the coercion handles once per operator (not once per matvec): SciPy hands a
-    # LinearOperator real probe vectors or non-contiguous (dim, 1) columns, which the native kernel
-    # cannot slice directly.
-    ascontiguousarray = np.ascontiguousarray
-    complex128 = np.complex128
-
-    def matvec(vec):
-        return kernel.matvec(ascontiguousarray(vec, complex128).reshape(-1))
-
-    def rmatvec(vec):
-        return kernel.rmatvec(ascontiguousarray(vec, complex128).reshape(-1))
-
-    return scipy.sparse.linalg.LinearOperator(
-        shape=kernel.shape,
-        matvec=matvec,
-        rmatvec=rmatvec,
-        dtype=kernel.dtype,
-    )
-
 
 # Attach the ffsim ``_linear_operator_`` protocol method to the compiled ``FermionOperator`` type.
 # The wrapper itself is type-agnostic (it depends only on ``SupportsFciLinearOperator``), but the
 # attach is done manually per type rather than generically: ``FermionOperator`` is the only operator
 # with a native FCI kernel today, and the ``(norb, nelec)`` sector semantics are not yet known to
 # generalize to the other operator types.
-FermionOperator._linear_operator_ = _scipy_linear_operator_from_fci  # type: ignore[attr-defined]
+FermionOperator._linear_operator_ = scipy_linear_operator_from_fci  # type: ignore[attr-defined]
 
 __all__ = [
     "EdgeAction",

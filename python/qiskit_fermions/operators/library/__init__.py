@@ -31,7 +31,6 @@ commutator variants.
 .. autosummary::
    :toctree: ../stubs/
 
-   SupportsCommutators
    commutator
    anti_commutator
    double_commutator
@@ -85,7 +84,6 @@ Finally, the following additional operator generator utilities exist in this mod
 from qiskit_fermions._lib.operators.operators_library.fcidump import FCIDump
 
 from .commutators import (
-    SupportsCommutators,
     anti_commutator,
     commutator,
     double_commutator,
@@ -93,7 +91,6 @@ from .commutators import (
 
 __all__ = [
     "FCIDump",
-    "SupportsCommutators",
     "anti_commutator",
     "commutator",
     "double_commutator",

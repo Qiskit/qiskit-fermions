@@ -23,7 +23,8 @@ Why couple with ffsim
 `ffsim`_ is a high-performance simulator for fermionic quantum circuits that exploits
 particle-number and spin-Z conservation to represent state vectors far more compactly than a
 generic :math:`2^n`-dimensional qubit statevector. It defines two small protocols that any object
-can implement to participate in its simulation machinery:
+can implement to participate in its simulation machinery (see :mod:`qiskit_fermions.protocols`
+for this package's own protocols, which follow the same design):
 
 - :class:`ffsim.SupportsApplyUnitary`, via a method ``_apply_unitary_(vec, norb, nelec, copy)``
   applying the object as a unitary to a fixed-particle-number state vector, and
@@ -83,7 +84,7 @@ guarded at runtime by :data:`~qiskit_fermions.utils.optionals.HAS_FFSIM` (as you
 On Windows, that extra simply resolves to nothing (a silent no-op via a ``sys_platform`` marker),
 rather than an install failure.
 
-Simulation must still work without ffsim, so :meth:`.FermionOperator._linear_operator_` is backed
+Simulation must still work without ffsim, so :class:`.SupportsLinearOperator` is backed
 by an independent **native Rust FCI (full configuration interaction) kernel** -- not a wrapper
 around ffsim's own linear-algebra routines. It compiles an operator's terms once into a scatter map
 over the fixed-particle-number determinant basis, then reuses that compiled form across repeated
@@ -100,8 +101,9 @@ internally -- therefore works identically whether or not ffsim is installed:
    :include-source:
 
    >>> import scipy.sparse.linalg
+   >>> from qiskit_fermions.linalg import linear_operator
    >>>
-   >>> linop = hamiltonian._linear_operator_(norb, nelec)  # pure scipy + native Rust kernel, no ffsim
+   >>> linop = linear_operator(hamiltonian, norb, nelec)  # pure scipy + native Rust kernel, no ffsim
    >>> energy, _ = scipy.sparse.linalg.eigsh(linop, k=1, which="SA")
    >>> print(f"ground-state energy: {energy[0]:.6f}")
    ground-state energy: -0.500000
@@ -154,6 +156,7 @@ add an explicit guard before ever calling it:
    :include-source:
 
    >>> from qiskit_fermions.circuit.library import Evolution
+   >>> from qiskit_fermions.linalg import apply_unitary
    >>>
    >>> non_conserving = FermionOperator.from_terms([([cre(0), cre(1)], 1.0)])  # creates 2 particles
    >>> gate = Evolution(2 * norb, non_conserving, time=1.0)
@@ -163,12 +166,12 @@ add an explicit guard before ever calling it:
    ...     reference = np.asarray([1, 0, 0, 0], dtype=complex)
    >>>
    >>> try:
-   ...     gate._apply_unitary_(reference, norb, nelec, copy=True)
+   ...     apply_unitary(reference, gate, norb, nelec, copy=True)
    ... except ValueError as exc:
    ...     print("rejected:", exc)
    rejected: Evolution requires an operator that conserves the (norb, nelec) sector: every term must preserve the particle number of each spin species (norb=2, nelec=(1, 1)).
 
-Calling :meth:`.FermionOperator._linear_operator_` *directly* on a non-conserving operator bypasses
+Calling :meth:`.SupportsLinearOperator._linear_operator_` *directly* on a non-conserving operator bypasses
 this guard -- it is a lower-level building block, not a validated simulation entry point -- and will
 return a matrix-vector product that silently zeroes the non-conserving amplitude rather than raising.
 
@@ -234,5 +237,8 @@ Next steps
   spin-agnostic mode indexing used outside of simulation calls.
 - Read the :ref:`transpilation guide <transpilation_explanation>` for how to leave fermionic space
   entirely and simulate on qubits, which is required for non-particle-conserving operators.
+- Browse :mod:`qiskit_fermions.protocols` for the full catalog of protocols this package defines,
+  including the conversion protocols (:class:`.SupportsFermionOperator`,
+  :class:`.SupportsMajoranaOperator`) that are unrelated to ffsim.
 
 .. _ffsim: https://qiskit-community.github.io/ffsim/

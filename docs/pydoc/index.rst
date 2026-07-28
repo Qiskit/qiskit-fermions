@@ -64,6 +64,16 @@ Linear Algebra
 
 
 *********
+Protocols
+*********
+
+.. toctree::
+   :maxdepth: 1
+
+   qiskit_fermions.protocols
+
+
+*********
 Utilities
 *********
 

@@ -12,44 +12,14 @@
 
 """Commutator functions."""
 
-from typing import Protocol, TypeVar, cast, runtime_checkable
+from typing import TypeVar
 
-T = TypeVar("T")
+from qiskit_fermions.protocols import SupportsCommutators
 
-
-@runtime_checkable
-class SupportsCommutators(Protocol[T]):
-    """A runtime-checkable Protocol indicating support for efficient commutator generation.
-
-    Implementation of this protocol requires the three methods below.
-    """
-
-    @staticmethod
-    def _commutator_(op_a: T, op_b: T) -> T:
-        """Computes the commutator of two operator instances.
-
-        See :func:`.commutator` for more details.
-        """
-        ...
-
-    @staticmethod
-    def _anti_commutator_(op_a: T, op_b: T) -> T:
-        """Computes the anti-commutator of two operator instances.
-
-        See :func:`.anti_commutator` for more details.
-        """
-        ...
-
-    @staticmethod
-    def _double_commutator_(op_a: T, op_b: T, op_c: T, sign: bool) -> T:
-        """Computes the double-commutator of three operator instances.
-
-        See :func:`.double_commutator` for more details.
-        """
-        ...
+T = TypeVar("T", bound=SupportsCommutators)
 
 
-def commutator(op_a: SupportsCommutators, op_b: SupportsCommutators) -> SupportsCommutators:
+def commutator(op_a: T, op_b: T) -> T:
     r"""Computes the commutator of two operators.
 
     The commutator is defined as:
@@ -81,10 +51,10 @@ def commutator(op_a: SupportsCommutators, op_b: SupportsCommutators) -> Supports
     Returns:
         The commutator :math:`[A, B]`.
     """
-    return cast(SupportsCommutators, type(op_a)._commutator_(op_a, op_b))
+    return op_a._commutator_(op_a, op_b)
 
 
-def anti_commutator(op_a: SupportsCommutators, op_b: SupportsCommutators) -> SupportsCommutators:
+def anti_commutator(op_a: T, op_b: T) -> T:
     r"""Computes the anti-commutator of two operators.
 
     The anti-commutator is defined as:
@@ -116,15 +86,10 @@ def anti_commutator(op_a: SupportsCommutators, op_b: SupportsCommutators) -> Sup
     Returns:
         The anti-commutator :math:`\{A, B\}`.
     """
-    return cast(SupportsCommutators, type(op_a)._anti_commutator_(op_a, op_b))
+    return op_a._anti_commutator_(op_a, op_b)
 
 
-def double_commutator(
-    op_a: SupportsCommutators,
-    op_b: SupportsCommutators,
-    op_c: SupportsCommutators,
-    sign: bool,
-) -> SupportsCommutators:
+def double_commutator(op_a: T, op_b: T, op_c: T, sign: bool) -> T:
     r"""Computes the double-commutator of three operators.
 
     The double-commutator is defined as follows (see also Equation (13.6.18) in [1]_):
@@ -170,4 +135,4 @@ def double_commutator(
     Returns:
         The double-commutator as per the definition above.
     """
-    return cast(SupportsCommutators, type(op_a)._double_commutator_(op_a, op_b, op_c, sign))
+    return op_a._double_commutator_(op_a, op_b, op_c, sign)

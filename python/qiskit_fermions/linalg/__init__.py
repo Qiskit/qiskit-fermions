@@ -23,10 +23,12 @@ This module provides various linear algebra utilities.
 .. autosummary::
    :toctree: ../stubs/
 
+   apply_unitary
    givens_decomposition
    givens_decomposition_slater
    double_factorized_2body
    double_factorized_t2
+   linear_operator
    reconstruct_t2
    double_factorized_t2_alpha_beta
    reconstruct_t2_alpha_beta
@@ -44,12 +46,17 @@ from qiskit_fermions._lib.linalg.givens import (
     givens_decomposition_slater,
 )
 
+from .apply_unitary import apply_unitary
+from .linear_operator import linear_operator
+
 __all__ = [
+    "apply_unitary",
     "double_factorized_2body",
     "double_factorized_t2",
     "double_factorized_t2_alpha_beta",
     "givens_decomposition",
     "givens_decomposition_slater",
+    "linear_operator",
     "reconstruct_t2",
     "reconstruct_t2_alpha_beta",
 ]
