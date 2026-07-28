@@ -14,14 +14,13 @@
 
 from __future__ import annotations
 
-from typing import Protocol, TypeVar, runtime_checkable
+from typing import Protocol, TypeVar
 
 T = TypeVar("T", bound="SupportsCommutators")
 
 
-@runtime_checkable
 class SupportsCommutators(Protocol):
-    """A runtime-checkable Protocol indicating support for efficient commutator generation.
+    """A Protocol indicating support for efficient commutator generation.
 
     Implementation of this protocol requires the three methods below. See :func:`.commutator`,
     :func:`.anti_commutator`, and :func:`.double_commutator` for the type-agnostic helper functions
