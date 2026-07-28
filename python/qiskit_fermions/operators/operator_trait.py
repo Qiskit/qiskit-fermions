@@ -25,7 +25,23 @@ else:
 
 
 class OperatorTrait(Protocol):
-    """A protocol indicating all methods implemented by operator classes."""
+    """A protocol indicating all methods implemented by operator classes.
+
+    Unlike the other protocols in this module, this one does not correspond to a single
+    type-agnostic helper function -- it is the common structural interface satisfied by every
+    concrete operator class (for example :class:`.FermionOperator` and :class:`.MajoranaOperator`),
+    used for type hints and generic code that should work uniformly across operator types.
+
+    .. doctest::
+
+        >>> from qiskit_fermions.operators import FermionOperator, MajoranaOperator
+        >>> def num_terms(op) -> int:
+        ...     return len(op)
+        >>> num_terms(FermionOperator.from_dict({((True, 0),): 1.0}))
+        1
+        >>> num_terms(MajoranaOperator.from_dict({(0, 1): 1.0}))
+        1
+    """
 
     @classmethod
     def zero(cls) -> Self:

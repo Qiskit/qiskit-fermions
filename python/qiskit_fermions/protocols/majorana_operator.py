@@ -21,7 +21,20 @@ if TYPE_CHECKING:
 
 
 class SupportsMajoranaOperator(Protocol):
-    """An equivalent of the :class:`.SupportsFermionOperator` protocol, targeting Majorana operators."""
+    """An equivalent of the :class:`.SupportsFermionOperator` protocol, targeting Majorana operators.
+
+    See :func:`.majorana_operator` for the type-agnostic helper function dispatching to the method
+    below.
+
+    .. doctest::
+
+        >>> from qiskit_fermions.operators import FermionOperator
+        >>> fer_op = FermionOperator.from_dict({((True, 0), (False, 0)): 1})
+        >>> maj_op = fer_op._majorana_operator_()
+        >>> print(format(maj_op.normal_ordered().simplify()))
+         5.000000e-1 +0.000000e0j * ()
+          0.000000e0-5.000000e-1j * (γ'0 γ0)
+    """
 
     def _majorana_operator_(self) -> MajoranaOperator:
         """Converts this operator into a :class:`.MajoranaOperator` instance."""

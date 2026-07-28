@@ -24,12 +24,27 @@ if TYPE_CHECKING:
 
 
 class SupportsLinearOperator(Protocol):
-    """A mirror of the :class:`ffsim.SupportsLinearOperator` protocol."""
+    """A mirror of the :class:`ffsim.SupportsLinearOperator` protocol.
+
+    See :func:`.linear_operator` for the type-agnostic helper function dispatching to the method
+    below.
+
+    .. doctest::
+
+        >>> import numpy as np
+        >>> from qiskit_fermions.operators import FermionOperator
+        >>> num_op = FermionOperator.from_dict({((True, 0), (False, 0)): 1.0})
+        >>> linop = num_op._linear_operator_(norb=2, nelec=1)
+        >>> linop.shape
+        (2, 2)
+        >>> linop.matvec(np.array([1.0, 0.0], dtype=complex))
+        array([1.+0.j, 0.+0.j])
+    """
 
     def _linear_operator_(
         self, norb: int, nelec: int | tuple[int, int]
     ) -> scipy.sparse.linalg.LinearOperator:
-        """Returns a SciPy ``LinearOperator`` for this operator on the ``(norb, nelec)`` FCI sector."""
+        """Returns a :class:`scipy.sparse.linalg.LinearOperator` for this operator on the ``(norb, nelec)`` FCI sector."""
 
 
 class _SupportsFciLinearOperator(Protocol):

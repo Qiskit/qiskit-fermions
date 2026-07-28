@@ -23,7 +23,19 @@ T = TypeVar("T", bound="SupportsCommutators")
 class SupportsCommutators(Protocol):
     """A runtime-checkable Protocol indicating support for efficient commutator generation.
 
-    Implementation of this protocol requires the three methods below.
+    Implementation of this protocol requires the three methods below. See :func:`.commutator`,
+    :func:`.anti_commutator`, and :func:`.double_commutator` for the type-agnostic helper functions
+    dispatching to these methods.
+
+    .. doctest::
+
+        >>> from qiskit_fermions.operators import FermionOperator
+        >>> cre_0 = FermionOperator.from_dict({((True, 0),): 1.0})
+        >>> ann_0 = FermionOperator.from_dict({((False, 0),): 1.0})
+        >>> comm = FermionOperator._commutator_(cre_0, ann_0)
+        >>> print(format(comm.normal_ordered().simplify()))
+          1.000000e0 +0.000000e0j * ()
+         -2.000000e0 +0.000000e0j * (+0 -0)
     """
 
     @staticmethod

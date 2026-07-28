@@ -23,7 +23,8 @@ Why couple with ffsim
 `ffsim`_ is a high-performance simulator for fermionic quantum circuits that exploits
 particle-number and spin-Z conservation to represent state vectors far more compactly than a
 generic :math:`2^n`-dimensional qubit statevector. It defines two small protocols that any object
-can implement to participate in its simulation machinery:
+can implement to participate in its simulation machinery (see :mod:`qiskit_fermions.protocols`
+for this package's own protocols, which follow the same design):
 
 - :class:`ffsim.SupportsApplyUnitary`, via a method ``_apply_unitary_(vec, norb, nelec, copy)``
   applying the object as a unitary to a fixed-particle-number state vector, and
@@ -234,5 +235,8 @@ Next steps
   spin-agnostic mode indexing used outside of simulation calls.
 - Read the :ref:`transpilation guide <transpilation_explanation>` for how to leave fermionic space
   entirely and simulate on qubits, which is required for non-particle-conserving operators.
+- Browse :mod:`qiskit_fermions.protocols` for the full catalog of protocols this package defines,
+  including the conversion protocols (:class:`.SupportsFermionOperator`,
+  :class:`.SupportsMajoranaOperator`) that are unrelated to ffsim.
 
 .. _ffsim: https://qiskit-community.github.io/ffsim/

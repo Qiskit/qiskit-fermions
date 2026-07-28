@@ -21,12 +21,28 @@ Mapper Library
 This module provides efficient implementations of commonly used operator representation mapper
 routines.
 
+Python wrappers
+================
+
+The functions below are thin, type-agnostic convenience mappers. Each delegates to the appropriate
+library implementation below under the hood, based on the type of the object it is given. They do
+not implement any conversion logic themselves.
+
 .. autosummary::
    :toctree: ../stubs/
 
    fermion_operator
    jordan_wigner
    majorana_operator
+
+Library implementations
+========================
+
+The functions below are the native, efficient mapper implementations backing this module.
+
+.. autosummary::
+   :toctree: ../stubs/
+
    fermion_jordan_wigner
    fermion_to_majorana
    majorana_to_fermion

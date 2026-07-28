@@ -22,7 +22,7 @@ from qiskit_fermions.protocols import SupportsLinearOperator
 def linear_operator(
     operator: SupportsLinearOperator, norb: int, nelec: int | tuple[int, int]
 ) -> scipy.sparse.linalg.LinearOperator:
-    """Returns a SciPy ``LinearOperator`` for an operator on the ``(norb, nelec)`` FCI sector.
+    """Returns a :class:`scipy.sparse.linalg.LinearOperator` for an operator on the ``(norb, nelec)`` FCI sector.
 
     This is a thin, type-agnostic wrapper around the :class:`.SupportsLinearOperator` protocol
     method, mirroring the free-function style of :func:`ffsim.linear_operator`.

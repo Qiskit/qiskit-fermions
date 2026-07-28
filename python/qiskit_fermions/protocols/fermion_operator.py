@@ -21,7 +21,20 @@ if TYPE_CHECKING:
 
 
 class SupportsFermionOperator(Protocol):
-    """An equivalent of the :class:`ffsim.SupportsFermionOperator` protocol."""
+    """An equivalent of the :class:`ffsim.SupportsFermionOperator` protocol.
+
+    See :func:`.fermion_operator` for the type-agnostic helper function dispatching to the method
+    below.
+
+    .. doctest::
+
+        >>> from qiskit_fermions.operators import MajoranaOperator
+        >>> maj_op = MajoranaOperator.from_dict({(0, 1): 1})
+        >>> fer_op = maj_op._fermion_operator_()
+        >>> print(format(fer_op.normal_ordered().simplify()))
+          0.000000e0 +1.000000e0j * ()
+          0.000000e0 -2.000000e0j * (+0 -0)
+    """
 
     def _fermion_operator_(self) -> FermionOperator:
         """Converts this operator into a :class:`.FermionOperator` instance."""
