@@ -22,7 +22,12 @@ import numpy as np
 from qiskit.dagcircuit import DAGOpNode
 
 from qiskit_fermions.circuit import FermionicDAGCircuit
-from qiskit_fermions.circuit.library import Evolution, InitializeModes, OrbitalRotation
+from qiskit_fermions.circuit.library import (
+    Evolution,
+    InitializeModes,
+    OrbitalRotation,
+    PrepareSlaterDeterminant,
+)
 from qiskit_fermions.operators import FermionOperator
 from qiskit_fermions.operators.terms.filtering import filter_diagonal_terms
 
@@ -99,15 +104,20 @@ class QDriftTrotterization(FermionicDAGCircuitPass):
                 couples a mode known to be occupied with a mode known to be unoccupied. Any term
                 acting only within one of these two sets cannot change the occupation and, thus, has
                 no effect on a sampled bitstring, so re-drawing avoids wasting one of the
-                ``num_terms`` slots on it. This requires an :class:`.InitializeModes` gate to precede
-                the :class:`.Evolution` gates being Trotterized (to seed the initial occupied and
-                unoccupied mode sets); if none is found, or if the mode sets it seeds turn out to be
-                entirely occupied or entirely unoccupied, filtering is skipped for that gate and a
-                :class:`UserWarning` is emitted instead. Any :class:`.OrbitalRotation` gate
-                encountered before or between the :class:`.Evolution` gates also updates these sets:
-                every mode it acts on becomes "uncertain" (since the rotation may mix it with any
-                other mode it touches), just like a mode touched by an accepted qDRIFT term. See the
-                :meth:`run` docstring for the precise acceptance rule.
+                ``num_terms`` slots on it. This requires an :class:`.InitializeModes` or
+                :class:`.PrepareSlaterDeterminant` gate to precede the :class:`.Evolution` gates
+                being Trotterized (to seed the initial occupied and unoccupied mode sets); if none is
+                found, or if the mode sets it seeds turn out to be entirely occupied or entirely
+                unoccupied, filtering is skipped for that gate and a :class:`UserWarning` is emitted
+                instead. Any :class:`.OrbitalRotation` gate encountered before or between the
+                :class:`.Evolution` gates also updates these sets: every mode it acts on becomes
+                "uncertain" (since the rotation may mix it with any other mode it touches), just like
+                a mode touched by an accepted qDRIFT term. A :class:`.PrepareSlaterDeterminant` gate
+                updates these sets the same way its :class:`.InitializeModes` and
+                :class:`.OrbitalRotation` components would if applied in sequence: it seeds the
+                occupied/unoccupied sets from its ``occupation``, then immediately marks every mode
+                it acts on as "uncertain" because of its rotation. See the :meth:`run` docstring for
+                the precise acceptance rule.
             rng: the random number generator (rng) to be used. When this is an ``int``, the internal
                 rng will be initialized with ``np.random.default_rng(seed=rng)``.
         """
@@ -143,7 +153,10 @@ class QDriftTrotterization(FermionicDAGCircuitPass):
         making it eligible to participate in either role for subsequent samples. Any
         :class:`.OrbitalRotation` gate found in the circuit updates these sets the same way: every
         mode it acts on becomes "uncertain" too, since the rotation may mix it with any other mode
-        in its support.
+        in its support. A :class:`.PrepareSlaterDeterminant` gate is treated as its
+        :class:`.InitializeModes` and :class:`.OrbitalRotation` components applied back-to-back: its
+        ``occupation`` first seeds the occupied/unoccupied sets, and then every mode it acts on is
+        immediately marked "uncertain", since it also carries a rotation.
 
         Args:
             dag: the input circuit with fermion-based instructions. Only
@@ -190,6 +203,20 @@ class QDriftTrotterization(FermionicDAGCircuitPass):
                 modes = set(_global_modes(dag, node).tolist())
                 occupied |= modes
                 unoccupied |= modes
+
+            elif isinstance(node.op, PrepareSlaterDeterminant):
+                # This gate is the composition of an `InitializeModes` reference occupation
+                # followed by an `OrbitalRotation` (see its class docstring), so it updates the
+                # tracked sets the same way those two gates would back-to-back: first seed from
+                # `occupation`, then immediately promote every mode it touches to "uncertain"
+                # because of the rotation it also carries.
+                modes = _global_modes(dag, node)
+                occupation = node.op.occupation
+                occupied |= set(modes[occupation].tolist())
+                unoccupied |= set(modes[~occupation].tolist())
+                all_modes = set(modes.tolist())
+                occupied |= all_modes
+                unoccupied |= all_modes
 
             if not isinstance(node.op, Evolution):
                 out_dag.apply_operation_back(node.op, qargs=node.qargs)

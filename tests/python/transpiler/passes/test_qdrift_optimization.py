@@ -19,7 +19,12 @@ from pathlib import Path
 import numpy as np
 import pytest
 from qiskit_fermions.circuit import FermionicCircuit
-from qiskit_fermions.circuit.library import Evolution, InitializeModes, OrbitalRotation
+from qiskit_fermions.circuit.library import (
+    Evolution,
+    InitializeModes,
+    OrbitalRotation,
+    PrepareSlaterDeterminant,
+)
 from qiskit_fermions.operators import FermionOperator, MajoranaOperator, gamma
 from qiskit_fermions.operators.library import FCIDump
 from qiskit_fermions.operators.terms.grouping import group_terms_by_electronic_structure
@@ -310,6 +315,42 @@ def test_qdrift_filter_trivial_orbital_rotation_marks_modes_uncertain():
     assert qdrift_circ.count_ops() == {
         "InitializeModes": 1,
         "OrbitalRotation": 1,
+        "Evolution": num_terms,
+    }
+
+    for instruction in qdrift_circ._inner.data:
+        if instruction.operation.name == "Evolution":
+            assert instruction.operation.operator.get_support() == {0, 1}
+
+
+def test_qdrift_filter_trivial_prepare_slater_determinant_seeds_and_marks_uncertain():
+    """PrepareSlaterDeterminant is the composition of an InitializeModes reference occupation and an
+    OrbitalRotation (see its class docstring), so filter_trivial must treat it as both applied
+    back-to-back: seed the occupied/unoccupied sets from its occupation, then immediately mark every
+    mode it acts on as "uncertain" because of the rotation it also carries."""
+    num_modes = 4
+    # occupation seeds occupied={0,1}, unoccupied={2,3}; the rotation swaps modes 0 and 2 (leaving 1
+    # and 3 unchanged), so all four end up "uncertain" right away, just like the OrbitalRotation-only
+    # test above (whose rotation is embedded here, extended to the identity on modes 1 and 3).
+    rotation_unitary = np.eye(4, dtype=complex)
+    rotation_unitary[[0, 2]] = rotation_unitary[[2, 0]]
+    prep = PrepareSlaterDeterminant([True, True, False, False], rotation_unitary)
+
+    # entirely confined to the original occupied set {0, 1} -- trivial unless mode 0 is uncertain
+    hamil = FermionOperator.from_terms([(((True, 1), (False, 0)), 1.0)])
+    hamil.groups = None
+
+    circ = FermionicCircuit(num_modes)
+    circ.append(prep, circ.modes)
+    circ.append(Evolution(num_modes, hamil, time=1.0), circ.modes)
+
+    num_terms = 5
+    qdrift = QDriftTrotterization(num_terms, filter_trivial=True, rng=42)
+    pm = FermionicPassManager(qdrift)
+
+    qdrift_circ = pm.run(circ)
+    assert qdrift_circ.count_ops() == {
+        "PrepareSlaterDeterminant": 1,
         "Evolution": num_terms,
     }
 
