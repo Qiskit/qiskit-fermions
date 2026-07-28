@@ -24,6 +24,7 @@ This module provides various protocols used throughout the package.
    :toctree: ../stubs/
 
    SupportsCommutators
+   SupportsFermionOperator
    SupportsLinearOperator
 
 """
@@ -31,9 +32,11 @@ This module provides various protocols used throughout the package.
 from __future__ import annotations
 
 from .commutators import SupportsCommutators
+from .fermion_operator import SupportsFermionOperator
 from .linear_operator import SupportsLinearOperator
 
 __all__ = [
     "SupportsCommutators",
+    "SupportsFermionOperator",
     "SupportsLinearOperator",
 ]

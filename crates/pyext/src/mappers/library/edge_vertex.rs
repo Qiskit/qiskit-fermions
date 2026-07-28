@@ -91,6 +91,18 @@ pub fn py_edge_vertex_to_majorana(inter_op: PyEdgeVertexOperator) -> PyMajoranaO
     edge_vertex_to_majorana(&inter_op.inner).into()
 }
 
+#[gen_stub_pymethods]
+#[pymethods]
+impl PyEdgeVertexOperator {
+    /// Converts this operator into a :class:`.FermionOperator`.
+    ///
+    /// This implements the :class:`.SupportsFermionOperator` protocol by delegating to
+    /// :func:`.edge_vertex_to_fermion`.
+    fn _fermion_operator_(&self) -> PyFermionOperator {
+        py_edge_vertex_to_fermion(self.clone())
+    }
+}
+
 #[pymodule]
 pub mod edge_vertex {
     #[pymodule_export]

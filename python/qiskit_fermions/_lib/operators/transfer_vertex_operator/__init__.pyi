@@ -2,6 +2,7 @@
 # ruff: noqa: E501, F401, F403, F405
 
 import builtins
+from qiskit_fermions._lib.operators import fermion_operator
 import typing
 __all__ = [
     "TransferVertexOperator",
@@ -348,6 +349,13 @@ class TransferVertexOperator:
     def groups(self, value: typing.Optional[typing.Sequence[builtins.int]]) -> None:
         r"""
         Sets the :attr:`groups` attribute.
+        """
+    def _fermion_operator_(self) -> fermion_operator.FermionOperator:
+        r"""
+        Converts this operator into a :class:`.FermionOperator`.
+        
+        This implements the :class:`.SupportsFermionOperator` protocol by delegating to
+        :func:`.transfer_vertex_to_fermion`.
         """
     @staticmethod
     def _commutator_(op_a: TransferVertexOperator, op_b: TransferVertexOperator) -> TransferVertexOperator: ...

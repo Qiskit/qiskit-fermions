@@ -24,6 +24,7 @@ routines.
 .. autosummary::
    :toctree: ../stubs/
 
+   fermion_operator
    jordan_wigner
    fermion_jordan_wigner
    fermion_to_majorana
@@ -54,12 +55,14 @@ from qiskit_fermions._lib.mappers.mappers_library.transfer_vertex import (
     transfer_vertex_to_majorana,
 )
 
+from .fermion_operator import fermion_operator
 from .jordan_wigner import jordan_wigner
 
 __all__ = [
     "edge_vertex_to_fermion",
     "edge_vertex_to_majorana",
     "fermion_jordan_wigner",
+    "fermion_operator",
     "fermion_to_majorana",
     "jordan_wigner",
     "majorana_to_fermion",
