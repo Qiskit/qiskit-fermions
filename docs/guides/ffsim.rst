@@ -44,14 +44,15 @@ simulated statevector into measurement counts -- work out of the box.
    :nofigs:
    :include-source:
 
-   >>> from qiskit_fermions.utils.optionals import HAS_FFSIM
-   >>> if HAS_FFSIM:
-   ...     import ffsim
    >>> import numpy as np
    >>>
    >>> from qiskit_fermions.circuit import FermionicCircuit
    >>> from qiskit_fermions.circuit.library import Evolution
    >>> from qiskit_fermions.operators import FermionOperator, ann, cre
+   >>> from qiskit_fermions.utils.optionals import HAS_FFSIM
+   >>>
+   >>> if HAS_FFSIM:
+   ...     import ffsim
    >>>
    >>> norb, nelec = 2, (1, 1)
    >>> hamiltonian = FermionOperator.from_terms([
@@ -78,9 +79,9 @@ A native path when ffsim is unavailable
 Coupling with ffsim's protocols does not make ffsim a *hard* dependency. `ffsim`_ transitively
 depends on `PySCF <https://pyscf.org/>`_, which does not support Windows -- so ffsim is declared as
 an optional extra (``pip install "qiskit-fermions[simulation]"``, or transitively via ``[all]``),
-guarded at runtime by :data:`~qiskit_fermions.utils.optionals.HAS_FFSIM`. On Windows, that extra
-simply resolves to nothing (a silent no-op via a ``sys_platform`` marker), rather than an install
-failure.
+guarded at runtime by :data:`~qiskit_fermions.utils.optionals.HAS_FFSIM` (as you already saw above).
+On Windows, that extra simply resolves to nothing (a silent no-op via a ``sys_platform`` marker),
+rather than an install failure.
 
 Simulation must still work without ffsim, so :meth:`.FermionOperator._linear_operator_` is backed
 by an independent **native Rust FCI (full configuration interaction) kernel** -- not a wrapper
@@ -110,16 +111,16 @@ time purely for performance: :class:`.OrbitalRotation` is one example, whose ``_
 implementation delegates to ffsim's dedicated Givens-rotation kernel
 (:func:`ffsim.apply_orbital_rotation`) when ffsim is installed, and otherwise falls back to
 expressing the rotation as :math:`\exp(G)` for a one-body generator :math:`G` and applying that
-through the same native-kernel-plus-``expm_multiply`` path used throughout this section. Both paths
-implement the same protocol method and produce the same result -- ffsim is a *performance* choice
-here, not a correctness dependency. Gates without such a fast path (:class:`.Evolution`, and
-everything built out of it, such as :class:`.PrepareSlaterDeterminant` and :class:`.UCJ`) simply use
-the ffsim-independent path unconditionally.
+through the same native-kernel-plus-:func:`~scipy.sparse.linalg.expm_multiply` path used throughout
+this section. Both paths implement the same protocol method and produce the same result -- ffsim is
+a *performance* choice here, not a correctness dependency. Gates without such a fast path
+(:class:`.Evolution`, and everything built out of it, such as :class:`.UCJ`) simply use the
+ffsim-independent path unconditionally.
 
 In short: **ffsim's protocols are the interface; ffsim itself is an accelerator you can uninstall.**
 This is also why the two getting-started guides that use ffsim directly (:ref:`LUCJ
-<lucj_getting_started>` and :ref:`SKQD <skqd_getting_started>`) guard their ffsim-specific code with
-``HAS_FFSIM`` the same way this guide does.
+<lucj_getting_started>` and :ref:`SKQD <skqd_getting_started>`) internally guard their ffsim-specific
+code with :data:`~qiskit_fermions.utils.optionals.HAS_FFSIM` the same way this guide does.
 
 Fermionic simulation lives in a fixed particle-number sector
 ---------------------------------------------------------------
