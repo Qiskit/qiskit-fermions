@@ -18,7 +18,8 @@ from typing import TYPE_CHECKING
 
 import scipy.sparse.linalg
 
-from qiskit_fermions.operators.protocol import OperatorTrait
+from qiskit_fermions.linalg import linear_operator
+from qiskit_fermions.operators import OperatorTrait
 
 from .. import FermionicGate
 
@@ -175,7 +176,7 @@ class Evolution(FermionicGate):
                 + (" of each spin species" if not isinstance(nelec, int) else "")
                 + f" (norb={norb}, nelec={nelec})."
             )
-        linop = operator._linear_operator_(norb, nelec)
+        linop = linear_operator(operator, norb, nelec)
         # ``traceA`` is only a balancing hint for scipy (it factors out ``exp(traceA / n)`` to
         # improve conditioning), not a correctness input: an inexact value costs at most some
         # numerical conditioning. Passing 0.0 avoids scipy estimating the trace itself and mirrors

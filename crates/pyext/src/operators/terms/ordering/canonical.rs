@@ -65,12 +65,12 @@ use qiskit_fermions_core::operators::terms::ordering::canonical::canonical_order
 #[pyfunction(name = "canonical_order")]
 #[gen_stub(override_return_type(
     type_repr = "OperatorTrait",
-    imports = ("qiskit_fermions.operators.protocol.OperatorTrait")
+    imports = ("qiskit_fermions.operators.operator_trait.OperatorTrait")
 ))]
 pub fn py_canonical_order(
     #[gen_stub(override_type(
         type_repr = "OperatorTrait",
-        imports = ("qiskit_fermions.operators.protocol.OperatorTrait")
+        imports = ("qiskit_fermions.operators.operator_trait.OperatorTrait")
     ))]
     op: &Bound<'_, PyAny>,
 ) -> PyResult<Py<PyAny>> {
