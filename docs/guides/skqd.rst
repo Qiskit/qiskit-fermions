@@ -226,8 +226,9 @@ native FCI matrix-vector kernel), so we can hand it straight to
    :include-source:
 
    >>> import scipy.sparse.linalg
+   >>> from qiskit_fermions.linalg import linear_operator
    >>>
-   >>> linop = hamiltonian_momentum._linear_operator_(norb, nelec)
+   >>> linop = linear_operator(hamiltonian_momentum, norb, nelec)
    >>> reference_energy, ground_state = scipy.sparse.linalg.eigsh(linop, k=1, which="SA")
    >>> reference_energy = reference_energy[0]
    >>> ground_state = ground_state[:, 0]
@@ -249,7 +250,7 @@ determinants is not:
    ...     return int(np.searchsorted(np.cumsum(weights), fraction) + 1)
    ...
    >>> # the same Hamiltonian in the position basis has an identical spectrum, but a dense ground state
-   >>> position_linop = hamiltonian_position._linear_operator_(norb, nelec)
+   >>> position_linop = linear_operator(hamiltonian_position, norb, nelec)
    >>> position_energy, position_ground = scipy.sparse.linalg.eigsh(position_linop, k=1, which="SA")
    >>>
    >>> print(f"position-basis energy: {position_energy[0]:.6f}")

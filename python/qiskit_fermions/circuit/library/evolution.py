@@ -113,9 +113,9 @@ class Evolution(FermionicGate):
         """Applies ``exp(-i * time * operator)`` after relabeling the operator to global modes.
 
         The operator is relabeled onto its global modes and turned into a ``scipy`` ``LinearOperator``
-        via its ``_linear_operator_`` protocol method (backed by a native FCI matrix-vector kernel),
-        then applied to the vector via ``scipy.sparse.linalg.expm_multiply``. This mirrors ffsim's own
-        ``_apply_unitary_`` implementations (e.g. for its UCCSD operators).
+        via :func:`.linear_operator` (backed by a native FCI matrix-vector kernel), then applied to the
+        vector via ``scipy.sparse.linalg.expm_multiply``. This mirrors ffsim's own ``_apply_unitary_``
+        implementations (e.g. for its UCCSD operators).
 
         Args:
             vec: the state vector to act on.
@@ -136,7 +136,7 @@ class Evolution(FermionicGate):
             NotImplementedError: if the gate's ``operator`` is not a
                 :class:`~qiskit_fermions.operators.FermionOperator`. The simulation path is currently
                 backed by the native FCI kernel, which only ``FermionOperator`` exposes (via
-                ``_linear_operator_``); evolving other operator types is not yet supported.
+                :class:`.SupportsLinearOperator`); evolving other operator types is not yet supported.
             ValueError: if the operator does not conserve the ``(norb, nelec)`` sector. Evolving
                 under ``exp(-i * time * operator)`` only yields a unitary when ``operator`` maps the
                 sector to itself; a term that leaves the sector would be silently projected to zero by
@@ -147,10 +147,11 @@ class Evolution(FermionicGate):
         """
         from qiskit_fermions.operators import FermionOperator
 
-        # The simulation path relies on the operator exposing ``_linear_operator_`` (the native FCI
+        # The simulation path relies on the operator exposing ``SupportsLinearOperator`` (the native FCI
         # kernel) and ``conserves_sector``, which today only ``FermionOperator`` provides. Until
-        # ``_linear_operator_`` is folded into ``OperatorTrait`` so any operator can be evolved, reject
-        # a non-``FermionOperator`` operator with a clear error rather than failing obscurely deeper in.
+        # ``SupportsLinearOperator`` is folded into ``OperatorTrait`` so any operator can be evolved,
+        # reject a non-``FermionOperator`` operator with a clear error rather than failing obscurely
+        # deeper in.
         if not isinstance(self.operator, FermionOperator):
             raise NotImplementedError(
                 "Evolution can only be applied to a state vector when its operator is a "
@@ -162,7 +163,8 @@ class Evolution(FermionicGate):
             vec = vec.copy()
 
         # `self.operator` is narrowed to `FermionOperator` by the guard above, and `relabel_modes`
-        # preserves the type, so the relabeled operator exposes `conserves_sector`/`_linear_operator_`.
+        # preserves the type, so the relabeled operator exposes `conserves_sector` and satisfies
+        # `SupportsLinearOperator`.
         operator = self.operator.relabel_modes(freg_indices)
         # A term that leaves the fixed (norb, nelec) sector is projected to zero by the native kernel,
         # which would turn `exp(-i t H)` into a non-unitary map. Reject rather than silently produce a

@@ -84,7 +84,7 @@ guarded at runtime by :data:`~qiskit_fermions.utils.optionals.HAS_FFSIM` (as you
 On Windows, that extra simply resolves to nothing (a silent no-op via a ``sys_platform`` marker),
 rather than an install failure.
 
-Simulation must still work without ffsim, so :meth:`.FermionOperator._linear_operator_` is backed
+Simulation must still work without ffsim, so :class:`.SupportsLinearOperator` is backed
 by an independent **native Rust FCI (full configuration interaction) kernel** -- not a wrapper
 around ffsim's own linear-algebra routines. It compiles an operator's terms once into a scatter map
 over the fixed-particle-number determinant basis, then reuses that compiled form across repeated
@@ -101,8 +101,9 @@ internally -- therefore works identically whether or not ffsim is installed:
    :include-source:
 
    >>> import scipy.sparse.linalg
+   >>> from qiskit_fermions.linalg import linear_operator
    >>>
-   >>> linop = hamiltonian._linear_operator_(norb, nelec)  # pure scipy + native Rust kernel, no ffsim
+   >>> linop = linear_operator(hamiltonian, norb, nelec)  # pure scipy + native Rust kernel, no ffsim
    >>> energy, _ = scipy.sparse.linalg.eigsh(linop, k=1, which="SA")
    >>> print(f"ground-state energy: {energy[0]:.6f}")
    ground-state energy: -0.500000
@@ -169,7 +170,7 @@ add an explicit guard before ever calling it:
    ...     print("rejected:", exc)
    rejected: Evolution requires an operator that conserves the (norb, nelec) sector: every term must preserve the particle number of each spin species (norb=2, nelec=(1, 1)).
 
-Calling :meth:`.FermionOperator._linear_operator_` *directly* on a non-conserving operator bypasses
+Calling :meth:`.SupportsLinearOperator._linear_operator_` *directly* on a non-conserving operator bypasses
 this guard -- it is a lower-level building block, not a validated simulation entry point -- and will
 return a matrix-vector product that silently zeroes the non-conserving amplitude rather than raising.
 
