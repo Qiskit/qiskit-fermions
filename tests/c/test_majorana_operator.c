@@ -528,7 +528,7 @@ static int test_groups(void) {
 
     QfMajoranaOperator *group_ops[2];
 
-    qf_maj_op_split_out_groups(op, group_ops);
+    qf_maj_op_split_out_groups(op, NULL, 0, group_ops);
 
     uint32_t boundaries_group[3] = {0, 2, 4};
     QkComplex64 coeffs_group[2] = {{1.0, 0.0}, {1.0, 0.0}};
@@ -539,6 +539,16 @@ static int test_groups(void) {
 
     bool correct_group0 = qf_maj_op_equiv(group_ops[0], group0, 1e-10);
     bool correct_group1 = qf_maj_op_equiv(group_ops[1], group1, 1e-10);
+
+    uint32_t group_indices[2] = {1, 1};
+    QfMajoranaOperator *group_ops_indexed[2];
+    qf_maj_op_split_out_groups(op, group_indices, 2, group_ops_indexed);
+
+    bool correct_indexed0 = qf_maj_op_equiv(group_ops_indexed[0], group1, 1e-10);
+    bool correct_indexed1 = qf_maj_op_equiv(group_ops_indexed[1], group1, 1e-10);
+
+    qf_maj_op_free(group_ops_indexed[0]);
+    qf_maj_op_free(group_ops_indexed[1]);
 
     uint32_t *groups_out;
     uint64_t groups_len;
@@ -556,9 +566,9 @@ static int test_groups(void) {
     bool deleted_groups = !qf_maj_op_has_groups(op);
 
     bool passed_all = has_no_groups && has_some_groups && correct_num_groups && correct_group0 &&
-                      correct_group1 && correct_groups_len && correct_groups_out0 &&
-                      correct_groups_out1 && correct_groups_out2 && correct_groups_out3 &&
-                      deleted_groups;
+                      correct_group1 && correct_indexed0 && correct_indexed1 &&
+                      correct_groups_len && correct_groups_out0 && correct_groups_out1 &&
+                      correct_groups_out2 && correct_groups_out3 && deleted_groups;
 
     qf_maj_op_free(op);
     qf_maj_op_free(group0);

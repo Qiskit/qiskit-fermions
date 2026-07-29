@@ -15,7 +15,7 @@
 from __future__ import annotations
 
 import sys
-from collections.abc import Iterable, Iterator
+from collections.abc import Iterable, Iterator, Sequence
 from typing import Protocol
 
 if sys.version_info >= (3, 11):
@@ -133,5 +133,10 @@ class OperatorTrait(Protocol):
     def num_groups(self) -> int | None:
         """Returns the number of groups."""
 
-    def split_out_groups(self) -> list[Self]:
-        """Splits this operator into an optional list of new operators based on its :attr:`.groups`."""
+    def split_out_groups(self, group_indices: Sequence[int] | None = None) -> list[Self]:
+        """Splits this operator into an optional list of new operators based on its :attr:`.groups`.
+
+        .. note::
+           If ``group_indices`` is omitted, every group is built, in index order. Otherwise, only
+           the requested indices are built, in the given order.
+        """

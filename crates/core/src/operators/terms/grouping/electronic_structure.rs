@@ -246,7 +246,7 @@ mod tests {
             "The number of groups we expect is 14, meaning the highest group index should be 13!",
         );
 
-        let groups = normal.split_out_groups().unwrap();
+        let groups = normal.split_out_groups(None).unwrap();
         assert!(
             groups.len() == 14,
             "Expected 14 individual operators, one for each group."
@@ -301,7 +301,7 @@ mod tests {
             "The number of groups we expect is 14, meaning the highest group index should be 13!",
         );
 
-        let groups = normal.split_out_groups().unwrap();
+        let groups = normal.split_out_groups(None).unwrap();
         assert!(
             groups.len() == 14,
             "Expected 14 individual operators, one for each group."

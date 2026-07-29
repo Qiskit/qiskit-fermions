@@ -489,10 +489,23 @@ pub unsafe extern "C" fn qf_maj_op_del_groups(op: *mut MajoranaOperator) {
 /// @brief Splits this operator into a list of new operators based on its ``groups`` attribute.
 ///
 /// @param op A pointer to the majorana operator whose ``groups`` to split out.
+/// @param group_indices A pointer to the array of group indices for which to build operators, in
+///     the desired output order. May be ``NULL``, in which case every group is built, in index
+///     order (equivalent to passing every index from ``0`` to
+///     :c:func:`qf_maj_op_num_groups` ``- 1``).
+/// @param num_indices The number of indices in the ``group_indices`` array. Ignored if
+///     ``group_indices`` is ``NULL``.
 /// @param group_ops_out A pointer to the array of :c:struct:`QfMajoranaOperator` into which to
-///     write the operators for each group.
+///     write the operators for each requested group. Must be sized to ``num_indices`` when
+///     ``group_indices`` is non-``NULL``, or to :c:func:`qf_maj_op_num_groups` when it is
+///     ``NULL``.
 ///
 /// @rst
+///
+/// A duplicate index in ``group_indices`` is written once per occurrence in ``group_ops_out``.
+/// Requesting only a small number of groups out of a much larger total is significantly cheaper
+/// than requesting all of them, since terms belonging to a group that is not requested are
+/// skipped rather than appended anywhere.
 ///
 /// .. seealso::
 ///    The explanation on :ref:`grouping_explanation`.
@@ -513,17 +526,30 @@ pub unsafe extern "C" fn qf_maj_op_del_groups(op: *mut MajoranaOperator) {
 ///     uint32_t groups_in[4] = {0, 1, 0, 1};
 ///     qf_maj_op_set_groups(op, groups_in, num_terms);
 ///
+///     // build every group, in index order
 ///     QfMajoranaOperator *group_ops[2];
-///     qf_maj_op_split_out_groups(op, group_ops);
+///     qf_maj_op_split_out_groups(op, NULL, 0, group_ops);
+///
+///     // build only group 1
+///     uint32_t group_indices[1] = {1};
+///     QfMajoranaOperator *group_op[1];
+///     qf_maj_op_split_out_groups(op, group_indices, 1, group_op);
 ///
 /// @endrst
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn qf_maj_op_split_out_groups(
     op: *const MajoranaOperator,
+    group_indices: *const u32,
+    num_indices: u64,
     group_ops_out: *mut *mut MajoranaOperator,
 ) {
     let op = unsafe { const_ptr_as_ref(op) };
-    let groups = op.split_out_groups().expect(
+    let group_indices = if group_indices.is_null() {
+        None
+    } else {
+        Some(unsafe { slice_from_ptr(group_indices, num_indices as usize) })
+    };
+    let groups = op.split_out_groups(group_indices).expect(
         "Expected groups to be present. It is the user's responsibility to check this via \
         qf_maj_op_has_groups before calling this function.",
     );

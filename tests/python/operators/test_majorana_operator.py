@@ -473,8 +473,25 @@ class TestMajoranaOperator:
         with subtests.test("split groups"):
             assert all([a.equiv(b) for a, b in zip(groups, expected, strict=True)])
 
+        with subtests.test("split groups reversed"):
+            reversed_groups = op.split_out_groups(group_indices=[1, 0])
+            assert all(
+                a.equiv(b) for a, b in zip(reversed_groups, list(reversed(expected)), strict=True)
+            )
+
+        with subtests.test("split groups duplicate"):
+            duplicate_groups = op.split_out_groups(group_indices=[0, 0])
+            assert all(
+                a.equiv(b)
+                for a, b in zip(duplicate_groups, [expected[0], expected[0]], strict=True)
+            )
+
+        with subtests.test("split groups empty"):
+            assert op.split_out_groups(group_indices=[]) == []
+
     def test_split_out_groups_err(self):
         cls = self.get_class()
 
         op = cls.from_dict({(0, 1): 1, (1, 0): 1, (0, 0, 1, 1): 2})
         assert op.split_out_groups() is None
+        assert op.split_out_groups(group_indices=[0]) is None

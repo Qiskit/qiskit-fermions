@@ -126,12 +126,50 @@ impl MajoranaOperator {
         }
     }
 
-    pub fn split_out_groups(&self) -> Option<Vec<Self>> {
-        let mut groups = vec![Self::zero(); self.num_groups()? as usize];
-        for term in self.iter_with_groups() {
-            groups[term.group as usize]._append_term(term.coeff, term.modes);
+    /// Splits this operator into new operators based on its [`groups`](Self::groups).
+    ///
+    /// If `group_indices` is `None`, every group is materialized once, in index order (`0` to
+    /// [`num_groups`](Self::num_groups) `- 1`). If `group_indices` is `Some`, only the requested
+    /// indices are materialized, in the given order; a duplicate index is materialized once
+    /// internally and cloned once per occurrence in the output. This is significantly cheaper than
+    /// requesting all indices when only a small number of groups out of a much larger total are
+    /// needed, e.g. when subsampling groups for a randomized product formula, since terms
+    /// belonging to a group that is not requested are skipped rather than appended anywhere.
+    ///
+    /// Returns `None` if `self.groups` is `None`, regardless of `group_indices`.
+    pub fn split_out_groups(&self, group_indices: Option<&[u32]>) -> Option<Vec<Self>> {
+        match group_indices {
+            None => {
+                let mut groups = vec![Self::zero(); self.num_groups()? as usize];
+                for term in self.iter_with_groups() {
+                    groups[term.group as usize]._append_term(term.coeff, term.modes);
+                }
+                Some(groups)
+            }
+            Some(group_indices) => {
+                self.groups.as_ref()?;
+                let mut wanted: HashMap<u32, Self> = group_indices
+                    .iter()
+                    .map(|&idx| (idx, Self::zero()))
+                    .collect();
+                for term in self.iter_with_groups() {
+                    if let Some(acc) = wanted.get_mut(&term.group) {
+                        acc._append_term(term.coeff, term.modes);
+                    }
+                }
+                Some(
+                    group_indices
+                        .iter()
+                        .map(|idx| {
+                            wanted
+                                .get(idx)
+                                .expect("every requested index was inserted above")
+                                .clone()
+                        })
+                        .collect(),
+                )
+            }
         }
-        Some(groups)
     }
 
     pub fn normal_ordered(&self, ascending: bool, reduce: bool) -> Self {
@@ -1149,8 +1187,26 @@ mod tests {
             },
         ];
 
-        let groups = op.split_out_groups();
-        assert_eq!(groups, Some(expected));
+        let groups = op.split_out_groups(None);
+        assert_eq!(groups, Some(expected.clone()));
+
+        // reversed and non-exhaustive: asserts order-preservation and partial selection.
+        let selected = op.split_out_groups(Some(&[1, 0]));
+        assert_eq!(
+            selected,
+            Some(vec![expected[1].clone(), expected[0].clone()])
+        );
+
+        // a duplicate index must be returned once per occurrence, not deduplicated.
+        let duplicated = op.split_out_groups(Some(&[0, 0]));
+        assert_eq!(
+            duplicated,
+            Some(vec![expected[0].clone(), expected[0].clone()])
+        );
+
+        // an empty request returns an empty (not `None`) result, since `groups` is present.
+        let empty = op.split_out_groups(Some(&[]));
+        assert_eq!(empty, Some(vec![]));
     }
 
     #[test]
@@ -1166,8 +1222,8 @@ mod tests {
             groups: None,
         };
 
-        let groups = op.split_out_groups();
-        assert!(groups.is_none());
+        assert!(op.split_out_groups(None).is_none());
+        assert!(op.split_out_groups(Some(&[0])).is_none());
     }
 
     #[test]
