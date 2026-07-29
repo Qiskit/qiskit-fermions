@@ -356,7 +356,7 @@ for detailed instructions.
 
 Once the bitstring samples have been obtained, these can be used in combination
 with the Hamiltonian coefficients to perform SQD post-processing, as explained in the `SQD addon
-tutorials <https://quantum.cloud.ibm.com/docs/en/addons/qiskit-addon-sqd/guides/overview>`_.
+tutorials <https://quantum.cloud.ibm.com/docs/addons/qiskit-addon-sqd/guides/overview>`_.
 
 
 .. _qDRIFT: https://arxiv.org/abs/1811.08017
