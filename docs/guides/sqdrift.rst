@@ -78,6 +78,43 @@ detail in :ref:`this guide <grouping_explanation>`.
        QfExitCode exit = qf_ferm_op_group_terms_by_electronic_structure(normal, num_modes, false);
        QfFermionOperator* canon = qf_ferm_op_canonical_order(normal);
 
+.. hint::
+
+   The full electronic structure Hamiltonian contains certain terms whose
+   inclusion in a time-evolution circuit will have no impact on the perceived
+   bitstrings and, thus, only result in an increased sampling overhead.
+   Therefore, it is recommended that such terms be filtered from the
+   Hamiltonian at this point, before constructing the :class:`.Evolution` gate
+   in the next step.
+
+   The terms that fit this description are exactly those that are *diagonal*
+   in the occupation-number basis, i.e. the products of number operators
+   (:math:`a^\dagger_i a_i`). This includes the constant energy offset, whose
+   time evolution only introduces a global phase into the circuit, the
+   individual number-operators whose time evolution amounts to single-qubit Z
+   rotations, as well as higher-order products such as :math:`n_i n_j`. None
+   of these impact the sampled bitstrings.
+
+   The :func:`~qiskit_fermions.operators.terms.filtering.filter_diagonal_terms`
+   function removes such terms from an operator in place:
+
+   .. tab-set-code::
+
+       .. code-block:: python
+
+          >>> from qiskit_fermions.operators.terms.filtering import filter_diagonal_terms
+          >>>
+          >>> filter_diagonal_terms(canon)
+
+       .. code-block:: c
+
+          qf_ferm_op_filter_diagonal_terms(canon);
+
+   Filtering here, once, is considerably cheaper than filtering repeatedly:
+   :class:`.QDriftTrotterization` runs once per transpiled circuit, so
+   filtering the Hamiltonian beforehand -- rather than on every call -- avoids
+   redoing the same work for every circuit generated from it.
+
 3. Prepare the time evolution circuit
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -133,29 +170,6 @@ each circuit, every time we transpile the circuit. Through this, we can generate
 multiple circuit randomizations as required by the `SqDRIFT`_ algorithm by
 repeatedly running the transpilation pipeline.
 
-.. hint::
-
-   The full electronic structure Hamiltonian contains certain terms whose
-   inclusion in a time-evolution circuit will have no impact on the perceived
-   bitstrings and, thus, only result in an increased sampling overhead.
-   Therefore, it is recommended that such terms be filtered from the Hamiltonian
-   before continuing with the remaining procedure.
-
-   The terms that fit this description are exactly those that are *diagonal* in
-   the occupation-number basis, i.e. the products of number operators
-   (:math:`a^\dagger_i a_i`). This includes the constant energy offset, whose
-   time evolution only introduces a global phase into the circuit, the
-   individual number-operators whose time evolution amounts to single-qubit Z
-   rotations, as well as higher-order products such as :math:`n_i n_j`. None of
-   these impact the sampled bitstrings.
-
-   The :func:`~qiskit_fermions.operators.terms.filtering.filter_diagonal_terms`
-   function can be used to remove such terms from an operator manually (for
-   example before constructing the :class:`.Evolution` gate in the previous
-   step. Alternatively, the :class:`.QDriftTrotterization` pass can apply this
-   filtering automatically via its ``filter_diagonal_terms=True`` flag, so an
-   explicit call is usually not necessary.
-
 This step also introduces the few parameters with which one can tweak the
 ensemble of circuits to generate:
 
@@ -171,7 +185,7 @@ ensemble of circuits to generate:
        >>> from qiskit_fermions.transpiler.passes import QDriftTrotterization
        >>>
        >>> num_groups = 10
-       >>> qdrift = QDriftTrotterization(num_groups, filter_diagonal_terms=True, rng=19)
+       >>> qdrift = QDriftTrotterization(num_groups, rng=19)
        >>>
        >>> pm = generate_preset_jw_pass_manager()
        >>> pm.optimization = FermionicPassManager([qdrift])
@@ -225,11 +239,9 @@ sampled excitations with and without ``filter_trivial=True``:
        >>> hf_circ.append(Evolution(num_modes, canon, time), hf_circ.modes)
        >>>
        >>> num_groups = 5
-       >>> qdrift_unfiltered = QDriftTrotterization(
-       ...     num_groups, filter_diagonal_terms=True, rng=3480
-       ... )
+       >>> qdrift_unfiltered = QDriftTrotterization(num_groups, rng=3480)
        >>> qdrift_trivial = QDriftTrotterization(
-       ...     num_groups, filter_diagonal_terms=True, filter_trivial=True, rng=3480
+       ...     num_groups, filter_trivial=True, rng=3480
        ... )
        >>>
        >>> for instruction in FermionicPassManager(qdrift_unfiltered).run(hf_circ)._inner.data:
@@ -280,15 +292,6 @@ once the first excitation touched them.
    has no occupation information to filter against: it emits a
    :class:`UserWarning` and leaves the sampling unfiltered for that
    :class:`.Evolution` gate.
-
-.. note::
-   ``filter_diagonal_terms=True`` remains worth keeping enabled even alongside
-   ``filter_trivial=True``. The two act at different stages: diagonal-term
-   filtering shrinks the Hamiltonian *before* sampling begins, while
-   ``filter_trivial`` only rejects already-sampled terms one draw at a time.
-   Removing the (always-trivial) diagonal terms up front reduces how often
-   ``filter_trivial`` has to reject and re-draw, lowering the runtime cost of
-   filling all ``num_groups`` slots.
 
 (Optional) Optimize the fermionic mode indexing
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

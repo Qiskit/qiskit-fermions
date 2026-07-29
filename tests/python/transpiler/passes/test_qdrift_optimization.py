@@ -25,8 +25,9 @@ from qiskit_fermions.circuit.library import (
     OrbitalRotation,
     PrepareSlaterDeterminant,
 )
-from qiskit_fermions.operators import FermionOperator, MajoranaOperator, gamma
+from qiskit_fermions.operators import FermionOperator
 from qiskit_fermions.operators.library import FCIDump
+from qiskit_fermions.operators.terms.filtering import filter_diagonal_terms
 from qiskit_fermions.operators.terms.grouping import group_terms_by_electronic_structure
 from qiskit_fermions.transpiler.passes import QDriftTrotterization
 from qiskit_fermions.transpiler.passmanager import FermionicPassManager
@@ -142,6 +143,8 @@ def _is_diagonal(term):
 
 
 def test_qdrift_optimization_filter_diagonal_terms():
+    """Diagonal-term filtering is expected to happen on the Hamiltonian before it is wrapped in an
+    Evolution gate (see the QDriftTrotterization class docstring), not on every call to run()."""
     file_path = Path(__file__).parent / "../../../h2.fcidump"
     fcidump = FCIDump.from_file(str(file_path))
     num_modes = 2 * fcidump.norb
@@ -152,44 +155,25 @@ def test_qdrift_optimization_filter_diagonal_terms():
     # sanity check: the grouped, normal-ordered Hamiltonian still contains diagonal terms (the
     # constant offset and number operators) which the filtering is expected to remove.
     assert any(_is_diagonal(term) for term, _ in normal.iter_terms())
-    num_groups_before = normal.num_groups()
+
+    filter_diagonal_terms(normal)
+    assert not any(_is_diagonal(term) for term, _ in normal.iter_terms())
 
     time = 1.5
     circ = FermionicCircuit(num_modes)
     circ.append(Evolution(num_modes, normal, time=time), circ.modes)
 
     num_terms = 5
-    qdrift = QDriftTrotterization(num_terms, filter_diagonal_terms=True, rng=42)
+    qdrift = QDriftTrotterization(num_terms, rng=42)
     pm = FermionicPassManager(qdrift)
 
     qdrift_circ = pm.run(circ)
     assert qdrift_circ.count_ops() == {"Evolution": num_terms}
 
-    # the user's original operator must not have been mutated by the pass
-    assert normal.num_groups() == num_groups_before
-    assert any(_is_diagonal(term) for term, _ in normal.iter_terms())
-
     # none of the sampled sub-operators may contain a diagonal term
     for instruction in qdrift_circ._inner.data:
         for term, _ in instruction.operation.operator.iter_terms():
             assert not _is_diagonal(term), "a diagonal term was sampled despite filtering"
-
-
-def test_qdrift_optimization_filter_diagonal_terms_rejects_non_fermion_operator():
-    """Diagonal-term filtering is only defined for fermionic number operators, so requesting it for
-    an Evolution gate carrying a non-FermionOperator must raise TypeError rather than passing the
-    wrong operator type into the fermion-specific filter."""
-    num_modes = 2
-    hamil = MajoranaOperator.from_dict({(gamma(0, False), gamma(1, False)): 1.0})
-
-    circ = FermionicCircuit(num_modes)
-    circ.append(Evolution(num_modes, hamil, time=1.5), circ.modes)
-
-    qdrift = QDriftTrotterization(5, filter_diagonal_terms=True, rng=42)
-    pm = FermionicPassManager(qdrift)
-
-    with pytest.raises(TypeError, match="only supported for Evolution gates"):
-        pm.run(circ)
 
 
 def test_qdrift_optimization_preserves_coefficient_sign():
