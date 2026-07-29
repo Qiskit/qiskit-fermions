@@ -10,6 +10,8 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
+import pickle
+
 import numpy as np
 import pytest
 from qiskit_fermions.operators import FermionOperator, ann, cre
@@ -156,6 +158,21 @@ class TestFermionOperator:
             assert op.groups == reconstructed.groups
         with subtests.test("list"):
             reconstructed = cls.from_terms_with_groups(list(op.iter_terms_with_groups()))
+            assert op.equiv(reconstructed)
+            assert op.groups == reconstructed.groups
+
+    def test_pickle(self, subtests):
+        cls = self.get_class()
+        op = cls.from_dict({(cre(0), ann(2)): 2.0, (cre(2), ann(0)): 2.0})
+
+        with subtests.test("without groups"):
+            reconstructed = pickle.loads(pickle.dumps(op))
+            assert op.equiv(reconstructed)
+            assert reconstructed.groups is None
+
+        with subtests.test("with groups"):
+            op.groups = [0, 1]
+            reconstructed = pickle.loads(pickle.dumps(op))
             assert op.equiv(reconstructed)
             assert op.groups == reconstructed.groups
 

@@ -14,6 +14,8 @@
 
 from __future__ import annotations
 
+import pickle
+
 import pytest
 from qiskit import QuantumRegister
 from qiskit.circuit.library import PauliEvolutionGate
@@ -161,6 +163,32 @@ def test_relabel_modes_pyomo_optimization():
 
     qu_circ_decomp = qu_circ.decompose(reps=2)
     assert qu_circ_decomp.depth(lambda instr: len(instr.qubits) == 2) == 4
+
+
+@pytest.mark.skipif(not HAS_PYOMO, reason="Pyomo is required")
+def test_relabel_modes_pyomo_metadata_pickle():
+    """Regression test for https://github.com/Qiskit/qiskit-fermions/issues/225.
+
+    The issue speculated that the pyomo ``SolverResults`` object stashed in
+    ``dag.metadata["permutation.opt_result"]`` might not be picklable. That turned out not to be
+    the actual root cause of the reported failure, but the issue explicitly asked for a test
+    ensuring circuits carrying this metadata are -- and remain -- serializable.
+    """
+    hamil = FermionOperator.from_dict({((True, 0), (False, 2)): 2.0, ((True, 2), (False, 0)): 2.0})
+    dag = _single_evolution_dag(hamil)
+
+    solver = SolverFactory("appsi_highs")
+    solver.options["time_limit"] = 60
+    relabel = RelabelModes(solver=solver)
+
+    out_dag = relabel.run(dag)
+    assert "permutation" in out_dag.metadata
+    assert "permutation.opt_result" in out_dag.metadata
+
+    reconstructed = pickle.loads(pickle.dumps(out_dag))
+    assert reconstructed.metadata["permutation"] == out_dag.metadata["permutation"]
+    opt_result_type = type(out_dag.metadata["permutation.opt_result"])
+    assert isinstance(reconstructed.metadata["permutation.opt_result"], opt_result_type)
 
 
 def _single_evolution_dag(operator, num_modes=4, time=1.5):

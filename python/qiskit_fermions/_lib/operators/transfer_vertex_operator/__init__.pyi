@@ -872,6 +872,21 @@ class TransferVertexOperator:
             ValueError: if ``permutation`` contains duplicate entries, or is too short to relabel
                 some mode the operator acts upon.
         """
+    def __getnewargs__(self) -> tuple[builtins.list[builtins.complex], builtins.list[builtins.int], builtins.list[builtins.int], builtins.list[builtins.int]]:
+        r"""
+        Returns the constructor arguments needed to pickle this operator.
+        
+        Together with :meth:`__getstate__`/:meth:`__setstate__` (which round-trip
+        :attr:`groups`), this makes instances of this class picklable.
+        """
+    def __getstate__(self) -> typing.Optional[builtins.list[builtins.int]]:
+        r"""
+        Returns the pickled state of this operator (its :attr:`groups`).
+        """
+    def __setstate__(self, state: typing.Optional[typing.Sequence[builtins.int]]) -> None:
+        r"""
+        Restores this operator's :attr:`groups` from its pickled state.
+        """
 
 @typing.final
 class TransferVertexOperatorDataGroupIter:
