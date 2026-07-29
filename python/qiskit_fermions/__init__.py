@@ -17,7 +17,7 @@
 """
 
 import sys
-from inspect import ismodule
+from inspect import isclass, ismodule
 
 from . import _lib
 from .version import __version__  # noqa: F401
@@ -32,4 +32,14 @@ while len(__modules):
             if ismodule(__submodule):
                 __modules[__submodule] = __submodule_path
                 sys.modules[__submodule_path] = __submodule
+            elif isclass(__submodule) and __submodule.__module__ != __path:
+                # Native pyclasses declare their public, logical dotted path (e.g.
+                # ``qiskit_fermions.operators.fermion_operator``) as ``__module__`` for a
+                # user-facing ``repr``/error messages, which does not match the physical
+                # ``_lib``-rooted path under which they are actually importable. That
+                # logical path is never itself a real module, so ``pickle`` cannot resolve
+                # it via ``importlib.import_module`` when serializing a reference to the
+                # class. Aliasing it to the real (private, underscore-prefixed) module here
+                # fixes that without touching the public-facing ``__module__``.
+                sys.modules[__submodule.__module__] = __module
         del __modules[__module]

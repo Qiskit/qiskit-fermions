@@ -927,7 +927,7 @@ class FermionOperator:
             ValueError: if ``permutation`` contains duplicate entries, or is too short to relabel
                 some mode the operator acts upon.
         """
-    def _fci_linear_operator_(self, norb: builtins.int, nelec: typing.Any) -> fci.FciLinearOperator:
+    def __getnewargs__(self) -> tuple[builtins.list[builtins.complex], builtins.list[builtins.bool], builtins.list[builtins.int], builtins.list[builtins.int]]:
         r"""
         Returns a native FCI matrix-vector view of this operator on a fixed sector.
         
@@ -960,7 +960,20 @@ class FermionOperator:
             TypeError: if ``nelec`` is neither an ``int`` nor a ``(int, int)`` tuple.
             ValueError: if ``norb`` exceeds the maximum number of orbitals the bitmask
                 representation supports (64).
+        Returns the constructor arguments needed to pickle this operator.
+        
+        Together with :meth:`__getstate__`/:meth:`__setstate__` (which round-trip
+        :attr:`groups`), this makes instances of this class picklable.
         """
+    def __getstate__(self) -> typing.Optional[builtins.list[builtins.int]]:
+        r"""
+        Returns the pickled state of this operator (its :attr:`groups`).
+        """
+    def __setstate__(self, state: typing.Optional[typing.Sequence[builtins.int]]) -> None:
+        r"""
+        Restores this operator's :attr:`groups` from its pickled state.
+        """
+    def _fci_linear_operator_(self, norb: builtins.int, nelec: typing.Any) -> fci.FciLinearOperator: ...
     @staticmethod
     def _commutator_(op_a: FermionOperator, op_b: FermionOperator) -> FermionOperator: ...
     @staticmethod

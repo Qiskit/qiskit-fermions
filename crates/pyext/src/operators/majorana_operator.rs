@@ -1011,6 +1011,28 @@ impl PyMajoranaOperator {
             .map(Into::into)
             .map_err(crate::value_err)
     }
+
+    /// Returns the constructor arguments needed to pickle this operator.
+    ///
+    /// Together with :meth:`__getstate__`/:meth:`__setstate__` (which round-trip
+    /// :attr:`groups`), this makes instances of this class picklable.
+    fn __getnewargs__(&self) -> (Vec<Complex64>, Vec<u32>, Vec<usize>) {
+        (
+            self.inner.coeffs.clone(),
+            self.inner.modes.clone(),
+            self.inner.boundaries.clone(),
+        )
+    }
+
+    /// Returns the pickled state of this operator (its :attr:`groups`).
+    fn __getstate__(&self) -> Option<Vec<u32>> {
+        self.inner.groups.clone()
+    }
+
+    /// Restores this operator's :attr:`groups` from its pickled state.
+    fn __setstate__(&mut self, state: Option<Vec<u32>>) {
+        self.inner.groups = state;
+    }
 }
 
 #[pymodule]
