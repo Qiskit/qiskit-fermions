@@ -538,7 +538,7 @@ handful of configurations dominate, led by the reference determinant.
 
 The sampled bitstrings are the input to the classical half of SKQD: the Hamiltonian is projected onto
 the subspace the sampled configurations span and diagonalized there. We hand this off to the
-`qiskit-addon-sqd <https://quantum.cloud.ibm.com/docs/en/addons/qiskit-addon-sqd>`_ package, whose
+`qiskit-addon-sqd <https://quantum.cloud.ibm.com/docs/addons/qiskit-addon-sqd>`_ package, whose
 :func:`~qiskit_addon_sqd.fermion.diagonalize_fermionic_hamiltonian` runs the full sample-based
 quantum diagonalization loop: it builds a subspace from batches of the sampled configurations,
 diagonalizes the Hamiltonian in it, and iteratively refines the subspace via *configuration
@@ -632,7 +632,7 @@ transpiled ``circuits`` would be executed and measured in place of the statevect
 6, with the resulting counts feeding the same step-7 diagonalization unchanged. Refer to the `Qiskit
 documentation <https://quantum.cloud.ibm.com/docs/guides/intro-to-patterns>`_ for running circuits,
 and to the `SQD addon tutorials
-<https://quantum.cloud.ibm.com/docs/en/addons/qiskit-addon-sqd/guides/overview>`_ for more on the
+<https://quantum.cloud.ibm.com/docs/addons/qiskit-addon-sqd/guides/overview>`_ for more on the
 subspace-diagonalization post-processing -- including its behavior on noisy samples, where
 configuration recovery does the most work.
 

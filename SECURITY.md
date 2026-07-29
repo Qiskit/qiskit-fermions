@@ -17,4 +17,4 @@ Please do **not** open a public issue about a potential security vulnerability.
 You can find more details on the security vulnerability feature in the GitHub
 documentation here:
 
-https://docs.github.com/en/code-security/security-advisories/guidance-on-reporting-and-writing/privately-reporting-a-security-vulnerability
+https://docs.github.com/code-security/how-tos/report-and-fix-vulnerabilities/report-privately

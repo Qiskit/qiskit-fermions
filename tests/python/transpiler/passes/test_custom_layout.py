@@ -111,7 +111,7 @@ def derby_klassen(
 
     .. [1] C. Derby, J. Klassen, J. Bausch, and T. Cubitt, Compact fermion to qubit mappings,
            Phys. Rev. B 104, 035118 (2021),
-           `doi:10.1103/PhysRevB.104.035118 <http://dx.doi.org/10.1103/PhysRevB.104.035118>`_.
+           `doi:10.1103/PhysRevB.104.035118 <https://doi.org/10.1103/PhysRevB.104.035118>`_.
     """
     assert op.is_even()
 
@@ -169,7 +169,7 @@ def test_derby_klassen():
 
     .. [1] C. Derby, J. Klassen, J. Bausch, and T. Cubitt, Compact fermion to qubit mappings,
            Phys. Rev. B 104, 035118 (2021),
-           `doi:10.1103/PhysRevB.104.035118 <http://dx.doi.org/10.1103/PhysRevB.104.035118>`_.
+           `doi:10.1103/PhysRevB.104.035118 <https://doi.org/10.1103/PhysRevB.104.035118>`_.
     """
     num_qubits = 20
     hamil = build_fermi_hubbard_square_lattice(4, 4, 5.0, 5.0)
@@ -300,7 +300,7 @@ def test_custom_layout():
 
     .. [1] C. Derby, J. Klassen, J. Bausch, and T. Cubitt, Compact fermion to qubit mappings,
            Phys. Rev. B 104, 035118 (2021),
-           `doi:10.1103/PhysRevB.104.035118 <http://dx.doi.org/10.1103/PhysRevB.104.035118>`_.
+           `doi:10.1103/PhysRevB.104.035118 <https://doi.org/10.1103/PhysRevB.104.035118>`_.
     """
     num_modes = 16
     num_qubits = 20
