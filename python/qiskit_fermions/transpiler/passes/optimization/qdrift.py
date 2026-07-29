@@ -14,7 +14,6 @@
 
 from __future__ import annotations
 
-import copy
 import warnings
 from typing import Any
 
@@ -28,8 +27,6 @@ from qiskit_fermions.circuit.library import (
     OrbitalRotation,
     PrepareSlaterDeterminant,
 )
-from qiskit_fermions.operators import FermionOperator
-from qiskit_fermions.operators.terms.filtering import filter_diagonal_terms
 
 from ... import FermionicDAGCircuitPass
 
@@ -59,6 +56,15 @@ class QDriftTrotterization(FermionicDAGCircuitPass):
     ``num_terms`` grows. Because the output depends on the random draws, it differs from run to run
     unless a fixed ``rng`` is supplied.
 
+    .. hint::
+       Terms that are diagonal in the occupation-number basis (i.e. products of number operators)
+       have no effect on the sampled bitstrings, so including them only increases the sampling
+       overhead. Filter them out with
+       :func:`~qiskit_fermions.operators.terms.filtering.filter_diagonal_terms` on the Hamiltonian
+       *before* constructing the :class:`.Evolution` gate, rather than on every call to :meth:`run`:
+       this pass runs once per transpiled circuit, so filtering upstream avoids repeating the same
+       filtering work for every circuit generated from the same Hamiltonian.
+
     .. seealso::
        The qDRIFT protocol was introduced in `arXiv:1811.08017 <https://arxiv.org/abs/1811.08017>`_.
     """
@@ -74,7 +80,6 @@ class QDriftTrotterization(FermionicDAGCircuitPass):
         self,
         num_terms: int,
         *,
-        filter_diagonal_terms: bool = False,
         filter_trivial: bool = False,
         rng: np.random.Generator | int | None = None,
     ) -> None:
@@ -84,22 +89,6 @@ class QDriftTrotterization(FermionicDAGCircuitPass):
             num_terms: the number of terms to sample for the qDRIFT Trotterization. This equals the
                 number of :class:`.Evolution` gates emitted per input gate; a larger value reduces
                 the Trotterization error at the cost of a deeper circuit.
-            filter_diagonal_terms: when set to ``True``, terms that are diagonal in the
-                occupation-number basis (i.e. products of number operators) are removed from the
-                Hamiltonian before the qDRIFT sampling. The time evolution of such terms does not
-                affect the sampled bitstrings, so including them would only increase the sampling
-                overhead. This automates the manual filtering otherwise required when preparing a
-                Hamiltonian for SqDRIFT. The Hamiltonian is assumed to be normal-ordered. See also
-                :func:`~qiskit_fermions.operators.terms.filtering.filter_diagonal_terms`. Because
-                diagonal-term filtering is defined in terms of fermionic number operators, it is
-                only supported for :class:`.Evolution` gates whose operator is a
-                :class:`.FermionOperator`; :meth:`run` raises :class:`TypeError` otherwise. This
-                remains worthwhile even in combination with ``filter_trivial=True``: it shrinks the
-                pool of terms being sampled from *before* the sampling starts, whereas
-                ``filter_trivial`` can only reject terms one draw at a time, after they have already
-                been sampled. Removing the (always-trivial) diagonal terms up front therefore lowers
-                the average number of rejected draws that ``filter_trivial`` has to make, reducing
-                the runtime cost of reaching ``num_terms`` accepted samples.
             filter_trivial: when set to ``True``, the sampling loop rejects a sampled term unless it
                 couples a mode known to be occupied with a mode known to be unoccupied. Any term
                 acting only within one of these two sets cannot change the occupation and, thus, has
@@ -125,9 +114,6 @@ class QDriftTrotterization(FermionicDAGCircuitPass):
 
         self.num_terms = num_terms
         """The number of terms to include in the qDRIFT Trotterization."""
-
-        self.filter_diagonal_terms = filter_diagonal_terms
-        """Whether to filter out diagonal terms before the qDRIFT sampling."""
 
         self.filter_trivial = filter_trivial
         """Whether to reject sampled terms that cannot affect the sampled bitstring (see the
@@ -167,9 +153,6 @@ class QDriftTrotterization(FermionicDAGCircuitPass):
             The output circuit which is still acting on a fermionic register.
 
         Raises:
-            TypeError: if ``filter_diagonal_terms`` is ``True`` but an :class:`.Evolution` gate
-                carries an operator that is not a :class:`.FermionOperator` (diagonal-term filtering
-                is only defined for fermionic operators).
             RuntimeError: if ``filter_trivial`` is ``True`` and :attr:`MAX_SAMPLE_RETRIES`
                 consecutive samples are rejected without finding a non-trivial term to emit.
         """
@@ -225,20 +208,6 @@ class QDriftTrotterization(FermionicDAGCircuitPass):
             hamil = node.op.operator
             time = node.op.params[0]
             num_modes = len(node.qargs)
-
-            if self.filter_diagonal_terms:
-                # Diagonal-term filtering is defined in terms of fermionic number operators, so it
-                # only applies to a `FermionOperator`; reject any other operator type up front.
-                if not isinstance(hamil, FermionOperator):
-                    raise TypeError(
-                        "filter_diagonal_terms=True is only supported for Evolution gates whose "
-                        f"operator is a FermionOperator, but got {type(hamil).__name__}."
-                    )
-                # Work on a copy so that the user's original operator (held by the Evolution gate)
-                # is left untouched. Filtering re-indexes any group information to a contiguous
-                # range, keeping the grouped branch below consistent.
-                hamil = copy.deepcopy(hamil)
-                filter_diagonal_terms(hamil)
 
             terms: list[Any]  # can be either a list of operator terms or operator instances
             if hamil.groups is None:
