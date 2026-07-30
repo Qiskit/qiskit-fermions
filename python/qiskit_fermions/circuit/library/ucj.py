@@ -14,7 +14,6 @@
 
 from __future__ import annotations
 
-import numbers
 from enum import Enum
 from typing import TYPE_CHECKING, cast
 
@@ -52,22 +51,23 @@ class UCJ(FermionicGate):
     and :math:`\mathcal{U}_\text{final}` is an optional final orbital rotation. The number of terms
     :math:`L` is the number of ansatz repetitions.
 
-    This gate supports three spin variants (see :class:`.UCJ.Variant`), selected by the shapes of the
-    supplied tensors and by ``nelec`` (mirroring ffsim's
+    This gate supports three spin variants (see :class:`.UCJ.Variant`), selected explicitly by the
+    ``variant`` argument and validated against the shapes of the supplied tensors (mirroring ffsim's
     :external:class:`~ffsim.UCJOpSpinBalanced`, :external:class:`~ffsim.UCJOpSpinUnbalanced` and
     :external:class:`~ffsim.UCJOpSpinless`):
 
     - **spin-balanced** -- ``diag_coulomb_mats`` has shape ``(L, 2, norb, norb)`` (the
       ``[alpha-alpha, alpha-beta]`` matrices, with beta-beta reusing alpha-alpha and beta-alpha
       reusing alpha-beta) and ``orbital_rotations`` has shape ``(L, norb, norb)`` (one rotation
-      applied to both spin sectors).
+      applied to both spin sectors). Acts on ``2 * norb`` block-spin modes.
     - **spin-unbalanced** -- ``diag_coulomb_mats`` has shape ``(L, 3, norb, norb)`` (the
       ``[alpha-alpha, alpha-beta, beta-beta]`` matrices) and ``orbital_rotations`` has shape
-      ``(L, 2, norb, norb)`` (independent ``[alpha, beta]`` rotations).
+      ``(L, 2, norb, norb)`` (independent ``[alpha, beta]`` rotations). Acts on ``2 * norb``
+      block-spin modes.
     - **spinless** -- ``diag_coulomb_mats`` and ``orbital_rotations`` both have shape
-      ``(L, norb, norb)``. When ``nelec`` is an integer the gate acts on ``norb`` spinless modes;
-      when ``nelec`` is a pair it acts on ``2 * norb`` block-spin modes with the single diagonal
-      Coulomb matrix used for both same-spin sectors and no cross-spin interaction.
+      ``(L, norb, norb)``. Acts on ``norb`` spinless modes. The equivalent two-register operator
+      with a shared same-spin diagonal Coulomb matrix and no cross-spin interaction is expressible
+      via the ``"balanced"`` variant with its alpha-beta block set to zero.
 
     .. note::
        This gate builds the ansatz from *exact* tensors. To use ffsim's optimized ("compressed")
@@ -85,9 +85,8 @@ class UCJ(FermionicGate):
 
         Mirrors ffsim's three UCJ operator flavors:
         :external:class:`~ffsim.UCJOpSpinBalanced`, :external:class:`~ffsim.UCJOpSpinUnbalanced`, and
-        :external:class:`~ffsim.UCJOpSpinless`. The variant is inferred from the supplied tensor
-        shapes (and cross-checked against ``nelec``); its string value is accepted by
-        :meth:`.UCJ.from_t_amplitudes`.
+        :external:class:`~ffsim.UCJOpSpinless`. Passed explicitly to :meth:`.UCJ.__init__` (or its
+        string value) and validated against the supplied tensor shapes.
         """
 
         SPINLESS = "spinless"
@@ -97,7 +96,7 @@ class UCJ(FermionicGate):
     def __init__(
         self,
         norb: int,
-        nelec: int | tuple[int, int],
+        variant: UCJ.Variant | str,
         diag_coulomb_mats: np.ndarray,
         orbital_rotations: np.ndarray,
         *,
@@ -107,9 +106,9 @@ class UCJ(FermionicGate):
 
         Args:
             norb: the number of spatial orbitals.
-            nelec: either a single integer for a spinless system, or a pair of integers storing the
-                numbers of spin alpha and spin beta fermions. Together with the tensor shapes this
-                selects the spin variant (see the class docstring).
+            variant: the spin variant, a :class:`.UCJ.Variant` (or its string value ``"balanced"``,
+                ``"unbalanced"``, or ``"spinless"``). Determines the number of modes this gate acts
+                on (see the class docstring) and the expected tensor shapes.
             diag_coulomb_mats: the diagonal Coulomb matrices, of shape ``(L, 2, norb, norb)``
                 (spin-balanced), ``(L, 3, norb, norb)`` (spin-unbalanced), or ``(L, norb, norb)``
                 (spinless), where ``L`` is the number of ansatz repetitions.
@@ -119,18 +118,18 @@ class UCJ(FermionicGate):
                 (spin-balanced or spinless) or ``(2, norb, norb)`` (spin-unbalanced).
 
         Raises:
-            ValueError: if the tensor shapes are inconsistent with each other, with ``norb``, or
-                with ``nelec``.
+            ValueError: if ``variant`` is not recognized, or if the tensor shapes are inconsistent
+                with each other, with ``norb``, or with ``variant``.
         """
-        # normalize a numpy integer (e.g. ``np.int64``) to a plain ``int`` so the spinless sector is
-        # classified correctly here and downstream (ffsim's kernels classify with ``isinstance(int)``)
-        if isinstance(nelec, numbers.Integral):
-            nelec = int(nelec)
+        try:
+            variant = UCJ.Variant(variant)
+        except ValueError:
+            raise ValueError(
+                f"Unknown UCJ variant {variant!r}; expected 'balanced', 'unbalanced', or 'spinless'."
+            ) from None
 
         self.norb = norb
         """The number of spatial orbitals."""
-        self.nelec = nelec
-        """The number of electrons (spinless) or the ``(n_alpha, n_beta)`` pair (spinful)."""
         self.diag_coulomb_mats = self._to_real_diag_coulomb_mats(diag_coulomb_mats)
         """The diagonal Coulomb matrices defining each ansatz repetition."""
         self.orbital_rotations = np.asarray(orbital_rotations, dtype=complex)
@@ -142,22 +141,11 @@ class UCJ(FermionicGate):
         )
         """The optional final orbital rotation."""
 
-        self._variant = self._infer_variant(norb)
-        num_modes = norb if self._spinless else 2 * norb
+        self._variant = variant
+        self._validate_shapes(norb)
+        num_modes = norb if self._variant is UCJ.Variant.SPINLESS else 2 * norb
 
         super().__init__("UCJ", num_modes, [])
-
-    @property
-    def _spinless(self) -> bool:
-        """Whether the *sector* is spinless (integer ``nelec``, acting on ``norb`` modes).
-
-        This is distinct from :attr:`Variant.SPINLESS` (which is about the tensor *shapes*): a
-        spinless-variant operator may still be applied to a spinful ``(n_alpha, n_beta)`` sector, in
-        which case it acts on ``2 * norb`` block-spin modes. Mode count, the Hartree-Fock reference,
-        and the per-spin gate placement all key off the sector, not the variant.
-        """
-        # ``nelec`` is normalized to a plain ``int`` for the spinless case in ``__init__``.
-        return isinstance(self.nelec, int)
 
     @classmethod
     def from_t_amplitudes(
@@ -247,7 +235,7 @@ class UCJ(FermionicGate):
 
         return cls(
             norb,
-            nelec,
+            variant,
             diag_coulomb_mats,
             orbital_rotations,
             final_orbital_rotation=final_orbital_rotation,
@@ -443,54 +431,33 @@ class UCJ(FermionicGate):
                 mask[cols, rows] = True
         mats *= mask
 
-    def _infer_variant(self, norb: int) -> UCJ.Variant:
-        """Infers the spin variant from the tensor shapes and validates them against ``norb``."""
+    def _validate_shapes(self, norb: int) -> None:
+        """Validates the tensor shapes against ``norb`` and ``self._variant``."""
         dc = self.diag_coulomb_mats
         rot = self.orbital_rotations
-        expected_dc: tuple[int, ...]
-        expected_rot: tuple[int, ...]
+        variant = self._variant
 
-        if dc.ndim == 3 and rot.ndim == 3:
-            variant = UCJ.Variant.SPINLESS
-            expected_dc = (dc.shape[0], norb, norb)
-            expected_rot = (rot.shape[0], norb, norb)
-        elif dc.ndim == 4 and dc.shape[1] == 2 and rot.ndim == 3:
-            variant = UCJ.Variant.BALANCED
+        if variant is UCJ.Variant.SPINLESS:
+            expected_dc: tuple[int, ...] = (dc.shape[0], norb, norb)
+            expected_rot: tuple[int, ...] = (rot.shape[0], norb, norb)
+        elif variant is UCJ.Variant.BALANCED:
             expected_dc = (dc.shape[0], 2, norb, norb)
             expected_rot = (rot.shape[0], norb, norb)
-        elif dc.ndim == 4 and dc.shape[1] == 3 and rot.ndim == 4 and rot.shape[1] == 2:
-            variant = UCJ.Variant.UNBALANCED
+        else:  # UNBALANCED
             expected_dc = (dc.shape[0], 3, norb, norb)
             expected_rot = (rot.shape[0], 2, norb, norb)
-        else:
-            raise ValueError(
-                "Could not infer the UCJ spin variant from the tensor shapes "
-                f"diag_coulomb_mats={dc.shape} and orbital_rotations={rot.shape}. Expected "
-                "(L, 2, norb, norb)/(L, norb, norb) [balanced], (L, 3, norb, norb)/"
-                "(L, 2, norb, norb) [unbalanced], or (L, norb, norb)/(L, norb, norb) [spinless]."
-            )
 
         if dc.shape != expected_dc or rot.shape != expected_rot:
             raise ValueError(
                 f"Inconsistent {variant.value} UCJ tensor shapes for norb={norb}: got "
-                f"diag_coulomb_mats={dc.shape}, orbital_rotations={rot.shape}."
+                f"diag_coulomb_mats={dc.shape}, orbital_rotations={rot.shape}; expected "
+                f"diag_coulomb_mats={expected_dc}, orbital_rotations={expected_rot}."
             )
         if dc.shape[0] != rot.shape[0]:
             raise ValueError(
                 f"diag_coulomb_mats and orbital_rotations must have the same number of repetitions; "
                 f"got {dc.shape[0]} and {rot.shape[0]}."
             )
-        # ``nelec`` is normalized to a plain ``int`` for the spinless case, so an integer nelec means
-        # the caller intends the spinless variant; cross-check it against the shape-inferred variant.
-        if isinstance(self.nelec, int) and variant is not UCJ.Variant.SPINLESS:
-            raise ValueError(
-                f"An integer nelec selects the spinless variant, but the tensor shapes imply the "
-                f"{variant.value} variant."
-            )
-        # note: the converse (a spinless operator applied to a spinful sector) is allowed and needs
-        # no branch here -- see the class docstring's spinless variant.
-
-        return variant
 
     @staticmethod
     def _to_real_diag_coulomb_mats(diag_coulomb_mats: np.ndarray) -> np.ndarray:
@@ -568,12 +535,12 @@ class UCJ(FermionicGate):
     def _append_orbital_rotation(self, definition, rotation: np.ndarray) -> None:
         """Appends an orbital rotation, respecting the spin variant's per-spin placement.
 
-        Spinless with an integer ``nelec`` places a single rotation on all ``norb`` modes.
-        Otherwise the block-spin register is split into alpha modes ``0..norb`` and beta modes
-        ``norb..2*norb``: the balanced/spinless case applies the same rotation to both halves, while
-        the unbalanced case applies the independent ``[alpha, beta]`` rotations.
+        The spinless variant places a single rotation on all ``norb`` modes. Otherwise the
+        block-spin register is split into alpha modes ``0..norb`` and beta modes ``norb..2*norb``:
+        the balanced case applies the same rotation to both halves, while the unbalanced case
+        applies the independent ``[alpha, beta]`` rotations.
         """
-        if self._spinless:
+        if self._variant is UCJ.Variant.SPINLESS:
             definition.append(OrbitalRotation(rotation), definition.modes)
             return
 
@@ -610,11 +577,12 @@ class UCJ(FermionicGate):
         coloring of the interaction graph (see :meth:`_term_group`), assigned on the fly.
         """
         norb = self.norb
-        num_modes = norb if self._spinless else 2 * norb
+        is_spinless = self._variant is UCJ.Variant.SPINLESS
+        num_modes = norb if is_spinless else 2 * norb
         mat_aa, mat_ab, mat_bb = self._resolve_diag_coulomb_blocks(diag_coulomb_mat)
 
         # a true spinless system has only the aa block on the norb spinless modes
-        if self._spinless:
+        if is_spinless:
             blocks = {(0, 0): mat_aa}
         else:
             blocks = {(0, 0): mat_aa, (0, 1): mat_ab, (1, 0): mat_ab.T, (1, 1): mat_bb}
