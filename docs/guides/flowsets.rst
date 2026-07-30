@@ -1078,6 +1078,10 @@ The pieces this guide builds are exactly the ones that carry over ---
 :class:`~qiskit.synthesis.EvolutionSynthesis` for making the flow-set structure pay off.
 Only the encoding and the flow-set decomposition are different.
 
+The :ref:`2D flow-set guide <flowsets_2d_getting_started>` picks up exactly here, working
+through the Verstraete-Cirac encoding on a square lattice --- four flow sets, a depth-2
+Clifford for each, and the stabilizer projection the verification then needs.
+
 .. [1] A. Gandon, S. Piccinelli, M. Rossmannek, F. Tacchino, A. Baiardi, J. Nys, and
        I. Tavernelli, Stabilizer-based quantum simulation of fermion dynamics with local
        qubit encodings (2026), `arXiv:2512.11418v2 <https://arxiv.org/abs/2512.11418v2>`_.
