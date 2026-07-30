@@ -209,8 +209,9 @@ class QDriftTrotterization(FermionicDAGCircuitPass):
             time = node.op.params[0]
             num_modes = len(node.qargs)
 
-            terms: list[Any] | None  # a list of operator terms, or None when `hamil.groups` is set
-            if hamil.groups is None:
+            # `terms` is a list of operator terms, or None when `hamil.has_groups()` is False
+            terms: list[Any] | None
+            if not hamil.has_groups():
                 # NOTE: the qDRIFT protocol normalizes each term to unit magnitude because the
                 # evolution time is entirely dictated by `delta` (computed below). Only the
                 # magnitude of a coefficient sets its sampling probability, but its sign fixes the

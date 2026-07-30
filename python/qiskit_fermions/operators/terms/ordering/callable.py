@@ -72,7 +72,7 @@ def order_terms(
     Returns:
         A new operator of the same type with its terms in the requested order.
     """
-    if op.groups is None:
+    if not op.has_groups():
         terms = sorted(op.iter_terms(), key=key, reverse=reverse)
         return op.__class__.from_terms(terms)
 

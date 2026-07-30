@@ -761,6 +761,35 @@ impl PyMajoranaOperator {
         self.inner.groups = groups;
     }
 
+    /// Returns whether this operator tracks group indices.
+    ///
+    /// This is equivalent to (but cheaper than) checking ``op.groups is not None``, because it does
+    /// not copy the group indices out of the operator in order to inspect them.
+    ///
+    /// .. note::
+    ///    This returns ``True`` even when :attr:`groups` is an empty list, which is the state of a
+    ///    grouped operator that holds no terms.
+    ///
+    /// .. doctest::
+    ///
+    ///     >>> from qiskit_fermions.operators import MajoranaOperator
+    ///     >>> op = MajoranaOperator(
+    ///     ...     [1.0, 2.0, -1.0, -2.0],
+    ///     ...     [0, 1, 2, 3, 1, 0, 3, 2],
+    ///     ...     [0, 2, 4, 6, 8],
+    ///     ... )
+    ///     >>> op.has_groups()
+    ///     False
+    ///     >>> op.groups = [0, 1, 0, 1]
+    ///     >>> op.has_groups()
+    ///     True
+    ///
+    /// Returns:
+    ///     Whether :attr:`groups` is set on this operator.
+    pub fn has_groups(&self) -> bool {
+        self.inner.has_groups()
+    }
+
     /// Returns the number of groups.
     ///
     /// If :attr:`groups` is ``None``, this function also returns ``None``. Otherwise, it will

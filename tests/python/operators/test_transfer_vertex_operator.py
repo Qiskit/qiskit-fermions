@@ -437,11 +437,13 @@ class TestTransferVertexOperator:
         op += cls.from_dict(group1)
 
         with subtests.test("num_groups none"):
+            assert not op.has_groups()
             assert op.num_groups() is None
 
         op.groups = [0, 0, 1]
 
         with subtests.test("num_groups some"):
+            assert op.has_groups()
             assert op.num_groups() == 2
 
         groups = op.split_out_groups()
@@ -465,6 +467,30 @@ class TestTransferVertexOperator:
 
         with subtests.test("split groups empty"):
             assert op.split_out_groups(group_indices=[]) == []
+
+    def test_has_groups(self, subtests):
+        cls = self.get_class()
+
+        op = cls.from_dict({((0, 1),): 1.0})
+
+        with subtests.test("unset"):
+            assert not op.has_groups()
+
+        with subtests.test("assigned"):
+            op.groups = [0]
+            assert op.has_groups()
+
+        with subtests.test("empty list"):
+            # an operator may track groups while carrying no group indices at all, which
+            # `has_groups` reports as `True` even though `num_groups` is 0
+            empty = cls.zero()
+            empty.groups = []
+            assert empty.has_groups()
+            assert empty.num_groups() == 0
+
+        with subtests.test("reset to None"):
+            op.groups = None
+            assert not op.has_groups()
 
     def test_split_out_groups_err(self):
         cls = self.get_class()

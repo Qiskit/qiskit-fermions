@@ -512,8 +512,8 @@ impl OperatorTrait for FermionOperator {
         })
     }
 
-    fn has_groups(&self) -> bool {
-        self.groups.is_some()
+    fn groups(&self) -> Option<&[u32]> {
+        self.groups.as_deref()
     }
 
     fn iter_with_groups(&self) -> impl ExactSizeIterator<Item = Self::GroupTermView<'_>> {
@@ -1378,18 +1378,22 @@ mod tests {
     }
 
     #[test]
-    fn test_num_groups() {
+    fn test_has_and_num_groups() {
         let mut zero = FermionOperator::zero();
 
+        assert!(!zero.has_groups());
         assert!(zero.num_groups().is_none());
 
         zero.groups = Some(vec![]);
 
+        // an operator may track groups while holding no terms at all
+        assert!(zero.has_groups());
         assert_eq!(zero.num_groups(), Some(0));
 
         let mut one = FermionOperator::one();
         one.groups = Some(vec![0]);
 
+        assert!(one.has_groups());
         assert_eq!(one.num_groups(), Some(1));
     }
 

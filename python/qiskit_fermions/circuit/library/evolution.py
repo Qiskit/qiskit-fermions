@@ -74,9 +74,9 @@ class Evolution(FermionicGate):
         # when the operator being evolved has groups use those for the decomposition, otherwise
         # decompose into all individual terms
         iterator = (
-            self.operator.iter_terms
-            if self.operator.groups is None
-            else self.operator.split_out_groups
+            self.operator.split_out_groups
+            if self.operator.has_groups()
+            else self.operator.iter_terms
         )
 
         for item in iterator():
