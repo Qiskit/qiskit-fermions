@@ -571,6 +571,56 @@ class TestFermionOperator:
             op.groups = None
             assert not op.has_groups()
 
+    def test_group_weights(self, subtests):
+        cls = self.get_class()
+
+        op = cls.from_dict(
+            {
+                (cre(0), ann(1)): 1.0,
+                (cre(1), ann(0)): -3.0 + 4.0j,
+                (cre(0), cre(0), ann(1), ann(1)): 2.0,
+            }
+        )
+
+        with subtests.test("unset"):
+            assert op.group_weights() is None
+
+        # NOTE: `from_dict` does not preserve the insertion order of its keys, so the expected
+        # weights are derived from the operator's actual coefficient order rather than hardcoded.
+        # The magnitude, not the real part, is what gets averaged (hence `abs` below).
+        coeffs = op.get_coeffs()
+        first_two = (abs(coeffs[0]) + abs(coeffs[1])) / 2
+        last = abs(coeffs[2])
+
+        op.groups = [0, 0, 1]
+
+        with subtests.test("assigned"):
+            assert op.group_weights() == [first_two, last]
+
+        with subtests.test("sparse group index"):
+            # group 1 is carried by no term at all, so it weighs 0.0 rather than NaN
+            op.groups = [0, 0, 2]
+            assert op.group_weights() == [first_two, 0.0, last]
+
+        with subtests.test("empty list"):
+            empty = cls.zero()
+            empty.groups = []
+            assert empty.group_weights() == []
+
+        with subtests.test("exact averages"):
+            # built positionally (rather than via `from_dict`) so that the term order -- and hence
+            # the pairing with the group indices below -- is fixed, pinning the exact expected
+            # averages: group 0 is (|1.0| + |-3.0 + 4.0j|) / 2 == (1.0 + 5.0) / 2, and group 1 is
+            # the lone |2.0|.
+            exact = cls(
+                [1.0, -3.0 + 4.0j, 2.0],
+                [True, False, True, False, True, False],
+                [0, 1, 1, 0, 2, 3],
+                [0, 2, 4, 6],
+            )
+            exact.groups = [0, 0, 1]
+            assert exact.group_weights() == [3.0, 2.0]
+
     def test_split_out_groups_err(self):
         cls = self.get_class()
 

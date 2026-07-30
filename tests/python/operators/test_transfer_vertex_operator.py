@@ -492,6 +492,36 @@ class TestTransferVertexOperator:
             op.groups = None
             assert not op.has_groups()
 
+    def test_group_weights(self, subtests):
+        cls = self.get_class()
+
+        op = cls.from_dict({((0, 1),): 1.0, ((2, 3),): -3.0 + 4.0j, ((1, 0), (2, 3)): 2.0})
+
+        with subtests.test("unset"):
+            assert op.group_weights() is None
+
+        # NOTE: `from_dict` does not preserve the insertion order of its keys, so the expected
+        # weights are derived from the operator's actual coefficient order rather than hardcoded.
+        # The magnitude, not the real part, is what gets averaged (hence `abs` below).
+        coeffs = op.get_coeffs()
+        first_two = (abs(coeffs[0]) + abs(coeffs[1])) / 2
+        last = abs(coeffs[2])
+
+        op.groups = [0, 0, 1]
+
+        with subtests.test("assigned"):
+            assert op.group_weights() == [first_two, last]
+
+        with subtests.test("sparse group index"):
+            # group 1 is carried by no term at all, so it weighs 0.0 rather than NaN
+            op.groups = [0, 0, 2]
+            assert op.group_weights() == [first_two, 0.0, last]
+
+        with subtests.test("empty list"):
+            empty = cls.zero()
+            empty.groups = []
+            assert empty.group_weights() == []
+
     def test_split_out_groups_err(self):
         cls = self.get_class()
 

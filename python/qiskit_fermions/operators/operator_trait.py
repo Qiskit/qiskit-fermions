@@ -140,6 +140,14 @@ class OperatorTrait(Protocol):
     def num_groups(self) -> int | None:
         """Returns the number of groups."""
 
+    def group_weights(self) -> list[float] | None:
+        """Returns the mean absolute coefficient magnitude of each group.
+
+        This is equivalent to (but cheaper than) reducing :meth:`get_coeffs` and :attr:`groups`
+        down to one value per group in NumPy, because it does not copy one value per *ungrouped*
+        term out of the operator just to aggregate it away again.
+        """
+
     def split_out_groups(self, group_indices: Sequence[int] | None = None) -> list[Self]:
         """Splits this operator into an optional list of new operators based on its :attr:`.groups`.
 

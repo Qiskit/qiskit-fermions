@@ -93,11 +93,6 @@ crate::impl_operator_macro!(TransferVertexOperator);
 
 impl TransferVertexOperator {
     #[inline]
-    pub fn coeffs(&self) -> &[Complex64] {
-        &self.coeffs
-    }
-
-    #[inline]
     pub fn left_indices(&self) -> &[u32] {
         &self.left_indices
     }
@@ -420,6 +415,11 @@ impl OperatorTrait for TransferVertexOperator {
                 right_indices: &self.right_indices[start..end],
             }
         })
+    }
+
+    #[inline]
+    fn coeffs(&self) -> &[Complex64] {
+        &self.coeffs
     }
 
     fn groups(&self) -> Option<&[u32]> {

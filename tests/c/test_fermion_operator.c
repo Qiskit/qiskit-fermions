@@ -678,6 +678,50 @@ static int test_groups(void) {
     return Ok;
 }
 
+static int test_group_weights(void) {
+    uint64_t num_terms = 4;
+    uint64_t num_actions = 8;
+    bool actions[8] = {true, false, true, false, true, false, true, false};
+    uint32_t modes[8] = {0, 1, 2, 3, 1, 0, 3, 2};
+    // the second term of each group is the negative of the first, so averaging the magnitudes
+    // (rather than the signed coefficients) is what makes the group weights non-zero
+    QkComplex64 coeffs[4] = {{1.0, 0.0}, {2.0, 0.0}, {-1.0, 0.0}, {-2.0, 0.0}};
+    uint32_t boundaries[5] = {0, 2, 4, 6, 8};
+    QfFermionOperator *op =
+        qf_ferm_op_new(num_terms, num_actions, coeffs, actions, modes, boundaries);
+
+    uint32_t groups_in[4] = {0, 1, 0, 1};
+    qf_ferm_op_set_groups(op, groups_in, num_terms);
+
+    double weights[2];
+    qf_ferm_op_group_weights(op, weights);
+
+    // both averages are exactly representable, so an exact comparison is safe here
+    bool correct_weight0 = weights[0] == 1.0;
+    bool correct_weight1 = weights[1] == 2.0;
+
+    // a group index carried by no term weighs 0.0 rather than NaN
+    uint32_t sparse_groups[4] = {0, 2, 0, 2};
+    qf_ferm_op_set_groups(op, sparse_groups, num_terms);
+
+    double sparse_weights[3];
+    qf_ferm_op_group_weights(op, sparse_weights);
+
+    bool correct_sparse0 = sparse_weights[0] == 1.0;
+    bool correct_sparse1 = sparse_weights[1] == 0.0;
+    bool correct_sparse2 = sparse_weights[2] == 2.0;
+
+    bool passed_all =
+        correct_weight0 && correct_weight1 && correct_sparse0 && correct_sparse1 && correct_sparse2;
+
+    qf_ferm_op_free(op);
+
+    if (!passed_all) {
+        return EqualityError;
+    }
+    return Ok;
+}
+
 int test_fermion_operator(void) {
     int num_failed = 0;
     num_failed += RUN_TEST(test_new);
@@ -703,6 +747,7 @@ int test_fermion_operator(void) {
     num_failed += RUN_TEST(test_relabel_modes_duplicate_err);
     num_failed += RUN_TEST(test_relabel_modes_too_small_err);
     num_failed += RUN_TEST(test_groups);
+    num_failed += RUN_TEST(test_group_weights);
 
     fflush(stderr);
     fprintf(stderr, "=== Number of failed subtests: %i\n", num_failed);

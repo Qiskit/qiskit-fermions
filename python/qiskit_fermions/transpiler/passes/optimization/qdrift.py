@@ -220,11 +220,12 @@ class QDriftTrotterization(FermionicDAGCircuitPass):
                 terms = [(actions, np.sign(coeff)) for actions, coeff in hamil.iter_terms()]
                 weights = np.abs(hamil.get_coeffs())
             else:
-                all_coeffs = hamil.get_coeffs()
-                groups = hamil.groups
-                weights = np.zeros((hamil.num_groups(),))
-                np.add.at(weights, groups, np.abs(all_coeffs))
-                weights /= np.unique(groups, return_counts=True)[1]
+                # NOTE: computed natively rather than by reducing `hamil.get_coeffs()` and
+                # `hamil.groups` here. Those two accessors each copy one value per *ungrouped*
+                # term out of the operator, only for both arrays to be aggregated straight back
+                # down to one weight per group -- which dominates the cost of the reduction itself
+                # for a Hamiltonian holding far more terms than groups.
+                weights = np.array(hamil.group_weights())
                 # NOTE: we do not materialize the group operators here. Since only a small
                 # fraction of the (potentially much larger) set of groups ends up being sampled,
                 # we look up each sampled group's operator lazily via `split_out_groups`, once we

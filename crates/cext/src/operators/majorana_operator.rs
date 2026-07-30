@@ -378,6 +378,66 @@ pub unsafe extern "C" fn qf_maj_op_num_groups(op: *const MajoranaOperator) -> u3
 
 /// @ingroup qf_maj_op
 ///
+/// @brief Gets the mean absolute coefficient magnitude of each group.
+///
+/// @param op A pointer to the Majorana operator whose group weights to compute.
+/// @param weights_out A pointer to the array of doubles into which to write the weights. Must be
+///     sized to :c:func:`qf_maj_op_num_groups`.
+///
+/// @rst
+///
+/// The ``i``-th entry is the sum of ``abs(coeff)`` over the terms in group ``i``, divided by the
+/// number of terms in that group. This is the sampling weight of a randomized product formula
+/// (e.g. qDRIFT) that draws whole groups rather than individual terms, and is computed in a single
+/// pass over the operator rather than by reducing :c:func:`qf_maj_op_get_coeffs` and
+/// :c:func:`qf_maj_op_get_groups` (one value per *ungrouped* term each) on the caller's side.
+///
+/// .. note::
+///    A group index that no term carries weighs ``0.0``, which keeps it out of the sample.
+///
+/// .. seealso::
+///    The explanation on :ref:`grouping_explanation`.
+///
+/// Example
+/// -------
+///
+/// .. code-block:: c
+///     :linenos:
+///
+///     uint64_t num_terms = 4;
+///     uint64_t num_modes = 8;
+///     uint32_t modes[8] = {0, 1, 2, 3, 1, 0, 3, 2};
+///     QkComplex64 coeffs[4] = {{1.0, 0.0}, {2.0, 0.0}, {-1.0, 0.0}, {-2.0, 0.0}};
+///     uint32_t boundaries[5] = {0, 2, 4, 6, 8};
+///     QfMajoranaOperator *op = qf_maj_op_new(num_terms, num_modes, coeffs, modes, boundaries);
+///
+///     uint32_t groups_in[4] = {0, 1, 0, 1};
+///     qf_maj_op_set_groups(op, groups_in, num_terms);
+///
+///     double weights[2];
+///     qf_maj_op_group_weights(op, weights);
+///
+///     assert(weights[0] == 1.0);
+///     assert(weights[1] == 2.0);
+///
+/// @endrst
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn qf_maj_op_group_weights(
+    op: *const MajoranaOperator,
+    weights_out: *mut f64,
+) {
+    let op = unsafe { const_ptr_as_ref(op) };
+    let weights = op.group_weights().expect(
+        "Expected groups to be present. It is the user's responsibility to check this via \
+        qf_maj_op_has_groups before calling this function.",
+    );
+    for (i, weight) in weights.iter().enumerate() {
+        unsafe { weights_out.add(i).write(*weight) };
+    }
+}
+
+/// @ingroup qf_maj_op
+///
 /// @brief Gets the group indices for all operator terms.
 ///
 /// @param op A pointer to the majorana operator whose group indices to get.
