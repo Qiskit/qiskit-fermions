@@ -15,6 +15,7 @@
 from __future__ import annotations
 
 import itertools
+import sys
 from enum import Enum
 from typing import TYPE_CHECKING, cast
 
@@ -27,6 +28,11 @@ from qiskit_fermions.operators.fermion_action import ann, cre
 from .. import FermionicGate
 from .evolution import Evolution
 from .orbital_rotation import OrbitalRotation
+
+if sys.version_info >= (3, 11):
+    from typing import Self
+else:
+    from typing_extensions import Self
 
 if TYPE_CHECKING:
     from qiskit_fermions.circuit import FermionicCircuit
@@ -157,7 +163,7 @@ class UCJ(FermionicGate):
             list[tuple[int, int]] | tuple[list[tuple[int, int]] | None, ...] | None
         ) = None,
         tol: float = 1e-8,
-    ) -> UCJ:
+    ) -> Self:
         r"""Constructs a UCJ ansatz from coupled-cluster :math:`t_2` (and optional :math:`t_1`) amplitudes.
 
         The ansatz layers are obtained from an *exact* double factorization of the :math:`t_2`
@@ -203,7 +209,7 @@ class UCJ(FermionicGate):
             ValueError: if ``variant`` is not recognized, or if a tuple ``n_reps`` is passed for a
                 variant other than :attr:`.UCJ.Variant.UNBALANCED`.
         """
-        variant = UCJ._normalize_variant(variant)
+        variant = cls._normalize_variant(variant)
 
         if variant is UCJ.Variant.UNBALANCED:
             # the variant selects which argument shapes are valid; mypy cannot narrow the unions
@@ -233,8 +239,9 @@ class UCJ(FermionicGate):
             final_orbital_rotation=final_orbital_rotation,
         )
 
-    @staticmethod
+    @classmethod
     def num_parameters(
+        cls,
         norb: int,
         variant: UCJ.Variant | str,
         n_reps: int,
@@ -262,12 +269,12 @@ class UCJ(FermionicGate):
         Raises:
             ValueError: if ``variant`` is not recognized.
         """
-        variant = UCJ._normalize_variant(variant)
+        variant = cls._normalize_variant(variant)
         rotation_params = norb**2 if variant is not UCJ.Variant.UNBALANCED else 2 * norb**2
-        pairs = UCJ._pairs_per_block(variant, interaction_pairs)
-        specs = UCJ._diag_coulomb_block_specs(variant)
+        pairs = cls._pairs_per_block(variant, interaction_pairs)
+        specs = cls._diag_coulomb_block_specs(variant)
         dc_params = sum(
-            len(UCJ._pair_positions(norb, pairs[block], symmetric=symmetric))
+            len(cls._pair_positions(norb, pairs[block], symmetric=symmetric))
             for block, symmetric in specs
         )
         num_params = n_reps * (rotation_params + dc_params)
@@ -275,8 +282,9 @@ class UCJ(FermionicGate):
             num_params += rotation_params
         return num_params
 
-    @staticmethod
+    @classmethod
     def from_parameters(
+        cls,
         params: np.ndarray,
         norb: int,
         variant: UCJ.Variant | str,
@@ -286,7 +294,7 @@ class UCJ(FermionicGate):
             list[tuple[int, int]] | tuple[list[tuple[int, int]] | None, ...] | None
         ) = None,
         with_final_orbital_rotation: bool = False,
-    ) -> UCJ:
+    ) -> Self:
         r"""Constructs a UCJ ansatz from a real-valued parameter vector.
 
         Args:
@@ -308,8 +316,8 @@ class UCJ(FermionicGate):
             ValueError: if ``variant`` is not recognized, or if ``len(params)`` does not match
                 :meth:`.num_parameters` for the given settings.
         """
-        variant = UCJ._normalize_variant(variant)
-        expected = UCJ.num_parameters(
+        variant = cls._normalize_variant(variant)
+        expected = cls.num_parameters(
             norb,
             variant,
             n_reps,
@@ -322,8 +330,8 @@ class UCJ(FermionicGate):
                 f"given settings. Expected {expected} but got {len(params)}."
             )
 
-        pairs = UCJ._pairs_per_block(variant, interaction_pairs)
-        specs = UCJ._diag_coulomb_block_specs(variant)
+        pairs = cls._pairs_per_block(variant, interaction_pairs)
+        specs = cls._diag_coulomb_block_specs(variant)
         n_dc_blocks = (
             3
             if variant is UCJ.Variant.UNBALANCED
@@ -339,18 +347,18 @@ class UCJ(FermionicGate):
             if variant is UCJ.Variant.UNBALANCED:
                 for s in range(2):
                     n = norb**2
-                    orbital_rotations[rep, s] = UCJ._unitary_from_parameters(
+                    orbital_rotations[rep, s] = cls._unitary_from_parameters(
                         params[index : index + n], norb
                     )
                     index += n
             else:
                 n = norb**2
-                orbital_rotations[rep] = UCJ._unitary_from_parameters(
+                orbital_rotations[rep] = cls._unitary_from_parameters(
                     params[index : index + n], norb
                 )
                 index += n
             for block, symmetric in specs:
-                positions = UCJ._pair_positions(norb, pairs[block], symmetric=symmetric)
+                positions = cls._pair_positions(norb, pairs[block], symmetric=symmetric)
                 if not positions:
                     continue
                 n = len(positions)
@@ -366,19 +374,19 @@ class UCJ(FermionicGate):
             if variant is UCJ.Variant.UNBALANCED:
                 final_orbital_rotation = np.stack(
                     [
-                        UCJ._unitary_from_parameters(params[index : index + norb**2], norb),
-                        UCJ._unitary_from_parameters(
+                        cls._unitary_from_parameters(params[index : index + norb**2], norb),
+                        cls._unitary_from_parameters(
                             params[index + norb**2 : index + 2 * norb**2], norb
                         ),
                     ]
                 )
             else:
-                final_orbital_rotation = UCJ._unitary_from_parameters(params[index:], norb)
+                final_orbital_rotation = cls._unitary_from_parameters(params[index:], norb)
 
         if variant is UCJ.Variant.SPINLESS:
             diag_coulomb_mats = diag_coulomb_mats[:, 0]
 
-        return UCJ(
+        return cls(
             norb,
             variant,
             diag_coulomb_mats,
@@ -408,11 +416,12 @@ class UCJ(FermionicGate):
         Returns:
             The real-valued parameter vector.
         """
+        cls = type(self)
         norb = self.norb
         variant = self._variant
         n_reps = self.diag_coulomb_mats.shape[0]
-        pairs = UCJ._pairs_per_block(variant, interaction_pairs)
-        specs = UCJ._diag_coulomb_block_specs(variant)
+        pairs = cls._pairs_per_block(variant, interaction_pairs)
+        specs = cls._diag_coulomb_block_specs(variant)
         diag_coulomb_mats = (
             self.diag_coulomb_mats[:, np.newaxis]
             if variant is UCJ.Variant.SPINLESS
@@ -420,7 +429,7 @@ class UCJ(FermionicGate):
         )
 
         params = np.empty(
-            UCJ.num_parameters(
+            cls.num_parameters(
                 norb,
                 variant,
                 n_reps,
@@ -435,14 +444,14 @@ class UCJ(FermionicGate):
             if variant is UCJ.Variant.UNBALANCED:
                 for s in range(2):
                     n = norb**2
-                    params[index : index + n] = UCJ._unitary_to_parameters(rotation[s])
+                    params[index : index + n] = cls._unitary_to_parameters(rotation[s])
                     index += n
             else:
                 n = norb**2
-                params[index : index + n] = UCJ._unitary_to_parameters(rotation)
+                params[index : index + n] = cls._unitary_to_parameters(rotation)
                 index += n
             for block, symmetric in specs:
-                positions = UCJ._pair_positions(norb, pairs[block], symmetric=symmetric)
+                positions = cls._pair_positions(norb, pairs[block], symmetric=symmetric)
                 if not positions:
                     continue
                 n = len(positions)
@@ -452,14 +461,14 @@ class UCJ(FermionicGate):
 
         if self.final_orbital_rotation is not None:
             if variant is UCJ.Variant.UNBALANCED:
-                params[index : index + norb**2] = UCJ._unitary_to_parameters(
+                params[index : index + norb**2] = cls._unitary_to_parameters(
                     self.final_orbital_rotation[0]
                 )
-                params[index + norb**2 :] = UCJ._unitary_to_parameters(
+                params[index + norb**2 :] = cls._unitary_to_parameters(
                     self.final_orbital_rotation[1]
                 )
             else:
-                params[index:] = UCJ._unitary_to_parameters(self.final_orbital_rotation)
+                params[index:] = cls._unitary_to_parameters(self.final_orbital_rotation)
 
         return params
 
