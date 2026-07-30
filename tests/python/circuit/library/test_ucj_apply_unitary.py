@@ -240,6 +240,33 @@ def test_ucj_single_rep_matches_hand_composed_ffsim_primitives():
     np.testing.assert_allclose(result, expected, atol=1e-10)
 
 
+def test_ucj_from_parameters_matches_ffsim_parameter_ordering():
+    """UCJ.from_parameters, fed ffsim's own to_parameters() vector, reproduces ffsim's state.
+
+    This validates that the parameter *ordering* :meth:`.UCJ.from_parameters`/:meth:`.UCJ.
+    to_parameters` use matches ffsim's ``UCJOpSpinBalanced`` convention exactly, not just internal
+    round-trip self-consistency: a vector produced by ffsim is handed unmodified to our gate.
+    """
+    norb = 4
+    nelec = (2, 2)
+    for with_final in (False, True):
+        ucj_op = ffsim.random.random_ucj_op_spin_balanced(
+            norb, n_reps=2, with_final_orbital_rotation=with_final, seed=4200 + with_final
+        )
+        params = ucj_op.to_parameters()
+        assert len(params) == UCJ.num_parameters(
+            norb, "balanced", 2, with_final_orbital_rotation=with_final
+        )
+
+        gate = UCJ.from_parameters(
+            params, norb, "balanced", 2, with_final_orbital_rotation=with_final
+        )
+        reference = ffsim.hartree_fock_state(norb, nelec)
+        expected = ffsim.apply_unitary(reference, ucj_op, norb=norb, nelec=nelec)
+        result = ffsim.apply_unitary(reference, gate, norb=norb, nelec=nelec)
+        np.testing.assert_allclose(result, expected, atol=1e-10)
+
+
 def test_ucj_from_t_amplitudes_balanced_matches_ffsim():
     """UCJ.from_t_amplitudes (balanced) matches ffsim's from_t_amplitudes, including LUCJ locality."""
     pyscf = pytest.importorskip("pyscf")

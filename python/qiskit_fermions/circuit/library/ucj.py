@@ -14,10 +14,12 @@
 
 from __future__ import annotations
 
+import itertools
 from enum import Enum
 from typing import TYPE_CHECKING, cast
 
 import numpy as np
+import scipy.linalg
 
 from qiskit_fermions._lib.operators.fermion_operator import FermionOperator
 from qiskit_fermions.operators.fermion_action import ann, cre
@@ -121,12 +123,7 @@ class UCJ(FermionicGate):
             ValueError: if ``variant`` is not recognized, or if the tensor shapes are inconsistent
                 with each other, with ``norb``, or with ``variant``.
         """
-        try:
-            variant = UCJ.Variant(variant)
-        except ValueError:
-            raise ValueError(
-                f"Unknown UCJ variant {variant!r}; expected 'balanced', 'unbalanced', or 'spinless'."
-            ) from None
+        variant = UCJ._normalize_variant(variant)
 
         self.norb = norb
         """The number of spatial orbitals."""
@@ -206,12 +203,7 @@ class UCJ(FermionicGate):
             ValueError: if ``variant`` is not recognized, or if a tuple ``n_reps`` is passed for a
                 variant other than :attr:`.UCJ.Variant.UNBALANCED`.
         """
-        try:
-            variant = UCJ.Variant(variant)
-        except ValueError:
-            raise ValueError(
-                f"Unknown UCJ variant {variant!r}; expected 'balanced', 'unbalanced', or 'spinless'."
-            ) from None
+        variant = UCJ._normalize_variant(variant)
 
         if variant is UCJ.Variant.UNBALANCED:
             # the variant selects which argument shapes are valid; mypy cannot narrow the unions
@@ -240,6 +232,269 @@ class UCJ(FermionicGate):
             orbital_rotations,
             final_orbital_rotation=final_orbital_rotation,
         )
+
+    @staticmethod
+    def num_parameters(
+        norb: int,
+        variant: UCJ.Variant | str,
+        n_reps: int,
+        *,
+        interaction_pairs: (
+            list[tuple[int, int]] | tuple[list[tuple[int, int]] | None, ...] | None
+        ) = None,
+        with_final_orbital_rotation: bool = False,
+    ) -> int:
+        r"""Returns the number of parameters of a UCJ ansatz with the given settings.
+
+        Args:
+            norb: the number of spatial orbitals.
+            variant: the spin variant, a :class:`.UCJ.Variant` (or its string value ``"balanced"``,
+                ``"unbalanced"``, or ``"spinless"``).
+            n_reps: the number of ansatz repetitions.
+            interaction_pairs: the allowed diagonal Coulomb interactions (see
+                :meth:`.from_t_amplitudes` for the exact per-variant shape convention). ``None``
+                (the default) imposes no restriction, so every block uses its full parameter count.
+            with_final_orbital_rotation: whether the ansatz includes a final orbital rotation.
+
+        Returns:
+            The number of parameters.
+
+        Raises:
+            ValueError: if ``variant`` is not recognized.
+        """
+        variant = UCJ._normalize_variant(variant)
+        rotation_params = norb**2 if variant is not UCJ.Variant.UNBALANCED else 2 * norb**2
+        pairs = UCJ._pairs_per_block(variant, interaction_pairs)
+        specs = UCJ._diag_coulomb_block_specs(variant)
+        dc_params = sum(
+            len(UCJ._pair_positions(norb, pairs[block], symmetric=symmetric))
+            for block, symmetric in specs
+        )
+        num_params = n_reps * (rotation_params + dc_params)
+        if with_final_orbital_rotation:
+            num_params += rotation_params
+        return num_params
+
+    @staticmethod
+    def from_parameters(
+        params: np.ndarray,
+        norb: int,
+        variant: UCJ.Variant | str,
+        n_reps: int,
+        *,
+        interaction_pairs: (
+            list[tuple[int, int]] | tuple[list[tuple[int, int]] | None, ...] | None
+        ) = None,
+        with_final_orbital_rotation: bool = False,
+    ) -> UCJ:
+        r"""Constructs a UCJ ansatz from a real-valued parameter vector.
+
+        Args:
+            params: the real-valued parameter vector.
+            norb: the number of spatial orbitals.
+            variant: the spin variant, a :class:`.UCJ.Variant` (or its string value ``"balanced"``,
+                ``"unbalanced"``, or ``"spinless"``).
+            n_reps: the number of ansatz repetitions.
+            interaction_pairs: the allowed diagonal Coulomb interactions (see
+                :meth:`.from_t_amplitudes` for the exact per-variant shape convention). ``None``
+                (the default) imposes no restriction, so every block uses its full parameter count.
+            with_final_orbital_rotation: whether ``params`` includes a trailing final orbital
+                rotation.
+
+        Returns:
+            The constructed :class:`.UCJ` gate.
+
+        Raises:
+            ValueError: if ``variant`` is not recognized, or if ``len(params)`` does not match
+                :meth:`.num_parameters` for the given settings.
+        """
+        variant = UCJ._normalize_variant(variant)
+        expected = UCJ.num_parameters(
+            norb,
+            variant,
+            n_reps,
+            interaction_pairs=interaction_pairs,
+            with_final_orbital_rotation=with_final_orbital_rotation,
+        )
+        if len(params) != expected:
+            raise ValueError(
+                "The number of parameters passed did not match the number expected based on the "
+                f"given settings. Expected {expected} but got {len(params)}."
+            )
+
+        pairs = UCJ._pairs_per_block(variant, interaction_pairs)
+        specs = UCJ._diag_coulomb_block_specs(variant)
+        n_dc_blocks = (
+            3
+            if variant is UCJ.Variant.UNBALANCED
+            else (2 if variant is UCJ.Variant.BALANCED else 1)
+        )
+        rotation_shape = (2, norb, norb) if variant is UCJ.Variant.UNBALANCED else (norb, norb)
+
+        diag_coulomb_mats = np.zeros((n_reps, n_dc_blocks, norb, norb))
+        orbital_rotations = np.zeros((n_reps, *rotation_shape), dtype=complex)
+
+        index = 0
+        for rep in range(n_reps):
+            if variant is UCJ.Variant.UNBALANCED:
+                for s in range(2):
+                    n = norb**2
+                    orbital_rotations[rep, s] = UCJ._unitary_from_parameters(
+                        params[index : index + n], norb
+                    )
+                    index += n
+            else:
+                n = norb**2
+                orbital_rotations[rep] = UCJ._unitary_from_parameters(
+                    params[index : index + n], norb
+                )
+                index += n
+            for block, symmetric in specs:
+                positions = UCJ._pair_positions(norb, pairs[block], symmetric=symmetric)
+                if not positions:
+                    continue
+                n = len(positions)
+                rows, cols = zip(*positions, strict=True)
+                vals = params[index : index + n]
+                diag_coulomb_mats[rep, block, rows, cols] = vals
+                if symmetric:
+                    diag_coulomb_mats[rep, block, cols, rows] = vals
+                index += n
+
+        final_orbital_rotation: np.ndarray | None = None
+        if with_final_orbital_rotation:
+            if variant is UCJ.Variant.UNBALANCED:
+                final_orbital_rotation = np.stack(
+                    [
+                        UCJ._unitary_from_parameters(params[index : index + norb**2], norb),
+                        UCJ._unitary_from_parameters(
+                            params[index + norb**2 : index + 2 * norb**2], norb
+                        ),
+                    ]
+                )
+            else:
+                final_orbital_rotation = UCJ._unitary_from_parameters(params[index:], norb)
+
+        if variant is UCJ.Variant.SPINLESS:
+            diag_coulomb_mats = diag_coulomb_mats[:, 0]
+
+        return UCJ(
+            norb,
+            variant,
+            diag_coulomb_mats,
+            orbital_rotations,
+            final_orbital_rotation=final_orbital_rotation,
+        )
+
+    def to_parameters(
+        self,
+        *,
+        interaction_pairs: (
+            list[tuple[int, int]] | tuple[list[tuple[int, int]] | None, ...] | None
+        ) = None,
+    ) -> np.ndarray:
+        r"""Converts this UCJ ansatz to a real-valued parameter vector.
+
+        Note:
+            If ``interaction_pairs`` restricts a block, the returned parameter vector incorporates
+            only the diagonal Coulomb matrix entries corresponding to the allowed interactions, so
+            the original operator is not recoverable from the parameter vector alone.
+
+        Args:
+            interaction_pairs: the allowed diagonal Coulomb interactions (see
+                :meth:`.from_t_amplitudes` for the exact per-variant shape convention). ``None``
+                (the default) imposes no restriction, so every block's full contents are included.
+
+        Returns:
+            The real-valued parameter vector.
+        """
+        norb = self.norb
+        variant = self._variant
+        n_reps = self.diag_coulomb_mats.shape[0]
+        pairs = UCJ._pairs_per_block(variant, interaction_pairs)
+        specs = UCJ._diag_coulomb_block_specs(variant)
+        diag_coulomb_mats = (
+            self.diag_coulomb_mats[:, np.newaxis]
+            if variant is UCJ.Variant.SPINLESS
+            else self.diag_coulomb_mats
+        )
+
+        params = np.empty(
+            UCJ.num_parameters(
+                norb,
+                variant,
+                n_reps,
+                interaction_pairs=interaction_pairs,
+                with_final_orbital_rotation=self.final_orbital_rotation is not None,
+            )
+        )
+
+        index = 0
+        for rep in range(n_reps):
+            rotation = self.orbital_rotations[rep]
+            if variant is UCJ.Variant.UNBALANCED:
+                for s in range(2):
+                    n = norb**2
+                    params[index : index + n] = UCJ._unitary_to_parameters(rotation[s])
+                    index += n
+            else:
+                n = norb**2
+                params[index : index + n] = UCJ._unitary_to_parameters(rotation)
+                index += n
+            for block, symmetric in specs:
+                positions = UCJ._pair_positions(norb, pairs[block], symmetric=symmetric)
+                if not positions:
+                    continue
+                n = len(positions)
+                rows, cols = zip(*positions, strict=True)
+                params[index : index + n] = diag_coulomb_mats[rep, block, rows, cols]
+                index += n
+
+        if self.final_orbital_rotation is not None:
+            if variant is UCJ.Variant.UNBALANCED:
+                params[index : index + norb**2] = UCJ._unitary_to_parameters(
+                    self.final_orbital_rotation[0]
+                )
+                params[index + norb**2 :] = UCJ._unitary_to_parameters(
+                    self.final_orbital_rotation[1]
+                )
+            else:
+                params[index:] = UCJ._unitary_to_parameters(self.final_orbital_rotation)
+
+        return params
+
+    @staticmethod
+    def _normalize_variant(variant: UCJ.Variant | str) -> UCJ.Variant:
+        """Normalizes a variant argument, raising the same ``ValueError`` as ``__init__``."""
+        try:
+            return UCJ.Variant(variant)
+        except ValueError:
+            raise ValueError(
+                f"Unknown UCJ variant {variant!r}; expected 'balanced', 'unbalanced', or 'spinless'."
+            ) from None
+
+    @staticmethod
+    def _pairs_per_block(
+        variant: UCJ.Variant,
+        interaction_pairs: (
+            list[tuple[int, int]] | tuple[list[tuple[int, int]] | None, ...] | None
+        ),
+    ) -> tuple[list[tuple[int, int]] | None, ...]:
+        """Normalizes ``interaction_pairs`` into a per-block tuple, defaulting missing blocks to None.
+
+        ``spinless`` takes a bare list (or ``None``); ``balanced``/``unbalanced`` take a tuple of
+        per-block lists (or ``None``) -- matching :meth:`.from_t_amplitudes`'s convention.
+        """
+        if interaction_pairs is None:
+            n_blocks = (
+                3
+                if variant is UCJ.Variant.UNBALANCED
+                else (2 if variant is UCJ.Variant.BALANCED else 1)
+            )
+            return (None,) * n_blocks
+        if variant is UCJ.Variant.SPINLESS:
+            return (cast("list[tuple[int, int]] | None", interaction_pairs),)
+        return cast("tuple[list[tuple[int, int]] | None, ...]", interaction_pairs)
 
     @staticmethod
     def _final_rotation_from_t1(
@@ -430,6 +685,81 @@ class UCJ(FermionicGate):
             if symmetric:
                 mask[cols, rows] = True
         mats *= mask
+
+    @staticmethod
+    def _pair_positions(
+        norb: int, pairs: list[tuple[int, int]] | None, *, symmetric: bool
+    ) -> list[tuple[int, int]]:
+        """Returns the ``(i, j)`` positions ``pairs`` designates, defaulting to the full index set.
+
+        With ``pairs=None`` this returns every upper-triangular ``(i, j)`` (``symmetric=True``, same-
+        spin blocks) or every ordered pair (``symmetric=False``, the alpha-beta block) -- the same
+        default index sets :meth:`.num_parameters`/:meth:`.from_parameters`/:meth:`.to_parameters` use to
+        size and walk a block with no explicit restriction. An explicit ``pairs`` (including ``[]``)
+        is returned unchanged; it is the caller's responsibility to pass only upper-triangular pairs
+        for a ``symmetric`` block.
+        """
+        if pairs is not None:
+            return pairs
+        if symmetric:
+            return list(itertools.combinations_with_replacement(range(norb), 2))
+        return [(i, j) for i in range(norb) for j in range(norb)]
+
+    @staticmethod
+    def _unitary_from_parameters(params: np.ndarray, norb: int) -> np.ndarray:
+        """Builds a ``(norb, norb)`` unitary from ``norb**2`` real parameters.
+
+        The parameters describe an antihermitian generator ``A`` and the unitary is ``expm(A)``: the
+        first ``norb*(norb-1)/2`` parameters are the real parts of ``A``'s upper-triangular
+        (off-diagonal) entries, and the remaining ``norb*(norb+1)/2`` are the imaginary parts of its
+        upper-triangular entries *including the diagonal* (row-major) -- mirroring ffsim's
+        ``unitary_from_parameters``/``antihermitians_from_parameters`` convention exactly, so a
+        parameter vector produced by ffsim's own ``to_parameters`` round-trips through this method.
+        """
+        n_triu = norb * (norb - 1) // 2
+        rows_off, cols_off = np.triu_indices(norb, k=1)
+        rows_all, cols_all = np.triu_indices(norb)
+        generator = np.zeros((norb, norb), dtype=complex)
+        real_parts = params[:n_triu]
+        imag_parts = 1j * params[n_triu:]
+        generator[rows_all, cols_all] = imag_parts
+        generator[cols_all, rows_all] = imag_parts
+        generator[rows_off, cols_off] += real_parts
+        generator[cols_off, rows_off] -= real_parts
+        return scipy.linalg.expm(generator)
+
+    @staticmethod
+    def _unitary_to_parameters(unitary: np.ndarray) -> np.ndarray:
+        """Inverts :meth:`._unitary_from_parameters`, extracting ``norb**2`` real parameters.
+
+        Takes the matrix logarithm of ``unitary`` to recover its antihermitian generator, then reads
+        back the same fixed slices ``_unitary_from_parameters`` writes.
+        """
+        norb = unitary.shape[-1]
+        generator = scipy.linalg.logm(unitary)
+        n_triu = norb * (norb - 1) // 2
+        rows_off, cols_off = np.triu_indices(norb, k=1)
+        rows_all, cols_all = np.triu_indices(norb)
+        params = np.empty(norb**2)
+        params[:n_triu] = generator[rows_off, cols_off].real
+        params[n_triu:] = generator[rows_all, cols_all].imag
+        return params
+
+    @staticmethod
+    def _diag_coulomb_block_specs(variant: UCJ.Variant) -> list[tuple[int, bool]]:
+        """Returns the ``(block index, symmetric)`` pairs for each diagonal Coulomb block, in order.
+
+        Matches the block layout of ``diag_coulomb_mats``' second axis and the order in which
+        :meth:`.num_parameters`/:meth:`.from_parameters`/:meth:`.to_parameters` expect the corresponding
+        ``interaction_pairs`` elements: a bare list for ``spinless``, ``(pairs_aa, pairs_ab)`` for
+        ``balanced``, ``(pairs_aa, pairs_ab, pairs_bb)`` for ``unbalanced``. The alpha-beta (``ab``)
+        block is the only non-symmetric one (it is not the transpose of itself in general).
+        """
+        if variant is UCJ.Variant.SPINLESS:
+            return [(0, True)]
+        if variant is UCJ.Variant.BALANCED:
+            return [(0, True), (1, True)]
+        return [(0, True), (1, False), (2, True)]  # UNBALANCED: aa, ab, bb
 
     def _validate_shapes(self, norb: int) -> None:
         """Validates the tensor shapes against ``norb`` and ``self._variant``."""
