@@ -529,6 +529,22 @@ class TestFermionOperator:
         with subtests.test("split groups"):
             assert all([a.equiv(b) for a, b in zip(groups, expected, strict=True)])
 
+        with subtests.test("split groups reversed"):
+            reversed_groups = op.split_out_groups(group_indices=[1, 0])
+            assert all(
+                a.equiv(b) for a, b in zip(reversed_groups, list(reversed(expected)), strict=True)
+            )
+
+        with subtests.test("split groups duplicate"):
+            duplicate_groups = op.split_out_groups(group_indices=[0, 0])
+            assert all(
+                a.equiv(b)
+                for a, b in zip(duplicate_groups, [expected[0], expected[0]], strict=True)
+            )
+
+        with subtests.test("split groups empty"):
+            assert op.split_out_groups(group_indices=[]) == []
+
     def test_split_out_groups_err(self):
         cls = self.get_class()
 
@@ -536,3 +552,4 @@ class TestFermionOperator:
             {(cre(0), ann(1)): 1, (cre(1), ann(0)): 1, (cre(0), cre(0), ann(1), ann(1)): 2}
         )
         assert op.split_out_groups() is None
+        assert op.split_out_groups(group_indices=[0]) is None

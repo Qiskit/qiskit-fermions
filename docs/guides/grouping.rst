@@ -114,7 +114,7 @@ the same group. The following code shows how that can be done:
        qf_maj_op_set_groups(op, groups, num_terms);
 
        QfMajoranaOperator *group_ops[4];
-       qf_maj_op_split_out_groups(op, group_ops);
+       qf_maj_op_split_out_groups(op, NULL, 0, group_ops);
 
 
 .. [1] A. Gandon et al., Stabilizer-based quantum simulation of fermion dynamics

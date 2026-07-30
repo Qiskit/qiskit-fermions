@@ -306,7 +306,8 @@ the :ref:`grouping <grouping_explanation>` guide.
        qf_maj_op_set_groups(op, groups, 3);
 
        // Partition operator by groups
-       QfMajoranaOperator **grouped_ops = qf_maj_op_split_out_groups(op, &num_groups);
+       QfMajoranaOperator *grouped_ops[2];
+       qf_maj_op_split_out_groups(op, NULL, 0, grouped_ops);
 
 
 .. |arithmetic_and_mathematical_operations| replace:: **Arithmetic and mathematical operations**

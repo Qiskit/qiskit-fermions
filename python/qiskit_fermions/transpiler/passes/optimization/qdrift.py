@@ -209,7 +209,7 @@ class QDriftTrotterization(FermionicDAGCircuitPass):
             time = node.op.params[0]
             num_modes = len(node.qargs)
 
-            terms: list[Any]  # can be either a list of operator terms or operator instances
+            terms: list[Any] | None  # a list of operator terms, or None when `hamil.groups` is set
             if hamil.groups is None:
                 # NOTE: the qDRIFT protocol normalizes each term to unit magnitude because the
                 # evolution time is entirely dictated by `delta` (computed below). Only the
@@ -224,11 +224,11 @@ class QDriftTrotterization(FermionicDAGCircuitPass):
                 weights = np.zeros((hamil.num_groups(),))
                 np.add.at(weights, groups, np.abs(all_coeffs))
                 weights /= np.unique(groups, return_counts=True)[1]
-                # NOTE: we do not pre-process the coefficients of these different group terms here,
-                # because we would unnecessarily need to loop over all terms in all groups. Instead,
-                # we replace the coefficients by identity values only once that particular group
-                # term actually gets sampled.
-                terms = hamil.split_out_groups()
+                # NOTE: we do not materialize the group operators here. Since only a small
+                # fraction of the (potentially much larger) set of groups ends up being sampled,
+                # we look up each sampled group's operator lazily via `split_out_groups`, once we
+                # know which indices were actually drawn.
+                terms = None
 
             def _unit_terms(term):
                 if isinstance(term, tuple):
@@ -276,8 +276,17 @@ class QDriftTrotterization(FermionicDAGCircuitPass):
                 sampled_indices = self._rng.choice(
                     np.arange(len(weights)), size=self.num_terms, p=probabilities
                 )
-                for sampled_idx in sampled_indices:
-                    unit_terms = _unit_terms(terms[sampled_idx])
+                if terms is None:
+                    # Only look up the (typically much smaller) set of distinct sampled groups,
+                    # rather than materializing every group in the Hamiltonian, then map each
+                    # draw back to its (possibly repeated) fetched operator.
+                    unique_indices, inverse = np.unique(sampled_indices, return_inverse=True)
+                    sampled_terms = hamil.split_out_groups(group_indices=unique_indices.tolist())
+                    draws = [sampled_terms[i] for i in inverse]
+                else:
+                    draws = [terms[sampled_idx] for sampled_idx in sampled_indices]
+                for term in draws:
+                    unit_terms = _unit_terms(term)
                     op = hamil.__class__.from_terms(unit_terms)
                     evo = Evolution(num_modes, op, time=delta)
                     out_dag.apply_operation_back(evo, qargs=out_dag.qubits)
@@ -297,7 +306,11 @@ class QDriftTrotterization(FermionicDAGCircuitPass):
                 # this is numpy's own implementation of weighted sampling (see `Generator.choice`),
                 # just reusing the `cdf` precomputed above instead of rebuilding it on every draw.
                 sampled_idx = cdf.searchsorted(self._rng.random(), side="right")
-                unit_terms = _unit_terms(terms[sampled_idx])
+                if terms is None:
+                    term = hamil.split_out_groups(group_indices=[int(sampled_idx)])[0]
+                else:
+                    term = terms[sampled_idx]
+                unit_terms = _unit_terms(term)
                 op = hamil.__class__.from_terms(unit_terms)
 
                 term_support = op.get_support()

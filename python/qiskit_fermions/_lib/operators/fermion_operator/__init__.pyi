@@ -673,13 +673,18 @@ class FermionOperator:
         Returns:
             The largest group index in :attr:`groups` plus 1.
         """
-    def split_out_groups(self) -> typing.Optional[builtins.list[FermionOperator]]:
+    def split_out_groups(self, group_indices: typing.Optional[typing.Sequence[builtins.int]] = None) -> typing.Optional[builtins.list[FermionOperator]]:
         r"""
         Splits this operator into an optional list of new operators based on :attr:`groups`.
         
-        If :attr:`groups` is ``None``, this function also returns ``None``. Otherwise, it will
-        return a list of new operators that contain those terms of this operator with the
-        corresponding `group` index.
+        If :attr:`groups` is ``None``, this function also returns ``None``. Otherwise, if
+        ``group_indices`` is ``None`` (the default), it returns a list of one new operator for
+        every group index in :attr:`groups`, in index order. If ``group_indices`` is given, only
+        the requested indices are built, in the given order: this avoids the cost of constructing
+        operators for groups that are never used, which is especially beneficial when only a small
+        number of groups out of a much larger total are needed, e.g. when subsampling groups for a
+        randomized product formula. A duplicate index in ``group_indices`` is returned once per
+        occurrence.
         
         .. doctest::
         
@@ -698,9 +703,17 @@ class FermionOperator:
             ...     print(list(sorted(g.iter_terms())))
             [([(True, 0), (False, 1)], (1+0j)), ([(True, 1), (False, 0)], (-1+0j))]
             [([(True, 2), (False, 3)], (2+0j)), ([(True, 3), (False, 2)], (-2+0j))]
+            >>> groups = op.split_out_groups(group_indices=[1])
+            >>> for g in groups:
+            ...     print(list(sorted(g.iter_terms())))
+            [([(True, 2), (False, 3)], (2+0j)), ([(True, 3), (False, 2)], (-2+0j))]
+        
+        Args:
+            group_indices: the group indices for which to build operators, in the desired output
+                order. When omitted, every group is built, in index order.
         
         Returns:
-            An optional vector of one new operator for each group index in :attr:`groups`.
+            An optional vector of one new operator for each requested group index.
         """
     def adjoint(self) -> FermionOperator:
         r"""
