@@ -230,7 +230,7 @@ There is no need to re-implement it: an ``ffsim`` UCJ operator exposes the same 
    >>>
    >>> compressed_ansatz = UCJ(
    ...     norb,
-   ...     nelec,
+   ...     "balanced",
    ...     compressed.diag_coulomb_mats,
    ...     compressed.orbital_rotations,
    ...     final_orbital_rotation=compressed.final_orbital_rotation,

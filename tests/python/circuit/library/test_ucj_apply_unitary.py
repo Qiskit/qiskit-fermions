@@ -28,7 +28,7 @@ from qiskit_fermions.circuit.library import UCJ
 ffsim = pytest.importorskip("ffsim")
 
 
-def _apply_ours(ucj_op, norb, nelec, reference):
+def _apply_ours(ucj_op, norb, nelec, reference, variant):
     """Rebuilds an ffsim UCJ operator with our UCJ gate and applies it to ``reference``.
 
     Applies the :class:`.UCJ` gate itself (via ffsim's ``SupportsApplyUnitary`` protocol), so these
@@ -37,7 +37,7 @@ def _apply_ours(ucj_op, norb, nelec, reference):
     """
     gate = UCJ(
         norb,
-        nelec,
+        variant,
         ucj_op.diag_coulomb_mats,
         ucj_op.orbital_rotations,
         final_orbital_rotation=ucj_op.final_orbital_rotation,
@@ -55,7 +55,7 @@ def test_ucj_spin_balanced_matches_ffsim():
         )
         reference = ffsim.hartree_fock_state(norb, nelec)
         expected = ffsim.apply_unitary(reference, ucj_op, norb=norb, nelec=nelec)
-        result = _apply_ours(ucj_op, norb, nelec, reference)
+        result = _apply_ours(ucj_op, norb, nelec, reference, "balanced")
         np.testing.assert_allclose(result, expected, atol=1e-10)
 
 
@@ -69,18 +69,35 @@ def test_ucj_spin_unbalanced_matches_ffsim():
         )
         reference = ffsim.hartree_fock_state(norb, nelec)
         expected = ffsim.apply_unitary(reference, ucj_op, norb=norb, nelec=nelec)
-        result = _apply_ours(ucj_op, norb, nelec, reference)
+        result = _apply_ours(ucj_op, norb, nelec, reference, "unbalanced")
         np.testing.assert_allclose(result, expected, atol=1e-10)
 
 
-def test_ucj_spinless_on_spinful_sector_matches_ffsim():
-    """The spinless UCJ gate applied to a spinful sector matches ffsim."""
+def test_ucj_spinless_shortcut_via_zeroed_balanced_ab_block_matches_ffsim():
+    """A spinless ffsim operator run on a spinful sector is reproduced via a zeroed-ab balanced gate.
+
+    ``Variant.SPINLESS`` now always means a true 1-register spinless gate (see the class docstring),
+    so the two-register/shared-matrix/no-cross-spin shortcut ffsim's ``UCJOpSpinless`` supports for a
+    tuple ``nelec`` is no longer directly constructible. This confirms the same physics remains fully
+    expressible via ``Variant.BALANCED`` with its alpha-beta block zeroed (aa == bb == the spinless
+    matrix, no ab term) -- the equivalence this design decision relies on.
+    """
     norb = 4
     nelec = (2, 2)
     ucj_op = ffsim.random.random_ucj_op_spinless(norb, n_reps=2, seed=55)
     reference = ffsim.hartree_fock_state(norb, nelec)
     expected = ffsim.apply_unitary(reference, ucj_op, norb=norb, nelec=nelec)
-    result = _apply_ours(ucj_op, norb, nelec, reference)
+
+    zero_ab = np.zeros_like(ucj_op.diag_coulomb_mats)
+    balanced_diag_coulomb_mats = np.stack([ucj_op.diag_coulomb_mats, zero_ab], axis=1)
+    gate = UCJ(
+        norb,
+        "balanced",
+        balanced_diag_coulomb_mats,
+        ucj_op.orbital_rotations,
+        final_orbital_rotation=ucj_op.final_orbital_rotation,
+    )
+    result = ffsim.apply_unitary(reference, gate, norb=norb, nelec=nelec)
     np.testing.assert_allclose(result, expected, atol=1e-10)
 
 
@@ -93,34 +110,8 @@ def test_ucj_spinless_on_spinless_sector_matches_ffsim():
     )
     reference = ffsim.slater_determinant(norb, list(range(nelec)))
     expected = ffsim.apply_unitary(reference, ucj_op, norb=norb, nelec=nelec)
-    result = _apply_ours(ucj_op, norb, nelec, reference)
+    result = _apply_ours(ucj_op, norb, nelec, reference, "spinless")
     np.testing.assert_allclose(result, expected, atol=1e-10)
-
-
-def test_ucj_gate_accepts_numpy_int_nelec():
-    """A UCJ built with a numpy-integer (e.g. ``np.int64``) spinless nelec infers the spinless variant.
-
-    A numpy scalar is not a Python ``int``, so a naive ``isinstance(nelec, int)`` check at
-    construction time would infer the spinful variant and build the wrong (aa/ab/bb) diagonal-Coulomb
-    layer. This is a UCJ-specific *construction*-time concern (variant inference), distinct from the
-    shared apply-path ``_normalize_nelec`` covered by the other gates' apply tests: the ``np.int64``
-    build must select the same spinless variant as the plain-``int`` build.
-    """
-    norb = 4
-    ucj_op = ffsim.random.random_ucj_op_spinless(
-        norb, n_reps=2, with_final_orbital_rotation=True, seed=5
-    )
-
-    def build(nelec):
-        return UCJ(
-            norb,
-            nelec,
-            ucj_op.diag_coulomb_mats,
-            ucj_op.orbital_rotations,
-            final_orbital_rotation=ucj_op.final_orbital_rotation,
-        )
-
-    assert build(2)._variant is build(np.int64(2))._variant is UCJ.Variant.SPINLESS
 
 
 def test_ucj_gate_apply_unitary_matches_ffsim():
@@ -139,7 +130,7 @@ def test_ucj_gate_apply_unitary_matches_ffsim():
 
     gate = UCJ(
         norb,
-        nelec,
+        "balanced",
         ucj_op.diag_coulomb_mats,
         ucj_op.orbital_rotations,
         final_orbital_rotation=ucj_op.final_orbital_rotation,
@@ -156,7 +147,7 @@ def test_ucj_gate_through_circuit_matches_ffsim():
     reference = ffsim.hartree_fock_state(norb, nelec)
     expected = ffsim.apply_unitary(reference, ucj_op, norb=norb, nelec=nelec)
 
-    gate = UCJ(norb, nelec, ucj_op.diag_coulomb_mats, ucj_op.orbital_rotations)
+    gate = UCJ(norb, "balanced", ucj_op.diag_coulomb_mats, ucj_op.orbital_rotations)
     circ = FermionicCircuit(2 * norb)
     circ.append(gate, circ.modes)
     result = ffsim.apply_unitary(reference, circ, norb=norb, nelec=nelec)
@@ -210,7 +201,7 @@ def test_ucj_gate_subset_placement_matches_global_embedding():
     # applied to the same reference.
     gate = UCJ(
         norb_local,
-        nelec,
+        "spinless",
         ucj_op.diag_coulomb_mats,
         ucj_op.orbital_rotations,
         final_orbital_rotation=ucj_op.final_orbital_rotation,
@@ -245,7 +236,7 @@ def test_ucj_single_rep_matches_hand_composed_ffsim_primitives():
     )
     expected = ffsim.apply_orbital_rotation(vec, orbital_rotation, norb=norb, nelec=nelec)
 
-    result = _apply_ours(ucj_op, norb, nelec, reference)
+    result = _apply_ours(ucj_op, norb, nelec, reference, "balanced")
     np.testing.assert_allclose(result, expected, atol=1e-10)
 
 
@@ -284,24 +275,28 @@ def test_ucj_from_t_amplitudes_balanced_matches_ffsim():
 
 
 def test_ucj_from_t_amplitudes_spinless_matches_ffsim():
-    """UCJ.from_t_amplitudes (spinless) matches ffsim's UCJOpSpinless.from_t_amplitudes."""
-    pyscf = pytest.importorskip("pyscf")
-    import pyscf.cc as _pyscf_cc
+    """UCJ.from_t_amplitudes (spinless) matches ffsim's UCJOpSpinless.from_t_amplitudes.
 
-    mol = pyscf.gto.Mole()
-    mol.build(
-        atom=[["H", (0, 0, 0)], ["H", (0, 0, 0.74)]], basis="6-31g", symmetry="Dooh", verbose=0
-    )
-    scf = pyscf.scf.RHF(mol).run()
-    mol_data = ffsim.MolecularData.from_scf(scf)
-    norb, nelec = mol_data.norb, mol_data.nelec
-    ccsd = _pyscf_cc.CCSD(scf).run()
+    ``variant="spinless"`` now always means a true 1-register spinless gate (see the class
+    docstring), so this exercises a genuinely spinless (integer nelec) sector rather than ffsim's
+    dropped two-register/shared-matrix shortcut for a spinful tuple nelec -- that equivalence is
+    covered separately by
+    ``test_ucj_spinless_shortcut_via_zeroed_balanced_ab_block_matches_ffsim``.
+    """
+    norb = 4
+    nelec = 3
+    rng = np.random.default_rng(99)
+    nocc, nvrt = nelec, norb - nelec
+    t2 = rng.standard_normal((nocc, nocc, nvrt, nvrt))
+    t2 = t2 - t2.transpose(1, 0, 2, 3)
+    t2 = t2 - t2.transpose(0, 1, 3, 2)
+    t1 = rng.standard_normal((nocc, nvrt))
 
-    reference = ffsim.hartree_fock_state(norb, nelec)
-    ucj_op = ffsim.UCJOpSpinless.from_t_amplitudes(ccsd.t2, t1=ccsd.t1)
+    reference = ffsim.slater_determinant(norb, list(range(nelec)))
+    ucj_op = ffsim.UCJOpSpinless.from_t_amplitudes(t2, t1=t1)
     expected = ffsim.apply_unitary(reference, ucj_op, norb=norb, nelec=nelec)
 
-    gate = UCJ.from_t_amplitudes(nelec, ccsd.t2, t1=ccsd.t1, variant="spinless")
+    gate = UCJ.from_t_amplitudes(nelec, t2, t1=t1, variant="spinless")
     result = ffsim.apply_unitary(reference, gate, norb=norb, nelec=nelec)
     np.testing.assert_allclose(result, expected, atol=1e-10)
 

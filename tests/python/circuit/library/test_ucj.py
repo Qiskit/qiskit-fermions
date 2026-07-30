@@ -31,17 +31,17 @@ def _balanced_tensors(norb, n_reps, *, seed):
     return mats, rotations
 
 
-def test_ucj_infers_balanced_variant():
-    """A ``(L, 2, norb, norb)`` diag-Coulomb tensor selects the balanced variant and 2*norb modes."""
+def test_ucj_balanced_variant():
+    """A ``(L, 2, norb, norb)`` diag-Coulomb tensor is accepted for the balanced variant."""
     norb = 3
     mats, rotations = _balanced_tensors(norb, 2, seed=0)
-    gate = UCJ(norb, (1, 1), mats, rotations)
+    gate = UCJ(norb, "balanced", mats, rotations)
     assert gate.num_modes == 2 * norb
     assert gate._variant is UCJ.Variant.BALANCED
 
 
-def test_ucj_infers_unbalanced_variant():
-    """A ``(L, 3, norb, norb)`` diag-Coulomb tensor with paired rotations selects unbalanced."""
+def test_ucj_unbalanced_variant():
+    """A ``(L, 3, norb, norb)`` diag-Coulomb tensor with paired rotations is accepted as unbalanced."""
     norb = 3
     n_reps = 2
     rng = np.random.default_rng(1)
@@ -52,23 +52,29 @@ def test_ucj_infers_unbalanced_variant():
             for k in range(n_reps)
         ]
     )
-    gate = UCJ(norb, (2, 1), mats, rotations)
+    gate = UCJ(norb, "unbalanced", mats, rotations)
     assert gate.num_modes == 2 * norb
     assert gate._variant is UCJ.Variant.UNBALANCED
 
 
-def test_ucj_infers_spinless_variant():
-    """A ``(L, norb, norb)`` diag-Coulomb tensor selects the spinless variant."""
+def test_ucj_spinless_variant():
+    """A ``(L, norb, norb)`` diag-Coulomb tensor is accepted for the spinless variant (norb modes)."""
     norb = 3
     n_reps = 2
     rng = np.random.default_rng(2)
     mats = rng.standard_normal((n_reps, norb, norb))
     rotations = np.stack([random_unitary(norb, seed=30 + k) for k in range(n_reps)])
-    # spinful nelec -> 2*norb modes; integer nelec -> norb modes
-    assert UCJ(norb, (1, 1), mats, rotations).num_modes == 2 * norb
-    spinless = UCJ(norb, 2, mats, rotations)
+    spinless = UCJ(norb, "spinless", mats, rotations)
     assert spinless.num_modes == norb
     assert spinless._variant is UCJ.Variant.SPINLESS
+
+
+def test_ucj_rejects_unknown_variant():
+    """An unrecognized variant string raises a ValueError naming the accepted variants."""
+    norb = 3
+    mats, rotations = _balanced_tensors(norb, 2, seed=0)
+    with pytest.raises(ValueError, match="Unknown UCJ variant"):
+        UCJ(norb, "nonsense", mats, rotations)
 
 
 def test_ucj_rejects_inconsistent_shapes():
@@ -76,15 +82,15 @@ def test_ucj_rejects_inconsistent_shapes():
     norb = 3
     mats, rotations = _balanced_tensors(norb, 2, seed=3)
     with pytest.raises(ValueError, match="Inconsistent"):
-        UCJ(norb + 1, (1, 1), mats, rotations)  # norb mismatch
+        UCJ(norb + 1, "balanced", mats, rotations)  # norb mismatch
 
 
-def test_ucj_rejects_integer_nelec_for_balanced_tensors():
-    """An integer nelec with balanced-shaped tensors is rejected (spinless variant only)."""
+def test_ucj_rejects_balanced_shaped_tensors_for_spinless_variant():
+    """Balanced-shaped tensors passed with variant='spinless' are rejected as inconsistent."""
     norb = 3
     mats, rotations = _balanced_tensors(norb, 2, seed=4)
-    with pytest.raises(ValueError, match="spinless variant"):
-        UCJ(norb, 2, mats, rotations)
+    with pytest.raises(ValueError, match="Inconsistent"):
+        UCJ(norb, "spinless", mats, rotations)
 
 
 def test_ucj_define_gate_sequence():
@@ -97,7 +103,7 @@ def test_ucj_define_gate_sequence():
     n_reps = 2
     mats, rotations = _balanced_tensors(norb, n_reps, seed=7)
     final = random_unitary(norb, seed=99)
-    gate = UCJ(norb, (1, 1), mats, rotations, final_orbital_rotation=final)
+    gate = UCJ(norb, "balanced", mats, rotations, final_orbital_rotation=final)
 
     circ = FermionicCircuit(gate.num_modes)
     circ.append(gate, circ.modes)
@@ -109,15 +115,15 @@ def test_ucj_define_gate_sequence():
     assert ops["OrbitalRotation"] == 4 * n_reps + 2
 
 
-def test_ucj_spinless_true_uses_norb_modes():
-    """A true spinless system (integer nelec) acts on norb modes with only same-spin terms."""
+def test_ucj_spinless_uses_norb_modes():
+    """A spinless variant acts on norb modes with only same-spin terms."""
     norb = 3
     n_reps = 1
     rng = np.random.default_rng(8)
     mats = rng.standard_normal((n_reps, norb, norb))
     mats = mats + mats.transpose(0, 2, 1)
     rotations = np.stack([random_unitary(norb, seed=40)])
-    gate = UCJ(norb, 2, mats, rotations)
+    gate = UCJ(norb, "spinless", mats, rotations)
     circ = FermionicCircuit(gate.num_modes)
     circ.append(gate, circ.modes)
     ops = circ.decompose().count_ops()
@@ -131,7 +137,7 @@ def test_ucj_accepts_complex_diag_coulomb_with_zero_imaginary_part():
     """Complex-typed diag-Coulomb mats with a negligible imaginary part are coerced to real."""
     norb = 3
     mats, rotations = _balanced_tensors(norb, 1, seed=11)
-    gate = UCJ(norb, (1, 1), mats.astype(complex), rotations)
+    gate = UCJ(norb, "balanced", mats.astype(complex), rotations)
     assert gate.diag_coulomb_mats.dtype == np.float64
     np.testing.assert_allclose(gate.diag_coulomb_mats, mats)
 
@@ -143,7 +149,7 @@ def test_ucj_rejects_complex_diag_coulomb_with_nonzero_imaginary_part():
     complex_mats = mats.astype(complex)
     complex_mats[0, 0, 0, 1] += 0.5j
     with pytest.raises(ValueError, match="imaginary part"):
-        UCJ(norb, (1, 1), complex_mats, rotations)
+        UCJ(norb, "balanced", complex_mats, rotations)
 
 
 def test_ucj_from_t_amplitudes_rejects_tuple_n_reps_for_balanced():
@@ -244,16 +250,6 @@ def test_ucj_from_t_amplitudes_unbalanced_int_n_reps_pads():
             np.testing.assert_allclose(rot, np.eye(norb), atol=1e-12)
 
 
-def test_ucj_rejects_uninferable_tensor_shapes():
-    """Tensor shapes matching no variant raise a ValueError explaining the expected layouts."""
-    norb = 3
-    # a 4-D diag-Coulomb tensor with an unrecognized second axis (neither 2 nor 3)
-    mats = np.zeros((1, 4, norb, norb))
-    rotations = np.zeros((1, norb, norb))
-    with pytest.raises(ValueError, match="Could not infer the UCJ spin variant"):
-        UCJ(norb, (1, 1), mats, rotations)
-
-
 def test_ucj_rejects_mismatched_repetition_counts():
     """Differing repetition counts between the diag-Coulomb and rotation tensors are rejected."""
     norb = 3
@@ -262,7 +258,7 @@ def test_ucj_rejects_mismatched_repetition_counts():
         :1
     ]  # 1 rep
     with pytest.raises(ValueError, match="same number of repetitions"):
-        UCJ(norb, (1, 1), mats, rotations)
+        UCJ(norb, "balanced", mats, rotations)
 
 
 def test_orbital_rotation_from_t1_amplitudes_is_unitary():
@@ -284,7 +280,7 @@ def _reference_diag_coulomb_terms(gate, diag_coulomb_mat):
     """The ungrouped ``{term: coeff}`` reference for one repetition's diagonal Coulomb operator."""
     norb = gate.norb
     mat_aa, mat_ab, mat_bb = gate._resolve_diag_coulomb_blocks(diag_coulomb_mat)
-    if gate._spinless:
+    if gate._variant is UCJ.Variant.SPINLESS:
         blocks = {(0, 0): mat_aa}
     else:
         blocks = {(0, 0): mat_aa, (0, 1): mat_ab, (1, 0): mat_ab.T, (1, 1): mat_bb}
@@ -307,7 +303,7 @@ def test_diag_coulomb_grouping_preserves_operator(norb):
     from qiskit_fermions.operators import FermionOperator
 
     mats, rotations = _balanced_tensors(norb, 1, seed=100 + norb)
-    gate = UCJ(norb, (1, 1), mats, rotations)
+    gate = UCJ(norb, "balanced", mats, rotations)
     operator = gate._diag_coulomb_operator(gate.diag_coulomb_mats[0])
 
     reference = FermionOperator.from_dict(
@@ -317,14 +313,13 @@ def test_diag_coulomb_grouping_preserves_operator(norb):
 
 
 @pytest.mark.parametrize(
-    ("variant", "nelec", "norb"),
+    ("variant", "norb"),
     [
-        ("balanced", (1, 1), 4),
-        ("spinless", 2, 4),  # spinful sector: 2*norb block-spin modes
-        ("spinless", 3, 5),  # true spinless sector: norb modes
+        ("balanced", 4),
+        ("spinless", 5),
     ],
 )
-def test_diag_coulomb_groups_have_disjoint_support(variant, nelec, norb):
+def test_diag_coulomb_groups_have_disjoint_support(variant, norb):
     """Every diagonal Coulomb group's terms act on mutually disjoint modes (one parallel layer)."""
     rng = np.random.default_rng(hash((variant, norb)) % (2**32))
     if variant == "balanced":
@@ -334,7 +329,7 @@ def test_diag_coulomb_groups_have_disjoint_support(variant, nelec, norb):
         mats = rng.standard_normal((1, norb, norb))
         mats = mats + mats.transpose(0, 2, 1)
     rotations = np.stack([random_unitary(norb, seed=7)])
-    gate = UCJ(norb, nelec, mats, rotations)
+    gate = UCJ(norb, variant, mats, rotations)
 
     operator = gate._diag_coulomb_operator(gate.diag_coulomb_mats[0])
     assert operator.groups is not None
@@ -346,17 +341,17 @@ def test_diag_coulomb_groups_have_disjoint_support(variant, nelec, norb):
 
 
 @pytest.mark.parametrize(
-    ("variant", "nelec", "norb"),
+    ("variant", "norb"),
     [
-        ("balanced", (1, 1), 3),  # spinful sector: even num_modes = 2*norb
-        ("balanced", (1, 1), 4),
-        ("balanced", (1, 1), 5),
-        ("spinless", 3, 3),  # true spinless sector: odd num_modes = norb (odd)
-        ("spinless", 4, 4),  # true spinless sector: even num_modes = norb (even)
-        ("spinless", 5, 5),  # true spinless sector: odd num_modes = norb (odd)
+        ("balanced", 3),  # spinful sector: even num_modes = 2*norb
+        ("balanced", 4),
+        ("balanced", 5),
+        ("spinless", 3),  # odd num_modes = norb (odd)
+        ("spinless", 4),  # even num_modes = norb (even)
+        ("spinless", 5),  # odd num_modes = norb (odd)
     ],
 )
-def test_diag_coulomb_group_count_is_optimal(variant, nelec, norb):
+def test_diag_coulomb_group_count_is_optimal(variant, norb):
     """The group (layer) count matches the provable optimum of the closed-form circle coloring.
 
     Every term sharing a mode must land in a distinct group, so the count is bounded below by the
@@ -372,7 +367,7 @@ def test_diag_coulomb_group_count_is_optimal(variant, nelec, norb):
         mats = rng.standard_normal((1, norb, norb))
         mats = mats + mats.transpose(0, 2, 1)
     rotations = np.stack([random_unitary(norb, seed=7)])
-    gate = UCJ(norb, nelec, mats, rotations)
+    gate = UCJ(norb, variant, mats, rotations)
     operator = gate._diag_coulomb_operator(gate.diag_coulomb_mats[0])
 
     degree: dict[int, int] = {}

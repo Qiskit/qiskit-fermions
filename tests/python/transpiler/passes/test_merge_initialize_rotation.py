@@ -326,7 +326,7 @@ def test_merge_ucj_workflow():
     norb, nelec, n_reps = 2, (1, 1), 1
     diag_coulomb_mats = np.zeros((n_reps, 2, norb, norb))
     orbital_rotations = np.stack([random_unitary(norb, seed=5) for _ in range(n_reps)])
-    ucj = UCJ(norb, nelec, diag_coulomb_mats, orbital_rotations)
+    ucj = UCJ(norb, "balanced", diag_coulomb_mats, orbital_rotations)
 
     circ = FermionicCircuit(2 * norb)
     circ.append(InitializeModes.from_hartree_fock(norb, nelec), circ.modes)
