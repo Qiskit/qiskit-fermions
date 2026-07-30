@@ -76,11 +76,19 @@ pub trait OperatorTrait {
     /// impl signature more specific than this one and trip the `refining_impl_trait` lint.
     fn iter(&self) -> impl ExactSizeIterator<Item = Self::TermView<'_>>;
 
+    /// Returns the operator's coefficients, one per term.
+    ///
+    /// This is the single point of access through which the trait's coefficient-dependent provided
+    /// methods ([`group_weights`](Self::group_weights)) reach the `coeffs` field, so that they need
+    /// not be reimplemented per operator type.
+    fn coeffs(&self) -> &[Complex64];
+
     /// Returns the operator's group indices, one per term, or `None` if it tracks no groups.
     ///
     /// This is the single point of access through which the trait's group-related provided methods
-    /// ([`has_groups`](Self::has_groups), [`num_groups`](Self::num_groups)) reach the `groups` field,
-    /// so that they need not be reimplemented per operator type.
+    /// ([`has_groups`](Self::has_groups), [`num_groups`](Self::num_groups),
+    /// [`group_weights`](Self::group_weights)) reach the `groups` field, so that they need not be
+    /// reimplemented per operator type.
     fn groups(&self) -> Option<&[u32]>;
 
     /// Returns whether the operator tracks group indices (i.e. `groups` is `Some`).
@@ -104,6 +112,37 @@ pub trait OperatorTrait {
             Some(max) => max + 1,
             None => 0,
         })
+    }
+
+    /// Returns the mean absolute coefficient magnitude of each group, or `None` if the operator
+    /// tracks no groups.
+    ///
+    /// The `i`-th entry is the sum of `|coeff|` over the terms in group `i`, divided by the number
+    /// of terms in that group. This is the sampling weight of a randomized product formula (e.g.
+    /// qDRIFT) that draws whole groups rather than individual terms.
+    ///
+    /// Computing this natively reduces the per-term coefficients and group indices down to one
+    /// value per group in a single pass, so a caller across an FFI boundary receives only
+    /// [`num_groups`](Self::num_groups) values instead of two arrays of one value per (ungrouped)
+    /// term that it would have to reduce itself.
+    ///
+    /// A group index that no term carries yields a weight of `0.0`: the index range is dense by
+    /// construction (see [`num_groups`](Self::num_groups)), but nothing enforces that, and a `0.0`
+    /// weight keeps such a group out of the sample rather than poisoning every weight with a `NaN`.
+    fn group_weights(&self) -> Option<Vec<f64>> {
+        let groups = self.groups()?;
+        let mut sums = vec![0.0; self.num_groups()? as usize];
+        let mut counts = vec![0_u32; sums.len()];
+        for (&group, coeff) in groups.iter().zip(self.coeffs()) {
+            sums[group as usize] += coeff.norm();
+            counts[group as usize] += 1;
+        }
+        for (sum, &count) in sums.iter_mut().zip(counts.iter()) {
+            if count > 0 {
+                *sum /= f64::from(count);
+            }
+        }
+        Some(sums)
     }
 
     /// Iterates over the terms of the operator together with their group index.

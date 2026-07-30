@@ -94,11 +94,6 @@ crate::impl_operator_macro!(FermionOperator);
 
 impl FermionOperator {
     #[inline]
-    pub fn coeffs(&self) -> &[Complex64] {
-        &self.coeffs
-    }
-
-    #[inline]
     pub fn actions(&self) -> &[bool] {
         &self.actions
     }
@@ -510,6 +505,11 @@ impl OperatorTrait for FermionOperator {
                 modes: &self.modes[start..end],
             }
         })
+    }
+
+    #[inline]
+    fn coeffs(&self) -> &[Complex64] {
+        &self.coeffs
     }
 
     fn groups(&self) -> Option<&[u32]> {
@@ -1395,6 +1395,39 @@ mod tests {
 
         assert!(one.has_groups());
         assert_eq!(one.num_groups(), Some(1));
+    }
+
+    #[test]
+    fn test_group_weights() {
+        let mut op = FermionOperator {
+            coeffs: vec![
+                Complex64::new(1.0, 0.0),
+                Complex64::new(-3.0, 4.0),
+                Complex64::new(2.0, 0.0),
+            ],
+            actions: vec![true, false, true, false, true, true, false, false],
+            modes: vec![0, 1, 1, 0, 0, 0, 1, 1],
+            boundaries: vec![0, 2, 4, 8],
+            groups: None,
+        };
+
+        // an ungrouped operator has no per-group weights to report
+        assert!(op.group_weights().is_none());
+
+        op.groups = Some(vec![0, 0, 1]);
+
+        // group 0 averages |1.0| and |-3.0 + 4.0j| = 5.0, i.e. (1.0 + 5.0) / 2; group 1 holds the
+        // single term |2.0|. Note that the magnitude, not the real part, is what is averaged.
+        assert_eq!(op.group_weights(), Some(vec![3.0, 2.0]));
+
+        // a grouped operator holding no terms has no groups to weight either
+        let mut zero = FermionOperator::zero();
+        zero.groups = Some(vec![]);
+        assert_eq!(zero.group_weights(), Some(vec![]));
+
+        // group 1 is carried by no term at all, so it weighs 0.0 rather than NaN-ing the sample
+        op.groups = Some(vec![0, 0, 2]);
+        assert_eq!(op.group_weights(), Some(vec![3.0, 0.0, 2.0]));
     }
 
     #[test]

@@ -89,11 +89,6 @@ crate::impl_operator_macro!(MajoranaOperator);
 
 impl MajoranaOperator {
     #[inline]
-    pub fn coeffs(&self) -> &[Complex64] {
-        &self.coeffs
-    }
-
-    #[inline]
     pub fn modes(&self) -> &[u32] {
         &self.modes
     }
@@ -437,6 +432,11 @@ impl OperatorTrait for MajoranaOperator {
                 modes: &self.modes[start..end],
             }
         })
+    }
+
+    #[inline]
+    fn coeffs(&self) -> &[Complex64] {
+        &self.coeffs
     }
 
     fn groups(&self) -> Option<&[u32]> {

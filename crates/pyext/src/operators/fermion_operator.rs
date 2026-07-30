@@ -869,6 +869,43 @@ impl PyFermionOperator {
         self.inner.num_groups()
     }
 
+    /// Returns the mean absolute coefficient magnitude of each group.
+    ///
+    /// The ``i``-th entry is the sum of ``abs(coeff)`` over the terms in group ``i``, divided by
+    /// the number of terms in that group. If :attr:`groups` is ``None``, this function also returns
+    /// ``None``.
+    ///
+    /// This is the sampling weight of a randomized product formula (e.g. qDRIFT) that draws whole
+    /// groups rather than individual terms. Computing it natively is considerably cheaper than
+    /// reducing :meth:`get_coeffs` and :attr:`groups` in NumPy, because those two accessors each
+    /// copy one value per *ungrouped* term out of the operator only for it to be aggregated back
+    /// down to one value per group, whereas this returns just the :meth:`num_groups` reduced
+    /// values.
+    ///
+    /// .. note::
+    ///    A group index that no term carries weighs ``0.0``, which keeps it out of the sample.
+    ///
+    /// .. doctest::
+    ///
+    ///     >>> from qiskit_fermions.operators import FermionOperator
+    ///     >>> op = FermionOperator(
+    ///     ...     [1.0, 2.0, -1.0, -2.0],
+    ///     ...     [True, False, True, False, True, False, True, False],
+    ///     ...     [0, 1, 2, 3, 1, 0, 3, 2],
+    ///     ...     [0, 2, 4, 6, 8],
+    ///     ... )
+    ///     >>> print(op.group_weights())
+    ///     None
+    ///     >>> op.groups = [0, 1, 0, 1]
+    ///     >>> op.group_weights()
+    ///     [1.0, 2.0]
+    ///
+    /// Returns:
+    ///     The mean absolute coefficient magnitude of each group index.
+    pub fn group_weights(&self) -> Option<Vec<f64>> {
+        self.inner.group_weights()
+    }
+
     /// Splits this operator into an optional list of new operators based on :attr:`groups`.
     ///
     /// If :attr:`groups` is ``None``, this function also returns ``None``. Otherwise, if
