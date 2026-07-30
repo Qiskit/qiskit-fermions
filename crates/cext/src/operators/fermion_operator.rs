@@ -369,11 +369,11 @@ pub unsafe extern "C" fn qf_ferm_op_one() -> *mut FermionOperator {
 
 /// @ingroup qf_ferm_op
 ///
-/// @brief Checks whether this operator has a ``groups`` attribute that is not empty.
+/// @brief Checks whether this operator tracks group indices.
 ///
 /// @param op A pointer to the fermionic operator to be checked.
 ///
-/// @return Whether the provided operator has a non-empty ``groups`` attribute.
+/// @return Whether the provided operator has a ``groups`` attribute.
 ///
 /// @rst
 ///
@@ -397,7 +397,7 @@ pub unsafe extern "C" fn qf_ferm_op_one() -> *mut FermionOperator {
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn qf_ferm_op_has_groups(op: *const FermionOperator) -> bool {
     let op = unsafe { const_ptr_as_ref(op) };
-    op.groups.is_some()
+    op.has_groups()
 }
 
 /// @ingroup qf_ferm_op

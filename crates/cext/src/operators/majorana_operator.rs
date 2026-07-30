@@ -312,11 +312,11 @@ pub unsafe extern "C" fn qf_maj_op_one() -> *mut MajoranaOperator {
 
 /// @ingroup qf_maj_op
 ///
-/// @brief Checks whether this operator has a ``groups`` attribute that is not empty.
+/// @brief Checks whether this operator tracks group indices.
 ///
 /// @param op A pointer to the majorana operator to be checked.
 ///
-/// @return Whether the provided operator has a non-empty ``groups`` attribute.
+/// @return Whether the provided operator has a ``groups`` attribute.
 ///
 /// @rst
 ///
@@ -337,7 +337,7 @@ pub unsafe extern "C" fn qf_maj_op_one() -> *mut MajoranaOperator {
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn qf_maj_op_has_groups(op: *const MajoranaOperator) -> bool {
     let op = unsafe { const_ptr_as_ref(op) };
-    op.groups.is_some()
+    op.has_groups()
 }
 
 /// @ingroup qf_maj_op

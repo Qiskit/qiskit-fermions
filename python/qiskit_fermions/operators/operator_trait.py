@@ -130,6 +130,13 @@ class OperatorTrait(Protocol):
     def groups(self, groups: list[int] | None) -> None:
         """Sets the groups indices."""
 
+    def has_groups(self) -> bool:
+        """Returns whether this operator tracks group indices.
+
+        This is equivalent to (but cheaper than) checking ``op.groups is not None``, because it does
+        not copy the group indices out of the operator in order to inspect them.
+        """
+
     def num_groups(self) -> int | None:
         """Returns the number of groups."""
 

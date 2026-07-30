@@ -49,7 +49,7 @@ def group_terms_by_electronic_structure(op: fermion_operator.FermionOperator, nu
     
        group_terms_by_electronic_structure(normal, 2 * fcidump.norb, two_body_physicist_order=False)
     
-       assert normal.groups is not None
+       assert normal.has_groups()
     
     Args:
         op: the normal-ordered operator whose terms to group.

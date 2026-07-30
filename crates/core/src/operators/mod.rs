@@ -76,10 +76,35 @@ pub trait OperatorTrait {
     /// impl signature more specific than this one and trip the `refining_impl_trait` lint.
     fn iter(&self) -> impl ExactSizeIterator<Item = Self::TermView<'_>>;
 
+    /// Returns the operator's group indices, one per term, or `None` if it tracks no groups.
+    ///
+    /// This is the single point of access through which the trait's group-related provided methods
+    /// ([`has_groups`](Self::has_groups), [`num_groups`](Self::num_groups)) reach the `groups` field,
+    /// so that they need not be reimplemented per operator type.
+    fn groups(&self) -> Option<&[u32]>;
+
     /// Returns whether the operator tracks group indices (i.e. `groups` is `Some`).
     ///
+    /// Note that this is `true` even for an operator whose group indices are an empty slice, which
+    /// is the state of a grouped operator with no terms (see [`num_groups`](Self::num_groups)).
+    ///
     /// [`iter_with_groups`](Self::iter_with_groups) may only be called when this is `true`.
-    fn has_groups(&self) -> bool;
+    fn has_groups(&self) -> bool {
+        self.groups().is_some()
+    }
+
+    /// Returns the number of groups tracked by the operator, or `None` if it tracks no groups.
+    ///
+    /// The number of groups is evaluated lazily as the largest occurring group index plus 1, so it
+    /// may be used as the index for the next group. An operator that tracks groups but holds no
+    /// terms reports `Some(0)`.
+    fn num_groups(&self) -> Option<u32> {
+        let groups = self.groups()?;
+        Some(match groups.iter().max() {
+            Some(max) => max + 1,
+            None => 0,
+        })
+    }
 
     /// Iterates over the terms of the operator together with their group index.
     ///

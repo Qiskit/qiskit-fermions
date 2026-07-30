@@ -619,6 +619,34 @@ class MajoranaOperator:
         Returns:
             A new operator.
         """
+    def has_groups(self) -> builtins.bool:
+        r"""
+        Returns whether this operator tracks group indices.
+        
+        This is equivalent to (but cheaper than) checking ``op.groups is not None``, because it does
+        not copy the group indices out of the operator in order to inspect them.
+        
+        .. note::
+           This returns ``True`` even when :attr:`groups` is an empty list, which is the state of a
+           grouped operator that holds no terms.
+        
+        .. doctest::
+        
+            >>> from qiskit_fermions.operators import MajoranaOperator
+            >>> op = MajoranaOperator(
+            ...     [1.0, 2.0, -1.0, -2.0],
+            ...     [0, 1, 2, 3, 1, 0, 3, 2],
+            ...     [0, 2, 4, 6, 8],
+            ... )
+            >>> op.has_groups()
+            False
+            >>> op.groups = [0, 1, 0, 1]
+            >>> op.has_groups()
+            True
+        
+        Returns:
+            Whether :attr:`groups` is set on this operator.
+        """
     def num_groups(self) -> typing.Optional[builtins.int]:
         r"""
         Returns the number of groups.
