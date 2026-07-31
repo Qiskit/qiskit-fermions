@@ -60,6 +60,7 @@ class UCC(FermionicGate):
 
       .. math::
 
+          \begin{align}
           T_1 &= \sum_{ia} t_{ia}\left(
           a^\dagger_{a\alpha} a_{i\alpha} + a^\dagger_{a\beta} a_{i\beta}\right), \\
           T_2 &= \sum_{ijab} t_{ijab}\left[
@@ -67,6 +68,7 @@ class UCC(FermionicGate):
           a^\dagger_{a\alpha} a^\dagger_{b\alpha} a_{j\alpha} a_{i\alpha}
           + a^\dagger_{a\beta} a^\dagger_{b\beta} a_{j\beta} a_{i\beta}\right)
           + a^\dagger_{a\alpha} a^\dagger_{b\beta} a_{j\beta} a_{i\alpha}\right],
+          \end{align}
 
       with ``t1`` of shape ``(nocc, nvrt)`` and ``t2`` of shape ``(nocc, nocc, nvrt, nvrt)``. Acts
       on ``2 * norb`` block-spin modes.
@@ -74,6 +76,7 @@ class UCC(FermionicGate):
 
       .. math::
 
+          \begin{align}
           T_1 &= \sum_{ia} t^{(\alpha)}_{ia} a^\dagger_{a\alpha} a_{i\alpha}
           + \sum_{IA} t^{(\beta)}_{IA} a^\dagger_{A\beta} a_{I\beta}, \\
           T_2 &= \frac14 \sum_{ijab} t^{(\alpha\alpha)}_{ijab}
@@ -82,6 +85,7 @@ class UCC(FermionicGate):
           a^\dagger_{A\beta} a^\dagger_{B\beta} a_{J\beta} a_{I\beta}
           + \sum_{iJaB} t^{(\alpha\beta)}_{iJaB}
           a^\dagger_{a\alpha} a^\dagger_{B\beta} a_{J\beta} a_{i\alpha},
+          \end{align}
 
       with ``t1`` a pair ``(t1a, t1b)`` and ``t2`` a triple ``(t2aa, t2ab, t2bb)``. Acts on
       ``2 * norb`` block-spin modes. Note that the occupied/virtual split is resolved **per spin
