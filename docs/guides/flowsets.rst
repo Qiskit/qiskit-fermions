@@ -173,9 +173,8 @@ Next, label each term with the flow set it belongs to. The
 per group (:ref:`step 6 <flowsets_transpile>` puts this to work), so the grouping decided
 here at the *fermionic* level survives into the circuit.
 
-For the 1D chain the two hopping flow sets are the west-oriented arrows
-(:math:`T_{j,j+1}`) and the east-oriented arrows (:math:`T_{j+1,j}`), following the
-orientation convention of Appendix B 2 of Ref. [1]_. The diagonal
+For the 1D chain the two hopping flow sets are the east-oriented arrows
+(:math:`T_{j,j+1}`) and the west-oriented arrows (:math:`T_{j+1,j}`). The diagonal
 interaction terms commute with everything diagonal and form a third group:
 
 .. plot::
@@ -188,9 +187,9 @@ interaction terms commute with everything diagonal and form a third group:
    ...     for terms, _ in operator.iter_terms():
    ...         match terms:
    ...             case [(left, right)] if right == left + 1:
-   ...                 groups.append(0)  # west-oriented: T_{j,j+1}
+   ...                 groups.append(0)  # east-oriented: T_{j,j+1}
    ...             case [(left, right)] if right == left - 1:
-   ...                 groups.append(1)  # east-oriented: T_{j+1,j}
+   ...                 groups.append(1)  # west-oriented: T_{j+1,j}
    ...             case _:
    ...                 groups.append(2)  # diagonal interaction terms
    ...     return groups
@@ -206,6 +205,15 @@ interaction terms commute with everything diagonal and form a third group:
 
 Groups 0 and 1 are the two flow sets: each is a directed path along the chain, so by the
 flow property all terms within a group commute.
+
+.. note::
+   The east/west labels used throughout this guide are **geometric**: with the chain drawn
+   left to right and mode indices increasing in that direction, :math:`T_{j,j+1}` points
+   east and :math:`T_{j+1,j}` points west. Ref. [1]_ is internally inconsistent on this
+   naming --- its prose and its figures disagree --- so this guide deliberately does *not*
+   follow the prose, and instead keeps the labels tied to the picture. When cross-reading
+   with the paper, match the flow sets by their Pauli weights (1 and 3 below), not by the
+   compass words.
 
 3. Writing the custom encoding
 ------------------------------
@@ -263,12 +271,12 @@ over terms and their composition:
    ...                 [("ZZ", [j, j + 1], 1.0)], num_qubits=num_qubits
    ...             )
    ...         case (j, k) if k == j + 1:
-   ...             # west-oriented transfer operator: weight 1
+   ...             # east-oriented transfer operator: weight 1
    ...             return SparseObservable.from_sparse_list(
    ...                 [("X", [k], -0.5)], num_qubits=num_qubits
    ...             )
    ...         case (j, k) if k == j - 1:
-   ...             # east-oriented transfer operator: weight 3
+   ...             # west-oriented transfer operator: weight 3
    ...             return SparseObservable.from_sparse_list(
    ...                 [("ZXZ", [k, k + 1, k + 2], 0.5)], num_qubits=num_qubits
    ...             )
@@ -337,13 +345,13 @@ weights present in each group:
    1 [3]
    2 [0, 2]
 
-The west-oriented flow set (group 0) consists **entirely of weight-1 Paulis**. Its time
+The east-oriented flow set (group 0) consists **entirely of weight-1 Paulis**. Its time
 evolution is therefore a layer of single-qubit rotations and needs *no entangling gates at
 all* -- whereas under Jordan-Wigner every hopping term is weight-2 and requires them. This
 is the space-time trade-off of Ref. [1]_ in its simplest form: one extra qubit converts
 half of the hopping Hamiltonian into single-qubit rotations.
 
-The east-oriented flow set (group 1) pays for it at weight 3, and the interaction (group 2)
+The west-oriented flow set (group 1) pays for it at weight 3, and the interaction (group 2)
 sits at weight 2, with the weight-0 entry being the identity. Nothing here is yet a
 *circuit* claim --- what a synthesis makes of these weights is the subject of steps 5
 and 6.
@@ -491,7 +499,7 @@ One opaque box over all four modes. The interesting part is what it decomposes i
 :class:`.Evolution` splits itself group-by-group whenever its operator has
 :attr:`~qiskit_fermions.operators.TransferVertexOperator.groups` assigned. So a single
 :meth:`~qiskit.circuit.QuantumCircuit.decompose` turns it into **one** :class:`.Evolution`
-**per flow set**, ordered by group index --- west, east, then the diagonal interaction,
+**per flow set**, ordered by group index --- east, west, then the diagonal interaction,
 carrying 3, 3 and 8 terms respectively, exactly the groups from step 2:
 
 .. plot::
@@ -625,7 +633,7 @@ gates on nearest neighbours maps
    X_{j+1} \; \longmapsto \; Z_j X_{j+1} Z_{j+2}
 
 simultaneously for **every** :math:`j`. So one ``CZ`` chain turns the entire weight-3
-(east) flow set into a layer of independent single-qubit :math:`X` rotations. All the
+(west) flow set into a layer of independent single-qubit :math:`X` rotations. All the
 :class:`~qiskit.synthesis.EvolutionSynthesis` interface asks for is a
 :meth:`~qiskit.synthesis.EvolutionSynthesis.synthesize` method; ``reps`` is here because a
 product formula is also where the number of Trotter steps belongs, exactly as in Qiskit's
@@ -669,7 +677,7 @@ own :class:`~qiskit.synthesis.LieTrotter`:
    ...
    ...     def synthesize(self, evolution):
    ...         circuit = QuantumCircuit(evolution.operator.num_qubits)
-   ...         west, east, diagonal = [], [], {}
+   ...         east, west, diagonal = [], [], {}
    ...
    ...         for label, indices, coeff in evolution.operator.to_sparse_list():
    ...             # as in Qiskit's own product formulas, `reps` Trotter steps divide the
@@ -678,24 +686,24 @@ own :class:`~qiskit.synthesis.LieTrotter`:
    ...             match label, indices:
    ...                 case "", _:  # the identity contributes only a global phase
    ...                     circuit.global_phase -= self.reps * angle / 2
-   ...                 case "X", [qubit]:  # west flow set: already weight-1
-   ...                     west.append((qubit, angle))
+   ...                 case "X", [qubit]:  # east flow set: already weight-1
+   ...                     east.append((qubit, angle))
    ...                 case "ZXZ", [j, k, l] if (k, l) == (j + 1, j + 2):
-   ...                     east.append((k, angle))  # needs the CZ conjugation below
+   ...                     west.append((k, angle))  # needs the CZ conjugation below
    ...                 case "ZZ", [j, k]:  # interaction: diagonal, see rzz_layers above
    ...                     diagonal[min(j, k), max(j, k)] = angle
    ...                 case _:
    ...                     raise ValueError(f"unexpected Pauli term: {label} on {indices}")
    ...
    ...         for _ in range(self.reps):
-   ...             # west flow set: bare rotations, no entangling gates at all
-   ...             for qubit, angle in west:
+   ...             # east flow set: bare rotations, no entangling gates at all
+   ...             for qubit, angle in east:
    ...                 circuit.rx(angle, qubit)
    ...
-   ...             # east flow set: one CZ chain diagonalizes the WHOLE set at once
-   ...             if east:
+   ...             # west flow set: one CZ chain diagonalizes the WHOLE set at once
+   ...             if west:
    ...                 cz_brickwork(circuit)
-   ...                 for qubit, angle in east:
+   ...                 for qubit, angle in west:
    ...                     circuit.rx(angle, qubit)
    ...                 cz_brickwork(circuit)
    ...
@@ -744,7 +752,7 @@ it runs on, changes:
 From depth 23 with 26 ``CX`` gates down to depth 12 with 22: fewer entangling gates *and*
 nearly half the depth. Comparing the two pictures, the difference is not that the gates are
 cheaper but that they *stack*. The serial ladders are gone; entangling gates now sit above
-one another in shared layers, because the whole east flow set is rotated in a single shared
+one another in shared layers, because the whole west flow set is rotated in a single shared
 basis and the interaction is emitted in layers of disjoint pairs.
 
 .. note::
@@ -867,7 +875,7 @@ parallel layers. This is the constant-depth result of Ref. [1]_.
 
 .. note::
    The depth 12 splits across the three flow sets as 0 + 4 + 8, at every chain length. The
-   west flow set contributes **zero**: it is bare ``Rx`` rotations. The east flow set costs 4,
+   east flow set contributes **zero**: it is bare ``Rx`` rotations. The west flow set costs 4,
    from the two ``CZ`` brickwork layers going in and the two coming out --- dropping the
    interaction leaves exactly that, a two-qubit depth of 4 at any chain length. The remaining
    8 is the interaction, whose ``Rzz`` terms act on both nearest and next-nearest neighbours
