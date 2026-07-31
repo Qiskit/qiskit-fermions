@@ -409,11 +409,15 @@ class UCC(FermionicGate):
         gate's :attr:`.antisymmetric` flag selects -- so ``from_parameters(gate.to_parameters(), ...)``
         round-trips as long as the flag is passed consistently.
 
-        Note:
-            Only the independent amplitude entries implied by the variant's symmetries (and by
-            :attr:`.antisymmetric`) are written out; see :meth:`.num_parameters`. Amplitudes violating
-            those symmetries -- or carrying a non-negligible imaginary part -- are therefore not
-            recoverable from the parameter vector.
+        .. note::
+           Only the independent amplitude entries implied by the variant's symmetries (and by
+           :attr:`.antisymmetric`) are written out; see :meth:`.num_parameters`. Amplitudes violating
+           those symmetries -- or carrying a non-negligible imaginary part -- are therefore not
+           recoverable from the parameter vector.
+
+        .. note::
+           The round-trip is two-sided and holds at *any* parameter scale: the amplitudes are this
+           ansatz's parameters directly, so both directions are a plain re-indexing.
 
         Returns:
             The real-valued parameter vector.
@@ -827,12 +831,13 @@ class UCC(FermionicGate):
                 return
             terms[actions] = terms.get(actions, 0.0) + coeff
 
-        if variant is UCC.Variant.UNRESTRICTED:
-            self._add_unrestricted_terms(add, mode)
-        elif variant is UCC.Variant.RESTRICTED:
-            self._add_restricted_terms(add, mode)
-        else:
-            self._add_spinless_terms(add, mode)
+        match variant:
+            case UCC.Variant.UNRESTRICTED:
+                self._add_unrestricted_terms(add, mode)
+            case UCC.Variant.RESTRICTED:
+                self._add_restricted_terms(add, mode)
+            case _:  # SPINLESS
+                self._add_spinless_terms(add, mode)
 
         return FermionOperator.from_dict(terms)  # type: ignore[arg-type]
 

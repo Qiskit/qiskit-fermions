@@ -321,7 +321,10 @@ Note the absent ``final_orbital_rotation``: :class:`.UCC` carries none, because 
 amplitudes already *are* its single excitations. For :class:`.UCJ` that trailing rotation is where
 the singles live -- it only factorizes :math:`t_2` -- which is why steps 3 and 4 had to hold it
 fixed outside ``theta``. Here every amplitude is a parameter, so :meth:`.UCC.to_parameters` gives
-the warm start directly:
+the warm start directly, and the whole question of freezing a rotation does not arise. Should you
+want one anyway -- to widen the manifold beyond what the singles already span -- append an
+:class:`.OrbitalRotation` to the circuit yourself; unlike UCJ's flag, it is then yours to either
+keep fixed or fold into ``theta`` by hand.
 
 .. plot::
    :context:

@@ -190,6 +190,33 @@ def test_ucc_parameters_round_trip_unrestricted():
         np.testing.assert_allclose(got, want, atol=1e-12)
 
 
+@pytest.mark.parametrize(
+    ("variant", "nocc", "antisymmetric"),
+    [
+        ("restricted", 2, False),
+        ("unrestricted", (3, 2), False),
+        ("unrestricted", (3, 2), True),
+        ("spinless", 3, False),
+        ("spinless", 3, True),
+    ],
+)
+def test_ucc_parameters_round_trip_is_two_sided_at_any_scale(variant, nocc, antisymmetric):
+    """``to_parameters(from_parameters(p)) == p`` exactly, however large ``p`` is.
+
+    The amplitudes are this ansatz's parameters directly, so both directions are a plain re-indexing
+    and the round-trip is scale-free -- pinned here at a scale far beyond the other round-trip tests',
+    and to exact equality rather than a tolerance, since no arithmetic is performed on the values.
+    """
+    norb = 5
+    expected = UCC.num_parameters(norb, nocc, variant, antisymmetric=antisymmetric)
+    rng = np.random.default_rng(abs(hash((variant, antisymmetric))) % (2**32))
+    params = rng.standard_normal(expected) * 20.0
+
+    gate = UCC.from_parameters(params, norb, nocc, variant, antisymmetric=antisymmetric)
+
+    np.testing.assert_allclose(gate.to_parameters(), params, rtol=0, atol=0)
+
+
 def test_ucc_from_parameters_wrong_length_raises():
     """A parameter vector of the wrong length is rejected."""
     with pytest.raises(ValueError, match="did not match the number expected"):
