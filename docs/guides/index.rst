@@ -53,6 +53,15 @@ How-Tos
 This section lists goal-oriented guides for accomplishing specific tasks with
 particular components of this package:
 
+Circuits
+--------
+
+.. toctree::
+   :maxdepth: 1
+   :glob:
+
+   vqe_outer_loop
+
 Transpiler passes
 -----------------
 

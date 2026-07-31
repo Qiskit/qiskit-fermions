@@ -261,6 +261,110 @@ def test_ucj_rejects_mismatched_repetition_counts():
         UCJ(norb, "balanced", mats, rotations)
 
 
+@pytest.mark.parametrize("variant", ["balanced", "unbalanced", "spinless"])
+@pytest.mark.parametrize("with_final", [False, True])
+def test_ucj_parameters_round_trip(variant, with_final):
+    """to_parameters/from_parameters round-trip for every variant, with and without a final rotation.
+
+    The parameter scale is kept small so the antihermitian generators underlying the orbital
+    rotation parametrization stay within the principal branch of the matrix logarithm -- for larger
+    parameters, ``to_parameters`` can recover a *different* valid generator for the same unitary
+    (the same inherent ``logm`` branch-cut behavior ffsim's own parametrization exhibits), which is
+    not a round-trip failure of :class:`.UCJ` itself.
+    """
+    norb, n_reps = 3, 2
+    rng = np.random.default_rng(hash((variant, with_final)) % (2**32))
+    n_params = UCJ.num_parameters(norb, variant, n_reps, with_final_orbital_rotation=with_final)
+    params = rng.standard_normal(n_params) * 0.1
+
+    gate = UCJ.from_parameters(
+        params, norb, variant, n_reps, with_final_orbital_rotation=with_final
+    )
+    back = gate.to_parameters()
+
+    assert len(back) == n_params
+    np.testing.assert_allclose(back, params, atol=1e-8)
+    assert (gate.final_orbital_rotation is not None) == with_final
+
+
+@pytest.mark.parametrize("variant", ["balanced", "unbalanced", "spinless"])
+@pytest.mark.parametrize("norb", [3, 5])
+def test_ucj_parameters_round_trip_preserves_operator_at_any_scale(variant, norb):
+    """from_parameters(to_parameters(gate)) reproduces the *operator*, however large the parameters.
+
+    This is the invariant that holds unconditionally, and the counterpart to
+    :func:`test_ucj_parameters_round_trip`: that test pins the vector-level round-trip and must keep
+    its parameters small, because ``to_parameters`` returns the principal-branch generator and so
+    cannot recover a vector that wrapped. The tensors it produces are unaffected by the wrap, which
+    is what is asserted here -- deliberately at unit scale, where wrapping does occur.
+    """
+    n_reps = 2
+    rng = np.random.default_rng(hash((variant, norb)) % (2**32))
+    n_params = UCJ.num_parameters(norb, variant, n_reps, with_final_orbital_rotation=True)
+    # scaled past the principal branch, so `to_parameters` really does return a wrapped-away vector
+    # -- asserted below, to keep this test from silently degrading into the small-parameter case
+    params = rng.standard_normal(n_params) * 2.0
+
+    gate = UCJ.from_parameters(params, norb, variant, n_reps, with_final_orbital_rotation=True)
+    regate = UCJ.from_parameters(
+        gate.to_parameters(), norb, variant, n_reps, with_final_orbital_rotation=True
+    )
+
+    # guard the premise: these parameters must actually leave the principal branch, or the assertions
+    # below would hold trivially and duplicate test_ucj_parameters_round_trip
+    assert not np.allclose(gate.to_parameters(), params)
+
+    np.testing.assert_allclose(regate.diag_coulomb_mats, gate.diag_coulomb_mats, atol=1e-8)
+    np.testing.assert_allclose(regate.orbital_rotations, gate.orbital_rotations, atol=1e-8)
+    np.testing.assert_allclose(
+        regate.final_orbital_rotation, gate.final_orbital_rotation, atol=1e-8
+    )
+    # the emitted vector is idempotent under further round-trips even when it differs from `params`
+    np.testing.assert_allclose(regate.to_parameters(), gate.to_parameters(), atol=1e-8)
+
+
+@pytest.mark.parametrize("variant", ["balanced", "unbalanced", "spinless"])
+def test_ucj_num_parameters_matches_to_parameters_length(variant):
+    """num_parameters agrees with the length of the vector to_parameters actually produces."""
+    norb, n_reps = 3, 2
+    rng = np.random.default_rng(hash(variant) % (2**32))
+    n_params = UCJ.num_parameters(norb, variant, n_reps)
+    params = rng.standard_normal(n_params) * 0.1
+    gate = UCJ.from_parameters(params, norb, variant, n_reps)
+    assert UCJ.num_parameters(norb, variant, n_reps) == len(gate.to_parameters())
+
+
+def test_ucj_from_parameters_rejects_wrong_length():
+    """A parameter vector of the wrong length raises a clear ValueError."""
+    norb, n_reps = 3, 1
+    expected = UCJ.num_parameters(norb, "balanced", n_reps)
+    with pytest.raises(ValueError, match="Expected"):
+        UCJ.from_parameters(np.zeros(expected - 1), norb, "balanced", n_reps)
+
+
+def test_ucj_parameters_interaction_pairs_masking():
+    """interaction_pairs restricts to_parameters/from_parameters to a shorter, masked vector."""
+    norb, n_reps = 4, 1
+    pairs = [(0, 1), (2, 3)]
+    rng = np.random.default_rng(5)
+
+    n_full = UCJ.num_parameters(norb, "spinless", n_reps)
+    n_masked = UCJ.num_parameters(norb, "spinless", n_reps, interaction_pairs=pairs)
+    assert n_masked < n_full
+
+    params = rng.standard_normal(n_masked) * 0.1
+    gate = UCJ.from_parameters(params, norb, "spinless", n_reps, interaction_pairs=pairs)
+
+    mat = gate.diag_coulomb_mats[0]
+    masked_out = mat.copy()
+    for i, j in pairs:
+        masked_out[i, j] = masked_out[j, i] = 0.0
+    np.testing.assert_array_equal(masked_out, 0.0)
+
+    back = gate.to_parameters(interaction_pairs=pairs)
+    np.testing.assert_allclose(back, params, atol=1e-8)
+
+
 def test_orbital_rotation_from_t1_amplitudes_is_unitary():
     """OrbitalRotation.from_t1_amplitudes builds a unitary of the right size."""
     t1 = np.array([[0.1, 0.2], [0.3, -0.1]])  # 2 occ, 2 virt
