@@ -827,6 +827,44 @@ The gate *count* grows linearly under both --- there are :math:`O(N)` terms to a
 that is unavoidable --- but the flow-set synthesis applies them in a constant number of
 parallel layers. This is the constant-depth result of Ref. [1]_.
 
+.. plot::
+   :context:
+   :nofigs:
+
+   Guard the claim the prose above rests on, but which none of the visible doctests pin
+   down: that ``FlowSetSynthesis`` reproduces each flow set's evolution *exactly*, not
+   just to some Trotter order. The published numbers only fix behaviour at the sizes and
+   step counts they were written with, so a change that silently broke exactness --- a
+   dropped ``CZ`` layer, a conjugation applied in the wrong order --- could leave every
+   visible output intact. Checked here across two chain lengths, group by group, against
+   ``expm``.
+
+   >>> from qiskit.quantum_info import Operator
+   >>> from scipy.linalg import expm
+   >>>
+   >>> class _Evolution:  # the two attributes `synthesize` reads
+   ...     def __init__(self, operator, time):
+   ...         self.operator, self.time = operator, time
+   >>>
+   >>> def flow_set_is_exact(num_sites, time=0.37):
+   ...     operator = fermi_hubbard_1d(num_sites, tunneling=1.0, interaction=2.0)
+   ...     operator.groups = flow_set_groups(operator)
+   ...     for group in operator.split_out_groups():
+   ...         encoded = flow_set_encoding(group, num_sites + 1)
+   ...         if not encoded.to_sparse_list():  # all-identity group
+   ...             continue
+   ...         synthesized = FlowSetSynthesis().synthesize(_Evolution(encoded, time))
+   ...         exact = expm(-1j * time * to_matrix(encoded))
+   ...         # `global_phase` is carried by the circuit, so compare up to a phase
+   ...         got = Operator(synthesized).data
+   ...         pivot = np.unravel_index(np.argmax(np.abs(exact)), exact.shape)
+   ...         if not np.allclose(got * (exact[pivot] / got[pivot]), exact, atol=1e-9):
+   ...             return False
+   ...     return True
+   >>>
+   >>> all(flow_set_is_exact(n) for n in (4, 6))
+   True
+
 .. note::
    The depth 12 splits across the three flow sets as 0 + 4 + 8, at every chain length. The
    west flow set contributes **zero**: it is bare ``Rx`` rotations. The east flow set costs 4,
