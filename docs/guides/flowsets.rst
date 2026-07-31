@@ -20,9 +20,10 @@ in this package:
 
 That choice drives everything below. It calls for a **custom fermion-to-qubit encoding**
 tailored to the flow sets, which here spends one **ancilla qubit** so that the qubit count
-no longer matches the number of fermionic modes, and for a **custom synthesis** that
+associated with the implementation of a given Hamiltonian term no longer grows with the 
+number of fermionic modes (as is the case for JW), and for a **custom synthesis** that
 exploits the commutativity within each set. The payoff is a circuit whose two-qubit depth
-is **constant in the system size**, against the linear growth of a term-by-term
+is **constant in the system size**, against the linear growth of a JW-based term-by-term
 Trotterization. The plumbing that gets an encoding of your own into the transpiler ---
 :class:`.CustomF2QLayout` and :class:`.MapperFnEvolutionSynthesis` --- is the part that
 carries over to any model.
