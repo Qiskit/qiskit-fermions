@@ -62,7 +62,8 @@ class UCJ(FermionicGate):
     This gate supports three spin variants (see :class:`.UCJ.Variant`), selected explicitly by the
     ``variant`` argument and validated against the shapes of the supplied tensors (mirroring ffsim's
     :external:class:`~ffsim.UCJOpSpinBalanced`, :external:class:`~ffsim.UCJOpSpinUnbalanced` and
-    :external:class:`~ffsim.UCJOpSpinless`):
+    :external:class:`~ffsim.UCJOpSpinless`). The number of spatial orbitals is *not* a constructor
+    argument -- it is inferred from those same tensor shapes (see :attr:`.norb`):
 
     - **spin-balanced** -- ``diag_coulomb_mats`` has shape ``(L, 2, norb, norb)`` (the
       ``[alpha-alpha, alpha-beta]`` matrices, with beta-beta reusing alpha-alpha and beta-alpha
@@ -103,7 +104,6 @@ class UCJ(FermionicGate):
 
     def __init__(
         self,
-        norb: int,
         variant: UCJ.Variant | str,
         diag_coulomb_mats: np.ndarray,
         orbital_rotations: np.ndarray,
@@ -112,8 +112,10 @@ class UCJ(FermionicGate):
     ) -> None:
         r"""Initializing an instance of this gate can be done with the arguments listed below.
 
+        The number of spatial orbitals is inferred from the supplied tensor shapes (see
+        :attr:`.norb`).
+
         Args:
-            norb: the number of spatial orbitals.
             variant: the spin variant, a :class:`.UCJ.Variant` (or its string value ``"balanced"``,
                 ``"unbalanced"``, or ``"spinless"``). Determines the number of modes this gate acts
                 on (see the class docstring) and the expected tensor shapes.
@@ -127,12 +129,10 @@ class UCJ(FermionicGate):
 
         Raises:
             ValueError: if ``variant`` is not recognized, or if the tensor shapes are inconsistent
-                with each other, with ``norb``, or with ``variant``.
+                with each other or with ``variant``.
         """
         variant = UCJ._normalize_variant(variant)
 
-        self.norb = norb
-        """The number of spatial orbitals."""
         self.diag_coulomb_mats = self._to_real_diag_coulomb_mats(diag_coulomb_mats)
         """The diagonal Coulomb matrices defining each ansatz repetition."""
         self.orbital_rotations = np.asarray(orbital_rotations, dtype=complex)
@@ -145,7 +145,10 @@ class UCJ(FermionicGate):
         """The optional final orbital rotation."""
 
         self._variant = variant
-        self._validate_shapes(norb)
+        norb = self._validate_shapes()
+
+        self.norb = norb
+        """The number of spatial orbitals, inferred from the tensor shapes."""
         num_modes = norb if self._variant is UCJ.Variant.SPINLESS else 2 * norb
 
         super().__init__("UCJ", num_modes, [])
@@ -228,11 +231,9 @@ class UCJ(FermionicGate):
                 tol,
             )
 
-        norb = orbital_rotations.shape[-1]
         final_orbital_rotation = cls._final_rotation_from_t1(t1, variant)
 
         return cls(
-            norb,
             variant,
             diag_coulomb_mats,
             orbital_rotations,
@@ -375,7 +376,6 @@ class UCJ(FermionicGate):
             diag_coulomb_mats = diag_coulomb_mats[:, 0]
 
         return cls(
-            norb,
             variant,
             diag_coulomb_mats,
             orbital_rotations,
@@ -772,11 +772,40 @@ class UCJ(FermionicGate):
             case _:  # UNBALANCED: aa, ab, bb
                 return [(0, True), (1, False), (2, True)]
 
-    def _validate_shapes(self, norb: int) -> None:
-        """Validates the tensor shapes against ``norb`` and ``self._variant``."""
+    def _validate_shapes(self) -> int:
+        """Validates the tensor shapes against ``self._variant``, returning the implied ``norb``.
+
+        ``norb`` is inferred from the trailing axis of ``orbital_rotations``, which carries it in
+        every variant. The rank is checked first, so that trailing axis is only read once it is known
+        to mean what it should: a tensor of the wrong ``ndim`` would otherwise infer a bogus ``norb``
+        and then be "validated" against it.
+
+        Raises:
+            ValueError: if the tensor shapes are inconsistent with each other or with the variant.
+        """
         dc = self.diag_coulomb_mats
         rot = self.orbital_rotations
         variant = self._variant
+
+        # the expected rank of each tensor per variant; the exact axis sizes are checked below, once
+        # the rank makes the inferred norb meaningful
+        match variant:
+            case UCJ.Variant.SPINLESS:
+                dc_ndim, rot_ndim = 3, 3
+            case UCJ.Variant.BALANCED:
+                dc_ndim, rot_ndim = 4, 3
+            case _:  # UNBALANCED
+                dc_ndim, rot_ndim = 4, 4
+        if dc.ndim != dc_ndim or rot.ndim != rot_ndim:
+            raise ValueError(
+                f"Inconsistent {variant.value} UCJ tensor shapes: got "
+                f"diag_coulomb_mats={dc.shape} ({dc.ndim}-dimensional), "
+                f"orbital_rotations={rot.shape} ({rot.ndim}-dimensional); expected a "
+                f"{dc_ndim}-dimensional diag_coulomb_mats and a {rot_ndim}-dimensional "
+                f"orbital_rotations."
+            )
+
+        norb = int(rot.shape[-1])
 
         expected_dc: tuple[int, ...]
         expected_rot: tuple[int, ...]
@@ -793,7 +822,7 @@ class UCJ(FermionicGate):
 
         if dc.shape != expected_dc or rot.shape != expected_rot:
             raise ValueError(
-                f"Inconsistent {variant.value} UCJ tensor shapes for norb={norb}: got "
+                f"Inconsistent {variant.value} UCJ tensor shapes for the inferred norb={norb}: got "
                 f"diag_coulomb_mats={dc.shape}, orbital_rotations={rot.shape}; expected "
                 f"diag_coulomb_mats={expected_dc}, orbital_rotations={expected_rot}."
             )
@@ -802,6 +831,8 @@ class UCJ(FermionicGate):
                 f"diag_coulomb_mats and orbital_rotations must have the same number of repetitions; "
                 f"got {dc.shape[0]} and {rot.shape[0]}."
             )
+
+        return norb
 
     @staticmethod
     def _to_real_diag_coulomb_mats(diag_coulomb_mats: np.ndarray) -> np.ndarray:

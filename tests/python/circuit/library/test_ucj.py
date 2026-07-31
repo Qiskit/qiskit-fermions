@@ -35,7 +35,7 @@ def test_ucj_balanced_variant():
     """A ``(L, 2, norb, norb)`` diag-Coulomb tensor is accepted for the balanced variant."""
     norb = 3
     mats, rotations = _balanced_tensors(norb, 2, seed=0)
-    gate = UCJ(norb, "balanced", mats, rotations)
+    gate = UCJ("balanced", mats, rotations)
     assert gate.num_modes == 2 * norb
     assert gate._variant is UCJ.Variant.BALANCED
 
@@ -52,7 +52,7 @@ def test_ucj_unbalanced_variant():
             for k in range(n_reps)
         ]
     )
-    gate = UCJ(norb, "unbalanced", mats, rotations)
+    gate = UCJ("unbalanced", mats, rotations)
     assert gate.num_modes == 2 * norb
     assert gate._variant is UCJ.Variant.UNBALANCED
 
@@ -64,7 +64,7 @@ def test_ucj_spinless_variant():
     rng = np.random.default_rng(2)
     mats = rng.standard_normal((n_reps, norb, norb))
     rotations = np.stack([random_unitary(norb, seed=30 + k) for k in range(n_reps)])
-    spinless = UCJ(norb, "spinless", mats, rotations)
+    spinless = UCJ("spinless", mats, rotations)
     assert spinless.num_modes == norb
     assert spinless._variant is UCJ.Variant.SPINLESS
 
@@ -74,15 +74,34 @@ def test_ucj_rejects_unknown_variant():
     norb = 3
     mats, rotations = _balanced_tensors(norb, 2, seed=0)
     with pytest.raises(ValueError, match="Unknown UCJ variant"):
-        UCJ(norb, "nonsense", mats, rotations)
+        UCJ("nonsense", mats, rotations)
 
 
 def test_ucj_rejects_inconsistent_shapes():
-    """Tensor shapes inconsistent with norb or with each other raise ValueError."""
+    """Tensor shapes inconsistent with each other raise ValueError.
+
+    ``norb`` is inferred from ``orbital_rotations``' trailing axis, so the two tensors validate
+    against each other: a ``diag_coulomb_mats`` implying a different ``norb`` is what makes the pair
+    inconsistent.
+    """
     norb = 3
-    mats, rotations = _balanced_tensors(norb, 2, seed=3)
+    _, rotations = _balanced_tensors(norb, 2, seed=3)
+    mats_wrong_norb, _ = _balanced_tensors(norb + 1, 2, seed=3)
     with pytest.raises(ValueError, match="Inconsistent"):
-        UCJ(norb + 1, "balanced", mats, rotations)  # norb mismatch
+        UCJ("balanced", mats_wrong_norb, rotations)
+
+
+def test_ucj_rejects_wrong_rank_tensors():
+    """A tensor of the wrong rank is rejected rather than inferring a bogus norb from its last axis.
+
+    ``norb`` is read off ``orbital_rotations``' trailing axis, so the rank has to be checked first --
+    otherwise a wrongly ranked tensor would infer some ``norb`` and then be "validated" against it.
+    """
+    norb = 3
+    mats, _ = _balanced_tensors(norb, 2, seed=3)
+    # a balanced orbital_rotations must be 3-dimensional (L, norb, norb), not 4-dimensional
+    with pytest.raises(ValueError, match="dimensional"):
+        UCJ("balanced", mats, np.zeros((2, 2, norb, norb)))
 
 
 def test_ucj_rejects_balanced_shaped_tensors_for_spinless_variant():
@@ -90,7 +109,34 @@ def test_ucj_rejects_balanced_shaped_tensors_for_spinless_variant():
     norb = 3
     mats, rotations = _balanced_tensors(norb, 2, seed=4)
     with pytest.raises(ValueError, match="Inconsistent"):
-        UCJ(norb, "spinless", mats, rotations)
+        UCJ("spinless", mats, rotations)
+
+
+def test_ucj_zero_reps_infers_norb():
+    """A zero-repetition ansatz is legal and still infers ``norb`` from the tensors' trailing axes.
+
+    ``norb`` lives in the trailing axes, so it survives an empty repetition axis. This is worth
+    pinning down because the zero-rep case is reachable from ``from_t_amplitudes`` -- an all-zero
+    ``t2``, or a ``tol`` above every factorization weight, truncates away every term -- and it is the
+    case where the shape inference has the least to go on.
+    """
+    norb = 3
+    gate = UCJ("balanced", np.empty((0, 2, norb, norb)), np.empty((0, norb, norb)))
+    assert gate.norb == norb
+    assert gate.num_modes == 2 * norb
+
+    # the same via the public factorization path: a vanishing t2 yields no terms at all
+    from_t2 = UCJ.from_t_amplitudes(
+        (1, 1), np.zeros((1, 1, norb - 1, norb - 1)), variant="balanced"
+    )
+    assert from_t2.norb == norb
+    assert from_t2.num_modes == 2 * norb
+    assert from_t2.diag_coulomb_mats.shape[0] == 0
+
+    # a zero-rep ansatz is the identity, so its definition carries no ansatz layers
+    circ = FermionicCircuit(gate.num_modes)
+    circ.append(gate, circ.modes)
+    assert circ.decompose().count_ops() == {}
 
 
 def test_ucj_define_gate_sequence():
@@ -103,7 +149,7 @@ def test_ucj_define_gate_sequence():
     n_reps = 2
     mats, rotations = _balanced_tensors(norb, n_reps, seed=7)
     final = random_unitary(norb, seed=99)
-    gate = UCJ(norb, "balanced", mats, rotations, final_orbital_rotation=final)
+    gate = UCJ("balanced", mats, rotations, final_orbital_rotation=final)
 
     circ = FermionicCircuit(gate.num_modes)
     circ.append(gate, circ.modes)
@@ -123,7 +169,7 @@ def test_ucj_spinless_uses_norb_modes():
     mats = rng.standard_normal((n_reps, norb, norb))
     mats = mats + mats.transpose(0, 2, 1)
     rotations = np.stack([random_unitary(norb, seed=40)])
-    gate = UCJ(norb, "spinless", mats, rotations)
+    gate = UCJ("spinless", mats, rotations)
     circ = FermionicCircuit(gate.num_modes)
     circ.append(gate, circ.modes)
     ops = circ.decompose().count_ops()
@@ -137,7 +183,7 @@ def test_ucj_accepts_complex_diag_coulomb_with_zero_imaginary_part():
     """Complex-typed diag-Coulomb mats with a negligible imaginary part are coerced to real."""
     norb = 3
     mats, rotations = _balanced_tensors(norb, 1, seed=11)
-    gate = UCJ(norb, "balanced", mats.astype(complex), rotations)
+    gate = UCJ("balanced", mats.astype(complex), rotations)
     assert gate.diag_coulomb_mats.dtype == np.float64
     np.testing.assert_allclose(gate.diag_coulomb_mats, mats)
 
@@ -149,7 +195,7 @@ def test_ucj_rejects_complex_diag_coulomb_with_nonzero_imaginary_part():
     complex_mats = mats.astype(complex)
     complex_mats[0, 0, 0, 1] += 0.5j
     with pytest.raises(ValueError, match="imaginary part"):
-        UCJ(norb, "balanced", complex_mats, rotations)
+        UCJ("balanced", complex_mats, rotations)
 
 
 def test_ucj_from_t_amplitudes_rejects_tuple_n_reps_for_balanced():
@@ -258,7 +304,7 @@ def test_ucj_rejects_mismatched_repetition_counts():
         :1
     ]  # 1 rep
     with pytest.raises(ValueError, match="same number of repetitions"):
-        UCJ(norb, "balanced", mats, rotations)
+        UCJ("balanced", mats, rotations)
 
 
 @pytest.mark.parametrize("variant", ["balanced", "unbalanced", "spinless"])
@@ -407,7 +453,7 @@ def test_diag_coulomb_grouping_preserves_operator(norb):
     from qiskit_fermions.operators import FermionOperator
 
     mats, rotations = _balanced_tensors(norb, 1, seed=100 + norb)
-    gate = UCJ(norb, "balanced", mats, rotations)
+    gate = UCJ("balanced", mats, rotations)
     operator = gate._diag_coulomb_operator(gate.diag_coulomb_mats[0])
 
     reference = FermionOperator.from_dict(
@@ -433,7 +479,7 @@ def test_diag_coulomb_groups_have_disjoint_support(variant, norb):
         mats = rng.standard_normal((1, norb, norb))
         mats = mats + mats.transpose(0, 2, 1)
     rotations = np.stack([random_unitary(norb, seed=7)])
-    gate = UCJ(norb, variant, mats, rotations)
+    gate = UCJ(variant, mats, rotations)
 
     operator = gate._diag_coulomb_operator(gate.diag_coulomb_mats[0])
     assert operator.groups is not None
@@ -471,7 +517,7 @@ def test_diag_coulomb_group_count_is_optimal(variant, norb):
         mats = rng.standard_normal((1, norb, norb))
         mats = mats + mats.transpose(0, 2, 1)
     rotations = np.stack([random_unitary(norb, seed=7)])
-    gate = UCJ(norb, variant, mats, rotations)
+    gate = UCJ(variant, mats, rotations)
     operator = gate._diag_coulomb_operator(gate.diag_coulomb_mats[0])
 
     degree: dict[int, int] = {}
