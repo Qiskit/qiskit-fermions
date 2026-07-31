@@ -33,6 +33,8 @@ else:
     from typing_extensions import Self
 
 if TYPE_CHECKING:
+    from collections.abc import Sequence
+
     from qiskit_fermions.circuit import FermionicCircuit
 
 
@@ -468,15 +470,34 @@ class UCC(FermionicGate):
         # factors -- each exp(-i H_k) would then be non-unitary and the Trotterized circuit would not
         # even preserve the norm. Grouping T_k with its conjugate makes every group anti-Hermitian, so
         # every Trotter factor is a genuine unitary.
-        groups: dict[frozenset, int] = {}
+        #
+        # Taking the adjoint conjugates each action and reverses its order, which leaves the *multiset*
+        # of modes acted on unchanged -- so that sorted multiset is exactly the key uniting a term with
+        # its conjugate. Note it must be the multiset and not the mode `set`: repeated modes are
+        # possible (`a+_2 a+_2 a_0 a_0` alongside `a+_2 a_0`), and a set would collapse two distinct
+        # supports into one key.
+        #
+        # The group indices are then assigned in sorted key order rather than by first encounter.
+        # `Evolution` emits one product-formula factor per group in index order and the excitations do
+        # not commute, so that order changes the Trotter error; deriving it from set/dict iteration
+        # would tie it to element hashing, and hence to PYTHONHASHSEED, making the synthesized circuit
+        # differ between processes.
+        def support(actions: Sequence[tuple[bool, int]]) -> tuple[int, ...]:
+            return tuple(sorted(mode for _, mode in actions))
+
+        keys = sorted(
+            {
+                support(actions)
+                for operator in (excitations, adjoint)
+                for actions, _ in operator.iter_terms()
+            }
+        )
+        groups = {key: index for index, key in enumerate(keys)}
+
         terms_with_groups = []
         for operator, sign in ((excitations, 1.0), (adjoint, -1.0)):
             for actions, coeff in operator.iter_terms():
-                # an excitation and its conjugate act on the same set of modes, so the (unordered)
-                # support is exactly the key that unites them
-                key = frozenset(mode for _, mode in actions)
-                group = groups.setdefault(key, len(groups))
-                terms_with_groups.append((actions, sign * coeff, group))
+                terms_with_groups.append((actions, sign * coeff, groups[support(actions)]))
 
         return FermionOperator.from_terms_with_groups(terms_with_groups)
 

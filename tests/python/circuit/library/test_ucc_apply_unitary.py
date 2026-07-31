@@ -322,6 +322,13 @@ def test_ucc_trotterized_circuit_converges_to_the_exact_gate():
         np.testing.assert_allclose(np.linalg.norm(vec), 1.0, atol=1e-10)
         errors.append(float(np.abs(vec - exact).max()))
 
-    # strictly decreasing, and roughly first-order: quadrupling the reps cuts the error ~4x
+    # strictly decreasing, and roughly first-order: quadrupling the reps cuts the error ~4x. The rate
+    # is asserted rather than an absolute floor on the last error, because the achievable error at a
+    # fixed rep count depends on the order the product formula applies the groups in -- an ordering
+    # detail this test has no business pinning. The rate is the property that actually witnesses
+    # "same unitary, first-order splitting".
     assert errors[0] > errors[1] > errors[2] > errors[3], errors
-    assert errors[-1] < 1e-2, errors
+    ratios = [errors[i] / errors[i + 1] for i in range(len(errors) - 1)]
+    assert all(ratio > 2.5 for ratio in ratios), (errors, ratios)
+    # the asymptotic ratio approaches 4; the coarsest steps are not yet in that regime
+    assert ratios[-1] > 3.5, (errors, ratios)

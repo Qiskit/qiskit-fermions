@@ -287,6 +287,33 @@ def test_ucc_generator_groups_are_individually_hermitian_unrestricted():
         assert group.is_hermitian()
 
 
+@pytest.mark.parametrize("variant", ["restricted", "spinless"])
+def test_ucc_generator_group_layout_is_canonical(variant):
+    """The group layout is sorted by mode support, so it cannot depend on term-iteration order.
+
+    The group index decides where in the product formula :class:`.Evolution` places that group's
+    factor. Since the excitations do not commute, that placement changes the Trotter error, so it must
+    be a function of the amplitudes alone. The indices were once assigned in first-encounter order over
+    a ``frozenset``-keyed dict, which tied them to element hashing and hence to ``PYTHONHASHSEED``: the
+    synthesized circuit's Trotter error then differed between processes, surfacing as an intermittent
+    failure of ``test_ucc_trotterized_circuit_converges_to_the_exact_gate``. Asserting the layout is
+    sorted pins that down without needing to vary the hash seed, which a single process cannot do.
+    """
+    t1, t2 = _restricted_amplitudes(2, 2, seed=23)
+    generator = UCC(variant, t1, t2).hermitian_generator()
+
+    support_by_group: dict[int, tuple[int, ...]] = {}
+    for (actions, _), group in zip(
+        generator.iter_terms(), generator.groups, strict=True
+    ):  # pragma: no branch
+        support = tuple(sorted(mode for _, mode in actions))
+        # a term and its conjugate share the mode multiset, so a group has exactly one support
+        assert support_by_group.setdefault(group, support) == support
+
+    layout = [support_by_group[group] for group in sorted(support_by_group)]
+    assert layout == sorted(layout), layout
+
+
 def test_ucc_spinless_cluster_operator_acts_only_on_norb_modes():
     """The spinless generator stays within the single ``norb``-mode register (no spin offset)."""
     nocc, nvrt = 2, 2
