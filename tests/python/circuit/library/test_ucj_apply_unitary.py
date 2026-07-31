@@ -36,7 +36,6 @@ def _apply_ours(ucj_op, norb, nelec, reference, variant):
     delegates to its ``_build_definition()`` -- rather than the definition circuit directly.
     """
     gate = UCJ(
-        norb,
         variant,
         ucj_op.diag_coulomb_mats,
         ucj_op.orbital_rotations,
@@ -91,7 +90,6 @@ def test_ucj_spinless_shortcut_via_zeroed_balanced_ab_block_matches_ffsim():
     zero_ab = np.zeros_like(ucj_op.diag_coulomb_mats)
     balanced_diag_coulomb_mats = np.stack([ucj_op.diag_coulomb_mats, zero_ab], axis=1)
     gate = UCJ(
-        norb,
         "balanced",
         balanced_diag_coulomb_mats,
         ucj_op.orbital_rotations,
@@ -129,7 +127,6 @@ def test_ucj_gate_apply_unitary_matches_ffsim():
     expected = ffsim.apply_unitary(reference, ucj_op, norb=norb, nelec=nelec)
 
     gate = UCJ(
-        norb,
         "balanced",
         ucj_op.diag_coulomb_mats,
         ucj_op.orbital_rotations,
@@ -147,7 +144,7 @@ def test_ucj_gate_through_circuit_matches_ffsim():
     reference = ffsim.hartree_fock_state(norb, nelec)
     expected = ffsim.apply_unitary(reference, ucj_op, norb=norb, nelec=nelec)
 
-    gate = UCJ(norb, "balanced", ucj_op.diag_coulomb_mats, ucj_op.orbital_rotations)
+    gate = UCJ("balanced", ucj_op.diag_coulomb_mats, ucj_op.orbital_rotations)
     circ = FermionicCircuit(2 * norb)
     circ.append(gate, circ.modes)
     result = ffsim.apply_unitary(reference, circ, norb=norb, nelec=nelec)
@@ -200,7 +197,6 @@ def test_ucj_gate_subset_placement_matches_global_embedding():
     # our path: the local UCJ gate, placed on the global orbitals via ``placement`` in the circuit,
     # applied to the same reference.
     gate = UCJ(
-        norb_local,
         "spinless",
         ucj_op.diag_coulomb_mats,
         ucj_op.orbital_rotations,
