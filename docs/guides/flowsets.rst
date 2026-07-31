@@ -20,7 +20,7 @@ in this package:
 
 That choice drives everything below. It calls for a **custom fermion-to-qubit encoding**
 tailored to the flow sets, which here spends one **ancilla qubit** so that the qubit count
-associated with the implementation of a given Hamiltonian term no longer grows with the 
+associated with the implementation of a given Hamiltonian term no longer grows with the
 number of fermionic modes (as is the case for JW), and for a **custom synthesis** that
 exploits the commutativity within each set. The payoff is a circuit whose two-qubit depth
 is **constant in the system size**, against the linear growth of a JW-based term-by-term
@@ -53,9 +53,11 @@ interchangeable: the **first** index carries the minus combination and the secon
 plus, which is what makes :math:`T_{jk}` distinct from :math:`T_{kj}` and gives the edge
 its orientation.
 
-These satisfy *mixed* commutation relations: two transfer operators meeting at a shared
-site **commute** if the arrows *flow* through that site (one arrives, one leaves) and
-**anticommute** if they *clash* (both arrive, or both leave).
+These satisfy *mixed* commutation relations. Two transfer operators acting on **disjoint**
+sites commute trivially, since each is an *even* product of fermionic operators. The
+interesting case is a shared site: there, the two **commute** if the arrows *flow* through
+that site (one arrives, one leaves) and **anticommute** if they *clash* (both arrive, or
+both leave).
 
 The rule is easiest to see on a picture. Drawing the vertices as nodes and each
 :math:`T_{jk}` as an arrow from :math:`j` to :math:`k` gives the *directed* interaction
@@ -223,7 +225,14 @@ fermionic parity is delocalized across a *pair* of qubits:
    T_{j,j+1} = -\tfrac{1}{2} X_{j+1} \, , \qquad
    T_{j+1,j} = +\tfrac{1}{2} Z_j X_{j+1} Z_{j+2} \, .
 
-The payoff is visible immediately: one whole flow set is mapped to **weight-1** Paulis.
+The index :math:`j+2` in the last expression is what forces the extra qubit. The final bond
+of the chain has :math:`j = N_f - 2`, so its :math:`Z_{j+2}` lands on qubit :math:`N_f` ---
+one past the last fermionic mode :math:`N_f - 1`. That trailing qubit is the ancilla, and it
+is why :math:`N_q = N_f + 1` rather than :math:`N_f`. The same reach shows up in
+:math:`V_j`, whose :math:`Z_{j+1}` sits on the ancilla for :math:`j = N_f - 1`.
+
+The payoff is visible immediately: one whole flow set is mapped to a sum of **weight-1**
+Paulis.
 
 .. note::
    The :math:`\tfrac{1}{2}` prefactors are fixed by the normalization :math:`T_{jk}^2 =
@@ -921,7 +930,11 @@ each other, rather than from splitting all fourteen terms.
    fidelity even for a deliberately wrong synthesis.
 
 As a final cross-check, the site densities :math:`\langle n_j(t) \rangle = (1 - \langle
-V_j \rangle)/2` computed in the encoded space must reproduce the Jordan-Wigner result:
+V_j \rangle)/2` computed in the encoded space must reproduce the Jordan-Wigner result. This
+check is about the *encoding*, not the circuit, so no Trotter approximation enters it at
+all: both time evolutions are computed exactly, by matrix exponentiation of the respective
+Hamiltonians. Any discrepancy would therefore point at the encoding itself rather than at a
+product formula:
 
 .. plot::
    :context:
