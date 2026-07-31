@@ -391,10 +391,22 @@ class UCJ(FermionicGate):
     ) -> np.ndarray:
         r"""Converts this UCJ ansatz to a real-valued parameter vector.
 
-        Note:
-            If ``interaction_pairs`` restricts a block, the returned parameter vector incorporates
-            only the diagonal Coulomb matrix entries corresponding to the allowed interactions, so
-            the original operator is not recoverable from the parameter vector alone.
+        .. note::
+           If ``interaction_pairs`` restricts a block, the returned parameter vector incorporates
+           only the diagonal Coulomb matrix entries corresponding to the allowed interactions, so
+           the original operator is not recoverable from the parameter vector alone.
+
+        .. note::
+           The returned vector is the *principal-branch* representative of this ansatz's orbital
+           rotations: each rotation is parameterized by ``logm(U)``, which is unique only up to
+           :math:`2\pi i` shifts of its eigenvalue phases. Consequently :meth:`.from_parameters`
+           applied to the returned vector reproduces this operator exactly, but the reverse
+           composition does *not* generally return its input -- ``to_parameters(from_parameters(p))``
+           equals ``p`` only when ``p``'s generators already lie in the principal branch (all
+           eigenvalue phases within :math:`(-\pi, \pi]`). Both a wrapped ``p`` and the returned
+           vector describe the same unitary, so the operator is unaffected. Amplitudes from
+           :meth:`.from_t_amplitudes` are well inside the principal branch; large hand-built
+           parameter vectors need not be.
 
         Args:
             interaction_pairs: the allowed diagonal Coulomb interactions (see
@@ -697,14 +709,17 @@ class UCJ(FermionicGate):
 
     @staticmethod
     def _unitary_from_parameters(params: np.ndarray, norb: int) -> np.ndarray:
-        """Builds a ``(norb, norb)`` unitary from ``norb**2`` real parameters.
+        r"""Builds a ``(norb, norb)`` unitary from ``norb**2`` real parameters.
 
         The parameters describe an antihermitian generator ``A`` and the unitary is ``expm(A)``: the
         first ``norb*(norb-1)/2`` parameters are the real parts of ``A``'s upper-triangular
         (off-diagonal) entries, and the remaining ``norb*(norb+1)/2`` are the imaginary parts of its
         upper-triangular entries *including the diagonal* (row-major) -- mirroring ffsim's
-        ``unitary_from_parameters``/``antihermitians_from_parameters`` convention exactly, so a
-        parameter vector produced by ffsim's own ``to_parameters`` round-trips through this method.
+        ``unitary_from_parameters``/``antihermitians_from_parameters`` convention exactly, so this
+        method maps an ffsim-produced parameter vector to the same unitary ffsim would build from it.
+        Note the map is many-to-one: generators differing by :math:`2\pi i` shifts of their eigenvalue
+        phases give the same unitary, so it is not invertible on parameter vectors -- see
+        :meth:`._unitary_to_parameters`.
         """
         n_triu = norb * (norb - 1) // 2
         rows_off, cols_off = np.triu_indices(norb, k=1)
@@ -720,10 +735,14 @@ class UCJ(FermionicGate):
 
     @staticmethod
     def _unitary_to_parameters(unitary: np.ndarray) -> np.ndarray:
-        """Inverts :meth:`._unitary_from_parameters`, extracting ``norb**2`` real parameters.
+        r"""Extracts the ``norb**2`` real parameters of ``unitary``'s principal antihermitian generator.
 
-        Takes the matrix logarithm of ``unitary`` to recover its antihermitian generator, then reads
-        back the same fixed slices ``_unitary_from_parameters`` writes.
+        Takes the matrix logarithm of ``unitary`` to recover a generator, then reads back the same
+        fixed slices :meth:`._unitary_from_parameters` writes -- so ``_unitary_from_parameters`` of the
+        result reproduces ``unitary`` to machine precision. It is a one-sided inverse only:
+        ``scipy.linalg.logm`` returns the *principal* branch, so a vector whose generator had
+        eigenvalue phases outside :math:`(-\pi, \pi]` is not recovered, though the wrapped and
+        principal generators exponentiate to the same unitary.
         """
         norb = unitary.shape[-1]
         generator = scipy.linalg.logm(unitary)
