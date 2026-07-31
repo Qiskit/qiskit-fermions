@@ -268,7 +268,7 @@ def test_ucc_generator_groups_are_individually_hermitian(variant):
     conjugate in a shared group, which this test locks in.
     """
     t1, t2 = _restricted_amplitudes(2, 2, seed=18)
-    generator = UCC(variant, t1, t2).hermitian_generator()
+    generator = UCC(variant, t1, t2).cluster_operator() * 1j
 
     assert generator.is_hermitian()
     assert generator.has_groups()
@@ -280,7 +280,7 @@ def test_ucc_generator_groups_are_individually_hermitian(variant):
 def test_ucc_generator_groups_are_individually_hermitian_unrestricted():
     """The conjugate-pairing group invariant also holds for the unrestricted variant."""
     t1, t2 = _unrestricted_amplitudes(2, 1, 2, 3, seed=19)
-    generator = UCC("unrestricted", t1, t2).hermitian_generator()
+    generator = UCC("unrestricted", t1, t2).cluster_operator() * 1j
 
     assert generator.is_hermitian()
     for group in generator.split_out_groups():
@@ -300,7 +300,7 @@ def test_ucc_generator_group_layout_is_canonical(variant):
     sorted pins that down without needing to vary the hash seed, which a single process cannot do.
     """
     t1, t2 = _restricted_amplitudes(2, 2, seed=23)
-    generator = UCC(variant, t1, t2).hermitian_generator()
+    generator = UCC(variant, t1, t2).cluster_operator()
 
     support_by_group: dict[int, tuple[int, ...]] = {}
     for (actions, _), group in zip(
@@ -522,6 +522,6 @@ def test_ucc_antisymmetric_flag_does_not_change_the_operator():
     t1, t2 = _restricted_amplitudes(2, 2, seed=27)
     t2 = _antisymmetrize(t2)
 
-    checked = UCC("spinless", t1, t2, antisymmetric=True).hermitian_generator()
-    unchecked = UCC("spinless", t1, t2).hermitian_generator()
+    checked = UCC("spinless", t1, t2, antisymmetric=True).cluster_operator()
+    unchecked = UCC("spinless", t1, t2).cluster_operator()
     assert checked.equiv(unchecked)

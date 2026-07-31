@@ -458,9 +458,17 @@ class UCC(FermionicGate):
         ``p``, mode ``norb + p`` is beta orbital ``p``) for the spinful variants, and directly on the
         ``norb`` modes for the spinless variant. Occupied orbitals are ordered before virtual ones.
 
+        Being anti-Hermitian, this generator relates to the ansatz unitary by
+        :math:`e^{T - T^\dagger} = e^{-i H}` with the Hermitian :math:`H = i (T - T^\dagger)`. That
+        :math:`H` is what :class:`.Evolution` consumes, since it requires a Hermitian operator to
+        produce a unitary, and it is how :meth:`_build_definition` expresses the ansatz.
+
         The returned operator carries :attr:`~qiskit_fermions.operators.FermionOperator.groups` that
-        pair every excitation with its Hermitian conjugate; see :meth:`.hermitian_generator` for why
-        that grouping matters.
+        pair every excitation with its Hermitian conjugate. That grouping is load-bearing:
+        :class:`.Evolution` decomposes group-by-group, so each group becomes one factor
+        :math:`e^{-i H_k}` of the product formula, and multiplying by :math:`i` leaves every group
+        individually Hermitian -- hence every factor a genuine unitary. Splitting term-by-term
+        instead would not be (see the comment below).
 
         Returns:
             The cluster generator :math:`T - T^\dagger` as a
@@ -504,20 +512,6 @@ class UCC(FermionicGate):
                 terms_with_groups.append((actions, sign * coeff, groups[support(actions)]))
 
         return FermionOperator.from_terms_with_groups(terms_with_groups)
-
-    def hermitian_generator(self) -> FermionOperator:
-        r"""Returns the Hermitian generator :math:`H = i (T - T^\dagger)` this ansatz evolves under.
-
-        The ansatz unitary is :math:`e^{T - T^\dagger} = e^{-i H}` for this :math:`H`, which is the
-        form :class:`.Evolution` consumes (it requires a Hermitian operator to produce a unitary). The
-        grouping of :meth:`.cluster_operator` is preserved, so each group of :math:`H` is individually
-        Hermitian and every factor of the resulting product formula is unitary.
-
-        Returns:
-            The Hermitian generator :math:`i (T - T^\dagger)` as a
-            :class:`~qiskit_fermions.operators.FermionOperator`.
-        """
-        return self.cluster_operator() * 1j
 
     @staticmethod
     def _normalize_variant(variant: UCC.Variant | str) -> UCC.Variant:
@@ -1019,7 +1013,7 @@ class UCC(FermionicGate):
 
         # e^{T - T^dag} == e^{-i * 1.0 * H} for the Hermitian H = i (T - T^dag)
         definition.append(
-            Evolution(self.num_modes, self.hermitian_generator(), time=1.0),  # type: ignore[arg-type]
+            Evolution(self.num_modes, self.cluster_operator() * 1j, time=1.0),  # type: ignore[arg-type]
             definition.modes,
         )
 
