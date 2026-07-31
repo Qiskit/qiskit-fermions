@@ -130,8 +130,16 @@ keep the final orbital rotation from the :math:`t_1` amplitudes out of ``theta``
 Given ``theta``, :meth:`.UCJ.from_parameters` builds the gate directly. Rather than returning an
 energy directly, ``params_to_vec`` stops one step earlier and returns the ansatz *state vector* --
 this is the interface both optimizers used below need, and the energy is trivially recovered from
-it via the Hamiltonian's :func:`ffsim.linear_operator`. The final orbital rotation from the
-:math:`t_1` amplitudes is kept fixed throughout -- only the repetition tensors are optimized.
+it via the Hamiltonian's :func:`ffsim.linear_operator`.
+
+The final orbital rotation is initialized from the :math:`t_1` amplitudes and held fixed throughout:
+since that rotation already captures the singles, the optimization can focus on the
+:math:`t_2`-derived repetition tensors, and ``theta`` stays :math:`\mathcal{O}(N^2)` parameters
+shorter. This is a choice, not a requirement -- freezing it does restrict the variational manifold,
+so for systems with significant singles character you may well want it optimized too. Passing
+``with_final_orbital_rotation=True`` to both :meth:`.UCJ.num_parameters` and
+:meth:`.UCJ.from_parameters` folds it into ``theta``, which then also makes the two explicit
+``final_orbital_rotation`` assignments below unnecessary.
 
 .. plot::
    :context:
@@ -151,6 +159,8 @@ it via the Hamiltonian's :func:`ffsim.linear_operator`. The final orbital rotati
    >>> def params_to_vec(theta):
    ...     """Builds a fresh UCJ ansatz from theta and returns its state vector."""
    ...     ansatz = UCJ.from_parameters(theta, norb, "balanced", n_reps)
+   ...     # reattached rather than read from theta, so it stays fixed; to optimize it instead, pass
+   ...     # with_final_orbital_rotation=True above (and to num_parameters) and drop this line
    ...     ansatz.final_orbital_rotation = final_orbital_rotation
    ...
    ...     circuit = FermionicCircuit(2 * norb)
@@ -188,6 +198,7 @@ float; no gradient of the fermionic ansatz is implemented.
    >>> from scipy.optimize import minimize
    >>>
    >>> ccsd_ansatz = UCJ.from_t_amplitudes(nelec, t2, t1=t1, n_reps=1)
+   >>> # cleared so that to_parameters emits theta's layout; keep it if you opted to optimize it
    >>> ccsd_ansatz.final_orbital_rotation = None
    >>> theta0 = ccsd_ansatz.to_parameters()
    >>>
