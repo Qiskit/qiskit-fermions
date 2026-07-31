@@ -656,16 +656,21 @@ own :class:`~qiskit.synthesis.LieTrotter`:
    >>>
    >>> # The interaction reaches nearest (distance 1) and next-nearest (distance 2)
    >>> # neighbours, so every interior qubit carries four Rzz gates and can only do one at
-   >>> # a time: four layers is the best any schedule can do. These offsets achieve it, as
-   >>> # (distance, modulus, starting offsets) selecting the gates of one layer.
-   >>> RZZ_SCHEDULE = ((1, 2, (0,)), (2, 4, (0, 1)), (1, 2, (1,)), (2, 4, (2, 3)))
-   >>>
+   >>> # a time: four layers is the best any schedule can do. These offsets achieve it.
    >>> def rzz_layers(circuit, angles):
+   ...     """Emit the diagonal Rzz gates in four layers of disjoint qubit pairs."""
+   ...     near = [(j, k) for j, k in angles if k - j == 1]
+   ...     far = [(j, k) for j, k in angles if k - j == 2]
+   ...     schedule = [
+   ...         [(j, k) for j, k in near if j % 2 == 0],
+   ...         [(j, k) for j, k in far if j % 4 in (0, 1)],
+   ...         [(j, k) for j, k in near if j % 2 == 1],
+   ...         [(j, k) for j, k in far if j % 4 in (2, 3)],
+   ...     ]
    ...     # emit layer by layer, since Qiskit's depth follows the order gates were added
-   ...     for distance, modulus, offsets in RZZ_SCHEDULE:
-   ...         for (j, k), angle in angles.items():
-   ...             if k - j == distance and j % modulus in offsets:
-   ...                 circuit.rzz(angle, j, k)
+   ...     for layer in schedule:
+   ...         for j, k in layer:
+   ...             circuit.rzz(angles[j, k], j, k)
    >>>
    >>> class FlowSetSynthesis(EvolutionSynthesis):
    ...     '''Synthesize one flow set of the encoded Hamiltonian at a time.'''
