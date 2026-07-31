@@ -106,7 +106,8 @@ Coulomb matrix written directly by its upper triangle and diagonal, then symmetr
 .. tip::
    The rest of this guide only ever calls ``num_parameters``/``from_parameters``/``to_parameters``
    on the ansatz -- never anything :class:`.UCJ`-specific. Any ansatz gate exposing that same
-   three-method interface can be dropped in here unchanged.
+   three-method interface can be dropped in here unchanged; :ref:`step 6 <vqe_outer_loop_ucc>` does
+   exactly that with :class:`.UCC`.
 
 We fix a single repetition (``n_reps=1``) here to keep the optimization fast for this guide, and
 keep the final orbital rotation from the :math:`t_1` amplitudes out of ``theta`` (see step 3) --
@@ -276,6 +277,106 @@ them here -- but with the same warm start, the linear method consistently needs 
 fraction of L-BFGS-B's iterations to reach the same energy, since it exploits the extra structure
 of ``params_to_vec`` that a generic finite-difference method cannot.
 
+.. _vqe_outer_loop_ucc:
+
+6. Swap in a different ansatz
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Nothing above is specific to :class:`.UCJ`. Because the loop only ever calls
+``num_parameters``/``from_parameters``/``to_parameters``, another ansatz exposing that interface
+drops straight in. :class:`.UCC` implements the unitary coupled-cluster ansatz
+:math:`e^{T - T^\dagger}` and exposes exactly those three methods, so the only changes are the
+class name and its shape arguments -- :class:`.UCC` is sized by the occupied/virtual split
+(``norb``, ``nocc``) rather than by a repetition count.
+
+.. note::
+   The variant names differ between the two classes but describe the same spin choice here:
+   :class:`.UCJ`'s ``"balanced"`` and :class:`.UCC`'s ``"restricted"`` both mean *one* spatial
+   parametrization shared by both spin sectors. Each class follows the naming of the ffsim operators
+   it mirrors (:external:class:`~ffsim.UCJOpSpinBalanced` versus
+   :external:class:`~ffsim.UCCSDOpRestrictedReal`). Likewise :class:`.UCJ`'s ``"unbalanced"`` and
+   :class:`.UCC`'s ``"unrestricted"`` are the independent-per-spin variants, and both classes call
+   the single-register variant ``"spinless"``.
+
+.. plot::
+   :context:
+   :nofigs:
+   :include-source:
+
+   >>> from qiskit_fermions.circuit.library import UCC
+   >>>
+   >>> nocc = nelec[0]
+   >>>
+   >>> def ucc_params_to_vec(theta):
+   ...     """Builds a fresh UCC ansatz from theta and returns its state vector."""
+   ...     ansatz = UCC.from_parameters(theta, norb, nocc, "restricted")
+   ...
+   ...     circuit = FermionicCircuit(2 * norb)
+   ...     circuit.append(InitializeModes.from_hartree_fock(norb, nelec), circuit.modes)
+   ...     circuit.append(ansatz, circuit.modes)
+   ...
+   ...     return ffsim.apply_unitary(reference, circuit, norb=norb, nelec=nelec)
+
+Note the absent ``final_orbital_rotation``: :class:`.UCC` carries none, because its :math:`t_1`
+amplitudes already *are* its single excitations. For :class:`.UCJ` that trailing rotation is where
+the singles live -- it only factorizes :math:`t_2` -- which is why steps 3 and 4 had to hold it
+fixed outside ``theta``. Here every amplitude is a parameter, so :meth:`.UCC.to_parameters` gives
+the warm start directly, and the whole question of freezing a rotation does not arise. Should you
+want one anyway -- to widen the manifold beyond what the singles already span -- append an
+:class:`.OrbitalRotation` to the circuit yourself; unlike UCJ's flag, it is then yours to either
+keep fixed or fold into ``theta`` by hand.
+
+.. plot::
+   :context:
+   :nofigs:
+   :include-source:
+
+   >>> ucc_theta0 = UCC.from_t_amplitudes(t2, t1=t1, variant="restricted").to_parameters()
+   >>>
+   >>> ucc_result = ffsim.optimize.minimize_linear_method(
+   ...     ucc_params_to_vec,
+   ...     linop,
+   ...     x0=ucc_theta0,
+   ...     maxiter=50,
+   ...     optimize_regularization=False,
+   ...     optimize_variation=False,
+   ... )
+   >>>
+   >>> print(f"CCSD:      {ccsd.e_tot:.5f} Hartree")
+   CCSD:      -1.15167 Hartree
+   >>> print(f"UCC:       {ucc_result.fun:.5f} Hartree")
+   UCC:       -1.15167 Hartree
+
+Both ansatzes reach the CCSD energy on this molecule. Their parameter counts differ, but be careful
+reading anything general into that at this size -- the two scale quite differently. :class:`.UCJ`'s
+count is :math:`O(n_\text{orb}^2)` per repetition, while :class:`.UCC`'s doubles are
+:math:`O(n_\text{occ}^2 n_\text{vrt}^2)`, so UCC starts smaller on tiny systems and ends up much
+larger. At half filling the crossover is already around eight orbitals:
+
+.. plot::
+   :context:
+   :nofigs:
+   :include-source:
+
+   >>> for n in (4, 8, 20):
+   ...     ucj = UCJ.num_parameters(n, "balanced", 1)
+   ...     ucc = UCC.num_parameters(n, n // 2, "restricted")
+   ...     print(f"norb={n:<3} UCJ (n_reps=1): {ucj:<5} UCC: {ucc}")
+   norb=4   UCJ (n_reps=1): 36    UCC: 14
+   norb=8   UCJ (n_reps=1): 136   UCC: 152
+   norb=20  UCJ (n_reps=1): 820   UCC: 5150
+
+This is a trade-off, not a ranking, and the comparison above is deliberately generous to UCJ by
+holding ``n_reps=1``: repetitions are what buy UCJ its expressivity, and its count grows linearly in
+them. What matters for this guide is that switching between the two costs three lines.
+
+.. note::
+   The two ansatzes also differ in how faithfully their circuits reproduce the gate. :class:`.UCJ`
+   synthesizes exactly, whereas :class:`.UCC`'s excitation terms do not commute, so its circuit
+   :meth:`~qiskit.circuit.Gate.definition` is a first-order product formula. The simulation path used
+   above applies the exponential exactly, so the optimization here is unaffected -- but a circuit
+   transpiled for hardware carries a Trotter error, tightened with a higher-order product formula.
+
 .. skip: end
 
 Next steps
@@ -285,6 +386,9 @@ Next steps
   from coupled-cluster amplitudes, and how to transpile it onto qubits for hardware execution --
   the same transpilation applies to ``UCJ.from_parameters(lm_result.x, ...)`` here, built from the
   converged parameter vector from step 5.
+- See :class:`.UCC` for the unitary coupled-cluster ansatz swapped in at step 6, including its
+  ``"unrestricted"`` and ``"spinless"`` variants and the opt-in ``antisymmetric`` parameterization
+  of the :math:`t_2` amplitudes.
 - Read the :ref:`ffsim backend guide <ffsim_backend_explanation>` for why :func:`ffsim.apply_unitary`
   and :func:`ffsim.linear_operator` work natively on :class:`.FermionicCircuit` and
   :class:`.FermionOperator`.

@@ -29,6 +29,7 @@ This module provides a library of :class:`.FermionicGate` implementations.
    InitializeModes
    OrbitalRotation
    PrepareSlaterDeterminant
+   UCC
    UCJ
 """
 
@@ -36,9 +37,11 @@ from .evolution import Evolution
 from .initialize_modes import InitializeModes
 from .orbital_rotation import OrbitalRotation
 from .prepare_slater_determinant import PrepareSlaterDeterminant
+from .ucc import UCC
 from .ucj import UCJ
 
 __all__ = [
+    "UCC",
     "UCJ",
     "Evolution",
     "InitializeModes",
