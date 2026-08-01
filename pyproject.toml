@@ -112,7 +112,7 @@ dev = [
     {include-group = "docs"},
     {include-group = "lint"},
     {include-group = "coverage"},
-    "tox>=4.28.0",
+    "tox>=4.58.0",
 ]
 
 [project.entry-points."qiskit_fermions.transpiler.synthesis"]
