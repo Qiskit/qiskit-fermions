@@ -59,7 +59,7 @@ build = [
 ]
 style = [
     "ruff==0.15.8",
-    "typos>=1.20.0",
+    "typos>=1.48.0",
 ]
 lint = [
     {include-group = "style"},
