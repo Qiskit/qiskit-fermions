@@ -68,7 +68,7 @@ lint = [
     "toml>=0.10.2",
 ]
 basetest = [
-    "pytest>=8.0",
+    "pytest>=9.1.1",
     "pytest-subtests>=0.15.0",
 ]
 doctest = [
