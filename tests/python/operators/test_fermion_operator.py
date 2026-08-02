@@ -466,7 +466,7 @@ class TestFermionOperator:
         comm = commutator(op1, op2)
         comm = comm.normal_ordered()
         comm.ichop()
-        assert comm.equiv(cls.from_dict({(): 1, (cre(0), ann(0)): -2}))
+        assert comm.equiv(cls.from_dict({(): -1, (cre(0), ann(0)): 2}))
 
     def test_anti_commutator(self):
         cls = self.get_class()

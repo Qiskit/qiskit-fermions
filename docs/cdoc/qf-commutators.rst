@@ -100,8 +100,9 @@ Double-Commutator
        and ``op_type`` with its matching prefix (e.g. ``ferm_op`` for
        :c:struct:`QfFermionOperator`).
 
-    The double-commutator is defined as follows
-    (see also Equation (13.6.18) in [1]_):
+    The double-commutator is defined as follows (see also Chapter 13.6, *Equation of motion
+    methods*, page 479 of [1]_; the ``sign=false`` case is the symmetric double commutator
+    :math:`[A, B, C]` appearing in Equation (2) of [2]_):
 
     If ``sign`` is ``false``, it returns
 
@@ -116,6 +117,10 @@ Double-Commutator
 
     .. [1] R. McWeeny. Methods of Molecular Quantum Mechanics.
            2nd Edition, Academic Press, 1992. ISBN 0-12-486552-6.
+
+    .. [2] P. J. Ollitrault, A. Miessen, I. Tavernelli. Molecular Quantum Dynamics: A Quantum
+           Computing Perspective. Acc. Chem. Res. 54, 4229-4238 (2021).
+           https://doi.org/10.1021/acs.accounts.1c00514
 
     :param op_a: A pointer to the operator :math:`A`.
     :param op_b: A pointer to the operator :math:`B`.
