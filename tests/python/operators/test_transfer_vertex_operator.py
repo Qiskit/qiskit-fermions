@@ -182,6 +182,12 @@ class TestTransferVertexOperator:
         op.ichop(1e-5)
         assert op.equiv(cls.from_dict({(): 1e-4}))
 
+    def test_ichop_preserves_complex_coeffs(self):
+        cls = self.get_class()
+        op = cls.from_dict({(): 1 + 2j, ((0, 1),): -3j, ((1, 2),): 1e-10})
+        op.ichop()
+        assert op.equiv(cls.from_dict({(): 1 + 2j, ((0, 1),): -3j}))
+
     def test_simplify(self):
         cls = self.get_class()
         coeffs = [1e-10, 2, 3, 4, -4]
