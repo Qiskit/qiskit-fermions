@@ -367,6 +367,19 @@ class TestEdgeVertexOperator:
             expected = cls.from_dict({((0, 0), (2, 2), (0, 1), (1, 0), (1, 2)): -1})
             assert op.normal_ordered().equiv(expected)
 
+        with subtests.test("edge operators on the same pair of modes commute"):
+            # Eq. (5) of arXiv:2512.11418v1 only covers `j != k != l != m`, so it says nothing
+            # about two edge operators spanning the *same* pair of modes. Because
+            # `E_{kj} = -E_{jk}`, those are collinear and commute: reordering them must not
+            # introduce a sign.
+            op = cls.from_dict({((1, 0), (0, 1)): 1 + 2j})
+            expected = cls.from_dict({((0, 1), (1, 0)): 1 + 2j})
+            assert op.normal_ordered().equiv(expected)
+
+            # Two identical edge operators: the sort is a no-op, but the parity rule still runs.
+            op = cls.from_dict({((1, 0), (1, 0)): 1 + 2j})
+            assert op.normal_ordered().equiv(op)
+
     def test_commutator(self, subtests):
         cls = self.get_class()
 
@@ -394,6 +407,16 @@ class TestEdgeVertexOperator:
             comm.ichop()
             assert comm.equiv(cls.zero())
 
+        with subtests.test("edge operators on the same pair of modes"):
+            # Not covered by Eq. (5), which requires `j != k != l != m`: since
+            # `E_{1,0} = -E_{0,1}`, the two are collinear and therefore commute.
+            op1 = cls.from_dict({((0, 1),): 1})
+            op2 = cls.from_dict({((1, 0),): 1})
+            comm = commutator(op1, op2)
+            comm = comm.normal_ordered()
+            comm.ichop()
+            assert comm.equiv(cls.zero())
+
     def test_anti_commutator(self, subtests):
         cls = self.get_class()
 
@@ -406,8 +429,11 @@ class TestEdgeVertexOperator:
             assert comm.equiv(cls.zero())
 
         with subtests.test("2. relation of Eq. (5) from arXiv:2512.11418v1"):
+            # Eq. (5) requires `j != k != l`, so the two edge operators must share *exactly one*
+            # mode. `E_{0,1}` and `E_{1,2}` share only mode 1. Two edge operators spanning the
+            # *same* pair of modes instead commute -- see `test_normal_ordered`.
             op1 = cls.from_dict({((0, 1),): 1})
-            op2 = cls.from_dict({((1, 0),): 1})
+            op2 = cls.from_dict({((1, 2),): 1})
             comm = anti_commutator(op1, op2)
             comm = comm.normal_ordered()
             comm.ichop()
