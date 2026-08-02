@@ -31,9 +31,9 @@ class TransferVertexOperator:
                 = -(a_j a_j - a_j a^\dagger_j + a^\dagger_j a_j - a^\dagger_j a^\dagger_j)
                 = 1 - 2 a^\dagger_j a_j \, , \nonumber \\
         T_{jk} &= \frac{i}{2} V_j E_{jk}
-                = \frac{1}{2} \gamma_{2j} \gamma_{2k-1} \, , \nonumber \\
+                = \frac{i}{2} \gamma_{2j} \gamma_{2k-1} \, , \nonumber \\
         T_{kj} &= \frac{i}{2} E_{jk} V_k
-                = -\frac{1}{2} \gamma_{2j-1} \gamma_{2k} \nonumber
+                = -\frac{i}{2} \gamma_{2j-1} \gamma_{2k} \nonumber
         \end{align}
     
     where :math:`E_{jk}` is an edge operator of the :class:`.EdgeVertexOperator` and
@@ -829,11 +829,15 @@ class TransferVertexOperator:
         r"""
         Returns the Hermitian conjugate (or adjoint) of this operator.
         
-        The generators of this operator (the vertex and transfer operators) are individually
-        Hermitian, so the terms themselves are unchanged by the adjoint; only the coefficients are
-        affected:
+        Two things happen to every term:
         
         - the coefficients are complex conjugated
+        - the generators within each term are reversed in order
+        
+        The reversal is required because :math:`(AB)^\dagger = B^\dagger A^\dagger`. While the
+        individual vertex and transfer generators *are* Hermitian, they **anticommute when they share
+        an index** (see :ref:`the definition above <TransferVertexOperator-definition>`), so the
+        reversed product is not equal to the original one and the order cannot simply be dropped.
         
         Note that this does not make the operator self-adjoint in general: an operator with complex
         coefficients differs from its adjoint (as the doctest below illustrates).
@@ -845,7 +849,7 @@ class TransferVertexOperator:
             >>> adj = op.adjoint()
             >>> print(format(adj))
              -0.000000e0 +1.000000e0j * ()
-              1.000000e0 -0.000000e0j * (V(0) T(0,1))
+              1.000000e0 -0.000000e0j * (T(0,1) V(0))
         
         ..
         """
@@ -912,6 +916,13 @@ class TransferVertexOperator:
         .. note::
            This check is implemented using :meth:`.equiv` on the :meth:`.normal_ordered` difference
            of ``self`` and its :meth:`.adjoint` and :meth:`.zero`.
+        
+        .. note::
+           This check is *conservative*: it can return ``False`` for an operator that is in fact
+           Hermitian. :meth:`.normal_ordered` does not contract repeated generators into scalars
+           (for example :math:`V_j V_j = 1`), so a term that would only cancel against its adjoint
+           *after* such a contraction is not recognized as zero. A ``True`` result is always
+           reliable.
         
         Args:
             atol: The numerical accuracy upto which coefficients are considered equal. This value

@@ -996,10 +996,15 @@ impl PyEdgeVertexOperator {
 
     /// Returns the Hermitian conjugate (or adjoint) of this operator.
     ///
-    /// The generators of this operator (the vertex and edge operators) are individually Hermitian,
-    /// so the terms themselves are unchanged by the adjoint; only the coefficients are affected:
+    /// Two things happen to every term:
     ///
     /// - the coefficients are complex conjugated
+    /// - the generators within each term are reversed in order
+    ///
+    /// The reversal is required because :math:`(AB)^\dagger = B^\dagger A^\dagger`. While the
+    /// individual vertex and edge generators *are* Hermitian, they **anticommute when they share an
+    /// index** (see :ref:`the definition above <EdgeVertexOperator-definition>`), so the reversed
+    /// product is not equal to the original one and the order cannot simply be dropped.
     ///
     /// Note that this does not make the operator self-adjoint in general: an operator with complex
     /// coefficients differs from its adjoint (as the doctest below illustrates).
@@ -1011,7 +1016,7 @@ impl PyEdgeVertexOperator {
     ///     >>> adj = op.adjoint()
     ///     >>> print(format(adj))
     ///      -0.000000e0 +1.000000e0j * ()
-    ///       1.000000e0 -0.000000e0j * (V(0) E(0,1))
+    ///       1.000000e0 -0.000000e0j * (E(0,1) V(0))
     ///
     /// ..
     fn adjoint(&self) -> Self {
@@ -1082,6 +1087,13 @@ impl PyEdgeVertexOperator {
     /// .. note::
     ///    This check is implemented using :meth:`.equiv` on the :meth:`.normal_ordered` difference
     ///    of ``self`` and its :meth:`.adjoint` and :meth:`.zero`.
+    ///
+    /// .. note::
+    ///    This check is *conservative*: it can return ``False`` for an operator that is in fact
+    ///    Hermitian. :meth:`.normal_ordered` does not contract repeated generators into scalars
+    ///    (for example :math:`V_j V_j = 1` and :math:`E_{jk} E_{kj} = -1`), so a term that would
+    ///    only cancel against its adjoint *after* such a contraction is not recognized as zero.
+    ///    A ``True`` result is always reliable.
     ///
     /// Args:
     ///     atol: The numerical accuracy upto which coefficients are considered equal. This value

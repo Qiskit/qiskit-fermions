@@ -318,10 +318,34 @@ class TestEdgeVertexOperator:
         with subtests.test("pow==2"):
             assert (op**2).equiv(cls.from_dict({((0, 1), (0, 1)): 4}))
 
-    def test_adjoint(self):
+    def test_adjoint(self, subtests):
         cls = self.get_class()
-        op = cls.from_dict({(): 2j, ((0, 1),): 3})
-        assert op.adjoint().equiv(cls.from_dict({(): -2j, ((0, 1),): 3}))
+
+        with subtests.test("single-factor terms"):
+            op = cls.from_dict({(): 2j, ((0, 1),): 3})
+            assert op.adjoint().equiv(cls.from_dict({(): -2j, ((0, 1),): 3}))
+
+        with subtests.test("multi-factor term is reversed"):
+            op = cls.from_dict({((0, 0), (0, 1), (1, 2)): 3 - 4j})
+            assert op.adjoint().equiv(cls.from_dict({((1, 2), (0, 1), (0, 0)): 3 + 4j}))
+
+        with subtests.test("(A @ B).adjoint() == B.adjoint() @ A.adjoint()"):
+            op_a = cls.from_dict({((0, 0), (0, 1)): 2 + 1j})
+            op_b = cls.from_dict({((1, 2), (2, 2)): -1 + 3j})
+            assert (op_a @ op_b).adjoint().equiv(op_b.adjoint() @ op_a.adjoint())
+
+    def test_is_hermitian(self, subtests):
+        cls = self.get_class()
+
+        # V(0) and E(0,1) share the index 0 and therefore anticommute, so
+        # (V(0) E(0,1))† = E(0,1) V(0) = -V(0) E(0,1) and the operator is not Hermitian.
+        op = cls.from_dict({((0, 0), (0, 1)): 1.0})
+
+        with subtests.test("anticommuting product is not Hermitian"):
+            assert not op.is_hermitian()
+
+        with subtests.test("symmetrized product is Hermitian"):
+            assert (op + op.adjoint()).is_hermitian()
 
     def test_equiv(self):
         cls = self.get_class()
