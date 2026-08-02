@@ -239,8 +239,14 @@ fn _normal_ordered_term(term_view: EdgeVertexOperatorTermView) -> EdgeVertexOper
                         // whether we swap depends on the actual indices:
                         if left_1 > right_1 || (left_1 == right_1 && left_2 > right_2) {
                             term.swap(j - 1, j);
-                            // swap will commute if they do not share support
-                            if HashSet::from([right_1, right_2, left_1, left_2]).len() != 4 {
+                            // Two edge operators anticommute iff they share *exactly one* mode:
+                            // `{E_jk, E_kl} = 0`. Sharing *both* modes is the commuting case, since
+                            // `E_jk` and `E_kj = -E_jk` are collinear and every operator commutes
+                            // with itself. Disjoint supports commute too.
+                            let overlap = HashSet::from([left_1, left_2])
+                                .intersection(&HashSet::from([right_1, right_2]))
+                                .count();
+                            if overlap == 1 {
                                 parity = !parity;
                             }
                         }
@@ -346,9 +352,9 @@ impl OperatorTrait for EdgeVertexOperator {
         let mut right_indices = Vec::with_capacity(self.right_indices.len());
 
         // Besides conjugating the coefficients, the generators within each term must be reversed:
-        // `(AB)† = B†A†` and the edge/vertex generators anticommute when they share an index, so
-        // `BA != AB` in general. Both index arrays are reversed over the same span, which keeps each
-        // `(left, right)` pair intact while reversing the order of the pairs.
+        // `(AB)† = B†A†` and the edge/vertex generators anticommute when they share exactly one
+        // index, so `BA != AB` in general. Both index arrays are reversed over the same span, which
+        // keeps each `(left, right)` pair intact while reversing the order of the pairs.
         self.iter().for_each(|term| {
             coeffs.push(term.coeff.conj());
             left_indices.extend(term.left_indices.iter().rev());
@@ -1102,10 +1108,15 @@ mod tests {
     #[test]
     fn test_normal_ordered_gandon_rel2() {
         // Tests the 2. relation of Eq. (5) from arXiv:2512.11418v1: {E_{jk}, E_{kl}} = 0
+        //
+        // Eq. (5) holds for `j != k != l`, so the two edge operators must share *exactly one*
+        // mode for this relation to apply. Here that is `E_{1,2} E_{0,1}` (sharing only mode 1),
+        // which anticommutes and hence picks up a sign when reordered. See
+        // `test_normal_ordered_shared_pair_commutes` for the excluded share-both-modes case.
         let op = EdgeVertexOperator {
             coeffs: vec![Complex64::new(1.0, 0.0)],
             left_indices: vec![1, 0],
-            right_indices: vec![0, 1],
+            right_indices: vec![2, 1],
             boundaries: vec![0, 2],
             groups: None,
         };
@@ -1113,12 +1124,53 @@ mod tests {
         let expected = EdgeVertexOperator {
             coeffs: vec![Complex64::new(-1.0, 0.0)],
             left_indices: vec![0, 1],
+            right_indices: vec![1, 2],
+            boundaries: vec![0, 2],
+            groups: None,
+        };
+
+        assert_eq!(op.normal_ordered(), expected);
+    }
+
+    /// Two edge operators spanning the *same* pair of modes commute, so reordering them must not
+    /// introduce a sign.
+    ///
+    /// This is the case Eq. (5) of arXiv:2512.11418v1 does not cover: its relations are stated for
+    /// `j != k != l != m`, so neither `{E_{jk}, E_{kl}} = 0` (exactly one shared mode) nor
+    /// `[E_{jk}, E_{lm}] = 0` (disjoint modes) says anything about `E_{jk}` versus `E_{jk}` or
+    /// `E_{kj}`. Since `E_{kj} = -E_{jk}`, those are collinear and commute.
+    #[test]
+    fn test_normal_ordered_shared_pair_commutes() {
+        // E_{1,0} E_{0,1} -> E_{0,1} E_{1,0} with the coefficient *unchanged*.
+        let op = EdgeVertexOperator {
+            coeffs: vec![Complex64::new(1.0, 2.0)],
+            left_indices: vec![1, 0],
+            right_indices: vec![0, 1],
+            boundaries: vec![0, 2],
+            groups: None,
+        };
+
+        let expected = EdgeVertexOperator {
+            coeffs: vec![Complex64::new(1.0, 2.0)],
+            left_indices: vec![0, 1],
             right_indices: vec![1, 0],
             boundaries: vec![0, 2],
             groups: None,
         };
 
         assert_eq!(op.normal_ordered(), expected);
+
+        // Same for two *identical* edge operators, where the sort is a no-op but the parity rule is
+        // still consulted.
+        let op = EdgeVertexOperator {
+            coeffs: vec![Complex64::new(1.0, 2.0)],
+            left_indices: vec![1, 1],
+            right_indices: vec![0, 0],
+            boundaries: vec![0, 2],
+            groups: None,
+        };
+
+        assert_eq!(op.normal_ordered(), op);
     }
 
     #[test]

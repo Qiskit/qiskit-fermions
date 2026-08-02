@@ -47,8 +47,16 @@ class EdgeVertexOperator:
         \left[ E_{jk}, E_{lm} \right] &= 0 \nonumber \, .
         \end{align}
     
-    In summary, edge and vertex operators commute, unless they share an index, in which case they
-    anticommute. A simple example can be represented visually like so:
+    In summary, edge and vertex operators commute, unless they share *exactly one* index, in which
+    case they anticommute.
+    
+    .. note::
+       The relations above are stated for :math:`j \neq k \neq l \neq m`, so they do not cover two
+       edge operators spanning the *same* pair of modes. Those commute: since :math:`E_{kj} =
+       -E_{jk}`, such a pair is collinear, and every operator commutes with itself. This is why the
+       condition is "exactly one" shared index rather than "at least one".
+    
+    A simple example can be represented visually like so:
     
     .. plot::
        :alt: A visual depication of an edge-vertex operator.
