@@ -203,82 +203,224 @@ impl EdgeVertexOperator {
         }
     }
 
-    // TODO: expose an optional mode to also unify E_{jk} operators into a fixed order of j,k
-    pub fn normal_ordered(&self) -> Self {
+    /// Returns an equivalent operator with normal-ordered terms.
+    ///
+    /// `ascending` fixes the orientation convention of the generalized edge operators: because
+    /// `E_kj = -E_jk`, every edge operator has two representations, and this picks `j < k`
+    /// (`ascending = true`) or `j > k` (`ascending = false`), absorbing the sign into the
+    /// coefficient. Vertex operators `V_j = E_jj` are unaffected.
+    ///
+    /// `reduce` additionally contracts adjacent generators via the identities in
+    /// [`_reduce_once`], which is what makes the result a genuine canonical form. Pass `false` to
+    /// get the reorder-only behaviour.
+    pub fn normal_ordered(&self, ascending: bool, reduce: bool) -> Self {
         let mut result = Self::zero();
         self.iter()
-            .for_each(|term| result.__iadd__(&_normal_ordered_term(term)));
+            .for_each(|term| result.__iadd__(&_normal_ordered_term(term, ascending, reduce)));
         result
     }
 
     pub fn is_hermitian(&self, atol: f64) -> bool {
-        let mut diff = (self.__sub__(&self.adjoint())).normal_ordered();
+        let mut diff = (self.__sub__(&self.adjoint())).normal_ordered(true, true);
         diff.ichop(atol);
         diff.equiv(&Self::zero(), atol)
     }
 }
 
-fn _normal_ordered_term(term_view: EdgeVertexOperatorTermView) -> EdgeVertexOperator {
-    let mut coeffs = vec![];
-    let mut left_indices = vec![];
-    let mut right_indices = vec![];
-    let mut boundaries = vec![0];
+/// Rewrites `(left, right)` into the orientation selected by `ascending`, returning the rewritten
+/// pair and the sign picked up from `E_kj = -E_jk`.
+///
+/// Vertex operators (`left == right`) are returned unchanged with a `+1` sign.
+fn _canon_orientation(pair: (u32, u32), ascending: bool) -> ((u32, u32), bool) {
+    let (left, right) = pair;
+    if left == right {
+        return (pair, false);
+    }
+    let wanted = if ascending {
+        (left.min(right), left.max(right))
+    } else {
+        (left.max(right), left.min(right))
+    };
+    (wanted, wanted != pair)
+}
 
-    let mut stack = vec![(term_view.to_vec(), term_view.coeff)];
-    while let Some((mut term, coeff)) = stack.pop() {
-        let mut parity = false;
-        for i in 1..term.len() {
-            // shift the operator at index i to the left until it's in the correct location
-            for j in (1..=i).rev() {
-                let (right_1, right_2) = term[j];
-                let (left_1, left_2) = term[j - 1];
+/// Sorts `term` into normal order in place, returning whether the reordering picked up a sign.
+///
+/// This only ever *permutes* factors; contraction is handled separately by [`_reduce_once`].
+fn _sort_term(term: &mut [(u32, u32)]) -> bool {
+    let mut parity = false;
+    for i in 1..term.len() {
+        // shift the operator at index i to the left until it's in the correct location
+        for j in (1..=i).rev() {
+            let (right_1, right_2) = term[j];
+            let (left_1, left_2) = term[j - 1];
 
-                let left_is_vertex_op = left_1 == left_2;
-                let right_is_vertex_op = right_1 == right_2;
+            let left_is_vertex_op = left_1 == left_2;
+            let right_is_vertex_op = right_1 == right_2;
 
-                match (left_is_vertex_op, right_is_vertex_op) {
-                    (true, false) => {
-                        // vertex op is left of edge op -> nothing to do
-                    }
-                    (true, true) => {
-                        // two vertex ops; must check their indices
-                        if left_1 > right_1 {
-                            // -> this is a commuting operation
-                            term.swap(j - 1, j);
-                        }
-                    }
-                    (false, true) => {
-                        // vertex op is right of edge op -> must _always_ swap
+            match (left_is_vertex_op, right_is_vertex_op) {
+                (true, false) => {
+                    // vertex op is left of edge op -> nothing to do
+                }
+                (true, true) => {
+                    // two vertex ops; must check their indices
+                    if left_1 > right_1 {
+                        // -> this is a commuting operation
                         term.swap(j - 1, j);
-                        // parity depends on whether the operator supports overlap
-                        if left_1 == right_1 || left_2 == right_1 {
-                            // -> anti-commuting operation when they do not!
-                            parity = !parity;
-                        }
                     }
-                    (false, false) => {
-                        // two edge ops
-                        // whether we swap depends on the actual indices:
-                        if left_1 > right_1 || (left_1 == right_1 && left_2 > right_2) {
-                            term.swap(j - 1, j);
-                            // Two edge operators anticommute iff they share *exactly one* mode:
-                            // `{E_jk, E_kl} = 0`. Sharing *both* modes is the commuting case, since
-                            // `E_jk` and `E_kj = -E_jk` are collinear and every operator commutes
-                            // with itself. Disjoint supports commute too.
-                            let overlap = HashSet::from([left_1, left_2])
-                                .intersection(&HashSet::from([right_1, right_2]))
-                                .count();
-                            if overlap == 1 {
-                                parity = !parity;
-                            }
+                }
+                (false, true) => {
+                    // vertex op is right of edge op -> must _always_ swap
+                    term.swap(j - 1, j);
+                    // parity depends on whether the operator supports overlap
+                    if left_1 == right_1 || left_2 == right_1 {
+                        // -> anti-commuting operation when they do not!
+                        parity = !parity;
+                    }
+                }
+                (false, false) => {
+                    // two edge ops
+                    // whether we swap depends on the actual indices:
+                    if left_1 > right_1 || (left_1 == right_1 && left_2 > right_2) {
+                        term.swap(j - 1, j);
+                        // Two edge operators anticommute iff they share *exactly one* mode:
+                        // `{E_jk, E_kl} = 0`. Sharing *both* modes is the commuting case, since
+                        // `E_jk` and `E_kj = -E_jk` are collinear and every operator commutes
+                        // with itself. Disjoint supports commute too.
+                        let overlap = HashSet::from([left_1, left_2])
+                            .intersection(&HashSet::from([right_1, right_2]))
+                            .count();
+                        if overlap == 1 {
+                            parity = !parity;
                         }
                     }
                 }
             }
         }
-        let signed_coeff = if parity { -coeff } else { coeff };
-        coeffs.push(signed_coeff);
-        term.iter().for_each(|&(&a, &i)| {
+    }
+    parity
+}
+
+/// Applies a single contraction to the first reducible adjacent pair in `term`, if any.
+///
+/// Returns the scalar factor that must be multiplied into the term's coefficient, or `None` when
+/// no rule applies. The rules, all of which strictly shorten the term:
+///
+/// - `V_j V_j = 1`, `E_jk E_jk = 1` (identical factors square to the identity),
+/// - `E_jk E_kj = -1` (anti-parallel edge operators),
+/// - `E_ab E_bc = -i E_ac` for distinct `a`, `b`, `c` (*fusion*: two edge operators sharing exactly
+///   one mode collapse into a single one).
+///
+/// Together with `E_kj = -E_jk` the fusion rule generates every product of two edge operators that
+/// share exactly one mode, so no further cases are needed.
+fn _reduce_once(term: &mut Vec<(u32, u32)>, ascending: bool) -> Option<Complex64> {
+    for j in 0..term.len().saturating_sub(1) {
+        let (a, b) = term[j];
+        let (c, d) = term[j + 1];
+
+        // Identical support: contracts to a scalar and both factors disappear.
+        if (a == c && b == d) || (a == d && b == c) {
+            // `E_jk E_jk = +1` (and `V_j V_j = 1`), whereas `E_jk E_kj = -1`.
+            let sign = if a == c && b == d { 1.0 } else { -1.0 };
+            term.drain(j..=j + 1);
+            return Some(Complex64::new(sign, 0.0));
+        }
+
+        // Vertex operators only contract against themselves, which the branch above covers.
+        if a == b || c == d {
+            continue;
+        }
+
+        // Exactly one shared mode: fuse into a single edge operator.
+        let shared = HashSet::from([a, b])
+            .intersection(&HashSet::from([c, d]))
+            .count();
+        if shared != 1 {
+            continue;
+        }
+
+        // Rewrite both factors into the `E_xy E_yz` shape that the fusion rule is stated for,
+        // tracking the sign each orientation flip contributes.
+        let mut parity = false;
+        let (mut a, mut b) = (a, b);
+        let (mut c, mut d) = (c, d);
+        if b != c {
+            if a == c {
+                (a, b) = (b, a);
+                parity = !parity;
+            } else if b == d {
+                (c, d) = (d, c);
+                parity = !parity;
+            } else {
+                // a == d: both need flipping
+                (a, b) = (b, a);
+                (c, d) = (d, c);
+            }
+        }
+        debug_assert_eq!(
+            b, c,
+            "fusion requires the shared mode in the inner position"
+        );
+
+        // `E_ab E_bc = -i E_ac`, then re-canonicalize the surviving operator's orientation.
+        let (fused, flipped) = _canon_orientation((a, d), ascending);
+        if flipped {
+            parity = !parity;
+        }
+        term[j] = fused;
+        term.remove(j + 1);
+
+        let factor = Complex64::new(0.0, -1.0);
+        return Some(if parity { -factor } else { factor });
+    }
+    None
+}
+
+fn _normal_ordered_term(
+    term_view: EdgeVertexOperatorTermView,
+    ascending: bool,
+    reduce: bool,
+) -> EdgeVertexOperator {
+    let mut coeffs = vec![];
+    let mut left_indices = vec![];
+    let mut right_indices = vec![];
+    let mut boundaries = vec![0];
+
+    let mut stack = vec![(term_view.into_vec(), term_view.coeff)];
+    while let Some((mut term, coeff)) = stack.pop() {
+        let mut coeff = coeff;
+
+        if reduce {
+            // Canonicalize orientations up front so the contraction rules can match on indices
+            // without worrying about which of `E_jk`/`E_kj` happens to be stored.
+            for factor in term.iter_mut() {
+                let (canon, flipped) = _canon_orientation(*factor, ascending);
+                *factor = canon;
+                if flipped {
+                    coeff = -coeff;
+                }
+            }
+        }
+
+        // Reorder, then contract, then reorder again: a contraction can bring two factors next to
+        // each other that were not adjacent before (and fusion introduces a brand-new operator),
+        // so this has to run to a fixed point. Every contraction removes at least one factor, so
+        // the loop terminates after at most `term.len()` iterations.
+        loop {
+            if _sort_term(&mut term) {
+                coeff = -coeff;
+            }
+            if !reduce {
+                break;
+            }
+            match _reduce_once(&mut term, ascending) {
+                Some(factor) => coeff *= factor,
+                None => break,
+            }
+        }
+
+        coeffs.push(coeff);
+        term.iter().for_each(|&(a, i)| {
             left_indices.push(a);
             right_indices.push(i);
         });
@@ -1134,7 +1276,71 @@ mod tests {
             groups: None,
         };
 
-        assert_eq!(op.normal_ordered(), op);
+        assert_eq!(op.normal_ordered(true, false), op);
+    }
+
+    /// Builds a single-term operator from `(left, right)` pairs.
+    fn single_term(actions: &[(u32, u32)], coeff: Complex64) -> EdgeVertexOperator {
+        EdgeVertexOperator {
+            coeffs: vec![coeff],
+            left_indices: actions.iter().map(|&(l, _)| l).collect(),
+            right_indices: actions.iter().map(|&(_, r)| r).collect(),
+            boundaries: vec![0, actions.len()],
+            groups: None,
+        }
+    }
+
+    #[test]
+    fn test_normal_ordered_reduce_scalars() {
+        let one = Complex64::new(1.0, 0.0);
+
+        // `V_0 V_0 = 1`
+        let op = single_term(&[(0, 0), (0, 0)], one);
+        assert_eq!(op.normal_ordered(true, true), single_term(&[], one));
+
+        // `E_01 E_01 = 1`
+        let op = single_term(&[(0, 1), (0, 1)], one);
+        assert_eq!(op.normal_ordered(true, true), single_term(&[], one));
+
+        // `E_01 E_10 = -1`
+        let op = single_term(&[(0, 1), (1, 0)], one);
+        assert_eq!(op.normal_ordered(true, true), single_term(&[], -one));
+    }
+
+    #[test]
+    fn test_normal_ordered_reduce_fusion() {
+        let one = Complex64::new(1.0, 0.0);
+        let minus_i = Complex64::new(0.0, -1.0);
+
+        // `E_01 E_12 = -i E_02`
+        let op = single_term(&[(0, 1), (1, 2)], one);
+        assert_eq!(
+            op.normal_ordered(true, true),
+            single_term(&[(0, 2)], minus_i)
+        );
+
+        // The same fusion has to be found when neither factor stores the shared mode in the inner
+        // position, which requires applying `E_kj = -E_jk` first.
+        let op = single_term(&[(1, 0), (2, 1)], one);
+        assert_eq!(
+            op.normal_ordered(true, true),
+            single_term(&[(0, 2)], minus_i)
+        );
+    }
+
+    #[test]
+    fn test_normal_ordered_ascending() {
+        let one = Complex64::new(1.0, 0.0);
+
+        // `E_10 = -E_01`, so the non-selected orientation is rewritten and the sign absorbed.
+        let op = single_term(&[(1, 0)], one);
+        assert_eq!(op.normal_ordered(true, true), single_term(&[(0, 1)], -one));
+        assert_eq!(op.normal_ordered(false, true), single_term(&[(1, 0)], one));
+
+        // Vertex operators have no orientation freedom.
+        let op = single_term(&[(1, 1)], one);
+        assert_eq!(op.normal_ordered(true, true), op);
+        assert_eq!(op.normal_ordered(false, true), op);
     }
 
     #[test]
@@ -1156,7 +1362,7 @@ mod tests {
             groups: None,
         };
 
-        assert_eq!(op.normal_ordered(), expected);
+        assert_eq!(op.normal_ordered(true, false), expected);
     }
 
     #[test]
@@ -1183,7 +1389,7 @@ mod tests {
             groups: None,
         };
 
-        assert_eq!(op.normal_ordered(), expected);
+        assert_eq!(op.normal_ordered(true, false), expected);
     }
 
     /// Two edge operators spanning the *same* pair of modes commute, so reordering them must not
@@ -1212,7 +1418,7 @@ mod tests {
             groups: None,
         };
 
-        assert_eq!(op.normal_ordered(), expected);
+        assert_eq!(op.normal_ordered(true, false), expected);
 
         // Same for two *identical* edge operators, where the sort is a no-op but the parity rule is
         // still consulted.
@@ -1224,7 +1430,7 @@ mod tests {
             groups: None,
         };
 
-        assert_eq!(op.normal_ordered(), op);
+        assert_eq!(op.normal_ordered(true, false), op);
     }
 
     #[test]
@@ -1246,7 +1452,7 @@ mod tests {
             groups: None,
         };
 
-        assert_eq!(op.normal_ordered(), expected);
+        assert_eq!(op.normal_ordered(true, false), expected);
     }
 
     #[test]
@@ -1268,7 +1474,7 @@ mod tests {
             groups: None,
         };
 
-        assert_eq!(op.normal_ordered(), expected);
+        assert_eq!(op.normal_ordered(true, false), expected);
     }
 
     #[test]
@@ -1290,7 +1496,7 @@ mod tests {
             groups: None,
         };
 
-        assert_eq!(op.normal_ordered(), expected);
+        assert_eq!(op.normal_ordered(true, false), expected);
     }
 
     /// Exercises the `atol` boundary of `is_hermitian`.

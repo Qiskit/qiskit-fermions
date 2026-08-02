@@ -203,75 +203,166 @@ impl TransferVertexOperator {
         }
     }
 
-    pub fn normal_ordered(&self) -> Self {
+    /// Returns an equivalent operator with normal-ordered terms.
+    ///
+    /// `reduce` additionally contracts adjacent generators via the identities in [`_reduce_once`].
+    /// Pass `false` to get the reorder-only behaviour.
+    ///
+    /// Note that, unlike [`EdgeVertexOperator::normal_ordered`], there is no orientation
+    /// convention to fix: `T_jk` and `T_kj` are *different* operators rather than two
+    /// representations of one, so there is no analogue of that method's `ascending` argument.
+    pub fn normal_ordered(&self, reduce: bool) -> Self {
         let mut result = Self::zero();
         self.iter()
-            .for_each(|term| result.__iadd__(&_normal_ordered_term(term)));
+            .for_each(|term| result.__iadd__(&_normal_ordered_term(term, reduce)));
         result
     }
 
     pub fn is_hermitian(&self, atol: f64) -> bool {
-        let mut diff = (self.__sub__(&self.adjoint())).normal_ordered();
+        let mut diff = (self.__sub__(&self.adjoint())).normal_ordered(true);
         diff.ichop(atol);
         diff.equiv(&Self::zero(), atol)
     }
 }
 
-fn _normal_ordered_term(term_view: TransferVertexOperatorTermView) -> TransferVertexOperator {
-    let mut coeffs = vec![];
-    let mut left_indices = vec![];
-    let mut right_indices = vec![];
-    let mut boundaries = vec![0];
+/// Sorts `term` into normal order in place, returning whether the reordering picked up a sign.
+///
+/// This only ever *permutes* factors; contraction is handled separately by [`_reduce_once`].
+fn _sort_term(term: &mut [(u32, u32)]) -> bool {
+    let mut parity = false;
+    for i in 1..term.len() {
+        // shift the operator at index i to the left until it's in the correct location
+        for j in (1..=i).rev() {
+            let (right_1, right_2) = term[j];
+            let (left_1, left_2) = term[j - 1];
 
-    let mut stack = vec![(term_view.to_vec(), term_view.coeff)];
-    while let Some((mut term, coeff)) = stack.pop() {
-        let mut parity = false;
-        for i in 1..term.len() {
-            // shift the operator at index i to the left until it's in the correct location
-            for j in (1..=i).rev() {
-                let (right_1, right_2) = term[j];
-                let (left_1, left_2) = term[j - 1];
+            let left_is_vertex_op = left_1 == left_2;
+            let right_is_vertex_op = right_1 == right_2;
 
-                let left_is_vertex_op = left_1 == left_2;
-                let right_is_vertex_op = right_1 == right_2;
-
-                match (left_is_vertex_op, right_is_vertex_op) {
-                    (true, false) => {
-                        // vertex op is left of transfer op -> nothing to do
-                    }
-                    (true, true) => {
-                        // two vertex ops; must check their indices
-                        if left_1 > right_1 {
-                            // -> this is a commuting operation
-                            term.swap(j - 1, j);
-                        }
-                    }
-                    (false, true) => {
-                        // vertex op is right of transfer op -> must _always_ swap
+            match (left_is_vertex_op, right_is_vertex_op) {
+                (true, false) => {
+                    // vertex op is left of transfer op -> nothing to do
+                }
+                (true, true) => {
+                    // two vertex ops; must check their indices
+                    if left_1 > right_1 {
+                        // -> this is a commuting operation
                         term.swap(j - 1, j);
-                        // parity depends on whether the operator supports overlap
-                        if left_1 == right_1 || left_2 == right_1 {
-                            // -> anti-commuting operation when they do not!
-                            parity = !parity;
-                        }
                     }
-                    (false, false) => {
-                        // two transfer ops
-                        // whether we swap depends on the actual indices:
-                        if left_1 > right_1 || (left_1 == right_1 && left_2 > right_2) {
-                            term.swap(j - 1, j);
-                            // swap will commute unless either sided index pairs equal
-                            if left_1 == right_1 || left_2 == right_2 {
-                                parity = !parity;
-                            }
+                }
+                (false, true) => {
+                    // vertex op is right of transfer op -> must _always_ swap
+                    term.swap(j - 1, j);
+                    // parity depends on whether the operator supports overlap
+                    if left_1 == right_1 || left_2 == right_1 {
+                        // -> anti-commuting operation when they do not!
+                        parity = !parity;
+                    }
+                }
+                (false, false) => {
+                    // two transfer ops
+                    // whether we swap depends on the actual indices:
+                    if left_1 > right_1 || (left_1 == right_1 && left_2 > right_2) {
+                        term.swap(j - 1, j);
+                        // swap will commute unless either sided index pairs equal
+                        if left_1 == right_1 || left_2 == right_2 {
+                            parity = !parity;
                         }
                     }
                 }
             }
         }
-        let signed_coeff = if parity { -coeff } else { coeff };
-        coeffs.push(signed_coeff);
-        term.iter().for_each(|&(&a, &i)| {
+    }
+    parity
+}
+
+/// Applies a single contraction to the first reducible adjacent pair in `term`, if any.
+///
+/// Returns the scalar factor that must be multiplied into the term's coefficient, or `None` when
+/// no rule applies. There are exactly two rules:
+///
+/// - `V_j V_j = 1` and `T_jk T_jk = 1/4` — two *identical* adjacent factors contract to a scalar
+///   and both disappear.
+/// - `T_jk T_kj = -1/4 V_j V_k` — two anti-parallel transfer operators turn into a pair of vertex
+///   operators. This keeps the term's length but removes both transfer operators, which is what
+///   makes the surrounding fixed-point loop terminate (see [`_num_transfer_ops`]).
+///
+/// # Why there is no fusion rule
+///
+/// Unlike the edge operators, two transfer operators sharing a single mode never collapse into one.
+/// Writing `T_jk = (i/2) γ_{2j} γ_{2k-1}`, cancelling one shared Majorana always leaves an
+/// (even, odd) Majorana pair drawn from two *different* modes, and no single `T`/`V` generator has
+/// that form. So `T_jk T_jl` can only be rewritten into another length-two product, never
+/// shortened, and rewriting it would not make the form any more canonical.
+fn _reduce_once(term: &mut Vec<(u32, u32)>) -> Option<Complex64> {
+    for j in 0..term.len().saturating_sub(1) {
+        let (a, b) = term[j];
+        let (c, d) = term[j + 1];
+
+        if a == c && b == d {
+            // `V_j V_j = 1`, whereas `T_jk T_jk = 1/4`.
+            let factor = if a == b { 1.0 } else { 0.25 };
+            term.drain(j..=j + 1);
+            return Some(Complex64::new(factor, 0.0));
+        }
+
+        if a == d && b == c && a != b {
+            // `T_jk T_kj = -1/4 V_j V_k`
+            term[j] = (a, a);
+            term[j + 1] = (b, b);
+            return Some(Complex64::new(-0.25, 0.0));
+        }
+    }
+    None
+}
+
+/// Returns the number of transfer (i.e. non-vertex) factors in `term`.
+///
+/// This is the measure that makes the reduction loop well-founded: every rule in [`_reduce_once`]
+/// strictly decreases it, so the loop cannot cycle even though `T_jk T_kj = -1/4 V_j V_k` leaves
+/// the term's length unchanged.
+fn _num_transfer_ops(term: &[(u32, u32)]) -> usize {
+    term.iter().filter(|(a, b)| a != b).count()
+}
+
+fn _normal_ordered_term(
+    term_view: TransferVertexOperatorTermView,
+    reduce: bool,
+) -> TransferVertexOperator {
+    let mut coeffs = vec![];
+    let mut left_indices = vec![];
+    let mut right_indices = vec![];
+    let mut boundaries = vec![0];
+
+    let mut stack = vec![(term_view.into_vec(), term_view.coeff)];
+    while let Some((mut term, coeff)) = stack.pop() {
+        let mut coeff = coeff;
+
+        // Reorder, then contract, then reorder again: a contraction can bring two factors next to
+        // each other that were not adjacent before, so this has to run to a fixed point.
+        loop {
+            if _sort_term(&mut term) {
+                coeff = -coeff;
+            }
+            if !reduce {
+                break;
+            }
+            let before = (_num_transfer_ops(&term), term.len());
+            match _reduce_once(&mut term) {
+                Some(factor) => {
+                    coeff *= factor;
+                    debug_assert!(
+                        (_num_transfer_ops(&term), term.len()) < before,
+                        "every reduction must strictly decrease (transfer ops, length), else this \
+                         loop may not terminate"
+                    );
+                }
+                None => break,
+            }
+        }
+
+        coeffs.push(coeff);
+        term.iter().for_each(|&(a, i)| {
             left_indices.push(a);
             right_indices.push(i);
         });
@@ -1127,7 +1218,52 @@ mod tests {
             groups: None,
         };
 
-        assert_eq!(op.normal_ordered(), op);
+        assert_eq!(op.normal_ordered(false), op);
+    }
+
+    /// Builds a single-term operator from `(left, right)` pairs.
+    fn single_term(actions: &[(u32, u32)], coeff: Complex64) -> TransferVertexOperator {
+        TransferVertexOperator {
+            coeffs: vec![coeff],
+            left_indices: actions.iter().map(|&(l, _)| l).collect(),
+            right_indices: actions.iter().map(|&(_, r)| r).collect(),
+            boundaries: vec![0, actions.len()],
+            groups: None,
+        }
+    }
+
+    #[test]
+    fn test_normal_ordered_reduce() {
+        let one = Complex64::new(1.0, 0.0);
+
+        // `V_0 V_0 = 1`
+        let op = single_term(&[(0, 0), (0, 0)], one);
+        assert_eq!(op.normal_ordered(true), single_term(&[], one));
+
+        // `T_01 T_01 = 1/4`
+        let op = single_term(&[(0, 1), (0, 1)], Complex64::new(4.0, 0.0));
+        assert_eq!(op.normal_ordered(true), single_term(&[], one));
+
+        // `T_01 T_10 = -1/4 V_0 V_1`
+        let op = single_term(&[(0, 1), (1, 0)], Complex64::new(4.0, 0.0));
+        assert_eq!(
+            op.normal_ordered(true),
+            single_term(&[(0, 0), (1, 1)], -one)
+        );
+    }
+
+    #[test]
+    fn test_normal_ordered_no_fusion() {
+        // Two transfer operators sharing a single mode cannot collapse into one, unlike two edge
+        // operators. Reducing must leave the length alone rather than invent a shorter form.
+        let op = single_term(&[(0, 1), (0, 2)], Complex64::new(1.0, 0.0));
+        let reduced = op.normal_ordered(true);
+        assert!(
+            reduced
+                .boundaries
+                .windows(2)
+                .all(|pair| pair[1] - pair[0] == 2)
+        );
     }
 
     #[test]
@@ -1149,7 +1285,7 @@ mod tests {
             groups: None,
         };
 
-        assert_eq!(op.normal_ordered(), expected);
+        assert_eq!(op.normal_ordered(false), expected);
     }
 
     #[test]
@@ -1171,7 +1307,7 @@ mod tests {
             groups: None,
         };
 
-        assert_eq!(op.normal_ordered(), expected);
+        assert_eq!(op.normal_ordered(false), expected);
     }
 
     #[test]
@@ -1193,7 +1329,7 @@ mod tests {
             groups: None,
         };
 
-        assert_eq!(op.normal_ordered(), expected);
+        assert_eq!(op.normal_ordered(false), expected);
     }
 
     #[test]
@@ -1215,7 +1351,7 @@ mod tests {
             groups: None,
         };
 
-        assert_eq!(op.normal_ordered(), expected);
+        assert_eq!(op.normal_ordered(false), expected);
     }
 
     #[test]
@@ -1237,7 +1373,7 @@ mod tests {
             groups: None,
         };
 
-        assert_eq!(op.normal_ordered(), expected);
+        assert_eq!(op.normal_ordered(false), expected);
     }
 
     #[test]
@@ -1259,7 +1395,7 @@ mod tests {
             groups: None,
         };
 
-        assert_eq!(op.normal_ordered(), expected);
+        assert_eq!(op.normal_ordered(false), expected);
     }
 
     #[test]
@@ -1281,7 +1417,7 @@ mod tests {
             groups: None,
         };
 
-        assert_eq!(op.normal_ordered(), expected);
+        assert_eq!(op.normal_ordered(false), expected);
     }
 
     /// Exercises the `atol` boundary of `is_hermitian`.

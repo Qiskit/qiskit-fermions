@@ -883,7 +883,7 @@ class EdgeVertexOperator:
             other: the other operator to compare with.
             atol: the absolute tolerance for the comparison. This value defaults to ``1e-8``.
         """
-    def normal_ordered(self) -> EdgeVertexOperator:
+    def normal_ordered(self, ascending: builtins.bool = True, reduce: builtins.bool = True) -> EdgeVertexOperator:
         r"""
         Returns an equivalent operator with normal ordered terms.
         
@@ -900,8 +900,18 @@ class EdgeVertexOperator:
         
             >>> from qiskit_fermions.operators import EdgeVertexOperator
             >>> op = EdgeVertexOperator.from_dict({((0, 1), (1, 0), (1, 2), (0, 0), (2, 2)): 1})
-            >>> print(format(op.normal_ordered().simplify()))
+            >>> print(format(op.normal_ordered(reduce=False).simplify()))
              -1.000000e0 -0.000000e0j * (V(0) V(2) E(0,1) E(1,0) E(1,2))
+            >>> print(format(op.normal_ordered().simplify()))
+              1.000000e0 +0.000000e0j * (V(0) V(2) E(1,2))
+        
+        Args:
+            ascending: the orientation convention for edge operators. Since :math:`E_{kj} =
+                -E_{jk}`, every edge operator has two representations; ``True`` selects :math:`j <
+                k` and ``False`` selects :math:`j > k`, absorbing the sign into the coefficient.
+                Vertex operators are unaffected. This value defaults to ``True``.
+            reduce: whether to contract adjacent generators that combine into a scalar or into a
+                single generator. See the example above. This value defaults to ``True``.
         
         Returns:
             An equivalent but normal-ordered operator.
@@ -911,15 +921,12 @@ class EdgeVertexOperator:
         Returns whether this operator is Hermitian.
         
         .. note::
-           This check is implemented using :meth:`.equiv` on the :meth:`.normal_ordered` difference
-           of ``self`` and its :meth:`.adjoint` and :meth:`.zero`.
-        
-        .. note::
-           This check is *conservative*: it can return ``False`` for an operator that is in fact
-           Hermitian. :meth:`.normal_ordered` does not contract repeated generators into scalars
-           (for example :math:`V_j V_j = 1` and :math:`E_{jk} E_{kj} = -1`), so a term that would
-           only cancel against its adjoint *after* such a contraction is not recognized as zero.
-           A ``True`` result is always reliable.
+           This check is implemented using :meth:`.equiv` on the fully reduced
+           :meth:`.normal_ordered` difference of ``self`` and its :meth:`.adjoint` and
+           :meth:`.zero`. Because that normal form contracts every reducible pair of adjacent
+           generators — including *fusing* two edge operators that share a single mode via
+           :math:`E_{ab} E_{bc} = -i E_{ac}` — a term that only cancels against its adjoint after
+           such a contraction is still recognized as zero.
         
         Args:
             atol: The numerical accuracy upto which coefficients are considered equal. This value

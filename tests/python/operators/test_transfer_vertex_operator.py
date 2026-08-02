@@ -10,12 +10,15 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
+import itertools
 import pickle
 
 import numpy as np
 import pytest
 from qiskit_fermions.operators import TransferVertexOperator
 from qiskit_fermions.operators.library import anti_commutator, commutator
+
+from .majorana_matrix_oracle import operator_matrix, transfer_matrix
 
 
 class TestTransferVertexOperator:
@@ -347,6 +350,22 @@ class TestTransferVertexOperator:
         with subtests.test("symmetrized product is Hermitian"):
             assert (op + op.adjoint()).is_hermitian()
 
+        with subtests.test("conservative for shared-mode transfer products"):
+            # A documented limitation rather than a bug: this operator *is* Hermitian, but the two
+            # terms of `op - op.adjoint()` reduce to `T(1,0) T(1,2)` and `T(0,1) T(2,1)`, which
+            # share a single mode. Such products can only be rewritten into another length-two form,
+            # never shortened, so `normal_ordered` leaves them alone and the cancellation is missed.
+            # `EdgeVertexOperator` has no such gap because there the analogous product fuses.
+            op = cls.from_dict(
+                {
+                    ((1, 0), (1, 2), (0, 0)): -0.3 - 1.3j,
+                    ((2, 1), (2, 2), (0, 1)): 0.5 + 1.3j,
+                }
+            )
+            matrix = operator_matrix(op, 3, transfer_matrix)
+            assert np.allclose(matrix, matrix.conj().T), "test premise: op must be Hermitian"
+            assert not op.is_hermitian()
+
     def test_equiv(self):
         cls = self.get_class()
         op = cls.from_dict({(): 1e-7})
@@ -358,14 +377,83 @@ class TestTransferVertexOperator:
     def test_normal_ordered(self, subtests):
         cls = self.get_class()
 
+        # These cases pin the pure *reordering* behaviour, so they opt out of the contraction that
+        # `reduce=True` (the default) would additionally apply. See `test_normal_ordered_reduce`.
         with subtests.test("no change"):
             op = cls.from_dict({((0, 0), (1, 1), (1, 1), (0, 1)): 1})
-            assert op.normal_ordered().equiv(op)
+            assert op.normal_ordered(reduce=False).equiv(op)
 
         with subtests.test("ordering of vertex and edge operators"):
             op = cls.from_dict({((0, 1), (1, 0), (1, 2), (0, 0), (2, 2)): 1})
             expected = cls.from_dict({((0, 0), (2, 2), (0, 1), (1, 0), (1, 2)): -1})
-            assert op.normal_ordered().equiv(expected)
+            assert op.normal_ordered(reduce=False).equiv(expected)
+
+    def test_normal_ordered_reduce(self, subtests):
+        cls = self.get_class()
+
+        with subtests.test("V_j V_j = 1"):
+            op = cls.from_dict({((0, 0), (0, 0)): 2 + 1j})
+            assert op.normal_ordered().equiv(cls.from_dict({(): 2 + 1j}))
+
+        with subtests.test("T_jk T_jk = 1/4"):
+            op = cls.from_dict({((0, 1), (0, 1)): 4})
+            assert op.normal_ordered().equiv(cls.from_dict({(): 1}))
+
+        with subtests.test("T_jk T_kj = -1/4 V_j V_k"):
+            op = cls.from_dict({((0, 1), (1, 0)): 4})
+            assert op.normal_ordered().equiv(cls.from_dict({((0, 0), (1, 1)): -1}))
+
+        with subtests.test("transfer operators sharing one mode do not fuse"):
+            # Unlike two edge operators, `T_{0,1} T_{0,2}` cannot collapse into a single generator:
+            # cancelling the shared Majorana leaves an (even, odd) pair from two different modes.
+            # So this term keeps its length, and reducing must not invent a shorter form.
+            op = cls.from_dict({((0, 1), (0, 2)): 1})
+            reduced = op.normal_ordered()
+            assert all(len(actions) == 2 for actions, _ in reduced.iter_terms())
+
+    @pytest.mark.parametrize("length", [2, 3])
+    @pytest.mark.parametrize("reduce", [False, True])
+    def test_normal_ordered_preserves_matrix(self, length, reduce):
+        """Asserts ``normal_ordered`` never changes the operator it represents.
+
+        Reordering and contracting generators is only sound if every swap and every contraction
+        carries the right sign, and a sign error is invisible to a test that compares against a
+        hand-written expectation derived from the same (possibly wrong) rule. So this compares
+        against dense matrices built straight from the Majorana definitions instead, exhaustively
+        over every term of the given length.
+        """
+        cls = self.get_class()
+        num_modes = 3
+        generators = [(a, b) for a in range(num_modes) for b in range(num_modes)]
+
+        for actions in itertools.product(generators, repeat=length):
+            op = cls.from_dict({tuple(actions): 1 - 0.5j})
+            reordered = op.normal_ordered(reduce=reduce)
+            expected = operator_matrix(op, num_modes, transfer_matrix)
+            actual = operator_matrix(reordered, num_modes, transfer_matrix)
+            assert np.allclose(actual, expected), f"normal_ordered changed the operator {actions}"
+
+    @pytest.mark.parametrize("length", [2, 3])
+    def test_normal_ordered_is_fully_reduced(self, length):
+        """Asserts no contractible pair of adjacent generators survives ``normal_ordered``.
+
+        Only identical and anti-parallel pairs are contractible here; transfer operators sharing a
+        single mode are deliberately left alone (see :meth:`is_hermitian`).
+        """
+        cls = self.get_class()
+        num_modes = 3
+        generators = [(a, b) for a in range(num_modes) for b in range(num_modes)]
+
+        def reducible(actions) -> bool:
+            return any(
+                left == right or (left == (right[1], right[0]) and left[0] != left[1])
+                for left, right in itertools.pairwise(actions)
+            )
+
+        for actions in itertools.product(generators, repeat=length):
+            reduced = cls.from_dict({tuple(actions): 1}).normal_ordered()
+            for remaining, _ in reduced.iter_terms():
+                assert not reducible(tuple(remaining)), f"{actions} left {remaining} unreduced"
 
     def test_commutator(self, subtests):
         cls = self.get_class()
