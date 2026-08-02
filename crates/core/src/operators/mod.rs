@@ -54,6 +54,32 @@ pub trait OperatorTrait {
     fn __imatmul__(&mut self, other: &Self);
     fn ichop(&mut self, atol: f64);
 
+    /// Subtracts `other` from `self` in place.
+    ///
+    /// Implemented per operator type rather than as `__iadd__(&other.__neg__())` because
+    /// [`__neg__`](OperatorMacro::__neg__) deep-copies *all* of `other`'s buffers - index data
+    /// included - only to scale its coefficients, which `__iadd__` then copies a second time.
+    /// Appending `other`'s terms while negating just the newly appended coefficients does the same
+    /// work in one pass and with no temporary.
+    fn __isub__(&mut self, other: &Self);
+
+    /// Returns the composition `self & other`, i.e. with `other` applied first.
+    ///
+    /// This exists as its own method rather than being expressed as a clone followed by
+    /// [`__iand__`](Self::__iand__) because composing rebuilds every buffer from scratch: cloning
+    /// first would allocate and copy buffers that are immediately overwritten and dropped unread.
+    ///
+    /// The composition of two operators tracks no groups, matching `__iand__`.
+    fn composed(&self, other: &Self) -> Self;
+
+    /// Returns the composition `self @ other`, i.e. with `self` applied first.
+    ///
+    /// The counterpart of [`composed`](Self::composed) carrying the operand order of
+    /// [`__imatmul__`](Self::__imatmul__). Both orders are spelled out once per operator type,
+    /// next to the in-place operation each mirrors, rather than being derived from one another by
+    /// swapping arguments at the call site.
+    fn matmul(&self, other: &Self) -> Self;
+
     /// The borrowed view of a single term yielded by [`OperatorTrait::iter`].
     type TermView<'a>: PartialEq + TermSortKey
     where
@@ -186,7 +212,6 @@ pub trait OperatorMacro {
     fn __pow__(&self, exponent: usize) -> Self;
 
     // more in-place operations
-    fn __isub__(&mut self, other: &Self);
     fn __idiv__(&mut self, other: Complex64);
 }
 
@@ -207,16 +232,12 @@ macro_rules! impl_operator_macro {
             where
                 Self: OperatorTrait,
             {
+                // Unlike the composing operations below, this clone is load-bearing: `__isub__`
+                // appends to the existing buffers, so the result genuinely starts out as a copy of
+                // `self`.
                 let mut result = self.clone();
-                result.__iadd__(&other.__neg__());
+                result.__isub__(other);
                 result
-            }
-
-            fn __isub__(&mut self, other: &Self)
-            where
-                Self: OperatorTrait,
-            {
-                self.__iadd__(&other.__neg__());
             }
 
             fn __mul__(&self, other: Complex64) -> Self
@@ -255,18 +276,16 @@ macro_rules! impl_operator_macro {
             where
                 Self: OperatorTrait,
             {
-                let mut result = self.clone();
-                result.__iand__(other);
-                result
+                // Composing reads both operands through borrowed term views and returns freshly
+                // built buffers, so there is nothing a clone of `self` could contribute here.
+                self.composed(other)
             }
 
             fn __matmul__(&self, other: &Self) -> Self
             where
                 Self: OperatorTrait,
             {
-                let mut result = self.clone();
-                result.__imatmul__(other);
-                result
+                self.matmul(other)
             }
 
             fn __pow__(&self, exponent: usize) -> Self
