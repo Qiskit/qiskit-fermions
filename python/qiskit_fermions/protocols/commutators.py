@@ -33,8 +33,8 @@ class SupportsCommutators(Protocol):
         >>> ann_0 = FermionOperator.from_dict({((False, 0),): 1.0})
         >>> comm = FermionOperator._commutator_(cre_0, ann_0)
         >>> print(format(comm.normal_ordered().simplify()))
-          1.000000e0 +0.000000e0j * ()
-         -2.000000e0 +0.000000e0j * (+0 -0)
+         -1.000000e0 +0.000000e0j * ()
+          2.000000e0 +0.000000e0j * (+0 -0)
     """
 
     @staticmethod

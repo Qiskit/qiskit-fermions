@@ -92,7 +92,9 @@ def anti_commutator(op_a: T, op_b: T) -> T:
 def double_commutator(op_a: T, op_b: T, op_c: T, sign: bool) -> T:
     r"""Computes the double-commutator of three operators.
 
-    The double-commutator is defined as follows (see also Equation (13.6.18) in [1]_):
+    The double-commutator is defined as follows (see also Chapter 13.6, *Equation of motion
+    methods*, page 479 of [1]_; the ``sign=False`` case is the symmetric double commutator
+    :math:`[A, B, C]` appearing in Equation (2) of [2]_):
 
     If ``sign`` is ``False``, it returns
 
@@ -112,7 +114,7 @@ def double_commutator(op_a: T, op_b: T, op_c: T, sign: bool) -> T:
     .. doctest::
 
        >>> from qiskit_fermions.operators import FermionOperator
-       >>> from qiskit_fermions.operators.library import anti_commutator
+       >>> from qiskit_fermions.operators.library import double_commutator
        >>> op1 = FermionOperator.from_dict({((True, 0), (False, 0)): 1})
        >>> op2 = FermionOperator.from_dict({((False, 0), (True, 0)): 2})
        >>> op3 = FermionOperator.from_dict(
@@ -125,6 +127,10 @@ def double_commutator(op_a: T, op_b: T, op_c: T, sign: bool) -> T:
 
     .. [1] R. McWeeny. Methods of Molecular Quantum Mechanics.
            2nd Edition, Academic Press, 1992. ISBN 0-12-486552-6.
+
+    .. [2] P. J. Ollitrault, A. Miessen, I. Tavernelli. Molecular Quantum Dynamics: A Quantum
+           Computing Perspective. Acc. Chem. Res. 54, 4229-4238 (2021).
+           https://doi.org/10.1021/acs.accounts.1c00514
 
     Args:
         op_a: the operator :math:`A` above.
