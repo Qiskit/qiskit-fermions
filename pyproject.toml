@@ -58,7 +58,7 @@ build = [
     "qiskit>=2.5",
 ]
 style = [
-    "ruff==0.16.0",
+    "ruff==0.16.1",
     "typos>=1.20.0",
 ]
 lint = [
