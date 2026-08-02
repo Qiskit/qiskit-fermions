@@ -38,7 +38,7 @@ impl FermionOperatorTermView<'_> {
     }
 
     pub fn into_vec(&'_ self) -> Vec<(bool, u32)> {
-        zip(self.actions.to_vec(), self.modes.to_vec()).collect()
+        zip(self.actions.iter().copied(), self.modes.iter().copied()).collect()
     }
 }
 
@@ -69,7 +69,7 @@ impl FermionOperatorGroupTermView<'_> {
     }
 
     pub fn into_vec(&'_ self) -> Vec<(bool, u32)> {
-        zip(self.actions.to_vec(), self.modes.to_vec()).collect()
+        zip(self.actions.iter().copied(), self.modes.iter().copied()).collect()
     }
 }
 
@@ -450,7 +450,7 @@ impl OperatorTrait for FermionOperator {
             coeffs,
             actions,
             modes,
-            boundaries: self.boundaries.to_vec(),
+            boundaries: self.boundaries.clone(),
             groups: self.groups.clone(),
         }
     }
@@ -601,26 +601,35 @@ impl OperatorTrait for FermionOperator {
     }
 
     fn get_support(&self) -> HashSet<u32> {
-        HashSet::from_iter(self.modes.clone())
+        self.modes.iter().copied().collect()
     }
 
     fn relabel_modes(&self, permutation: Vec<u32>) -> Result<Self, CoherenceError> {
         if permutation.iter().collect::<HashSet<_>>().len() != permutation.len() {
             return Err(CoherenceError::DuplicateIndices);
         }
-        let mut out = self.clone();
-        let new_modes: Result<Vec<u32>, CoherenceError> = self
+        // The relabelled modes are computed before anything is copied, so that the error path does
+        // not first clone the entire operator only to discard it.
+        let modes: Vec<u32> = self
             .modes
             .iter()
             .map(|&idx| {
                 permutation
                     .get(idx as usize)
-                    .cloned()
+                    .copied()
                     .ok_or(CoherenceError::IndexMapTooSmall)
             })
-            .collect();
-        out.modes = new_modes?;
-        Ok(out)
+            .collect::<Result<_, _>>()?;
+        Ok(Self {
+            coeffs: self.coeffs.clone(),
+            actions: self.actions.clone(),
+            modes,
+            boundaries: self.boundaries.clone(),
+            // Relabelling permutes mode indices without reordering, splitting or merging terms, so
+            // any grouping of those terms carries over unchanged. This is the one operation that
+            // preserves `groups` rather than dropping it.
+            groups: self.groups.clone(),
+        })
     }
 }
 
@@ -1730,5 +1739,29 @@ mod tests {
 
         assert_eq!(op1, op1_before);
         assert_eq!(op2, op2_before);
+    }
+
+    #[test]
+    fn test_relabel_modes_preserves_groups() {
+        let op = FermionOperator {
+            coeffs: vec![Complex64::new(1.0, 0.0), Complex64::new(2.0, 0.0)],
+            actions: vec![true, false, true, false],
+            modes: vec![0, 1, 2, 3],
+            boundaries: vec![0, 2, 4],
+            groups: Some(vec![0, 1]),
+        };
+
+        let relabeled = op.relabel_modes(vec![3, 2, 1, 0]).unwrap();
+
+        assert_eq!(
+            relabeled,
+            FermionOperator {
+                coeffs: vec![Complex64::new(1.0, 0.0), Complex64::new(2.0, 0.0)],
+                actions: vec![true, false, true, false],
+                modes: vec![3, 2, 1, 0],
+                boundaries: vec![0, 2, 4],
+                groups: Some(vec![0, 1]),
+            }
+        );
     }
 }

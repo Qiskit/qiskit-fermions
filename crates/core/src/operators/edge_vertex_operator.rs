@@ -37,7 +37,11 @@ impl EdgeVertexOperatorTermView<'_> {
     }
 
     pub fn into_vec(&'_ self) -> Vec<(u32, u32)> {
-        zip(self.left_indices.to_vec(), self.right_indices.to_vec()).collect()
+        zip(
+            self.left_indices.iter().copied(),
+            self.right_indices.iter().copied(),
+        )
+        .collect()
     }
 }
 
@@ -68,7 +72,11 @@ impl EdgeVertexOperatorGroupTermView<'_> {
     }
 
     pub fn into_vec(&'_ self) -> Vec<(u32, u32)> {
-        zip(self.left_indices.to_vec(), self.right_indices.to_vec()).collect()
+        zip(
+            self.left_indices.iter().copied(),
+            self.right_indices.iter().copied(),
+        )
+        .collect()
     }
 }
 
@@ -522,39 +530,45 @@ impl OperatorTrait for EdgeVertexOperator {
     }
 
     fn get_support(&self) -> HashSet<u32> {
-        let support_left: HashSet<u32> = HashSet::from_iter(self.left_indices.clone());
-        let support_right: HashSet<u32> = HashSet::from_iter(self.right_indices.clone());
-        support_left.union(&support_right).copied().collect()
+        // Both index buffers feed a single set, rather than each building its own set to be unioned
+        // afterwards: the union of two sets of mode indices is the set of all of them.
+        self.left_indices
+            .iter()
+            .chain(&self.right_indices)
+            .copied()
+            .collect()
     }
 
     fn relabel_modes(&self, permutation: Vec<u32>) -> Result<Self, CoherenceError> {
         if permutation.iter().collect::<HashSet<_>>().len() != permutation.len() {
             return Err(CoherenceError::DuplicateIndices);
         }
-        let mut out = self.clone();
-        let new_left: Result<Vec<u32>, CoherenceError> = self
-            .left_indices
-            .iter()
-            .map(|&idx| {
-                permutation
-                    .get(idx as usize)
-                    .cloned()
-                    .ok_or(CoherenceError::IndexMapTooSmall)
-            })
-            .collect();
-        out.left_indices = new_left?;
-        let new_right: Result<Vec<u32>, CoherenceError> = self
-            .right_indices
-            .iter()
-            .map(|&idx| {
-                permutation
-                    .get(idx as usize)
-                    .cloned()
-                    .ok_or(CoherenceError::IndexMapTooSmall)
-            })
-            .collect();
-        out.right_indices = new_right?;
-        Ok(out)
+        let relabel = |indices: &[u32]| -> Result<Vec<u32>, CoherenceError> {
+            indices
+                .iter()
+                .map(|&idx| {
+                    permutation
+                        .get(idx as usize)
+                        .copied()
+                        .ok_or(CoherenceError::IndexMapTooSmall)
+                })
+                .collect()
+        };
+        // Both index buffers are relabelled before anything is copied, so that the error path does
+        // not first clone the entire operator only to discard it. The left buffer is still mapped
+        // first, keeping the error it reports ahead of the right buffer's.
+        let left_indices = relabel(&self.left_indices)?;
+        let right_indices = relabel(&self.right_indices)?;
+        Ok(Self {
+            coeffs: self.coeffs.clone(),
+            left_indices,
+            right_indices,
+            boundaries: self.boundaries.clone(),
+            // Relabelling permutes mode indices without reordering, splitting or merging terms, so
+            // any grouping of those terms carries over unchanged. This is the one operation that
+            // preserves `groups` rather than dropping it.
+            groups: self.groups.clone(),
+        })
     }
 }
 
@@ -1611,5 +1625,65 @@ mod tests {
 
         assert_eq!(op1, op1_before);
         assert_eq!(op2, op2_before);
+    }
+
+    /// The support of both index buffers, where the two only partially overlap.
+    ///
+    /// A single set now collects both buffers instead of unioning a set per buffer; overlapping but
+    /// unequal sides are what distinguishes that from taking only one side, or their intersection.
+    #[test]
+    fn test_get_support_overlapping_sides() {
+        let op = EdgeVertexOperator {
+            coeffs: vec![Complex64::new(1.0, 0.0), Complex64::new(1.0, 0.0)],
+            left_indices: vec![0, 2, 4],
+            right_indices: vec![2, 4, 7],
+            boundaries: vec![0, 2, 3],
+            groups: None,
+        };
+
+        assert_eq!(op.get_support(), HashSet::from([0, 2, 4, 7]));
+    }
+
+    /// A right-side index outside the permutation must still be reported.
+    ///
+    /// Both buffers are relabelled through one closure now, so the right side needs its own case to
+    /// show it is mapped at all rather than copied through.
+    #[test]
+    fn test_relabel_modes_index_too_small_err_from_right() {
+        let op = EdgeVertexOperator {
+            coeffs: vec![Complex64::new(1.0, 0.0)],
+            left_indices: vec![0],
+            right_indices: vec![3],
+            boundaries: vec![0, 1],
+            groups: None,
+        };
+
+        let relabeled = op.relabel_modes(vec![1, 0, 2]);
+
+        assert!(matches!(relabeled, Err(CoherenceError::IndexMapTooSmall)));
+    }
+
+    #[test]
+    fn test_relabel_modes_preserves_groups() {
+        let op = EdgeVertexOperator {
+            coeffs: vec![Complex64::new(1.0, 0.0), Complex64::new(2.0, 0.0)],
+            left_indices: vec![0, 2],
+            right_indices: vec![1, 3],
+            boundaries: vec![0, 1, 2],
+            groups: Some(vec![0, 1]),
+        };
+
+        let relabeled = op.relabel_modes(vec![3, 2, 1, 0]).unwrap();
+
+        assert_eq!(
+            relabeled,
+            EdgeVertexOperator {
+                coeffs: vec![Complex64::new(1.0, 0.0), Complex64::new(2.0, 0.0)],
+                left_indices: vec![3, 1],
+                right_indices: vec![2, 0],
+                boundaries: vec![0, 1, 2],
+                groups: Some(vec![0, 1]),
+            }
+        );
     }
 }
