@@ -392,7 +392,7 @@ impl OperatorTrait for TransferVertexOperator {
         self.iter()
             .filter(|term| term.coeff.abs() > atol)
             .for_each(|term| {
-                coeffs.push(term.coeff.conj());
+                coeffs.push(term.coeff);
                 left_indices.extend_from_slice(term.left_indices);
                 right_indices.extend_from_slice(term.right_indices);
                 boundaries.push(right_indices.len());
@@ -947,6 +947,33 @@ mod tests {
         };
 
         assert_eq!(op, expected2);
+    }
+
+    #[test]
+    fn test_ichop_preserves_complex_coeffs() {
+        let mut op = TransferVertexOperator {
+            coeffs: vec![
+                Complex64::new(1.0, 2.0),
+                Complex64::new(0.0, -3.0),
+                Complex64::new(1e-8, 1e-8),
+            ],
+            left_indices: vec![0, 1],
+            right_indices: vec![1, 2],
+            boundaries: vec![0, 0, 1, 2],
+            groups: None,
+        };
+
+        op.ichop(1e-7);
+
+        let expected = TransferVertexOperator {
+            coeffs: vec![Complex64::new(1.0, 2.0), Complex64::new(0.0, -3.0)],
+            left_indices: vec![0],
+            right_indices: vec![1],
+            boundaries: vec![0, 0, 1],
+            groups: None,
+        };
+
+        assert_eq!(op, expected);
     }
 
     #[test]
