@@ -40,6 +40,18 @@ pub trait TermSortKey {
     fn sort_key(&self) -> impl Ord;
 }
 
+/// Rescales the coefficient of a single term view.
+///
+/// Implemented by the `*TermView` structs. Because a view owns its coefficient outright and only
+/// borrows the index data, rescaling one allocates nothing - it is a field update on a `Copy`
+/// struct. This is what lets a weighted sum of operators be built in a single pass through
+/// [`OperatorTrait::from_terms`], instead of materialising a scaled copy of every summand and then
+/// concatenating those copies one at a time.
+pub trait ScaledTerm {
+    /// Returns this term with its coefficient multiplied by `factor`.
+    fn scaled(self, factor: Complex64) -> Self;
+}
+
 pub trait OperatorTrait {
     fn zero() -> Self;
     fn one() -> Self;
@@ -81,7 +93,7 @@ pub trait OperatorTrait {
     fn matmul(&self, other: &Self) -> Self;
 
     /// The borrowed view of a single term yielded by [`OperatorTrait::iter`].
-    type TermView<'a>: PartialEq + TermSortKey
+    type TermView<'a>: PartialEq + TermSortKey + ScaledTerm
     where
         Self: 'a;
 
@@ -91,7 +103,7 @@ pub trait OperatorTrait {
     /// Its [`TermSortKey`] must match that of the corresponding [`Self::TermView`] (i.e. ignore the
     /// group index), so that ordering a grouped operator agrees with ordering the same terms
     /// ungrouped.
-    type GroupTermView<'a>: PartialEq + TermSortKey
+    type GroupTermView<'a>: PartialEq + TermSortKey + ScaledTerm
     where
         Self: 'a;
 

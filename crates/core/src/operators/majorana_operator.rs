@@ -10,7 +10,7 @@
 // copyright notice, and modified files need to carry a notice indicating
 // that they have been altered from the originals.
 
-use crate::operators::{CoherenceError, OperatorMacro, OperatorTrait, TermSortKey};
+use crate::operators::{CoherenceError, OperatorMacro, OperatorTrait, ScaledTerm, TermSortKey};
 use num_complex::{Complex64, ComplexFloat};
 use std::collections::{HashMap, HashSet};
 use std::ops::{
@@ -48,6 +48,13 @@ impl TermSortKey for MajoranaOperatorTermView<'_> {
     }
 }
 
+impl ScaledTerm for MajoranaOperatorTermView<'_> {
+    fn scaled(mut self, factor: Complex64) -> Self {
+        self.coeff *= factor;
+        self
+    }
+}
+
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct MajoranaOperatorGroupTermView<'a> {
     pub coeff: Complex64,
@@ -74,6 +81,13 @@ impl TermSortKey for MajoranaOperatorGroupTermView<'_> {
         // Match the ungrouped `TermView` key exactly (ignoring `group`), so ordering a grouped
         // operator agrees with ordering the same terms ungrouped.
         self.into_vec()
+    }
+}
+
+impl ScaledTerm for MajoranaOperatorGroupTermView<'_> {
+    fn scaled(mut self, factor: Complex64) -> Self {
+        self.coeff *= factor;
+        self
     }
 }
 

@@ -10,7 +10,7 @@
 // copyright notice, and modified files need to carry a notice indicating
 // that they have been altered from the originals.
 
-use crate::operators::{CoherenceError, OperatorMacro, OperatorTrait, TermSortKey};
+use crate::operators::{CoherenceError, OperatorMacro, OperatorTrait, ScaledTerm, TermSortKey};
 use num_complex::{Complex64, ComplexFloat};
 use std::cmp::Ordering;
 use std::collections::{HashMap, HashSet};
@@ -51,6 +51,15 @@ impl TermSortKey for FermionOperatorTermView<'_> {
     }
 }
 
+impl ScaledTerm for FermionOperatorTermView<'_> {
+    fn scaled(mut self, factor: Complex64) -> Self {
+        // Only the coefficient changes; the index data stays borrowed from the operator this view
+        // came from, so nothing is copied.
+        self.coeff *= factor;
+        self
+    }
+}
+
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct FermionOperatorGroupTermView<'a> {
     pub coeff: Complex64,
@@ -78,6 +87,13 @@ impl TermSortKey for FermionOperatorGroupTermView<'_> {
         // Match the ungrouped `TermView` key exactly (ignoring `group`), so ordering a grouped
         // operator agrees with ordering the same terms ungrouped.
         self.into_vec()
+    }
+}
+
+impl ScaledTerm for FermionOperatorGroupTermView<'_> {
+    fn scaled(mut self, factor: Complex64) -> Self {
+        self.coeff *= factor;
+        self
     }
 }
 
