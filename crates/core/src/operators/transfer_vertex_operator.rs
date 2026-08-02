@@ -340,11 +340,25 @@ impl OperatorTrait for TransferVertexOperator {
     }
 
     fn adjoint(&self) -> Self {
+        let mut coeffs = Vec::with_capacity(self.coeffs.len());
+        let mut left_indices = Vec::with_capacity(self.left_indices.len());
+        let mut right_indices = Vec::with_capacity(self.right_indices.len());
+
+        // Besides conjugating the coefficients, the generators within each term must be reversed:
+        // `(AB)† = B†A†` and the transfer/vertex generators anticommute when they share an index, so
+        // `BA != AB` in general. Both index arrays are reversed over the same span, which keeps each
+        // `(left, right)` pair intact while reversing the order of the pairs.
+        self.iter().for_each(|term| {
+            coeffs.push(term.coeff.conj());
+            left_indices.extend(term.left_indices.iter().rev());
+            right_indices.extend(term.right_indices.iter().rev());
+        });
+
         Self {
-            coeffs: self.coeffs.iter().map(|c| c.conj()).collect(),
-            left_indices: self.left_indices.clone(),
-            right_indices: self.right_indices.clone(),
-            boundaries: self.boundaries.clone(),
+            coeffs,
+            left_indices,
+            right_indices,
+            boundaries: self.boundaries.to_vec(),
             groups: self.groups.clone(),
         }
     }
@@ -978,22 +992,67 @@ mod tests {
 
     #[test]
     fn test_adjoint() {
+        // The second term is `V(0) T(0,1) T(1,2)`, i.e. multi-factor, so that the reversal of the
+        // operator string is actually observable. A single-factor term would make it a no-op.
         let op1 = TransferVertexOperator {
-            coeffs: vec![Complex64::new(0.0, 2.0), Complex64::new(3.0, 0.0)],
-            left_indices: vec![0],
-            right_indices: vec![1],
-            boundaries: vec![0, 0, 1],
+            coeffs: vec![Complex64::new(0.0, 2.0), Complex64::new(3.0, -4.0)],
+            left_indices: vec![0, 0, 1],
+            right_indices: vec![0, 1, 2],
+            boundaries: vec![0, 0, 3],
             groups: None,
         };
         let adj = op1.adjoint();
         let expected = TransferVertexOperator {
-            coeffs: vec![Complex64::new(0.0, -2.0), Complex64::new(3.0, 0.0)],
-            left_indices: vec![0],
-            right_indices: vec![1],
-            boundaries: vec![0, 0, 1],
+            coeffs: vec![Complex64::new(0.0, -2.0), Complex64::new(3.0, 4.0)],
+            left_indices: vec![1, 0, 0],
+            right_indices: vec![2, 1, 0],
+            boundaries: vec![0, 0, 3],
             groups: None,
         };
         assert_eq!(adj, expected);
+    }
+
+    #[test]
+    fn test_adjoint_is_antihomomorphism() {
+        // `(A B)† == B† A†`. This identity only holds if `adjoint` reverses the operator string, so
+        // it directly guards against dropping that reversal.
+        let op1 = TransferVertexOperator {
+            coeffs: vec![Complex64::new(2.0, 1.0)],
+            left_indices: vec![0, 0],
+            right_indices: vec![0, 1],
+            boundaries: vec![0, 2],
+            groups: None,
+        };
+        let op2 = TransferVertexOperator {
+            coeffs: vec![Complex64::new(-1.0, 3.0)],
+            left_indices: vec![1, 2],
+            right_indices: vec![2, 2],
+            boundaries: vec![0, 2],
+            groups: None,
+        };
+
+        let lhs = op1.__matmul__(&op2).adjoint();
+        let rhs = op2.adjoint().__matmul__(&op1.adjoint());
+        assert!(lhs.equiv(&rhs, 1e-12));
+    }
+
+    #[test]
+    fn test_is_hermitian_requires_reversal() {
+        // `V(0) T(0,1)` is *not* Hermitian: the two generators share the index 0 and therefore
+        // anticommute, so `(V(0) T(0,1))† = T(0,1) V(0) = -V(0) T(0,1)`.
+        let op = TransferVertexOperator {
+            coeffs: vec![Complex64::new(1.0, 0.0)],
+            left_indices: vec![0, 0],
+            right_indices: vec![0, 1],
+            boundaries: vec![0, 2],
+            groups: None,
+        };
+        assert!(!op.is_hermitian(1e-10));
+
+        // Symmetrizing it does give a Hermitian operator.
+        let mut sym = op.clone();
+        sym.__iadd__(&op.adjoint());
+        assert!(sym.is_hermitian(1e-10));
     }
 
     #[test]
@@ -1171,6 +1230,10 @@ mod tests {
         assert_eq!(op.normal_ordered(), expected);
     }
 
+    /// Exercises the `atol` boundary of `is_hermitian`.
+    ///
+    /// Note that these are single-factor terms, so this test is insensitive to whether `adjoint`
+    /// reverses the operator string; see `test_is_hermitian_requires_reversal` for that.
     #[test]
     fn test_is_hermitian() {
         let op = TransferVertexOperator {
