@@ -621,7 +621,7 @@ impl PyEdgeVertexOperator {
             let val_str = format!("{:12.6e}{:+12.6e}j", term.coeff.re, term.coeff.im);
             items_str.push(format!("{val_str} * {key_str}"));
         }
-        Ok(items_str.join("\n").to_string())
+        Ok(items_str.join("\n"))
     }
 
     /// Constructs the additive identity operator.

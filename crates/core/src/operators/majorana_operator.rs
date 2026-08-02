@@ -10,7 +10,7 @@
 // copyright notice, and modified files need to carry a notice indicating
 // that they have been altered from the originals.
 
-use crate::operators::{CoherenceError, OperatorMacro, OperatorTrait, TermSortKey};
+use crate::operators::{CoherenceError, OperatorMacro, OperatorTrait, ScaledTerm, TermSortKey};
 use num_complex::{Complex64, ComplexFloat};
 use std::collections::{HashMap, HashSet};
 use std::ops::{
@@ -48,6 +48,13 @@ impl TermSortKey for MajoranaOperatorTermView<'_> {
     }
 }
 
+impl ScaledTerm for MajoranaOperatorTermView<'_> {
+    fn scaled(mut self, factor: Complex64) -> Self {
+        self.coeff *= factor;
+        self
+    }
+}
+
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct MajoranaOperatorGroupTermView<'a> {
     pub coeff: Complex64,
@@ -74,6 +81,13 @@ impl TermSortKey for MajoranaOperatorGroupTermView<'_> {
         // Match the ungrouped `TermView` key exactly (ignoring `group`), so ordering a grouped
         // operator agrees with ordering the same terms ungrouped.
         self.into_vec()
+    }
+}
+
+impl ScaledTerm for MajoranaOperatorGroupTermView<'_> {
+    fn scaled(mut self, factor: Complex64) -> Self {
+        self.coeff *= factor;
+        self
     }
 }
 
@@ -300,9 +314,15 @@ fn reduce_pairs(tpl: &[u32]) -> Vec<u32> {
 }
 
 fn _compose(a: &MajoranaOperator, b: &MajoranaOperator) -> (Vec<Complex64>, Vec<u32>, Vec<usize>) {
-    let mut coeffs = vec![];
-    let mut modes = vec![];
-    let mut boundaries = vec![0];
+    // The output size is known exactly: one term per (left, right) pair, each holding the factors
+    // of both inputs. Reserving up front turns the inner loop's repeated `extend_from_slice` into
+    // plain memcpy without the reallocation-and-copy rounds an unreserved vector would incur.
+    let num_terms = a.coeffs.len() * b.coeffs.len();
+    let num_factors = a.modes.len() * b.coeffs.len() + b.modes.len() * a.coeffs.len();
+    let mut coeffs = Vec::with_capacity(num_terms);
+    let mut modes = Vec::with_capacity(num_factors);
+    let mut boundaries = Vec::with_capacity(num_terms + 1);
+    boundaries.push(0);
 
     for left in a.iter() {
         for right in b.iter() {
@@ -376,7 +396,7 @@ impl OperatorTrait for MajoranaOperator {
         Self {
             coeffs,
             modes,
-            boundaries: self.boundaries.to_vec(),
+            boundaries: self.boundaries.clone(),
             groups: self.groups.clone(),
         }
     }
@@ -394,14 +414,41 @@ impl OperatorTrait for MajoranaOperator {
         self.coeffs.iter_mut().for_each(|c| *c *= other);
     }
 
-    fn __iand__(&mut self, other: &Self) {
-        (self.coeffs, self.modes, self.boundaries) = _compose(self, other);
+    fn __isub__(&mut self, other: &Self) {
+        self.coeffs.extend(other.coeffs.iter().map(|c| -c));
+        self.modes.extend_from_slice(&other.modes);
+        let offset = self.boundaries[self.boundaries.len() - 1];
+        self.boundaries
+            .extend(other.boundaries[1..].iter().map(|b| b + offset));
         self.groups = None;
     }
 
+    fn composed(&self, other: &Self) -> Self {
+        let (coeffs, modes, boundaries) = _compose(self, other);
+        Self {
+            coeffs,
+            modes,
+            boundaries,
+            groups: None,
+        }
+    }
+
+    fn matmul(&self, other: &Self) -> Self {
+        let (coeffs, modes, boundaries) = _compose(other, self);
+        Self {
+            coeffs,
+            modes,
+            boundaries,
+            groups: None,
+        }
+    }
+
+    fn __iand__(&mut self, other: &Self) {
+        *self = self.composed(other);
+    }
+
     fn __imatmul__(&mut self, other: &Self) {
-        (self.coeffs, self.modes, self.boundaries) = _compose(other, self);
-        self.groups = None;
+        *self = self.matmul(other);
     }
 
     fn ichop(&mut self, atol: f64) {
@@ -491,26 +538,34 @@ impl OperatorTrait for MajoranaOperator {
     }
 
     fn get_support(&self) -> HashSet<u32> {
-        HashSet::from_iter(self.modes.clone())
+        self.modes.iter().copied().collect()
     }
 
     fn relabel_modes(&self, permutation: Vec<u32>) -> Result<Self, CoherenceError> {
         if permutation.iter().collect::<HashSet<_>>().len() != permutation.len() {
             return Err(CoherenceError::DuplicateIndices);
         }
-        let mut out = self.clone();
-        let new_modes: Result<Vec<u32>, CoherenceError> = self
+        // The relabelled modes are computed before anything is copied, so that the error path does
+        // not first clone the entire operator only to discard it.
+        let modes: Vec<u32> = self
             .modes
             .iter()
             .map(|&idx| {
                 permutation
                     .get(idx as usize)
-                    .cloned()
+                    .copied()
                     .ok_or(CoherenceError::IndexMapTooSmall)
             })
-            .collect();
-        out.modes = new_modes?;
-        Ok(out)
+            .collect::<Result<_, _>>()?;
+        Ok(Self {
+            coeffs: self.coeffs.clone(),
+            modes,
+            boundaries: self.boundaries.clone(),
+            // Relabelling permutes mode indices without reordering, splitting or merging terms, so
+            // any grouping of those terms carries over unchanged. This is the one operation that
+            // preserves `groups` rather than dropping it.
+            groups: self.groups.clone(),
+        })
     }
 }
 
@@ -1330,5 +1385,110 @@ mod tests {
         let round_trip = MajoranaOperator::from_terms_with_groups(op.iter_with_groups());
 
         assert_eq!(round_trip, op);
+    }
+
+    /// Two grouped, non-commuting operands for the allocation-free rewrites below.
+    ///
+    /// Grouped so that the tests can also assert that the out-of-place operations drop `groups`
+    /// exactly where their in-place counterparts do, and non-commuting so that an operand swap
+    /// cannot pass unnoticed.
+    fn operand_pair() -> (MajoranaOperator, MajoranaOperator) {
+        let op1 = MajoranaOperator {
+            coeffs: vec![Complex64::new(2.0, -1.0), Complex64::new(3.0, 0.5)],
+            modes: vec![0, 1],
+            boundaries: vec![0, 1, 2],
+            groups: Some(vec![0, 1]),
+        };
+        let op2 = MajoranaOperator {
+            coeffs: vec![Complex64::new(1.5, 2.0), Complex64::new(0.0, 4.0)],
+            modes: vec![1, 2],
+            boundaries: vec![0, 1, 2],
+            groups: Some(vec![0, 0]),
+        };
+        (op1, op2)
+    }
+
+    #[test]
+    fn test_and_matches_clone_then_and_assign() {
+        let (op1, op2) = operand_pair();
+
+        let mut expected = op1.clone();
+        expected.__iand__(&op2);
+
+        assert_eq!(op1.__and__(&op2), expected);
+        assert!(!op1.__and__(&op2).has_groups());
+    }
+
+    #[test]
+    fn test_matmul_matches_clone_then_matmul_assign() {
+        let (op1, op2) = operand_pair();
+
+        let mut expected = op1.clone();
+        expected.__imatmul__(&op2);
+
+        assert_eq!(op1.__matmul__(&op2), expected);
+        assert!(!op1.__matmul__(&op2).has_groups());
+    }
+
+    #[test]
+    fn test_sub_matches_add_of_negation() {
+        let (op1, op2) = operand_pair();
+
+        // The formulation `__sub__` used before it was fused, spelled out here so that the fused
+        // version is pinned to it. Complex coefficients matter: a sign error in the real part alone
+        // would survive real-only operands.
+        let mut expected = op1.clone();
+        expected.__iadd__(&op2.__neg__());
+
+        assert_eq!(op1.__sub__(&op2), expected);
+
+        let mut in_place = op1.clone();
+        in_place.__isub__(&op2);
+        assert_eq!(in_place, expected);
+    }
+
+    /// The out-of-place operations must not write through to either operand.
+    ///
+    /// `composed`/`matmul` take `&self`, so this cannot regress without a signature change, but the
+    /// in-place counterparts they now back (`*self = self.composed(other)`) make the property worth
+    /// stating outright.
+    #[test]
+    fn test_out_of_place_operations_leave_operands_untouched() {
+        let (op1, op2) = operand_pair();
+        let (op1_before, op2_before) = (op1.clone(), op2.clone());
+
+        let _ = op1.__and__(&op2);
+        let _ = op1.__matmul__(&op2);
+        let _ = op1.__sub__(&op2);
+        let _ = op1.__add__(&op2);
+        let _ = op1.__neg__();
+        let _ = op1.__pow__(2);
+        let _ = op1.adjoint();
+        let _ = op1.relabel_modes(vec![1, 0]);
+
+        assert_eq!(op1, op1_before);
+        assert_eq!(op2, op2_before);
+    }
+
+    #[test]
+    fn test_relabel_modes_preserves_groups() {
+        let op = MajoranaOperator {
+            coeffs: vec![Complex64::new(1.0, 0.0), Complex64::new(2.0, 0.0)],
+            modes: vec![0, 1, 2, 3],
+            boundaries: vec![0, 2, 4],
+            groups: Some(vec![0, 1]),
+        };
+
+        let relabeled = op.relabel_modes(vec![3, 2, 1, 0]).unwrap();
+
+        assert_eq!(
+            relabeled,
+            MajoranaOperator {
+                coeffs: vec![Complex64::new(1.0, 0.0), Complex64::new(2.0, 0.0)],
+                modes: vec![3, 2, 1, 0],
+                boundaries: vec![0, 2, 4],
+                groups: Some(vec![0, 1]),
+            }
+        );
     }
 }

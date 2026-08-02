@@ -117,8 +117,10 @@ fn zrot(target: &mut Array2<Complex64>, givens: &GivensRotation, slice_type: Sli
 /// - A vector of Givens rotations, each given as (real cosine, complex sine, index i, index j)
 /// - A vector of complex diagonal phase factors
 pub fn givens_decomposition(unitary: Array2<Complex64>) -> (Vec<GivensRotation>, Vec<Complex64>) {
-    let n = unitary.nrows();
-    let mut matrix = unitary.clone();
+    // The input is taken by value and never read again, so it becomes the working matrix directly
+    // (as in `givens_decomposition_slater` below).
+    let mut matrix = unitary;
+    let n = matrix.nrows();
     let mut left_rotations: Vec<GivensRotation> = Vec::new();
     let mut right_rotations: Vec<GivensRotation> = Vec::new();
 
