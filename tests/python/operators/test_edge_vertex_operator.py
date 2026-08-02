@@ -10,12 +10,15 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
+import itertools
 import pickle
 
 import numpy as np
 import pytest
 from qiskit_fermions.operators import EdgeVertexOperator
 from qiskit_fermions.operators.library import anti_commutator, commutator
+
+from .majorana_matrix_oracle import edge_matrix, operator_matrix
 
 
 class TestEdgeVertexOperator:
@@ -347,6 +350,21 @@ class TestEdgeVertexOperator:
         with subtests.test("symmetrized product is Hermitian"):
             assert (op + op.adjoint()).is_hermitian()
 
+        with subtests.test("Hermitian only after fusion"):
+            # This operator is Hermitian, but recognizing that requires *fusing* `E(1,0) E(2,1)`
+            # into a multiple of `E(2,0)`: the two terms of `op - op.adjoint()` cancel only once
+            # that contraction is applied. Reordering alone leaves a non-zero remainder, which is
+            # why this used to be reported as non-Hermitian.
+            op = cls.from_dict(
+                {
+                    ((2, 0), (2, 2)): 0.1 - 0.4j,
+                    ((2, 1), (2, 2), (1, 0)): 0.1 - 0.1j,
+                }
+            )
+            matrix = operator_matrix(op, 3, edge_matrix)
+            assert np.allclose(matrix, matrix.conj().T), "test premise: op must be Hermitian"
+            assert op.is_hermitian()
+
     def test_equiv(self):
         cls = self.get_class()
         op = cls.from_dict({(): 1e-7})
@@ -358,14 +376,16 @@ class TestEdgeVertexOperator:
     def test_normal_ordered(self, subtests):
         cls = self.get_class()
 
+        # These cases pin the pure *reordering* behaviour, so they opt out of the contraction that
+        # `reduce=True` (the default) would additionally apply. See `test_normal_ordered_reduce`.
         with subtests.test("no change"):
             op = cls.from_dict({((0, 0), (1, 1), (1, 1), (0, 1)): 1})
-            assert op.normal_ordered().equiv(op)
+            assert op.normal_ordered(reduce=False).equiv(op)
 
         with subtests.test("ordering of vertex and edge operators"):
             op = cls.from_dict({((0, 1), (1, 0), (1, 2), (0, 0), (2, 2)): 1})
             expected = cls.from_dict({((0, 0), (2, 2), (0, 1), (1, 0), (1, 2)): -1})
-            assert op.normal_ordered().equiv(expected)
+            assert op.normal_ordered(reduce=False).equiv(expected)
 
         with subtests.test("edge operators on the same pair of modes commute"):
             # Eq. (5) of arXiv:2512.11418v1 only covers `j != k != l != m`, so it says nothing
@@ -374,11 +394,130 @@ class TestEdgeVertexOperator:
             # introduce a sign.
             op = cls.from_dict({((1, 0), (0, 1)): 1 + 2j})
             expected = cls.from_dict({((0, 1), (1, 0)): 1 + 2j})
-            assert op.normal_ordered().equiv(expected)
+            assert op.normal_ordered(reduce=False).equiv(expected)
 
             # Two identical edge operators: the sort is a no-op, but the parity rule still runs.
             op = cls.from_dict({((1, 0), (1, 0)): 1 + 2j})
-            assert op.normal_ordered().equiv(op)
+            assert op.normal_ordered(reduce=False).equiv(op)
+
+    def test_normal_ordered_reduce(self, subtests):
+        cls = self.get_class()
+
+        with subtests.test("V_j V_j = 1"):
+            op = cls.from_dict({((0, 0), (0, 0)): 2 + 1j})
+            assert op.normal_ordered().equiv(cls.from_dict({(): 2 + 1j}))
+
+        with subtests.test("E_jk E_jk = 1"):
+            op = cls.from_dict({((0, 1), (0, 1)): 2 + 1j})
+            assert op.normal_ordered().equiv(cls.from_dict({(): 2 + 1j}))
+
+        with subtests.test("E_jk E_kj = -1"):
+            op = cls.from_dict({((0, 1), (1, 0)): 2 + 1j})
+            assert op.normal_ordered().equiv(cls.from_dict({(): -2 - 1j}))
+
+        with subtests.test("fusion: E_ab E_bc = -i E_ac"):
+            op = cls.from_dict({((0, 1), (1, 2)): 1})
+            assert op.normal_ordered().equiv(cls.from_dict({((0, 2),): -1j}))
+
+        with subtests.test("fusion is found regardless of stored orientation"):
+            # `E_{1,0} E_{2,1}` shares mode 1, but neither factor is oriented so that the shared
+            # mode sits in the inner position. Reducing it requires applying `E_{kj} = -E_{jk}`
+            # first, which is what the orientation canonicalization is for.
+            op = cls.from_dict({((1, 0), (2, 1)): 1})
+            assert op.normal_ordered().equiv(cls.from_dict({((0, 2),): -1j}))
+
+        with subtests.test("nothing left to contract"):
+            for actions in [((0, 0), (1, 1)), ((0, 0), (1, 2)), ((0, 1), (2, 3))]:
+                op = cls.from_dict({actions: 1})
+                reduced = op.normal_ordered()
+                assert reduced.equiv(op), f"{actions} should not have been reduced"
+
+    @pytest.mark.parametrize("ascending", [True, False])
+    def test_normal_ordered_ascending(self, ascending, subtests):
+        cls = self.get_class()
+
+        with subtests.test("orientation is canonicalized"):
+            # `E_{1,0} = -E_{0,1}`, so whichever orientation is *not* selected must be rewritten
+            # into the one that is, with the sign absorbed into the coefficient.
+            op = cls.from_dict({((1, 0),): 1})
+            expected_action = (0, 1) if ascending else (1, 0)
+            expected_coeff = -1 if ascending else 1
+            assert op.normal_ordered(ascending=ascending).equiv(
+                cls.from_dict({(expected_action,): expected_coeff})
+            )
+
+        with subtests.test("vertex operators are unaffected"):
+            op = cls.from_dict({((1, 1),): 1})
+            assert op.normal_ordered(ascending=ascending).equiv(op)
+
+    def test_normal_ordered_is_canonical(self):
+        """Asserts that two representations of one operator normal-order to the same terms.
+
+        Because ``E_kj = -E_jk``, the same operator can be stored in many ways. Flipping every
+        edge operator's orientation (and the coefficient's sign with it) is a no-op on the operator
+        itself, so it must be a no-op on the normal-ordered result too.
+        """
+        cls = self.get_class()
+        num_modes = 3
+        generators = [(a, b) for a in range(num_modes) for b in range(num_modes)]
+
+        for actions in itertools.product(generators, repeat=3):
+            coeff = 1 - 0.5j
+            flipped, flipped_coeff = [], coeff
+            for left, right in actions:
+                if left == right:
+                    flipped.append((left, right))
+                else:
+                    flipped.append((right, left))
+                    flipped_coeff = -flipped_coeff
+
+            original = cls.from_dict({tuple(actions): coeff}).normal_ordered().simplify()
+            equivalent = cls.from_dict({tuple(flipped): flipped_coeff}).normal_ordered().simplify()
+            assert original.equiv(equivalent), f"{actions} is not canonical"
+
+    @pytest.mark.parametrize("length", [2, 3])
+    @pytest.mark.parametrize("reduce", [False, True])
+    @pytest.mark.parametrize("ascending", [True, False])
+    def test_normal_ordered_preserves_matrix(self, length, reduce, ascending):
+        """Asserts ``normal_ordered`` never changes the operator it represents.
+
+        Reordering and contracting generators is only sound if every swap and every contraction
+        carries the right sign, and a sign error is invisible to a test that compares against a
+        hand-written expectation derived from the same (possibly wrong) rule. So this compares
+        against dense matrices built straight from the Majorana definitions instead, exhaustively
+        over every term of the given length.
+        """
+        cls = self.get_class()
+        num_modes = 3
+        generators = [(a, b) for a in range(num_modes) for b in range(num_modes)]
+
+        for actions in itertools.product(generators, repeat=length):
+            op = cls.from_dict({tuple(actions): 1 - 0.5j})
+            reordered = op.normal_ordered(ascending=ascending, reduce=reduce)
+            expected = operator_matrix(op, num_modes, edge_matrix)
+            actual = operator_matrix(reordered, num_modes, edge_matrix)
+            assert np.allclose(actual, expected), f"normal_ordered changed the operator {actions}"
+
+    @pytest.mark.parametrize("length", [2, 3])
+    def test_normal_ordered_is_fully_reduced(self, length):
+        """Asserts no reducible pair of adjacent generators survives ``normal_ordered``."""
+        cls = self.get_class()
+        num_modes = 3
+        generators = [(a, b) for a in range(num_modes) for b in range(num_modes)]
+
+        def reducible(actions) -> bool:
+            for (a, b), (c, d) in itertools.pairwise(actions):
+                if {a, b} == {c, d}:
+                    return True
+                # two edge operators sharing exactly one mode fuse into a single one
+                if a != b and c != d and len({a, b} & {c, d}) == 1:
+                    return True
+            return False
+
+        for actions in itertools.product(generators, repeat=length):
+            reduced = cls.from_dict({tuple(actions): 1}).normal_ordered()
+            for remaining, _ in reduced.iter_terms():
+                assert not reducible(tuple(remaining)), f"{actions} left {remaining} unreduced"
 
     def test_commutator(self, subtests):
         cls = self.get_class()

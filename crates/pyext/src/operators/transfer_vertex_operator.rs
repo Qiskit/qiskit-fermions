@@ -1075,31 +1075,52 @@ impl PyTransferVertexOperator {
     ///    have to be taken into account. See
     ///    :ref:`here <TransferVertexOperator-definition>` for the detailed definitions.
     ///
+    /// .. note::
+    ///    Fewer contractions are available here than for :class:`.EdgeVertexOperator`. Two edge
+    ///    operators sharing a single mode *fuse* into one, but the analogous transfer product does
+    ///    not: writing :math:`T_{jk} = \frac{i}{2} \gamma_{2j} \gamma_{2k-1}`, cancelling the
+    ///    shared Majorana always leaves an (even, odd) pair drawn from two different modes, which
+    ///    is not a single generator. Only ``V(j) V(j)``, ``T(j,k) T(j,k)`` and ``T(j,k) T(k,j)``
+    ///    contract.
+    ///
     /// .. doctest::
     ///
     ///     >>> from qiskit_fermions.operators import TransferVertexOperator
     ///     >>> op = TransferVertexOperator.from_dict({((0, 1), (1, 0), (1, 2), (0, 0), (2, 2)): 1})
-    ///     >>> print(format(op.normal_ordered().simplify()))
+    ///     >>> print(format(op.normal_ordered(reduce=False).simplify()))
     ///      -1.000000e0 -0.000000e0j * (V(0) V(2) T(0,1) T(1,0) T(1,2))
+    ///     >>> print(format(op.normal_ordered().simplify()))
+    ///      2.500000e-1 +0.000000e0j * (V(1) V(2) T(1,2))
+    ///
+    /// Args:
+    ///     reduce: whether to contract adjacent generators that combine into a scalar or into a
+    ///         pair of vertex operators. See the example above. This value defaults to ``True``.
     ///
     /// Returns:
     ///     An equivalent but normal-ordered operator.
-    fn normal_ordered(&self) -> Self {
-        self.inner.normal_ordered().into()
+    #[pyo3(signature = (reduce=true))]
+    fn normal_ordered(&self, reduce: bool) -> Self {
+        self.inner.normal_ordered(reduce).into()
     }
 
     /// Returns whether this operator is Hermitian.
     ///
     /// .. note::
-    ///    This check is implemented using :meth:`.equiv` on the :meth:`.normal_ordered` difference
-    ///    of ``self`` and its :meth:`.adjoint` and :meth:`.zero`.
+    ///    This check is implemented using :meth:`.equiv` on the fully reduced
+    ///    :meth:`.normal_ordered` difference of ``self`` and its :meth:`.adjoint` and
+    ///    :meth:`.zero`.
     ///
     /// .. note::
     ///    This check is *conservative*: it can return ``False`` for an operator that is in fact
-    ///    Hermitian. :meth:`.normal_ordered` does not contract repeated generators into scalars
-    ///    (for example :math:`V_j V_j = 1`), so a term that would only cancel against its adjoint
-    ///    *after* such a contraction is not recognized as zero. A ``True`` result is always
-    ///    reliable.
+    ///    Hermitian. A ``True`` result is always reliable.
+    ///
+    ///    :meth:`.normal_ordered` contracts every pair of adjacent generators that combines into a
+    ///    *shorter* term, but two transfer operators sharing a single mode do not: as explained
+    ///    there, :math:`T_{jk} T_{jl}` can only be rewritten into another length-two product.
+    ///    Since neither form is more canonical than the other, such products are left alone, and a
+    ///    term that would only cancel against its adjoint after rewriting one is not recognized as
+    ///    zero. :class:`.EdgeVertexOperator` has no such gap, because there the analogous product
+    ///    *fuses* into a single edge operator.
     ///
     /// Args:
     ///     atol: The numerical accuracy upto which coefficients are considered equal. This value
