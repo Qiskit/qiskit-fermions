@@ -1,0 +1,132 @@
+name: Build release artifacts
+on:
+  workflow_call:
+    inputs:
+      default-action:
+        description: >-
+          The default action for each artifact.
+          Choose from 'build' (default) or 'skip'.
+        type: string
+        default: "build"
+        required: false
+
+      sdist:
+        description: >-
+          The action to take for the sdist.
+          Choose from 'default', 'build' or 'skip'.
+        type: string
+        default: "default"
+        required: false
+
+      wheels-linux:
+        description: >-
+          The action to take for Linux (x86_64, aarch64) wheels.
+          Choose from 'default', 'build' or 'skip'.
+          This builds multiple artifacts, which all match 'wheels-linux-*'.
+        type: string
+        default: "default"
+        required: false
+
+      wheels-macos:
+        description: >-
+          The action to take for macOS arm64 wheels.
+          Choose from 'default', 'build' or 'skip'.
+        type: string
+        default: "default"
+        required: false
+
+      wheels-windows:
+        description: >-
+          The action to take for Windows x64 wheels.
+          Choose from 'default', 'build' or 'skip'.
+        type: string
+        default: "default"
+        required: false
+
+      artifact-prefix:
+        description: "A prefix to give all artifacts uploaded with 'actions/upload-artifact'."
+        type: string
+        default: ""
+        required: false
+
+      python-version:
+        description: "The Python version to use to host the build runner."
+        type: string
+        default: "3.13"
+        required: false
+
+jobs:
+  wheels-linux:
+    name: "Wheels / Linux"
+    if: (inputs.wheels-linux == 'default' && inputs.default-action || inputs.wheels-linux) == 'build'
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - ubuntu-24.04-arm
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: ${{ inputs.python-version }}
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: pypa/cibuildwheel@v3.4.0
+      - uses: actions/upload-artifact@v7
+        with:
+          path: ./wheelhouse/*.whl
+          name: ${{ inputs.artifact-prefix }}wheels-linux-${{ matrix.os }}
+
+  wheels-macos:
+    name: "Wheels / macOS arm64"
+    if: (inputs.wheels-macos == 'default' && inputs.default-action || inputs.wheels-macos) == 'build'
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        name: Install Python
+        with:
+          python-version: ${{ inputs.python-version }}
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: pypa/cibuildwheel@v3.4.0
+      - uses: actions/upload-artifact@v7
+        with:
+          path: ./wheelhouse/*.whl
+          name: ${{ inputs.artifact-prefix }}wheels-macos
+
+  wheels-windows:
+    name: "Wheels / Windows x64"
+    if: (inputs.wheels-windows == 'default' && inputs.default-action || inputs.wheels-windows) == 'build'
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        name: Install Python
+        with:
+          python-version: ${{ inputs.python-version }}
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: pypa/cibuildwheel@v3.4.0
+      - uses: actions/upload-artifact@v7
+        with:
+          path: ./wheelhouse/*.whl
+          name: ${{ inputs.artifact-prefix }}wheels-windows
+
+  sdist:
+    name: "sdist"
+    if: (inputs.sdist == 'default' && inputs.default-action || inputs.sdist) == 'build'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: ${{ inputs.python-version }}
+      - name: Build sdist
+        run: |
+          set -e
+          python -m pip install -U build
+          python -m build --sdist .
+      - uses: actions/upload-artifact@v7
+        with:
+          path: ./dist/*.tar.gz
+          name: ${{ inputs.artifact-prefix }}sdist
