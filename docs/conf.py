@@ -24,8 +24,8 @@ logging.getLogger("qiskit").setLevel(logging.WARNING)
 sys.path.insert(0, os.path.abspath(".."))
 
 project = "Qiskit Fermions"
-project_copyright = "2025, Qiskit addons team"
-description = "Qiskit for Fermions"
+project_copyright = "2026, Qiskit addons team"
+description = "An extension of Qiskit for working with fermionic systems"
 author = "Qiskit addons team"
 language = "en"
 release = metadata_version("qiskit-fermions")

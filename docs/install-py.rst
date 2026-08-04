@@ -1,95 +1,122 @@
 Install the Python API
-=======================
+======================
 
-Requirements
-------------
+Prerequisites
+^^^^^^^^^^^^^
 
-Qiskit must be installed in the same Python environment that you
-install ``qiskit-fermions`` in. The simplest way to do this is from
-PyPI, but you can install Qiskit from source if you want to.
+First, create a minimal environment with only Python installed in it.
+We recommend using `Python virtual environments
+<https://docs.python.org/3.10/tutorial/venv.html>`__.
+
+.. code:: sh
+
+    python3 -m venv /path/to/virtual/environment
+
+Activate your new environment.
+
+.. code:: sh
+
+    source /path/to/virtual/environment/bin/activate
+
+There are two primary ways to install this package: from PyPI or from source.
+The preferred method is to install from PyPI:
+
+Install from PyPI
+^^^^^^^^^^^^^^^^^
+
+.. code:: sh
+
+    pip install qiskit-fermions
+
+
+Install from source
+^^^^^^^^^^^^^^^^^^^
+
+If you plan to develop in the repository you should install from source.
+
+First, Qiskit must be installed in the same Python environment that you install
+``qiskit-fermions`` in. The simplest way to do this is from PyPI, but you can
+install Qiskit from source if you want to.
 
 .. code:: console
 
    $ pip install qiskit
 
-Steps
------
+Next, clone the ``qiskit-fermions`` repository.
 
-Assuming that you have already installed Qiskit into your Python environment
-(see `here <install.rst>`_), the remaining installation process is fairly
-simple:
+.. code:: sh
 
-1. Ensure that you are in the right directory:
+    git clone git@github.com:Qiskit/qiskit-fermions.git
 
-   .. code:: console
+Now, install the Rust toolchain, upgrade pip, and enter the repository. Refer to
+the `Rust documentation <https://www.rust-lang.org/tools/install>`__ for
+instructions on installing the toolchain.
 
-      $ cd path/to/qiskit-fermions
+.. code:: sh
 
-2. Install the Python installation tooling:
+    ### <INSTALL RUST HERE> ###
+    pip install --upgrade pip
+    cd qiskit-fermions
 
-   .. code:: console
+Install the remaining ``build`` dependencies.
+If you plan on developing in the repository, install the ``dev`` dependencies.
 
-      $ pip install --group build
+.. code:: sh
 
-3. Install the ``qiskit-fermions`` Python package into your environment:
+    pip install --group build
+    pip install --group dev  # optional
 
-   .. code:: console
+The next step is to install ``qiskit-fermions`` to the virtual environment.
 
-      $ pip install .
+.. code:: sh
 
-   .. hint::
+    pip install .
 
-      You can also perform an editable install while still compiling the
-      underlying Rust crate in ``release`` mode:
+.. hint::
 
-      .. code:: console
+   You can also perform an editable install while still compiling the
+   underlying Rust crate in ``release`` mode:
 
-         $ SETUPTOOLS_RUST_CARGO_PROFILE=release pip install -e .
+   .. code:: sh
 
-   .. hint::
+       SETUPTOOLS_RUST_CARGO_PROFILE=release pip install -e .
 
-      Some features rely on optional dependencies. To install all of them,
-      use the ``all`` extra:
+.. hint::
 
-      .. code:: console
+   Some features rely on optional dependencies. To install all of them,
+   use the ``all`` extra:
 
-         $ pip install ".[all]"
+   .. code:: sh
 
-      Refer to the ``[project.optional-dependencies]`` section of
-      ``pyproject.toml`` to see which dependency groups are available.
+       pip install ".[all]"
 
-4. (optional) You may wish to generate the Python type stub files to have better
-   integration with coding tools (e.g. for tab completion). You can do that
-   quite simply like so:
+   Refer to the ``[project.optional-dependencies]`` section of `pyproject.toml
+   <https://github.com/Qiskit/qiskit-fermions/blob/main/pyproject.toml>`_
+   to see which dependency groups are available.
 
-   .. code:: console
+You can optionally verify that the installation was successful. The simplest
+test is to try and import one of the classes provided by the ``qiskit-fermions``
+package, for example like so:
 
-      $ make pystubs
+.. code:: sh
 
-5. (optional) Verify that the installation was successful:
-   The simplest test is to try and import one of the classes provided by the
-   ``qiskit-fermions`` package, for example like so:
+    python -c "from qiskit_fermions.circuit import FermionicCircuit"
 
-   .. code:: console
+If this completes successfully, your installation worked.
 
-      $ python -c "from qiskit_fermions.circuit import FermionicCircuit"
+.. hint::
 
-   If this completes successfully, your installation worked.
+   You can also run the entire Python test suite:
 
-   .. hint::
+   .. code:: sh
 
-      If you have performed an editable install, you can also run the entire
-      Python test suite:
+       pip install --group test
+       make testpython
 
-      .. code:: console
+   To additionally run the tests that exercise optional dependencies, install
+   the extras and use the ``testoptional`` target:
 
-         $ pip install --group test
-         $ make testpython
+   .. code:: sh
 
-      To additionally run the tests that exercise optional dependencies,
-      install the extras and use the ``testoptional`` target:
-
-      .. code:: console
-
-         $ pip install -e ".[all]"
-         $ make testoptional
+       pip install -e ".[all]"
+       make testoptional

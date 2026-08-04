@@ -2,7 +2,7 @@
 <div align="left">
 
   [![License](https://img.shields.io/github/license/Qiskit/qiskit-fermions?label=License)](LICENSE.txt)
-  [![Docs](https://img.shields.io/badge/%F0%9F%93%84%20Docs-dev-blue.svg)](https://qiskit.github.io/qiskit-fermions/)
+  [![Docs](https://img.shields.io/badge/%F0%9F%93%84%20Docs-dev-blue.svg)](https://quantum.cloud.ibm.com/docs/addons/qiskit-fermions)
   [![Qiskit](https://img.shields.io/badge/Qiskit%20-%20%3E%3D2.5%20-%20%236133BD?logo=Qiskit)](https://github.com/Qiskit/qiskit)
   [![Python](https://img.shields.io/badge/python-3.10%7C3.11%7C3.12%7C3.13%7C3.14-blue.svg)](https://www.python.org/)
   [![rustc](https://img.shields.io/badge/rustc-1.95+-blue.svg)](https://rust-lang.github.io/rfcs/2495-min-rust-version.html)
@@ -13,50 +13,31 @@
 
 # Qiskit Fermions
 
-> [!WARNING]
-> This package is under active development!
-> If you have feedback, please [open an issue](https://github.com/Qiskit/qiskit-fermions/issues/new/choose).
+`qiskit-fermions` extends the Qiskit SDK with tools for working on fermionic systems. Within its
+scope it provides:
 
-### Table of contents
+- efficient data structures for the representation and manipulation of fermionic operators in
+  different forms
+- a framework for implementing operator conversion methods (including fermion-to-qubit encodings)
+- a library of efficient implementations of common conversion methods
+- a framework and library of gates for expressing fermionic circuits
+- a transpilation pipeline integrated with Qiskit's transpiler process to synthesize fermionic
+  circuits into qubit-based circuits
 
-* [About](#about)
-* [Documentation](#documentation)
-* [Installation](#installation)
-* [Deprecation Policy](#deprecation-policy)
-* [Contributing](#contributing)
-* [License](#license)
+Additionally, `qiskit-fermions` integrates with other tools of the ecosystem, such as:
 
-----------------------------------------------------------------------------------------------------
-
-### About
-
-This package extends Qiskit with tools for working on fermionic systems.
-It follows a similar design philosophy as Qiskit itself:
-
-- the core functionality is written in Rust
-- first-party language bindings are provided for both, Python and C
-- the APIs are designed to "feel" similar to Qiskit
-
-The scope of this package includes the following functionality:
-
-- several operator data structures
-- a framework to develop operator conversion methods
-- a library of common operator converters
-- a framework to develop quantum circuit synthesis methods
-- a library of common quantum circuit synthesizers
+- [ffsim](https://qiskit-community.github.io/ffsim/) for efficient simulation of fermionic circuits
 
 ----------------------------------------------------------------------------------------------------
 
 ### Documentation
 
-All documentation is available at https://qiskit.github.io/qiskit-fermions/.
+[Documentation](https://quantum.cloud.ibm.com/docs/addons/qiskit-fermions) for this package is
+available on the IBM Quantum Platform.
 
 ----------------------------------------------------------------------------------------------------
 
 ### Installation
-
-First, follow the [installation setup instructions](docs/install.rst).
-Then, you can follow the language specific installation steps linked below:
 
 #### C
 
@@ -64,31 +45,64 @@ Please refer to the [C installation instructions](docs/install-c.rst).
 
 #### Python
 
-Please refer to the [Python installation instructions](docs/install-py.rst).
+We encourage installing this package via `pip`, when possible:
+
+```bash
+pip install 'qiskit-fermions'
+```
+
+For more installation information refer to these [installation instructions](docs/install.rst).
 
 ----------------------------------------------------------------------------------------------------
 
-### Deprecation Policy
+### Getting started
 
-> [!IMPORTANT]
-> This policy does **not** apply yet. Until the first release is tagged, `qiskit-fermions` is in
-> early development: `main` is unstable, breaking changes may happen at any time without notice, and
-> release notes are not being tracked. The policy below takes effect with the first tagged release.
-
-We follow [semantic versioning](https://semver.org/) and are guided by the principles in
-[Qiskit's deprecation policy](https://github.com/Qiskit/qiskit/blob/main/DEPRECATION.md).
-We may occasionally make breaking changes in order to improve the user experience.
-When possible, we will keep old interfaces and mark them as deprecated, as long as they can co-exist with the
-new ones.
-Each substantial improvement, breaking change, or deprecation will be documented in the
-[release notes](https://qiskit.github.io/qiskit-fermions/release-notes.html).
+Several guides exist to help you get started with this package. A good starting point to get an
+ overview of its breadth of features is the [1D Fermi-Hubbard guide](docs/guides/flowsets.rst).
 
 ----------------------------------------------------------------------------------------------------
 
-### Citing this package
+### Use case examples
 
-If you use this package in your research, use the [CITATION.bib](CITATION.bib) file in this
-project’s repository to cite the appropriate reference(s).
+Components of this package have been used in research related to the following
+papers:
+
+- The qDRIFT randomized circuit compilation in [^1].
+- The fermion-to-qubit synthesis during the transpilation process in [^2].
+
+----------------------------------------------------------------------------------------------------
+
+### Technical discussion
+
+#### Design Intentions
+
+This package is deliberately designed to align with Qiskit: it builds on a core
+implemented in Rust and provides first-party language bindings to Python and C.
+Its API intends to draw parallels to Qiskit in order to seamlessly integrate
+into the workflows of users with experience in programming Qiskit.
+
+A core principal to the design of `qiskit-fermions` was the decoupling of its
+fermionic circuit representation from its qubitized form. To be more precise:
+the fermionic circuits are meaningful by themselves and do not require a mapping
+to qubit space to be interpretable.
+Furthermore, the fermionic circuit representation may not make any assumptions
+about its fermion-to-qubit encoding applied later on. Consequently, while
+Jordan-Wigner retains a dominant position and role, it is not assumed to be the
+_default_ fermion-to-qubit encoding.
+
+#### Known issues
+
+As long as Qiskit's own C API has not yet reached feature parity with its Python
+API, some components of this package remain exclusive to its Python API, too.
+This includes the entire circuit library (`qiskit_fermions.circuit`) as
+well as transpiler passes (`qiskit_fermions.transpiler`).
+
+#### Future work
+
+- Migrate the circuit library and transpiler passes into the Rust core (and
+  provide a C API for interacting with them)
+- Extend the library of efficient operator conversion implementations
+- Extend the library of efficient operator data structures
 
 ----------------------------------------------------------------------------------------------------
 
@@ -99,15 +113,40 @@ The source code is available [on GitHub](https://github.com/Qiskit/qiskit-fermio
 The developer guide is located at
 [CONTRIBUTING.md](https://github.com/Qiskit/qiskit-fermions/blob/main/CONTRIBUTING.md)
 in the root of this project's repository.
-By participating, you are expected to uphold Qiskit's [code of conduct](https://github.com/Qiskit/qiskit/blob/main/CODE_OF_CONDUCT.md).
+By participating, you are expected to uphold Qiskit's
+[code of conduct](https://github.com/Qiskit/qiskit/blob/main/CODE_OF_CONDUCT.md).
 
-We use [GitHub issues](https://github.com/Qiskit/qiskit-fermions/issues/new/choose)
-for tracking requests and bugs.
+----------------------------------------------------------------------------------------------------
+
+### Citing this package
+
+If you use this package in your research, use the [CITATION.bib](CITATION.bib) file in this project’s
+repository to cite the appropriate reference(s).
 
 ----------------------------------------------------------------------------------------------------
 
 ### License
 
 [Apache License 2.0](LICENSE.txt)
+
+----------------------------------------------------------------------------------------------------
+
+### Deprecation Policy
+
+We follow [semantic versioning](https://semver.org/). We may occasionally make breaking changes in
+order to improve the user experience. When possible, we will keep old interfaces and mark them as
+deprecated, as long as they can co-exist with the new ones. Each substantial improvement, breaking
+change, or deprecation will be documented in the
+[release notes](https://quantum.cloud.ibm.com/docs/api/qiskit-fermions/release-notes).
+
+----------------------------------------------------------------------------------------------------
+
+### References
+
+[^1]: Samuele Piccinelli, et al., [Quantum chemistry with provable convergence via randomized
+sample-based Krylov quantum diagonalization](https://arxiv.org/abs/2508.02578v2), arXiv:2508.02578 [quant-ph].
+
+[^2]: Anthony Gandon, et al., [Stabilizer-based quantum simulation of fermion dynamics with local
+qubit encodings](https://arxiv.org/abs/2512.11418v2), arXiv:2512.11418 [quant-ph].
 
 <!-- vim: set tw=100: -->
