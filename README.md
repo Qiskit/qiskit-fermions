@@ -21,7 +21,7 @@ scope it provides:
 - a framework for implementing operator conversion methods (including fermion-to-qubit encodings)
 - a library of efficient implementations of common conversion methods
 - a framework and library of gates for expressing fermionic circuits
-- a transpilation pipeline integrated with Qiskit's transpiler process to synthesize fermionic
+- a transpilation pipeline integrated with the Qiskit transpiler process to synthesize fermionic
   circuits into qubit-based circuits
 
 Additionally, `qiskit-fermions` integrates with other tools of the ecosystem, such as:
@@ -33,7 +33,7 @@ Additionally, `qiskit-fermions` integrates with other tools of the ecosystem, su
 ### Documentation
 
 [Documentation](https://quantum.cloud.ibm.com/docs/addons/qiskit-fermions) for this package is
-available on the IBM Quantum Platform.
+available on IBM Quantum Platform.
 
 ----------------------------------------------------------------------------------------------------
 
@@ -51,7 +51,7 @@ We encourage installing this package via `pip`, when possible:
 pip install 'qiskit-fermions'
 ```
 
-For more installation information refer to these [installation instructions](docs/install.rst).
+For more installation information, refer to these [installation instructions](docs/install.rst).
 
 ----------------------------------------------------------------------------------------------------
 
@@ -74,25 +74,25 @@ papers:
 
 ### Technical discussion
 
-#### Design Intentions
+#### Design intentions
 
 This package is deliberately designed to align with Qiskit: it builds on a core
 implemented in Rust and provides first-party language bindings to Python and C.
 Its API intends to draw parallels to Qiskit in order to seamlessly integrate
 into the workflows of users with experience in programming Qiskit.
 
-A core principal to the design of `qiskit-fermions` was the decoupling of its
+A core principle to the design of `qiskit-fermions` was the decoupling of its
 fermionic circuit representation from its qubitized form. To be more precise:
 the fermionic circuits are meaningful by themselves and do not require a mapping
 to qubit space to be interpretable.
-Furthermore, the fermionic circuit representation may not make any assumptions
+Furthermore, the fermionic circuit representation cannot make any assumptions
 about its fermion-to-qubit encoding applied later on. Consequently, while
 Jordan-Wigner retains a dominant position and role, it is not assumed to be the
 _default_ fermion-to-qubit encoding.
 
 #### Known issues
 
-As long as Qiskit's own C API has not yet reached feature parity with its Python
+As long as the Qiskit C API has not yet reached feature parity with its Python
 API, some components of this package remain exclusive to its Python API, too.
 This includes the entire circuit library (`qiskit_fermions.circuit`) as
 well as transpiler passes (`qiskit_fermions.transpiler`).
@@ -131,7 +131,7 @@ repository to cite the appropriate reference(s).
 
 ----------------------------------------------------------------------------------------------------
 
-### Deprecation Policy
+### Deprecation policy
 
 We follow [semantic versioning](https://semver.org/). We may occasionally make breaking changes in
 order to improve the user experience. When possible, we will keep old interfaces and mark them as

@@ -84,7 +84,7 @@ Now, compile the ``qiskit-fermions`` C API:
 
 If you want to test your installation, you now must also install `CMake
 <https://cmake.org/>`_.
-You can then test your compilation by running the C uni tests:
+You can then test your compilation by running the C unit tests:
 
 .. code:: sh
 
