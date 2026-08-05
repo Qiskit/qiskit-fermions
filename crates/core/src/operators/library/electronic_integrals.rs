@@ -111,6 +111,36 @@ fn _expand_s8_index(iajb: u32) -> ExpandedIndices {
     res
 }
 
+/// Counts the terms one spin block of a packed one-body matrix contributes.
+///
+/// A stored element yields one term, plus a second for its transpose when it is off-diagonal (see
+/// `_insert_1body_idx`). Used only to size the output buffers up front.
+fn _count_1body_terms(one_body: ArrayView1<f64>) -> usize {
+    one_body
+        .indexed_iter()
+        .filter(|&(_, coeff)| coeff.abs() > 0.0)
+        .map(|(ia, _)| {
+            let (i, a) = _inflate_index(ia as u32);
+            if i == a { 1 } else { 2 }
+        })
+        .sum()
+}
+
+/// Counts the index tuples one spin block of a packed two-body tensor expands into.
+///
+/// Each stored element contributes one term per tuple in its symmetry orbit. Used only to size the
+/// output buffers up front.
+fn _count_2body_tuples(
+    two_body: ArrayView1<f64>,
+    expand: impl Fn(u32) -> ExpandedIndices,
+) -> usize {
+    two_body
+        .indexed_iter()
+        .filter(|&(_, coeff)| coeff.abs() > 0.0)
+        .map(|(iajb, _)| expand(iajb as u32).len)
+        .sum()
+}
+
 pub trait From1Body {
     /// Appends the one-body terms, assigning group indices from `next_group_idx` upwards, and
     /// returns the next free group index.
@@ -155,6 +185,22 @@ pub trait From1Body {
 }
 
 impl FermionOperator {
+    /// Reserves room for `num_terms` further terms, each spanning `modes_per_term` modes.
+    ///
+    /// The buffers otherwise grow by repeated reallocation, which for a large FCIDUMP means copying
+    /// a `modes` vector on its way to tens of millions of entries a couple of dozen times. Callers
+    /// that know how many terms they are about to append reserve once instead.
+    #[inline]
+    fn _reserve_terms(&mut self, num_terms: usize, modes_per_term: usize) {
+        self.coeffs.reserve(num_terms);
+        self.actions.reserve(num_terms * modes_per_term);
+        self.modes.reserve(num_terms * modes_per_term);
+        self.boundaries.reserve(num_terms);
+        if let Some(groups) = self.groups.as_mut() {
+            groups.reserve(num_terms);
+        }
+    }
+
     #[inline]
     fn _insert_1body_idx(op: &mut Self, c: Complex64, i: u32, a: u32, group_idx: Option<u32>) {
         op.coeffs.push(c);
@@ -212,6 +258,7 @@ impl From1Body for FermionOperator {
         norb: u32,
         mut next_group_idx: Option<u32>,
     ) -> Option<u32> {
+        self._reserve_terms(_count_1body_terms(one_body_a) * 2, 2);
         one_body_a
             .indexed_iter()
             .filter(|&(_, coeff)| coeff.abs() > 0.0)
@@ -241,6 +288,10 @@ impl From1Body for FermionOperator {
         norb: u32,
         mut next_group_idx: Option<u32>,
     ) -> Option<u32> {
+        self._reserve_terms(
+            _count_1body_terms(one_body_a) + _count_1body_terms(one_body_b),
+            2,
+        );
         one_body_a
             .indexed_iter()
             .filter(|&(_, coeff)| coeff.abs() > 0.0)
@@ -320,6 +371,8 @@ impl From2Body for FermionOperator {
         norb: u32,
         mut next_group_idx: Option<u32>,
     ) -> Option<u32> {
+        // Every expanded tuple is emitted once per spin block (aa, ab, ba, bb).
+        self._reserve_terms(_count_2body_tuples(two_body_aa, _expand_s8_index) * 4, 4);
         two_body_aa
             .indexed_iter()
             .filter(|&(_, coeff)| coeff.abs() > 0.0)
@@ -366,6 +419,14 @@ impl From2Body for FermionOperator {
         norb: u32,
         mut next_group_idx: Option<u32>,
     ) -> Option<u32> {
+        let npair = norb * (norb + 1) / 2;
+        // aa and bb emit one term per tuple; ab emits two (the block and its spin-flipped partner).
+        self._reserve_terms(
+            _count_2body_tuples(two_body_aa, _expand_s8_index)
+                + _count_2body_tuples(two_body_ab, |iajb| _expand_s4_index(iajb, npair)) * 2
+                + _count_2body_tuples(two_body_bb, _expand_s8_index),
+            4,
+        );
         two_body_aa
             .indexed_iter()
             .filter(|&(_, coeff)| coeff.abs() > 0.0)
@@ -380,7 +441,6 @@ impl From2Body for FermionOperator {
                 next_group_idx = next_group_idx.map(|x| x + 1);
             });
 
-        let npair = norb * (norb + 1) / 2;
         two_body_ab
             .indexed_iter()
             .filter(|&(_, coeff)| coeff.abs() > 0.0)
@@ -464,6 +524,52 @@ mod tests {
             assert_eq!(p * (p + 1) / 2 + q, index, "identity broken at {index}");
             assert!(q <= p, "q > p at {index}");
         }
+    }
+
+    #[test]
+    fn test_builders_reserve_exactly_what_they_append() {
+        // The `_count_*` helpers size the output buffers up front. If one over-counts we silently
+        // over-allocate; if it under-counts we reintroduce a reallocation. Asserting
+        // `capacity == len` on a freshly built operator pins both directions. `Vec::reserve` is
+        // free to over-allocate in principle, but on an empty vector with an exact request every
+        // current implementation allocates exactly, so an inexact count is what this would catch.
+        let norb = 4;
+        let npair = norb * (norb + 1) / 2;
+        let num_s8 = npair * (npair + 1) / 2;
+        let num_s4 = npair * npair;
+
+        // Dense blocks, so every symmetry orbit is exercised (and a few explicit zeros, which the
+        // count must skip exactly as the build loop does).
+        let mut one_body = Array1::from_iter((0..npair).map(|x| f64::from(x) + 1.0));
+        one_body[2] = 0.0;
+        let mut two_body_s8 = Array1::from_iter((0..num_s8).map(|x| f64::from(x) + 1.0));
+        two_body_s8[5] = 0.0;
+        let two_body_s4 = Array1::from_iter((0..num_s4).map(|x| f64::from(x) + 1.0));
+
+        let op = FermionOperator::from_1body_tril_spin_sym(ArrayView1::from(&one_body), norb);
+        assert_eq!(op.coeffs.len(), op.coeffs.capacity(), "1body sym coeffs");
+        assert_eq!(op.modes.len(), op.modes.capacity(), "1body sym modes");
+
+        let op = FermionOperator::from_1body_tril_spin(
+            ArrayView1::from(&one_body),
+            ArrayView1::from(&one_body),
+            norb,
+        );
+        assert_eq!(op.coeffs.len(), op.coeffs.capacity(), "1body coeffs");
+        assert_eq!(op.modes.len(), op.modes.capacity(), "1body modes");
+
+        let op = FermionOperator::from_2body_tril_spin_sym(ArrayView1::from(&two_body_s8), norb);
+        assert_eq!(op.coeffs.len(), op.coeffs.capacity(), "2body sym coeffs");
+        assert_eq!(op.modes.len(), op.modes.capacity(), "2body sym modes");
+
+        let op = FermionOperator::from_2body_tril_spin(
+            ArrayView1::from(&two_body_s8),
+            ArrayView1::from(&two_body_s4),
+            ArrayView1::from(&two_body_s8),
+            norb,
+        );
+        assert_eq!(op.coeffs.len(), op.coeffs.capacity(), "2body coeffs");
+        assert_eq!(op.modes.len(), op.modes.capacity(), "2body modes");
     }
 
     #[test]
