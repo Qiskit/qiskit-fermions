@@ -137,6 +137,6 @@ References
    :hidden:
    :caption: API reference
 
-   Python API reference <https://quantum.cloud.ibm.com/docs/en/api/qiskit-fermions>
-   C API reference <FIXME>
+   Python API reference <https://quantum.cloud.ibm.com/docs/api/qiskit-fermions>
+   C API reference <https://quantum.cloud.ibm.com/docs/api/qiskit-fermions-c>
    Release notes <release-notes>
