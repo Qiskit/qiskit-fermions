@@ -76,13 +76,33 @@ fn _expand_s8_index(iajb: u32) -> Vec<(u32, u32, u32, u32)> {
 }
 
 pub trait From1Body {
-    fn add_1body_tril_spin_sym(&mut self, one_body_a: ArrayView1<f64>, norb: u32);
+    /// Appends the one-body terms, assigning group indices from `next_group_idx` upwards, and
+    /// returns the next free group index.
+    ///
+    /// The group index is threaded in and out rather than re-derived from the operator so that a
+    /// caller appending several blocks in sequence keeps the running index in its own scope.
+    /// Deriving it per integral instead (via
+    /// [`num_groups`](crate::operators::OperatorTrait::num_groups), which scans every group index)
+    /// makes building a large operator quadratic in its term count.
+    ///
+    /// `next_group_idx` must be `Some` iff the operator tracks groups; it is returned unchanged
+    /// (`None`) for an operator that does not.
+    fn add_1body_tril_spin_sym(
+        &mut self,
+        one_body_a: ArrayView1<f64>,
+        norb: u32,
+        next_group_idx: Option<u32>,
+    ) -> Option<u32>;
+
+    /// Appends the one-body alpha and beta terms. See
+    /// [`add_1body_tril_spin_sym`](Self::add_1body_tril_spin_sym) for the group-index contract.
     fn add_1body_tril_spin(
         &mut self,
         one_body_a: ArrayView1<f64>,
         one_body_b: ArrayView1<f64>,
         norb: u32,
-    );
+        next_group_idx: Option<u32>,
+    ) -> Option<u32>;
 
     fn from_1body_tril_spin_sym(one_body_a: ArrayView1<f64>, norb: u32) -> Self;
     fn from_1body_tril_spin(
@@ -150,24 +170,31 @@ impl FermionOperator {
 }
 
 impl From1Body for FermionOperator {
-    fn add_1body_tril_spin_sym(&mut self, one_body_a: ArrayView1<f64>, norb: u32) {
+    fn add_1body_tril_spin_sym(
+        &mut self,
+        one_body_a: ArrayView1<f64>,
+        norb: u32,
+        mut next_group_idx: Option<u32>,
+    ) -> Option<u32> {
         one_body_a
             .indexed_iter()
             .filter(|&(_, coeff)| coeff.abs() > 0.0)
             .for_each(|(ia, &coeff)| {
                 let (i, a) = _inflate_index(ia as u32);
                 let c = Complex64::new(coeff, 0.0);
-                let mut next_group_idx = self.num_groups();
                 Self::_insert_1body_idx(self, c, i, a, next_group_idx);
-                next_group_idx = self.num_groups();
+                next_group_idx = next_group_idx.map(|x| x + 1);
                 Self::_insert_1body_idx(self, c, i + norb, a + norb, next_group_idx);
+                next_group_idx = next_group_idx.map(|x| x + 1);
             });
+
+        next_group_idx
     }
 
     fn from_1body_tril_spin_sym(one_body_a: ArrayView1<f64>, norb: u32) -> Self {
         let mut op = Self::zero();
         op.groups = Some(vec![]);
-        op.add_1body_tril_spin_sym(one_body_a, norb);
+        op.add_1body_tril_spin_sym(one_body_a, norb, Some(0));
         op
     }
 
@@ -176,15 +203,16 @@ impl From1Body for FermionOperator {
         one_body_a: ArrayView1<f64>,
         one_body_b: ArrayView1<f64>,
         norb: u32,
-    ) {
+        mut next_group_idx: Option<u32>,
+    ) -> Option<u32> {
         one_body_a
             .indexed_iter()
             .filter(|&(_, coeff)| coeff.abs() > 0.0)
             .for_each(|(ia, &coeff)| {
                 let (i, a) = _inflate_index(ia as u32);
                 let c = Complex64::new(coeff, 0.0);
-                let next_group_idx = self.num_groups();
                 Self::_insert_1body_idx(self, c, i, a, next_group_idx);
+                next_group_idx = next_group_idx.map(|x| x + 1);
             });
 
         one_body_b
@@ -193,9 +221,11 @@ impl From1Body for FermionOperator {
             .for_each(|(ia, &coeff)| {
                 let (i, a) = _inflate_index(ia as u32);
                 let c = Complex64::new(coeff, 0.0);
-                let next_group_idx = self.num_groups();
                 Self::_insert_1body_idx(self, c, i + norb, a + norb, next_group_idx);
+                next_group_idx = next_group_idx.map(|x| x + 1);
             });
+
+        next_group_idx
     }
 
     fn from_1body_tril_spin(
@@ -205,20 +235,32 @@ impl From1Body for FermionOperator {
     ) -> Self {
         let mut op = Self::zero();
         op.groups = Some(vec![]);
-        op.add_1body_tril_spin(one_body_a, one_body_b, norb);
+        op.add_1body_tril_spin(one_body_a, one_body_b, norb, Some(0));
         op
     }
 }
 
 pub trait From2Body {
-    fn add_2body_tril_spin_sym(&mut self, two_body_aa: ArrayView1<f64>, norb: u32);
+    /// Appends the two-body terms, assigning group indices from `next_group_idx` upwards, and
+    /// returns the next free group index. See
+    /// [`add_1body_tril_spin_sym`](From1Body::add_1body_tril_spin_sym) for the group-index contract.
+    fn add_2body_tril_spin_sym(
+        &mut self,
+        two_body_aa: ArrayView1<f64>,
+        norb: u32,
+        next_group_idx: Option<u32>,
+    ) -> Option<u32>;
+
+    /// Appends the two-body alpha-alpha, alpha-beta and beta-beta terms. See
+    /// [`add_1body_tril_spin_sym`](From1Body::add_1body_tril_spin_sym) for the group-index contract.
     fn add_2body_tril_spin(
         &mut self,
         two_body_aa: ArrayView1<f64>,
         two_body_ab: ArrayView1<f64>,
         two_body_bb: ArrayView1<f64>,
         norb: u32,
-    );
+        next_group_idx: Option<u32>,
+    ) -> Option<u32>;
 
     fn from_2body_tril_spin_sym(two_body_aa: ArrayView1<f64>, norb: u32) -> Self;
     fn from_2body_tril_spin(
@@ -236,13 +278,17 @@ pub trait From2Body {
 }
 
 impl From2Body for FermionOperator {
-    fn add_2body_tril_spin_sym(&mut self, two_body_aa: ArrayView1<f64>, norb: u32) {
+    fn add_2body_tril_spin_sym(
+        &mut self,
+        two_body_aa: ArrayView1<f64>,
+        norb: u32,
+        mut next_group_idx: Option<u32>,
+    ) -> Option<u32> {
         two_body_aa
             .indexed_iter()
             .filter(|&(_, coeff)| coeff.abs() > 0.0)
             .for_each(|(iajb, &coeff)| {
                 let c = Complex64::new(0.5 * coeff, 0.0);
-                let next_group_idx = self.num_groups();
                 let group_idx_ab = next_group_idx.map(|x| x + 1);
                 let group_idx_ba = next_group_idx.map(|x| x + 2);
                 let group_idx_bb = next_group_idx.map(|x| x + 3);
@@ -262,13 +308,16 @@ impl From2Body for FermionOperator {
                             group_idx_bb,
                         );
                     });
+                next_group_idx = next_group_idx.map(|x| x + 4);
             });
+
+        next_group_idx
     }
 
     fn from_2body_tril_spin_sym(two_body_aa: ArrayView1<f64>, norb: u32) -> Self {
         let mut op = Self::zero();
         op.groups = Some(vec![]);
-        op.add_2body_tril_spin_sym(two_body_aa, norb);
+        op.add_2body_tril_spin_sym(two_body_aa, norb, Some(0));
         op
     }
 
@@ -278,18 +327,19 @@ impl From2Body for FermionOperator {
         two_body_ab: ArrayView1<f64>,
         two_body_bb: ArrayView1<f64>,
         norb: u32,
-    ) {
+        mut next_group_idx: Option<u32>,
+    ) -> Option<u32> {
         two_body_aa
             .indexed_iter()
             .filter(|&(_, coeff)| coeff.abs() > 0.0)
             .for_each(|(iajb, &coeff)| {
                 let c = Complex64::new(0.5 * coeff, 0.0);
-                let next_group_idx = self.num_groups();
                 _expand_s8_index(iajb as u32)
                     .iter()
                     .for_each(|&(i, a, j, b)| {
                         Self::_insert_2body_idx(self, c, i, j, b, a, next_group_idx);
                     });
+                next_group_idx = next_group_idx.map(|x| x + 1);
             });
 
         let npair = norb * (norb + 1) / 2;
@@ -298,7 +348,6 @@ impl From2Body for FermionOperator {
             .filter(|&(_, coeff)| coeff.abs() > 0.0)
             .for_each(|(iajb, &coeff)| {
                 let c = Complex64::new(0.5 * coeff, 0.0);
-                let next_group_idx = self.num_groups();
                 let group_idx_b = next_group_idx.map(|x| x + 1);
                 _expand_s4_index(iajb as u32, npair)
                     .iter()
@@ -306,6 +355,7 @@ impl From2Body for FermionOperator {
                         Self::_insert_2body_idx(self, c, i, j + norb, b + norb, a, next_group_idx);
                         Self::_insert_2body_idx(self, c, j + norb, i, a, b + norb, group_idx_b);
                     });
+                next_group_idx = next_group_idx.map(|x| x + 2);
             });
 
         two_body_bb
@@ -313,7 +363,6 @@ impl From2Body for FermionOperator {
             .filter(|&(_, coeff)| coeff.abs() > 0.0)
             .for_each(|(iajb, &coeff)| {
                 let c = Complex64::new(0.5 * coeff, 0.0);
-                let next_group_idx = self.num_groups();
                 _expand_s8_index(iajb as u32)
                     .iter()
                     .for_each(|&(i, a, j, b)| {
@@ -327,7 +376,10 @@ impl From2Body for FermionOperator {
                             next_group_idx,
                         );
                     });
+                next_group_idx = next_group_idx.map(|x| x + 1);
             });
+
+        next_group_idx
     }
 
     fn from_2body_tril_spin(
@@ -338,7 +390,7 @@ impl From2Body for FermionOperator {
     ) -> Self {
         let mut op = Self::zero();
         op.groups = Some(vec![]);
-        op.add_2body_tril_spin(two_body_aa, two_body_ab, two_body_bb, norb);
+        op.add_2body_tril_spin(two_body_aa, two_body_ab, two_body_bb, norb, Some(0));
         op
     }
 }

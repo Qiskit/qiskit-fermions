@@ -185,29 +185,44 @@ impl From<&FCIDump> for FermionOperator {
         let mut op = Self::zero();
         op.groups = Some(vec![]);
 
+        // The running group index is owned here and threaded through each block, so that no builder
+        // has to re-derive it from the operator (see `From1Body::add_1body_tril_spin_sym`).
+        let mut next_group_idx = Some(0);
+
         if let Some(coeff) = fcidump.constant {
             op.coeffs.push(Complex64::new(coeff, 0.0));
             op.boundaries.push(op.boundaries.len() - 1);
             op.groups = Some(vec![0]);
+            next_group_idx = Some(1);
         };
 
         match &fcidump.one_body_b {
             Some(_) => {
-                op.add_1body_tril_spin(
+                let next_group_idx = op.add_1body_tril_spin(
                     ArrayView1::from(&fcidump.one_body_a),
                     ArrayView1::from(fcidump.one_body_b.as_ref().unwrap()),
                     fcidump.norb,
+                    next_group_idx,
                 );
                 op.add_2body_tril_spin(
                     ArrayView1::from(&fcidump.two_body_aa),
                     ArrayView1::from(fcidump.two_body_ab.as_ref().unwrap()),
                     ArrayView1::from(fcidump.two_body_bb.as_ref().unwrap()),
                     fcidump.norb,
+                    next_group_idx,
                 );
             }
             None => {
-                op.add_1body_tril_spin_sym(ArrayView1::from(&fcidump.one_body_a), fcidump.norb);
-                op.add_2body_tril_spin_sym(ArrayView1::from(&fcidump.two_body_aa), fcidump.norb);
+                let next_group_idx = op.add_1body_tril_spin_sym(
+                    ArrayView1::from(&fcidump.one_body_a),
+                    fcidump.norb,
+                    next_group_idx,
+                );
+                op.add_2body_tril_spin_sym(
+                    ArrayView1::from(&fcidump.two_body_aa),
+                    fcidump.norb,
+                    next_group_idx,
+                );
             }
         }
 
