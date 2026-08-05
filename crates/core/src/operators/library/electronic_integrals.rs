@@ -15,8 +15,69 @@ use crate::operators::fermion_operator::FermionOperator;
 use ndarray::ArrayView1;
 use num_complex::Complex64;
 
+/// The index tuples a single packed integral expands into.
+///
+/// An 8-fold-symmetric index expands into at most 8 tuples (4 for the 4-fold case), so the
+/// expansions are returned in a fixed-size buffer rather than a freshly heap-allocated `Vec` per
+/// integral: building a large operator calls these once per stored integral, and the allocation
+/// dominated the arithmetic.
+struct ExpandedIndices {
+    buf: [(u32, u32, u32, u32); 8],
+    len: usize,
+}
+
+impl ExpandedIndices {
+    #[inline]
+    fn new() -> Self {
+        Self {
+            buf: [(0, 0, 0, 0); 8],
+            len: 0,
+        }
+    }
+
+    #[inline]
+    fn push(&mut self, tuple: (u32, u32, u32, u32)) {
+        self.buf[self.len] = tuple;
+        self.len += 1;
+    }
+
+    /// Appends `(i, a, j, b)` together with whichever of its index-swap partners are distinct from
+    /// it, mirroring the permutational symmetry of a real two-electron integral.
+    #[inline]
+    fn push_with_swaps(&mut self, i: u32, a: u32, j: u32, b: u32) {
+        self.push((i, a, j, b));
+        if i > a {
+            self.push((a, i, j, b));
+        }
+        if j > b {
+            self.push((i, a, b, j));
+        }
+        if i > a && j > b {
+            self.push((a, i, b, j));
+        }
+    }
+
+    #[inline]
+    fn as_slice(&self) -> &[(u32, u32, u32, u32)] {
+        &self.buf[..self.len]
+    }
+}
+
+/// Splits a lower-triangular packed index into its `(row, column)` pair.
+///
+/// `index` is `p * (p + 1) / 2 + q` with `q <= p`, so `p` is the largest integer with
+/// `p * (p + 1) / 2 <= index`, i.e. `floor((sqrt(8 * index + 1) - 1) / 2)`. The closed form
+/// replaces a loop that counted `p` up from zero. `f64` has 53 bits of mantissa and `index` is a
+/// `u32`, so `8 * index + 1` is exact and the square root is correct to well under half an integer
+/// step; the neighbours are still checked so a rounding step in either direction cannot slip
+/// through.
+#[inline]
 fn _inflate_index(index: u32) -> (u32, u32) {
-    let mut p = 0;
+    let mut p = (((8.0 * f64::from(index) + 1.0).sqrt() - 1.0) / 2.0) as u32;
+    // Nudge into place if the floating-point floor landed one off.
+    while p * (p + 1) / 2 > index {
+        p -= 1;
+    }
     while (p + 1) * (p + 2) / 2 <= index {
         p += 1;
     }
@@ -24,53 +85,28 @@ fn _inflate_index(index: u32) -> (u32, u32) {
     (p, q)
 }
 
-fn _expand_s4_index(iajb: u32, npair: u32) -> Vec<(u32, u32, u32, u32)> {
+fn _expand_s4_index(iajb: u32, npair: u32) -> ExpandedIndices {
     let ia = iajb / npair;
     let jb = iajb % npair;
 
     let (i, a) = _inflate_index(ia);
     let (j, b) = _inflate_index(jb);
 
-    let mut res = vec![(i, a, j, b)];
-    if i > a {
-        res.push((a, i, j, b));
-    }
-    if j > b {
-        res.push((i, a, b, j));
-    }
-    if i > a && j > b {
-        res.push((a, i, b, j));
-    }
+    let mut res = ExpandedIndices::new();
+    res.push_with_swaps(i, a, j, b);
     res
 }
 
-fn _expand_s8_index(iajb: u32) -> Vec<(u32, u32, u32, u32)> {
+fn _expand_s8_index(iajb: u32) -> ExpandedIndices {
     let (ia, jb) = _inflate_index(iajb);
-    let (mut i, mut a) = _inflate_index(ia);
-    let (mut j, mut b) = _inflate_index(jb);
+    let (i, a) = _inflate_index(ia);
+    let (j, b) = _inflate_index(jb);
 
-    let mut res = vec![(i, a, j, b)];
-    if i > a {
-        res.push((a, i, j, b));
-    }
-    if j > b {
-        res.push((i, a, b, j));
-    }
-    if i > a && j > b {
-        res.push((a, i, b, j));
-    }
+    let mut res = ExpandedIndices::new();
+    res.push_with_swaps(i, a, j, b);
     if ia > jb {
-        (i, a, j, b) = (j, b, i, a);
-        res.push((i, a, j, b));
-        if i > a {
-            res.push((a, i, j, b));
-        }
-        if j > b {
-            res.push((i, a, b, j));
-        }
-        if i > a && j > b {
-            res.push((a, i, b, j));
-        }
+        // The bra and ket pairs are distinct, so the whole block repeats with them exchanged.
+        res.push_with_swaps(j, b, i, a);
     }
     res
 }
@@ -293,6 +329,7 @@ impl From2Body for FermionOperator {
                 let group_idx_ba = next_group_idx.map(|x| x + 2);
                 let group_idx_bb = next_group_idx.map(|x| x + 3);
                 _expand_s8_index(iajb as u32)
+                    .as_slice()
                     .iter()
                     .for_each(|&(i, a, j, b)| {
                         Self::_insert_2body_idx(self, c, i, j, b, a, next_group_idx);
@@ -335,6 +372,7 @@ impl From2Body for FermionOperator {
             .for_each(|(iajb, &coeff)| {
                 let c = Complex64::new(0.5 * coeff, 0.0);
                 _expand_s8_index(iajb as u32)
+                    .as_slice()
                     .iter()
                     .for_each(|&(i, a, j, b)| {
                         Self::_insert_2body_idx(self, c, i, j, b, a, next_group_idx);
@@ -350,6 +388,7 @@ impl From2Body for FermionOperator {
                 let c = Complex64::new(0.5 * coeff, 0.0);
                 let group_idx_b = next_group_idx.map(|x| x + 1);
                 _expand_s4_index(iajb as u32, npair)
+                    .as_slice()
                     .iter()
                     .for_each(|&(i, a, j, b)| {
                         Self::_insert_2body_idx(self, c, i, j + norb, b + norb, a, next_group_idx);
@@ -364,6 +403,7 @@ impl From2Body for FermionOperator {
             .for_each(|(iajb, &coeff)| {
                 let c = Complex64::new(0.5 * coeff, 0.0);
                 _expand_s8_index(iajb as u32)
+                    .as_slice()
                     .iter()
                     .for_each(|&(i, a, j, b)| {
                         Self::_insert_2body_idx(
@@ -401,6 +441,57 @@ mod tests {
     use num_complex::Complex64;
 
     use super::*;
+
+    #[test]
+    fn test_inflate_index_matches_linear_search() {
+        // `_inflate_index` uses a closed form with a floating-point square root, so check it
+        // exhaustively against the linear search it replaced rather than at sampled points: an
+        // off-by-one from rounding would corrupt every index built from it. The sweep covers packed
+        // indices well past any real FCIDUMP (norb = 2000 packs into ~2e6 pairs).
+        fn linear_search(index: u32) -> (u32, u32) {
+            let mut p = 0;
+            while (p + 1) * (p + 2) / 2 <= index {
+                p += 1;
+            }
+            (p, index - p * (p + 1) / 2)
+        }
+
+        for index in 0..2_000_000_u32 {
+            let (p, q) = _inflate_index(index);
+            assert_eq!((p, q), linear_search(index), "mismatch at {index}");
+            // Also pin the defining identity, so both implementations agreeing on a wrong answer
+            // would still fail.
+            assert_eq!(p * (p + 1) / 2 + q, index, "identity broken at {index}");
+            assert!(q <= p, "q > p at {index}");
+        }
+    }
+
+    #[test]
+    fn test_expand_s8_index_covers_the_symmetry_orbit() {
+        // A fully off-diagonal index expands to all 8 permutations; the fully diagonal one to 1.
+        // These bracket the fixed-size buffer, so an over-push would panic here rather than only in
+        // a large build.
+        //
+        // iajb = 7 unpacks to ia = 3, jb = 1, i.e. (i, a) = (2, 0) and (j, b) = (1, 0): both pairs
+        // off-diagonal and distinct from each other, which is the maximal orbit.
+        assert_eq!(_inflate_index(7), (3, 1));
+        assert_eq!(
+            _expand_s8_index(7).as_slice(),
+            &[
+                (2, 0, 1, 0),
+                (0, 2, 1, 0),
+                (2, 0, 0, 1),
+                (0, 2, 0, 1),
+                (1, 0, 2, 0),
+                (0, 1, 2, 0),
+                (1, 0, 0, 2),
+                (0, 1, 0, 2),
+            ]
+        );
+
+        // ia == jb == 0 -> i == a == j == b, a single tuple.
+        assert_eq!(_expand_s8_index(0).as_slice(), &[(0, 0, 0, 0)]);
+    }
 
     #[test]
     fn test_1body_tril_spin_sym() {
