@@ -19,6 +19,36 @@ use regex::{Captures, Regex};
 use std::fs::File;
 use std::io::Read;
 
+/// Splits one integral line into its coefficient and four (1-based) orbital indices, or returns
+/// `None` if the line is not an integral record and should be skipped.
+///
+/// This replaces a per-line capturing regex (`(.+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)`) whose captures
+/// each had to be copied into an owned `String` before parsing; here every field is parsed straight
+/// out of the borrowed line, so reading a large file allocates nothing per record.
+///
+/// The regex's leading group was greedy, so on a line carrying more than five fields the *last*
+/// four were taken as the indices and everything before them as the coefficient. That is preserved
+/// exactly: the indices are the final four whitespace-separated tokens. A line is skipped when it
+/// has fewer than five tokens, when any of the last four is not a non-negative integer, or when the
+/// remainder does not parse as a float — matching the cases where the regex previously found no
+/// match (and, for the coefficient, where the subsequent `parse` would have panicked).
+fn split_integral_line(line: &str) -> Option<(f64, usize, usize, usize, usize)> {
+    let line = line.trim();
+
+    // Walk back over the four index fields, remembering where the coefficient ends.
+    let mut rest = line;
+    let mut indices = [0_usize; 4];
+    for slot in indices.iter_mut().rev() {
+        let start = rest.rfind(char::is_whitespace)? + 1;
+        // `\d+` matched digits only: no sign, and a bare `-1` is not an index.
+        *slot = rest[start..].parse::<usize>().ok()?;
+        rest = rest[..start].trim_end();
+    }
+
+    let coeff = rest.parse::<f64>().ok()?;
+    Some((coeff, indices[0], indices[1], indices[2], indices[3]))
+}
+
 #[derive(Clone, Debug, PartialEq)]
 pub struct FCIDump {
     pub norb: u32,
@@ -83,8 +113,6 @@ impl FCIDump {
         let num_s4 = npair * npair;
         let num_s8 = npair * (npair + 1) / 2;
 
-        let integral_line = Regex::new(r"(.+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)").unwrap();
-
         let mut beta_present: bool = false;
         let mut constant: Option<f64> = None;
         let mut one_body_a = Array1::<f64>::zeros(npair);
@@ -94,14 +122,9 @@ impl FCIDump {
         let mut two_body_bb = Array1::<f64>::zeros(num_s8);
 
         for line in integrals.lines() {
-            let Some(integral) = integral_line.captures(line.trim()) else {
+            let Some((coeff, i, a, j, b)) = split_integral_line(line) else {
                 continue;
             };
-            let coeff = unwrap_cap(&integral, 1).parse::<f64>().unwrap();
-            let i = unwrap_cap(&integral, 2).parse::<usize>().unwrap();
-            let a = unwrap_cap(&integral, 3).parse::<usize>().unwrap();
-            let j = unwrap_cap(&integral, 4).parse::<usize>().unwrap();
-            let b = unwrap_cap(&integral, 5).parse::<usize>().unwrap();
 
             match (i, a, j, b) {
                 (0, 0, 0, 0) => constant = Some(coeff),
@@ -185,29 +208,44 @@ impl From<&FCIDump> for FermionOperator {
         let mut op = Self::zero();
         op.groups = Some(vec![]);
 
+        // The running group index is owned here and threaded through each block, so that no builder
+        // has to re-derive it from the operator (see `From1Body::add_1body_tril_spin_sym`).
+        let mut next_group_idx = Some(0);
+
         if let Some(coeff) = fcidump.constant {
             op.coeffs.push(Complex64::new(coeff, 0.0));
             op.boundaries.push(op.boundaries.len() - 1);
             op.groups = Some(vec![0]);
+            next_group_idx = Some(1);
         };
 
         match &fcidump.one_body_b {
             Some(_) => {
-                op.add_1body_tril_spin(
+                let next_group_idx = op.add_1body_tril_spin(
                     ArrayView1::from(&fcidump.one_body_a),
                     ArrayView1::from(fcidump.one_body_b.as_ref().unwrap()),
                     fcidump.norb,
+                    next_group_idx,
                 );
                 op.add_2body_tril_spin(
                     ArrayView1::from(&fcidump.two_body_aa),
                     ArrayView1::from(fcidump.two_body_ab.as_ref().unwrap()),
                     ArrayView1::from(fcidump.two_body_bb.as_ref().unwrap()),
                     fcidump.norb,
+                    next_group_idx,
                 );
             }
             None => {
-                op.add_1body_tril_spin_sym(ArrayView1::from(&fcidump.one_body_a), fcidump.norb);
-                op.add_2body_tril_spin_sym(ArrayView1::from(&fcidump.two_body_aa), fcidump.norb);
+                let next_group_idx = op.add_1body_tril_spin_sym(
+                    ArrayView1::from(&fcidump.one_body_a),
+                    fcidump.norb,
+                    next_group_idx,
+                );
+                op.add_2body_tril_spin_sym(
+                    ArrayView1::from(&fcidump.two_body_aa),
+                    fcidump.norb,
+                    next_group_idx,
+                );
             }
         }
 
@@ -648,5 +686,47 @@ mod tests {
             "&FCI NORB=   2,NELEC=   2,MS2= 0,\n /\n 0.5   1   1   2   0\n",
         );
         FCIDump::from_file(path);
+    }
+
+    #[test]
+    fn test_split_integral_line_accepts_well_formed_records() {
+        assert_eq!(
+            split_integral_line(" 0.284 1 1 1 1"),
+            Some((0.284, 1, 1, 1, 1))
+        );
+        // Irregular internal padding, a leading sign and an exponent must all parse.
+        assert_eq!(
+            split_integral_line(" -1.67e-04    2    1    1    1"),
+            Some((-1.67e-4, 2, 1, 1, 1))
+        );
+        // The all-zero index tuple carries the constant and must not be treated as malformed.
+        assert_eq!(split_integral_line(" 0.5 0 0 0 0"), Some((0.5, 0, 0, 0, 0)));
+        // A coefficient written without a decimal point is still a valid float.
+        assert_eq!(split_integral_line("1 2 3 4 5"), Some((1.0, 2, 3, 4, 5)));
+    }
+
+    #[test]
+    fn test_split_integral_line_skips_non_records() {
+        // Blank, short and non-numeric lines are skipped rather than parsed, which is what let the
+        // previous regex-based loop walk past the namelist remnants and any trailing blank line.
+        assert_eq!(split_integral_line(""), None);
+        assert_eq!(split_integral_line("   "), None);
+        assert_eq!(split_integral_line(" 0.5 1 1 1"), None);
+        assert_eq!(split_integral_line("garbage line"), None);
+        // `\d+` matched digits only, so a signed index is not an index.
+        assert_eq!(split_integral_line(" 0.5 1 1 1 -1"), None);
+        // Commas were never stripped from integral records, so a comma-separated line did not match.
+        assert_eq!(split_integral_line(" 0.5,  1,  1,  1,  1"), None);
+    }
+
+    #[test]
+    fn test_split_integral_line_takes_the_last_four_indices() {
+        // The replaced regex opened with a greedy `(.+)`, so on a line with more than five fields
+        // the *last* four became the indices and everything before them the coefficient. That line
+        // shape is not legal FCIDUMP, but pin the behaviour so the rewrite is a faithful swap: here
+        // the coefficient text is `0.5 1`, which is not a float, so the record is skipped.
+        assert_eq!(split_integral_line(" 0.5 1 1 1 1 2"), None);
+        // With a coefficient that survives the greedy match, the last four fields are the indices.
+        assert_eq!(split_integral_line(" 0.5 1 2 3 4"), Some((0.5, 1, 2, 3, 4)));
     }
 }
