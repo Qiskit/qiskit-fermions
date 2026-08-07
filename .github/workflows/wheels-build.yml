@@ -72,7 +72,7 @@ jobs:
         with:
           python-version: ${{ inputs.python-version }}
       - uses: dtolnay/rust-toolchain@stable
-      - uses: pypa/cibuildwheel@v3.4.0
+      - uses: pypa/cibuildwheel@v4.2.0
       - uses: actions/upload-artifact@v7
         with:
           path: ./wheelhouse/*.whl
@@ -89,7 +89,7 @@ jobs:
         with:
           python-version: ${{ inputs.python-version }}
       - uses: dtolnay/rust-toolchain@stable
-      - uses: pypa/cibuildwheel@v3.4.0
+      - uses: pypa/cibuildwheel@v4.2.0
       - uses: actions/upload-artifact@v7
         with:
           path: ./wheelhouse/*.whl
@@ -106,7 +106,7 @@ jobs:
         with:
           python-version: ${{ inputs.python-version }}
       - uses: dtolnay/rust-toolchain@stable
-      - uses: pypa/cibuildwheel@v3.4.0
+      - uses: pypa/cibuildwheel@v4.2.0
       - uses: actions/upload-artifact@v7
         with:
           path: ./wheelhouse/*.whl
