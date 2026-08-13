@@ -38,6 +38,29 @@ jobs:
         name: Install Python
         with:
           python-version: ${{ inputs.python-version }}
+          # There is no lockfile (dependencies come from `pyproject.toml`'s PEP 735 dependency groups
+          # and extras), so the pip wheel cache is keyed on that file.  Coarser than a lockfile: any
+          # edit to it, dependency-related or not, invalidates the cache.
+          cache: pip
+          cache-dependency-path: pyproject.toml
+
+      # `Cargo.lock` is committed and pins every dependency to crates.io, so it fully describes what
+      # gets downloaded.  Deliberately the registry only, not `target/`: two build scripts key off the
+      # Qiskit C API whose path is constant in CI while its contents move, and the workspace is built
+      # under several mutually exclusive feature and profile combinations that would not share
+      # artifacts anyway.  `restore-keys` is safe here (unlike for the Qiskit C API cache) because the
+      # registry is content-addressed -- a partial restore is just a warm subset that cargo completes
+      # and checksums.
+      - name: Cache cargo registry
+        uses: actions/cache@v6
+        with:
+          path: |
+            ~/.cargo/registry/index
+            ~/.cargo/registry/cache
+            ~/.cargo/git/db
+          key: cargo-registry-v1 | ${{ runner.os }} | ${{ runner.arch }} | ${{ hashFiles('Cargo.lock') }}
+          restore-keys: |
+            cargo-registry-v1 | ${{ runner.os }} | ${{ runner.arch }}
 
       - name: Install Rust
         run: rustup toolchain install --profile minimal --no-self-update
