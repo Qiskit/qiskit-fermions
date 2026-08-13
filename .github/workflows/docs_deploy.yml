@@ -1,0 +1,88 @@
+---
+name: Deploy documentation
+
+# Post-merge publication of the documentation to GitHub Pages.
+#
+# This is deliberately separate from `docs.yml` (which is the reusable, branch-protected *build*).
+# Deploying is a consequence of merging rather than a precondition for it, and a Pages deployment can
+# only ever run on `main`, so it could never be a useful required status check: on a pull request the
+# job would be skipped, and GitHub counts a skipped required check as a success.
+#
+# The build steps below duplicate `docs.yml`'s because a `actions/upload-pages-artifact` artifact
+# cannot be handed across workflow runs.
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "[0-9]+.[0-9]+.[0-9]+*"
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.repository }}-${{ github.ref }}-${{ github.workflow }}
+  # Don't cancel: we may otherwise end up with weird half-uploaded docs.
+  cancel-in-progress: false
+
+jobs:
+  build:
+    if: github.repository_owner == 'Qiskit'
+    name: build docs
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v7
+        name: Install Python
+        with:
+          # Keep in step with `python-coverage` in `config.yml`.
+          python-version: '3.11'
+
+      - name: Install Rust
+        run: rustup toolchain install --profile minimal --no-self-update
+
+      - name: Install dependencies
+        run: tools/install_ubuntu_docs_dependencies.sh
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+
+      - name: Tell reno to name the upcoming release after the branch we are on
+        shell: bash
+        run: |
+          sed -i.bak -e '/unreleased_version_title:*/d' releasenotes/config.yaml
+          echo unreleased_version_title: \"Upcoming release \(\`\`${GITHUB_REF_NAME}\`\`\)\" >> releasenotes/config.yaml
+
+      - name: Install Package
+        shell: bash
+        run: |
+          pip install --group build --group docs qiskit
+          SETUPTOOLS_RUST_CARGO_PROFILE=release pip install -e ".[all]"
+
+      - name: Build docs
+        shell: bash
+        run: |
+          make docs
+
+      - name: Upload docs artifact for GitHub Pages
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: docs/_build/html
+
+  deploy:
+    name: deploy docs
+    if: ${{ github.ref == 'refs/heads/main' }}
+    needs: build
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5
