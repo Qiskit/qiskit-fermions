@@ -177,13 +177,18 @@ C_LIBQISKIT_FERMIONS_OUT=$(C_DIR_OUT_LIB)/$(subst _cext,,$(C_LIB_CARGO_FILENAME)
 #
 # Typically, downstream recipes should depend on `build-clib-release` or
 # `build-clib-dev` instead.
-.PHONY: build-clib build-clib-release build-clib-dev
-build-clib:
-	cargo rustc -p qiskit-fermions-cext --crate-type cdylib ${C_LIB_CARGO_FLAGS} -- ${C_LIB_RUSTC_FLAGS}
-build-clib-release: C_LIB_CARGO_FLAGS=--release
-build-clib-release: build-clib
-build-clib-dev: C_LIB_CARGO_FLAGS=--profile dev
-build-clib-dev: build-clib
+#
+# These two must keep separate recipes rather than sharing a common prerequisite
+# parameterised by a target-specific variable: a phony target is only built once
+# per `make` invocation, so a shared one would collapse a request for both
+# profiles (`make cext testc`) into whichever was asked for first, leaving the
+# other profile's `target/<profile>/` empty and tripping CMake's
+# `find_library(... REQUIRED)`.
+.PHONY: build-clib-release build-clib-dev
+build-clib-release:
+	cargo rustc -p qiskit-fermions-cext --crate-type cdylib --release -- ${C_LIB_RUSTC_FLAGS}
+build-clib-dev:
+	cargo rustc -p qiskit-fermions-cext --crate-type cdylib --profile dev -- ${C_LIB_RUSTC_FLAGS}
 # This is the minimal amount of work we can do that builds the generated header
 # file(s) (by force running the build script of `qiskit-fermions-cext`).  You do
 # not need to run this rule if you also depend on `build-clib`, but it doesn't
@@ -223,7 +228,13 @@ cext: cheader clib
 # compiled C API of the Qiskit SDK.
 .PHONY: testc
 # Use ctest to run C API tests.
-testc: build-clib-dev
+#
+# `cheader` is a prerequisite as well as `build-clib-dev`: the tests `#include
+# <qiskit_fermions.h>` from `$(C_DIR_OUT_INCLUDE)` (passed below as
+# `QISKIT_FERMIONS_INCLUDE_PATH`), and `build-clib-dev` only builds the shared
+# library -- it never *installs* the generated header.  Without this, a clean
+# tree fails with `fatal error: qiskit_fermions.h: No such file or directory`.
+testc: build-clib-dev cheader
 # `-S` specifies the source (including the `CMakeLists.txt` file, `-B` is where
 # to put the build files, including the generated CMake stuff.  See the
 # `CMakeLists.txt` file for the build variables.
