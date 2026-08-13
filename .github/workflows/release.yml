@@ -16,6 +16,11 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - build
+    # Creating a release needs write access to repository contents.  This currently also works without
+    # the block (the repository's default workflow token is read/write), but stating it explicitly
+    # keeps the job working if that default is ever tightened to read-only.
+    permissions:
+      contents: write
     steps:
       - name: Checkout tag
         uses: actions/checkout@v7
@@ -53,6 +58,10 @@ jobs:
           pattern: deploy-*
           path: deploy
           merge-multiple: true
+      # `release/v1` is a mutable branch rather than a tag, so we silently pick up upstream changes
+      # (and Dependabot will not bump it).  That is deliberate and is what upstream recommends for
+      # this action: trusted publishing has to track PyPI's OIDC flow, and a stale pin would fail at
+      # release time rather than in CI.
       - name: Publish release to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
