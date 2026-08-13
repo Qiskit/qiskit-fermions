@@ -1,39 +1,27 @@
+---
 name: Latest version tests
 
-on:
-  push:
-    branches:
-      - main
-      - 'stable/**'
-  pull_request:
-    branches:
-      - main
-      - 'stable/**'
-  schedule:
-    - cron: '0 1 * * *'
+# This is a reusable workflow, driven by `branch-protection.yml` (for pull requests and the merge
+# queue) and by `on-nightly.yml` (for the scheduled run).  It deliberately has no triggers of its own
+# beyond `workflow_call`, and no `concurrency` block: the calling workflow owns both.
 
-concurrency:
-  group: ${{ github.repository }}-${{ github.ref }}-${{ github.head_ref }}-${{ github.workflow }}
-  # Only cancel in PR mode.  In push mode, don't cancel so we don't see spurious test "failures",
-  # and we get coverage reports on Coveralls for every push.
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+on:
+  workflow_call:
+    inputs:
+      python-version:
+        description: Python version to test.
+        type: string
+        required: true
+      runner:
+        description: Runner image to use.
+        type: string
+        required: true
 
 jobs:
   tests:
-    if: github.repository_owner == 'Qiskit'
-    name: latest version tests (${{ matrix.os }}, ${{ matrix.python-version }})
-    runs-on: ${{ matrix.os }}
+    name: ${{ inputs.python-version }} / ${{ inputs.runner }}
+    runs-on: ${{ inputs.runner }}
     timeout-minutes: 30
-    strategy:
-      max-parallel: 4
-      matrix:
-        os: [ubuntu-latest]
-        python-version: ["3.10", "3.14"]
-        include:
-          - os: macos-latest
-            python-version: "3.14"
-          - os: windows-latest
-            python-version: "3.14"
     steps:
       - uses: actions/checkout@v7
         with:
@@ -42,10 +30,10 @@ jobs:
       - uses: actions/setup-python@v7
         name: Install Python
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: ${{ inputs.python-version }}
 
       - name: Install Rust
-        run: rustup toolchain install stable --override --profile minimal --no-self-update
+        run: rustup toolchain install --profile minimal --no-self-update
 
       - name: Install dependencies
         run: |
