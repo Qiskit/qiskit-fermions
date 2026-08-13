@@ -227,7 +227,13 @@ extend-exclude = ["crates/qiskit-pyo3-ffi"]
 manylinux-x86_64-image = "manylinux_2_28"
 manylinux-aarch64-image = "manylinux_2_28"
 build = ["cp3??-*"]
-skip = ["*-win32", "*_i686", "*_universal2", "*-musllinux_*"]
+skip = [
+    "cp315-*",  # not yet supported
+    "*-win32",
+    "*_i686",
+    "*_universal2",
+    "*-musllinux_*",
+]
 # Run straight from the source checkout: passing an explicit path (`{project}/tests/python`) on
 # the command line makes pytest ignore `[tool.pytest.ini_options].testpaths`, so it never walks
 # into `python/qiskit_fermions/` and picks up the Sybil-collected doctests there (those need the
