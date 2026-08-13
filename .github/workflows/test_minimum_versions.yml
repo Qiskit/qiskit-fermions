@@ -1,34 +1,34 @@
+---
 name: Minimum version tests
 
-on:
-  push:
-    branches:
-      - main
-      - 'stable/**'
-  pull_request:
-    branches:
-      - main
-      - 'stable/**'
-  schedule:
-    - cron: '0 1 * * *'
+# This is a reusable workflow, driven by `branch-protection.yml` (for pull requests and the merge
+# queue) and by `on-nightly.yml` (for the scheduled run).  It deliberately has no triggers of its own
+# beyond `workflow_call`, and no `concurrency` block: the calling workflow owns both.
 
-concurrency:
-  group: ${{ github.repository }}-${{ github.ref }}-${{ github.head_ref }}-${{ github.workflow }}
-  # Only cancel in PR mode.  In push mode, don't cancel so we don't see spurious test "failures",
-  # and we get coverage reports on Coveralls for every push.
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+on:
+  workflow_call:
+    inputs:
+      runner:
+        description: Runner image to use.
+        type: string
+        required: true
+      python-version:
+        description: Python version to test.
+        type: string
+        required: true
+      qiskit-version:
+        description: >
+          Git ref of the oldest supported Qiskit release, used to build the Qiskit C API against.
+        type: string
+        required: true
 
 jobs:
   tests:
-    if: github.repository_owner == 'Qiskit'
-    name: minimum version tests (${{ matrix.os }}, ${{ matrix.python-version }})
-    runs-on: ${{ matrix.os }}
+    # The caller's job name carries the matrix values, which GitHub appends to it, so this only needs
+    # to say which suite is running.
+    name: minimum
+    runs-on: ${{ inputs.runner }}
     timeout-minutes: 30
-    strategy:
-      max-parallel: 4
-      matrix:
-        os: [ubuntu-latest]
-        python-version: ["3.10"]
     steps:
       - uses: actions/checkout@v7
         with:
@@ -37,10 +37,10 @@ jobs:
       - uses: actions/setup-python@v7
         name: Install Python
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: ${{ inputs.python-version }}
 
       - name: Install Rust
-        run: rustup toolchain install stable --override --profile minimal --no-self-update
+        run: rustup toolchain install --profile minimal --no-self-update
 
       - name: Install dependencies
         run: |
@@ -50,11 +50,13 @@ jobs:
         shell: bash
         env:
           GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+          # Passed through the environment rather than interpolated directly into the script below.
+          QISKIT_VERSION: ${{ inputs.qiskit-version }}
         run: |
           git clone https://github.com/Qiskit/qiskit build/qiskit
           cd build/qiskit
           # checkout the minimum release tag
-          git checkout 2.5.0
+          git checkout "$QISKIT_VERSION"
           make c
 
       - name: Rust tests

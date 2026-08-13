@@ -1,0 +1,47 @@
+---
+name: Deploy documentation
+
+# Post-merge publication of the documentation to GitHub Pages.
+#
+# This is a thin caller: the build and the deployment both live in `docs.yml`, which is the single
+# source of truth and is also what `branch-protection.yml` uses to check that the documentation still
+# builds on a pull request.  The only difference here is the `deploy: true` input.
+#
+# Deploying is deliberately not part of branch protection.  It is a consequence of merging rather than
+# a precondition for it, and it can only ever run on `main`, so as a required status check it would
+# always be skipped on a pull request -- which GitHub counts as a success.
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "[0-9]+.[0-9]+.[0-9]+*"
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.repository }}-${{ github.ref }}-${{ github.workflow }}
+  # Don't cancel: we may otherwise end up with weird half-uploaded docs.
+  cancel-in-progress: false
+
+# The called workflow's `deploy` job needs these, and permissions can only be maintained or reduced
+# down a workflow chain, never elevated, so they have to be granted here too.
+permissions:
+  pages: write
+  id-token: write
+
+jobs:
+  config:
+    name: Configure
+    if: github.repository_owner == 'Qiskit'
+    uses: ./.github/workflows/config.yml
+
+  docs:
+    name: Docs
+    needs: config
+    uses: ./.github/workflows/docs.yml
+    with:
+      runner: ${{ needs.config.outputs.runner-linux-x86_64 }}
+      python-version: ${{ needs.config.outputs.python-coverage }}
+      # Only publish from `main`; tag builds and manual dispatches from elsewhere just build.
+      deploy: ${{ github.ref == 'refs/heads/main' }}

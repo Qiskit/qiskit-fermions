@@ -1,0 +1,63 @@
+---
+
+# This is a no-op workflow whose only purpose is to centralise shared CI configuration values.  It's
+# also possible to specify these in the GitHub web interface, but that separates them from the rest
+# of the configuration logic and means that changes to the configuration do not appear in the git
+# history.
+#
+# Every value here is a literal declared directly as a `workflow_call` output, so callers can read
+# them as `needs.config.outputs.<name>` without this workflow needing any real jobs.
+#
+# Note that all values must be quoted: an unquoted `3.10` is the *number* 3.1, which would install
+# Python 3.1 rather than 3.10.
+
+name: Set CI configuration
+
+on:
+  workflow_call:
+    outputs:
+      python-old:
+        description: Oldest supported version of Python (see `requires-python` in `pyproject.toml`).
+        value: '3.10'
+
+      python-new:
+        description: Newest supported version of Python.
+        value: '3.14'
+
+      python-coverage:
+        description: >
+          Python version used for the coverage and documentation builds.  These don't need to sweep a
+          range of versions, they just need a single one that all of the tooling supports.
+        value: '3.11'
+
+      qiskit-minimum:
+        description: >
+          Oldest supported Qiskit release, used to build the Qiskit C API for the minimum-version
+          tests.  This does not *enforce* agreement with the `qiskit~=...` pins in `pyproject.toml`
+          (`build-system.requires`, `project.dependencies` and `dependency-groups.build`); it just
+          keeps the CI-side value in one greppable place.  Keep them in step by hand.
+        value: '2.5.0'
+
+      runner-linux-x86_64:
+        description: Runner image for Linux x86_64 jobs.
+        value: 'ubuntu-latest'
+
+      runner-linux-arm64:
+        description: Runner image for Linux ARM64 jobs.
+        value: 'ubuntu-24.04-arm'
+
+      runner-macos-arm64:
+        description: Runner image for macOS ARM64 jobs.
+        value: 'macos-latest'
+
+      runner-windows-x86_64:
+        description: Runner image for Windows x86_64 jobs.
+        value: 'windows-latest'
+
+jobs:
+  # We have to have _some_ job defined or the workflow isn't valid.
+  noop:
+    name: Configure
+    runs-on: 'ubuntu-latest'
+    steps:
+      - run: ':'

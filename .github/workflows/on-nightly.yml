@@ -1,0 +1,83 @@
+---
+
+# Nightly runs of the full test matrices.
+#
+# The test workflows themselves are `workflow_call`-only (they're driven by `branch-protection.yml` for
+# pull requests and the merge queue), and a `workflow_call`-only workflow cannot carry a `schedule`
+# trigger, so the schedule has to live in a caller like this one.
+#
+# This is also the main post-merge safety net: `branch-protection.yml` only runs on pull requests and
+# the merge queue, so nothing else runs the full suites against `main`.  If this workflow starts
+# failing, that needs to be noticed.
+
+name: Nightly tests
+
+on:
+  schedule:
+    - cron: '0 1 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.repository }}-${{ github.ref }}-${{ github.workflow }}
+  cancel-in-progress: true
+
+jobs:
+  # The owner guard lives here alone: every other job `needs: config`, so skipping this one skips the
+  # whole graph and forks don't burn their Actions minutes on our schedule.
+  config:
+    name: Configure
+    if: github.repository_owner == 'Qiskit'
+    uses: ./.github/workflows/config.yml
+
+  test-latest:
+    name: Tests / Latest
+    needs: config
+    uses: ./.github/workflows/test_latest_versions.yml
+    with:
+      runner: ${{ matrix.config.runner }}
+      python-version: ${{ matrix.config.python-version }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - runner: ${{ needs.config.outputs.runner-linux-x86_64 }}
+            python-version: ${{ needs.config.outputs.python-old }}
+          - runner: ${{ needs.config.outputs.runner-linux-x86_64 }}
+            python-version: ${{ needs.config.outputs.python-new }}
+          - runner: ${{ needs.config.outputs.runner-macos-arm64 }}
+            python-version: ${{ needs.config.outputs.python-new }}
+          - runner: ${{ needs.config.outputs.runner-windows-x86_64 }}
+            python-version: ${{ needs.config.outputs.python-new }}
+
+  test-minimum:
+    name: Tests / Minimum
+    needs: config
+    uses: ./.github/workflows/test_minimum_versions.yml
+    with:
+      runner: ${{ matrix.config.runner }}
+      python-version: ${{ matrix.config.python-version }}
+      qiskit-version: ${{ needs.config.outputs.qiskit-minimum }}
+    strategy:
+      fail-fast: false
+      # A single-entry matrix, for consistency with the other test jobs: GitHub appends the matrix
+      # values to the job name, which is what makes the legs distinguishable in the Actions summary.
+      matrix:
+        config:
+          - runner: ${{ needs.config.outputs.runner-linux-x86_64 }}
+            python-version: ${{ needs.config.outputs.python-old }}
+
+  test-development:
+    name: Tests / Development
+    needs: config
+    uses: ./.github/workflows/test_development_versions.yml
+    with:
+      runner: ${{ matrix.config.runner }}
+      python-version: ${{ matrix.config.python-version }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - runner: ${{ needs.config.outputs.runner-linux-x86_64 }}
+            python-version: ${{ needs.config.outputs.python-old }}
+          - runner: ${{ needs.config.outputs.runner-linux-x86_64 }}
+            python-version: ${{ needs.config.outputs.python-new }}

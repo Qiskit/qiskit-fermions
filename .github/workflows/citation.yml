@@ -1,5 +1,10 @@
 name: Citation preview
 
+# Note the `paths` filter: this workflow does not report a status at all on pull requests that don't
+# touch `CITATION.bib`.  That makes it unsuitable as a required status check (a required check that is
+# never reported blocks merging forever), which is why it is deliberately not part of
+# `branch-protection.yml`.
+
 on:
   push:
     branches:
@@ -12,8 +17,14 @@ on:
       - 'stable/**'
     paths: ['CITATION.bib', '.github/workflows/citation.yml']
 
+concurrency:
+  group: ${{ github.repository }}-${{ github.ref }}-${{ github.head_ref }}-${{ github.workflow }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   build-preview:
+    if: github.repository_owner == 'Qiskit'
+    name: build citation preview
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:

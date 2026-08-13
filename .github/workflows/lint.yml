@@ -1,25 +1,25 @@
+---
 name: Lint
 
-on:
-  push:
-    branches:
-      - main
-      - 'stable/**'
-  pull_request:
-    branches:
-      - main
-      - 'stable/**'
+# This is a reusable workflow, driven by `branch-protection.yml`.  It deliberately has no `push` or
+# `pull_request` triggers of its own, and no `concurrency` block: the calling workflow owns both.
 
-concurrency:
-  group: ${{ github.repository }}-${{ github.ref }}-${{ github.head_ref }}-${{ github.workflow }}
-  # Only cancel in PR mode, otherwise we may have weird half-uploaded docs...
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+on:
+  workflow_call:
+    inputs:
+      runner:
+        description: Runner image to use.  Expects an Ubuntu image (we install `clang-format` via apt).
+        type: string
+        required: true
+      python-version:
+        description: Python version to use.
+        type: string
+        required: true
 
 jobs:
   lint:
-    if: github.repository_owner == 'Qiskit'
-    name: lint check
-    runs-on: ubuntu-latest
+    name: Lint
+    runs-on: ${{ inputs.runner }}
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v7
@@ -29,16 +29,12 @@ jobs:
       - uses: actions/setup-python@v7
         name: Install Python
         with:
-          python-version: '3.10'
+          python-version: ${{ inputs.python-version }}
 
+      # No explicit toolchain: `rust-toolchain.toml` pins the version (our declared MSRV) and lists
+      # the `rustfmt` and `clippy` components that `make lint` needs.
       - name: Install Rust
-        run:
-          rustup toolchain install stable
-            --override
-            --profile minimal
-            --component rustfmt
-            --component clippy
-            --no-self-update
+        run: rustup toolchain install --profile minimal --no-self-update
 
       - name: Install dependencies
         run: |
