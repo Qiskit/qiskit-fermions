@@ -12,18 +12,20 @@ name: Development version tests
 on:
   workflow_call:
     inputs:
-      python-version:
-        description: Python version to test.
-        type: string
-        required: true
       runner:
         description: Runner image to use.
+        type: string
+        required: true
+      python-version:
+        description: Python version to test.
         type: string
         required: true
 
 jobs:
   tests:
-    name: ${{ inputs.python-version }} / ${{ inputs.runner }}
+    # The caller's job name carries the matrix values, which GitHub appends to it, so this only needs
+    # to say which suite is running.
+    name: development
     runs-on: ${{ inputs.runner }}
     timeout-minutes: 30
     steps:

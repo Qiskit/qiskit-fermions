@@ -41,7 +41,7 @@ jobs:
     needs: config
     uses: ./.github/workflows/docs.yml
     with:
-      python-version: ${{ needs.config.outputs.python-coverage }}
       runner: ${{ needs.config.outputs.runner-linux-x86_64 }}
+      python-version: ${{ needs.config.outputs.python-coverage }}
       # Only publish from `main`; tag builds and manual dispatches from elsewhere just build.
       deploy: ${{ github.ref == 'refs/heads/main' }}

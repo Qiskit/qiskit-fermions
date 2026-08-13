@@ -7,12 +7,12 @@ name: Lint
 on:
   workflow_call:
     inputs:
-      python-version:
-        description: Python version to use.
-        type: string
-        required: true
       runner:
         description: Runner image to use.  Expects an Ubuntu image (we install `clang-format` via apt).
+        type: string
+        required: true
+      python-version:
+        description: Python version to use.
         type: string
         required: true
 

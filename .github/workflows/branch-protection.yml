@@ -64,60 +64,66 @@ jobs:
     needs: config
     uses: ./.github/workflows/lint.yml
     with:
-      python-version: ${{ needs.config.outputs.python-old }}
       runner: ${{ needs.config.outputs.runner-linux-x86_64 }}
+      python-version: ${{ needs.config.outputs.python-old }}
 
   docs:
     name: Docs
     needs: config
     uses: ./.github/workflows/docs.yml
     with:
-      python-version: ${{ needs.config.outputs.python-coverage }}
       runner: ${{ needs.config.outputs.runner-linux-x86_64 }}
+      python-version: ${{ needs.config.outputs.python-coverage }}
 
   test-latest:
-    name: Tests / Latest / ${{ matrix.config.id }}
+    name: Tests / Latest
     needs: config
     uses: ./.github/workflows/test_latest_versions.yml
     with:
       runner: ${{ matrix.config.runner }}
-      python-version: ${{ matrix.config.python }}
+      python-version: ${{ matrix.config.python-version }}
     strategy:
       fail-fast: false
       matrix:
         config:
-          - id: Linux / oldest
-            runner: ${{ needs.config.outputs.runner-linux-x86_64 }}
-            python: ${{ needs.config.outputs.python-old }}
-          - id: Linux / newest
-            runner: ${{ needs.config.outputs.runner-linux-x86_64 }}
-            python: ${{ needs.config.outputs.python-new }}
-          - id: macOS / newest
-            runner: ${{ needs.config.outputs.runner-macos-arm64 }}
-            python: ${{ needs.config.outputs.python-new }}
-          - id: Windows / newest
-            runner: ${{ needs.config.outputs.runner-windows-x86_64 }}
-            python: ${{ needs.config.outputs.python-new }}
+          - runner: ${{ needs.config.outputs.runner-linux-x86_64 }}
+            python-version: ${{ needs.config.outputs.python-old }}
+          - runner: ${{ needs.config.outputs.runner-linux-x86_64 }}
+            python-version: ${{ needs.config.outputs.python-new }}
+          - runner: ${{ needs.config.outputs.runner-macos-arm64 }}
+            python-version: ${{ needs.config.outputs.python-new }}
+          - runner: ${{ needs.config.outputs.runner-windows-x86_64 }}
+            python-version: ${{ needs.config.outputs.python-new }}
 
   test-minimum:
     name: Tests / Minimum
     needs: config
     uses: ./.github/workflows/test_minimum_versions.yml
     with:
-      runner: ${{ needs.config.outputs.runner-linux-x86_64 }}
-      python-version: ${{ needs.config.outputs.python-old }}
+      runner: ${{ matrix.config.runner }}
+      python-version: ${{ matrix.config.python-version }}
       qiskit-version: ${{ needs.config.outputs.qiskit-minimum }}
+    strategy:
+      fail-fast: false
+      # A single-entry matrix, for consistency with the other test jobs: GitHub appends the matrix
+      # values to the job name, which is what makes the legs distinguishable in the Actions summary.
+      matrix:
+        config:
+          - runner: ${{ needs.config.outputs.runner-linux-x86_64 }}
+            python-version: ${{ needs.config.outputs.python-old }}
 
   test-development:
     name: Tests / Development
     needs: config
     uses: ./.github/workflows/test_development_versions.yml
     with:
-      runner: ${{ needs.config.outputs.runner-linux-x86_64 }}
-      python-version: ${{ matrix.python-version }}
+      runner: ${{ matrix.config.runner }}
+      python-version: ${{ matrix.config.python-version }}
     strategy:
       fail-fast: false
       matrix:
-        python-version:
-          - ${{ needs.config.outputs.python-old }}
-          - ${{ needs.config.outputs.python-new }}
+        config:
+          - runner: ${{ needs.config.outputs.runner-linux-x86_64 }}
+            python-version: ${{ needs.config.outputs.python-old }}
+          - runner: ${{ needs.config.outputs.runner-linux-x86_64 }}
+            python-version: ${{ needs.config.outputs.python-new }}
