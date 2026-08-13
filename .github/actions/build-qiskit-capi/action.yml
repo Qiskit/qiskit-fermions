@@ -294,7 +294,11 @@ runs:
           # Link against the import library; the DLL itself has to be found at run time, hence the
           # `PATH` entry.  Exporting it here rather than per-step means every later step gets it.
           qiskit_lib=$(find "$lib_dir" -name "qiskit_cext.dll.lib" | head -n1)
-          echo "$lib_dir" >> "$GITHUB_PATH"
+          # `$GITHUB_PATH` is consumed by the runner rather than by this shell, so it needs a native
+          # Windows path: the loader cannot follow the `/d/a/...` form that Git bash reports here, and
+          # silently not finding the DLL surfaces much later as `STATUS_DLL_NOT_FOUND` from the test
+          # binary rather than as an error from this step.
+          cygpath -w "$lib_dir" >> "$GITHUB_PATH"
         else
           qiskit_lib=$(find "$lib_dir" -name "libqiskit.*" | head -n1)
         fi
