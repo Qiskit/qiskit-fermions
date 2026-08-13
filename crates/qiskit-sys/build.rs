@@ -13,10 +13,15 @@
 use std::env;
 use std::path::{Path, PathBuf};
 
+/// Wraps doc comments carried over from the C headers in an ```` ```ignore ```` fence, so that
+/// rustdoc does not try to compile the C snippets in them as Rust doctests.
+///
+/// Named to distinguish it from [`bindgen::CargoCallbacks`], which is registered alongside it below
+/// and would otherwise shadow this type.
 #[derive(Debug)]
-struct CargoCallbacks;
+struct CommentCallbacks;
 
-impl bindgen::callbacks::ParseCallbacks for CargoCallbacks {
+impl bindgen::callbacks::ParseCallbacks for CommentCallbacks {
     fn process_comment(&self, comment: &str) -> Option<String> {
         Some(format!("````ignore\n{}\n````", comment))
     }
@@ -48,7 +53,14 @@ fn generate_bindings_c() {
     let bindings: bindgen::Bindings = bindgen::Builder::default()
         .clang_arg(format!("-I{}", qiskit_include))
         .header(format!("{}/qiskit.h", qiskit_include))
-        .parse_callbacks(Box::new(CargoCallbacks))
+        // `CargoCallbacks` emits a `rerun-if-changed` line for every header bindgen actually
+        // parses.  The `rerun-if-env-changed` declarations in `main` only cover the *paths* to the
+        // Qiskit C API changing -- but those paths are constant in CI by construction, while their
+        // *contents* move whenever the Qiskit version being built against does.  Without this, an
+        // existing `target/` directory reuses bindings generated from the previous headers, which
+        // can silently mismatch the library actually being linked.
+        .parse_callbacks(Box::new(bindgen::CargoCallbacks::new()))
+        .parse_callbacks(Box::new(CommentCallbacks))
         .generate()
         .expect("Unable to generate bindings");
 
