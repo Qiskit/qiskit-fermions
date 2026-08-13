@@ -44,10 +44,8 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          components: llvm-tools-preview
+      - name: Install Rust
+        run: rustup toolchain install stable --override --profile minimal --no-self-update
 
       - name: Install dependencies
         run: |
