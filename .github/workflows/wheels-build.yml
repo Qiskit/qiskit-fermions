@@ -71,7 +71,8 @@ jobs:
       - uses: actions/setup-python@v7
         with:
           python-version: ${{ inputs.python-version }}
-      - uses: dtolnay/rust-toolchain@stable
+      - name: Install Rust
+        run: rustup toolchain install stable --override --profile minimal --no-self-update
       - uses: pypa/cibuildwheel@v4.2.0
       - uses: actions/upload-artifact@v7
         with:
@@ -88,7 +89,8 @@ jobs:
         name: Install Python
         with:
           python-version: ${{ inputs.python-version }}
-      - uses: dtolnay/rust-toolchain@stable
+      - name: Install Rust
+        run: rustup toolchain install stable --override --profile minimal --no-self-update
       - uses: pypa/cibuildwheel@v4.2.0
       - uses: actions/upload-artifact@v7
         with:
@@ -105,7 +107,8 @@ jobs:
         name: Install Python
         with:
           python-version: ${{ inputs.python-version }}
-      - uses: dtolnay/rust-toolchain@stable
+      - name: Install Rust
+        run: rustup toolchain install stable --override --profile minimal --no-self-update
       - uses: pypa/cibuildwheel@v4.2.0
       - uses: actions/upload-artifact@v7
         with:

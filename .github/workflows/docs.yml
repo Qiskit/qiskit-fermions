@@ -34,10 +34,8 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          components: llvm-tools-preview
+      - name: Install Rust
+        run: rustup toolchain install stable --override --profile minimal --no-self-update
 
       - name: Install dependencies
         run: tools/install_ubuntu_docs_dependencies.sh
