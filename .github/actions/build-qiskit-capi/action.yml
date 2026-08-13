@@ -226,6 +226,26 @@ runs:
           python -m build --wheel
         fi
 
+    # macOS records a dylib's `install_name` into everything that links against it, and Qiskit's is an
+    # absolute path into its own `target/release/deps/`.  That resolves fine when Qiskit was just built
+    # in this workspace, but only `dist/c` is cached -- so on a cache hit the path does not exist and
+    # anything linked against it dies at load time with a dyld "Library not loaded" abort, far away
+    # from the cause.  Repointing the `install_name` at the library's real location makes `dist/c`
+    # genuinely self-contained, which is what the cache assumes.
+    - name: Make the Qiskit C API relocatable
+      if: runner.os == 'macOS'
+      shell: bash
+      run: |
+        set -euo pipefail
+        lib=$(find "$(pwd)/build/qiskit/dist/c/lib" -name "libqiskit.dylib" | head -n1)
+        if [[ -z "$lib" ]]; then
+          echo "::error::no libqiskit.dylib found to repoint" >&2
+          exit 1
+        fi
+        echo "Current install_name: $(otool -D "$lib" | tail -n1)"
+        install_name_tool -id "$lib" "$lib"
+        echo "Updated install_name: $(otool -D "$lib" | tail -n1)"
+
     # Runs on every path, not just after a build: this guards the build recipe as much as the cache,
     # and an assertion that only runs on the rarer branch is an assertion that rots.
     - name: Verify Qiskit C API
