@@ -1,0 +1,134 @@
+---
+
+# Populates the base-branch caches that the branch-protection workflows read.  This is not a
+# branch-protection requirement, just a CI performance improvement.
+#
+# GitHub scopes Actions caches by branch.  A pull request can *read* caches written on its base branch,
+# but anything it writes goes to a scope belonging to that pull request alone -- restorable only by
+# re-runs of the same pull request, never by another one.  There is no way to opt out of that isolation,
+# so without a `push`-triggered run on the target branches every pull request would miss on its first
+# run, warm a private scope, and then discard it on merge.  Only a handful of triggers may write the
+# default-branch scope at all (`push`, `schedule` and `workflow_dispatch` among them; notably *not*
+# `merge_group`), which is what makes this workflow the mechanism that makes the caches pay off.
+#
+# It deliberately only builds and caches; it runs no test suite.  The merge-queue rules already require
+# the suites to have passed on the literal commits being fast-forwarded onto these branches, so
+# re-running them here would be waste.
+#
+# Not warmed here: the coverage leg, because `coverage.yml` has its own `push` trigger on these branches
+# and so writes the base-branch scope for free.  If that trigger is ever removed, add a leg for
+# `python-coverage` below.
+
+name: Update caches
+
+on:
+  push:
+    branches:
+      - main
+      - 'stable/**'
+  # To re-warm the caches by hand if an entry is ever evicted (unused entries are dropped after 7 days)
+  # or deliberately deleted.  `workflow_dispatch` may write the default-branch cache scope, so a manual
+  # run is as good as a push here.
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.repository }}-${{ github.ref }}-${{ github.workflow }}
+  cancel-in-progress: true
+
+jobs:
+  # The owner guard lives here alone: every other job `needs: config`, so skipping this one skips the
+  # whole graph and forks don't burn their Actions minutes warming our caches.
+  config:
+    name: Configure
+    if: github.repository_owner == 'Qiskit'
+    uses: ./.github/workflows/config.yml
+
+  qiskit-capi:
+    name: Qiskit C API
+    needs: config
+    runs-on: ${{ matrix.config.runner }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      # These legs must mirror the ones in `branch-protection.yml` that build the Qiskit C API: a cache
+      # is only worth writing if its key is one a pull-request job will actually look up.  The cache key
+      # covers the runner OS and architecture, the Python minor version and the Qiskit ref, so every
+      # distinct combination needs its own leg here.
+      matrix:
+        config:
+          - runner: ${{ needs.config.outputs.runner-linux-x86_64 }}
+            python-version: ${{ needs.config.outputs.python-old }}
+            ref-mode: latest-release
+            ref: ''
+          - runner: ${{ needs.config.outputs.runner-linux-x86_64 }}
+            python-version: ${{ needs.config.outputs.python-new }}
+            ref-mode: latest-release
+            ref: ''
+          - runner: ${{ needs.config.outputs.runner-macos-arm64 }}
+            python-version: ${{ needs.config.outputs.python-new }}
+            ref-mode: latest-release
+            ref: ''
+          - runner: ${{ needs.config.outputs.runner-windows-x86_64 }}
+            python-version: ${{ needs.config.outputs.python-new }}
+            ref-mode: latest-release
+            ref: ''
+          - runner: ${{ needs.config.outputs.runner-linux-x86_64 }}
+            python-version: ${{ needs.config.outputs.python-old }}
+            ref-mode: pinned
+            ref: ${{ needs.config.outputs.qiskit-minimum }}
+          # The development legs track the tip of Qiskit's `main`, so their exact-ref keys go stale
+          # continuously and these two entries are instead what the suite falls back to.  Keeping them
+          # fresh here is what turns that fallback from "last time anyone built it" into "as of the
+          # most recent push".
+          - runner: ${{ needs.config.outputs.runner-linux-x86_64 }}
+            python-version: ${{ needs.config.outputs.python-old }}
+            ref-mode: main
+            ref: ''
+          - runner: ${{ needs.config.outputs.runner-linux-x86_64 }}
+            python-version: ${{ needs.config.outputs.python-new }}
+            ref-mode: main
+            ref: ''
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        name: Install Python
+        with:
+          python-version: ${{ matrix.config.python-version }}
+          # There is no lockfile (dependencies come from `pyproject.toml`'s PEP 735 dependency groups
+          # and extras), so the pip wheel cache is keyed on that file.  Coarser than a lockfile: any
+          # edit to it, dependency-related or not, invalidates the cache.
+          cache: pip
+          cache-dependency-path: pyproject.toml
+
+      # `Cargo.lock` is committed and pins every dependency to crates.io, so it fully describes what
+      # gets downloaded.  Deliberately the registry only, not `target/`: two build scripts key off the
+      # Qiskit C API whose path is constant in CI while its contents move, and the workspace is built
+      # under several mutually exclusive feature and profile combinations that would not share
+      # artifacts anyway.  `restore-keys` is safe here (unlike for the Qiskit C API cache) because the
+      # registry is content-addressed -- a partial restore is just a warm subset that cargo completes
+      # and checksums.
+      - name: Cache cargo registry
+        uses: actions/cache@v6
+        with:
+          path: |
+            ~/.cargo/registry/index
+            ~/.cargo/registry/cache
+            ~/.cargo/git/db
+          key: cargo-registry-v1 | ${{ runner.os }} | ${{ runner.arch }} | ${{ hashFiles('Cargo.lock') }}
+          restore-keys: |
+            cargo-registry-v1 | ${{ runner.os }} | ${{ runner.arch }}
+
+      - name: Install Rust
+        run: rustup toolchain install --profile minimal --no-self-update
+
+      - name: Build and cache the Qiskit C API
+        uses: ./.github/actions/build-qiskit-capi
+        with:
+          ref-mode: ${{ matrix.config.ref-mode }}
+          ref: ${{ matrix.config.ref }}
+          python-version: ${{ matrix.config.python-version }}
+          # The development suite installs a Qiskit wheel built from the same tree, so the warmed entry
+          # has to contain it too or that suite still pays for a clone.
+          build-wheel: ${{ matrix.config.ref-mode == 'main' }}
+          cache-only: true

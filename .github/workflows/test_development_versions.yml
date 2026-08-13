@@ -20,6 +20,15 @@ on:
         description: Python version to test.
         type: string
         required: true
+      qiskit-ref:
+        description: >
+          Exact Qiskit commit to build against.  When empty (the pull-request case) the tip of
+          Qiskit's `main` is resolved at run time and an older cached build is accepted rather than
+          rebuilding, since upstream moves continuously.  The nightly run resolves the tip once in a
+          preceding job and passes it here, so that it always tests that exact commit.
+        type: string
+        required: false
+        default: ''
 
 jobs:
   tests:
@@ -37,6 +46,29 @@ jobs:
         name: Install Python
         with:
           python-version: ${{ inputs.python-version }}
+          # There is no lockfile (dependencies come from `pyproject.toml`'s PEP 735 dependency groups
+          # and extras), so the pip wheel cache is keyed on that file.  Coarser than a lockfile: any
+          # edit to it, dependency-related or not, invalidates the cache.
+          cache: pip
+          cache-dependency-path: pyproject.toml
+
+      # `Cargo.lock` is committed and pins every dependency to crates.io, so it fully describes what
+      # gets downloaded.  Deliberately the registry only, not `target/`: two build scripts key off the
+      # Qiskit C API whose path is constant in CI while its contents move, and the workspace is built
+      # under several mutually exclusive feature and profile combinations that would not share
+      # artifacts anyway.  `restore-keys` is safe here (unlike for the Qiskit C API cache) because the
+      # registry is content-addressed -- a partial restore is just a warm subset that cargo completes
+      # and checksums.
+      - name: Cache cargo registry
+        uses: actions/cache@v6
+        with:
+          path: |
+            ~/.cargo/registry/index
+            ~/.cargo/registry/cache
+            ~/.cargo/git/db
+          key: cargo-registry-v1 | ${{ runner.os }} | ${{ runner.arch }} | ${{ hashFiles('Cargo.lock') }}
+          restore-keys: |
+            cargo-registry-v1 | ${{ runner.os }} | ${{ runner.arch }}
 
       - name: Install Rust
         run: rustup toolchain install --profile minimal --no-self-update
@@ -45,34 +77,32 @@ jobs:
         run: |
           python -m pip install -U pip build uv
 
+      # Also builds the Qiskit wheel installed further down, and exports
+      # `QISKIT_LIB`/`QISKIT_INCLUDE` for the steps below.
       - name: Compile Qiskit from source
-        shell: bash
-        run: |
-          git clone https://github.com/Qiskit/qiskit build/qiskit
-          cd build/qiskit
-          git rev-parse HEAD
-          make c
-          python -m build --wheel
+        uses: ./.github/actions/build-qiskit-capi
+        with:
+          ref-mode: ${{ inputs.qiskit-ref == '' && 'main' || 'pinned' }}
+          ref: ${{ inputs.qiskit-ref }}
+          python-version: ${{ inputs.python-version }}
+          build-wheel: true
+          # Only when resolving the tip ourselves.  Given an explicit commit (the nightly), that exact
+          # commit is the point of the run and a near-miss would defeat it.
+          allow-stale: ${{ inputs.qiskit-ref == '' }}
 
       - name: Rust tests
         shell: bash
         run: |
-          export QISKIT_LIB=$(find $(pwd)/build/qiskit/dist/c/lib -name "libqiskit.*")
-          export QISKIT_INCLUDE=$(pwd)/build/qiskit/dist/c/include
           make testrust
 
       - name: Compile qiskit-fermions C API
         shell: bash
         run: |
-          export QISKIT_LIB=$(find $(pwd)/build/qiskit/dist/c/lib -name "libqiskit.*")
-          export QISKIT_INCLUDE=$(pwd)/build/qiskit/dist/c/include
           make cext
 
       - name: C tests
         shell: bash
         run: |
-          export QISKIT_LIB=$(find $(pwd)/build/qiskit/dist/c/lib -name "libqiskit.*")
-          export QISKIT_INCLUDE=$(pwd)/build/qiskit/dist/c/include
           make testc
 
       - name: Install Python package

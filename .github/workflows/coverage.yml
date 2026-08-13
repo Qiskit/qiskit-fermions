@@ -48,6 +48,29 @@ jobs:
         name: Install Python
         with:
           python-version: ${{ needs.config.outputs.python-coverage }}
+          # There is no lockfile (dependencies come from `pyproject.toml`'s PEP 735 dependency groups
+          # and extras), so the pip wheel cache is keyed on that file.  Coarser than a lockfile: any
+          # edit to it, dependency-related or not, invalidates the cache.
+          cache: pip
+          cache-dependency-path: pyproject.toml
+
+      # `Cargo.lock` is committed and pins every dependency to crates.io, so it fully describes what
+      # gets downloaded.  Deliberately the registry only, not `target/`: two build scripts key off the
+      # Qiskit C API whose path is constant in CI while its contents move, and the workspace is built
+      # under several mutually exclusive feature and profile combinations that would not share
+      # artifacts anyway.  `restore-keys` is safe here (unlike for the Qiskit C API cache) because the
+      # registry is content-addressed -- a partial restore is just a warm subset that cargo completes
+      # and checksums.
+      - name: Cache cargo registry
+        uses: actions/cache@v6
+        with:
+          path: |
+            ~/.cargo/registry/index
+            ~/.cargo/registry/cache
+            ~/.cargo/git/db
+          key: cargo-registry-v1 | ${{ runner.os }} | ${{ runner.arch }} | ${{ hashFiles('Cargo.lock') }}
+          restore-keys: |
+            cargo-registry-v1 | ${{ runner.os }} | ${{ runner.arch }}
 
       - name: Install Rust
         run:
@@ -57,42 +80,44 @@ jobs:
             --component llvm-tools-preview
             --no-self-update
 
+      # `grcov` is pinned to an exact version, so the compiled binary is reusable until that pin moves.
+      # This is `~/.cargo/bin` only; the registry cache below deliberately excludes it so the two do not
+      # overlap.
+      - name: Cache grcov
+        id: cache-grcov
+        uses: actions/cache@v6
+        with:
+          path: ~/.cargo/bin/grcov
+          key: grcov | ${{ runner.os }} | ${{ runner.arch }} | 0.8.20
+
       - name: Install dependencies
         run: |
             python -m pip install -U pip
-            cargo install grcov@0.8.20
+            if [[ "${{ steps.cache-grcov.outputs.cache-hit }}" != "true" ]]; then
+              cargo install grcov@0.8.20
+            fi
             sudo apt-get install lcov
 
+      # Exports `QISKIT_LIB`/`QISKIT_INCLUDE` for the steps below.
       - name: Compile Qiskit C API
-        shell: bash
-        env:
-          GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
-        run: |
-          git clone https://github.com/Qiskit/qiskit build/qiskit
-          cd build/qiskit
-          # checkout the latest (i.e. stable) release tag
-          git checkout $(gh release -R Qiskit/qiskit view --json tagName --jq ".tagName")
-          make c
+        uses: ./.github/actions/build-qiskit-capi
+        with:
+          ref-mode: latest-release
+          python-version: ${{ needs.config.outputs.python-coverage }}
 
       - name: Rust coverage
         shell: bash
         run: |
-          export QISKIT_LIB=$(find $(pwd)/build/qiskit/dist/c/lib -name "libqiskit.*")
-          export QISKIT_INCLUDE=$(pwd)/build/qiskit/dist/c/include
           make rustcoverage
 
       - name: Compile qiskit-fermions C API
         shell: bash
         run: |
-          export QISKIT_LIB=$(find $(pwd)/build/qiskit/dist/c/lib -name "libqiskit.*")
-          export QISKIT_INCLUDE=$(pwd)/build/qiskit/dist/c/include
           make cext
 
       - name: C coverage
         shell: bash
         run: |
-          export QISKIT_LIB=$(find $(pwd)/build/qiskit/dist/c/lib -name "libqiskit.*")
-          export QISKIT_INCLUDE=$(pwd)/build/qiskit/dist/c/include
           make ccoverage
 
       - name: Install Python package
