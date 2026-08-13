@@ -1,12 +1,18 @@
 ---
 name: Sphinx
 
-# This is a reusable workflow, driven by `branch-protection.yml`.  It deliberately has no `push` or
-# `pull_request` triggers of its own, and no `concurrency` block: the calling workflow owns both.
+# This is a reusable workflow and the single source of truth for building the documentation.  It
+# deliberately has no `push` or `pull_request` triggers of its own, and no `concurrency` block: the
+# calling workflow owns both.
 #
-# This builds the documentation and uploads it as an artifact; it does *not* deploy.  Publishing to
-# GitHub Pages happens post-merge in `docs_deploy.yml`, which cannot be part of branch protection
-# because it only ever runs on `main`.
+# It is called from two places:
+#
+# * `branch-protection.yml`, which only builds (`deploy: false`, the default); and
+# * `docs_deploy.yml`, which builds and then publishes to GitHub Pages (`deploy: true`).
+#
+# The deployment lives here, behind an input, rather than in `docs_deploy.yml`, so that the build
+# steps exist exactly once.  Publishing can't simply be a separate workflow that reuses the build,
+# because an `actions/upload-pages-artifact` artifact cannot be handed between workflow runs.
 
 on:
   workflow_call:
@@ -19,6 +25,13 @@ on:
         description: Runner image to use.  Expects an Ubuntu image.
         type: string
         required: true
+      deploy:
+        description: >
+          Whether to publish the built documentation to GitHub Pages.  Only ever set this for runs on
+          `main`: a Pages deployment from anywhere else would clobber the published documentation.
+        type: boolean
+        required: false
+        default: false
 
 jobs:
   build:
@@ -80,3 +93,19 @@ jobs:
         with:
           name: qiskit-fermions-htmldocs
           path: ./artifact
+
+  deploy:
+    name: deploy docs
+    if: ${{ inputs.deploy }}
+    needs: build
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ${{ inputs.runner }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5
