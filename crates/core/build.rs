@@ -14,6 +14,14 @@ use std::env;
 use std::path::Path;
 
 fn main() {
+    println!("cargo:rerun-if-changed=build.rs");
+    // The rpath emitted below is derived from `QISKIT_LIB`, so a change to it has to re-run this
+    // script.  Without this, an existing `target/` directory keeps the rpath baked in from whatever
+    // `QISKIT_LIB` was set when it was first built.  That is easy to miss because the stale path
+    // often still *exists* (CI workspace paths are stable), so the link succeeds and silently
+    // points at the wrong Qiskit library rather than failing outright.
+    println!("cargo::rerun-if-env-changed=QISKIT_LIB");
+
     if cfg!(feature = "cext") {
         let qiskit_lib = env::var("QISKIT_LIB").unwrap();
 
