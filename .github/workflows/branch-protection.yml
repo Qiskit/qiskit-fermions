@@ -1,0 +1,123 @@
+---
+
+# This is the shared configuration that defines all the jobs we include in branch protection.  This
+# needs to be run both by PRs and by the merge queue.
+#
+# All required branch-protection rules should be in here, and everything in here should be listed in
+# the `finalize` job.  The repository ruleset in the GitHub web interface then only needs to require
+# the single "Finalize" check, which means adding, removing or renaming any other CI job is a pure
+# code change and never needs a settings edit.
+
+name: Branch Protection
+
+on:
+  # `merge_group` is inert until a merge-queue rule is added to the repository ruleset; keeping the
+  # trigger here means enabling the queue later is a settings-only change.
+  merge_group:
+  pull_request:
+    branches:
+      - main
+      - 'stable/**'
+
+concurrency:
+  # Deliberately no `github.head_ref` component: it is empty for `merge_group` events, so including it
+  # would collapse every merge-queue entry into a single concurrency group and make them cancel each
+  # other.  `github.ref` is already unique per pull request and per queue entry.
+  group: ${{ github.repository }}-${{ github.ref }}-${{ github.workflow }}
+  cancel-in-progress: true
+
+jobs:
+  config:
+    name: Configure
+    uses: ./.github/workflows/config.yml
+
+  # This 'finalize' job is a no-op; its sole purpose is to depend on all the other jobs and provide a
+  # single in-code determination of whether the branch-protection rules have been passed.  The
+  # ruleset in the GitHub web interface can then depend only on this job.
+  finalize:
+    name: Finalize
+    runs-on: 'ubuntu-latest'
+    # This list should contain every other job in this file.
+    needs:
+      - config
+      - lint
+      - docs
+      - test-latest
+      - test-minimum
+      - test-development
+    # This job needs to trigger even if its predecessors failed and return the same status.  By
+    # default, GitHub Actions will "skip" the job if a requirement failed, but that counts as a
+    # "success" state, which is not acceptable for a branch-protection rule.  We don't use `always`
+    # because we don't want `cancelled` to trigger this.
+    if: success() || failure()
+    steps:
+      - run: |
+          echo "Successful run."
+        if: ${{ !contains(needs.*.result, 'failure') }}
+      - run: |
+          echo "Predecessor jobs failed.  See GitHub Actions logs." >&2
+          exit 1
+        if: ${{ contains(needs.*.result, 'failure') }}
+
+  lint:
+    name: Lint
+    needs: config
+    uses: ./.github/workflows/lint.yml
+    with:
+      python-version: ${{ needs.config.outputs.python-old }}
+      runner: ${{ needs.config.outputs.runner-linux-x86_64 }}
+
+  docs:
+    name: Docs
+    needs: config
+    uses: ./.github/workflows/docs.yml
+    with:
+      python-version: ${{ needs.config.outputs.python-coverage }}
+      runner: ${{ needs.config.outputs.runner-linux-x86_64 }}
+
+  test-latest:
+    name: Tests / Latest / ${{ matrix.config.id }}
+    needs: config
+    uses: ./.github/workflows/test_latest_versions.yml
+    with:
+      runner: ${{ matrix.config.runner }}
+      python-version: ${{ matrix.config.python }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - id: Linux / oldest
+            runner: ${{ needs.config.outputs.runner-linux-x86_64 }}
+            python: ${{ needs.config.outputs.python-old }}
+          - id: Linux / newest
+            runner: ${{ needs.config.outputs.runner-linux-x86_64 }}
+            python: ${{ needs.config.outputs.python-new }}
+          - id: macOS / newest
+            runner: ${{ needs.config.outputs.runner-macos-arm64 }}
+            python: ${{ needs.config.outputs.python-new }}
+          - id: Windows / newest
+            runner: ${{ needs.config.outputs.runner-windows-x86_64 }}
+            python: ${{ needs.config.outputs.python-new }}
+
+  test-minimum:
+    name: Tests / Minimum
+    needs: config
+    uses: ./.github/workflows/test_minimum_versions.yml
+    with:
+      runner: ${{ needs.config.outputs.runner-linux-x86_64 }}
+      python-version: ${{ needs.config.outputs.python-old }}
+      qiskit-version: ${{ needs.config.outputs.qiskit-minimum }}
+
+  test-development:
+    name: Tests / Development
+    needs: config
+    uses: ./.github/workflows/test_development_versions.yml
+    with:
+      runner: ${{ needs.config.outputs.runner-linux-x86_64 }}
+      python-version: ${{ matrix.python-version }}
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version:
+          - ${{ needs.config.outputs.python-old }}
+          - ${{ needs.config.outputs.python-new }}

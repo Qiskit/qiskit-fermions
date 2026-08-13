@@ -1,5 +1,12 @@
 name: Coverage
 
+# This is deliberately *not* part of `branch-protection.yml`:
+#
+# * it needs the `push` trigger to give Coveralls a datapoint for every commit, which a
+#   `workflow_call`-only workflow cannot do; and
+# * coverage is a metric rather than a correctness property, so a coveralls.io outage should not be
+#   able to block merging.
+
 on:
   push:
     branches:
@@ -33,6 +40,7 @@ jobs:
       - uses: actions/setup-python@v7
         name: Install Python
         with:
+          # Keep in step with `python-coverage` in `config.yml`.
           python-version: '3.11'
 
       - name: Install Rust
