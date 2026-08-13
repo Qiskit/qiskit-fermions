@@ -223,6 +223,10 @@ runs:
           cp target/release/qiskit_cext.dll.lib dist/c/lib/qiskit_cext.dll.lib
         fi
         if [[ "$BUILD_WHEEL" == "true" ]]; then
+          # Installed here rather than left to the caller: `build` is this action's own requirement
+          # whenever a wheel is asked for, and a caller that forgets it does not find out until `make c`
+          # has already run, throwing away several minutes of work just before the cache is saved.
+          python -m pip install -U build
           python -m build --wheel
         fi
 
