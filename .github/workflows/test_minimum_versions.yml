@@ -46,38 +46,27 @@ jobs:
         run: |
           python -m pip install -U pip uv
 
+      # Exports `QISKIT_LIB`/`QISKIT_INCLUDE` for the steps below.
       - name: Compile Qiskit C API (minimum version)
-        shell: bash
-        env:
-          GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
-          # Passed through the environment rather than interpolated directly into the script below.
-          QISKIT_VERSION: ${{ inputs.qiskit-version }}
-        run: |
-          git clone https://github.com/Qiskit/qiskit build/qiskit
-          cd build/qiskit
-          # checkout the minimum release tag
-          git checkout "$QISKIT_VERSION"
-          make c
+        uses: ./.github/actions/build-qiskit-capi
+        with:
+          ref-mode: pinned
+          ref: ${{ inputs.qiskit-version }}
+          python-version: ${{ inputs.python-version }}
 
       - name: Rust tests
         shell: bash
         run: |
-          export QISKIT_LIB=$(find $(pwd)/build/qiskit/dist/c/lib -name "libqiskit.*")
-          export QISKIT_INCLUDE=$(pwd)/build/qiskit/dist/c/include
           make testrust
 
       - name: Compile qiskit-fermions C API
         shell: bash
         run: |
-          export QISKIT_LIB=$(find $(pwd)/build/qiskit/dist/c/lib -name "libqiskit.*")
-          export QISKIT_INCLUDE=$(pwd)/build/qiskit/dist/c/include
           make cext
 
       - name: C tests
         shell: bash
         run: |
-          export QISKIT_LIB=$(find $(pwd)/build/qiskit/dist/c/lib -name "libqiskit.*")
-          export QISKIT_INCLUDE=$(pwd)/build/qiskit/dist/c/include
           make testc
 
       - name: Install Python dependencies (minimum versions)

@@ -29,6 +29,35 @@ jobs:
     if: github.repository_owner == 'Qiskit'
     uses: ./.github/workflows/config.yml
 
+  # The development suite accepts an older cached Qiskit build rather than rebuilding whenever upstream
+  # has moved on, which is right for pull requests but wrong for the nightly: this is the run whose
+  # whole job is catching upstream breakage, so it must test the actual tip.
+  #
+  # Resolving the tip *here* and passing the commit down means the suite legs test a Qiskit that is at
+  # most this job's own duration old, and -- because they are handed an exact commit rather than
+  # resolving `main` themselves -- that they cannot drift apart from each other or miss the cache this
+  # job just populated.
+  qiskit-development-ref:
+    name: Resolve Qiskit main
+    needs: config
+    runs-on: ${{ needs.config.outputs.runner-linux-x86_64 }}
+    timeout-minutes: 5
+    outputs:
+      ref: ${{ steps.resolve.outputs.ref }}
+    steps:
+      - name: Resolve the tip of Qiskit's main
+        id: resolve
+        shell: bash
+        run: |
+          set -euo pipefail
+          ref=$(git ls-remote https://github.com/Qiskit/qiskit HEAD | cut -f1)
+          if [[ -z "$ref" ]]; then
+            echo "::error::failed to resolve the tip of Qiskit's main" >&2
+            exit 1
+          fi
+          echo "Qiskit main is at $ref"
+          echo "ref=$ref" >> "$GITHUB_OUTPUT"
+
   test-latest:
     name: Tests / Latest
     needs: config
@@ -68,11 +97,16 @@ jobs:
 
   test-development:
     name: Tests / Development
-    needs: config
+    needs:
+      - config
+      - qiskit-development-ref
     uses: ./.github/workflows/test_development_versions.yml
     with:
       runner: ${{ matrix.config.runner }}
       python-version: ${{ matrix.config.python-version }}
+      # Passing the commit explicitly is what pins every leg to the same tip and keeps the nightly off
+      # the stale-cache path that pull requests use.
+      qiskit-ref: ${{ needs.qiskit-development-ref.outputs.ref }}
     strategy:
       fail-fast: false
       matrix:

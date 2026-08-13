@@ -1,0 +1,314 @@
+---
+
+# Builds -- or restores from cache -- the Qiskit SDK C API, and exports the environment variables the
+# `cext` build needs to link against it.
+#
+# This is the single most expensive thing our CI does: a full release build of the Qiskit workspace,
+# which measured between 4.7 minutes (Linux) and 9.4 minutes (Windows) and accounted for roughly half
+# of every test job's wall time.  Four workflows need it (the three test suites and coverage), which is
+# why it lives here rather than being duplicated inline.
+#
+# It is a composite action rather than a reusable workflow because a reusable workflow runs on its own
+# runner: the artifact would have to cross a job boundary via `upload-artifact`, which is scoped to a
+# single run and so would give no reuse between runs -- the entire point.  Running in-place also means
+# `dist/c` lands where the `make` steps already expect it and the `$GITHUB_ENV` exports below reach the
+# rest of the job.
+#
+# Requires the repository to be checked out first (for `uses: ./...` to resolve at all).
+
+name: Build Qiskit C API
+description: >
+  Build or restore the Qiskit SDK C API into `build/qiskit/dist/c`, and export `QISKIT_LIB` and
+  `QISKIT_INCLUDE` for subsequent steps in the calling job.
+
+inputs:
+  ref-mode:
+    description: >
+      How to determine which Qiskit commit to build:
+
+      `latest-release` resolves the newest release tag via the GitHub API;
+      `pinned` uses `ref` verbatim (for the minimum supported version);
+      `main` resolves the current tip of Qiskit's default branch.
+    required: true
+  ref:
+    description: >
+      Git ref to build.  Required for `ref-mode: pinned`, ignored otherwise.
+    required: false
+    default: ''
+  python-version:
+    description: >
+      Python version this artifact will be used with.  This is part of the cache key: the built
+      library carries a hard `NEEDED` on `libpython3.<minor>.so`, so an artifact built against one
+      Python minor cannot be used with another.
+    required: true
+  build-wheel:
+    description: >
+      Also build a Qiskit wheel from the same tree, into `build/qiskit/dist`.  Only the
+      development-version tests need this; it is cached alongside the C API so that a cache hit lets
+      them skip the clone entirely rather than just the `make c`.
+    required: false
+    default: 'false'
+  allow-stale:
+    description: >
+      Accept the newest cached build for this platform when there is no entry for the exact resolved
+      ref.  Only meaningful with `ref-mode: main`, where the ref moves continuously and an exact-match
+      requirement means paying the full build cost most often precisely when Qiskit is busiest.
+
+      The trade is a delayed signal rather than a wrong one -- the development suite is already
+      permitted to fail for upstream reasons with no local cause, and the nightly run rebuilds from
+      the true tip.  Never enable this for `latest-release` or `pinned`, where a near-miss would mean
+      silently testing a different Qiskit version than the one being claimed.
+    required: false
+    default: 'false'
+  cache-only:
+    description: >
+      Populate the cache and skip the environment exports.  Used by the cache-warming workflow, where
+      nothing downstream consumes them.
+    required: false
+    default: 'false'
+
+outputs:
+  qiskit-ref:
+    description: The resolved Qiskit ref (release tag or commit SHA) that was requested.
+    value: ${{ steps.resolve.outputs.ref }}
+  cache-hit:
+    description: Whether the exact requested ref was restored from cache.
+    value: ${{ steps.cache.outputs.cache-hit }}
+
+runs:
+  using: composite
+  steps:
+    # Resolving before the cache lookup is what allows the clone to be skipped entirely on a hit:
+    # the key has to describe the artifact's contents, and nothing on disk states which Qiskit we
+    # want.
+    - name: Resolve Qiskit ref
+      id: resolve
+      shell: bash
+      env:
+        # `github.token` rather than a passed-in secret: composite actions cannot read `secrets.*`.
+        GH_TOKEN: ${{ github.token }}
+        REF_MODE: ${{ inputs.ref-mode }}
+        REF_INPUT: ${{ inputs.ref }}
+      run: |
+        set -euo pipefail
+        case "$REF_MODE" in
+          latest-release)
+            ref=$(gh release -R Qiskit/qiskit view --json tagName --jq '.tagName')
+            ;;
+          pinned)
+            if [[ -z "$REF_INPUT" ]]; then
+              echo "::error::ref-mode 'pinned' requires the 'ref' input" >&2
+              exit 1
+            fi
+            ref="$REF_INPUT"
+            ;;
+          main)
+            # Resolve to a concrete SHA rather than the branch name, so that a cache hit means the
+            # same commit rather than merely the same branch.
+            ref=$(git ls-remote https://github.com/Qiskit/qiskit HEAD | cut -f1)
+            ;;
+          *)
+            echo "::error::unknown ref-mode '$REF_MODE' (expected latest-release, pinned or main)" >&2
+            exit 1
+            ;;
+        esac
+        if [[ -z "$ref" ]]; then
+          echo "::error::failed to resolve a Qiskit ref for ref-mode '$REF_MODE'" >&2
+          exit 1
+        fi
+        echo "Resolved Qiskit ref: $ref"
+        echo "ref=$ref" >> "$GITHUB_OUTPUT"
+
+    - name: Determine cache key
+      id: key
+      shell: bash
+      env:
+        PYTHON_VERSION: ${{ inputs.python-version }}
+        REF_MODE: ${{ inputs.ref-mode }}
+        RESOLVED_REF: ${{ steps.resolve.outputs.ref }}
+      run: |
+        set -euo pipefail
+        # Only `major.minor` matters: the artifact links `libpython3.<minor>.so`, so splitting the
+        # cache on the patch version would just lower the hit rate for no benefit.
+        minor=$(printf '%s' "$PYTHON_VERSION" | cut -d. -f1,2)
+
+        # `ref-mode` is part of the prefix so that the `main` line of caches, whose refs move
+        # continuously, can be prefix-matched (see `allow-stale`) without ever matching a release
+        # build.
+        prefix="qiskit-capi-v1 | ${RUNNER_OS} | ${RUNNER_ARCH} | py${minor} | ${REF_MODE}"
+        echo "prefix=$prefix" >> "$GITHUB_OUTPUT"
+        echo "key=$prefix | $RESOLVED_REF" >> "$GITHUB_OUTPUT"
+
+    # The restore/save pair is deliberate rather than a single `actions/cache`: on a stale hit we want
+    # to *save* the exact-ref entry we did not find, so the next run for this ref is an exact hit.
+    - name: Restore Qiskit C API
+      id: cache
+      uses: actions/cache/restore@v6
+      with:
+        path: |
+          build/qiskit/dist/c
+          build/qiskit/dist/*.whl
+        key: ${{ steps.key.outputs.key }}
+        # Only ever a prefix of this platform's *same-ref-mode* caches, and only when the caller opts
+        # in.  For `latest-release`/`pinned` this is empty, so a miss means a rebuild: a near-miss
+        # there would restore a genuinely different Qiskit version while the job reports testing the
+        # requested one.
+        restore-keys: ${{ inputs.allow-stale == 'true' && format('{0} | ', steps.key.outputs.prefix) || '' }}
+
+    - name: Report cache result
+      shell: bash
+      env:
+        REQUESTED: ${{ steps.resolve.outputs.ref }}
+        EXACT_HIT: ${{ steps.cache.outputs.cache-hit }}
+        MATCHED_KEY: ${{ steps.cache.outputs.cache-matched-key }}
+        ALLOW_STALE: ${{ inputs.allow-stale }}
+      run: |
+        set -euo pipefail
+        # `cache-hit` is only `true` for an exact key match; a `restore-keys` match reports `false`
+        # with `cache-matched-key` set.  So "did we get anything at all" is the matched key, not
+        # `cache-hit`.
+        if [[ "$EXACT_HIT" == "true" ]]; then
+          echo "Exact cache hit for $REQUESTED."
+          exit 0
+        fi
+        if [[ -z "$MATCHED_KEY" ]]; then
+          echo "No cache entry found; building from source."
+          exit 0
+        fi
+
+        # A stale restore: say so loudly and in the job summary.  When a development-suite failure
+        # turns up, the first question is whether it is the change under test or an out-of-date
+        # Qiskit, and that should not require digging through logs to answer.
+        restored_version=$(sed -n 's/^#define QISKIT_VERSION "\(.*\)".*/\1/p' \
+          build/qiskit/dist/c/include/qiskit/version.h 2>/dev/null || true)
+        {
+          echo "### Qiskit C API restored from an older build"
+          echo
+          echo "| | |"
+          echo "|---|---|"
+          echo "| Requested ref | \`$REQUESTED\` |"
+          echo "| Restored from | \`$MATCHED_KEY\` |"
+          echo "| Reported version | \`${restored_version:-unknown}\` |"
+          echo
+          echo "The development suite accepts a cached Qiskit build rather than rebuilding when"
+          echo "upstream has moved on.  The nightly run rebuilds from the tip of \`main\`."
+        } >> "$GITHUB_STEP_SUMMARY"
+        echo "::notice::Qiskit C API restored from '$MATCHED_KEY' rather than the requested '$REQUESTED'."
+
+    - name: Build Qiskit C API
+      # Rebuild when we got nothing at all.  With `allow-stale`, a `restore-keys` match counts as
+      # usable even though `cache-hit` is `false`, hence testing the matched key rather than the
+      # hit flag.
+      if: steps.cache.outputs.cache-matched-key == ''
+      shell: bash
+      env:
+        QISKIT_REF: ${{ steps.resolve.outputs.ref }}
+        BUILD_WHEEL: ${{ inputs.build-wheel }}
+      run: |
+        set -euo pipefail
+        # A blobless partial clone: enough of the object graph to check out one commit, without
+        # fetching the history's blobs.  Note `--depth 1 --branch <ref>` would be faster still but
+        # cannot check out an arbitrary SHA, which `ref-mode: main` resolves to.
+        git clone --filter=blob:none https://github.com/Qiskit/qiskit build/qiskit
+        cd build/qiskit
+        git checkout "$QISKIT_REF"
+        git rev-parse HEAD
+        make c
+        if [[ "$RUNNER_OS" == "Windows" ]]; then
+          # `make c` installs only the DLL itself; the import library needed to *link* against it,
+          # and the `_cext`-named files, stay behind in `target/`.  Copying them into `dist/c/lib`
+          # before the cache is saved is what makes the cached tree self-sufficient on Windows.
+          cp target/release/qiskit_cext.dll.lib dist/c/lib/qiskit.dll.lib
+          cp target/release/qiskit_cext.dll dist/c/lib/qiskit_cext.dll
+          cp target/release/qiskit_cext.dll.lib dist/c/lib/qiskit_cext.dll.lib
+        fi
+        if [[ "$BUILD_WHEEL" == "true" ]]; then
+          python -m build --wheel
+        fi
+
+    # Runs on every path, not just after a build: this guards the build recipe as much as the cache,
+    # and an assertion that only runs on the rarer branch is an assertion that rots.
+    - name: Verify Qiskit C API
+      shell: bash
+      env:
+        QISKIT_REF: ${{ steps.resolve.outputs.ref }}
+        BUILD_WHEEL: ${{ inputs.build-wheel }}
+        MATCHED_KEY: ${{ steps.cache.outputs.cache-matched-key }}
+      run: |
+        set -euo pipefail
+        include="build/qiskit/dist/c/include"
+        version_h="$include/qiskit/version.h"
+        for required in "$version_h" "$include/qiskit.h"; do
+          if [[ ! -f "$required" ]]; then
+            echo "::error::expected $required to exist (restored from: '${MATCHED_KEY:-nothing}')" >&2
+            exit 1
+          fi
+        done
+
+        version=$(sed -n 's/^#define QISKIT_VERSION "\(.*\)".*/\1/p' "$version_h")
+        if [[ -z "$version" ]]; then
+          echo "::error::could not parse QISKIT_VERSION out of $version_h" >&2
+          exit 1
+        fi
+        echo "Qiskit C API reports version $version (requested ref: $QISKIT_REF)."
+
+        # `version.h` is generated from the tree that was actually built, so for a release-shaped ref
+        # it is an independent check that the artifact matches what was asked for -- which is what
+        # catches a mis-keyed cache entry before it can quietly poison the run.  A raw SHA has nothing
+        # to compare against (`main` reports `X.Y.0-dev` for every commit on the cycle), so there the
+        # SHA in the cache key is the only mechanism, which is why it is resolved to a SHA at all.
+        if [[ "$QISKIT_REF" =~ ^v?([0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
+          want="${BASH_REMATCH[1]}"
+          if [[ "$version" != "$want"* ]]; then
+            echo "::error::Qiskit C API is version '$version' but ref '$QISKIT_REF' was requested" >&2
+            exit 1
+          fi
+        fi
+
+        if [[ "$BUILD_WHEEL" == "true" ]] && ! compgen -G "build/qiskit/dist/*.whl" >/dev/null; then
+          echo "::error::build-wheel was requested but no wheel is present" >&2
+          exit 1
+        fi
+
+    # Saved even when a stale entry was restored, so that this exact ref is an exact hit next time.
+    # Skipped on an exact hit because cache entries are immutable -- re-saving the same key is a
+    # guaranteed no-op that logs a scary-looking warning.
+    - name: Save Qiskit C API
+      if: steps.cache.outputs.cache-hit != 'true'
+      uses: actions/cache/save@v6
+      with:
+        path: |
+          build/qiskit/dist/c
+          build/qiskit/dist/*.whl
+        key: ${{ steps.key.outputs.key }}
+
+    - name: Export Qiskit C API environment
+      if: inputs.cache-only != 'true'
+      shell: bash
+      run: |
+        set -euo pipefail
+        lib_dir="$(pwd)/build/qiskit/dist/c/lib"
+        include_dir="$(pwd)/build/qiskit/dist/c/include"
+
+        if [[ "$RUNNER_OS" == "Windows" ]]; then
+          # Link against the import library; the DLL itself has to be found at run time, hence the
+          # `PATH` entry.  Exporting it here rather than per-step means every later step gets it.
+          qiskit_lib=$(find "$lib_dir" -name "qiskit_cext.dll.lib" | head -n1)
+          echo "$lib_dir" >> "$GITHUB_PATH"
+        else
+          qiskit_lib=$(find "$lib_dir" -name "libqiskit.*" | head -n1)
+        fi
+
+        # Not defensive padding: the Makefile defaults these with `?=`, falling back to the
+        # *pip-installed* Qiskit's C artifacts.  An empty value here would therefore not fail the
+        # build -- it would silently retarget the whole suite at a different library and pass.
+        if [[ -z "$qiskit_lib" ]]; then
+          echo "::error::no Qiskit library found under $lib_dir" >&2
+          ls -la "$lib_dir" >&2 || true
+          exit 1
+        fi
+
+        echo "QISKIT_LIB=$qiskit_lib"
+        echo "QISKIT_INCLUDE=$include_dir"
+        echo "QISKIT_LIB=$qiskit_lib" >> "$GITHUB_ENV"
+        echo "QISKIT_INCLUDE=$include_dir" >> "$GITHUB_ENV"

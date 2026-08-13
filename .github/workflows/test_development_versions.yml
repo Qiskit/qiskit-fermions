@@ -20,6 +20,15 @@ on:
         description: Python version to test.
         type: string
         required: true
+      qiskit-ref:
+        description: >
+          Exact Qiskit commit to build against.  When empty (the pull-request case) the tip of
+          Qiskit's `main` is resolved at run time and an older cached build is accepted rather than
+          rebuilding, since upstream moves continuously.  The nightly run resolves the tip once in a
+          preceding job and passes it here, so that it always tests that exact commit.
+        type: string
+        required: false
+        default: ''
 
 jobs:
   tests:
@@ -45,34 +54,32 @@ jobs:
         run: |
           python -m pip install -U pip build uv
 
+      # Also builds the Qiskit wheel installed further down, and exports
+      # `QISKIT_LIB`/`QISKIT_INCLUDE` for the steps below.
       - name: Compile Qiskit from source
-        shell: bash
-        run: |
-          git clone https://github.com/Qiskit/qiskit build/qiskit
-          cd build/qiskit
-          git rev-parse HEAD
-          make c
-          python -m build --wheel
+        uses: ./.github/actions/build-qiskit-capi
+        with:
+          ref-mode: ${{ inputs.qiskit-ref == '' && 'main' || 'pinned' }}
+          ref: ${{ inputs.qiskit-ref }}
+          python-version: ${{ inputs.python-version }}
+          build-wheel: true
+          # Only when resolving the tip ourselves.  Given an explicit commit (the nightly), that exact
+          # commit is the point of the run and a near-miss would defeat it.
+          allow-stale: ${{ inputs.qiskit-ref == '' }}
 
       - name: Rust tests
         shell: bash
         run: |
-          export QISKIT_LIB=$(find $(pwd)/build/qiskit/dist/c/lib -name "libqiskit.*")
-          export QISKIT_INCLUDE=$(pwd)/build/qiskit/dist/c/include
           make testrust
 
       - name: Compile qiskit-fermions C API
         shell: bash
         run: |
-          export QISKIT_LIB=$(find $(pwd)/build/qiskit/dist/c/lib -name "libqiskit.*")
-          export QISKIT_INCLUDE=$(pwd)/build/qiskit/dist/c/include
           make cext
 
       - name: C tests
         shell: bash
         run: |
-          export QISKIT_LIB=$(find $(pwd)/build/qiskit/dist/c/lib -name "libqiskit.*")
-          export QISKIT_INCLUDE=$(pwd)/build/qiskit/dist/c/include
           make testc
 
       - name: Install Python package
