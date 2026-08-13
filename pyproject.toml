@@ -253,7 +253,11 @@ environment = 'PATH="$PATH:$HOME/.cargo/bin" CARGO_NET_GIT_FETCH_WITH_CLI="true"
 repair-wheel-command = "auditwheel repair -w {dest_dir} {wheel} && pipx run abi3audit --strict --report {wheel}"
 
 [tool.cibuildwheel.macos]
-environment = "MACOSX_DEPLOYMENT_TARGET='11.0' RUSTUP_TOOLCHAIN=stable"
+# A single floor for both architectures: `rustc` raises it to 11.0 for `aarch64-apple-darwin` (the
+# oldest macOS with arm64 support) on its own, so the arm64 wheels still come out tagged
+# `macosx_11_0_arm64` while the x86_64 ones reach back to the older Intel machines that can still run
+# them.  10.12 is also `rustc`'s own default for `x86_64-apple-darwin`.
+environment = "MACOSX_DEPLOYMENT_TARGET='10.12' RUSTUP_TOOLCHAIN=stable"
 repair-wheel-command = "delocate-wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel} && pipx run abi3audit --strict --report {wheel}"
 
 [tool.cibuildwheel.windows]
