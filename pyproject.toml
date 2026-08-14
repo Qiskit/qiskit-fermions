@@ -15,16 +15,19 @@ description = "Qiskit for Fermions"
 license = "Apache-2.0"
 license-files = ["LICENSE.txt"]
 classifiers = [
+    "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
     "Intended Audience :: Science/Research",
     "Natural Language :: English",
     "Operating System :: MacOS",
+    "Operating System :: Microsoft :: Windows",
     "Operating System :: POSIX :: Linux",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
+    "Programming Language :: Rust",
     "Topic :: Scientific/Engineering :: Physics",
     "Typing :: Typed",
 ]
@@ -40,6 +43,13 @@ dependencies = [
     "stevedore>=3.0.0",
     "typing-extensions",
 ]
+
+# Rendered as the sidebar links on the PyPI project page.
+[project.urls]
+Homepage = "https://github.com/Qiskit/qiskit-fermions"
+Documentation = "https://quantum.cloud.ibm.com/docs/addons/qiskit-fermions"
+Repository = "https://github.com/Qiskit/qiskit-fermions"
+Issues = "https://github.com/Qiskit/qiskit-fermions/issues"
 
 [project.optional-dependencies]
 all = [
