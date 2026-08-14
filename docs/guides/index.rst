@@ -26,6 +26,7 @@ specific example applications:
    :maxdepth: 1
    :glob:
 
+   flowsets
    sqdrift
    skqd
    lucj
