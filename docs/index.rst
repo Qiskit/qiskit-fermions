@@ -25,7 +25,7 @@ Getting started
 
 Several guides exist to help you get started with this package. A good starting
 point to get an overview of its breadth of features is the
-:doc:`1D Fermi-Hubbard guide <guides/flowsets>`.
+:doc:`1D Fermi-Hubbard guide <guides/1d_fermi_hubbard>`.
 
 Use case examples
 -----------------
@@ -130,8 +130,8 @@ References
    :hidden:
    :caption: Tutorials
 
-   Simulate 1D Fermi-Hubbard dynamics with flow sets <guides/flowsets>
-   Simulate 2D Fermi-Hubbard dynamics with flow sets <guides/flowsets_2d>
+   Simulate 1D Fermi-Hubbard dynamics with flow sets <guides/1d_fermi_hubbard>
+   Simulate 2D Fermi-Hubbard dynamics with flow sets <guides/2d_fermi_hubbard>
 
 .. toctree::
    :hidden:

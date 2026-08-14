@@ -20,8 +20,8 @@ specific example applications:
    :maxdepth: 1
    :glob:
 
-   flowsets
-   flowsets_2d
+   1d_fermi_hubbard
+   2d_fermi_hubbard
    sqdrift
    skqd
    lucj

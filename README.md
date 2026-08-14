@@ -58,7 +58,7 @@ For more installation information, refer to these [installation instructions](do
 ### Getting started
 
 Several guides exist to help you get started with this package. A good starting point to get an
- overview of its breadth of features is the [1D Fermi-Hubbard guide](docs/guides/flowsets.rst).
+ overview of its breadth of features is the [1D Fermi-Hubbard guide](docs/guides/1d_fermi_hubbard.rst).
 
 ----------------------------------------------------------------------------------------------------
 
