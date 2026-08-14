@@ -1,0 +1,212 @@
+---
+
+# Publishes a built documentation tree into a directory of the `gh-pages` branch.
+#
+# The Pages site for this repository hosts several builds side by side -- `dev/` for `main`,
+# `stable/<X.Y>/` for release branches and `pr/<N>/` for labelled pull requests -- which is why it is
+# served from a branch rather than through `actions/deploy-pages`: that action uploads a single artifact
+# that replaces the whole site, with no notion of sub-paths.  Publishing is therefore an ordinary
+# `git push`, and this action is the one implementation of it, shared by all three callers so that they
+# cannot drift apart.
+#
+# It is a composite action rather than a reusable workflow for the same reason as
+# `build-qiskit-capi`: everything happens in one working directory, and the callers differ only in
+# which artifact they download and where it lands.
+#
+# Requires the repository to be checked out first (for `uses: ./...` to resolve at all).
+
+name: Publish documentation
+description: >
+  Download a built documentation artifact and publish it into a directory of the `gh-pages` branch,
+  regenerating the site's landing page.
+
+inputs:
+  artifact-name:
+    description: Name of the artifact holding the built documentation.
+    required: false
+    default: qiskit-fermions-htmldocs
+  artifact-run-id:
+    description: >
+      Run ID to download the artifact from.  Leave empty to take it from the current run; set it to
+      reach into the run that built the documentation, which is what the preview workflow does since it
+      is triggered by `workflow_run` and so has no artifacts of its own.
+    required: false
+    default: ''
+  prefix:
+    description: >
+      Directory within the branch to publish into, e.g. `dev`, `stable/0.2` or `pr/123`.  Its previous
+      contents are replaced wholesale.
+    required: true
+  rewrite-links:
+    description: >
+      Rewrite the absolute IBM Quantum Platform API-reference links to point inside the published tree.
+      Wanted for every Pages publication -- a preview whose sidebar navigates to the hosted
+      documentation is not much of a preview -- and offered as an input only so that the behaviour is
+      visible at the call site rather than implied.
+    required: false
+    default: 'true'
+  github-token:
+    description: >
+      Token used to download the artifact and push the branch.  Needs `contents: write`, plus
+      `actions: read` when `artifact-run-id` is set.
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Validate inputs
+      shell: bash
+      env:
+        PREFIX: ${{ inputs.prefix }}
+      run: |
+        set -euo pipefail
+        # The prefix becomes a path that later steps `rm -rf`, so it is validated here rather than
+        # trusted.  Callers derive it from a branch name or a pull-request number; a leading slash,
+        # a `..` segment or a shell metacharacter must not reach `rm`.
+        if [[ -z "$PREFIX" ]]; then
+          echo "::error::prefix must not be empty" >&2
+          exit 1
+        fi
+        if [[ ! "$PREFIX" =~ ^[A-Za-z0-9][A-Za-z0-9._/-]*$ ]]; then
+          echo "::error::prefix '$PREFIX' contains characters that are not allowed in a path" >&2
+          exit 1
+        fi
+        if [[ "$PREFIX" == *".."* || "$PREFIX" == */ ]]; then
+          echo "::error::prefix '$PREFIX' must not contain '..' or end in '/'" >&2
+          exit 1
+        fi
+
+    - name: Check out gh-pages
+      uses: actions/checkout@v7
+      with:
+        ref: gh-pages
+        path: gh-pages
+        # The branch accumulates a commit per publication and every one of them rewrites ~25 MB of
+        # near-identical HTML, so its history is large and entirely uninteresting to this job.  This is
+        # what keeps that history free at run time.
+        fetch-depth: 1
+        token: ${{ inputs.github-token }}
+
+    - name: Download built documentation
+      uses: actions/download-artifact@v7
+      with:
+        name: ${{ inputs.artifact-name }}
+        path: downloaded
+        # Both are only meaningful when reaching into another run, and `run-id` requires a token with
+        # `actions: read`.  Empty strings leave the defaults in place.
+        run-id: ${{ inputs.artifact-run-id }}
+        github-token: ${{ inputs.artifact-run-id != '' && inputs.github-token || '' }}
+
+    - name: Locate the documentation tree
+      id: tree
+      shell: bash
+      run: |
+        set -euo pipefail
+        # The artifact is built by copying `docs/_build/html` to `artifact/qiskit-fermions-htmldocs`
+        # and uploading `artifact/`, so it extracts with the tree one level down.  Tolerate both
+        # shapes rather than hard-coding that: an artifact whose layout changed should not silently
+        # publish an empty directory.
+        if [[ -f downloaded/index.html ]]; then
+          tree=downloaded
+        elif [[ -f downloaded/qiskit-fermions-htmldocs/index.html ]]; then
+          tree=downloaded/qiskit-fermions-htmldocs
+        else
+          echo "::error::no index.html found in the downloaded artifact" >&2
+          find downloaded -maxdepth 2 >&2 || true
+          exit 1
+        fi
+        echo "Documentation tree: $tree"
+        echo "path=$tree" >> "$GITHUB_OUTPUT"
+
+    # Deliberately run from the checked-out repository rather than from anything in the artifact: the
+    # artifact is data to be published, never code to be executed.
+    - name: Rewrite platform links
+      if: inputs.rewrite-links == 'true'
+      shell: bash
+      env:
+        TREE: ${{ steps.tree.outputs.path }}
+      run: |
+        set -euo pipefail
+        python tools/rewrite_docs_links.py "$TREE"
+
+    - name: Stage the documentation
+      shell: bash
+      env:
+        TREE: ${{ steps.tree.outputs.path }}
+        PREFIX: ${{ inputs.prefix }}
+      run: |
+        set -euo pipefail
+        target="gh-pages/$PREFIX"
+        # A wholesale replacement rather than a copy over the top, so that pages deleted since the last
+        # publication actually disappear instead of lingering as orphans.
+        rm -rf "$target"
+        mkdir -p "$target"
+        cp -a "$TREE/." "$target/"
+        echo "Staged $(find "$target" -name '*.html' | wc -l) HTML file(s) into $PREFIX."
+
+    - name: Commit and push
+      shell: bash
+      env:
+        PREFIX: ${{ inputs.prefix }}
+        # Both absolute, because this step runs from inside the `gh-pages` checkout.  The downloaded
+        # artifact is still on disk there and is re-copied on every retry, so it has to be reachable.
+        INDEX_SCRIPT: ${{ github.workspace }}/tools/generate_docs_index.py
+        STAGED_TREE: ${{ github.workspace }}/${{ steps.tree.outputs.path }}
+      run: |
+        set -euo pipefail
+        cd gh-pages
+        git config user.name "github-actions[bot]"
+        git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+        # Regenerating the landing page and committing are one unit, and both have to happen *after*
+        # any replay onto a new branch tip -- hence a function called from inside the retry loop.
+        # Generating the page once, before the loop, would list whatever was on disk at the time and so
+        # silently omit a directory that a concurrent publication added in the meantime.
+        attempt_commit() {
+          python "$INDEX_SCRIPT" .
+          git add -A
+          if git diff --cached --quiet; then
+            echo "Nothing to publish: the branch already matches this build."
+            return 1
+          fi
+          git commit --quiet -m "Publish documentation for ${PREFIX}"
+        }
+
+        if ! attempt_commit; then
+          exit 0
+        fi
+
+        for attempt in 1 2 3 4 5; do
+          if git push origin HEAD:gh-pages; then
+            echo "Published to ${PREFIX}."
+            exit 0
+          fi
+          echo "::notice::push rejected (attempt ${attempt}); replaying onto the updated branch tip."
+          sleep $(( attempt * 5 ))
+
+          # Replay our directory onto the new tip rather than merging histories: each publication owns a
+          # disjoint directory, so there is nothing to three-way merge.  A rebase would additionally
+          # break if the branch were ever trimmed by an orphan force-push, where there is no merge base.
+          #
+          # Note this must be `checkout`, not `reset --mixed`.  A mixed reset moves HEAD and the index
+          # but leaves the working tree untouched, and this working tree has no copy of the directories
+          # a concurrent publication just added -- so the following `git add -A` would stage them as
+          # *deletions* and the push would remove someone else's freshly published preview.  Checking
+          # the new tip out into the working tree brings those siblings back first.
+          git fetch --depth=1 origin gh-pages
+          git checkout --force FETCH_HEAD -- .
+          git reset --mixed FETCH_HEAD
+
+          # `checkout -- .` restores the siblings but also reverts our own directory to whatever the
+          # remote has, so re-stage it from the artifact.
+          rm -rf "./${PREFIX}"
+          mkdir -p "./${PREFIX}"
+          cp -a "${STAGED_TREE}/." "./${PREFIX}/"
+
+          if ! attempt_commit; then
+            exit 0
+          fi
+        done
+
+        echo "::error::could not push to gh-pages after 5 attempts" >&2
+        exit 1
