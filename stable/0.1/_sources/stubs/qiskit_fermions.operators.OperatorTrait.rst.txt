@@ -1,0 +1,189 @@
+﻿OperatorTrait
+=============
+
+.. currentmodule:: qiskit_fermions.operators
+
+.. autoclass:: OperatorTrait
+   :show-inheritance:
+   :no-members:
+   :no-inherited-members:
+   :special-members:
+
+
+  
+  
+   .. rubric:: Attributes
+    
+   .. autoattribute:: groups
+  
+  
+  
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+  
+  
+   .. rubric:: Methods
+    
+   .. automethod:: adjoint
+   .. automethod:: equiv
+   .. automethod:: from_terms
+   .. automethod:: from_terms_with_groups
+   .. automethod:: get_coeffs
+   .. automethod:: get_support
+   .. automethod:: group_weights
+   .. automethod:: has_groups
+   .. automethod:: ichop
+   .. automethod:: iter_terms
+   .. automethod:: iter_terms_with_groups
+   .. automethod:: normal_ordered
+   .. automethod:: num_groups
+   .. automethod:: one
+   .. automethod:: relabel_modes
+   .. automethod:: simplify
+   .. automethod:: split_out_groups
+   .. automethod:: zero
+  
+  
+  
+  
+  
+  
+  
