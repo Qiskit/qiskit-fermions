@@ -47,6 +47,11 @@ REPO = "Qiskit/qiskit-fermions"
 #: Written alongside the index; see the module docstring for why this file is essential.
 NOJEKYLL = ".nojekyll"
 
+#: Order the sections appear in on the page.  `dev` must stay first: pull-request previews are by far
+#: the most numerous, so any order that lets them come first buries the development documentation that
+#: most visitors are looking for.  Changing this reorders the page, so change it on purpose.
+SECTION_ORDER = ("dev", "stable", "pr")
+
 PAGE_TEMPLATE = """<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -202,6 +207,73 @@ def _section(title: str, entries: list[str]) -> str:
     return f"<h2>{html.escape(title)}</h2>\n<ul>\n{joined}\n</ul>"
 
 
+def _dev_section(root: pathlib.Path) -> str:
+    """Render the section for the development build, if one is published.
+
+    Args:
+        root: Root of the published site.
+
+    Returns:
+        The section markup, or an empty string.
+    """
+    if not _is_build(root / "dev"):
+        return ""
+    return _section("Development", [_entry("dev/", "main", "latest development build")])
+
+
+def _stable_section(root: pathlib.Path) -> str:
+    """Render the section for released versions, newest first.
+
+    Args:
+        root: Root of the published site.
+
+    Returns:
+        The section markup, or an empty string.
+    """
+    stable_root = root / "stable"
+    if not stable_root.is_dir():
+        return ""
+    versions = sorted(
+        (path.name for path in stable_root.iterdir() if path.is_dir() and _is_build(path)),
+        key=_stable_sort_key,
+        reverse=True,
+    )
+    return _section("Stable", [_entry(f"stable/{name}/", name) for name in versions])
+
+
+def _pr_section(root: pathlib.Path) -> str:
+    """Render the section for pull-request previews, lowest number first.
+
+    Args:
+        root: Root of the published site.
+
+    Returns:
+        The section markup, or an empty string.
+    """
+    pr_root = root / "pr"
+    if not pr_root.is_dir():
+        return ""
+    # Numeric sort, and skip anything non-numeric: the publishing workflow only ever creates integer
+    # directories here, so a stray name means something is wrong and is better left out of the listing
+    # than rendered as a broken link.
+    numbers = sorted(
+        int(path.name)
+        for path in pr_root.iterdir()
+        if path.is_dir() and path.name.isdigit() and _is_build(path)
+    )
+    return _section(
+        "Pull requests",
+        [
+            _entry(
+                f"pr/{number}/",
+                f"#{number}",
+                aside=(f"https://github.com/{REPO}/pull/{number}", "on GitHub"),
+            )
+            for number in numbers
+        ],
+    )
+
+
 def build_index(root: pathlib.Path) -> str:
     """Render the landing page for the previews present under ``root``.
 
@@ -211,52 +283,16 @@ def build_index(root: pathlib.Path) -> str:
     Returns:
         The complete HTML document.
     """
-    sections = []
-
-    if _is_build(root / "dev"):
-        sections.append(
-            _section(
-                "Development",
-                [_entry("dev/", "main", "latest development build")],
-            )
-        )
-
-    stable_root = root / "stable"
-    if stable_root.is_dir():
-        versions = sorted(
-            (path.name for path in stable_root.iterdir() if path.is_dir() and _is_build(path)),
-            key=_stable_sort_key,
-            reverse=True,
-        )
-        sections.append(
-            _section("Stable", [_entry(f"stable/{name}/", name) for name in versions]),
-        )
-
-    pr_root = root / "pr"
-    if pr_root.is_dir():
-        # Numeric sort, and skip anything non-numeric: the publishing workflow only ever creates
-        # integer directories here, so a stray name means something is wrong and is better left out of
-        # the listing than rendered as a broken link.
-        numbers = sorted(
-            int(path.name)
-            for path in pr_root.iterdir()
-            if path.is_dir() and path.name.isdigit() and _is_build(path)
-        )
-        sections.append(
-            _section(
-                "Pull requests",
-                [
-                    _entry(
-                        f"pr/{number}/",
-                        f"#{number}",
-                        aside=(f"https://github.com/{REPO}/pull/{number}", "on GitHub"),
-                    )
-                    for number in numbers
-                ],
-            ),
-        )
-
-    body = "\n".join(section for section in sections if section)
+    # Rendered in the order given by SECTION_ORDER, which is fixed deliberately rather than emerging
+    # from the order these branches happen to be written in.  Development must come first: pull-request
+    # previews are by far the most numerous, and letting them precede the `dev/` link would bury the one
+    # entry most visitors actually came for.
+    built = {
+        "dev": _dev_section(root),
+        "stable": _stable_section(root),
+        "pr": _pr_section(root),
+    }
+    body = "\n".join(section for key in SECTION_ORDER if (section := built[key]))
     if not body:
         body = "<p>No documentation builds are currently published.</p>"
     return PAGE_TEMPLATE.format(repo=html.escape(REPO), sections=body)
