@@ -37,4 +37,8 @@ Please refer to [`tests/README.md`](tests/README.md).
 
 Please refer to [`docs/README.md`](docs/README.md).
 
+## Releasing
+
+Please refer to [`docs/release-process.md`](docs/release-process.md).
+
 <!-- vim: set tw=100: -->
