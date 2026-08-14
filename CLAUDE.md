@@ -101,7 +101,7 @@ Circuit synthesis is exposed as **stevedore entry points** under `qiskit_fermion
 
 `VERSION.txt` (committed) is the source of truth for Python; `make version-bump VERSION=...` syncs it with the Rust `Cargo.toml` workspace version and refreshes `Cargo.lock` via `tools/set_version.py`. `version.py` appends a git sha for dev builds and is excluded from coverage. Use PEP 440 forms (`0.2.0.dev0`, `1.0.0rc1`, `1.0.0`).
 
-**Pre-release status:** there is no tagged release yet, so `main` is an **unstable development branch** (see the "under active development" warning at the top of `README.md`). Until the first tagged release lands, we don't track release notes — breaking changes can be made freely and don't need `reno` entries (see the note under Conventions).
+**Release branches:** `0.1.0` was the first tagged release. `main` is the development branch for the next minor; each released minor gets a long-lived `stable/X.Y` branch, tagged and branched from the same commit, which only receives backported fixes. Backports are opened by Mergify from the `stable backport potential` label (see `.mergify.yml`).
 
 ## Conventions
 
@@ -109,4 +109,4 @@ Circuit synthesis is exposed as **stevedore entry points** under `qiskit_fermion
 - Python: `ruff` (line-length 100, target py310, Google docstrings), `mypy` (py310).
 - Rust: `cargo fmt`, edition 2024, MSRV 1.95.
 - C: `clang-format` with `.clang-format`.
-- Release notes: managed via `reno` (`releasenotes/`), but **not tracked yet** — no release notes are being written until the first tagged release lands. Until then `main` is an unstable development branch (see Versioning), so new changes don't need a `reno` entry.
+- Release notes: managed via `reno` (`releasenotes/`). User-facing changes need a `reno` entry; a note is filed under the first release tag reachable from the commit that adds it, so a backport must carry its note on the `stable/X.Y` branch to appear in that release. Notes for a released minor are kept in a `releasenotes/notes/X.Y/` subdirectory (housekeeping only — `reno` recurses, and the path never affects which release a note lands in).
