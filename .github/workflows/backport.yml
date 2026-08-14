@@ -13,7 +13,7 @@ on:
     types:
       - opened
     branches:
-      - 'stable/*'
+      - 'stable/**'
 
 jobs:
   copy_metadata:
