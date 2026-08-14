@@ -1,0 +1,162 @@
+---
+
+# Removes a pull request's documentation preview from GitHub Pages once the pull request is closed, and
+# collapses the comment that advertised it.
+#
+# Without this the `gh-pages` branch would accumulate a directory per pull request forever, and the
+# landing page would list previews whose branches no longer exist.
+#
+# A plain `pull_request` trigger suffices, rather than `pull_request_target`: previews only ever exist
+# for branches in this repository, so there is no fork case to work around, and a same-repo
+# `pull_request` run already holds a writable token.  Nothing from the pull request is executed here --
+# the only inputs are its number and the repository's own checkout.
+
+name: Clean up documentation preview
+
+on:
+  pull_request:
+    types:
+      - closed
+
+concurrency:
+  # Shared with every other workflow that pushes `gh-pages`, since they all contend for the same branch.
+  group: ${{ github.repository }}-gh-pages
+  cancel-in-progress: false
+
+permissions: {}
+
+jobs:
+  cleanup:
+    name: Remove preview
+    # Fork pull requests never get a preview, so there is nothing to remove and the run would only fail
+    # trying to push.
+    if: >-
+      github.repository_owner == 'Qiskit' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: 'ubuntu-latest'
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.11'
+
+      - name: Remove the preview directory
+        env:
+          PR: ${{ github.event.pull_request.number }}
+          INDEX_SCRIPT: ${{ github.workspace }}/tools/generate_docs_index.py
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          # The number comes from the event payload, so it is an integer produced by GitHub rather than
+          # anything a user typed.  Checked regardless, because it is interpolated into an `rm -rf`.
+          if [[ ! "$PR" =~ ^[0-9]+$ ]]; then
+            echo "::error::unexpected pull-request number '$PR'" >&2
+            exit 1
+          fi
+
+          remote="https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+
+          # The branch may legitimately not exist yet -- nothing has ever been published -- in which
+          # case there is no preview to remove and no reason to fail the run.
+          if ! git ls-remote --exit-code --heads "$remote" gh-pages >/dev/null 2>&1; then
+            echo "No gh-pages branch; nothing to clean up."
+            exit 0
+          fi
+
+          git clone --depth=1 --branch gh-pages "$remote" gh-pages
+          cd gh-pages
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          if [[ ! -d "pr/${PR}" ]]; then
+            echo "No preview published for pull request #${PR}; nothing to remove."
+            exit 0
+          fi
+
+          # Mirrors the publishing action: regenerate the landing page and commit as one unit, inside
+          # the retry loop, because the page is built from what is on disk and a concurrent publication
+          # may have added a directory since the last fetch.
+          attempt_commit() {
+            rm -rf "pr/${PR}"
+            python "$INDEX_SCRIPT" .
+            git add -A
+            if git diff --cached --quiet; then
+              echo "Nothing to remove: the branch no longer contains this preview."
+              return 1
+            fi
+            git commit --quiet -m "Remove documentation preview for pr/${PR}"
+          }
+
+          if ! attempt_commit; then
+            exit 0
+          fi
+
+          for attempt in 1 2 3 4 5; do
+            if git push origin HEAD:gh-pages; then
+              echo "Removed the preview for pull request #${PR}."
+              exit 0
+            fi
+            echo "::notice::push rejected (attempt ${attempt}); replaying onto the updated branch tip."
+            sleep $(( attempt * 5 ))
+
+            # `checkout` rather than `reset --mixed`, for the same reason as in the publishing action: a
+            # mixed reset leaves the working tree alone, so directories a concurrent publication just
+            # added would be staged as deletions and this cleanup would remove someone else's preview
+            # along with its own.
+            git fetch --depth=1 origin gh-pages
+            git checkout --force FETCH_HEAD -- .
+            git reset --mixed FETCH_HEAD
+            if ! attempt_commit; then
+              exit 0
+            fi
+          done
+
+          echo "::error::could not push to gh-pages after 5 attempts" >&2
+          exit 1
+
+      - name: Collapse the preview comment
+        # Runs even if the removal failed: a stale link is worse than a stale branch directory, and the
+        # comment should stop advertising a preview that is on its way out either way.
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR: ${{ github.event.pull_request.number }}
+          # Must match the marker written by `docs_preview.yml`.
+          MARKER: '<!-- docs-preview -->'
+        run: |
+          set -euo pipefail
+
+          # `gh pr view` reports the GraphQL node id in its `id` field -- which is what the mutation
+          # below needs -- along with the current minimized state, so one call is enough.  (The REST
+          # endpoint's `id` is a different, numeric value and would not work here.)
+          read -r node_id minimized < <(
+            gh pr view "$PR" --repo "$REPO" --json comments \
+              --jq ".comments
+                    | map(select(.body | startswith(\"${MARKER}\")))
+                    | .[0] | [(.id // empty), (.isMinimized // false)] | @tsv"
+          ) || true
+
+          if [[ -z "${node_id:-}" ]]; then
+            echo "No preview comment found for pull request #${PR}; nothing to collapse."
+            exit 0
+          fi
+          if [[ "${minimized:-false}" == "true" ]]; then
+            echo "Preview comment is already collapsed."
+            exit 0
+          fi
+
+          # `OUTDATED` renders as "This comment was marked as outdated" and hides the body behind a
+          # disclosure, which is exactly the intent: the link stays readable for anyone who expands it,
+          # rather than being edited away.
+          gh api graphql -f query='
+            mutation($id: ID!) {
+              minimizeComment(input: {subjectId: $id, classifier: OUTDATED}) {
+                minimizedComment { isMinimized minimizedReason }
+              }
+            }' -F id="$node_id" --jq '.data.minimizeComment.minimizedComment'
