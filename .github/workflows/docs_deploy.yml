@@ -3,12 +3,18 @@ name: Deploy documentation
 
 # Post-merge publication of the documentation to GitHub Pages.
 #
-# This is a thin caller: the build and the deployment both live in `docs.yml`, which is the single
-# source of truth and is also what `branch-protection.yml` uses to check that the documentation still
-# builds on a pull request.  The only difference here is the `deploy: true` input.
+# The build itself lives in `docs.yml`, which is the single source of truth and is also what
+# `branch-protection.yml` uses to check that the documentation still builds on a pull request.  This
+# workflow adds the publishing step on top of it, using the same `publish-docs` composite action that
+# publishes pull-request previews.
+#
+# The Pages site hosts several builds side by side, so each ref publishes into its own directory:
+# `main` becomes `dev/` and a release branch becomes `stable/<X.Y>/`.  Anything else -- a tag, or a
+# manual dispatch from another ref -- builds without publishing, which matches the previous behaviour
+# where only `main` was ever deployed.
 #
 # Deploying is deliberately not part of branch protection.  It is a consequence of merging rather than
-# a precondition for it, and it can only ever run on `main`, so as a required status check it would
+# a precondition for it, and it can only ever run post-merge, so as a required status check it would
 # always be skipped on a pull request -- which GitHub counts as a success.
 
 on:
@@ -18,17 +24,18 @@ on:
       - "[0-9]+.[0-9]+.[0-9]+*"
     branches:
       - main
+      - 'stable/**'
 
 concurrency:
-  group: ${{ github.repository }}-${{ github.ref }}-${{ github.workflow }}
+  # Shared with every other workflow that pushes `gh-pages`, since they all contend for the same
+  # branch.  Note this is deliberately not keyed on the ref: a `main` push and a `stable/**` push now
+  # queue behind each other rather than running in parallel, which they must, because they write to one
+  # branch.
+  group: ${{ github.repository }}-gh-pages
   # Don't cancel: we may otherwise end up with weird half-uploaded docs.
   cancel-in-progress: false
 
-# The called workflow's `deploy` job needs these, and permissions can only be maintained or reduced
-# down a workflow chain, never elevated, so they have to be granted here too.
-permissions:
-  pages: write
-  id-token: write
+permissions: {}
 
 jobs:
   config:
@@ -43,5 +50,64 @@ jobs:
     with:
       runner: ${{ needs.config.outputs.runner-linux-x86_64 }}
       python-version: ${{ needs.config.outputs.python-coverage }}
-      # Only publish from `main`; tag builds and manual dispatches from elsewhere just build.
-      deploy: ${{ github.ref == 'refs/heads/main' }}
+
+  prefix:
+    name: Resolve target directory
+    needs: config
+    runs-on: ${{ needs.config.outputs.runner-linux-x86_64 }}
+    outputs:
+      prefix: ${{ steps.resolve.outputs.prefix }}
+    steps:
+      - name: Map the ref to a directory
+        id: resolve
+        env:
+          REF: ${{ github.ref }}
+        run: |
+          set -euo pipefail
+          case "$REF" in
+            refs/heads/main)
+              prefix=dev
+              ;;
+            refs/heads/stable/*)
+              version="${REF#refs/heads/stable/}"
+              # Also a path-injection guard: the `stable/**` glob matches slashes, so without this a
+              # branch named `stable/../../x` would reach the publishing action's `rm -rf`.  That
+              # action validates its input too, but the shape of a release branch belongs here.
+              if [[ ! "$version" =~ ^[0-9]+\.[0-9]+$ ]]; then
+                echo "::error::branch '$REF' does not look like stable/<major>.<minor>" >&2
+                exit 1
+              fi
+              prefix="stable/$version"
+              ;;
+            *)
+              # Tags and dispatches from other refs build but do not publish, as before.
+              prefix=''
+              ;;
+          esac
+          echo "Publishing prefix: '${prefix:-<none>}'"
+          echo "prefix=$prefix" >> "$GITHUB_OUTPUT"
+
+  publish:
+    name: Publish
+    needs:
+      - config
+      - docs
+      - prefix
+    if: needs.prefix.outputs.prefix != ''
+    runs-on: ${{ needs.config.outputs.runner-linux-x86_64 }}
+    permissions:
+      # Push the `gh-pages` branch.  Note the previous `pages: write` and `id-token: write` are gone:
+      # publication no longer goes through `actions/deploy-pages`.
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: ${{ needs.config.outputs.python-coverage }}
+
+      - name: Publish to gh-pages
+        uses: ./.github/actions/publish-docs
+        with:
+          prefix: ${{ needs.prefix.outputs.prefix }}
+          github-token: ${{ github.token }}

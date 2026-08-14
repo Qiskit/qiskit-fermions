@@ -92,9 +92,11 @@ runs:
       with:
         name: ${{ inputs.artifact-name }}
         path: downloaded
-        # Both are only meaningful when reaching into another run, and `run-id` requires a token with
-        # `actions: read`.  Empty strings leave the defaults in place.
-        run-id: ${{ inputs.artifact-run-id }}
+        # Default to this run, so the deploy path -- where the build is a preceding job of the same run
+        # -- needs neither a run id nor `actions: read`.  Passing a run id switches to a cross-run
+        # download, which additionally requires a token carrying `actions: read`; that is the preview
+        # path, whose build happened in the `workflow_run` that triggered it.
+        run-id: ${{ inputs.artifact-run-id != '' && inputs.artifact-run-id || github.run_id }}
         github-token: ${{ inputs.artifact-run-id != '' && inputs.github-token || '' }}
 
     - name: Locate the documentation tree
