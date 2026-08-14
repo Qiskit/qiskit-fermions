@@ -20,11 +20,14 @@ specific example applications:
    :maxdepth: 1
    :glob:
 
-   1d_fermi_hubbard
-   2d_fermi_hubbard
    sqdrift
    skqd
    lucj
+
+You can also start with these more extensive end-to-end tutorials:
+
+* :ref:`1d_fermi_hubbard`
+* :ref:`2d_fermi_hubbard`
 
 Explanations
 ============

@@ -1,4 +1,4 @@
-.. _flowsets_getting_started:
+.. _1d_fermi_hubbard:
 
 Simulate 1D Fermi-Hubbard dynamics with flow sets
 =================================================
@@ -1078,7 +1078,7 @@ The pieces this guide builds are exactly the ones that carry over ---
 :class:`~qiskit.synthesis.EvolutionSynthesis` for making the flow-set structure pay off.
 Only the encoding and the flow-set decomposition are different.
 
-The :ref:`2D flow-set guide <flowsets_2d_getting_started>` picks up exactly here, working
+The :ref:`2D flow-set guide <2d_fermi_hubbard>` picks up exactly here, working
 through the Verstraete-Cirac encoding on a square lattice --- four flow sets, a depth-2
 Clifford for each, and the stabilizer projection the verification then needs.
 

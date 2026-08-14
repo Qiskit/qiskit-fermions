@@ -1,4 +1,4 @@
-.. _flowsets_2d_getting_started:
+.. _2d_fermi_hubbard:
 
 Simulate 2D Fermi-Hubbard dynamics with flow sets
 =================================================
@@ -9,7 +9,7 @@ Simulate 2D Fermi-Hubbard dynamics with flow sets
    Equivalent functionality will be made available via the C API in a future release.
 
 .. seealso::
-   **Read the** :ref:`1D flow-set guide <flowsets_getting_started>` **first.** This guide is
+   **Read the** :ref:`1D flow-set guide <1d_fermi_hubbard>` **first.** This guide is
    its two-dimensional sequel and does not repeat the material developed there: transfer
    and vertex operators, what a flow set is, how :attr:`~.TransferVertexOperator.groups`
    survives into the circuit, and how a custom encoding is wired into the transpiler
