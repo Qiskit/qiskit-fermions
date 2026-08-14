@@ -20,6 +20,22 @@ To generate a clean build, run the following `make` target first:
 make docsclean
 ```
 
+### Browsing a build offline
+
+The API-reference entries in the sidebar point at the documentation hosted on the IBM Quantum
+Platform, because that is what the artifact ingested by the platform needs. In a local build they
+therefore navigate away from the build you are reading. To rewrite them to the corresponding pages
+inside the same tree, use:
+```bash
+make docs-local
+```
+
+Then open `docs/_build/html/index.html`, or serve the tree with
+`python -m http.server -d docs/_build/html`.
+
+Note that this target *modifies* `docs/_build/html` in place, so use plain `make docs` if you need a
+tree with the absolute links intact.
+
 ## Rust
 
 Even though this package's core is implemented in Rust, we do not provide a stable Rust API.
