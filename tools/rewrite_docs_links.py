@@ -36,6 +36,12 @@ Two properties make the rewrite safe, and both are load-bearing:
     unit tests for this script; those two guards are what stands in for them, so please do not weaken
     them.
 
+The rewrite is one-way and cannot be undone by substituting the targets back: ``release-notes.html`` is
+both a target here *and* a link Sphinx already emits natively on every page, because ``docs/index.rst``
+spells that toctree entry relatively.  Nothing in the output distinguishes "was absolute, got rewritten"
+from "was always relative", so an inverse pass turns all ~139 of the native links into platform URLs.
+To get a pristine tree back, rebuild it.
+
 Usage:
     python tools/rewrite_docs_links.py docs/_build/html
 """
