@@ -27,6 +27,7 @@ specific example applications:
    :glob:
 
    flowsets
+   flowsets_2d
    sqdrift
    skqd
    lucj
