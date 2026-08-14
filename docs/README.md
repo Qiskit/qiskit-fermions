@@ -92,12 +92,18 @@ correctly pre-fixed, for example like so: ``:c:func:`qf_ferm_op_free` ``.
 
 ## Release Notes
 
-> **Note:** Release notes are not being tracked yet. Until the first release is tagged, `main` is an
-> unstable development branch and changes do **not** need a `reno` entry. The workflow below applies
-> once the first release is tagged.
-
 Release notes are managed by [`reno`](https://pypi.org/project/reno/).
 The [Qiskit contributing guide](https://github.com/Qiskit/qiskit/blob/main/CONTRIBUTING.md) contains
 a great explanation of working with `reno` which also applies to this package.
+
+Any user-facing change needs a note, added with `reno new <slug>` and committed alongside the change.
+
+`reno` files a note under the first release tag reachable from the commit that *added* the file, so
+the note has to be committed on the branch whose release it belongs to. In particular, a fix that is
+backported to a `stable/X.Y` branch must carry its note on that branch to show up in the
+corresponding patch release; adding it only to `main` files it under the next minor instead. The
+directory a note lives in has no bearing on this — notes for an already-released minor are collected
+into `releasenotes/notes/X.Y/` purely to keep the top level tidy, and `reno` recurses into
+subdirectories when scanning.
 
 <!-- vim: set tw=100: -->
