@@ -8,6 +8,10 @@
 # the single "Finalize" check, which means adding, removing or renaming any other CI job is a pure
 # code change and never needs a settings edit.
 
+# WARNING: `docs_preview.yml` matches this workflow by name, as the literal string
+# `workflows: ["Branch Protection"]` -- `workflow_run` offers no symbolic reference.  Renaming it stops
+# documentation previews from ever being published, silently and with no error anywhere, so rename both
+# together.
 name: Branch Protection
 
 on:
@@ -67,6 +71,10 @@ jobs:
       runner: ${{ needs.config.outputs.runner-linux-x86_64 }}
       python-version: ${{ needs.config.outputs.python-old }}
 
+  # Besides gating the merge, this job's `qiskit-fermions-htmldocs` artifact is what
+  # `docs_preview.yml` publishes when a pull request carries the `ci: preview docs` label -- which is
+  # why previews cost a download rather than a second build.  The preview itself is not and cannot be a
+  # required check: `workflow_run` runs never appear among a pull request's checks.
   docs:
     name: Docs
     needs: config
