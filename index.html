@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Qiskit Fermions documentation previews</title>
+<style>
+:root {
+  color-scheme: light dark;
+  --bg: #ffffff;
+  --fg: #1a1a1a;
+  --muted: #5a5a68;
+  --accent: #6929c4;
+  --border: #e0e0e0;
+  --card: #f7f7f9;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #161616;
+    --fg: #f4f4f4;
+    --muted: #a8a8b3;
+    --accent: #be95ff;
+    --border: #393939;
+    --card: #212121;
+  }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  padding: 2.5rem 1.25rem 4rem;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+}
+main { max-width: 46rem; margin: 0 auto; }
+h1 { font-size: 1.75rem; margin: 0 0 .35rem; font-weight: 600; }
+p.lede { margin: 0 0 2rem; color: var(--muted); }
+h2 {
+  font-size: .8rem; text-transform: uppercase; letter-spacing: .07em;
+  color: var(--muted); font-weight: 600;
+  margin: 2rem 0 .6rem; padding-bottom: .4rem; border-bottom: 1px solid var(--border);
+}
+ul { list-style: none; margin: 0; padding: 0; }
+li { margin: 0 0 .5rem; }
+a.entry {
+  display: flex; flex-wrap: wrap; gap: .25rem .75rem; align-items: baseline;
+  padding: .7rem .9rem; border: 1px solid var(--border); border-radius: 6px;
+  background: var(--card); color: var(--fg); text-decoration: none;
+}
+a.entry:hover, a.entry:focus { border-color: var(--accent); outline: none; }
+a.entry .name { font-weight: 600; }
+a.entry .note { color: var(--muted); font-size: .875rem; }
+li.paired { display: flex; align-items: center; gap: .75rem; }
+li.paired a.entry { flex: 1; }
+a.aside-link { color: var(--accent); font-size: .875rem; white-space: nowrap; }
+.aside { margin-top: 2.5rem; font-size: .875rem; color: var(--muted); }
+.aside a { color: var(--accent); }
+code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: .875em;
+}
+</style>
+</head>
+<body>
+<main>
+<h1>Qiskit Fermions documentation previews</h1>
+<p class="lede">Rendered documentation builds for branches and pull requests of
+<code>Qiskit/qiskit-fermions</code>.</p>
+<h2>Development</h2>
+<ul>
+<li><a class="entry" href="dev/"><span class="name">main</span><span class="note">latest development build</span></a></li>
+</ul>
+<p class="aside">These are previews and may be outdated or incomplete. The released documentation is
+published on the
+<a href="https://quantum.cloud.ibm.com/docs/api/qiskit-fermions">IBM Quantum Platform</a>.</p>
+</main>
+</body>
+</html>
