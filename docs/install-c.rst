@@ -1,19 +1,29 @@
 Install the C API
-==================
+=================
 
-Requirements
-------------
+Prerequisites
+^^^^^^^^^^^^^
 
-Before compiling the ``qiskit-fermions`` C API, you need to compile the Qiskit C
-API. You can do this in any location, but to get started quickly, follow these
-steps:
+Before getting started, you must ensure that you have installed the `Rust
+toolchain <https://www.rust-lang.org/tools/install>`_ as well as the `clang
+compiler <https://clang.llvm.org/>`_.
 
-.. code:: console
+Now, clone the ``qiskit-fermions`` repository.
 
-   $ cd path/to/qiskit-fermions
-   $ git clone git@github.com:Qiskit/qiskit.git build/qiskit
-   $ cd build/qiskit
-   $ make c
+.. code:: sh
+
+    git clone git@github.com:Qiskit/qiskit-fermions.git
+    cd qiskit-fermions
+
+Next, you must also compile the Qiskit C API. You can do this in any location,
+but to get started quickly, follow these steps:
+
+.. code:: sh
+
+    git clone git@github.com:Qiskit/qiskit.git build/qiskit
+    cd build/qiskit
+    ## git-checkout the latest stable tag
+    make c
 
 .. hint::
    On **Windows** only, you will need to copy additional library files:
@@ -22,75 +32,66 @@ steps:
      .. tab-item:: Windows
         :sync: windows
 
-        .. code:: console
+        .. code:: sh
 
-           $ cp target/release/qiskit_cext.dll dist/c/lib/qiskit_cext.dll
-           $ cp target/release/qiskit_cext.dll.lib dist/c/lib/qiskit_cext.dll.lib
-           $ cp target/release/qiskit_cext.dll.lib dist/c/lib/qiskit.dll.lib
+            cp target/release/qiskit_cext.dll dist/c/lib/qiskit_cext.dll
+            cp target/release/qiskit_cext.dll.lib dist/c/lib/qiskit_cext.dll.lib
+            cp target/release/qiskit_cext.dll.lib dist/c/lib/qiskit.dll.lib
 
-You can now move on to the steps of compiling ``qiskit-fermions`` C API that follow.
+You can now move on to the steps of compiling ``qiskit-fermions`` C API that
+follow.
 
-If you want to test your installation, install the following
-dependencies:
+Compile from source
+^^^^^^^^^^^^^^^^^^^
 
-- `CMake <https://cmake.org/>`_
+To get started, configure your shell environment with the locations of your
+compiled Qiskit C API library and include directory.
 
-Install steps
---------------
+.. important::
+   The C API links against the Qiskit **C** library, so ``QISKIT_LIB`` and
+   ``QISKIT_INCLUDE`` must resolve to it. If unset, the build attempts to infer
+   them from any installed ``qiskit`` Python package which bundles its C
+   artifacts (``qiskit.capi.get_lib()``/``get_include()``); set them explicitly,
+   as below, to build against a separately compiled Qiskit C API such as the
+   ``build/qiskit`` clone above.
 
-1. Ensure that you are in the right directory:
+.. hint::
+   This code uses the ``build/qiskit`` path from the code at
+   the top of this page. Adjust the paths according to your setup.
 
-   .. code:: console
+.. tab-set::
+   .. tab-item:: UNIX
+      :sync: unix
 
-      $ cd path/to/qiskit-fermions
+      .. code:: sh
 
-2. Configure your shell environment with the locations of your compiled Qiskit C
-   API library and include directory.
+          export QISKIT_LIB=$(find $(pwd)/build/qiskit/dist/c/lib -name "libqiskit.*")
+          export QISKIT_INCLUDE=$(pwd)/build/qiskit/dist/c/include
 
-   .. important::
-      The C API links against the Qiskit **C** library, so ``QISKIT_LIB`` and
-      ``QISKIT_INCLUDE`` must resolve to it. If unset, the build defaults them to
-      the installed ``qiskit`` package's C artifacts
-      (``qiskit.capi.get_lib()``/``get_include()``); set them explicitly, as
-      below, to build against a separately compiled Qiskit C API such as the
-      ``build/qiskit`` clone above. (The Python extension does not use these
-      variables at all — it links Qiskit through ``qiskit-pyo3-ffi``.)
+   .. tab-item:: Windows
+      :sync: windows
 
-   .. hint::
-      This code uses the ``build/qiskit`` path from the code at
-      the top of this page.  Adjust the paths according to your setup.
+      .. code:: sh
 
-   .. tab-set::
-     .. tab-item:: UNIX
-        :sync: unix
+          export QISKIT_LIB=$(find $(pwd)/build/qiskit/dist/c/lib -name "qiskit_cext.dll.lib")
+          export QISKIT_INCLUDE=$(pwd)/build/qiskit/dist/c/include
 
-        .. code:: console
+Now, compile the ``qiskit-fermions`` C API:
 
-          $ export QISKIT_LIB=$(find $(pwd)/build/qiskit/dist/c/lib -name "libqiskit.*")
-          $ export QISKIT_INCLUDE=$(pwd)/build/qiskit/dist/c/include
+.. code:: sh
 
-     .. tab-item:: Windows
-        :sync: windows
+    make cext
 
-        .. code:: console
+If you want to test your installation, you now must also install `CMake
+<https://cmake.org/>`_.
+You can then test your compilation by running the C unit tests:
 
-          $ export QISKIT_LIB=$(find $(pwd)/build/qiskit/dist/c/lib -name "qiskit_cext.dll.lib")
-          $ export QISKIT_INCLUDE=$(pwd)/build/qiskit/dist/c/include
+.. code:: sh
 
-3. Compile the ``qiskit-fermions`` C API:
-
-   .. code:: console
-
-      $ make cext
-
-4. (optional) Verify the installation by running the C unit tests:
-
-   .. code:: console
-
-      $ make testc
+    make testc
 
 
-Verify that you see these relevant files:
+Finally, verify that you see these relevant files:
 
 - ``dist/c/lib/libqiskit_fermions.so`` (The suffix might vary depending on your operating system)
 - ``dist/c/include/qiskit_fermions.h``
