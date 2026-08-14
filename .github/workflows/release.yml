@@ -1,8 +1,12 @@
 name: Deploy release artifacts
 on:
   push:
+    # Deliberately restrictive: a push to this workflow's trigger publishes to PyPI, which is
+    # irrevocable.  Only version-shaped tags qualify, so a stray or mistyped tag (`v0.1.0`, `test`,
+    # a documentation marker) cannot start a release.  Same filter as `docs_deploy.yml`; the
+    # trailing `*` admits pre-release suffixes such as `0.1.0rc1`.
     tags:
-      - '*'
+      - "[0-9]+.[0-9]+.[0-9]+*"
 jobs:
   build:
     name: Build wheels
@@ -30,10 +34,29 @@ jobs:
           pattern: deploy-*
           path: deploy
           merge-multiple: true
+      # We must set `prerelease` explicitly rather than let the action infer it.  Its automatic
+      # detection uses SemVer rules, under which every `0.x` version is "unstable" -- so a plain
+      # `0.1.0` would be published as a pre-release.  It also would not recognise our PEP 440
+      # spelling of a pre-release (`0.1.0rc1`, no hyphen) as unstable in the first place.  So derive
+      # the flag from the tag: a trailing non-numeric suffix (`a`/`b`/`rc`, per `tools/set_version.py`)
+      # means pre-release, and a bare `X.Y.Z` means stable.
+      - name: Determine release stability from the tag
+        id: stability
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          if [[ "$TAG" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            prerelease=false
+          else
+            prerelease=true
+          fi
+          echo "Tag '$TAG' -> prerelease=$prerelease"
+          echo "prerelease=$prerelease" >> "$GITHUB_OUTPUT"
       - name: Publish release
         uses: ghalactic/github-release-from-tag@v6
         with:
-          prerelease: false
+          prerelease: ${{ steps.stability.outputs.prerelease }}
           generateReleaseNotes: "true"
           assets: |
             - path: deploy/*
