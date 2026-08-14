@@ -147,7 +147,7 @@ def _stable_sort_key(name: str) -> tuple[int, ...]:
 
     Returns:
         A tuple of integers, so ``0.10`` sorts after ``0.9`` rather than before it as a string would.
-        Unparseable names sort last, under an empty tuple, rather than raising.
+        Unparsable names sort last, under an empty tuple, rather than raising.
     """
     try:
         return tuple(int(part) for part in name.split("."))
