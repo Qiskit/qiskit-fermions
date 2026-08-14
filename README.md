@@ -1,9 +1,10 @@
 <!-- SHIELDS -->
 <div align="left">
 
+  [![Release](https://img.shields.io/pypi/v/qiskit-fermions?label=Release&logo=pypi&logoColor=white)](https://pypi.org/project/qiskit-fermions/)
   [![License](https://img.shields.io/github/license/Qiskit/qiskit-fermions?label=License)](LICENSE.txt)
-  [![Docs](https://img.shields.io/badge/%F0%9F%93%84%20Docs-dev-blue.svg)](https://quantum.cloud.ibm.com/docs/addons/qiskit-fermions)
-  [![Qiskit](https://img.shields.io/badge/Qiskit%20-%20%3E%3D2.5%20-%20%236133BD?logo=Qiskit)](https://github.com/Qiskit/qiskit)
+  [![Docs](https://img.shields.io/badge/%F0%9F%93%84%20Docs-stable-blue.svg)](https://quantum.cloud.ibm.com/docs/addons/qiskit-fermions)
+  [![Qiskit](https://img.shields.io/badge/Qiskit%20-%20~%3D2.5.0%20-%20%236133BD?logo=Qiskit)](https://github.com/Qiskit/qiskit)
   [![Python](https://img.shields.io/badge/python-3.10%7C3.11%7C3.12%7C3.13%7C3.14-blue.svg)](https://www.python.org/)
   [![rustc](https://img.shields.io/badge/rustc-1.95+-blue.svg)](https://rust-lang.github.io/rfcs/2495-min-rust-version.html)
   ![Platform](https://img.shields.io/badge/%F0%9F%92%BB%20Platform-Linux%20%7C%20macOS%20%7C%20Windows-informational)
