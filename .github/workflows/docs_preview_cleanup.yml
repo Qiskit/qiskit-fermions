@@ -127,7 +127,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
           PR: ${{ github.event.pull_request.number }}
-          # Must match the marker written by `docs_preview.yml`.
+          # Must match the marker written by the `docs-preview` job in `branch-protection.yml`.
           MARKER: '<!-- docs-preview -->'
         run: |
           set -euo pipefail
@@ -135,11 +135,17 @@ jobs:
           # `gh pr view` reports the GraphQL node id in its `id` field -- which is what the mutation
           # below needs -- along with the current minimized state, so one call is enough.  (The REST
           # endpoint's `id` is a different, numeric value and would not work here.)
+          #
+          # `first(...)` emits nothing at all when no comment matches, which is the ordinary case for a
+          # pull request that was never labelled for a preview.  Selecting the object before building
+          # the row matters: reading the fields off a `null` would emit a row whose missing id collapses
+          # the array, shifting `isMinimized` into `node_id` and sending `false` to the mutation below.
+          # `|| true` because `read` reports failure on the resulting empty input.
           read -r node_id minimized < <(
             gh pr view "$PR" --repo "$REPO" --json comments \
               --jq ".comments
-                    | map(select(.body | startswith(\"${MARKER}\")))
-                    | .[0] | [(.id // empty), (.isMinimized // false)] | @tsv"
+                    | first(.[] | select(.body | startswith(\"${MARKER}\")))
+                    | [.id, (.isMinimized // false)] | @tsv"
           ) || true
 
           if [[ -z "${node_id:-}" ]]; then
