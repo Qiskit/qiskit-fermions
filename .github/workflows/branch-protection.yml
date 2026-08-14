@@ -7,7 +7,9 @@
 # the `finalize` job.  The repository ruleset in the GitHub web interface then only needs to require
 # the single "Finalize" check, which means adding, removing or renaming any other CI job is a pure
 # code change and never needs a settings edit.
-
+#
+# `publish-preview` is the one deliberate exception to that rule: it publishes rather than checks, so a
+# `gh-pages` push failure must not be able to block a merge.  See the comment on the job itself.
 name: Branch Protection
 
 on:
@@ -67,6 +69,9 @@ jobs:
       runner: ${{ needs.config.outputs.runner-linux-x86_64 }}
       python-version: ${{ needs.config.outputs.python-old }}
 
+  # Besides gating the merge, this job's `qiskit-fermions-htmldocs` artifact is what
+  # `publish-preview` below publishes, which is why a preview costs a download rather than a second
+  # build.
   docs:
     name: Docs
     needs: config
@@ -74,6 +79,98 @@ jobs:
     with:
       runner: ${{ needs.config.outputs.runner-linux-x86_64 }}
       python-version: ${{ needs.config.outputs.python-coverage }}
+
+  # Publishes this pull request's rendered documentation to `pr/<number>/` on GitHub Pages, so that it
+  # can be browsed rather than downloaded as a zip.
+  #
+  # DELIBERATELY ABSENT from `finalize`'s `needs`, and `continue-on-error`, in violation of this file's
+  # general rule that every job is listed there.  This job publishes rather than checks: a rejected
+  # `gh-pages` push or a Pages outage says nothing about whether the change is fit to merge, and must
+  # not be able to block one.  Please keep it that way.
+  #
+  # The label gates publication only -- `docs` above always runs -- so a change that breaks the
+  # documentation build still fails CI whether or not anyone wants to read the result.  Note the label
+  # is not in this workflow's trigger `types`: applying it does not start a run by itself, so a preview
+  # lands on the next push, or immediately if you re-run this workflow from the Actions tab.
+  publish-preview:
+    name: Publish docs preview
+    needs:
+      - config
+      - docs
+    # A fork's `GITHUB_TOKEN` is read-only, so this could not push even if it ran; skip rather than fail
+    # for a contributor who cannot act on it.  Fork authors use `make docs-local` instead.  The
+    # `pull_request` guard also covers `merge_group` runs, whose payload has no pull request at all.
+    if: >-
+      github.event_name == 'pull_request' &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      contains(github.event.pull_request.labels.*.name, 'ci: preview docs')
+    continue-on-error: true
+    runs-on: ${{ needs.config.outputs.runner-linux-x86_64 }}
+    permissions:
+      # Push the `gh-pages` branch.
+      contents: write
+      # Comment the preview's location on the pull request.
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: ${{ needs.config.outputs.python-coverage }}
+
+      - name: Publish to gh-pages
+        uses: ./.github/actions/publish-docs
+        with:
+          prefix: pr/${{ github.event.pull_request.number }}
+          github-token: ${{ github.token }}
+
+      - name: Comment the preview link
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR: ${{ github.event.pull_request.number }}
+          # Kept in step with `docs_preview_cleanup.yml`, which finds the comment by this marker.
+          MARKER: '<!-- docs-preview -->'
+        run: |
+          set -euo pipefail
+          url="https://qiskit.github.io/qiskit-fermions/pr/${PR}/"
+          # Built with `printf` rather than a multi-line string: a quoted string would carry this file's
+          # indentation into the comment, and leading spaces make Markdown render the whole thing as a
+          # code block instead of a link.
+          body=$(printf '%s\n:book: [Documentation preview](%s) for this pull request.\n\n%s\n' \
+            "$MARKER" "$url" \
+            'Updated on every push while the `ci: preview docs` label is applied, and removed when this pull request is closed.')
+
+          # Update in place rather than appending, so that a pull request accumulates one comment
+          # instead of one per push.  Matching on the marker rather than on the author: an app posting
+          # through a user account reports `type: User`, so the author is not a reliable discriminator.
+          #
+          # The numeric id and the GraphQL node id are different values and both are needed below --
+          # REST patches by the former, GraphQL mutates by the latter -- so read them together rather
+          # than looking the comment up twice.  `|| true` because `read` reports failure on empty input,
+          # which is the ordinary first-push case rather than an error.
+          read -r comment_id node_id < <(
+            gh api "repos/${REPO}/issues/${PR}/comments" --paginate \
+              --jq "map(select(.body | startswith(\"${MARKER}\")))
+                    | .[0] | [(.id // empty), (.node_id // empty)] | @tsv"
+          ) || true
+
+          if [[ -n "${comment_id:-}" ]]; then
+            echo "Updating existing comment ${comment_id}."
+            gh api --method PATCH "repos/${REPO}/issues/comments/${comment_id}" \
+              -f body="$body" --jq '.html_url'
+            # The comment may have been collapsed by a previous close of this pull request, and a body
+            # update alone would leave it hidden -- indistinguishable, to a reader, from no comment at
+            # all.  Best-effort: this fails harmlessly when the comment is not currently minimized.
+            gh api graphql -f query='
+              mutation($id: ID!) {
+                unminimizeComment(input: {subjectId: $id}) { clientMutationId }
+              }' -F id="$node_id" >/dev/null 2>&1 || true
+          else
+            echo "Creating preview comment."
+            gh api --method POST "repos/${REPO}/issues/${PR}/comments" \
+              -f body="$body" --jq '.html_url'
+          fi
 
   test-latest:
     name: Tests / Latest
