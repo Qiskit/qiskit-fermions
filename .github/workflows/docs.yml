@@ -5,14 +5,19 @@ name: Sphinx
 # deliberately has no `push` or `pull_request` triggers of its own, and no `concurrency` block: the
 # calling workflow owns both.
 #
-# It is called from two places:
+# It only ever *builds*.  Publishing is a separate concern, handled by the `publish-docs` composite
+# action from `docs_deploy.yml` (for `main` and `stable/**`) and `docs_preview.yml` (for labelled pull
+# requests), all of which consume the `qiskit-fermions-htmldocs` artifact produced below.
 #
-# * `branch-protection.yml`, which only builds (`deploy: false`, the default); and
-# * `docs_deploy.yml`, which builds and then publishes to GitHub Pages (`deploy: true`).
+# This split was not previously possible: publication went through `actions/deploy-pages`, whose
+# artifact cannot be handed between workflow runs, so the deployment had to live in the same job as the
+# build.  Serving Pages from the `gh-pages` branch instead turns publication into an ordinary
+# `git push`, which any later run can perform given the artifact -- which in turn is what allows a pull
+# request to be previewed without building its documentation a second time.
 #
-# The deployment lives here, behind an input, rather than in `docs_deploy.yml`, so that the build
-# steps exist exactly once.  Publishing can't simply be a separate workflow that reuses the build,
-# because an `actions/upload-pages-artifact` artifact cannot be handed between workflow runs.
+# Note the artifact deliberately keeps the absolute IBM Quantum Platform links in its API-reference
+# entries: it is also what the platform's documentation ingestion pulls.  Rewriting them for
+# self-contained browsing is the publishing action's job, on its own copy.
 
 on:
   workflow_call:
@@ -25,13 +30,6 @@ on:
         description: Python version to use.
         type: string
         required: true
-      deploy:
-        description: >
-          Whether to publish the built documentation to GitHub Pages.  Only ever set this for runs on
-          `main`: a Pages deployment from anywhere else would clobber the published documentation.
-        type: boolean
-        required: false
-        default: false
 
 jobs:
   build:
@@ -105,11 +103,6 @@ jobs:
         run: |
           make docs
 
-      - name: Upload docs artifact for GitHub Pages
-        uses: actions/upload-pages-artifact@v5
-        with:
-          path: docs/_build/html
-
       # Provide a nicely named artifact that extracts into an
       # identically named subdirectory.
       - name: Prepare nice docs artifact for humans
@@ -125,19 +118,3 @@ jobs:
         with:
           name: qiskit-fermions-htmldocs
           path: ./artifact
-
-  deploy:
-    name: deploy docs
-    if: ${{ inputs.deploy }}
-    needs: build
-    permissions:
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ${{ inputs.runner }}
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v5
