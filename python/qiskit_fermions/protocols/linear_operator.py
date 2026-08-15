@@ -14,7 +14,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Protocol
+from typing import TYPE_CHECKING, Any, Protocol, cast
 
 import numpy as np
 import scipy.sparse.linalg
@@ -85,7 +85,8 @@ def scipy_linear_operator_from_fci(  # noqa: D417
     This is attached to the operator classes as ``_linear_operator_`` at import time (see
     :mod:`qiskit_fermions.operators`): the native operator classes are compiled types whose
     instances cannot themselves subclass SciPy's :class:`~scipy.sparse.linalg.LinearOperator`, so
-    the protocol method is provided in Python.
+    the protocol method is provided in Python. The wrapper carries the native kernel's exact
+    fixed-sector trace as private metadata for internal matrix-exponential callers.
 
     Args:
         norb: the number of spatial orbitals.
@@ -109,9 +110,11 @@ def scipy_linear_operator_from_fci(  # noqa: D417
     def rmatvec(vec):
         return kernel.rmatvec(ascontiguousarray(vec, complex128).reshape(-1))
 
-    return scipy.sparse.linalg.LinearOperator(
+    operator = scipy.sparse.linalg.LinearOperator(
         shape=kernel.shape,
         matvec=matvec,
         rmatvec=rmatvec,
         dtype=kernel.dtype,
     )
+    cast(Any, operator)._trace = kernel.trace
+    return operator

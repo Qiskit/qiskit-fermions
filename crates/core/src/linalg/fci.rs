@@ -696,6 +696,47 @@ impl CompiledSector {
         self.dim
     }
 
+    /// The exact trace of the compiled operator on this FCI sector.
+    pub fn trace(&self) -> Complex64 {
+        match &self.kind {
+            CompiledKind::Spinless { entries } => entries
+                .iter()
+                .filter_map(|&(src, dst, weight)| (src == dst).then_some(weight))
+                .sum(),
+            CompiledKind::Spinful(spinful) => {
+                let diagonal_sum = |transitions: &ScaledTransitions| {
+                    (0..transitions.scale.len())
+                        .filter_map(|k| {
+                            (transitions.src[k] == transitions.dst[k])
+                                .then_some(transitions.scale[k])
+                        })
+                        .sum::<Complex64>()
+                };
+                let mut trace = spinful.scalar * (spinful.dim_a * spinful.dim_b) as f64;
+                trace += diagonal_sum(&spinful.alpha_only) * spinful.dim_b as f64;
+                trace += diagonal_sum(&spinful.beta_only) * spinful.dim_a as f64;
+                for (term, &coeff) in spinful.mixed_coeffs.iter().enumerate() {
+                    let alpha_trace: f64 = (spinful.mixed_alpha.indptr[term]
+                        ..spinful.mixed_alpha.indptr[term + 1])
+                        .filter_map(|k| {
+                            (spinful.mixed_alpha.src[k] == spinful.mixed_alpha.dst[k])
+                                .then_some(f64::from(spinful.mixed_alpha.phase[k]))
+                        })
+                        .sum();
+                    let beta_trace: f64 = (spinful.mixed_beta.indptr[term]
+                        ..spinful.mixed_beta.indptr[term + 1])
+                        .filter_map(|k| {
+                            (spinful.mixed_beta.src[k] == spinful.mixed_beta.dst[k])
+                                .then_some(f64::from(spinful.mixed_beta.phase[k]))
+                        })
+                        .sum();
+                    trace += coeff * alpha_trace * beta_trace;
+                }
+                trace
+            }
+        }
+    }
+
     /// Applies the compiled operator to a state vector: `out = op @ vec`.
     ///
     /// `vec` must have length [`Self::dim`]. Validated bit-for-bit in the tests against an
@@ -1569,6 +1610,70 @@ mod tests {
                 "mismatch at {i}: {x} vs {y}\n  got:      {a:?}\n  expected: {b:?}"
             );
         }
+    }
+
+    fn reference_trace(
+        norb: u32,
+        n_alpha: u32,
+        n_beta: Option<u32>,
+        terms: &[(Complex64, Vec<bool>, Vec<u32>)],
+    ) -> Complex64 {
+        let table = BinomialTable::new(norb);
+        let dim = table.num_strings(norb, n_alpha)
+            * n_beta.map_or(1, |n_beta| table.num_strings(norb, n_beta));
+        let mut trace = Complex64::new(0.0, 0.0);
+        for diagonal in 0..dim {
+            let mut basis = vec![Complex64::new(0.0, 0.0); dim];
+            basis[diagonal] = Complex64::new(1.0, 0.0);
+            trace += reference_matvec(norb, n_alpha, n_beta, terms, &basis)[diagonal];
+        }
+        trace
+    }
+
+    #[test]
+    fn compiled_trace_matches_reference() {
+        let spinless_terms = vec![
+            (Complex64::new(1.2, -0.1), vec![], vec![]),
+            (Complex64::new(0.5, 0.2), vec![true, false], vec![0, 0]),
+            (Complex64::new(0.7, 0.0), vec![true, false], vec![0, 1]),
+            (
+                Complex64::new(1.3, -0.4),
+                vec![true, false, true, false],
+                vec![0, 0, 2, 2],
+            ),
+        ];
+        let spinless = SpinlessSector::new(4, 2)
+            .compile(term_views(&spinless_terms))
+            .unwrap();
+        let expected = reference_trace(4, 2, None, &spinless_terms);
+        assert!((spinless.trace() - expected).norm() < 1e-12);
+
+        let norb = 3;
+        let spinful_terms = vec![
+            (Complex64::new(0.8, 0.1), vec![], vec![]),
+            (Complex64::new(0.4, 0.0), vec![true, false], vec![0, 0]),
+            (
+                Complex64::new(-0.2, 0.3),
+                vec![true, false],
+                vec![norb, norb],
+            ),
+            (
+                Complex64::new(1.1, -0.2),
+                vec![true, false, true, false],
+                vec![0, 0, norb, norb],
+            ),
+            (
+                Complex64::new(0.6, 0.0),
+                vec![true, true, false, false],
+                vec![0, norb + 2, norb, 2],
+            ),
+        ];
+        let spinful = SpinfulSector::new(norb, 2, 1)
+            .unwrap()
+            .compile(term_views(&spinful_terms))
+            .unwrap();
+        let expected = reference_trace(norb, 2, Some(1), &spinful_terms);
+        assert!((spinful.trace() - expected).norm() < 1e-12);
     }
 
     #[test]

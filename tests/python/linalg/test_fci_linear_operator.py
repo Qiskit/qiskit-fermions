@@ -36,6 +36,38 @@ def test_fci_linear_operator_shape_spinless():
     assert linop.shape == (10, 10)
 
 
+def test_fci_linear_operator_trace_spinless():
+    """The exact trace includes scalar and diagonal terms while excluding hopping terms."""
+    op = FermionOperator.from_dict(
+        {
+            (): 1.5,
+            ((True, 0), (False, 0)): 2.0,
+            ((True, 0), (False, 1)): 7.0,
+        }
+    )
+
+    linop = op._linear_operator_(3, 2)
+
+    assert linop._trace == pytest.approx(8.5)
+
+
+def test_fci_linear_operator_trace_spinful():
+    """The exact trace accounts for scalar, single-spin, and mixed-spin terms."""
+    op = FermionOperator.from_dict(
+        {
+            (): 1.0,
+            ((True, 0), (False, 0)): 2.0,
+            ((True, 2), (False, 2)): 3.0,
+            ((True, 0), (False, 0), (True, 2), (False, 2)): 4.0,
+            ((True, 0), (False, 1)): 7.0,
+        }
+    )
+
+    linop = op._linear_operator_(2, (1, 1))
+
+    assert linop._trace == pytest.approx(18.0)
+
+
 def test_fci_linear_operator_matvec_matches_ffsim():
     """The native spinful matvec matches ffsim's linear operator applied to the same vector."""
     hamil = FermionOperator.from_dict(

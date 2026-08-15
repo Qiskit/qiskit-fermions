@@ -1,0 +1,6 @@
+---
+fixes:
+  - |
+    Improved the numerical conditioning of state-vector simulation for
+    :class:`.Evolution` and :class:`.OrbitalRotation` gates by supplying the
+    exact fixed-sector operator trace to SciPy's matrix exponential routine.

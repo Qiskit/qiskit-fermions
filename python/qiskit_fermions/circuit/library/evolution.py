@@ -14,14 +14,13 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
-import scipy.sparse.linalg
+from typing import TYPE_CHECKING, Any, cast
 
 from qiskit_fermions.linalg import linear_operator
 from qiskit_fermions.operators import OperatorTrait
 
 from .. import FermionicGate
+from ._expm_multiply import _expm_multiply_with_trace
 
 if TYPE_CHECKING:
     import numpy as np
@@ -179,8 +178,5 @@ class Evolution(FermionicGate):
                 + f" (norb={norb}, nelec={nelec})."
             )
         linop = linear_operator(operator, norb, nelec)
-        # ``traceA`` is only a balancing hint for scipy (it factors out ``exp(traceA / n)`` to
-        # improve conditioning), not a correctness input: an inexact value costs at most some
-        # numerical conditioning. Passing 0.0 avoids scipy estimating the trace itself and mirrors
-        # ffsim's own ``_apply_unitary_`` implementations.
-        return scipy.sparse.linalg.expm_multiply(-1j * self.params[0] * linop, vec, traceA=0.0)
+        scale = -1j * self.params[0]
+        return _expm_multiply_with_trace(scale * linop, vec, scale * cast(Any, linop)._trace)

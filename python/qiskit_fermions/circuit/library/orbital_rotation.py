@@ -15,15 +15,15 @@
 from __future__ import annotations
 
 import numbers
-from typing import cast
+from typing import Any, cast
 
 import numpy as np
 import scipy.linalg
-import scipy.sparse.linalg
 
 from qiskit_fermions.utils.optionals import HAS_FFSIM
 
 from .. import FermionicGate
+from ._expm_multiply import _expm_multiply_with_trace
 
 
 class OrbitalRotation(FermionicGate):
@@ -228,6 +228,4 @@ class OrbitalRotation(FermionicGate):
         # ``qiskit_fermions.operators``); the stubs type ``from_dict``'s result as the compiled
         # ``_lib`` type, which does not carry the patched method, so mypy still needs the ignore.
         linop = linear_operator(generator, norb, nelec)  # type: ignore[arg-type]
-        # ``traceA=0.0`` mirrors Evolution._apply_unitary_placed_: it is only a scipy conditioning
-        # hint (it factors out ``exp(traceA / n)``), not a correctness input.
-        return cast(np.ndarray, scipy.sparse.linalg.expm_multiply(linop, vec, traceA=0.0))
+        return _expm_multiply_with_trace(linop, vec, cast(Any, linop)._trace)
