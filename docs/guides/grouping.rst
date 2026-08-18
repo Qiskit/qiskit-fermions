@@ -64,7 +64,7 @@ according to the *line flow sets* as shown in Figure 1c of [1]_.
     ... )
     <Figure size ... with 1 Axes>
 
-This is a simple two by three lattice of Majorana modes connected by
+This is a simple two-by-three lattice of Majorana modes connected by
 directed edges. Each edge represents a term in our operator acting on the two
 connected modes. We want to group these terms according to their edge labels
 (shown on the graph): terms connected by edges with the same label are placed in

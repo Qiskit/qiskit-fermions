@@ -349,7 +349,7 @@ pass:
 Next steps
 ^^^^^^^^^^
 
-Having generated an ensemble of circuits, we can sample
+Now that we have successfully generated an ensemble of circuits, we can sample
 bitstrings from them. To do so, the circuits must be executed on hardware.
 Refer to the `Qiskit
 documentation <https://quantum.cloud.ibm.com/docs/guides/intro-to-patterns>`_

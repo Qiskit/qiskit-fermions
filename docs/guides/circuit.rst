@@ -64,7 +64,7 @@ modes, then adds fermionic gates from the :mod:`qiskit_fermions.circuit.library`
 to implement the time evolution.
 
 The example also demonstrates how to incorporate domain knowledge into an
-operator by using :ref:`operator term grouping <grouping_explanation>`. Assigning group indices to the Hamiltonian terms preserves structural
+operator by using :ref:`operator term grouping <grouping_explanation>`. By assigning group indices to the Hamiltonian terms, structural information is
 information that optimization passes can exploit throughout the transpilation
 stack.
 
