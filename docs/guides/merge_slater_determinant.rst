@@ -11,8 +11,8 @@ Optimize Slater determinant preparation
 An :class:`.InitializeModes` gate declares a reference mode occupation; an
 :class:`.OrbitalRotation` gate rotates the single-particle basis. Placed back to back, the two
 gates *prepare a Slater determinant*: the modes start in the reference determinant and are then
-rotated into the target orbitals. The :class:`.PrepareSlaterDeterminant` gate captures exactly that
-composition -- and because it knows the reference occupation, transpiling it can use the rectangular
+rotated into the target orbitals. The :class:`.PrepareSlaterDeterminant` gate captures that
+composition, and because it knows the reference occupation, transpiling it can use the rectangular
 :func:`~qiskit_fermions.linalg.givens_decomposition_slater`, which realizes only the *occupied*
 orbitals, instead of the full square decomposition an :class:`.OrbitalRotation` alone requires. That
 is a strictly cheaper synthesis (see the payoff at the end of this guide).
@@ -22,11 +22,11 @@ The :class:`.MergeSlaterDeterminantPreparation` transpiler pass detects the
 rewrites it into :class:`.PrepareSlaterDeterminant` gate(s), so a later synthesis stage picks up the
 reduced decomposition automatically. Under simulation the rewrite is a no-op on the state:
 :class:`.PrepareSlaterDeterminant` is *validate-then-rotate* (it validates the reference occupation
-and then applies the rotation, exactly as the two separate gates do), so the merge only unlocks the
+and then applies the rotation, just as the two separate gates do), so the merge only unlocks the
 cheaper synthesis without changing the prepared state.
 
 Throughout this guide we draw a circuit before and after the pass, side by side: the input on the
-left, and on the right the result of running the pass on it. These two helpers do that -- ``merge``
+left, and on the right the result of running the pass on it. Two helpers do that: ``merge``
 runs the pass on a copy of the circuit (via its :class:`.FermionicDAGCircuit`) and converts the
 result back to a drawable :class:`.FermionicCircuit`, and ``draw_merge`` draws both halves into a
 single before/after figure:
@@ -123,9 +123,10 @@ A single full-register (``2 * norb``) :class:`.InitializeModes` followed by *two
 occupation at the sector boundary and emits **two** :class:`.PrepareSlaterDeterminant` gates. The
 two rotations may appear in either order.
 
-This is the shape produced by the LUCJ workflow (see the :ref:`LUCJ guide <lucj_getting_started>`):
-a user places an :class:`.InitializeModes` -- typically the Hartree-Fock reference via
-:meth:`~qiskit_fermions.circuit.library.InitializeModes.from_hartree_fock` -- at the front of the
+This is the shape produced by the local unitary cluster Jastrow (LUCJ) workflow (see the
+:ref:`LUCJ guide <lucj_getting_started>`):
+a user places an :class:`.InitializeModes` (typically the Hartree-Fock reference via
+:meth:`~qiskit_fermions.circuit.library.InitializeModes.from_hartree_fock`) at the front of the
 circuit and appends a :class:`.UCJ` ansatz, whose first two per-spin orbital rotations directly
 follow the initialization once the ansatz is decomposed.
 
@@ -142,7 +143,7 @@ follow the initialization once the ansatz is decomposed.
    <Figure size ... with 2 Axes>
 
 This pattern also fires when only *one* spin half is rotated by a gate directly following the
-initialization -- the shape produced when just one spin sector's orbital rotation happens to sit at
+initialization, the shape produced when just one spin sector's orbital rotation happens to sit at
 the front of the circuit. The rotated half becomes a :class:`.PrepareSlaterDeterminant` with its
 rotation, and the other half is prepared with an *identity* rotation. The identity preparation
 synthesizes to nothing more than the reference X gates the :class:`.InitializeModes` would have
@@ -165,7 +166,7 @@ What is left untouched
 
 The pass is deliberately conservative: it only fuses when the two gates genuinely compose into a
 Slater determinant preparation, and copies everything else through unchanged. "Immediately
-followed" is understood over the circuit's data-flow graph -- the :class:`.OrbitalRotation` fuses
+followed" is understood over the circuit's data-flow graph: the :class:`.OrbitalRotation` fuses
 only when the :class:`.InitializeModes` is its *sole* predecessor across all of its modes. In the
 figures below the before and after are identical: nothing fused.
 
@@ -195,9 +196,9 @@ A partial rotation that is not a spin half
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 A rotation covering exactly one contiguous spin half of a full-register initialization *does* fuse
-(see the previous section). But a rotation on any *other* partial mode set -- fewer modes than the
+(see the previous section). But a rotation on any *other* partial mode set (fewer modes than the
 initialization and not one of its two spin halves, such as a sub-range straddling the sector
-boundary -- is not a per-sector preparation. Merging it would silently drop the initialization's
+boundary) is not a per-sector preparation. Merging it would silently drop the initialization's
 role on the modes it leaves out, so the pass leaves both gates in place:
 
 .. plot::
@@ -216,11 +217,11 @@ Why it matters: the synthesis payoff
 
 The merge is worthwhile because :class:`.PrepareSlaterDeterminant` synthesizes to far fewer gates
 than the :class:`.OrbitalRotation` it absorbs. An :math:`m`-electron determinant over :math:`n`
-orbitals needs at most :math:`m(n-m)` two-qubit rotations and **no** diagonal phase gates, versus the
+orbitals needs at most :math:`m(n-m)` two-qubit rotations and no diagonal phase gates, versus the
 :math:`n(n-1)/2` rotations plus :math:`n` phases of the full square orbital rotation.
 
 The preset Jordan-Wigner pass manager runs :class:`.MergeSlaterDeterminantPreparation` in its
-optimization stage, so this reduction happens automatically. Here we transpile a two-electron,
+optimization stage, so this reduction happens automatically. We transpile a two-electron,
 six-orbital preparation all the way to a :class:`~qiskit.circuit.QuantumCircuit` and count its gates:
 
 .. note::
@@ -262,7 +263,7 @@ six-orbital preparation all the way to a :class:`~qiskit.circuit.QuantumCircuit`
    >>> prepared.draw("mpl", fold=-1)
    <Figure size ... with 1 Axes>
 
-Compare that to synthesizing the same orbital rotation on its own -- with no preceding
+Compare that to synthesizing the same orbital rotation on its own: with no preceding
 initialization there is nothing to merge, so the preset falls back to the full square
 decomposition, which is both deeper and carries diagonal phase gates:
 
@@ -286,8 +287,8 @@ decomposition, which is both deeper and carries diagonal phase gates:
    <Figure size ... with 1 Axes>
 
 The reduced decomposition drops all six phase gates and nearly halves the two-qubit rotation count.
-The prepared determinant is correct up to a global phase -- physically irrelevant for state
-preparation -- which is exactly what the phase gates would have fixed.
+The prepared determinant is correct up to a global phase (physically irrelevant for state
+preparation), which is what the phase gates would have fixed.
 
 .. seealso::
    :class:`.PrepareSlaterDeterminant`, :class:`.InitializeModes`, :class:`.OrbitalRotation`,

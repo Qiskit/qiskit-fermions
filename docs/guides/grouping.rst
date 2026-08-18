@@ -8,7 +8,7 @@ which collects routines that partition the terms of an operator based on their
 structure.
 
 As described in the :ref:`operators guide <term_grouping>`, operators can store a
-**groups array** - an optional part of the sparse data structure that associates each
+**groups array**, an optional part of the sparse data structure that associates each
 term with a group index. Terms sharing the same group index form a group, enabling
 systematic exploitation of structure in downstream processing.
 
@@ -64,7 +64,7 @@ according to the *line flow sets* as shown in Figure 1c of [1]_.
     ... )
     <Figure size ... with 1 Axes>
 
-Here, we have a simple two by three lattice of Majorana modes connected by
+This is a simple two by three lattice of Majorana modes connected by
 directed edges. Each edge represents a term in our operator acting on the two
 connected modes. We want to group these terms according to their edge labels
 (shown on the graph): terms connected by edges with the same label are placed in
