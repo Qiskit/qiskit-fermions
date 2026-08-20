@@ -183,7 +183,7 @@ circuit carrying bound parameters, only the mapping from ``theta`` to tensors to
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Starting the optimizer from :math:`\boldsymbol{\theta} = \mathbf{0}` (the identity rotation and a
-zero diagonal Coulomb matrix, i.e. the Hartree-Fock reference itself) lands on a nearby local
+zero diagonal Coulomb matrix, that is, the Hartree-Fock reference itself) lands on a nearby local
 minimum barely below Hartree-Fock. With only one repetition, the ansatz is not expressive enough
 near that point for a gradient-based search to escape it unassisted. A classically computed
 starting point is a much better choice, so we reuse the CCSD-initialized ansatz from step 1: calling

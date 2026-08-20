@@ -89,7 +89,7 @@ detail in :ref:`this guide <grouping_explanation>`.
    in the next step.
 
    The terms that fit this description are those that are diagonal
-   in the occupation-number basis, i.e. the products of number operators
+   in the occupation-number basis, that is, the products of number operators
    (:math:`a^\dagger_i a_i`). This includes the constant energy offset, whose
    time evolution only introduces a global phase into the circuit, the
    individual number-operators whose time evolution amounts to single-qubit Z
@@ -274,7 +274,7 @@ None of the excitations sampled without filtering touch the occupied set
 occupied and an unoccupied mode; every single one is trivial and would have
 no effect on the sampled bitstrings. With ``filter_trivial=True``, all five are
 rejected and replaced by excitations that do couple an occupied mode with an
-unoccupied one, e.g. the first accepted excitation ``[0, 1, 6, 7]`` moves a
+unoccupied one. For example, the first accepted excitation ``[0, 1, 6, 7]`` moves a
 particle between occupied modes ``0``, ``1``, and ``6`` and unoccupied mode
 ``7``.
 
