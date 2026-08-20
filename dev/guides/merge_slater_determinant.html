@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Optimize Slater determinant preparation - Qiskit Fermions 0.2.0.dev0+33f46e3</title>
+        <title>Optimize Slater determinant preparation - Qiskit Fermions 0.2.0.dev0+bdbe624</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+33f46e3</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+bdbe624</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+33f46e3</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+bdbe624</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -209,9 +209,9 @@
 <li class="toctree-l2"><a class="reference internal" href="lucj.html">Build an LUCJ ansatz</a></li>
 <li class="toctree-l2"><a class="reference internal" href="operators.html">Design Principles of Operator Representations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="grouping.html">Group operator terms: exploit the operator structure</a></li>
-<li class="toctree-l2"><a class="reference internal" href="mappers.html">Mapping operator representations</a></li>
-<li class="toctree-l2"><a class="reference internal" href="circuit.html">Working with fermionic circuits</a></li>
-<li class="toctree-l2"><a class="reference internal" href="transpilation.html">Transpiling fermionic circuits</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mappers.html">Map operator representations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="circuit.html">Work with fermionic circuits</a></li>
+<li class="toctree-l2"><a class="reference internal" href="transpilation.html">Transpile fermionic circuits</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ffsim.html">The ffsim simulation backend</a></li>
 <li class="toctree-l2"><a class="reference internal" href="vqe_outer_loop.html">Running the outer VQE parameter optimization loop</a></li>
 <li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Optimize Slater determinant preparation</a></li>
@@ -275,8 +275,8 @@ Equivalent functionality will be made available via the C API in a future releas
 <p>An <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.InitializeModes.html#qiskit_fermions.circuit.library.InitializeModes" title="qiskit_fermions.circuit.library.InitializeModes"><code class="xref py py-class docutils literal notranslate"><span class="pre">InitializeModes</span></code></a> gate declares a reference mode occupation; an
 <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.OrbitalRotation.html#qiskit_fermions.circuit.library.OrbitalRotation" title="qiskit_fermions.circuit.library.OrbitalRotation"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrbitalRotation</span></code></a> gate rotates the single-particle basis. Placed back to back, the two
 gates <em>prepare a Slater determinant</em>: the modes start in the reference determinant and are then
-rotated into the target orbitals. The <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.PrepareSlaterDeterminant.html#qiskit_fermions.circuit.library.PrepareSlaterDeterminant" title="qiskit_fermions.circuit.library.PrepareSlaterDeterminant"><code class="xref py py-class docutils literal notranslate"><span class="pre">PrepareSlaterDeterminant</span></code></a> gate captures exactly that
-composition – and because it knows the reference occupation, transpiling it can use the rectangular
+rotated into the target orbitals. The <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.PrepareSlaterDeterminant.html#qiskit_fermions.circuit.library.PrepareSlaterDeterminant" title="qiskit_fermions.circuit.library.PrepareSlaterDeterminant"><code class="xref py py-class docutils literal notranslate"><span class="pre">PrepareSlaterDeterminant</span></code></a> gate captures that
+composition, and because it knows the reference occupation, transpiling it can use the rectangular
 <a class="reference internal" href="../stubs/qiskit_fermions.linalg.givens_decomposition_slater.html#qiskit_fermions.linalg.givens_decomposition_slater" title="qiskit_fermions.linalg.givens_decomposition_slater"><code class="xref py py-func docutils literal notranslate"><span class="pre">givens_decomposition_slater()</span></code></a>, which realizes only the <em>occupied</em>
 orbitals, instead of the full square decomposition an <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.OrbitalRotation.html#qiskit_fermions.circuit.library.OrbitalRotation" title="qiskit_fermions.circuit.library.OrbitalRotation"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrbitalRotation</span></code></a> alone requires. That
 is a strictly cheaper synthesis (see the payoff at the end of this guide).</p>
@@ -285,10 +285,10 @@ is a strictly cheaper synthesis (see the payoff at the end of this guide).</p>
 rewrites it into <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.PrepareSlaterDeterminant.html#qiskit_fermions.circuit.library.PrepareSlaterDeterminant" title="qiskit_fermions.circuit.library.PrepareSlaterDeterminant"><code class="xref py py-class docutils literal notranslate"><span class="pre">PrepareSlaterDeterminant</span></code></a> gate(s), so a later synthesis stage picks up the
 reduced decomposition automatically. Under simulation the rewrite is a no-op on the state:
 <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.PrepareSlaterDeterminant.html#qiskit_fermions.circuit.library.PrepareSlaterDeterminant" title="qiskit_fermions.circuit.library.PrepareSlaterDeterminant"><code class="xref py py-class docutils literal notranslate"><span class="pre">PrepareSlaterDeterminant</span></code></a> is <em>validate-then-rotate</em> (it validates the reference occupation
-and then applies the rotation, exactly as the two separate gates do), so the merge only unlocks the
+and then applies the rotation, just as the two separate gates do), so the merge only unlocks the
 cheaper synthesis without changing the prepared state.</p>
 <p>Throughout this guide we draw a circuit before and after the pass, side by side: the input on the
-left, and on the right the result of running the pass on it. These two helpers do that – <code class="docutils literal notranslate"><span class="pre">merge</span></code>
+left, and on the right the result of running the pass on it. Two helpers do that: <code class="docutils literal notranslate"><span class="pre">merge</span></code>
 runs the pass on a copy of the circuit (via its <a class="reference internal" href="../stubs/qiskit_fermions.circuit.FermionicDAGCircuit.html#qiskit_fermions.circuit.FermionicDAGCircuit" title="qiskit_fermions.circuit.FermionicDAGCircuit"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicDAGCircuit</span></code></a>) and converts the
 result back to a drawable <a class="reference internal" href="../stubs/qiskit_fermions.circuit.FermionicCircuit.html#qiskit_fermions.circuit.FermionicCircuit" title="qiskit_fermions.circuit.FermionicCircuit"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicCircuit</span></code></a>, and <code class="docutils literal notranslate"><span class="pre">draw_merge</span></code> draws both halves into a
 single before/after figure:</p>
@@ -374,9 +374,10 @@ per sector, each fuse on their own into a <a class="reference internal" href="..
 <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.OrbitalRotation.html#qiskit_fermions.circuit.library.OrbitalRotation" title="qiskit_fermions.circuit.library.OrbitalRotation"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrbitalRotation</span></code></a>s, one on each contiguous spin half. The pass splits the global
 occupation at the sector boundary and emits <strong>two</strong> <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.PrepareSlaterDeterminant.html#qiskit_fermions.circuit.library.PrepareSlaterDeterminant" title="qiskit_fermions.circuit.library.PrepareSlaterDeterminant"><code class="xref py py-class docutils literal notranslate"><span class="pre">PrepareSlaterDeterminant</span></code></a> gates. The
 two rotations may appear in either order.</p>
-<p>This is the shape produced by the LUCJ workflow (see the <a class="reference internal" href="lucj.html#lucj-getting-started"><span class="std std-ref">LUCJ guide</span></a>):
-a user places an <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.InitializeModes.html#qiskit_fermions.circuit.library.InitializeModes" title="qiskit_fermions.circuit.library.InitializeModes"><code class="xref py py-class docutils literal notranslate"><span class="pre">InitializeModes</span></code></a> – typically the Hartree-Fock reference via
-<a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.InitializeModes.html#qiskit_fermions.circuit.library.InitializeModes.from_hartree_fock" title="qiskit_fermions.circuit.library.InitializeModes.from_hartree_fock"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_hartree_fock()</span></code></a> – at the front of the
+<p>This is the shape produced by the local unitary cluster Jastrow (LUCJ) workflow (see the
+<a class="reference internal" href="lucj.html#lucj-getting-started"><span class="std std-ref">LUCJ guide</span></a>):
+a user places an <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.InitializeModes.html#qiskit_fermions.circuit.library.InitializeModes" title="qiskit_fermions.circuit.library.InitializeModes"><code class="xref py py-class docutils literal notranslate"><span class="pre">InitializeModes</span></code></a> (typically the Hartree-Fock reference via
+<a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.InitializeModes.html#qiskit_fermions.circuit.library.InitializeModes.from_hartree_fock" title="qiskit_fermions.circuit.library.InitializeModes.from_hartree_fock"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_hartree_fock()</span></code></a>) at the front of the
 circuit and appends a <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.UCJ.html#qiskit_fermions.circuit.library.UCJ" title="qiskit_fermions.circuit.library.UCJ"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCJ</span></code></a> ansatz, whose first two per-spin orbital rotations directly
 follow the initialization once the ansatz is decomposed.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">circuit</span> <span class="o">=</span> <span class="n">FermionicCircuit</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span>  <span class="c1"># norb = 3, nelec = (2, 1)</span>
@@ -392,7 +393,7 @@ follow the initialization once the ansatz is decomposed.</p>
 <img alt="A global initialization with two per-spin rotations fusing into two preparations." class="plot-directive" src="../_images/merge_slater_determinant-4.png" />
 </figure>
 <p>This pattern also fires when only <em>one</em> spin half is rotated by a gate directly following the
-initialization – the shape produced when just one spin sector’s orbital rotation happens to sit at
+initialization, the shape produced when just one spin sector’s orbital rotation happens to sit at
 the front of the circuit. The rotated half becomes a <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.PrepareSlaterDeterminant.html#qiskit_fermions.circuit.library.PrepareSlaterDeterminant" title="qiskit_fermions.circuit.library.PrepareSlaterDeterminant"><code class="xref py py-class docutils literal notranslate"><span class="pre">PrepareSlaterDeterminant</span></code></a> with its
 rotation, and the other half is prepared with an <em>identity</em> rotation. The identity preparation
 synthesizes to nothing more than the reference X gates the <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.InitializeModes.html#qiskit_fermions.circuit.library.InitializeModes" title="qiskit_fermions.circuit.library.InitializeModes"><code class="xref py py-class docutils literal notranslate"><span class="pre">InitializeModes</span></code></a> would have
@@ -415,7 +416,7 @@ Slater synthesis on the rotated half:</p>
 <h2>What is left untouched<a class="headerlink" href="#what-is-left-untouched" title="Link to this heading">¶</a></h2>
 <p>The pass is deliberately conservative: it only fuses when the two gates genuinely compose into a
 Slater determinant preparation, and copies everything else through unchanged. “Immediately
-followed” is understood over the circuit’s data-flow graph – the <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.OrbitalRotation.html#qiskit_fermions.circuit.library.OrbitalRotation" title="qiskit_fermions.circuit.library.OrbitalRotation"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrbitalRotation</span></code></a> fuses
+followed” is understood over the circuit’s data-flow graph: the <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.OrbitalRotation.html#qiskit_fermions.circuit.library.OrbitalRotation" title="qiskit_fermions.circuit.library.OrbitalRotation"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrbitalRotation</span></code></a> fuses
 only when the <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.InitializeModes.html#qiskit_fermions.circuit.library.InitializeModes" title="qiskit_fermions.circuit.library.InitializeModes"><code class="xref py py-class docutils literal notranslate"><span class="pre">InitializeModes</span></code></a> is its <em>sole</em> predecessor across all of its modes. In the
 figures below the before and after are identical: nothing fused.</p>
 <section id="an-operation-in-between">
@@ -442,9 +443,9 @@ into a bare preparation, so nothing is merged:</p>
 <section id="a-partial-rotation-that-is-not-a-spin-half">
 <h3>A partial rotation that is not a spin half<a class="headerlink" href="#a-partial-rotation-that-is-not-a-spin-half" title="Link to this heading">¶</a></h3>
 <p>A rotation covering exactly one contiguous spin half of a full-register initialization <em>does</em> fuse
-(see the previous section). But a rotation on any <em>other</em> partial mode set – fewer modes than the
+(see the previous section). But a rotation on any <em>other</em> partial mode set (fewer modes than the
 initialization and not one of its two spin halves, such as a sub-range straddling the sector
-boundary – is not a per-sector preparation. Merging it would silently drop the initialization’s
+boundary) is not a per-sector preparation. Merging it would silently drop the initialization’s
 role on the modes it leaves out, so the pass leaves both gates in place:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">circuit</span> <span class="o">=</span> <span class="n">FermionicCircuit</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>  <span class="c1"># norb = 2: the only spin halves are modes [0, 1] and [2, 3]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">circuit</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">InitializeModes</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]),</span> <span class="n">circuit</span><span class="o">.</span><span class="n">modes</span><span class="p">)</span>
@@ -463,10 +464,10 @@ role on the modes it leaves out, so the pass leaves both gates in place:</p>
 <h2>Why it matters: the synthesis payoff<a class="headerlink" href="#why-it-matters-the-synthesis-payoff" title="Link to this heading">¶</a></h2>
 <p>The merge is worthwhile because <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.PrepareSlaterDeterminant.html#qiskit_fermions.circuit.library.PrepareSlaterDeterminant" title="qiskit_fermions.circuit.library.PrepareSlaterDeterminant"><code class="xref py py-class docutils literal notranslate"><span class="pre">PrepareSlaterDeterminant</span></code></a> synthesizes to far fewer gates
 than the <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.OrbitalRotation.html#qiskit_fermions.circuit.library.OrbitalRotation" title="qiskit_fermions.circuit.library.OrbitalRotation"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrbitalRotation</span></code></a> it absorbs. An <span class="math">\(m\)</span>-electron determinant over <span class="math">\(n\)</span>
-orbitals needs at most <span class="math">\(m(n-m)\)</span> two-qubit rotations and <strong>no</strong> diagonal phase gates, versus the
+orbitals needs at most <span class="math">\(m(n-m)\)</span> two-qubit rotations and no diagonal phase gates, versus the
 <span class="math">\(n(n-1)/2\)</span> rotations plus <span class="math">\(n\)</span> phases of the full square orbital rotation.</p>
 <p>The preset Jordan-Wigner pass manager runs <a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.MergeSlaterDeterminantPreparation.html#qiskit_fermions.transpiler.passes.MergeSlaterDeterminantPreparation" title="qiskit_fermions.transpiler.passes.MergeSlaterDeterminantPreparation"><code class="xref py py-class docutils literal notranslate"><span class="pre">MergeSlaterDeterminantPreparation</span></code></a> in its
-optimization stage, so this reduction happens automatically. Here we transpile a two-electron,
+optimization stage, so this reduction happens automatically. We transpile a two-electron,
 six-orbital preparation all the way to a <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumCircuit</span></code></a> and count its gates:</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -504,7 +505,7 @@ decomposition.</p>
 <figure class="align-default">
 <img alt="The synthesized merged Slater determinant preparation." class="plot-directive" src="../_images/merge_slater_determinant-9.png" />
 </figure>
-<p>Compare that to synthesizing the same orbital rotation on its own – with no preceding
+<p>Compare that to synthesizing the same orbital rotation on its own: with no preceding
 initialization there is nothing to merge, so the preset falls back to the full square
 decomposition, which is both deeper and carries diagonal phase gates:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">reference</span> <span class="o">=</span> <span class="n">FermionicCircuit</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span>
@@ -523,8 +524,8 @@ decomposition, which is both deeper and carries diagonal phase gates:</p>
 <img alt="The synthesized bare orbital rotation, with its extra phase gates." class="plot-directive" src="../_images/merge_slater_determinant-11.png" />
 </figure>
 <p>The reduced decomposition drops all six phase gates and nearly halves the two-qubit rotation count.
-The prepared determinant is correct up to a global phase – physically irrelevant for state
-preparation – which is exactly what the phase gates would have fixed.</p>
+The prepared determinant is correct up to a global phase (physically irrelevant for state
+preparation), which is what the phase gates would have fixed.</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <p><a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.PrepareSlaterDeterminant.html#qiskit_fermions.circuit.library.PrepareSlaterDeterminant" title="qiskit_fermions.circuit.library.PrepareSlaterDeterminant"><code class="xref py py-class docutils literal notranslate"><span class="pre">PrepareSlaterDeterminant</span></code></a>, <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.InitializeModes.html#qiskit_fermions.circuit.library.InitializeModes" title="qiskit_fermions.circuit.library.InitializeModes"><code class="xref py py-class docutils literal notranslate"><span class="pre">InitializeModes</span></code></a>, <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.OrbitalRotation.html#qiskit_fermions.circuit.library.OrbitalRotation" title="qiskit_fermions.circuit.library.OrbitalRotation"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrbitalRotation</span></code></a>,
@@ -616,7 +617,7 @@ pattern.</p>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=30ad73cd"></script>
+</div><script src="../_static/documentation_options.js?v=884e2f19"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

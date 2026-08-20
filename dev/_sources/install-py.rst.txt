@@ -96,7 +96,7 @@ The next step is to install ``qiskit-fermions`` to the virtual environment.
 
 You can optionally verify that the installation was successful. The simplest
 test is to try and import one of the classes provided by the ``qiskit-fermions``
-package, for example like so:
+package, as in the following example:
 
 .. code:: sh
 

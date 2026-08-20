@@ -1,7 +1,7 @@
 .. _transpilation_explanation:
 
-Transpiling fermionic circuits
-==============================
+Transpile fermionic circuits
+============================
 
 .. important::
 
@@ -19,7 +19,7 @@ As explained in :mod:`qiskit_fermions.transpiler`, the preset pass managers in
 this project split the transpilation into the following stages:
 
 **Input**
-   Converts the input circuit to a DAG data structure.
+   Converts the input circuit to a directed acyclic graph (DAG) data structure.
 
 **Optimization**
    Fermionic-level optimizations that keep the circuit in fermionic space. These

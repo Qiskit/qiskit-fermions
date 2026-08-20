@@ -3,12 +3,12 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="Running the outer VQE parameter optimization loop" href="vqe_outer_loop.html"><link rel="prev" title="Transpiling fermionic circuits" href="transpilation.html">
+<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="Running the outer VQE parameter optimization loop" href="vqe_outer_loop.html"><link rel="prev" title="Transpile fermionic circuits" href="transpilation.html">
         <link rel="prefetch" href="../_static/images/qiskit-light-logo.svg" as="image">
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>The ffsim simulation backend - Qiskit Fermions 0.2.0.dev0+33f46e3</title>
+        <title>The ffsim simulation backend - Qiskit Fermions 0.2.0.dev0+bdbe624</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+33f46e3</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+bdbe624</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+33f46e3</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+bdbe624</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -209,9 +209,9 @@
 <li class="toctree-l2"><a class="reference internal" href="lucj.html">Build an LUCJ ansatz</a></li>
 <li class="toctree-l2"><a class="reference internal" href="operators.html">Design Principles of Operator Representations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="grouping.html">Group operator terms: exploit the operator structure</a></li>
-<li class="toctree-l2"><a class="reference internal" href="mappers.html">Mapping operator representations</a></li>
-<li class="toctree-l2"><a class="reference internal" href="circuit.html">Working with fermionic circuits</a></li>
-<li class="toctree-l2"><a class="reference internal" href="transpilation.html">Transpiling fermionic circuits</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mappers.html">Map operator representations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="circuit.html">Work with fermionic circuits</a></li>
+<li class="toctree-l2"><a class="reference internal" href="transpilation.html">Transpile fermionic circuits</a></li>
 <li class="toctree-l2 current current-page"><a class="current reference internal" href="#">The ffsim simulation backend</a></li>
 <li class="toctree-l2"><a class="reference internal" href="vqe_outer_loop.html">Running the outer VQE parameter optimization loop</a></li>
 <li class="toctree-l2"><a class="reference internal" href="merge_slater_determinant.html">Optimize Slater determinant preparation</a></li>
@@ -274,9 +274,9 @@ Equivalent functionality will be made available through the C API in a future
 release.</p>
 </div>
 <p>The <a class="reference internal" href="lucj.html#lucj-getting-started"><span class="std std-ref">getting-started guides</span></a> simulate fermionic circuits and
-Hamiltonians with <a class="reference external" href="https://qiskit-community.github.io/ffsim/">ffsim</a> – calling <a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.apply_unitary.html#ffsim.apply_unitary" title="(in ffsim)"><code class="xref py py-func docutils literal notranslate"><span class="pre">ffsim.apply_unitary()</span></code></a>, <a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.linear_operator.html#ffsim.linear_operator" title="(in ffsim)"><code class="xref py py-func docutils literal notranslate"><span class="pre">ffsim.linear_operator()</span></code></a>, or
+Hamiltonians with <a class="reference external" href="https://qiskit-community.github.io/ffsim/">ffsim</a>, calling <a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.apply_unitary.html#ffsim.apply_unitary" title="(in ffsim)"><code class="xref py py-func docutils literal notranslate"><span class="pre">ffsim.apply_unitary()</span></code></a>, <a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.linear_operator.html#ffsim.linear_operator" title="(in ffsim)"><code class="xref py py-func docutils literal notranslate"><span class="pre">ffsim.linear_operator()</span></code></a>, or
 <a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.sample_state_vector.html#ffsim.sample_state_vector" title="(in ffsim)"><code class="xref py py-func docutils literal notranslate"><span class="pre">ffsim.sample_state_vector()</span></code></a> directly on <a class="reference internal" href="../stubs/qiskit_fermions.circuit.FermionicCircuit.html#qiskit_fermions.circuit.FermionicCircuit" title="qiskit_fermions.circuit.FermionicCircuit"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicCircuit</span></code></a>s and
-<a class="reference internal" href="../stubs/qiskit_fermions.operators.FermionOperator.html#qiskit_fermions.operators.FermionOperator" title="qiskit_fermions.operators.FermionOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionOperator</span></code></a>s. This guide explains <em>why</em> that works and what is actually happening
+<a class="reference internal" href="../stubs/qiskit_fermions.operators.FermionOperator.html#qiskit_fermions.operators.FermionOperator" title="qiskit_fermions.operators.FermionOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionOperator</span></code></a>s. This guide explains why that works and what is actually happening
 underneath: this package couples deliberately with ffsim’s simulation protocols rather than
 building its own simulation API, and it does so in a way that keeps a native (scipy-only)
 simulation path available for users who cannot or do not want to install ffsim.</p>
@@ -295,12 +295,12 @@ applying the object as a unitary to a fixed-particle-number state vector, and</p
 </ul>
 <p>Rather than invent a separate simulation interface, every fermionic gate in
 <a class="reference internal" href="../pydoc/qiskit_fermions.circuit.library.html#module-qiskit_fermions.circuit.library" title="qiskit_fermions.circuit.library"><code class="xref py py-mod docutils literal notranslate"><span class="pre">qiskit_fermions.circuit.library</span></code></a> and <a class="reference internal" href="../stubs/qiskit_fermions.operators.FermionOperator.html#qiskit_fermions.operators.FermionOperator" title="qiskit_fermions.operators.FermionOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionOperator</span></code></a> implement these exact
-protocols. The direct payoff is that ffsim’s own tools work <em>natively</em> on this package’s objects,
+protocols. The direct payoff is that ffsim’s own tools work natively on this package’s objects,
 with no conversion step: <a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.apply_unitary.html#ffsim.apply_unitary" title="(in ffsim)"><code class="xref py py-func docutils literal notranslate"><span class="pre">ffsim.apply_unitary()</span></code></a> can simulate a <a class="reference internal" href="../stubs/qiskit_fermions.circuit.FermionicCircuit.html#qiskit_fermions.circuit.FermionicCircuit" title="qiskit_fermions.circuit.FermionicCircuit"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicCircuit</span></code></a>
 end to end, <a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.linear_operator.html#ffsim.linear_operator" title="(in ffsim)"><code class="xref py py-func docutils literal notranslate"><span class="pre">ffsim.linear_operator()</span></code></a> (or plain <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.linalg.eigsh.html#scipy.sparse.linalg.eigsh" title="(in SciPy v1.18.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.sparse.linalg.eigsh()</span></code></a>) can
 diagonalize a <a class="reference internal" href="../stubs/qiskit_fermions.operators.FermionOperator.html#qiskit_fermions.operators.FermionOperator" title="qiskit_fermions.operators.FermionOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionOperator</span></code></a>, and sampling utilities like
-<a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.sample_state_vector.html#ffsim.sample_state_vector" title="(in ffsim)"><code class="xref py py-func docutils literal notranslate"><span class="pre">ffsim.sample_state_vector()</span></code></a> – used in the <a class="reference internal" href="skqd.html#skqd-getting-started"><span class="std std-ref">SKQD guide</span></a> to turn a
-simulated statevector into measurement counts – work out of the box.</p>
+<a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.sample_state_vector.html#ffsim.sample_state_vector" title="(in ffsim)"><code class="xref py py-func docutils literal notranslate"><span class="pre">ffsim.sample_state_vector()</span></code></a> (used in the <a class="reference internal" href="skqd.html#skqd-getting-started"><span class="std std-ref">SKQD guide</span></a> to turn a
+simulated statevector into measurement counts) work out of the box.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.circuit</span><span class="w"> </span><span class="kn">import</span> <span class="n">FermionicCircuit</span>
@@ -333,22 +333,22 @@ simulation API.</p>
 </section>
 <section id="a-native-path-when-ffsim-is-unavailable">
 <h2>A native path when ffsim is unavailable<a class="headerlink" href="#a-native-path-when-ffsim-is-unavailable" title="Link to this heading">¶</a></h2>
-<p>Coupling with ffsim’s protocols does not make ffsim a <em>hard</em> dependency. <a class="reference external" href="https://qiskit-community.github.io/ffsim/">ffsim</a> transitively
-depends on <a class="reference external" href="https://pyscf.org/">PySCF</a>, which does not support Windows – so ffsim is declared as
+<p>Coupling with ffsim’s protocols does not make ffsim a hard dependency. <a class="reference external" href="https://qiskit-community.github.io/ffsim/">ffsim</a> transitively
+depends on <a class="reference external" href="https://pyscf.org/">PySCF</a>, which does not support Windows, so ffsim is declared as
 an optional extra (<code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">&quot;qiskit-fermions[simulation]&quot;</span></code>, or transitively via <code class="docutils literal notranslate"><span class="pre">[all]</span></code>),
 guarded at runtime by <a class="reference internal" href="../pydoc/qiskit_fermions.utils.optionals.html#qiskit_fermions.utils.optionals.HAS_FFSIM" title="qiskit_fermions.utils.optionals.HAS_FFSIM"><code class="xref py py-data docutils literal notranslate"><span class="pre">HAS_FFSIM</span></code></a> (as you already saw above).
 On Windows, that extra simply resolves to nothing (a silent no-op via a <code class="docutils literal notranslate"><span class="pre">sys_platform</span></code> marker),
 rather than an install failure.</p>
 <p>Simulation must still work without ffsim, so <a class="reference internal" href="../stubs/qiskit_fermions.protocols.SupportsLinearOperator.html#qiskit_fermions.protocols.SupportsLinearOperator" title="qiskit_fermions.protocols.SupportsLinearOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">SupportsLinearOperator</span></code></a> is backed
-by an independent <strong>native Rust FCI (full configuration interaction) kernel</strong> – not a wrapper
+by an independent native Rust FCI (full configuration interaction) kernel, not a wrapper
 around ffsim’s own linear-algebra routines. It compiles an operator’s terms once into a scatter map
 over the fixed-particle-number determinant basis, then reuses that compiled form across repeated
-matrix-vector products. This is exactly the protocol method ffsim itself expects
+matrix-vector products. This is the protocol method ffsim itself expects
 (<a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.SupportsLinearOperator.html#ffsim.SupportsLinearOperator" title="(in ffsim)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ffsim.SupportsLinearOperator</span></code></a>): it happens to be implemented without ffsim, and it is
 cross-checked against ffsim’s own matrix elements in this package’s test suite, but it does not call
 into ffsim at all. Handing a <a class="reference internal" href="../stubs/qiskit_fermions.operators.FermionOperator.html#qiskit_fermions.operators.FermionOperator" title="qiskit_fermions.operators.FermionOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionOperator</span></code></a> to <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.linalg.eigsh.html#scipy.sparse.linalg.eigsh" title="(in SciPy v1.18.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.sparse.linalg.eigsh()</span></code></a> or
-<a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.linalg.expm_multiply.html#scipy.sparse.linalg.expm_multiply" title="(in SciPy v1.18.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.sparse.linalg.expm_multiply()</span></code></a> – as <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution._apply_unitary_placed_" title="qiskit_fermions.circuit.library.Evolution._apply_unitary_placed_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Evolution._apply_unitary_placed_()</span></code></a> does
-internally – therefore works identically whether or not ffsim is installed:</p>
+<a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.linalg.expm_multiply.html#scipy.sparse.linalg.expm_multiply" title="(in SciPy v1.18.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.sparse.linalg.expm_multiply()</span></code></a> (as <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution._apply_unitary_placed_" title="qiskit_fermions.circuit.library.Evolution._apply_unitary_placed_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Evolution._apply_unitary_placed_()</span></code></a> does
+internally) therefore works identically whether or not ffsim is installed:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">scipy.sparse.linalg</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.linalg</span><span class="w"> </span><span class="kn">import</span> <span class="n">linear_operator</span>
 <span class="gp">&gt;&gt;&gt;</span>
@@ -364,18 +364,18 @@ implementation delegates to ffsim’s dedicated Givens-rotation kernel
 (<a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.apply_orbital_rotation.html#ffsim.apply_orbital_rotation" title="(in ffsim)"><code class="xref py py-func docutils literal notranslate"><span class="pre">ffsim.apply_orbital_rotation()</span></code></a>) when ffsim is installed, and otherwise falls back to
 expressing the rotation as <span class="math">\(\exp(G)\)</span> for a one-body generator <span class="math">\(G\)</span> and applying that
 through the same native-kernel-plus-<a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.linalg.expm_multiply.html#scipy.sparse.linalg.expm_multiply" title="(in SciPy v1.18.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">expm_multiply()</span></code></a> path used throughout
-this section. Both paths implement the same protocol method and produce the same result – ffsim is
-a <em>performance</em> choice here, not a correctness dependency. Gates without such a fast path
+this section. Both paths implement the same protocol method and produce the same result; ffsim is
+a performance choice here, not a correctness dependency. Gates without such a fast path
 (<a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a>, and everything built out of it, such as <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.UCJ.html#qiskit_fermions.circuit.library.UCJ" title="qiskit_fermions.circuit.library.UCJ"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCJ</span></code></a>) simply use the
 ffsim-independent path unconditionally.</p>
-<p>In short: <strong>ffsim’s protocols are the interface; ffsim itself is an accelerator you can uninstall.</strong>
+<p>In short: ffsim’s protocols are the interface; ffsim itself is an accelerator you can uninstall.
 This is also why the two getting-started guides that use ffsim directly (<a class="reference internal" href="lucj.html#lucj-getting-started"><span class="std std-ref">LUCJ</span></a> and <a class="reference internal" href="skqd.html#skqd-getting-started"><span class="std std-ref">SKQD</span></a>) internally guard their ffsim-specific
 code with <a class="reference internal" href="../pydoc/qiskit_fermions.utils.optionals.html#qiskit_fermions.utils.optionals.HAS_FFSIM" title="qiskit_fermions.utils.optionals.HAS_FFSIM"><code class="xref py py-data docutils literal notranslate"><span class="pre">HAS_FFSIM</span></code></a> the same way this guide does.</p>
 </section>
 <section id="fermionic-simulation-lives-in-a-fixed-particle-number-sector">
 <h2>Fermionic simulation lives in a fixed particle-number sector<a class="headerlink" href="#fermionic-simulation-lives-in-a-fixed-particle-number-sector" title="Link to this heading">¶</a></h2>
 <p>Both <code class="docutils literal notranslate"><span class="pre">_apply_unitary_</span></code> and <code class="docutils literal notranslate"><span class="pre">_linear_operator_</span></code> take an <code class="docutils literal notranslate"><span class="pre">nelec</span></code> argument and represent the state
-vector over the <em>fixed-particle-number determinant basis</em> for that <code class="docutils literal notranslate"><span class="pre">(norb,</span> <span class="pre">nelec)</span></code> sector –
+vector over the <em>fixed-particle-number determinant basis</em> for that <code class="docutils literal notranslate"><span class="pre">(norb,</span> <span class="pre">nelec)</span></code> sector,
 mirroring ffsim’s (and, transitively, PySCF’s) FCI space setup, rather than the full
 <span class="math">\(2^{\text{num\_modes}}\)</span>-dimensional space a general qubit simulator would use. This is a much
 smaller space (its size is a product of binomial coefficients rather than a power of two), but it
@@ -383,7 +383,7 @@ comes with a hard restriction: only operators and gates that <strong>preserve</s
 the spinful case, each spin species’ particle number individually) can be represented in it. An
 operator whose action would move amplitude to a different particle number simply has nowhere to go
 in this fixed-sector picture.</p>
-<p>The native kernel resolves this by silently dropping any term that would leave the sector – projecting
+<p>The native kernel resolves this by silently dropping any term that would leave the sector, projecting
 its contribution to zero rather than raising an error, since the kernel’s contract is “matrix-vector
 product on this sector,” not “validate this operator.” For most callers this dropping would be the
 wrong thing: applying <span class="math">\(\exp(-i t H)\)</span> for a Hamiltonian <span class="math">\(H\)</span> with a
@@ -414,10 +414,10 @@ alpha/beta split in the spinful case, and raises a <a class="reference external"
 </pre></div>
 </div>
 <p>Calling <a class="reference internal" href="../stubs/qiskit_fermions.protocols.SupportsLinearOperator.html#qiskit_fermions.protocols.SupportsLinearOperator._linear_operator_" title="qiskit_fermions.protocols.SupportsLinearOperator._linear_operator_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">SupportsLinearOperator._linear_operator_()</span></code></a> <em>directly</em> on a non-conserving operator bypasses
-this guard – it is a lower-level building block, not a validated simulation entry point – and will
+this guard (it is a lower-level building block, not a validated simulation entry point) and will
 return a matrix-vector product that silently zeroes the non-conserving amplitude rather than raising.</p>
-<p>The practical consequence is that <strong>non-particle-preserving simulation is not possible in fermionic
-space</strong> at all, by construction of the fixed-sector representation – not as a missing feature, but
+<p>The practical consequence is that non-particle-preserving simulation is not possible in fermionic
+space at all, by construction of the fixed-sector representation: not as a missing feature, but
 as the price of the compact FCI-space representation that makes fermionic simulation tractable in
 the first place. If your algorithm genuinely needs particle-number-violating operators (for example,
 a qubit-native error channel, or an operator built for a mapped Hamiltonian that does not conserve
@@ -430,7 +430,7 @@ choice to reach for.</p>
 </section>
 <section id="the-block-spin-convention-for-spinful-systems">
 <h2>The block-spin convention for spinful systems<a class="headerlink" href="#the-block-spin-convention-for-spinful-systems" title="Link to this heading">¶</a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">nelec</span></code> is typed <code class="docutils literal notranslate"><span class="pre">int</span> <span class="pre">|</span> <span class="pre">tuple[int,</span> <span class="pre">int]</span></code>, and its type – not a separate flag – is what selects
+<p><code class="docutils literal notranslate"><span class="pre">nelec</span></code> is typed <code class="docutils literal notranslate"><span class="pre">int</span> <span class="pre">|</span> <span class="pre">tuple[int,</span> <span class="pre">int]</span></code>, and its type, not a separate flag, is what selects
 between the two supported mode layouts:</p>
 <ul class="simple">
 <li><p>an <strong>int</strong> selects the <strong>spinless</strong> interpretation: the <code class="docutils literal notranslate"><span class="pre">norb</span></code> modes are treated directly as
@@ -438,17 +438,17 @@ spinless orbitals, and <code class="docutils literal notranslate"><span class="p
 <li><p>a <strong>pair</strong> <code class="docutils literal notranslate"><span class="pre">(n_alpha,</span> <span class="pre">n_beta)</span></code> selects the <strong>spinful</strong> interpretation of <code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">*</span> <span class="pre">norb</span></code> modes under
 a fixed <strong>block-spin convention</strong>: modes <code class="docutils literal notranslate"><span class="pre">0</span> <span class="pre">..</span> <span class="pre">norb</span></code> are the alpha (spin-up) orbitals and modes
 <code class="docutils literal notranslate"><span class="pre">norb</span> <span class="pre">..</span> <span class="pre">2</span> <span class="pre">*</span> <span class="pre">norb</span></code> are the beta (spin-down) orbitals. Each spin species is conserved
-<em>independently</em> – an alpha-only term can move an electron between alpha modes but never into a
+<em>independently</em>: an alpha-only term can move an electron between alpha modes but never into a
 beta mode, and vice versa.</p></li>
 </ul>
-<p>This dispatch happens at every ffsim-protocol entry point in this package – gate constructors,
-<code class="docutils literal notranslate"><span class="pre">_apply_unitary_placed_</span></code> implementations, and the native Rust kernel’s own sector compilation –
-and it is exactly the convention used throughout the <a class="reference internal" href="lucj.html#lucj-getting-started"><span class="std std-ref">LUCJ</span></a> and
+<p>This dispatch happens at every ffsim-protocol entry point in this package (gate constructors,
+<code class="docutils literal notranslate"><span class="pre">_apply_unitary_placed_</span></code> implementations, and the native Rust kernel’s own sector compilation),
+and it is the convention used throughout the <a class="reference internal" href="lucj.html#lucj-getting-started"><span class="std std-ref">LUCJ</span></a> and
 <a class="reference internal" href="skqd.html#skqd-getting-started"><span class="std std-ref">SKQD</span></a> guides (for example,
 <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.InitializeModes.html#qiskit_fermions.circuit.library.InitializeModes.from_hartree_fock" title="qiskit_fermions.circuit.library.InitializeModes.from_hartree_fock"><code class="xref py py-meth docutils literal notranslate"><span class="pre">InitializeModes.from_hartree_fock()</span></code></a> fills alpha occupations into modes <code class="docutils literal notranslate"><span class="pre">0</span> <span class="pre">..</span> <span class="pre">n_alpha</span></code> and
 beta occupations into modes <code class="docutils literal notranslate"><span class="pre">norb</span> <span class="pre">..</span> <span class="pre">norb</span> <span class="pre">+</span> <span class="pre">n_beta</span></code>). It is worth contrasting this with the
 <a class="reference internal" href="../pydoc/qiskit_fermions.operators.html#module-qiskit_fermions.operators" title="qiskit_fermions.operators"><code class="xref py py-mod docutils literal notranslate"><span class="pre">qiskit_fermions.operators</span></code></a> module and <a class="reference internal" href="../stubs/qiskit_fermions.circuit.FermionicCircuit.html#qiskit_fermions.circuit.FermionicCircuit" title="qiskit_fermions.circuit.FermionicCircuit"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicCircuit</span></code></a> in general, which use
-<em>generic</em> mode indices with no inherent spin semantics (see the <a class="reference internal" href="circuit.html#fermionic-circuit-explanation"><span class="std std-ref">fermionic circuit guide</span></a>) – the block-spin meaning is imposed only when a spinful <code class="docutils literal notranslate"><span class="pre">nelec</span></code>
+<em>generic</em> mode indices with no inherent spin semantics (see the <a class="reference internal" href="circuit.html#fermionic-circuit-explanation"><span class="std std-ref">fermionic circuit guide</span></a>): the block-spin meaning is imposed only when a spinful <code class="docutils literal notranslate"><span class="pre">nelec</span></code>
 is supplied to a simulation call, not baked into the operator or circuit representation itself.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.circuit.library</span><span class="w"> </span><span class="kn">import</span> <span class="n">InitializeModes</span>
 <span class="gp">&gt;&gt;&gt;</span>
@@ -499,7 +499,7 @@ including the conversion protocols (<a class="reference internal" href="../stubs
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Transpiling fermionic circuits</div>
+                <div class="title">Transpile fermionic circuits</div>
                 
               </div>
             </a>
@@ -553,7 +553,7 @@ including the conversion protocols (<a class="reference internal" href="../stubs
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=30ad73cd"></script>
+</div><script src="../_static/documentation_options.js?v=884e2f19"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
