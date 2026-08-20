@@ -1,0 +1,28 @@
+---
+fixes:
+  - |
+    Fixed the excessive memory consumption of
+    :func:`~qiskit_fermions.mappers.library.fermion_jordan_wigner` (and therefore of
+    :func:`~qiskit_fermions.mappers.library.jordan_wigner` when applied to a
+    :class:`~qiskit_fermions.operators.FermionOperator`). The mapper accumulated the mapped terms
+    using an addition that concatenates rather than merges duplicate Pauli terms, so the
+    intermediate observable grew with the number of Pauli terms *emitted* instead of the number of
+    *distinct* ones. Mapping a large Hamiltonian could therefore exhaust the available memory even
+    though the simplified result was orders of magnitude smaller. The accumulators are now
+    canonicalized once they have grown by a factor over their previously merged size, which bounds
+    the memory they hold in terms of the operator they actually represent.
+
+    Peak memory still grows with the number of worker threads: the terms are handed to whichever
+    thread is free rather than partitioned by the Pauli strings they produce, so each accumulator
+    ends up holding roughly a full copy of the mapped operator. What changed is the factor each one
+    carries -- previously proportional to the number of Pauli terms emitted, now to the number of
+    distinct ones. Reducing the thread count through rayon's ``RAYON_NUM_THREADS`` environment
+    variable therefore lowers the peak, roughly in proportion, and is the control to reach for when
+    memory is tight.
+
+    The mapped operator is unchanged: canonicalization only merges duplicate terms, so the result
+    represents exactly the same observable as before.
+  - |
+    :func:`~qiskit_fermions.mappers.library.fermion_jordan_wigner` no longer copies the operator it
+    is given. The Python binding took its argument by value, which duplicated every term buffer of
+    the input :class:`~qiskit_fermions.operators.FermionOperator` purely in order to read it.

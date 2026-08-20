@@ -10,6 +10,7 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
+import numpy as np
 import pytest
 from qiskit.quantum_info import SparseObservable
 from qiskit_fermions.mappers.library import fermion_jordan_wigner, jordan_wigner
@@ -80,6 +81,58 @@ def test_jordan_wigner_dispatches_fermion():
     direct = fermion_jordan_wigner(op, 3)
     assert isinstance(dispatched, SparseObservable)
     assert (dispatched - direct).simplify() == SparseObservable.zero(3)
+
+
+def test_fermion_jordan_wigner_merges_duplicate_terms():
+    # The mapper accumulates each mapped term into per-thread observables using an addition that
+    # concatenates rather than merges. Without periodic canonicalization those accumulators grow
+    # with the number of *emitted* Pauli terms instead of the number of *distinct* ones, which for
+    # an electronic-structure Hamiltonian is an asymptotic rather than a constant factor.
+    #
+    # Use a two-body operator big enough for the duplication to dominate: every two-body term maps
+    # to 16 Pauli products, and terms sharing a mode set collapse onto the same Pauli strings.
+    norb = 6
+    npair = norb * (norb + 1) // 2
+    rng = np.random.default_rng(1234)
+    two_body = rng.random(npair * (npair + 1) // 2)
+    op = FermionOperator.from_2body_tril_spin_sym(two_body, norb)
+
+    qop = fermion_jordan_wigner(op, 2 * norb)
+    simplified = qop.simplify(1e-12)
+
+    # The returned operator is not promised to be fully simplified, and how many duplicates survive
+    # depends on how the terms were spread over the worker threads, so the exact count varies with the
+    # number of cores available.
+    #
+    # What must hold is that it does not scale with the number of Pauli terms *emitted*, which is what
+    # regressed. Anchor on that count rather than on `simplified.num_terms`: the two are compared at
+    # different tolerances (the mapper merges at 1e-18), so a ratio between them is satisfied in part
+    # by that gap rather than by how well compaction worked. Every two-body term maps onto 16 Pauli
+    # products, so the emitted total is a hard upper bound that the unfixed mapper actually reached.
+    emitted = 16 * len(op)
+    assert qop.num_terms < emitted / 8, (
+        f"got {qop.num_terms} terms, close to the {emitted} emitted: duplicates are not being merged"
+    )
+
+    # Compaction must not change the operator, only its representation.
+    assert (qop - simplified).simplify(1e-12) == SparseObservable.zero(2 * norb)
+
+
+def test_fermion_jordan_wigner_merges_identity_terms():
+    # An identity Pauli term carries no bit terms at all, so measuring the accumulators by their bit
+    # term count alone scored these as free and never merged them however many piled up -- the very
+    # blowup that compaction exists to prevent, just in the one shape that measure misses.
+    num_repeats = 1 << 20
+    op = FermionOperator.from_terms([((), 1.0)] * num_repeats)
+
+    qop = fermion_jordan_wigner(op, 2)
+    assert qop.num_terms <= 2, (
+        f"got {qop.num_terms} terms from {num_repeats} identity terms: they are not being merged"
+    )
+
+    # ... and the result must still be `num_repeats * I`.
+    expected = SparseObservable.identity(2) * float(num_repeats)
+    assert (qop - expected).simplify(1e-9) == SparseObservable.zero(2)
 
 
 def test_jordan_wigner_unsupported_type_raises():
