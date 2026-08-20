@@ -12,7 +12,7 @@ An :class:`.InitializeModes` gate declares a reference mode occupation; an
 :class:`.OrbitalRotation` gate rotates the single-particle basis. Placed back to back, the two
 gates *prepare a Slater determinant*: the modes start in the reference determinant and are then
 rotated into the target orbitals. The :class:`.PrepareSlaterDeterminant` gate captures that
-composition, and because it knows the reference occupation, transpiling it can use the rectangular
+composition, and because it carries the reference occupation, transpiling it can use the rectangular
 :func:`~qiskit_fermions.linalg.givens_decomposition_slater`, which realizes only the *occupied*
 orbitals, instead of the full square decomposition an :class:`.OrbitalRotation` alone requires. That
 is a strictly cheaper synthesis (see the payoff at the end of this guide).

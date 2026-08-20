@@ -136,8 +136,8 @@ approaches:
    <Figure size ... with 1 Axes>
 
 Both workflows produce equivalent circuits. However, the traditional workflow
-requires you to implement optimization steps manually, whereas the
-fermionic-first approach allows you to integrate problem-aware optimizations
+requires you to implement optimization steps manually, whereas with the
+fermionic-first approach you can integrate problem-aware optimizations
 into the transpilation process.
 
 Advanced workflows

@@ -178,7 +178,7 @@ orbitals into ``2 * norb`` fermionic modes.
 
 We keep the one-body part :math:`H_1` and the two-body part :math:`H_2` as separate operators
 rather than summing them eagerly, matching the terms :math:`H_1` and :math:`H_2` of the section-1 equations.
-Building each piece once (in both bases) lets us reuse them below: summed, they give the full
+Building each piece once (in both bases) makes them reusable below: summed, they give the full
 Hamiltonian for the exact diagonalization in either basis; individually, :math:`H_2` (momentum basis)
 is the operator the Trotter step evolves in step 4.
 
