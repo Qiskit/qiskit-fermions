@@ -35,7 +35,7 @@ with :math:`n_{i\sigma}` the number operator on spatial orbital :math:`i` with s
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The (L)UCJ ansatz can be initialized from the amplitudes of a coupled-cluster singles and
-doubles (CCSD) calculation. Here we run restricted Hartree-Fock followed by CCSD for a hydrogen
+doubles (CCSD) calculation. We run restricted Hartree-Fock followed by CCSD for a hydrogen
 molecule in the ``6-31g`` basis, using `PySCF <https://pyscf.org/>`_ for the quantum chemistry.
 
 .. invisible-code-block: python
@@ -80,7 +80,7 @@ We will need the Hamiltonian later to evaluate the ansatz energy. We build it di
 and the constant nuclear-repulsion energy. The electronic-integral constructors
 :meth:`~qiskit_fermions.operators.FermionOperator.from_1body_tril_spin_sym` and
 :meth:`~qiskit_fermions.operators.FermionOperator.from_2body_tril_spin_sym` expect the integrals
-in packed (lower-triangular) `chemist` ordering, which is exactly what PySCF produces.
+in packed (lower-triangular) `chemist` ordering, which is what PySCF produces.
 
 .. plot::
    :context:
@@ -186,7 +186,7 @@ molecular Hamiltonian.
    LUCJ energy: -1.14618323 Hartree
 
 The LUCJ energy improves substantially on the Hartree-Fock reference and approaches the CCSD
-energy it was initialized from -- the small remaining gap is the price of truncating the ansatz to
+energy it was initialized from; the small remaining gap is the price of truncating the ansatz to
 two repetitions:
 
 .. plot::
@@ -207,8 +207,8 @@ two repetitions:
 The :class:`.UCJ` gate above is initialized from an *exact* double factorization of the :math:`t_2`
 amplitudes: the number of ansatz repetitions :math:`L` is whatever that factorization yields (up to
 the ``n_reps`` truncation), and each layer reproduces one factorized term exactly. `ffsim`_
-additionally offers an optimized ("compressed") double factorization -- its
-``from_t_amplitudes(..., optimize=True)`` -- which *variationally* fits the amplitudes with a chosen,
+additionally offers an optimized ("compressed") double factorization, its
+``from_t_amplitudes(..., optimize=True)``, which variationally fits the amplitudes with a chosen,
 typically smaller, number of repetitions. This trades a classical optimization up front for a
 shallower ansatz at a target accuracy, and has no equivalent in this package.
 
@@ -241,8 +241,8 @@ There is no need to re-implement it: an ``ffsim`` UCJ operator exposes the same 
    ... )
    >>> compressed_circuit.append(compressed_ansatz, compressed_circuit.modes)
 
-The resulting circuit is used exactly like the one built from the exact factorization -- the
-:class:`.UCJ` gate does not care how its tensors were obtained -- and evaluating its energy the same
+The resulting circuit is used like the one built from the exact factorization (the
+:class:`.UCJ` gate does not care how its tensors were obtained), and evaluating its energy the same
 way recovers the same correlation energy at this (small) system size:
 
 .. plot::
@@ -271,7 +271,7 @@ The :func:`~qiskit_fermions.transpiler.presets.generate_preset_jw_pass_manager` 
 staged pipeline that maps the fermionic circuit through the Jordan-Wigner transformation and
 synthesizes each gate into a qubit-level circuit. The composite :class:`.UCJ` gate must first be
 decomposed into its primitive gates (:class:`.OrbitalRotation`, :class:`.Evolution`, ...) so the
-pipeline's optimization stage can act on them -- so we pass ``circuit.decompose()``.
+pipeline's optimization stage can act on them, so we pass ``circuit.decompose()``.
 
 .. skip: start if(not HAS_FFSIM)
 
@@ -300,12 +300,12 @@ Coulomb evolutions into :class:`~qiskit.circuit.library.RZZGate`\ s:
    >>> transpiled.draw("mpl", fold=-1)
    <Figure size ... with 1 Axes>
 
-.. rubric:: Targeting hardware connectivity with ffsim's LUCJ pass manager
+.. rubric:: Target hardware connectivity with ffsim's LUCJ pass manager
 
 A real device has a restricted qubit coupling map, and the LUCJ ansatz is designed to match it: the
 same-spin (``pairs_aa``) interactions form two linear chains and the alpha-beta (``pairs_ab``)
 interactions bridge them. ffsim's :external:func:`~ffsim.qiskit.generate_lucj_pass_manager` builds a
-device-aware qubit pipeline for exactly this structure -- and returns the subset of ``pairs_ab`` the
+device-aware qubit pipeline for this structure, and returns the subset of ``pairs_ab`` the
 hardware can actually accommodate. We can slot that pipeline into the preset's ``qubit`` stage while
 keeping our own fermion-to-qubit synthesis:
 
@@ -340,8 +340,8 @@ keeping our own fermion-to-qubit synthesis:
 
 With ``pm.qubit`` now set to the device-aware pipeline, running the pass manager lays the circuit out
 on the backend's qubits and routes it to the coupling map. If we route the *unrestricted* ansatz from
-step 3 -- whose diagonal Coulomb operator still contains alpha-beta terms the hardware cannot reach
-directly -- the router must insert many ``SWAP`` gates to bridge them:
+step 3, whose diagonal Coulomb operator still contains alpha-beta terms the hardware cannot reach
+directly, the router must insert many ``SWAP`` gates to bridge them:
 
 .. plot::
    :context:
@@ -355,10 +355,10 @@ directly -- the router must insert many ``SWAP`` gates to bridge them:
    >>> naive_swaps  # many SWAPs to bridge the unreachable alpha-beta interactions
    33
 
-.. rubric:: Restricting the ansatz to the hardware-implementable interactions
+.. rubric:: Restrict the ansatz to the hardware-implementable interactions
 
-The fix is to feed ``allowed_pairs_ab`` back into the ansatz construction -- via the
-``interaction_pairs`` argument of :meth:`~qiskit_fermions.circuit.library.UCJ.from_t_amplitudes` --
+The fix is to feed ``allowed_pairs_ab`` back into the ansatz construction, via the
+``interaction_pairs`` argument of :meth:`~qiskit_fermions.circuit.library.UCJ.from_t_amplitudes`,
 so the diagonal Coulomb operator only contains alpha-beta terms the coupling map can implement
 directly. The ansatz then matches the device topology and the router barely has to touch it:
 
@@ -383,8 +383,8 @@ directly. The ansatz then matches the device topology and the router barely has 
 Drawing only the active qubits (``idle_wires=False``) shows the circuit restricted to the two spin
 chains and the alpha-beta bridge, expressed in the device basis gates. Layout and routing scatter the
 logical modes across the device's physical qubits, so we pass a ``wire_order`` taken from the
-circuit's final layout -- :meth:`~qiskit.transpiler.TranspileLayout.final_index_layout` lists the
-physical qubit each input qubit ended up on, in input-qubit order -- to draw the wires back in the
+circuit's final layout (:meth:`~qiskit.transpiler.TranspileLayout.final_index_layout` lists the
+physical qubit each input qubit ended up on, in input-qubit order) to draw the wires back in the
 original mode order:
 
 .. plot::

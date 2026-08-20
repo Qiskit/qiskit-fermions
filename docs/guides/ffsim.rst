@@ -10,9 +10,9 @@ The ffsim simulation backend
    release.
 
 The :ref:`getting-started guides <lucj_getting_started>` simulate fermionic circuits and
-Hamiltonians with `ffsim`_ -- calling :func:`ffsim.apply_unitary`, :func:`ffsim.linear_operator`, or
+Hamiltonians with `ffsim`_, calling :func:`ffsim.apply_unitary`, :func:`ffsim.linear_operator`, or
 :func:`ffsim.sample_state_vector` directly on :class:`.FermionicCircuit`\ s and
-:class:`.FermionOperator`\ s. This guide explains *why* that works and what is actually happening
+:class:`.FermionOperator`\ s. This guide explains why that works and what is actually happening
 underneath: this package couples deliberately with ffsim's simulation protocols rather than
 building its own simulation API, and it does so in a way that keeps a native (scipy-only)
 simulation path available for users who cannot or do not want to install ffsim.
@@ -33,12 +33,12 @@ for this package's own protocols, which follow the same design):
 
 Rather than invent a separate simulation interface, every fermionic gate in
 :mod:`qiskit_fermions.circuit.library` and :class:`.FermionOperator` implement these exact
-protocols. The direct payoff is that ffsim's own tools work *natively* on this package's objects,
+protocols. The direct payoff is that ffsim's own tools work natively on this package's objects,
 with no conversion step: :func:`ffsim.apply_unitary` can simulate a :class:`.FermionicCircuit`
 end to end, :func:`ffsim.linear_operator` (or plain :func:`scipy.sparse.linalg.eigsh`) can
 diagonalize a :class:`.FermionOperator`, and sampling utilities like
-:func:`ffsim.sample_state_vector` -- used in the :ref:`SKQD guide <skqd_getting_started>` to turn a
-simulated statevector into measurement counts -- work out of the box.
+:func:`ffsim.sample_state_vector` (used in the :ref:`SKQD guide <skqd_getting_started>` to turn a
+simulated statevector into measurement counts) work out of the box.
 
 .. plot::
    :context:
@@ -77,23 +77,23 @@ simulation API.
 A native path when ffsim is unavailable
 -----------------------------------------
 
-Coupling with ffsim's protocols does not make ffsim a *hard* dependency. `ffsim`_ transitively
-depends on `PySCF <https://pyscf.org/>`_, which does not support Windows -- so ffsim is declared as
+Coupling with ffsim's protocols does not make ffsim a hard dependency. `ffsim`_ transitively
+depends on `PySCF <https://pyscf.org/>`_, which does not support Windows, so ffsim is declared as
 an optional extra (``pip install "qiskit-fermions[simulation]"``, or transitively via ``[all]``),
 guarded at runtime by :data:`~qiskit_fermions.utils.optionals.HAS_FFSIM` (as you already saw above).
 On Windows, that extra simply resolves to nothing (a silent no-op via a ``sys_platform`` marker),
 rather than an install failure.
 
 Simulation must still work without ffsim, so :class:`.SupportsLinearOperator` is backed
-by an independent **native Rust FCI (full configuration interaction) kernel** -- not a wrapper
+by an independent native Rust FCI (full configuration interaction) kernel, not a wrapper
 around ffsim's own linear-algebra routines. It compiles an operator's terms once into a scatter map
 over the fixed-particle-number determinant basis, then reuses that compiled form across repeated
-matrix-vector products. This is exactly the protocol method ffsim itself expects
+matrix-vector products. This is the protocol method ffsim itself expects
 (:class:`ffsim.SupportsLinearOperator`): it happens to be implemented without ffsim, and it is
 cross-checked against ffsim's own matrix elements in this package's test suite, but it does not call
 into ffsim at all. Handing a :class:`.FermionOperator` to :func:`scipy.sparse.linalg.eigsh` or
-:func:`scipy.sparse.linalg.expm_multiply` -- as :meth:`.Evolution._apply_unitary_placed_` does
-internally -- therefore works identically whether or not ffsim is installed:
+:func:`scipy.sparse.linalg.expm_multiply` (as :meth:`.Evolution._apply_unitary_placed_` does
+internally) therefore works identically whether or not ffsim is installed:
 
 .. plot::
    :context:
@@ -114,12 +114,12 @@ implementation delegates to ffsim's dedicated Givens-rotation kernel
 (:func:`ffsim.apply_orbital_rotation`) when ffsim is installed, and otherwise falls back to
 expressing the rotation as :math:`\exp(G)` for a one-body generator :math:`G` and applying that
 through the same native-kernel-plus-:func:`~scipy.sparse.linalg.expm_multiply` path used throughout
-this section. Both paths implement the same protocol method and produce the same result -- ffsim is
-a *performance* choice here, not a correctness dependency. Gates without such a fast path
+this section. Both paths implement the same protocol method and produce the same result; ffsim is
+a performance choice here, not a correctness dependency. Gates without such a fast path
 (:class:`.Evolution`, and everything built out of it, such as :class:`.UCJ`) simply use the
 ffsim-independent path unconditionally.
 
-In short: **ffsim's protocols are the interface; ffsim itself is an accelerator you can uninstall.**
+In short: ffsim's protocols are the interface; ffsim itself is an accelerator you can uninstall.
 This is also why the two getting-started guides that use ffsim directly (:ref:`LUCJ
 <lucj_getting_started>` and :ref:`SKQD <skqd_getting_started>`) internally guard their ffsim-specific
 code with :data:`~qiskit_fermions.utils.optionals.HAS_FFSIM` the same way this guide does.
@@ -128,7 +128,7 @@ Fermionic simulation lives in a fixed particle-number sector
 ---------------------------------------------------------------
 
 Both ``_apply_unitary_`` and ``_linear_operator_`` take an ``nelec`` argument and represent the state
-vector over the *fixed-particle-number determinant basis* for that ``(norb, nelec)`` sector --
+vector over the *fixed-particle-number determinant basis* for that ``(norb, nelec)`` sector,
 mirroring ffsim's (and, transitively, PySCF's) FCI space setup, rather than the full
 :math:`2^{\text{num\_modes}}`-dimensional space a general qubit simulator would use. This is a much
 smaller space (its size is a product of binomial coefficients rather than a power of two), but it
@@ -137,7 +137,7 @@ the spinful case, each spin species' particle number individually) can be repres
 operator whose action would move amplitude to a different particle number simply has nowhere to go
 in this fixed-sector picture.
 
-The native kernel resolves this by silently dropping any term that would leave the sector -- projecting
+The native kernel resolves this by silently dropping any term that would leave the sector, projecting
 its contribution to zero rather than raising an error, since the kernel's contract is "matrix-vector
 product on this sector," not "validate this operator." For most callers this dropping would be the
 wrong thing: applying :math:`\exp(-i t H)` for a Hamiltonian :math:`H` with a
@@ -172,11 +172,11 @@ add an explicit guard before ever calling it:
    rejected: Evolution requires an operator that conserves the (norb, nelec) sector: every term must preserve the particle number of each spin species (norb=2, nelec=(1, 1)).
 
 Calling :meth:`.SupportsLinearOperator._linear_operator_` *directly* on a non-conserving operator bypasses
-this guard -- it is a lower-level building block, not a validated simulation entry point -- and will
+this guard (it is a lower-level building block, not a validated simulation entry point) and will
 return a matrix-vector product that silently zeroes the non-conserving amplitude rather than raising.
 
-The practical consequence is that **non-particle-preserving simulation is not possible in fermionic
-space** at all, by construction of the fixed-sector representation -- not as a missing feature, but
+The practical consequence is that non-particle-preserving simulation is not possible in fermionic
+space at all, by construction of the fixed-sector representation: not as a missing feature, but
 as the price of the compact FCI-space representation that makes fermionic simulation tractable in
 the first place. If your algorithm genuinely needs particle-number-violating operators (for example,
 a qubit-native error channel, or an operator built for a mapped Hamiltonian that does not conserve
@@ -191,7 +191,7 @@ choice to reach for.
 The block-spin convention for spinful systems
 ------------------------------------------------
 
-``nelec`` is typed ``int | tuple[int, int]``, and its type -- not a separate flag -- is what selects
+``nelec`` is typed ``int | tuple[int, int]``, and its type, not a separate flag, is what selects
 between the two supported mode layouts:
 
 - an **int** selects the **spinless** interpretation: the ``norb`` modes are treated directly as
@@ -199,18 +199,18 @@ between the two supported mode layouts:
 - a **pair** ``(n_alpha, n_beta)`` selects the **spinful** interpretation of ``2 * norb`` modes under
   a fixed **block-spin convention**: modes ``0 .. norb`` are the alpha (spin-up) orbitals and modes
   ``norb .. 2 * norb`` are the beta (spin-down) orbitals. Each spin species is conserved
-  *independently* -- an alpha-only term can move an electron between alpha modes but never into a
+  *independently*: an alpha-only term can move an electron between alpha modes but never into a
   beta mode, and vice versa.
 
-This dispatch happens at every ffsim-protocol entry point in this package -- gate constructors,
-``_apply_unitary_placed_`` implementations, and the native Rust kernel's own sector compilation --
-and it is exactly the convention used throughout the :ref:`LUCJ <lucj_getting_started>` and
+This dispatch happens at every ffsim-protocol entry point in this package (gate constructors,
+``_apply_unitary_placed_`` implementations, and the native Rust kernel's own sector compilation),
+and it is the convention used throughout the :ref:`LUCJ <lucj_getting_started>` and
 :ref:`SKQD <skqd_getting_started>` guides (for example,
 :meth:`.InitializeModes.from_hartree_fock` fills alpha occupations into modes ``0 .. n_alpha`` and
 beta occupations into modes ``norb .. norb + n_beta``). It is worth contrasting this with the
 :mod:`qiskit_fermions.operators` module and :class:`.FermionicCircuit` in general, which use
 *generic* mode indices with no inherent spin semantics (see the :ref:`fermionic circuit guide
-<fermionic_circuit_explanation>`) -- the block-spin meaning is imposed only when a spinful ``nelec``
+<fermionic_circuit_explanation>`): the block-spin meaning is imposed only when a spinful ``nelec``
 is supplied to a simulation call, not baked into the operator or circuit representation itself.
 
 .. plot::

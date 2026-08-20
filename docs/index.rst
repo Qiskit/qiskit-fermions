@@ -3,15 +3,15 @@ Qiskit Fermions
 ###############
 
 ``qiskit-fermions`` extends the Qiskit SDK with tools for working on fermionic
-systems. Within its scope it provides:
+systems. Within its scope it provides the following:
 
-- efficient data structures for the representation and manipulation of fermionic
-  operators in different forms
-- a framework for implementing operator conversion methods (including
+- Efficient data structures for the representation and manipulation of fermionic
+Operators in different forms
+- A framework for implementing operator conversion methods (including
   fermion-to-qubit encodings)
-- a library of efficient implementations of common conversion methods
-- a framework and library of gates for expressing fermionic circuits
-- a transpilation pipeline integrated with the Qiskit transpiler process to
+- A library of efficient implementations of common conversion methods
+- A framework and library of gates for expressing fermionic circuits
+- A transpilation pipeline integrated with the Qiskit transpiler process to
   synthesize fermionic circuits into qubit-based circuits
 
 Additionally, ``qiskit-fermions`` integrates with other tools of the ecosystem,
@@ -20,11 +20,10 @@ such as:
 - `ffsim <https://qiskit-community.github.io/ffsim/>`_ for efficient simulation
   of fermionic circuits
 
-Getting started
----------------
+Get started
+-----------
 
-Several guides exist to help you get started with this package. A good starting
-point to get an overview of its breadth of features is the
+Several guides exist to help you get started with this package. For an overview of its breadth of features, visit the
 :doc:`1D Fermi-Hubbard guide <guides/1d_fermi_hubbard>`.
 
 Use case examples
@@ -104,7 +103,7 @@ breaking changes in order to improve the user experience. When possible, we will
 keep old interfaces and mark them as deprecated, as long as they can co-exist
 with the new ones. Each substantial improvement, breaking change, or deprecation
 will be documented in the `release notes
-<https://quantum.cloud.ibm.com/docs/en/api/qiskit-fermions/release-notes>`_.
+<https://quantum.cloud.ibm.com/docs/api/qiskit-fermions/release-notes>`_.
 
 References
 ----------
