@@ -17,7 +17,7 @@ Commutator
     .. caution::
        The function signature here is **generic**! A real one will replace
        ``OpType`` with an actual :ref:`operator representations <qf_operators>`
-       and ``op_type`` with its matching prefix (e.g. ``ferm_op`` for
+       and ``op_type`` with its matching prefix (for example, ``ferm_op`` for
        :c:struct:`QfFermionOperator`).
 
     The commutator is defined as:
@@ -57,7 +57,7 @@ Anti-Commutator
     .. caution::
        The function signature here is **generic**! A real one will replace
        ``OpType`` with an actual :ref:`operator representations <qf_operators>`
-       and ``op_type`` with its matching prefix (e.g. ``ferm_op`` for
+       and ``op_type`` with its matching prefix (for example, ``ferm_op`` for
        :c:struct:`QfFermionOperator`).
 
     The anti-commutator is defined as:
@@ -97,7 +97,7 @@ Double-Commutator
     .. caution::
        The function signature here is **generic**! A real one will replace
        ``OpType`` with an actual :ref:`operator representations <qf_operators>`
-       and ``op_type`` with its matching prefix (e.g. ``ferm_op`` for
+       and ``op_type`` with its matching prefix (for example, ``ferm_op`` for
        :c:struct:`QfFermionOperator`).
 
     The double-commutator is defined as follows (see also Chapter 13.6, *Equation of motion
