@@ -1,7 +1,7 @@
 .. _fermionic_circuit_explanation:
 
-Working with fermionic circuits
-===============================
+Work with fermionic circuits
+============================
 
 .. important::
 
@@ -41,7 +41,7 @@ The :class:`.FermionicCircuit` enables a better workflow:
 This approach addresses the limitation by keeping problem-aware knowledge in
 fermionic space, where optimization passes can exploit fermionic structure and
 commutation relations to reduce circuit depth. The fermionic circuit describes
-*what* computation to perform, while transpilation handles *how* to map it to
+what computation to perform, while transpilation handles how to map it to
 qubits, providing a cleaner separation of concerns.
 
 Generic mode indexing
@@ -64,9 +64,8 @@ modes, then adds fermionic gates from the :mod:`qiskit_fermions.circuit.library`
 to implement the time evolution.
 
 The example also demonstrates how to incorporate domain knowledge into an
-operator by using :ref:`operator term grouping <grouping_explanation>`. By
-assigning group indices to the Hamiltonian terms, structural information gets
-preserved that optimization passes can exploit throughout the transpilation
+operator by using :ref:`operator term grouping <grouping_explanation>`. By assigning group indices to the Hamiltonian terms, structural information is
+information that optimization passes can exploit throughout the transpilation
 stack.
 
 .. tab-set::
