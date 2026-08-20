@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>FCIDump - Qiskit Fermions 0.2.0.dev0+2199efa</title>
+        <title>FCIDump - Qiskit Fermions 0.2.0.dev0+33f46e3</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+2199efa</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+33f46e3</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+2199efa</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+33f46e3</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -356,7 +356,7 @@ based on the intervals in which the indices fall (assuming a header with <code c
 <p><p><section id="example">
 <h3>Example<a class="headerlink" href="#example" title="Link to this heading">¶</a></h3>
 <p>Assuming you have an FCIDump file called <code class="docutils literal notranslate"><span class="pre">molecule.fcidump</span></code>, you use this function like so:</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="n">QfFCIDump</span><span class="w"> </span><span class="o">*</span><span class="n">fcidump</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_fcidump_from_file</span><span class="p">(</span><span class="s">&quot;molecule.fcidump&quot;</span><span class="p">);</span>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="n">QfFCIDump</span><span class="w"> </span><span class="o">*</span><span class="n">fcidump</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_fcidump_from_file</span><span class="p">(</span><span class="s">"molecule.fcidump"</span><span class="p">);</span>
 </pre></div>
 </div>
 </section>
@@ -380,7 +380,7 @@ based on the intervals in which the indices fall (assuming a header with <code c
 <dd><p>Frees an existing FCIDump data structure. </p>
 <p><p><section id="id3">
 <h3>Example<a class="headerlink" href="#id3" title="Link to this heading">¶</a></h3>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="n">QfFCIDump</span><span class="w"> </span><span class="o">*</span><span class="n">fcidump</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_fcidump_from_file</span><span class="p">(</span><span class="s">&quot;molecule.fcidump&quot;</span><span class="p">);</span>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="n">QfFCIDump</span><span class="w"> </span><span class="o">*</span><span class="n">fcidump</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_fcidump_from_file</span><span class="p">(</span><span class="s">"molecule.fcidump"</span><span class="p">);</span>
 <span class="linenos">2</span><span class="n">qf_fcidump_free</span><span class="p">(</span><span class="n">fcidump</span><span class="p">);</span>
 </pre></div>
 </div>
@@ -404,7 +404,7 @@ based on the intervals in which the indices fall (assuming a header with <code c
 file.</p>
 <section id="id4">
 <h3>Example<a class="headerlink" href="#id4" title="Link to this heading">¶</a></h3>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="n">QfFCIDump</span><span class="w"> </span><span class="o">*</span><span class="n">fcidump</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_fcidump_from_file</span><span class="p">(</span><span class="s">&quot;molecule.fcidump&quot;</span><span class="p">);</span>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="n">QfFCIDump</span><span class="w"> </span><span class="o">*</span><span class="n">fcidump</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_fcidump_from_file</span><span class="p">(</span><span class="s">"molecule.fcidump"</span><span class="p">);</span>
 <span class="linenos">2</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">norb</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_fcidump_norb</span><span class="p">(</span><span class="n">fcidump</span><span class="p">);</span>
 </pre></div>
 </div>
@@ -431,7 +431,7 @@ file.</p>
 file.</p>
 <section id="id5">
 <h3>Example<a class="headerlink" href="#id5" title="Link to this heading">¶</a></h3>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="n">QfFCIDump</span><span class="w"> </span><span class="o">*</span><span class="n">fcidump</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_fcidump_from_file</span><span class="p">(</span><span class="s">&quot;molecule.fcidump&quot;</span><span class="p">);</span>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="n">QfFCIDump</span><span class="w"> </span><span class="o">*</span><span class="n">fcidump</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_fcidump_from_file</span><span class="p">(</span><span class="s">"molecule.fcidump"</span><span class="p">);</span>
 <span class="linenos">2</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">nelec</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_fcidump_nelec</span><span class="p">(</span><span class="n">fcidump</span><span class="p">);</span>
 </pre></div>
 </div>
@@ -458,7 +458,7 @@ file.</p>
 file.</p>
 <section id="id6">
 <h3>Example<a class="headerlink" href="#id6" title="Link to this heading">¶</a></h3>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="n">QfFCIDump</span><span class="w"> </span><span class="o">*</span><span class="n">fcidump</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_fcidump_from_file</span><span class="p">(</span><span class="s">&quot;molecule.fcidump&quot;</span><span class="p">);</span>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="n">QfFCIDump</span><span class="w"> </span><span class="o">*</span><span class="n">fcidump</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_fcidump_from_file</span><span class="p">(</span><span class="s">"molecule.fcidump"</span><span class="p">);</span>
 <span class="linenos">2</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">ms2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_fcidump_ms2</span><span class="p">(</span><span class="n">fcidump</span><span class="p">);</span>
 </pre></div>
 </div>
@@ -489,7 +489,7 @@ file.</p>
 <dd><p>Constructs an :c:struct:<code class="docutils literal notranslate"><span class="pre">QfFermionOperator</span></code> from a :c:struct:<code class="docutils literal notranslate"><span class="pre">QfFCIDump</span></code>. </p>
 <p><p><section id="id7">
 <h3>Example<a class="headerlink" href="#id7" title="Link to this heading">¶</a></h3>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="n">QfFCIDump</span><span class="w"> </span><span class="o">*</span><span class="n">fcidump</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_fcidump_from_file</span><span class="p">(</span><span class="s">&quot;molecule.fcidump&quot;</span><span class="p">);</span>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="n">QfFCIDump</span><span class="w"> </span><span class="o">*</span><span class="n">fcidump</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_fcidump_from_file</span><span class="p">(</span><span class="s">"molecule.fcidump"</span><span class="p">);</span>
 <span class="linenos">2</span><span class="n">QfFermionOperator</span><span class="w"> </span><span class="o">*</span><span class="n">op</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_ferm_op_from_fcidump</span><span class="p">(</span><span class="n">fcidump</span><span class="p">);</span>
 </pre></div>
 </div>
@@ -528,7 +528,7 @@ file.</p>
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on 2026/08/14</div>
+              Last updated on 2026/08/20</div>
           </div>
           <div class="right-details">
             
@@ -575,7 +575,7 @@ file.</p>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=6844c108"></script>
+</div><script src="../_static/documentation_options.js?v=30ad73cd"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

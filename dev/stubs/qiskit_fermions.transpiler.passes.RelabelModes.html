@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>RelabelModes - Qiskit Fermions 0.2.0.dev0+2199efa</title>
+        <title>RelabelModes - Qiskit Fermions 0.2.0.dev0+33f46e3</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+2199efa</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+33f46e3</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+2199efa</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+33f46e3</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -320,7 +320,7 @@ trick to reduce the implementation depth, and then undoes the relabeling on the 
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">synth_plugins</span> <span class="o">=</span> <span class="n">F2QSynthesisPluginManager</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">synth</span> <span class="o">=</span> <span class="n">F2QSynthesis</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">synth</span><span class="o">.</span><span class="n">methods</span><span class="p">[</span><span class="s2">&quot;InitializeModes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">synth_plugins</span><span class="o">.</span><span class="n">method</span><span class="p">(</span><span class="s2">&quot;InitializeModes&quot;</span><span class="p">,</span> <span class="s2">&quot;TrivialOccupation&quot;</span><span class="p">)()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">synth</span><span class="o">.</span><span class="n">methods</span><span class="p">[</span><span class="s2">"InitializeModes"</span><span class="p">]</span> <span class="o">=</span> <span class="n">synth_plugins</span><span class="o">.</span><span class="n">method</span><span class="p">(</span><span class="s2">"InitializeModes"</span><span class="p">,</span> <span class="s2">"TrivialOccupation"</span><span class="p">)()</span>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># map blocked mode order onto the interleaved one</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">relabel</span> <span class="o">=</span> <span class="n">RelabelModes</span><span class="p">(</span><span class="n">permutation</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">])</span>
@@ -336,22 +336,22 @@ trick to reduce the implementation depth, and then undoes the relabeling on the 
 <span class="gp">&gt;&gt;&gt; </span><span class="n">qcirc</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">circ</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">qcirc</span><span class="o">.</span><span class="n">measure_all</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">bit_permutation</span> <span class="o">=</span> <span class="n">qcirc</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;permutation&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bit_permutation</span> <span class="o">=</span> <span class="n">qcirc</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"permutation"</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">bit_permutation</span><span class="p">)</span>
 <span class="go">[0, 2, 4, 1, 3, 5]</span>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">BasicSimulator</span><span class="p">()</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">qcirc</span><span class="p">,</span> <span class="n">shots</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">counts</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">get_counts</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">counts</span><span class="p">)</span>  <span class="c1"># measured in the interleaved ordering</span>
-<span class="go">{&#39;000111&#39;: 1}</span>
+<span class="go">{'000111': 1}</span>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># undo the relabeling to recover the counts in the original blocked ordering</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">post_processed</span> <span class="o">=</span> <span class="p">{</span>
-<span class="gp">... </span>    <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">bitstring</span><span class="p">[</span><span class="o">~</span><span class="n">idx</span><span class="p">]</span> <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">bit_permutation</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span> <span class="n">count</span>
+<span class="gp">... </span>    <span class="s2">""</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">bitstring</span><span class="p">[</span><span class="o">~</span><span class="n">idx</span><span class="p">]</span> <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">bit_permutation</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span> <span class="n">count</span>
 <span class="gp">... </span>    <span class="k">for</span> <span class="n">bitstring</span><span class="p">,</span> <span class="n">count</span> <span class="ow">in</span> <span class="n">counts</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
 <span class="gp">... </span><span class="p">}</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">post_processed</span><span class="p">)</span>  <span class="c1"># recovered in the original blocked ordering</span>
-<span class="go">{&#39;001011&#39;: 1}</span>
+<span class="go">{'001011': 1}</span>
 </pre></div>
 </div>
 <p>Initializing this transpiler pass can be done with the arguments listed below.</p>
@@ -471,7 +471,7 @@ was constructed.</p></li>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>passmanager_ir</strong> (<em>IR</em>) – Qiskit IR to optimize.</p></li>
 <li><p><strong>state</strong> (<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.PassManagerState" title="(in Qiskit v2.5)"><em>PassManagerState</em></a>) – State associated with workflow execution by the pass manager itself.</p></li>
-<li><p><strong>callback</strong> (<a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.14)"><em>Callable</em></a><em>[</em><em>[</em><em>Task</em><em>, </em><em>IR_OUT</em><em>, </em><a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.PropertySet" title="(in Qiskit v2.5)"><em>PropertySet</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>]</em><em>, </em><em>None</em><em>] </em><em>| </em><em>None</em>) – A callback function which is called per execution of optimization task.</p></li>
+<li><p><strong>callback</strong> (<a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.14)"><em>Callable</em></a><em>[</em><em>[</em><a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.Task" title="(in Qiskit v2.5)"><em>Task</em></a><em>, </em><em>IR_OUT</em><em>, </em><a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.PropertySet" title="(in Qiskit v2.5)"><em>PropertySet</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>]</em><em>, </em><em>None</em><em>] </em><em>| </em><em>None</em>) – A callback function which is called per execution of optimization task.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -535,7 +535,7 @@ was constructed.</p></li>
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on 2026/08/14</div>
+              Last updated on 2026/08/20</div>
           </div>
           <div class="right-details">
             
@@ -578,7 +578,7 @@ was constructed.</p></li>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=6844c108"></script>
+</div><script src="../_static/documentation_options.js?v=30ad73cd"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

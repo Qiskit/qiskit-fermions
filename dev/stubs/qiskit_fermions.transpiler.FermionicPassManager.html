@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>FermionicPassManager - Qiskit Fermions 0.2.0.dev0+2199efa</title>
+        <title>FermionicPassManager - Qiskit Fermions 0.2.0.dev0+33f46e3</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+2199efa</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+33f46e3</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+2199efa</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+33f46e3</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -291,7 +291,7 @@ condition is not met.</p></li>
 <dd><p>Append tasks to the schedule of passes.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>tasks</strong> (<em>Task</em><em>[</em><em>IR</em><em>, </em><em>IR</em><em>] </em><em>| </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em>[</em><em>Task</em><em>[</em><em>IR</em><em>, </em><em>IR</em><em>]</em><em>]</em>) – A set of pass manager tasks to be added to schedule.</p>
+<dd class="field-odd"><p><strong>tasks</strong> (<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.Task" title="(in Qiskit v2.5)"><em>Task</em></a><em>[</em><em>IR</em><em>, </em><em>IR</em><em>] </em><em>| </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em>[</em><a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.Task" title="(in Qiskit v2.5)"><em>Task</em></a><em>[</em><em>IR</em><em>, </em><em>IR</em><em>]</em><em>]</em>) – A set of pass manager tasks to be added to schedule.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#TypeError" title="(in Python v3.14)"><strong>TypeError</strong></a> – When any element of tasks is not a subclass of passmanager Task.</p>
@@ -327,7 +327,7 @@ condition is not met.</p></li>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>index</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – Task index to replace, based on the position in <code class="xref py py-meth docutils literal notranslate"><span class="pre">tasks()</span></code></p></li>
-<li><p><strong>tasks</strong> (<em>Task</em><em>[</em><em>IR</em><em>, </em><em>IR</em><em>] </em><em>| </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em>[</em><em>Task</em><em>[</em><em>IR</em><em>, </em><em>IR</em><em>]</em><em>]</em>) – A set of pass manager tasks to be added to schedule.</p></li>
+<li><p><strong>tasks</strong> (<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.Task" title="(in Qiskit v2.5)"><em>Task</em></a><em>[</em><em>IR</em><em>, </em><em>IR</em><em>] </em><em>| </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em>[</em><a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.Task" title="(in Qiskit v2.5)"><em>Task</em></a><em>[</em><em>IR</em><em>, </em><em>IR</em><em>]</em><em>]</em>) – A set of pass manager tasks to be added to schedule.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
@@ -352,7 +352,7 @@ condition is not met.</p></li>
 <li><p><strong>in_programs</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><em>Any</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><em>Any</em></a><em>]</em>) – Input programs to transform via all the registered passes.
 A single input object cannot be a Python builtin list object.
 A list object is considered as multiple input objects to optimize.</p></li>
-<li><p><strong>callback</strong> (<a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.14)"><em>Callable</em></a><em>[</em><em>[</em><em>Task</em><em>, </em><em>IR</em><em>, </em><a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.PropertySet" title="(in Qiskit v2.5)"><em>PropertySet</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>]</em><em>, </em><em>None</em><em>] </em><em>| </em><em>None</em>) – <p>A callback function that will be called after each pass execution. The
+<li><p><strong>callback</strong> (<a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.14)"><em>Callable</em></a><em>[</em><em>[</em><a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.Task" title="(in Qiskit v2.5)"><em>Task</em></a><em>, </em><em>IR</em><em>, </em><a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.PropertySet" title="(in Qiskit v2.5)"><em>PropertySet</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>]</em><em>, </em><em>None</em><em>] </em><em>| </em><em>None</em>) – <p>A callback function that will be called after each pass execution. The
 function will be called with 5 keyword arguments:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">task</span> <span class="p">(</span><span class="n">GenericPass</span><span class="p">):</span> <span class="n">the</span> <span class="k">pass</span> <span class="n">being</span> <span class="n">run</span>
 <span class="n">passmanager_ir</span> <span class="p">(</span><span class="n">Any</span><span class="p">):</span> <span class="n">depending</span> <span class="n">on</span> <span class="k">pass</span> <span class="n">manager</span> <span class="n">subclass</span>
@@ -369,11 +369,11 @@ passed are the same.</p>
 <p>To use the callback feature you define a function that will
 take in kwargs dict and access the variables. For example:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">callback_func</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-    <span class="n">task</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;task&#39;</span><span class="p">]</span>
-    <span class="n">passmanager_ir</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;passmanager_ir&#39;</span><span class="p">]</span>
-    <span class="n">property_set</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;property_set&#39;</span><span class="p">]</span>
-    <span class="n">running_time</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;running_time&#39;</span><span class="p">]</span>
-    <span class="n">count</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;count&#39;</span><span class="p">]</span>
+    <span class="n">task</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">'task'</span><span class="p">]</span>
+    <span class="n">passmanager_ir</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">'passmanager_ir'</span><span class="p">]</span>
+    <span class="n">property_set</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">'property_set'</span><span class="p">]</span>
+    <span class="n">running_time</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">'running_time'</span><span class="p">]</span>
+    <span class="n">count</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">'count'</span><span class="p">]</span>
     <span class="o">...</span>
 </pre></div>
 </div>
@@ -435,7 +435,7 @@ so that it can be nested inside another pass manager.</p>
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on 2026/08/14</div>
+              Last updated on 2026/08/20</div>
           </div>
           <div class="right-details">
             
@@ -476,7 +476,7 @@ so that it can be nested inside another pass manager.</p>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=6844c108"></script>
+</div><script src="../_static/documentation_options.js?v=30ad73cd"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

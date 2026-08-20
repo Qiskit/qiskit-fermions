@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Design Principles of Operator Representations - Qiskit Fermions 0.2.0.dev0+2199efa</title>
+        <title>Design Principles of Operator Representations - Qiskit Fermions 0.2.0.dev0+33f46e3</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+2199efa</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+33f46e3</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+2199efa</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+33f46e3</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -462,9 +462,9 @@ PYTHON</label><div class="sd-tab-content docutils">
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># Reconstruct operator from filtered terms</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">filtered_op</span> <span class="o">=</span> <span class="n">FermionOperator</span><span class="o">.</span><span class="n">from_terms</span><span class="p">(</span><span class="n">order_two_terms</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Original operator has </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">op</span><span class="p">)</span><span class="si">}</span><span class="s2"> terms&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Original operator has </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">op</span><span class="p">)</span><span class="si">}</span><span class="s2"> terms"</span><span class="p">)</span>
 <span class="go">Original operator has 3 terms</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Filtered operator has </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">filtered_op</span><span class="p">)</span><span class="si">}</span><span class="s2"> term&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Filtered operator has </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">filtered_op</span><span class="p">)</span><span class="si">}</span><span class="s2"> term"</span><span class="p">)</span>
 <span class="go">Filtered operator has 1 term</span>
 </pre></div>
 </div>
@@ -594,7 +594,7 @@ PYTHON</label><div class="sd-tab-content docutils">
 <span class="gp">&gt;&gt;&gt; </span><span class="n">difference</span> <span class="o">=</span> <span class="n">difference</span><span class="o">.</span><span class="n">normal_ordered</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">difference</span> <span class="o">=</span> <span class="n">difference</span><span class="o">.</span><span class="n">simplify</span><span class="p">(</span><span class="n">atol</span><span class="o">=</span><span class="mf">1e-10</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">is_hermitian</span> <span class="o">=</span> <span class="n">difference</span><span class="o">.</span><span class="n">equiv</span><span class="p">(</span><span class="n">FermionOperator</span><span class="o">.</span><span class="n">zero</span><span class="p">(),</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-10</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Operator is Hermitian: </span><span class="si">{</span><span class="n">is_hermitian</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Operator is Hermitian: </span><span class="si">{</span><span class="n">is_hermitian</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 <span class="go">Operator is Hermitian: True</span>
 </pre></div>
 </div>
@@ -618,7 +618,7 @@ C</label><div class="sd-tab-content docutils">
 
 <span class="n">QfFermionOperator</span><span class="w"> </span><span class="o">*</span><span class="n">zero</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_ferm_op_zero</span><span class="p">();</span>
 <span class="kt">bool</span><span class="w"> </span><span class="n">is_hermitian</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_ferm_op_equiv</span><span class="p">(</span><span class="n">normal_ordered</span><span class="p">,</span><span class="w"> </span><span class="n">zero</span><span class="p">,</span><span class="w"> </span><span class="mf">1e-10</span><span class="p">);</span>
-<span class="n">printf</span><span class="p">(</span><span class="s">&quot;Operator is Hermitian: %s</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">is_hermitian</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="s">&quot;true&quot;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="s">&quot;false&quot;</span><span class="p">);</span>
+<span class="n">printf</span><span class="p">(</span><span class="s">"Operator is Hermitian: %s</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span><span class="w"> </span><span class="n">is_hermitian</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="s">"true"</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="s">"false"</span><span class="p">);</span>
 
 <span class="c1">// Clean up</span>
 <span class="n">qf_ferm_op_free</span><span class="p">(</span><span class="n">op</span><span class="p">);</span>
@@ -715,13 +715,13 @@ C</label><div class="sd-tab-content docutils">
 
 <span class="c1">// Direct comparison fails due to different forms</span>
 <span class="kt">bool</span><span class="w"> </span><span class="n">equiv_before</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_ferm_op_equiv</span><span class="p">(</span><span class="n">op1</span><span class="p">,</span><span class="w"> </span><span class="n">op2</span><span class="p">,</span><span class="w"> </span><span class="mf">1e-10</span><span class="p">);</span>
-<span class="n">printf</span><span class="p">(</span><span class="s">&quot;Equivalent before normal ordering: %s</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">equiv_before</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="s">&quot;true&quot;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="s">&quot;false&quot;</span><span class="p">);</span>
+<span class="n">printf</span><span class="p">(</span><span class="s">"Equivalent before normal ordering: %s</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span><span class="w"> </span><span class="n">equiv_before</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="s">"true"</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="s">"false"</span><span class="p">);</span>
 
 <span class="c1">// Normal-order both and compare again</span>
 <span class="n">QfFermionOperator</span><span class="w"> </span><span class="o">*</span><span class="n">op1_normal</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_ferm_op_normal_ordered</span><span class="p">(</span><span class="n">op1</span><span class="p">);</span>
 <span class="n">QfFermionOperator</span><span class="w"> </span><span class="o">*</span><span class="n">op2_normal</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_ferm_op_normal_ordered</span><span class="p">(</span><span class="n">op2</span><span class="p">);</span>
 <span class="kt">bool</span><span class="w"> </span><span class="n">equiv_after</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_ferm_op_equiv</span><span class="p">(</span><span class="n">op1_normal</span><span class="p">,</span><span class="w"> </span><span class="n">op2_normal</span><span class="p">,</span><span class="w"> </span><span class="mf">1e-10</span><span class="p">);</span>
-<span class="n">printf</span><span class="p">(</span><span class="s">&quot;Equivalent after normal ordering: %s</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">equiv_after</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="s">&quot;true&quot;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="s">&quot;false&quot;</span><span class="p">);</span>
+<span class="n">printf</span><span class="p">(</span><span class="s">"Equivalent after normal ordering: %s</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span><span class="w"> </span><span class="n">equiv_after</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="s">"true"</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="s">"false"</span><span class="p">);</span>
 
 <span class="c1">// Clean up</span>
 <span class="n">qf_ferm_op_free</span><span class="p">(</span><span class="n">op1</span><span class="p">);</span>
@@ -779,7 +779,7 @@ your operator type to see what parameters are available.</p>
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on 2026/08/14</div>
+              Last updated on 2026/08/20</div>
           </div>
           <div class="right-details">
             
@@ -823,7 +823,7 @@ your operator type to see what parameters are available.</p>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=6844c108"></script>
+</div><script src="../_static/documentation_options.js?v=30ad73cd"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
