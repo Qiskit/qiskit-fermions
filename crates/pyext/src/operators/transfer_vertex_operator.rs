@@ -134,12 +134,12 @@ crate::declare_operator_iters!(
 /// Fermionic modes indexed by ``left_indices`` and ``right_indices`` are considered spinless.
 ///
 /// .. note::
-///    You may access **read-only copies** of these internal arrays via their respective methods:
+///    You can access **read-only copies** of these internal arrays via their respective methods:
 ///    :meth:`.get_coeffs`, :meth:`.get_left_indices`, :meth:`.get_right_indices`, and
 ///    :meth:`.get_boundaries`.
 ///
 /// This data structure allows for very efficient construction and manipulation of operators.
-/// However, it implies that duplicate terms may be contained in an operator at any moment.
+/// However, it implies that duplicate terms might be contained in an operator at any moment.
 /// These must be resolved manually through the use of :meth:`.simplify`.
 ///
 /// Construction
@@ -219,7 +219,7 @@ crate::declare_operator_iters!(
 ///     >>> print(repr(op))
 ///     TransferVertexOperator.from_dict({...})
 ///
-/// Finally, for large operators both of these outputs may be very long and undesirable. Then, a
+/// Finally, for large operators both of these outputs might be very long and undesirable. Then, a
 /// very simple form with minimal information can be obtained from the :py:func:`str` function:
 ///
 /// .. doctest::

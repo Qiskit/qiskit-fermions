@@ -397,7 +397,7 @@ state only) up to :math:`D - 1`.
 .. note::
    The fermionic circuit carries no measurements: measurement is a qubit-level concept, so we add it
    after transpilation, once the fermionic gates have been synthesized onto qubits. Convenience
-   ``measure`` instructions on :class:`.FermionicCircuit` may be introduced in the
+   ``measure`` instructions on :class:`.FermionicCircuit` might be introduced in the
    `future <https://github.com/Qiskit/qiskit-fermions/issues/219>`_.
 
 5. Transpile to qubit circuits

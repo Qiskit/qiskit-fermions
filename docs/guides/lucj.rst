@@ -256,7 +256,7 @@ way recovers the same correlation energy at this (small) system size:
    compressed LUCJ energy: -1.14618323 Hartree
 
 .. note::
-   ``diag_coulomb_mats`` from ``optimize=True`` may carry tiny imaginary round-off; :class:`.UCJ`
+   ``diag_coulomb_mats`` from ``optimize=True`` might carry tiny imaginary round-off; :class:`.UCJ`
    takes their real part and raises only if the imaginary part is not negligible. For a better fit at
    a given ``n_reps`` (at increased classical cost) see ffsim's ``multi_stage_start`` /
    ``multi_stage_step`` options.

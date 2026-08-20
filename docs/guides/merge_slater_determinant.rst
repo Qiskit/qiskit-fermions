@@ -121,7 +121,7 @@ Global initialization, per-spin rotations
 A single full-register (``2 * norb``) :class:`.InitializeModes` followed by *two*
 :class:`.OrbitalRotation`\ s, one on each contiguous spin half. The pass splits the global
 occupation at the sector boundary and emits **two** :class:`.PrepareSlaterDeterminant` gates. The
-two rotations may appear in either order.
+two rotations might appear in either order.
 
 This is the shape produced by the local unitary cluster Jastrow (LUCJ) workflow (see the
 :ref:`LUCJ guide <lucj_getting_started>`):

@@ -138,7 +138,7 @@ The final orbital rotation is initialized from the :math:`t_1` amplitudes and he
 since that rotation already captures the singles, the optimization can focus on the
 :math:`t_2`-derived repetition tensors, and ``theta`` stays :math:`\mathcal{O}(N^2)` parameters
 shorter. This is a choice, not a requirement: freezing it does restrict the variational manifold,
-so for systems with significant singles character you may well want it optimized too. Passing
+so for systems with significant singles character you might well want it optimized too. Passing
 ``with_final_orbital_rotation=True`` to both :meth:`.UCJ.num_parameters` and
 :meth:`.UCJ.from_parameters` folds it into ``theta``, which then also makes the two explicit
 ``final_orbital_rotation`` assignments below unnecessary.

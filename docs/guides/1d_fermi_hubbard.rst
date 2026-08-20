@@ -1022,7 +1022,7 @@ What to take away
   threw away the fact that its terms commute. Only supplying a flow-set-aware
   :class:`~qiskit.synthesis.EvolutionSynthesis` made the depth constant. Custom encodings,
   grouping and custom synthesis are complementary: all three are needed.
-- **Verify it.** An encoding that satisfies the commutation relations may still represent
+- **Verify it.** An encoding that satisfies the commutation relations might still represent
   a different Hamiltonian if a prefactor or sign is off. Checking an intertwining relation
   (or, more cheaply, the spectrum) catches this.
 
