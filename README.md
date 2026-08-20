@@ -42,11 +42,11 @@ available on IBM Quantum Platform.
 
 #### C
 
-Please refer to the [C installation instructions](docs/install-c.rst).
+Refer to the [C installation instructions](docs/install-c.rst).
 
 #### Python
 
-We encourage installing this package via `pip`, when possible:
+Install this package via `pip`, when possible:
 
 ```bash
 pip install 'qiskit-fermions'
@@ -56,7 +56,7 @@ For more installation information, refer to these [installation instructions](do
 
 ----------------------------------------------------------------------------------------------------
 
-### Getting started
+### Get started
 
 Several guides exist to help you get started with this package. For an overview of its breadth of
 features, visit the [1D Fermi-Hubbard guide](docs/guides/1d_fermi_hubbard.rst).
@@ -134,10 +134,10 @@ repository to cite the appropriate reference(s).
 
 ### Deprecation policy
 
-We follow [semantic versioning](https://semver.org/). We may occasionally make breaking changes in
-order to improve the user experience. When possible, we will keep old interfaces and mark them as
-deprecated, as long as they can co-exist with the new ones. Each substantial improvement, breaking
-change, or deprecation will be documented in the
+This package follows [semantic versioning](https://semver.org/). Breaking changes are made only
+occasionally, to improve the user experience. When possible, old interfaces are kept and marked as
+deprecated for as long as they can co-exist with the new ones. Each substantial improvement,
+breaking change, or deprecation is documented in the
 [release notes](https://quantum.cloud.ibm.com/docs/api/qiskit-fermions/release-notes).
 
 ----------------------------------------------------------------------------------------------------
