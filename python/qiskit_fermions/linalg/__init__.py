@@ -12,9 +12,9 @@
 
 # ruff: noqa: D205,D212,D415
 """
-=========================
+========================
 Linear Algebra Utilities
-=========================
+========================
 
 .. currentmodule:: qiskit_fermions.linalg
 

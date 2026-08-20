@@ -1,7 +1,7 @@
 .. _vqe_outer_loop_how_to:
 
 Running the outer VQE parameter optimization loop
-==================================================
+=================================================
 
 .. important::
 
@@ -95,7 +95,7 @@ The molecular Hamiltonian is built the same way as in the LUCJ guide:
    >>> hamiltonian += FermionOperator.from_2body_tril_spin_sym(h2e_tril, norb)
 
 2. Choose an unconstrained parametrization of the ansatz tensors
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The optimizer needs a flat real vector, but the ansatz tensors are constrained: each orbital
 rotation must be unitary, and each diagonal Coulomb matrix must be real symmetric.
@@ -127,7 +127,7 @@ keep the final orbital rotation from the :math:`t_1` amplitudes out of ``theta``
    >>> num_params = UCJ.num_parameters(norb, "balanced", n_reps)
 
 3. Build the ansatz and evaluate the state from a flat parameter vector
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Given ``theta``, :meth:`.UCJ.from_parameters` builds the gate directly. Rather than returning an
 energy directly, ``params_to_vec`` stops one step earlier and returns the ansatz state vector:
@@ -180,7 +180,7 @@ Each call to ``params_to_vec`` builds an entirely new :class:`.UCJ` gate: there 
 circuit carrying bound parameters, only the mapping from ``theta`` to tensors to a gate to a state.
 
 4. Run the outer loop with a generic optimizer
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Starting the optimizer from :math:`\boldsymbol{\theta} = \mathbf{0}` (the identity rotation and a
 zero diagonal Coulomb matrix, i.e. the Hartree-Fock reference itself) lands on a nearby local
@@ -234,7 +234,7 @@ Even with a generous iteration budget, each ``energy`` evaluation only reveals a
 a wasteful use of the full state vector ``params_to_vec`` already computed internally.
 
 5. Run the outer loop with ffsim's linear method
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 `ffsim`_ ships :func:`ffsim.optimize.minimize_linear_method`, an optimizer purpose-built for
 wavefunction ansatzes: rather than a scalar ``energy``, it takes ``params_to_vec`` directly (the
@@ -281,7 +281,7 @@ of ``params_to_vec`` that a generic finite-difference method cannot.
 .. _vqe_outer_loop_ucc:
 
 6. Swap in a different ansatz
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Nothing above is specific to :class:`.UCJ`. Because the loop only ever calls
 ``num_parameters``/``from_parameters``/``to_parameters``, another ansatz exposing that interface

@@ -1,7 +1,7 @@
 .. _operators_explanation:
 
 Design Principles of Operator Representations
-==============================================
+=============================================
 
 This guide explains the common design principles and core concepts shared across
 all operator representations in the :mod:`~qiskit_fermions.operators` module.
