@@ -825,17 +825,6 @@ each set is still Trotterized term by term, so the growth is only slowed, not re
    >>> figure
    <Figure size ... with 2 Axes>
 
-.. plot::
-   :context:
-   :nofigs:
-
-   Release the figure above now that the plot directive has captured it. Sybil shares
-   pyplot's state across all guides, so a figure left open here gets drawn into by the
-   next guide that calls ``mpl_draw`` without an explicit ``ax=``. The directive's
-   ``close-figs`` option does not cover that, since Sybil only executes the doctests.
-
-   >>> plt.close(figure)
-
 The gate *count* grows linearly under both (there are :math:`O(N)` terms to apply, and
 that is unavoidable) but the flow-set synthesis applies them in a constant number of
 parallel layers. This is the constant-depth result of Ref. [1]_.
