@@ -10,8 +10,8 @@ this package.
    Unless otherwise stated, the C API provides matching functionality, although it is not structured
    into modules. However, the function names will correspond naturally and should be easy to navigate.
 
-Getting started
-===============
+Get started
+===========
 
 This section lists some simple goal-oriented guides to get you started with
 specific example applications:
@@ -24,7 +24,7 @@ specific example applications:
    skqd
    lucj
 
-You can also start with these more extensive end-to-end tutorials:
+You can also start with these more extensive end-to-end examples:
 
 * :ref:`1d_fermi_hubbard`
 * :ref:`2d_fermi_hubbard`
@@ -46,7 +46,7 @@ this package:
    transpilation
    ffsim
 
-How-Tos
+How-tos
 =======
 
 This section lists goal-oriented guides for accomplishing specific tasks with

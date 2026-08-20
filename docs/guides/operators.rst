@@ -61,10 +61,10 @@ This approach dramatically reduces memory usage and computation time, especially
 systems with many modes but relatively few significant contributions. By encoding only
 non-identity operations, operations focus only on what matters, enabling work with large
 systems that would be infeasible with dense representations. Additionally, operators
-naturally scale to any number of modes - an operator acting on modes ``{0, 1}`` works
+naturally scale to any number of modes; an operator acting on modes ``{0, 1}`` works
 unchanged in systems with many more modes since unaffected modes are implicitly identity.
 
-Note that identical terms are preserved separately during arithmetic operations
+Identical terms are preserved separately during arithmetic operations
 and must be explicitly combined if needed.
 
 Internal storage format
@@ -241,7 +241,7 @@ given operation.
    currently provided by this module treat modes as spinless fermionic degrees
    of freedom. This means if your system has both spin-up and spin-down electrons
    or fermions, you must explicitly map them to distinct modes (for example, modes 0-3
-   for spin-up of 4 spatial orbitals, modes 4-7 for spin-down, or any other
+   for spin-up of four spatial orbitals, modes 4-7 for spin-down, or any other
    convention you choose).
 
    This design keeps the core representations simple and general while avoiding
@@ -268,7 +268,7 @@ Like the coefficients and mode indices, operators can optionally store a **group
 that associates each term with a group index. By integrating grouping directly into the
 operator representation as part of the sparse data structure, grouping information
 naturally travels with the operator through transformations. This enables systematic
-exploitation of structure - whether from physical properties, algebraic relationships, or
+exploitation of structure, whether from physical properties, algebraic relationships, or
 problem-specific symmetries. The structured information can then be used in downstream
 operations like circuit synthesis and decomposition by using methods like
 :meth:`.OperatorTrait.split_out_groups`.
@@ -390,7 +390,7 @@ reference of all available operations.
    While the :class:`.OperatorTrait` protocol provides a common interface,
    individual operator implementations might offer additional convenience methods
    not part of the protocol. For example, some operators provide an
-   ``is_hermitian()`` method that implements exactly this check. Always consult
+   ``is_hermitian()`` method that implements this check. Always consult
    the API documentation for your specific operator type to discover all
    available functionality.
 
@@ -404,8 +404,8 @@ Operator term ordering and normal forms
 A fundamental challenge in quantum operator algebra is that mathematically
 equivalent operators can be represented in many different ways, each with
 different implications for quantum algorithms. The same operator can be written
-in algebraically equivalent forms - for example, :math:`a^\dagger b` can be
-expressed as :math:`ba^\dagger + [a^\dagger,b]` - yet these representations lead
+in algebraically equivalent forms (for example, :math:`a^\dagger b` can be
+expressed as :math:`ba^\dagger + [a^\dagger,b]`), yet these representations lead
 to different behavior in circuit synthesis, simplification, and numerical
 algorithms.
 
