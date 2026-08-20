@@ -825,6 +825,7 @@ each set is still Trotterized term by term, so the growth is only slowed, not re
    >>> figure
    <Figure size ... with 2 Axes>
 
+<<<<<<< HEAD
 .. plot::
    :context:
    :nofigs:
@@ -838,6 +839,10 @@ each set is still Trotterized term by term, so the growth is only slowed, not re
 
 The gate *count* grows linearly under both --- there are :math:`O(N)` terms to apply, and
 that is unavoidable --- but the flow-set synthesis applies them in a constant number of
+=======
+The gate *count* grows linearly under both (there are :math:`O(N)` terms to apply, and
+that is unavoidable) but the flow-set synthesis applies them in a constant number of
+>>>>>>> f9456df (fix(docs): remove unnecessary manual figure closing (#284))
 parallel layers. This is the constant-depth result of Ref. [1]_.
 
 .. plot::
