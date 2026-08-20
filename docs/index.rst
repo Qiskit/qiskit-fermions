@@ -6,7 +6,7 @@ Qiskit Fermions
 systems. Within its scope it provides the following:
 
 - Efficient data structures for the representation and manipulation of fermionic
-Operators in different forms
+  operators in different forms
 - A framework for implementing operator conversion methods (including
   fermion-to-qubit encodings)
 - A library of efficient implementations of common conversion methods

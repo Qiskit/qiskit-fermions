@@ -15,14 +15,14 @@
 # Qiskit Fermions
 
 `qiskit-fermions` extends the Qiskit SDK with tools for working on fermionic systems. Within its
-scope it provides:
+scope it provides the following:
 
-- efficient data structures for the representation and manipulation of fermionic operators in
+- Efficient data structures for the representation and manipulation of fermionic operators in
   different forms
-- a framework for implementing operator conversion methods (including fermion-to-qubit encodings)
-- a library of efficient implementations of common conversion methods
-- a framework and library of gates for expressing fermionic circuits
-- a transpilation pipeline integrated with the Qiskit transpiler process to synthesize fermionic
+- A framework for implementing operator conversion methods (including fermion-to-qubit encodings)
+- A library of efficient implementations of common conversion methods
+- A framework and library of gates for expressing fermionic circuits
+- A transpilation pipeline integrated with the Qiskit transpiler process to synthesize fermionic
   circuits into qubit-based circuits
 
 Additionally, `qiskit-fermions` integrates with other tools of the ecosystem, such as:
@@ -58,8 +58,8 @@ For more installation information, refer to these [installation instructions](do
 
 ### Getting started
 
-Several guides exist to help you get started with this package. A good starting point to get an
- overview of its breadth of features is the [1D Fermi-Hubbard guide](docs/guides/1d_fermi_hubbard.rst).
+Several guides exist to help you get started with this package. For an overview of its breadth of
+features, visit the [1D Fermi-Hubbard guide](docs/guides/1d_fermi_hubbard.rst).
 
 ----------------------------------------------------------------------------------------------------
 
