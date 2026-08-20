@@ -61,7 +61,7 @@ import sys
 URL_MAP = {
     "https://quantum.cloud.ibm.com/docs/api/qiskit-fermions": "pydoc/index.html",
     "https://quantum.cloud.ibm.com/docs/api/qiskit-fermions-c": "cdoc/index.html",
-    "https://quantum.cloud.ibm.com/docs/en/api/qiskit-fermions/release-notes": "release-notes.html",
+    "https://quantum.cloud.ibm.com/docs/api/qiskit-fermions/release-notes": "release-notes.html",
 }
 
 #: Any link to this project's own documentation on the platform, however deep.  Used to catch URLs
