@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Running the outer VQE parameter optimization loop - Qiskit Fermions 0.1.0+72f222a</title>
+        <title>Running the outer VQE parameter optimization loop - Qiskit Fermions 0.1.0+c6f2913</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.1.0+72f222a</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.1.0+c6f2913</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.1.0+72f222a</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.1.0+c6f2913</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -306,9 +306,9 @@ focuses on the optimization loop around it instead. We reuse the molecule’s CC
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">mol</span> <span class="o">=</span> <span class="n">pyscf</span><span class="o">.</span><span class="n">gto</span><span class="o">.</span><span class="n">Mole</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">mol</span><span class="o">.</span><span class="n">build</span><span class="p">(</span>
-<span class="gp">... </span>    <span class="n">atom</span><span class="o">=</span><span class="p">[[</span><span class="s2">&quot;H&quot;</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)],</span> <span class="p">[</span><span class="s2">&quot;H&quot;</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.74</span><span class="p">)]],</span>
-<span class="gp">... </span>    <span class="n">basis</span><span class="o">=</span><span class="s2">&quot;6-31g&quot;</span><span class="p">,</span>
-<span class="gp">... </span>    <span class="n">symmetry</span><span class="o">=</span><span class="s2">&quot;Dooh&quot;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">atom</span><span class="o">=</span><span class="p">[[</span><span class="s2">"H"</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)],</span> <span class="p">[</span><span class="s2">"H"</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.74</span><span class="p">)]],</span>
+<span class="gp">... </span>    <span class="n">basis</span><span class="o">=</span><span class="s2">"6-31g"</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">symmetry</span><span class="o">=</span><span class="s2">"Dooh"</span><span class="p">,</span>
 <span class="gp">... </span>    <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
 <span class="gp">... </span><span class="p">)</span>
 <span class="go">&lt;pyscf.gto.mole.Mole object at ...&gt;</span>
@@ -363,7 +363,7 @@ keep the final orbital rotation from the <span class="math">\(t_1\)</span> ampli
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.circuit.library</span><span class="w"> </span><span class="kn">import</span> <span class="n">UCJ</span>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">n_reps</span> <span class="o">=</span> <span class="mi">1</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">num_params</span> <span class="o">=</span> <span class="n">UCJ</span><span class="o">.</span><span class="n">num_parameters</span><span class="p">(</span><span class="n">norb</span><span class="p">,</span> <span class="s2">&quot;balanced&quot;</span><span class="p">,</span> <span class="n">n_reps</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">num_params</span> <span class="o">=</span> <span class="n">UCJ</span><span class="o">.</span><span class="n">num_parameters</span><span class="p">(</span><span class="n">norb</span><span class="p">,</span> <span class="s2">"balanced"</span><span class="p">,</span> <span class="n">n_reps</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>
@@ -392,8 +392,8 @@ so for systems with significant singles character you may well want it optimized
 <span class="gp">&gt;&gt;&gt; </span><span class="n">linop</span> <span class="o">=</span> <span class="n">ffsim</span><span class="o">.</span><span class="n">linear_operator</span><span class="p">(</span><span class="n">hamiltonian</span><span class="p">,</span> <span class="n">norb</span><span class="o">=</span><span class="n">norb</span><span class="p">,</span> <span class="n">nelec</span><span class="o">=</span><span class="n">nelec</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">params_to_vec</span><span class="p">(</span><span class="n">theta</span><span class="p">):</span>
-<span class="gp">... </span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Builds a fresh UCJ ansatz from theta and returns its state vector.&quot;&quot;&quot;</span>
-<span class="gp">... </span>    <span class="n">ansatz</span> <span class="o">=</span> <span class="n">UCJ</span><span class="o">.</span><span class="n">from_parameters</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">norb</span><span class="p">,</span> <span class="s2">&quot;balanced&quot;</span><span class="p">,</span> <span class="n">n_reps</span><span class="p">)</span>
+<span class="gp">... </span><span class="w">    </span><span class="sd">"""Builds a fresh UCJ ansatz from theta and returns its state vector."""</span>
+<span class="gp">... </span>    <span class="n">ansatz</span> <span class="o">=</span> <span class="n">UCJ</span><span class="o">.</span><span class="n">from_parameters</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">norb</span><span class="p">,</span> <span class="s2">"balanced"</span><span class="p">,</span> <span class="n">n_reps</span><span class="p">)</span>
 <span class="gp">... </span>    <span class="c1"># reattached rather than read from theta, so it stays fixed; to optimize it instead, pass</span>
 <span class="gp">... </span>    <span class="c1"># with_final_orbital_rotation=True above (and to num_parameters) and drop this line</span>
 <span class="gp">... </span>    <span class="n">ansatz</span><span class="o">.</span><span class="n">final_orbital_rotation</span> <span class="o">=</span> <span class="n">final_orbital_rotation</span>
@@ -405,7 +405,7 @@ so for systems with significant singles character you may well want it optimized
 <span class="gp">... </span>    <span class="k">return</span> <span class="n">ffsim</span><span class="o">.</span><span class="n">apply_unitary</span><span class="p">(</span><span class="n">reference</span><span class="p">,</span> <span class="n">circuit</span><span class="p">,</span> <span class="n">norb</span><span class="o">=</span><span class="n">norb</span><span class="p">,</span> <span class="n">nelec</span><span class="o">=</span><span class="n">nelec</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">energy</span><span class="p">(</span><span class="n">theta</span><span class="p">):</span>
-<span class="gp">... </span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns the Hamiltonian expectation value of the ansatz state for theta.&quot;&quot;&quot;</span>
+<span class="gp">... </span><span class="w">    </span><span class="sd">"""Returns the Hamiltonian expectation value of the ansatz state for theta."""</span>
 <span class="gp">... </span>    <span class="n">state</span> <span class="o">=</span> <span class="n">params_to_vec</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
 <span class="gp">... </span>    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">vdot</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">linop</span> <span class="o">@</span> <span class="n">state</span><span class="p">)</span><span class="o">.</span><span class="n">real</span>
 </pre></div>
@@ -427,12 +427,12 @@ float; no gradient of the fermionic ansatz is implemented.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">scipy.optimize</span><span class="w"> </span><span class="kn">import</span> <span class="n">minimize</span>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ccsd_ansatz</span> <span class="o">=</span> <span class="n">UCJ</span><span class="o">.</span><span class="n">from_t_amplitudes</span><span class="p">(</span><span class="n">nelec</span><span class="p">,</span> <span class="n">t2</span><span class="p">,</span> <span class="n">t1</span><span class="o">=</span><span class="n">t1</span><span class="p">,</span> <span class="n">n_reps</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># cleared so that to_parameters emits theta&#39;s layout; keep it if you opted to optimize it</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># cleared so that to_parameters emits theta's layout; keep it if you opted to optimize it</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ccsd_ansatz</span><span class="o">.</span><span class="n">final_orbital_rotation</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">theta0</span> <span class="o">=</span> <span class="n">ccsd_ansatz</span><span class="o">.</span><span class="n">to_parameters</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">minimize</span><span class="p">(</span>
-<span class="gp">... </span>    <span class="n">energy</span><span class="p">,</span> <span class="n">theta0</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;L-BFGS-B&quot;</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;maxiter&quot;</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span> <span class="s2">&quot;ftol&quot;</span><span class="p">:</span> <span class="mf">1e-12</span><span class="p">,</span> <span class="s2">&quot;gtol&quot;</span><span class="p">:</span> <span class="mf">1e-8</span><span class="p">}</span>
+<span class="gp">... </span>    <span class="n">energy</span><span class="p">,</span> <span class="n">theta0</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">"L-BFGS-B"</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="p">{</span><span class="s2">"maxiter"</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span> <span class="s2">"ftol"</span><span class="p">:</span> <span class="mf">1e-12</span><span class="p">,</span> <span class="s2">"gtol"</span><span class="p">:</span> <span class="mf">1e-8</span><span class="p">}</span>
 <span class="gp">... </span><span class="p">)</span>
 </pre></div>
 </div>
@@ -445,11 +445,11 @@ can vary slightly between runs, machines, and BLAS backends. We give the optimiz
 iteration budget and check convergence with a tolerance rather than pinning down an exact
 iteration count.</p>
 </div>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Hartree-Fock: </span><span class="si">{</span><span class="n">scf</span><span class="o">.</span><span class="n">e_tot</span><span class="si">:</span><span class="s2">.5f</span><span class="si">}</span><span class="s2"> Hartree&quot;</span><span class="p">)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Hartree-Fock: </span><span class="si">{</span><span class="n">scf</span><span class="o">.</span><span class="n">e_tot</span><span class="si">:</span><span class="s2">.5f</span><span class="si">}</span><span class="s2"> Hartree"</span><span class="p">)</span>
 <span class="go">Hartree-Fock: -1.12676 Hartree</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;CCSD:         </span><span class="si">{</span><span class="n">ccsd</span><span class="o">.</span><span class="n">e_tot</span><span class="si">:</span><span class="s2">.5f</span><span class="si">}</span><span class="s2"> Hartree&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"CCSD:         </span><span class="si">{</span><span class="n">ccsd</span><span class="o">.</span><span class="n">e_tot</span><span class="si">:</span><span class="s2">.5f</span><span class="si">}</span><span class="s2"> Hartree"</span><span class="p">)</span>
 <span class="go">CCSD:         -1.15167 Hartree</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;L-BFGS-B:     </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">fun</span><span class="si">:</span><span class="s2">.5f</span><span class="si">}</span><span class="s2"> Hartree&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"L-BFGS-B:     </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">fun</span><span class="si">:</span><span class="s2">.5f</span><span class="si">}</span><span class="s2"> Hartree"</span><span class="p">)</span>
 <span class="go">L-BFGS-B:     -1.15167 Hartree</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">bool</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">fun</span> <span class="o">-</span> <span class="n">ccsd</span><span class="o">.</span><span class="n">e_tot</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">1e-4</span><span class="p">)</span>
 <span class="go">True</span>
@@ -486,9 +486,9 @@ disable that inner search here for a reliably reproducible trajectory.</p>
 <span class="gp">... </span>    <span class="n">optimize_variation</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
 <span class="gp">... </span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;CCSD:          </span><span class="si">{</span><span class="n">ccsd</span><span class="o">.</span><span class="n">e_tot</span><span class="si">:</span><span class="s2">.5f</span><span class="si">}</span><span class="s2"> Hartree&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"CCSD:          </span><span class="si">{</span><span class="n">ccsd</span><span class="o">.</span><span class="n">e_tot</span><span class="si">:</span><span class="s2">.5f</span><span class="si">}</span><span class="s2"> Hartree"</span><span class="p">)</span>
 <span class="go">CCSD:          -1.15167 Hartree</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;linear method: </span><span class="si">{</span><span class="n">lm_result</span><span class="o">.</span><span class="n">fun</span><span class="si">:</span><span class="s2">.5f</span><span class="si">}</span><span class="s2"> Hartree&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"linear method: </span><span class="si">{</span><span class="n">lm_result</span><span class="o">.</span><span class="n">fun</span><span class="si">:</span><span class="s2">.5f</span><span class="si">}</span><span class="s2"> Hartree"</span><span class="p">)</span>
 <span class="go">linear method: -1.15167 Hartree</span>
 </pre></div>
 </div>
@@ -520,8 +520,8 @@ the single-register variant <code class="docutils literal notranslate"><span cla
 <span class="gp">&gt;&gt;&gt; </span><span class="n">nocc</span> <span class="o">=</span> <span class="n">nelec</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">ucc_params_to_vec</span><span class="p">(</span><span class="n">theta</span><span class="p">):</span>
-<span class="gp">... </span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Builds a fresh UCC ansatz from theta and returns its state vector.&quot;&quot;&quot;</span>
-<span class="gp">... </span>    <span class="n">ansatz</span> <span class="o">=</span> <span class="n">UCC</span><span class="o">.</span><span class="n">from_parameters</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">norb</span><span class="p">,</span> <span class="n">nocc</span><span class="p">,</span> <span class="s2">&quot;restricted&quot;</span><span class="p">)</span>
+<span class="gp">... </span><span class="w">    </span><span class="sd">"""Builds a fresh UCC ansatz from theta and returns its state vector."""</span>
+<span class="gp">... </span>    <span class="n">ansatz</span> <span class="o">=</span> <span class="n">UCC</span><span class="o">.</span><span class="n">from_parameters</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">norb</span><span class="p">,</span> <span class="n">nocc</span><span class="p">,</span> <span class="s2">"restricted"</span><span class="p">)</span>
 <span class="gp">...</span>
 <span class="gp">... </span>    <span class="n">circuit</span> <span class="o">=</span> <span class="n">FermionicCircuit</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">norb</span><span class="p">)</span>
 <span class="gp">... </span>    <span class="n">circuit</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">InitializeModes</span><span class="o">.</span><span class="n">from_hartree_fock</span><span class="p">(</span><span class="n">norb</span><span class="p">,</span> <span class="n">nelec</span><span class="p">),</span> <span class="n">circuit</span><span class="o">.</span><span class="n">modes</span><span class="p">)</span>
@@ -538,7 +538,7 @@ the warm start directly, and the whole question of freezing a rotation does not 
 want one anyway – to widen the manifold beyond what the singles already span – append an
 <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.OrbitalRotation.html#qiskit_fermions.circuit.library.OrbitalRotation" title="qiskit_fermions.circuit.library.OrbitalRotation"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrbitalRotation</span></code></a> to the circuit yourself; unlike UCJ’s flag, it is then yours to either
 keep fixed or fold into <code class="docutils literal notranslate"><span class="pre">theta</span></code> by hand.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ucc_theta0</span> <span class="o">=</span> <span class="n">UCC</span><span class="o">.</span><span class="n">from_t_amplitudes</span><span class="p">(</span><span class="n">t2</span><span class="p">,</span> <span class="n">t1</span><span class="o">=</span><span class="n">t1</span><span class="p">,</span> <span class="n">variant</span><span class="o">=</span><span class="s2">&quot;restricted&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">to_parameters</span><span class="p">()</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ucc_theta0</span> <span class="o">=</span> <span class="n">UCC</span><span class="o">.</span><span class="n">from_t_amplitudes</span><span class="p">(</span><span class="n">t2</span><span class="p">,</span> <span class="n">t1</span><span class="o">=</span><span class="n">t1</span><span class="p">,</span> <span class="n">variant</span><span class="o">=</span><span class="s2">"restricted"</span><span class="p">)</span><span class="o">.</span><span class="n">to_parameters</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ucc_result</span> <span class="o">=</span> <span class="n">ffsim</span><span class="o">.</span><span class="n">optimize</span><span class="o">.</span><span class="n">minimize_linear_method</span><span class="p">(</span>
 <span class="gp">... </span>    <span class="n">ucc_params_to_vec</span><span class="p">,</span>
@@ -549,9 +549,9 @@ keep fixed or fold into <code class="docutils literal notranslate"><span class="
 <span class="gp">... </span>    <span class="n">optimize_variation</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
 <span class="gp">... </span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;CCSD:      </span><span class="si">{</span><span class="n">ccsd</span><span class="o">.</span><span class="n">e_tot</span><span class="si">:</span><span class="s2">.5f</span><span class="si">}</span><span class="s2"> Hartree&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"CCSD:      </span><span class="si">{</span><span class="n">ccsd</span><span class="o">.</span><span class="n">e_tot</span><span class="si">:</span><span class="s2">.5f</span><span class="si">}</span><span class="s2"> Hartree"</span><span class="p">)</span>
 <span class="go">CCSD:      -1.15167 Hartree</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;UCC:       </span><span class="si">{</span><span class="n">ucc_result</span><span class="o">.</span><span class="n">fun</span><span class="si">:</span><span class="s2">.5f</span><span class="si">}</span><span class="s2"> Hartree&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"UCC:       </span><span class="si">{</span><span class="n">ucc_result</span><span class="o">.</span><span class="n">fun</span><span class="si">:</span><span class="s2">.5f</span><span class="si">}</span><span class="s2"> Hartree"</span><span class="p">)</span>
 <span class="go">UCC:       -1.15167 Hartree</span>
 </pre></div>
 </div>
@@ -561,9 +561,9 @@ count is <span class="math">\(O(n_\text{orb}^2)\)</span> per repetition, while <
 <span class="math">\(O(n_\text{occ}^2 n_\text{vrt}^2)\)</span>, so UCC starts smaller on tiny systems and ends up much
 larger. At half filling the crossover is already around eight orbitals:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">20</span><span class="p">):</span>
-<span class="gp">... </span>    <span class="n">ucj</span> <span class="o">=</span> <span class="n">UCJ</span><span class="o">.</span><span class="n">num_parameters</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="s2">&quot;balanced&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-<span class="gp">... </span>    <span class="n">ucc</span> <span class="o">=</span> <span class="n">UCC</span><span class="o">.</span><span class="n">num_parameters</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">n</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;restricted&quot;</span><span class="p">)</span>
-<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;norb=</span><span class="si">{</span><span class="n">n</span><span class="si">:</span><span class="s2">&lt;3</span><span class="si">}</span><span class="s2"> UCJ (n_reps=1): </span><span class="si">{</span><span class="n">ucj</span><span class="si">:</span><span class="s2">&lt;5</span><span class="si">}</span><span class="s2"> UCC: </span><span class="si">{</span><span class="n">ucc</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="n">ucj</span> <span class="o">=</span> <span class="n">UCJ</span><span class="o">.</span><span class="n">num_parameters</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="s2">"balanced"</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="n">ucc</span> <span class="o">=</span> <span class="n">UCC</span><span class="o">.</span><span class="n">num_parameters</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">n</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">"restricted"</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"norb=</span><span class="si">{</span><span class="n">n</span><span class="si">:</span><span class="s2">&lt;3</span><span class="si">}</span><span class="s2"> UCJ (n_reps=1): </span><span class="si">{</span><span class="n">ucj</span><span class="si">:</span><span class="s2">&lt;5</span><span class="si">}</span><span class="s2"> UCC: </span><span class="si">{</span><span class="n">ucc</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 <span class="go">norb=4   UCJ (n_reps=1): 36    UCC: 14</span>
 <span class="go">norb=8   UCJ (n_reps=1): 136   UCC: 152</span>
 <span class="go">norb=20  UCJ (n_reps=1): 820   UCC: 5150</span>
@@ -636,7 +636,7 @@ the linear method’s other hyperparameters (<code class="docutils literal notra
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on 2026/08/14</div>
+              Last updated on 2026/08/20</div>
           </div>
           <div class="right-details">
             
@@ -676,7 +676,7 @@ the linear method’s other hyperparameters (<code class="docutils literal notra
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=b3d18e58"></script>
+</div><script src="../_static/documentation_options.js?v=e33f9f55"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

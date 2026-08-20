@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>F2QSynthesis - Qiskit Fermions 0.1.0+72f222a</title>
+        <title>F2QSynthesis - Qiskit Fermions 0.1.0+c6f2913</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.1.0+72f222a</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.1.0+c6f2913</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.1.0+72f222a</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.1.0+c6f2913</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -289,9 +289,9 @@ show the equivalent configuration to the <a class="reference internal" href="qis
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.transpiler</span><span class="w"> </span><span class="kn">import</span> <span class="n">passes</span>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">config</span> <span class="o">=</span> <span class="p">{</span>
-<span class="gp">... </span>    <span class="s2">&quot;Evolution&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;MapperFn&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">jordan_wigner</span><span class="p">,)),</span>
-<span class="gp">... </span>    <span class="s2">&quot;InitializeModes&quot;</span><span class="p">:</span> <span class="s2">&quot;TrivialOccupation&quot;</span><span class="p">,</span>
-<span class="gp">... </span>    <span class="s2">&quot;OrbitalRotation&quot;</span><span class="p">:</span> <span class="s2">&quot;GivensDecomposition&quot;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="s2">"Evolution"</span><span class="p">:</span> <span class="p">(</span><span class="s2">"MapperFn"</span><span class="p">,</span> <span class="p">(</span><span class="n">jordan_wigner</span><span class="p">,)),</span>
+<span class="gp">... </span>    <span class="s2">"InitializeModes"</span><span class="p">:</span> <span class="s2">"TrivialOccupation"</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="s2">"OrbitalRotation"</span><span class="p">:</span> <span class="s2">"GivensDecomposition"</span><span class="p">,</span>
 <span class="gp">... </span><span class="p">}</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">synth</span> <span class="o">=</span> <span class="n">passes</span><span class="o">.</span><span class="n">F2QSynthesis</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
 </pre></div>
@@ -302,9 +302,9 @@ show the equivalent configuration to the <a class="reference internal" href="qis
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.transpiler</span><span class="w"> </span><span class="kn">import</span> <span class="n">passes</span>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">synth</span> <span class="o">=</span> <span class="n">passes</span><span class="o">.</span><span class="n">F2QSynthesis</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">synth</span><span class="o">.</span><span class="n">methods</span><span class="p">[</span><span class="s2">&quot;Evolution&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">passes</span><span class="o">.</span><span class="n">MapperFnEvolutionSynthesis</span><span class="p">(</span><span class="n">jordan_wigner</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">synth</span><span class="o">.</span><span class="n">methods</span><span class="p">[</span><span class="s2">&quot;InitializeModes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">passes</span><span class="o">.</span><span class="n">TrivialOccupationInitializeModesSynthesis</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">synth</span><span class="o">.</span><span class="n">methods</span><span class="p">[</span><span class="s2">&quot;OrbitalRotation&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">passes</span><span class="o">.</span><span class="n">GivensDecompositionOrbitalRotationSynthesis</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">synth</span><span class="o">.</span><span class="n">methods</span><span class="p">[</span><span class="s2">"Evolution"</span><span class="p">]</span> <span class="o">=</span> <span class="n">passes</span><span class="o">.</span><span class="n">MapperFnEvolutionSynthesis</span><span class="p">(</span><span class="n">jordan_wigner</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">synth</span><span class="o">.</span><span class="n">methods</span><span class="p">[</span><span class="s2">"InitializeModes"</span><span class="p">]</span> <span class="o">=</span> <span class="n">passes</span><span class="o">.</span><span class="n">TrivialOccupationInitializeModesSynthesis</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">synth</span><span class="o">.</span><span class="n">methods</span><span class="p">[</span><span class="s2">"OrbitalRotation"</span><span class="p">]</span> <span class="o">=</span> <span class="n">passes</span><span class="o">.</span><span class="n">GivensDecompositionOrbitalRotationSynthesis</span><span class="p">()</span>
 </pre></div>
 </div>
 <p>Through this manual approach it is also possible to inject custom
@@ -374,7 +374,7 @@ initialization of this transpiler pass instance.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>passmanager_ir</strong> (<em>IR</em>) – Qiskit IR to optimize.</p></li>
 <li><p><strong>state</strong> (<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.PassManagerState" title="(in Qiskit v2.5)"><em>PassManagerState</em></a>) – State associated with workflow execution by the pass manager itself.</p></li>
-<li><p><strong>callback</strong> (<a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.14)"><em>Callable</em></a><em>[</em><em>[</em><em>Task</em><em>, </em><em>IR_OUT</em><em>, </em><a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.PropertySet" title="(in Qiskit v2.5)"><em>PropertySet</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>]</em><em>, </em><em>None</em><em>] </em><em>| </em><em>None</em>) – A callback function which is called per execution of optimization task.</p></li>
+<li><p><strong>callback</strong> (<a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.14)"><em>Callable</em></a><em>[</em><em>[</em><a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.Task" title="(in Qiskit v2.5)"><em>Task</em></a><em>, </em><em>IR_OUT</em><em>, </em><a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.PropertySet" title="(in Qiskit v2.5)"><em>PropertySet</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>]</em><em>, </em><em>None</em><em>] </em><em>| </em><em>None</em>) – A callback function which is called per execution of optimization task.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -438,7 +438,7 @@ initialization of this transpiler pass instance.</p>
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on 2026/08/14</div>
+              Last updated on 2026/08/20</div>
           </div>
           <div class="right-details">
             
@@ -479,7 +479,7 @@ initialization of this transpiler pass instance.</p>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=b3d18e58"></script>
+</div><script src="../_static/documentation_options.js?v=e33f9f55"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

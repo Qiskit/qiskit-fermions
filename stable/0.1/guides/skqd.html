@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Generate Krylov time-evolution circuits (SKQD) - Qiskit Fermions 0.1.0+72f222a</title>
+        <title>Generate Krylov time-evolution circuits (SKQD) - Qiskit Fermions 0.1.0+c6f2913</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.1.0+72f222a</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.1.0+c6f2913</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.1.0+72f222a</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.1.0+c6f2913</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -353,7 +353,7 @@ momentum basis, where the bath Hamiltonian is diagonal. The single-particle orbi
 performs this change is problem-specific linear algebra – it diagonalizes the bath hopping matrix
 while leaving the impurity orbital untouched, then relocates the impurity to a central site:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">momentum_basis</span><span class="p">(</span><span class="n">norb</span><span class="p">):</span>
-<span class="gp">... </span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Orbital rotation from the position to the momentum basis.&quot;&quot;&quot;</span>
+<span class="gp">... </span><span class="w">    </span><span class="sd">"""Orbital rotation from the position to the momentum basis."""</span>
 <span class="gp">... </span>    <span class="n">n_bath</span> <span class="o">=</span> <span class="n">norb</span> <span class="o">-</span> <span class="mi">1</span>
 <span class="gp">... </span>    <span class="n">hopping_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_bath</span><span class="p">,</span> <span class="n">n_bath</span><span class="p">))</span>
 <span class="gp">... </span>    <span class="n">np</span><span class="o">.</span><span class="n">fill_diagonal</span><span class="p">(</span><span class="n">hopping_matrix</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:],</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
@@ -374,15 +374,15 @@ so that the whole circuit – Hamiltonian and state alike – lives in the basis
 state is sparse and the sampled bitstrings are therefore informative. Rotating the one- and two-body
 integrals is a standard basis change of the electronic-structure tensors:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">rotation</span> <span class="o">=</span> <span class="n">orbital_rotation</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">h1e_momentum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ab,Aa,Bb-&gt;AB&quot;</span><span class="p">,</span> <span class="n">h1e</span><span class="p">,</span> <span class="n">rotation</span><span class="p">,</span> <span class="n">rotation</span><span class="o">.</span><span class="n">conj</span><span class="p">(),</span> <span class="n">optimize</span><span class="o">=</span><span class="s2">&quot;greedy&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">h1e_momentum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">"ab,Aa,Bb-&gt;AB"</span><span class="p">,</span> <span class="n">h1e</span><span class="p">,</span> <span class="n">rotation</span><span class="p">,</span> <span class="n">rotation</span><span class="o">.</span><span class="n">conj</span><span class="p">(),</span> <span class="n">optimize</span><span class="o">=</span><span class="s2">"greedy"</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">h2e_momentum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span>
-<span class="gp">... </span>    <span class="s2">&quot;abcd,Aa,Bb,Cc,Dd-&gt;ABCD&quot;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="s2">"abcd,Aa,Bb,Cc,Dd-&gt;ABCD"</span><span class="p">,</span>
 <span class="gp">... </span>    <span class="n">h2e</span><span class="p">,</span>
 <span class="gp">... </span>    <span class="n">rotation</span><span class="p">,</span>
 <span class="gp">... </span>    <span class="n">rotation</span><span class="o">.</span><span class="n">conj</span><span class="p">(),</span>
 <span class="gp">... </span>    <span class="n">rotation</span><span class="p">,</span>
 <span class="gp">... </span>    <span class="n">rotation</span><span class="o">.</span><span class="n">conj</span><span class="p">(),</span>
-<span class="gp">... </span>    <span class="n">optimize</span><span class="o">=</span><span class="s2">&quot;greedy&quot;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">optimize</span><span class="o">=</span><span class="s2">"greedy"</span><span class="p">,</span>
 <span class="gp">... </span><span class="p">)</span>
 </pre></div>
 </div>
@@ -390,9 +390,9 @@ integrals is a standard basis change of the electronic-structure tensors:</p>
 interaction stays put: <code class="docutils literal notranslate"><span class="pre">h2e_momentum</span></code> remains a <em>single</em> number-number term, just like <code class="docutils literal notranslate"><span class="pre">h2e</span></code> –
 the only change is that the impurity has been relocated to a central index. We can see this directly
 in the integral tensors, which each carry exactly one nonzero entry:</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;h2e nonzero at:          </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">argwhere</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">h2e</span><span class="p">)</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mf">1e-12</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"h2e nonzero at:          </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">argwhere</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">h2e</span><span class="p">)</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mf">1e-12</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 <span class="go">h2e nonzero at:          [[0, 0, 0, 0]]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;h2e_momentum nonzero at: </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">argwhere</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">h2e_momentum</span><span class="p">)</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mf">1e-12</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"h2e_momentum nonzero at: </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">argwhere</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">h2e_momentum</span><span class="p">)</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mf">1e-12</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 <span class="go">h2e_momentum nonzero at: [[3, 3, 3, 3]]</span>
 </pre></div>
 </div>
@@ -412,7 +412,7 @@ Hamiltonian for the exact diagonalization in either basis; individually, <span c
 is exactly the operator the Trotter step evolves in step 4.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.operators</span><span class="w"> </span><span class="kn">import</span> <span class="n">FermionOperator</span><span class="p">,</span> <span class="n">ann</span><span class="p">,</span> <span class="n">cre</span>
 <span class="gp">&gt;&gt;&gt;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># U n_imp_up n_imp_down: the impurity&#39;s up/down modes sit at `imp` and `imp + norb` in the</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># U n_imp_up n_imp_down: the impurity's up/down modes sit at `imp` and `imp + norb` in the</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># block-spin layout (the impurity is orbital 0 in the position basis, orbital 3 in the</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># momentum basis -- the single relocated index found above)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">imp_pos</span><span class="p">,</span> <span class="n">imp_mom</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">3</span>
@@ -448,10 +448,10 @@ native FCI matrix-vector kernel), so we can hand it straight to
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.linalg</span><span class="w"> </span><span class="kn">import</span> <span class="n">linear_operator</span>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">linop</span> <span class="o">=</span> <span class="n">linear_operator</span><span class="p">(</span><span class="n">hamiltonian_momentum</span><span class="p">,</span> <span class="n">norb</span><span class="p">,</span> <span class="n">nelec</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">reference_energy</span><span class="p">,</span> <span class="n">ground_state</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">sparse</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">eigsh</span><span class="p">(</span><span class="n">linop</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s2">&quot;SA&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reference_energy</span><span class="p">,</span> <span class="n">ground_state</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">sparse</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">eigsh</span><span class="p">(</span><span class="n">linop</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s2">"SA"</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">reference_energy</span> <span class="o">=</span> <span class="n">reference_energy</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ground_state</span> <span class="o">=</span> <span class="n">ground_state</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;exact ground-state energy: </span><span class="si">{</span><span class="n">reference_energy</span><span class="si">:</span><span class="s2">.6f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"exact ground-state energy: </span><span class="si">{</span><span class="n">reference_energy</span><span class="si">:</span><span class="s2">.6f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 <span class="go">exact ground-state energy: -13.422492</span>
 </pre></div>
 </div>
@@ -465,13 +465,13 @@ determinants is not:</p>
 <span class="gp">...</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># the same Hamiltonian in the position basis has an identical spectrum, but a dense ground state</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">position_linop</span> <span class="o">=</span> <span class="n">linear_operator</span><span class="p">(</span><span class="n">hamiltonian_position</span><span class="p">,</span> <span class="n">norb</span><span class="p">,</span> <span class="n">nelec</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">position_energy</span><span class="p">,</span> <span class="n">position_ground</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">sparse</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">eigsh</span><span class="p">(</span><span class="n">position_linop</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s2">&quot;SA&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">position_energy</span><span class="p">,</span> <span class="n">position_ground</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">sparse</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">eigsh</span><span class="p">(</span><span class="n">position_linop</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s2">"SA"</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;position-basis energy: </span><span class="si">{</span><span class="n">position_energy</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">.6f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"position-basis energy: </span><span class="si">{</span><span class="n">position_energy</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">.6f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 <span class="go">position-basis energy: -13.422492</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;determinants for 99% weight: </span><span class="si">{</span><span class="n">determinants_for</span><span class="p">(</span><span class="n">position_ground</span><span class="p">[:,</span><span class="w"> </span><span class="mi">0</span><span class="p">])</span><span class="si">}</span><span class="s2"> (position)&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"determinants for 99% weight: </span><span class="si">{</span><span class="n">determinants_for</span><span class="p">(</span><span class="n">position_ground</span><span class="p">[:,</span><span class="w"> </span><span class="mi">0</span><span class="p">])</span><span class="si">}</span><span class="s2"> (position)"</span><span class="p">)</span>
 <span class="go">determinants for 99% weight: 2563 (position)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;determinants for 99% weight: </span><span class="si">{</span><span class="n">determinants_for</span><span class="p">(</span><span class="n">ground_state</span><span class="p">)</span><span class="si">}</span><span class="s2"> (momentum)&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"determinants for 99% weight: </span><span class="si">{</span><span class="n">determinants_for</span><span class="p">(</span><span class="n">ground_state</span><span class="p">)</span><span class="si">}</span><span class="s2"> (momentum)"</span><span class="p">)</span>
 <span class="go">determinants for 99% weight: 21 (momentum)</span>
 </pre></div>
 </div>
@@ -496,7 +496,7 @@ the two-qubit gates by hand. The gates form a brickwork of nearest-neighbor rota
 from the Fermi level in expanding layers, spreading each near-Fermi electron across the empty modes
 just above it:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">fermi_level_rotation</span><span class="p">(</span><span class="n">norb</span><span class="p">,</span> <span class="n">nocc</span><span class="p">,</span> <span class="n">n_excited</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
-<span class="gp">... </span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Orbital rotation exciting the near-Fermi electrons into the nearest empty modes.&quot;&quot;&quot;</span>
+<span class="gp">... </span><span class="w">    </span><span class="sd">"""Orbital rotation exciting the near-Fermi electrons into the nearest empty modes."""</span>
 <span class="gp">... </span>    <span class="n">cos</span><span class="p">,</span> <span class="n">sin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">4</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">4</span><span class="p">)</span>
 <span class="gp">... </span>    <span class="n">fermi</span> <span class="o">=</span> <span class="n">nocc</span> <span class="o">-</span> <span class="mi">1</span>  <span class="c1"># highest occupied mode; the Fermi level sits between it and mode `nocc`</span>
 <span class="gp">... </span>    <span class="c1"># Nearest-neighbor Givens rotations fanning out from the Fermi level in expanding layers:</span>
@@ -649,7 +649,7 @@ couplings and inflating the depth by an order of magnitude.</p>
 </div>
 <p>The first circuit prepares only the reference determinant, while the last carries the most Trotter
 steps (4 in this case):</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">circuits</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">draw</span><span class="p">(</span><span class="s2">&quot;mpl&quot;</span><span class="p">,</span> <span class="n">fold</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">measure_arrows</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">circuits</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">draw</span><span class="p">(</span><span class="s2">"mpl"</span><span class="p">,</span> <span class="n">fold</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">measure_arrows</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 <span class="go">&lt;Figure size ... with 1 Axes&gt;</span>
 </pre></div>
 </div>
@@ -657,7 +657,7 @@ steps (4 in this case):</p>
 <figure class="align-default">
 <img alt="The reference-state preparation circuit (Krylov dimension 0)." class="plot-directive" src="../_images/skqd-13.png" />
 </figure>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">circuits</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">draw</span><span class="p">(</span><span class="s2">&quot;mpl&quot;</span><span class="p">,</span> <span class="n">fold</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">measure_arrows</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">circuits</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">draw</span><span class="p">(</span><span class="s2">"mpl"</span><span class="p">,</span> <span class="n">fold</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">measure_arrows</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 <span class="go">&lt;Figure size ... with 1 Axes&gt;</span>
 </pre></div>
 </div>
@@ -734,7 +734,7 @@ from step 2):</p>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">bit_array</span> <span class="o">=</span> <span class="n">BitArray</span><span class="o">.</span><span class="n">from_counts</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">counts</span><span class="p">))</span>
 <span class="gp">&gt;&gt;&gt;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># record each iteration&#39;s batch results so we can watch the energy converge</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># record each iteration's batch results so we can watch the energy converge</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">result_history</span> <span class="o">=</span> <span class="p">[]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">diagonalize_fermionic_hamiltonian</span><span class="p">(</span>
 <span class="gp">... </span>    <span class="n">h1e_momentum</span><span class="p">,</span>
@@ -749,7 +749,7 @@ from step 2):</p>
 <span class="gp">... </span>    <span class="n">callback</span><span class="o">=</span><span class="n">result_history</span><span class="o">.</span><span class="n">append</span><span class="p">,</span>
 <span class="gp">... </span>    <span class="n">seed</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">24</span><span class="p">),</span>
 <span class="gp">... </span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;SQD estimate: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">energy</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2"> (exact: </span><span class="si">{</span><span class="n">reference_energy</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"SQD estimate: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">energy</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2"> (exact: </span><span class="si">{</span><span class="n">reference_energy</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
 <span class="go">SQD estimate: -13.4224 (exact: -13.4225)</span>
 </pre></div>
 </div>
@@ -767,17 +767,17 @@ steadily improves which configurations land in those batches – so the recovere
 <span class="gp">&gt;&gt;&gt; </span><span class="n">occupancies</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">orbital_occupancies</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span><span class="p">,</span> <span class="n">axs</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">_</span> <span class="o">=</span> <span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">min_energies</span><span class="p">)),</span> <span class="n">min_energies</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;o&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;SQD energy&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">_</span> <span class="o">=</span> <span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="n">reference_energy</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;gray&quot;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;exact energy&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">_</span> <span class="o">=</span> <span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;iteration&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">_</span> <span class="o">=</span> <span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;energy&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">_</span> <span class="o">=</span> <span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Energy vs SQD iteration&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">_</span> <span class="o">=</span> <span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">min_energies</span><span class="p">)),</span> <span class="n">min_energies</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s2">"o"</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">"SQD energy"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">_</span> <span class="o">=</span> <span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="n">reference_energy</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"gray"</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">"--"</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">"exact energy"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">_</span> <span class="o">=</span> <span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">"iteration"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">_</span> <span class="o">=</span> <span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">"energy"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">_</span> <span class="o">=</span> <span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">"Energy vs SQD iteration"</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">_</span> <span class="o">=</span> <span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_major_locator</span><span class="p">(</span><span class="n">MaxNLocator</span><span class="p">(</span><span class="n">integer</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">_</span> <span class="o">=</span> <span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">_</span> <span class="o">=</span> <span class="n">axs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">norb</span><span class="p">),</span> <span class="n">occupancies</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">_</span> <span class="o">=</span> <span class="n">axs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;spatial orbital&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">_</span> <span class="o">=</span> <span class="n">axs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;average occupancy&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">_</span> <span class="o">=</span> <span class="n">axs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Occupancy per spatial orbital&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">_</span> <span class="o">=</span> <span class="n">axs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">"spatial orbital"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">_</span> <span class="o">=</span> <span class="n">axs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">"average occupancy"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">_</span> <span class="o">=</span> <span class="n">axs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">"Occupancy per spatial orbital"</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span>
 <span class="go">&lt;Figure size ... with 2 Axes&gt;</span>
 </pre></div>
@@ -840,7 +840,7 @@ momentum-basis sparsity established in step 2 sample-efficient in the first plac
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on 2026/08/14</div>
+              Last updated on 2026/08/20</div>
           </div>
           <div class="right-details">
             
@@ -881,7 +881,7 @@ momentum-basis sparsity established in step 2 sample-efficient in the first plac
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=b3d18e58"></script>
+</div><script src="../_static/documentation_options.js?v=e33f9f55"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Build an LUCJ ansatz - Qiskit Fermions 0.1.0+72f222a</title>
+        <title>Build an LUCJ ansatz - Qiskit Fermions 0.1.0+c6f2913</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.1.0+72f222a</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.1.0+c6f2913</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.1.0+72f222a</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.1.0+c6f2913</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -303,9 +303,9 @@ molecule in the <code class="docutils literal notranslate"><span class="pre">6-3
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># build the molecule and run Hartree-Fock</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">mol</span> <span class="o">=</span> <span class="n">pyscf</span><span class="o">.</span><span class="n">gto</span><span class="o">.</span><span class="n">Mole</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">mol</span><span class="o">.</span><span class="n">build</span><span class="p">(</span>
-<span class="gp">... </span>    <span class="n">atom</span><span class="o">=</span><span class="p">[[</span><span class="s2">&quot;H&quot;</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)],</span> <span class="p">[</span><span class="s2">&quot;H&quot;</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.74</span><span class="p">)]],</span>
-<span class="gp">... </span>    <span class="n">basis</span><span class="o">=</span><span class="s2">&quot;6-31g&quot;</span><span class="p">,</span>
-<span class="gp">... </span>    <span class="n">symmetry</span><span class="o">=</span><span class="s2">&quot;Dooh&quot;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">atom</span><span class="o">=</span><span class="p">[[</span><span class="s2">"H"</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)],</span> <span class="p">[</span><span class="s2">"H"</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.74</span><span class="p">)]],</span>
+<span class="gp">... </span>    <span class="n">basis</span><span class="o">=</span><span class="s2">"6-31g"</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">symmetry</span><span class="o">=</span><span class="s2">"Dooh"</span><span class="p">,</span>
 <span class="gp">... </span>    <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
 <span class="gp">... </span><span class="p">)</span>
 <span class="go">&lt;pyscf.gto.mole.Mole object at ...&gt;</span>
@@ -381,7 +381,7 @@ an <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.
 <span class="math">\(\mathcal{U}_k\)</span>, with a final <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.OrbitalRotation.html#qiskit_fermions.circuit.library.OrbitalRotation" title="qiskit_fermions.circuit.library.OrbitalRotation"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrbitalRotation</span></code></a> at the end. The orbital rotations act
 per spin sector, so each is placed on the alpha modes <code class="docutils literal notranslate"><span class="pre">0..norb</span></code> and the beta modes
 <code class="docutils literal notranslate"><span class="pre">norb..2*norb</span></code> independently.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">circuit</span><span class="o">.</span><span class="n">decompose</span><span class="p">()</span><span class="o">.</span><span class="n">draw</span><span class="p">(</span><span class="s2">&quot;mpl&quot;</span><span class="p">,</span> <span class="n">fold</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">circuit</span><span class="o">.</span><span class="n">decompose</span><span class="p">()</span><span class="o">.</span><span class="n">draw</span><span class="p">(</span><span class="s2">"mpl"</span><span class="p">,</span> <span class="n">fold</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
 <span class="go">&lt;Figure size ... with 1 Axes&gt;</span>
 </pre></div>
 </div>
@@ -414,16 +414,16 @@ molecular Hamiltonian.</p>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">linop</span> <span class="o">=</span> <span class="n">ffsim</span><span class="o">.</span><span class="n">linear_operator</span><span class="p">(</span><span class="n">hamiltonian</span><span class="p">,</span> <span class="n">norb</span><span class="o">=</span><span class="n">norb</span><span class="p">,</span> <span class="n">nelec</span><span class="o">=</span><span class="n">nelec</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">energy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vdot</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">linop</span> <span class="o">@</span> <span class="n">state</span><span class="p">)</span><span class="o">.</span><span class="n">real</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;LUCJ energy: </span><span class="si">{</span><span class="n">energy</span><span class="si">:</span><span class="s2">.8f</span><span class="si">}</span><span class="s2"> Hartree&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"LUCJ energy: </span><span class="si">{</span><span class="n">energy</span><span class="si">:</span><span class="s2">.8f</span><span class="si">}</span><span class="s2"> Hartree"</span><span class="p">)</span>
 <span class="go">LUCJ energy: -1.14618323 Hartree</span>
 </pre></div>
 </div>
 <p>The LUCJ energy improves substantially on the Hartree-Fock reference and approaches the CCSD
 energy it was initialized from – the small remaining gap is the price of truncating the ansatz to
 two repetitions:</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Hartree-Fock: </span><span class="si">{</span><span class="n">scf</span><span class="o">.</span><span class="n">e_tot</span><span class="si">:</span><span class="s2">.8f</span><span class="si">}</span><span class="s2"> Hartree&quot;</span><span class="p">)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Hartree-Fock: </span><span class="si">{</span><span class="n">scf</span><span class="o">.</span><span class="n">e_tot</span><span class="si">:</span><span class="s2">.8f</span><span class="si">}</span><span class="s2"> Hartree"</span><span class="p">)</span>
 <span class="go">Hartree-Fock: -1.12675532 Hartree</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;CCSD:         </span><span class="si">{</span><span class="n">ccsd</span><span class="o">.</span><span class="n">e_tot</span><span class="si">:</span><span class="s2">.8f</span><span class="si">}</span><span class="s2"> Hartree&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"CCSD:         </span><span class="si">{</span><span class="n">ccsd</span><span class="o">.</span><span class="n">e_tot</span><span class="si">:</span><span class="s2">.8f</span><span class="si">}</span><span class="s2"> Hartree"</span><span class="p">)</span>
 <span class="go">CCSD:         -1.15167268 Hartree</span>
 </pre></div>
 </div>
@@ -446,7 +446,7 @@ shallower ansatz at a target accuracy, and has no equivalent in this package.</p
 <span class="gp">... </span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">compressed_ansatz</span> <span class="o">=</span> <span class="n">UCJ</span><span class="p">(</span>
-<span class="gp">... </span>    <span class="s2">&quot;balanced&quot;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="s2">"balanced"</span><span class="p">,</span>
 <span class="gp">... </span>    <span class="n">compressed</span><span class="o">.</span><span class="n">diag_coulomb_mats</span><span class="p">,</span>
 <span class="gp">... </span>    <span class="n">compressed</span><span class="o">.</span><span class="n">orbital_rotations</span><span class="p">,</span>
 <span class="gp">... </span>    <span class="n">final_orbital_rotation</span><span class="o">=</span><span class="n">compressed</span><span class="o">.</span><span class="n">final_orbital_rotation</span><span class="p">,</span>
@@ -464,7 +464,7 @@ shallower ansatz at a target accuracy, and has no equivalent in this package.</p
 way recovers the same correlation energy at this (small) system size:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">state</span> <span class="o">=</span> <span class="n">ffsim</span><span class="o">.</span><span class="n">apply_unitary</span><span class="p">(</span><span class="n">reference</span><span class="p">,</span> <span class="n">compressed_circuit</span><span class="p">,</span> <span class="n">norb</span><span class="o">=</span><span class="n">norb</span><span class="p">,</span> <span class="n">nelec</span><span class="o">=</span><span class="n">nelec</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">energy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vdot</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">linop</span> <span class="o">@</span> <span class="n">state</span><span class="p">)</span><span class="o">.</span><span class="n">real</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;compressed LUCJ energy: </span><span class="si">{</span><span class="n">energy</span><span class="si">:</span><span class="s2">.8f</span><span class="si">}</span><span class="s2"> Hartree&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"compressed LUCJ energy: </span><span class="si">{</span><span class="n">energy</span><span class="si">:</span><span class="s2">.8f</span><span class="si">}</span><span class="s2"> Hartree"</span><span class="p">)</span>
 <span class="go">compressed LUCJ energy: -1.14618323 Hartree</span>
 </pre></div>
 </div>
@@ -490,13 +490,13 @@ pipeline’s optimization stage can act on them – so we pass <code class="docu
 <span class="gp">&gt;&gt;&gt; </span><span class="n">pm</span> <span class="o">=</span> <span class="n">generate_preset_jw_pass_manager</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">transpiled</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">circuit</span><span class="o">.</span><span class="n">decompose</span><span class="p">())</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">transpiled</span><span class="o">.</span><span class="n">count_ops</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">())))</span>
-<span class="go">{&#39;p&#39;: 16, &#39;rzz&#39;: 12, &#39;x&#39;: 2, &#39;xx_plus_yy&#39;: 28}</span>
+<span class="go">{'p': 16, 'rzz': 12, 'x': 2, 'xx_plus_yy': 28}</span>
 </pre></div>
 </div>
 <p>Without a target device this maps onto <code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">*</span> <span class="pre">norb</span></code> qubits with all-to-all connectivity assumed; the
 orbital rotations synthesize into <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.library.XXPlusYYGate" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">XXPlusYYGate</span></code></a>s and the diagonal
 Coulomb evolutions into <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.library.RZZGate" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">RZZGate</span></code></a>s:</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">transpiled</span><span class="o">.</span><span class="n">draw</span><span class="p">(</span><span class="s2">&quot;mpl&quot;</span><span class="p">,</span> <span class="n">fold</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">transpiled</span><span class="o">.</span><span class="n">draw</span><span class="p">(</span><span class="s2">"mpl"</span><span class="p">,</span> <span class="n">fold</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
 <span class="go">&lt;Figure size ... with 1 Axes&gt;</span>
 </pre></div>
 </div>
@@ -519,7 +519,7 @@ keeping our own fermion-to-qubit synthesis:</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">coupling_map</span> <span class="o">=</span> <span class="n">CouplingMap</span><span class="o">.</span><span class="n">from_heavy_hex</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">backend</span> <span class="o">=</span> <span class="n">GenericBackendV2</span><span class="p">(</span>
 <span class="gp">... </span>    <span class="n">num_qubits</span><span class="o">=</span><span class="n">coupling_map</span><span class="o">.</span><span class="n">size</span><span class="p">(),</span>
-<span class="gp">... </span>    <span class="n">basis_gates</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;cp&quot;</span><span class="p">,</span> <span class="s2">&quot;xx_plus_yy&quot;</span><span class="p">,</span> <span class="s2">&quot;p&quot;</span><span class="p">,</span> <span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;swap&quot;</span><span class="p">],</span>
+<span class="gp">... </span>    <span class="n">basis_gates</span><span class="o">=</span><span class="p">[</span><span class="s2">"cp"</span><span class="p">,</span> <span class="s2">"xx_plus_yy"</span><span class="p">,</span> <span class="s2">"p"</span><span class="p">,</span> <span class="s2">"x"</span><span class="p">,</span> <span class="s2">"swap"</span><span class="p">],</span>
 <span class="gp">... </span>    <span class="n">coupling_map</span><span class="o">=</span><span class="n">coupling_map</span><span class="p">,</span>
 <span class="gp">... </span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt;</span>
@@ -528,7 +528,7 @@ keeping our own fermion-to-qubit synthesis:</p>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">pm</span> <span class="o">=</span> <span class="n">generate_preset_jw_pass_manager</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">pm</span><span class="o">.</span><span class="n">qubit</span><span class="p">,</span> <span class="n">allowed_pairs_ab</span> <span class="o">=</span> <span class="n">generate_lucj_pass_manager</span><span class="p">(</span>
-<span class="gp">... </span>    <span class="n">backend</span><span class="p">,</span> <span class="n">norb</span><span class="p">,</span> <span class="s2">&quot;heavy-hex&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">pairs_aa</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="n">optimization_level</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">seed_transpiler</span><span class="o">=</span><span class="mi">0</span>
+<span class="gp">... </span>    <span class="n">backend</span><span class="p">,</span> <span class="n">norb</span><span class="p">,</span> <span class="s2">"heavy-hex"</span><span class="p">,</span> <span class="p">(</span><span class="n">pairs_aa</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="n">optimization_level</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">seed_transpiler</span><span class="o">=</span><span class="mi">0</span>
 <span class="gp">... </span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># the alpha-beta interactions the heavy-hex connectivity can implement</span>
@@ -543,7 +543,7 @@ directly – the router must insert many <code class="docutils literal notransla
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">naive</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">circuit</span><span class="o">.</span><span class="n">decompose</span><span class="p">())</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">naive</span><span class="o">.</span><span class="n">num_qubits</span>  <span class="c1"># laid out on the full heavy-hex device register</span>
 <span class="go">57</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">naive_swaps</span> <span class="o">=</span> <span class="n">naive</span><span class="o">.</span><span class="n">count_ops</span><span class="p">()[</span><span class="s2">&quot;swap&quot;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">naive_swaps</span> <span class="o">=</span> <span class="n">naive</span><span class="o">.</span><span class="n">count_ops</span><span class="p">()[</span><span class="s2">"swap"</span><span class="p">]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">naive_swaps</span>  <span class="c1"># many SWAPs to bridge the unreachable alpha-beta interactions</span>
 <span class="go">33</span>
 </pre></div>
@@ -562,7 +562,7 @@ directly. The ansatz then matches the device topology and the router barely has 
 <span class="gp">&gt;&gt;&gt; </span><span class="n">circuit</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">restricted</span><span class="p">,</span> <span class="n">circuit</span><span class="o">.</span><span class="n">modes</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">transpiled</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">circuit</span><span class="o">.</span><span class="n">decompose</span><span class="p">())</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">restricted_swaps</span> <span class="o">=</span> <span class="n">transpiled</span><span class="o">.</span><span class="n">count_ops</span><span class="p">()[</span><span class="s2">&quot;swap&quot;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">restricted_swaps</span> <span class="o">=</span> <span class="n">transpiled</span><span class="o">.</span><span class="n">count_ops</span><span class="p">()[</span><span class="s2">"swap"</span><span class="p">]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">restricted_swaps</span>  <span class="c1"># far fewer routing SWAPs than the unrestricted ansatz</span>
 <span class="go">4</span>
 </pre></div>
@@ -574,7 +574,7 @@ circuit’s final layout – <a class="reference external" href="https://quantum
 physical qubit each input qubit ended up on, in input-qubit order – to draw the wires back in the
 original mode order:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">wire_order</span> <span class="o">=</span> <span class="n">transpiled</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">final_index_layout</span><span class="p">(</span><span class="n">filter_ancillas</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">transpiled</span><span class="o">.</span><span class="n">draw</span><span class="p">(</span><span class="s2">&quot;mpl&quot;</span><span class="p">,</span> <span class="n">idle_wires</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">fold</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">wire_order</span><span class="o">=</span><span class="n">wire_order</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">transpiled</span><span class="o">.</span><span class="n">draw</span><span class="p">(</span><span class="s2">"mpl"</span><span class="p">,</span> <span class="n">idle_wires</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">fold</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">wire_order</span><span class="o">=</span><span class="n">wire_order</span><span class="p">)</span>
 <span class="go">&lt;Figure size ... with 1 Axes&gt;</span>
 </pre></div>
 </div>
@@ -643,7 +643,7 @@ to evaluate its energy without ffsim installed.</p></li>
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on 2026/08/14</div>
+              Last updated on 2026/08/20</div>
           </div>
           <div class="right-details">
             
@@ -683,7 +683,7 @@ to evaluate its energy without ffsim installed.</p></li>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=b3d18e58"></script>
+</div><script src="../_static/documentation_options.js?v=e33f9f55"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
