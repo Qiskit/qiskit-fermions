@@ -1,7 +1,7 @@
 .. _ffsim_backend_explanation:
 
 The ffsim simulation backend
-=============================
+============================
 
 .. important::
 
@@ -18,7 +18,7 @@ building its own simulation API, and it does so in a way that keeps a native (sc
 simulation path available for users who cannot or do not want to install ffsim.
 
 Why couple with ffsim
-----------------------
+---------------------
 
 `ffsim`_ is a high-performance simulator for fermionic quantum circuits that exploits
 particle-number and spin-Z conservation to represent state vectors far more compactly than a
@@ -75,7 +75,7 @@ already working with ffsim mix in this package's gates and operators without lea
 simulation API.
 
 A native path when ffsim is unavailable
------------------------------------------
+---------------------------------------
 
 Coupling with ffsim's protocols does not make ffsim a hard dependency. `ffsim`_ transitively
 depends on `PySCF <https://pyscf.org/>`_, which does not support Windows, so ffsim is declared as
@@ -125,7 +125,7 @@ This is also why the two getting-started guides that use ffsim directly (:ref:`L
 code with :data:`~qiskit_fermions.utils.optionals.HAS_FFSIM` the same way this guide does.
 
 Fermionic simulation lives in a fixed particle-number sector
----------------------------------------------------------------
+------------------------------------------------------------
 
 Both ``_apply_unitary_`` and ``_linear_operator_`` take an ``nelec`` argument and represent the state
 vector over the *fixed-particle-number determinant basis* for that ``(norb, nelec)`` sector,
@@ -189,7 +189,7 @@ restriction. Any transpilation route works for this; the
 choice to reach for.
 
 The block-spin convention for spinful systems
-------------------------------------------------
+---------------------------------------------
 
 ``nelec`` is typed ``int | tuple[int, int]``, and its type, not a separate flag, is what selects
 between the two supported mode layouts:
