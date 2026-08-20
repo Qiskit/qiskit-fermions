@@ -1,7 +1,7 @@
 .. _vqe_outer_loop_how_to:
 
-Running the outer VQE parameter optimization loop
-==================================================
+Run the outer VQE parameter optimization loop
+=============================================
 
 .. important::
 
