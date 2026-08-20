@@ -6,7 +6,7 @@ Generate Krylov time-evolution circuits (SKQD)
 .. important::
 
    The concepts in this guide are currently available only in the Python API.
-   Equivalent functionality will be made available through the C API in a future
+   Equivalent functionality will be made available in the C API in a future
    release.
 
 Sample-based Krylov Quantum Diagonalization (`SKQD`_) is a quantum-centric variant of subspace

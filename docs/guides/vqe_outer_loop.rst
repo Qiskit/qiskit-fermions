@@ -6,7 +6,7 @@ Run the outer VQE parameter optimization loop
 .. important::
 
    The concepts in this guide are currently available only in the Python API.
-   Equivalent functionality will be made available through the C API in a future
+   Equivalent functionality will be made available in the C API in a future
    release.
 
 The variational quantum eigensolver (VQE) minimizes the expectation value of a Hamiltonian over a

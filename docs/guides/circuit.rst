@@ -6,7 +6,7 @@ Work with fermionic circuits
 .. important::
 
    The concepts in this guide are currently available only in the Python API.
-   Equivalent functionality will be made available through the C API in a future
+   Equivalent functionality will be made available in the C API in a future
    release.
 
 This guide explains how to use the :class:`.FermionicCircuit` to implement

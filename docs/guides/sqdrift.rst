@@ -82,8 +82,8 @@ detail in :ref:`this guide <grouping_explanation>`.
 .. hint::
 
    The full electronic structure Hamiltonian contains certain terms whose
-   inclusion in a time-evolution circuit will have no impact on the perceived
-   bitstrings and, thus, only result in an increased sampling overhead.
+   inclusion in a time-evolution circuit has no impact on the perceived
+   bitstrings and, thus, only results in an increased sampling overhead.
    Therefore, it is recommended that such terms be filtered from the
    Hamiltonian at this point, before constructing the :class:`.Evolution` gate
    in the next step.
@@ -166,7 +166,7 @@ Crucially, add the :class:`.QDriftTrotterization` transpilation pass to the
 circuit does not use the time evolution of the entire Hamiltonian, whose depth
 would exceed the capabilities of currently available quantum computing hardware.
 
-Instead, it will subsample a fixed number of ``groups`` of Hamiltonian terms for
+Instead, it subsamples a fixed number of ``groups`` of Hamiltonian terms for
 each circuit, every time the circuit is transpiled. Through this, you can generate
 multiple circuit randomizations as required by the `SqDRIFT`_ algorithm by
 repeatedly running the transpilation pipeline.

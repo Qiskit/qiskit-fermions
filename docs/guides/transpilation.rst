@@ -6,7 +6,7 @@ Transpile fermionic circuits
 .. important::
 
    The concepts in this guide are currently available only in the Python API.
-   Equivalent functionality will be made available via the C API in a future release.
+   Equivalent functionality will be made available in the C API in a future release.
 
 This guide explains how to transpile a :class:`.FermionicCircuit` to a standard
 :class:`~qiskit.circuit.QuantumCircuit`. It continues with the same time evolution

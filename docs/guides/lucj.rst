@@ -6,7 +6,7 @@ Build an LUCJ ansatz
 .. important::
 
    The concepts in this guide are currently available only in the Python API.
-   Equivalent functionality will be made available through the C API in a future
+   Equivalent functionality will be made available in the C API in a future
    release.
 
 The local unitary cluster Jastrow (`LUCJ`_) ansatz is a compact, hardware-efficient
