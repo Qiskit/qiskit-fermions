@@ -109,19 +109,6 @@ longer a single path. Reading the horizontal arrows left-to-right gives one such
 vertical arrows top-to-bottom another, and reversing each gives two more: the east, west,
 north and south flow sets that organize everything below.
 
-.. plot::
-   :context:
-   :nofigs:
-
-   Release the figure above now that the plot directive has captured it. Sybil shares
-   pyplot's state across all guides, so a figure left open here gets drawn into by the
-   next guide that calls ``mpl_draw`` without an explicit ``ax=``. The directive's
-   ``close-figs`` option does not cover that, since Sybil only executes the doctests.
-   ``close("all")`` rather than ``close(figure)``, because the directive re-runs the block
-   once per output format and only the last of those figures is bound to ``figure``.
-
-   >>> plt.close("all")
-
 The Verstraete-Cirac encoding
 -----------------------------
 
@@ -640,14 +627,6 @@ and its second ``CX`` layer alternates between coupling sites and coupling ancil
    >>> square.draw("mpl")
    <Figure size ... with 1 Axes>
 
-.. plot::
-   :context:
-   :nofigs:
-
-   Release the figures, as after the lattice drawing near the top.
-
-   >>> plt.close("all")
-
 Both are two ``CX`` layers deep, and adding sites to the line widens them without deepening
 them; that is the whole constant-depth claim, visible by inspection. The west and north
 Cliffords differ only in their single-qubit layers, so they are not drawn separately.
@@ -939,14 +918,6 @@ edge makes the difference plain:
    >>> figure
    <Figure size ... with 2 Axes>
 
-.. plot::
-   :context:
-   :nofigs:
-
-   Release the figure above now that the plot directive has captured it, as in the lattice
-   drawing near the top.
-
-   >>> plt.close("all")
 
 The two-qubit depth is 24 and constant from :math:`3 \times 3` to :math:`8 \times 8`
 (that is 18 qubits up to 128) while :class:`~qiskit.synthesis.LieTrotter` applied to
