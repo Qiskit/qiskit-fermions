@@ -72,7 +72,7 @@ molecule in the ``6-31g`` basis, using `PySCF <https://pyscf.org/>`_ for the qua
    >>> t1, t2 = ccsd.t1, ccsd.t2
 
 2. Build the molecular Hamiltonian as a fermionic operator
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The Hamiltonian is needed later to evaluate the ansatz energy. Build it directly as a
 :class:`.FermionOperator` from the molecular-orbital integrals: the one-body integrals ``h1e``
@@ -159,7 +159,7 @@ per spin sector, so each is placed on the alpha modes ``0..norb`` and the beta m
    development.
 
 4. Simulate the ansatz and evaluate its energy
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Because every gate in the circuit implements ffsim's :class:`ffsim.SupportsApplyUnitary` protocol,
 the whole :class:`.FermionicCircuit` can be applied to a fixed particle-number state vector with
@@ -202,7 +202,7 @@ two repetitions:
 .. skip: end
 
 5. (Optional) Use ffsim's compressed double factorization
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The :class:`.UCJ` gate above is initialized from an *exact* double factorization of the :math:`t_2`
 amplitudes: the number of ansatz repetitions :math:`L` is whatever that factorization yields (up to
@@ -264,7 +264,7 @@ way recovers the same correlation energy at this (small) system size:
 .. skip: end
 
 6. Transpile the ansatz to a qubit circuit
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 To run the ansatz on hardware it must be lowered from fermionic modes to qubits.
 The :func:`~qiskit_fermions.transpiler.presets.generate_preset_jw_pass_manager` preset builds a

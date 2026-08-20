@@ -124,7 +124,7 @@ stack.
 Notice how the operator term grouping is preserved even in simple operations
 like decomposition. This demonstrates how structural information flows through the circuit
 stack. To understand the full transpilation to
-qubits, refer to the `Transpiling fermionic circuits <transpilation>`__  guide.
+qubits, refer to the :ref:`Transpiling fermionic circuits <transpilation_explanation>` guide.
 
 Transpile fermionic circuits
 ----------------------------

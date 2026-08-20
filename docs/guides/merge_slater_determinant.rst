@@ -78,7 +78,7 @@ sector. Slater determinant preparation is done per spin sector because each sect
 (electrons, orbitals) shape.
 
 Full-register (or spinless)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The simplest pattern: an :class:`.InitializeModes` immediately followed by an
 :class:`.OrbitalRotation` on the *same* modes. This is the spinless case (one determinant over all
@@ -116,7 +116,7 @@ per sector, each fuse on their own into a :class:`.PrepareSlaterDeterminant`:
    <Figure size ... with 2 Axes>
 
 Global initialization, per-spin rotations
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 A single full-register (``2 * norb``) :class:`.InitializeModes` followed by *two*
 :class:`.OrbitalRotation`\ s, one on each contiguous spin half. The pass splits the global
@@ -171,7 +171,7 @@ only when the :class:`.InitializeModes` is its *sole* predecessor across all of 
 figures below the before and after are identical: nothing fused.
 
 An operation in between
-~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
 
 If any gate touches the modes between the initialization and the rotation, they no longer compose
 into a bare preparation, so nothing is merged:
@@ -193,7 +193,7 @@ into a bare preparation, so nothing is merged:
    <Figure size ... with 2 Axes>
 
 A partial rotation that is not a spin half
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 A rotation covering exactly one contiguous spin half of a full-register initialization *does* fuse
 (see the previous section). But a rotation on any *other* partial mode set (fewer modes than the
@@ -213,7 +213,7 @@ role on the modes it leaves out, so the pass leaves both gates in place:
    <Figure size ... with 2 Axes>
 
 Why it matters: the synthesis payoff
--------------------------------------
+------------------------------------
 
 The merge is worthwhile because :class:`.PrepareSlaterDeterminant` synthesizes to far fewer gates
 than the :class:`.OrbitalRotation` it absorbs. An :math:`m`-electron determinant over :math:`n`

@@ -42,7 +42,7 @@ following the `SKQD`_ publication.
 .. skip: start if(not HAS_FFSIM)
 
 1. Build the SIAM Hamiltonian as a fermionic operator
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The single-impurity Anderson model places one interacting impurity orbital (index :math:`0`) in
 contact with a non-interacting bath of :math:`L` sites arranged as a chain. Its Hamiltonian splits
@@ -266,7 +266,7 @@ thousands of determinants while the momentum basis concentrates it onto a couple
 the whole reason SKQD sampling works in the momentum basis and not the position basis.
 
 3. Prepare the reference state
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The SKQD reference :math:`\lvert \psi_0 \rangle` is the superposition of all excitations of the
 electrons closest to the Fermi level into the nearest empty momentum modes. The `SKQD`_ publication
@@ -399,7 +399,7 @@ state only) up to :math:`D - 1`.
    `future <https://github.com/Qiskit/qiskit-fermions/issues/219>`_.
 
 5. Transpile to qubit circuits
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Transpiling a :class:`.FermionicCircuit` maps its fermionic gates to qubit gates. This uses the
 Jordan-Wigner :func:`.jordan_wigner` mapping. The :class:`.OrbitalRotation` gates synthesize into a
@@ -479,7 +479,7 @@ steps (four in this case):
    <Figure size ... with 1 Axes>
 
 6. Sample bitstrings from the Krylov circuits
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 On hardware, you would run the transpiled circuits and measure. This is the noiseless (statevector)
 version of that step, showing the bitstrings SKQD would collect. Simulate each untranspiled
@@ -533,7 +533,7 @@ handful of configurations dominate, led by the reference determinant.
 .. skip: end
 
 7. Diagonalize in the sampled subspace
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The sampled bitstrings are the input to the classical half of SKQD: the Hamiltonian is projected onto
 the subspace the sampled configurations span and diagonalized there. This is handed off to the
