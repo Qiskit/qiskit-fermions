@@ -26,7 +26,7 @@ but to get started quickly, follow these steps:
     make c
 
 .. hint::
-   On **Windows** only, you will need to copy additional library files:
+   On **Windows** only, you need to copy additional library files:
 
    .. tab-set::
      .. tab-item:: Windows
@@ -38,8 +38,7 @@ but to get started quickly, follow these steps:
             cp target/release/qiskit_cext.dll.lib dist/c/lib/qiskit_cext.dll.lib
             cp target/release/qiskit_cext.dll.lib dist/c/lib/qiskit.dll.lib
 
-You can now move on to the steps of compiling ``qiskit-fermions`` C API that
-follow.
+Now you can follow the steps in the next section to compile the ``qiskit-fermions`` C API.
 
 Compile from source
 ^^^^^^^^^^^^^^^^^^^
