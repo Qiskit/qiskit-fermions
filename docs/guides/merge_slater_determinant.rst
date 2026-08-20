@@ -25,8 +25,8 @@ reduced decomposition automatically. Under simulation the rewrite is a no-op on 
 and then applies the rotation, just as the two separate gates do), so the merge only unlocks the
 cheaper synthesis without changing the prepared state.
 
-Throughout this guide we draw a circuit before and after the pass, side by side: the input on the
-left, and on the right the result of running the pass on it. Two helpers do that: ``merge``
+Throughout this guide, each circuit is drawn before and after the pass, side by side: the input
+on the left, and on the right the result of running the pass on it. Two helpers do that: ``merge``
 runs the pass on a copy of the circuit (via its :class:`.FermionicDAGCircuit`) and converts the
 result back to a drawable :class:`.FermionicCircuit`, and ``draw_merge`` draws both halves into a
 single before/after figure:
@@ -221,7 +221,7 @@ orbitals needs at most :math:`m(n-m)` two-qubit rotations and no diagonal phase 
 :math:`n(n-1)/2` rotations plus :math:`n` phases of the full square orbital rotation.
 
 The preset Jordan-Wigner pass manager runs :class:`.MergeSlaterDeterminantPreparation` in its
-optimization stage, so this reduction happens automatically. We transpile a two-electron,
+optimization stage, so this reduction happens automatically. Transpile a two-electron,
 six-orbital preparation all the way to a :class:`~qiskit.circuit.QuantumCircuit` and count its gates:
 
 .. note::

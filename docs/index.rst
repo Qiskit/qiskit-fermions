@@ -98,11 +98,11 @@ License
 Deprecation policy
 ------------------
 
-We follow `semantic versioning <https://semver.org/>`_. We might occasionally make
-breaking changes in order to improve the user experience. When possible, we will
-keep old interfaces and mark them as deprecated, as long as they can co-exist
+This package follows `semantic versioning <https://semver.org/>`_. Breaking changes
+are made only occasionally, to improve the user experience. When possible, old
+interfaces are kept and marked as deprecated for as long as they can co-exist
 with the new ones. Each substantial improvement, breaking change, or deprecation
-will be documented in the `release notes
+is documented in the `release notes
 <https://quantum.cloud.ibm.com/docs/api/qiskit-fermions/release-notes>`_.
 
 References

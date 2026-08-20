@@ -9,7 +9,7 @@ Transpile fermionic circuits
    Equivalent functionality will be made available via the C API in a future release.
 
 This guide explains how to transpile a :class:`.FermionicCircuit` to a standard
-:class:`~qiskit.circuit.QuantumCircuit`. We continue with the same time evolution
+:class:`~qiskit.circuit.QuantumCircuit`. It continues with the same time evolution
 example from the :ref:`fermionic circuits guide <fermionic_circuit_explanation>`.
 
 Transpilation stages

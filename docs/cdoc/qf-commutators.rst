@@ -4,8 +4,8 @@ Commutator Generators
 
 The :ref:`operator representations <qf_operators>` provide efficient functions
 for the computation of various commutators. Since these functions work with
-generic operator representations (a notion that does not exist in C) we explain
-them generically in the following three sections.
+generic operator representations (a notion that does not exist in C), they are
+explained generically in the following three sections.
 The actual functions contained in the C API for the various operator
 representations are listed at the bottom of this page.
 

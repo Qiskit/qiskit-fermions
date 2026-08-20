@@ -40,12 +40,12 @@ ansatz gate, using :class:`.UCJ` as a concrete example.
 1. Construct the ansatz
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-As a concrete example, we use the :class:`.UCJ` ansatz for a hydrogen molecule in the ``6-31g``
-basis, following the :ref:`LUCJ guide <lucj_getting_started>`, which covers the classical
+As a concrete example, this guide uses the :class:`.UCJ` ansatz for a hydrogen molecule in the
+``6-31g`` basis, following the :ref:`LUCJ guide <lucj_getting_started>`, which covers the classical
 calculation, the Hamiltonian construction, and the ansatz gate itself in more detail; this guide
-focuses on the optimization loop around it instead. We reuse the molecule's coupled-cluster
-singles and doubles (CCSD) :math:`t_1`/
-:math:`t_2` amplitudes as the initial point for the optimization, rather than for a fixed ansatz.
+focuses on the optimization loop around it instead. The molecule's coupled-cluster singles and
+doubles (CCSD) :math:`t_1`/:math:`t_2` amplitudes serve as the initial point for the optimization,
+rather than as a fixed ansatz.
 
 .. plot::
    :context:
@@ -110,7 +110,7 @@ Coulomb matrix written directly by its upper triangle and diagonal, then symmetr
    three-method interface can be dropped in here unchanged; :ref:`step 6 <vqe_outer_loop_ucc>` does
    that with :class:`.UCC`.
 
-We fix a single repetition (``n_reps=1``) here to keep the optimization fast for this guide, and
+Fix a single repetition (``n_reps=1``) here to keep the optimization fast for this guide, and
 keep the final orbital rotation from the :math:`t_1` amplitudes out of ``theta`` (see step 3);
 :meth:`.UCJ.num_parameters` reports how many parameters this leaves.
 
@@ -186,7 +186,7 @@ Starting the optimizer from :math:`\boldsymbol{\theta} = \mathbf{0}` (the identi
 zero diagonal Coulomb matrix, that is, the Hartree-Fock reference itself) lands on a nearby local
 minimum barely below Hartree-Fock. With only one repetition, the ansatz is not expressive enough
 near that point for a gradient-based search to escape it unassisted. A classically computed
-starting point is a much better choice, so we reuse the CCSD-initialized ansatz from step 1: calling
+starting point is a much better choice, so reuse the CCSD-initialized ansatz from step 1: calling
 :meth:`~.UCJ.to_parameters` on it (with its final rotation cleared, since ``theta`` excludes it)
 gives ``theta0``, which is then handed to :func:`scipy.optimize.minimize` together with ``energy``.
 Any ``scipy`` gradient-free or finite-difference method works here since ``energy`` returns a plain
@@ -212,9 +212,9 @@ float; no gradient of the fermionic ansatz is implemented.
    Because ``energy`` relies on multi-threaded linear algebra (inside :func:`ffsim.apply_unitary`
    and :func:`ffsim.linear_operator`), and ``minimize`` here uses numeric finite-difference
    gradients, the optimization trajectory (in particular the number of iterations needed)
-   can vary slightly between runs, machines, and BLAS backends. We give the optimizer a generous
-   iteration budget and check convergence with a tolerance rather than pinning down an exact
-   iteration count.
+   can vary slightly between runs, machines, and BLAS backends. The optimizer therefore gets a
+   generous iteration budget, and convergence is checked with a tolerance rather than by pinning
+   down an exact iteration count.
 
 .. plot::
    :context:
@@ -251,8 +251,8 @@ to the :class:`.UCJ` gate and ``params_to_vec`` built above, unchanged.
    By default, each step also runs an inner search over the ``regularization``/``variation``
    hyperparameters, which can itself become numerically sensitive once the ansatz is already very
    close to the optimum, occasionally causing a step to stall. Since a good fixed ``regularization``
-   and ``variation`` are already known to work well starting this close to the CCSD solution, we
-   disable that inner search here for a reliably reproducible trajectory.
+   and ``variation`` are already known to work well starting this close to the CCSD solution, that
+   inner search is disabled here for a reliably reproducible trajectory.
 
 .. plot::
    :context:
@@ -273,8 +273,8 @@ to the :class:`.UCJ` gate and ``params_to_vec`` built above, unchanged.
    >>> print(f"linear method: {lm_result.fun:.5f} Hartree")
    linear method: -1.15167 Hartree
 
-The iteration counts of both optimizers vary between runs and machines, so we don't print
-them here; but with the same warm start, the linear method consistently needs only a small
+The iteration counts of both optimizers vary between runs and machines, so they are not printed
+here; but with the same warm start, the linear method consistently needs only a small
 fraction of L-BFGS-B's iterations to reach the same energy, since it exploits the extra structure
 of ``params_to_vec`` that a generic finite-difference method cannot.
 
