@@ -18,7 +18,7 @@ parametrized family of states,
    \Psi(\boldsymbol{\theta}) \rangle,
 
 using a classical optimizer to drive :math:`\boldsymbol{\theta}` toward the minimum. This guide
-shows how to drive that classical optimization -- the VQE **outer loop** -- around a fermionic
+shows how to drive that classical optimization (the VQE outer loop) around a fermionic
 ansatz gate, using :class:`.UCJ` as a concrete example.
 
 .. note::
@@ -42,9 +42,10 @@ ansatz gate, using :class:`.UCJ` as a concrete example.
 
 As a concrete example, we use the :class:`.UCJ` ansatz for a hydrogen molecule in the ``6-31g``
 basis, following the :ref:`LUCJ guide <lucj_getting_started>`, which covers the classical
-calculation, the Hamiltonian construction, and the ansatz gate itself in more detail -- this guide
-focuses on the optimization loop around it instead. We reuse the molecule's CCSD :math:`t_1`/
-:math:`t_2` amplitudes as the *initial point* for the optimization, rather than for a fixed ansatz.
+calculation, the Hamiltonian construction, and the ansatz gate itself in more detail; this guide
+focuses on the optimization loop around it instead. We reuse the molecule's coupled-cluster
+singles and doubles (CCSD) :math:`t_1`/
+:math:`t_2` amplitudes as the initial point for the optimization, rather than for a fixed ansatz.
 
 .. plot::
    :context:
@@ -99,18 +100,18 @@ The molecular Hamiltonian is built the same way as in the LUCJ guide:
 The optimizer needs a flat real vector, but the ansatz tensors are constrained: each orbital
 rotation must be unitary, and each diagonal Coulomb matrix must be real symmetric.
 :meth:`.UCJ.to_parameters` and :meth:`.UCJ.from_parameters` handle this conversion natively,
-parametrizing the *unconstrained* generators and mapping them onto valid tensors -- an orbital
+parametrizing the *unconstrained* generators and mapping them onto valid tensors: an orbital
 rotation :math:`U = \exp(A)` for a complex anti-Hermitian generator :math:`A`, and a diagonal
 Coulomb matrix written directly by its upper triangle and diagonal, then symmetrized.
 
 .. tip::
    The rest of this guide only ever calls ``num_parameters``/``from_parameters``/``to_parameters``
-   on the ansatz -- never anything :class:`.UCJ`-specific. Any ansatz gate exposing that same
+   on the ansatz, never anything :class:`.UCJ`-specific. Any ansatz gate exposing that same
    three-method interface can be dropped in here unchanged; :ref:`step 6 <vqe_outer_loop_ucc>` does
-   exactly that with :class:`.UCC`.
+   that with :class:`.UCC`.
 
 We fix a single repetition (``n_reps=1``) here to keep the optimization fast for this guide, and
-keep the final orbital rotation from the :math:`t_1` amplitudes out of ``theta`` (see step 3) --
+keep the final orbital rotation from the :math:`t_1` amplitudes out of ``theta`` (see step 3);
 :meth:`.UCJ.num_parameters` reports how many parameters this leaves.
 
 .. plot::
@@ -129,14 +130,14 @@ keep the final orbital rotation from the :math:`t_1` amplitudes out of ``theta``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Given ``theta``, :meth:`.UCJ.from_parameters` builds the gate directly. Rather than returning an
-energy directly, ``params_to_vec`` stops one step earlier and returns the ansatz *state vector* --
+energy directly, ``params_to_vec`` stops one step earlier and returns the ansatz state vector:
 this is the interface both optimizers used below need, and the energy is trivially recovered from
 it via the Hamiltonian's :func:`ffsim.linear_operator`.
 
 The final orbital rotation is initialized from the :math:`t_1` amplitudes and held fixed throughout:
 since that rotation already captures the singles, the optimization can focus on the
 :math:`t_2`-derived repetition tensors, and ``theta`` stays :math:`\mathcal{O}(N^2)` parameters
-shorter. This is a choice, not a requirement -- freezing it does restrict the variational manifold,
+shorter. This is a choice, not a requirement: freezing it does restrict the variational manifold,
 so for systems with significant singles character you may well want it optimized too. Passing
 ``with_final_orbital_rotation=True`` to both :meth:`.UCJ.num_parameters` and
 :meth:`.UCJ.from_parameters` folds it into ``theta``, which then also makes the two explicit
@@ -178,13 +179,13 @@ so for systems with significant singles character you may well want it optimized
 Each call to ``params_to_vec`` builds an entirely new :class:`.UCJ` gate: there is no persistent
 circuit carrying bound parameters, only the mapping from ``theta`` to tensors to a gate to a state.
 
-4. Run the outer optimization loop with a generic optimizer
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+4. Run the outer loop with a generic optimizer
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Starting the optimizer from :math:`\boldsymbol{\theta} = \mathbf{0}` (the identity rotation and a
 zero diagonal Coulomb matrix, i.e. the Hartree-Fock reference itself) lands on a nearby local
-minimum barely below Hartree-Fock: with only one repetition, the ansatz is not expressive enough
-near that point for a gradient-based search to find its way out unassisted. A classically computed
+minimum barely below Hartree-Fock. With only one repetition, the ansatz is not expressive enough
+near that point for a gradient-based search to escape it unassisted. A classically computed
 starting point is a much better choice, so we reuse the CCSD-initialized ansatz from step 1: calling
 :meth:`~.UCJ.to_parameters` on it (with its final rotation cleared, since ``theta`` excludes it)
 gives ``theta0``, which is then handed to :func:`scipy.optimize.minimize` together with ``energy``.
@@ -210,7 +211,7 @@ float; no gradient of the fermionic ansatz is implemented.
 .. note::
    Because ``energy`` relies on multi-threaded linear algebra (inside :func:`ffsim.apply_unitary`
    and :func:`ffsim.linear_operator`), and ``minimize`` here uses numeric finite-difference
-   gradients, the exact optimization trajectory -- in particular the number of iterations needed --
+   gradients, the optimization trajectory (in particular the number of iterations needed)
    can vary slightly between runs, machines, and BLAS backends. We give the optimizer a generous
    iteration budget and check convergence with a tolerance rather than pinning down an exact
    iteration count.
@@ -229,21 +230,21 @@ float; no gradient of the fermionic ansatz is implemented.
    >>> bool(abs(result.fun - ccsd.e_tot) < 1e-4)
    True
 
-Even with a generous iteration budget, each ``energy`` evaluation only reveals a single scalar --
+Even with a generous iteration budget, each ``energy`` evaluation only reveals a single scalar,
 a wasteful use of the full state vector ``params_to_vec`` already computed internally.
 
-5. Run the outer optimization loop with ffsim's linear method
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+5. Run the outer loop with ffsim's linear method
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 `ffsim`_ ships :func:`ffsim.optimize.minimize_linear_method`, an optimizer purpose-built for
 wavefunction ansatzes: rather than a scalar ``energy``, it takes ``params_to_vec`` directly (the
-function returning the *state*, as built in step 3 above) together with the Hamiltonian
-:class:`~scipy.sparse.linalg.LinearOperator`, and uses the extra structure this exposes --
-gradients and an approximate Hessian of the state with respect to :math:`\boldsymbol{\theta}` --
+function returning the state, as built in step 3 above) together with the Hamiltonian
+:class:`~scipy.sparse.linalg.LinearOperator`, and uses the extra structure this exposes
+(gradients and an approximate Hessian of the state with respect to :math:`\boldsymbol{\theta}`)
 to take much better-informed steps than a generic finite-difference method can. See `ffsim's own
 how-to guide on simulating VQE
 <https://qiskit-community.github.io/ffsim/how-to-guides/simulate-vqe.html>`_ for the method's
-background and a walkthrough using ffsim's own ansatz classes; here, the same optimizer is applied
+background and a walkthrough using ffsim's own ansatz classes; the same optimizer is applied
 to the :class:`.UCJ` gate and ``params_to_vec`` built above, unchanged.
 
 .. note::
@@ -272,8 +273,8 @@ to the :class:`.UCJ` gate and ``params_to_vec`` built above, unchanged.
    >>> print(f"linear method: {lm_result.fun:.5f} Hartree")
    linear method: -1.15167 Hartree
 
-The exact iteration counts of both optimizers vary between runs and machines, so we don't print
-them here -- but with the same warm start, the linear method consistently needs only a small
+The iteration counts of both optimizers vary between runs and machines, so we don't print
+them here; but with the same warm start, the linear method consistently needs only a small
 fraction of L-BFGS-B's iterations to reach the same energy, since it exploits the extra structure
 of ``params_to_vec`` that a generic finite-difference method cannot.
 
@@ -285,13 +286,13 @@ of ``params_to_vec`` that a generic finite-difference method cannot.
 Nothing above is specific to :class:`.UCJ`. Because the loop only ever calls
 ``num_parameters``/``from_parameters``/``to_parameters``, another ansatz exposing that interface
 drops straight in. :class:`.UCC` implements the unitary coupled-cluster ansatz
-:math:`e^{T - T^\dagger}` and exposes exactly those three methods, so the only changes are the
-class name and its shape arguments -- :class:`.UCC` is sized by the occupied/virtual split
+:math:`e^{T - T^\dagger}` and exposes those three methods, so the only changes are the
+class name and its shape arguments: :class:`.UCC` is sized by the occupied/virtual split
 (``norb``, ``nocc``) rather than by a repetition count.
 
 .. note::
    The variant names differ between the two classes but describe the same spin choice here:
-   :class:`.UCJ`'s ``"balanced"`` and :class:`.UCC`'s ``"restricted"`` both mean *one* spatial
+   :class:`.UCJ`'s ``"balanced"`` and :class:`.UCC`'s ``"restricted"`` both mean one spatial
    parametrization shared by both spin sectors. Each class follows the naming of the ffsim operators
    it mirrors (:external:class:`~ffsim.UCJOpSpinBalanced` versus
    :external:class:`~ffsim.UCCSDOpRestrictedReal`). Likewise :class:`.UCJ`'s ``"unbalanced"`` and
@@ -319,10 +320,10 @@ class name and its shape arguments -- :class:`.UCC` is sized by the occupied/vir
 
 Note the absent ``final_orbital_rotation``: :class:`.UCC` carries none, because its :math:`t_1`
 amplitudes already *are* its single excitations. For :class:`.UCJ` that trailing rotation is where
-the singles live -- it only factorizes :math:`t_2` -- which is why steps 3 and 4 had to hold it
-fixed outside ``theta``. Here every amplitude is a parameter, so :meth:`.UCC.to_parameters` gives
+the singles live (it only factorizes :math:`t_2`), which is why steps 3 and 4 had to hold it
+fixed outside ``theta``. Every amplitude is a parameter, so :meth:`.UCC.to_parameters` gives
 the warm start directly, and the whole question of freezing a rotation does not arise. Should you
-want one anyway -- to widen the manifold beyond what the singles already span -- append an
+want one anyway, to widen the manifold beyond what the singles already span, append an
 :class:`.OrbitalRotation` to the circuit yourself; unlike UCJ's flag, it is then yours to either
 keep fixed or fold into ``theta`` by hand.
 
@@ -348,7 +349,7 @@ keep fixed or fold into ``theta`` by hand.
    UCC:       -1.15167 Hartree
 
 Both ansatzes reach the CCSD energy on this molecule. Their parameter counts differ, but be careful
-reading anything general into that at this size -- the two scale quite differently. :class:`.UCJ`'s
+reading anything general into that at this size; the two scale quite differently. :class:`.UCJ`'s
 count is :math:`O(n_\text{orb}^2)` per repetition, while :class:`.UCC`'s doubles are
 :math:`O(n_\text{occ}^2 n_\text{vrt}^2)`, so UCC starts smaller on tiny systems and ends up much
 larger. At half filling the crossover is already around eight orbitals:
@@ -374,7 +375,7 @@ them. What matters for this guide is that switching between the two costs three 
    The two ansatzes also differ in how faithfully their circuits reproduce the gate. :class:`.UCJ`
    synthesizes exactly, whereas :class:`.UCC`'s excitation terms do not commute, so its circuit
    :meth:`~qiskit.circuit.Gate.definition` is a first-order product formula. The simulation path used
-   above applies the exponential exactly, so the optimization here is unaffected -- but a circuit
+   above applies the exponential exactly, so the optimization here is unaffected; but a circuit
    transpiled for hardware carries a Trotter error, tightened with a higher-order product formula.
 
 .. skip: end
@@ -383,7 +384,7 @@ Next steps
 ^^^^^^^^^^
 
 - See the :ref:`LUCJ guide <lucj_getting_started>` for how :class:`.UCJ` is normally constructed
-  from coupled-cluster amplitudes, and how to transpile it onto qubits for hardware execution --
+  from coupled-cluster amplitudes, and how to transpile it onto qubits for hardware execution;
   the same transpilation applies to ``UCJ.from_parameters(lm_result.x, ...)`` here, built from the
   converged parameter vector from step 5.
 - See :class:`.UCC` for the unitary coupled-cluster ansatz swapped in at step 6, including its

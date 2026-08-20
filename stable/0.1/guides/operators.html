@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Design Principles of Operator Representations - Qiskit Fermions 0.1.0+c6f2913</title>
+        <title>Design Principles of Operator Representations - Qiskit Fermions 0.1.0+4cf3f3b</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.1.0+c6f2913</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.1.0+4cf3f3b</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.1.0+c6f2913</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.1.0+4cf3f3b</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -209,9 +209,9 @@
 <li class="toctree-l2"><a class="reference internal" href="lucj.html">Build an LUCJ ansatz</a></li>
 <li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Design Principles of Operator Representations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="grouping.html">Group operator terms: exploit the operator structure</a></li>
-<li class="toctree-l2"><a class="reference internal" href="mappers.html">Mapping operator representations</a></li>
-<li class="toctree-l2"><a class="reference internal" href="circuit.html">Working with fermionic circuits</a></li>
-<li class="toctree-l2"><a class="reference internal" href="transpilation.html">Transpiling fermionic circuits</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mappers.html">Map operator representations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="circuit.html">Work with fermionic circuits</a></li>
+<li class="toctree-l2"><a class="reference internal" href="transpilation.html">Transpile fermionic circuits</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ffsim.html">The ffsim simulation backend</a></li>
 <li class="toctree-l2"><a class="reference internal" href="vqe_outer_loop.html">Running the outer VQE parameter optimization loop</a></li>
 <li class="toctree-l2"><a class="reference internal" href="merge_slater_determinant.html">Optimize Slater determinant preparation</a></li>
@@ -313,9 +313,9 @@ number) and a <strong>sequence of actions</strong> on specific modes.</p>
 systems with many modes but relatively few significant contributions. By encoding only
 non-identity operations, operations focus only on what matters, enabling work with large
 systems that would be infeasible with dense representations. Additionally, operators
-naturally scale to any number of modes - an operator acting on modes <code class="docutils literal notranslate"><span class="pre">{0,</span> <span class="pre">1}</span></code> works
+naturally scale to any number of modes; an operator acting on modes <code class="docutils literal notranslate"><span class="pre">{0,</span> <span class="pre">1}</span></code> works
 unchanged in systems with many more modes since unaffected modes are implicitly identity.</p>
-<p>Note that identical terms are preserved separately during arithmetic operations
+<p>Identical terms are preserved separately during arithmetic operations
 and must be explicitly combined if needed.</p>
 <section id="internal-storage-format">
 <h3>Internal storage format<a class="headerlink" href="#internal-storage-format" title="Link to this heading">¶</a></h3>
@@ -496,7 +496,7 @@ given operation.</p>
 currently provided by this module treat modes as spinless fermionic degrees
 of freedom. This means if your system has both spin-up and spin-down electrons
 or fermions, you must explicitly map them to distinct modes (for example, modes 0-3
-for spin-up of 4 spatial orbitals, modes 4-7 for spin-down, or any other
+for spin-up of four spatial orbitals, modes 4-7 for spin-down, or any other
 convention you choose).</p>
 <p>This design keeps the core representations simple and general while avoiding
 imposing a specific spin-ordering convention. Utility modules like
@@ -518,7 +518,7 @@ coexist with them in the module.</p>
 that associates each term with a group index. By integrating grouping directly into the
 operator representation as part of the sparse data structure, grouping information
 naturally travels with the operator through transformations. This enables systematic
-exploitation of structure - whether from physical properties, algebraic relationships, or
+exploitation of structure, whether from physical properties, algebraic relationships, or
 problem-specific symmetries. The structured information can then be used in downstream
 operations like circuit synthesis and decomposition by using methods like
 <a class="reference internal" href="../stubs/qiskit_fermions.operators.OperatorTrait.html#qiskit_fermions.operators.OperatorTrait.split_out_groups" title="qiskit_fermions.operators.OperatorTrait.split_out_groups"><code class="xref py py-meth docutils literal notranslate"><span class="pre">OperatorTrait.split_out_groups()</span></code></a>.</p>
@@ -644,7 +644,7 @@ equivalent operators from being recognized as such.</p>
 <p>While the <a class="reference internal" href="../stubs/qiskit_fermions.operators.OperatorTrait.html#qiskit_fermions.operators.OperatorTrait" title="qiskit_fermions.operators.OperatorTrait"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperatorTrait</span></code></a> protocol provides a common interface,
 individual operator implementations might offer additional convenience methods
 not part of the protocol. For example, some operators provide an
-<code class="docutils literal notranslate"><span class="pre">is_hermitian()</span></code> method that implements exactly this check. Always consult
+<code class="docutils literal notranslate"><span class="pre">is_hermitian()</span></code> method that implements this check. Always consult
 the API documentation for your specific operator type to discover all
 available functionality.</p>
 </div>
@@ -654,8 +654,8 @@ available functionality.</p>
 <p>A fundamental challenge in quantum operator algebra is that mathematically
 equivalent operators can be represented in many different ways, each with
 different implications for quantum algorithms. The same operator can be written
-in algebraically equivalent forms - for example, <span class="math">\(a^\dagger b\)</span> can be
-expressed as <span class="math">\(ba^\dagger + [a^\dagger,b]\)</span> - yet these representations lead
+in algebraically equivalent forms (for example, <span class="math">\(a^\dagger b\)</span> can be
+expressed as <span class="math">\(ba^\dagger + [a^\dagger,b]\)</span>), yet these representations lead
 to different behavior in circuit synthesis, simplification, and numerical
 algorithms.</p>
 <p>The operator representations support <strong>normal ordering</strong> operations that
@@ -823,7 +823,7 @@ your operator type to see what parameters are available.</p>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=e33f9f55"></script>
+</div><script src="../_static/documentation_options.js?v=b8abbc59"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

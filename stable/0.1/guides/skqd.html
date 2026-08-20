@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Generate Krylov time-evolution circuits (SKQD) - Qiskit Fermions 0.1.0+c6f2913</title>
+        <title>Generate Krylov time-evolution circuits (SKQD) - Qiskit Fermions 0.1.0+4cf3f3b</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.1.0+c6f2913</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.1.0+4cf3f3b</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.1.0+c6f2913</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.1.0+4cf3f3b</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -209,9 +209,9 @@
 <li class="toctree-l2"><a class="reference internal" href="lucj.html">Build an LUCJ ansatz</a></li>
 <li class="toctree-l2"><a class="reference internal" href="operators.html">Design Principles of Operator Representations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="grouping.html">Group operator terms: exploit the operator structure</a></li>
-<li class="toctree-l2"><a class="reference internal" href="mappers.html">Mapping operator representations</a></li>
-<li class="toctree-l2"><a class="reference internal" href="circuit.html">Working with fermionic circuits</a></li>
-<li class="toctree-l2"><a class="reference internal" href="transpilation.html">Transpiling fermionic circuits</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mappers.html">Map operator representations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="circuit.html">Work with fermionic circuits</a></li>
+<li class="toctree-l2"><a class="reference internal" href="transpilation.html">Transpile fermionic circuits</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ffsim.html">The ffsim simulation backend</a></li>
 <li class="toctree-l2"><a class="reference internal" href="vqe_outer_loop.html">Running the outer VQE parameter optimization loop</a></li>
 <li class="toctree-l2"><a class="reference internal" href="merge_slater_determinant.html">Optimize Slater determinant preparation</a></li>
@@ -274,7 +274,8 @@ Equivalent functionality will be made available through the C API in a future
 release.</p>
 </div>
 <p>Sample-based Krylov Quantum Diagonalization (<a class="reference external" href="https://arxiv.org/abs/2501.09702">SKQD</a>) is a quantum-centric variant of subspace
-diagonalization. Rather than sampling a single variational ansatz (as in plain <a class="reference external" href="https://arxiv.org/abs/2405.05068">SQD</a>) or an
+diagonalization. Rather than sampling a single variational ansatz (as in plain sample-based
+quantum diagonalization (<a class="reference external" href="https://arxiv.org/abs/2405.05068">SQD</a>)) or an
 ensemble of randomized time-evolution circuits (as in <a class="reference internal" href="sqdrift.html#sqdrift-getting-started"><span class="std std-ref">SqDRIFT</span></a>), it
 samples a <em>Krylov</em> basis: the family of states</p>
 <div class="math-wrapper docutils container">
@@ -286,14 +287,14 @@ D - 1,\]</div>
 fixed time step <span class="math">\(\Delta t\)</span>. Bitstrings sampled from these <span class="math">\(D\)</span> circuits populate the
 Krylov subspace in which the Hamiltonian is subsequently diagonalized classically.</p>
 <p>This guide reproduces the circuit-construction step of the <a class="reference external" href="https://arxiv.org/abs/2501.09702">SKQD</a> algorithm for the
-single-impurity Anderson model (SIAM) – a magnetic impurity coupled to a non-interacting bath –
+single-impurity Anderson model (SIAM), a magnetic impurity coupled to a non-interacting bath,
 following the <a class="reference external" href="https://arxiv.org/abs/2501.09702">SKQD</a> publication.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>The SKQD sampling step works only if the ground state is <strong>sparse</strong> in the computational basis:
 the classical diagonalization must be able to reconstruct it from a manageable number of sampled
-bitstrings. As we will see, that sparsity is not automatic – it is a property of the
-<em>single-particle basis</em> in which the problem is expressed. Getting the basis right is the crux of
+bitstrings. As we will see, that sparsity is not automatic; it is a property of the
+single-particle basis in which the problem is expressed. Getting the basis right is the crux of
 this construction.</p>
 </div>
 <section id="build-the-siam-hamiltonian-as-a-fermionic-operator">
@@ -323,7 +324,7 @@ into a one-body part <span class="math">\(H_1\)</span> and a two-body part <span
 <p>We work at the particle-hole-symmetric point <span class="math">\(\mu = -U/2\)</span>. These two parts map directly onto
 the one-body integrals <code class="docutils literal notranslate"><span class="pre">h1e</span></code> (bath hopping, impurity hybridization, impurity on-site energy) and
 the single two-body integral <code class="docutils literal notranslate"><span class="pre">h2e</span></code> (the impurity Coulomb term). We first assemble them in the
-<em>position</em> basis, where the model is naturally defined.</p>
+position basis, where the model is naturally defined.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">norb</span> <span class="o">=</span> <span class="mi">8</span>
@@ -347,10 +348,10 @@ the single two-body integral <code class="docutils literal notranslate"><span cl
 <section id="change-to-the-momentum-basis">
 <h2>2. Change to the momentum basis<a class="headerlink" href="#change-to-the-momentum-basis" title="Link to this heading">¶</a></h2>
 <p>The bath part of the SIAM is a free-fermion chain, so it is diagonalized by a change to the
-<em>momentum</em> basis. This is the decisive step for SKQD: because the bath is translationally
-invariant, the ground state is <strong>not</strong> sparse in the position basis, but it <em>is</em> sparse in the
+momentum basis. This is the decisive step for SKQD: because the bath is translationally
+invariant, the ground state is not sparse in the position basis, but it is sparse in the
 momentum basis, where the bath Hamiltonian is diagonal. The single-particle orbital rotation that
-performs this change is problem-specific linear algebra – it diagonalizes the bath hopping matrix
+performs this change is problem-specific linear algebra: it diagonalizes the bath hopping matrix
 while leaving the impurity orbital untouched, then relocates the impurity to a central site:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">momentum_basis</span><span class="p">(</span><span class="n">norb</span><span class="p">):</span>
 <span class="gp">... </span><span class="w">    </span><span class="sd">"""Orbital rotation from the position to the momentum basis."""</span>
@@ -369,8 +370,8 @@ while leaving the impurity orbital untouched, then relocates the impurity to a c
 <span class="gp">&gt;&gt;&gt; </span><span class="n">orbital_rotation</span> <span class="o">=</span> <span class="n">momentum_basis</span><span class="p">(</span><span class="n">norb</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Unlike a variational workflow, here we rotate the <strong>Hamiltonian integrals</strong> into the momentum basis,
-so that the whole circuit – Hamiltonian and state alike – lives in the basis where the ground
+<p>Unlike a variational workflow, we rotate the Hamiltonian integrals into the momentum basis,
+so that the whole circuit (Hamiltonian and state alike) lives in the basis where the ground
 state is sparse and the sampled bitstrings are therefore informative. Rotating the one- and two-body
 integrals is a standard basis change of the electronic-structure tensors:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">rotation</span> <span class="o">=</span> <span class="n">orbital_rotation</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span>
@@ -387,9 +388,9 @@ integrals is a standard basis change of the electronic-structure tensors:</p>
 </pre></div>
 </div>
 <p>Because the rotation leaves the impurity orbital fixed (it acts only on the bath), the on-site
-interaction stays put: <code class="docutils literal notranslate"><span class="pre">h2e_momentum</span></code> remains a <em>single</em> number-number term, just like <code class="docutils literal notranslate"><span class="pre">h2e</span></code> –
+interaction is unchanged: <code class="docutils literal notranslate"><span class="pre">h2e_momentum</span></code> remains a single number-number term, just like <code class="docutils literal notranslate"><span class="pre">h2e</span></code>;
 the only change is that the impurity has been relocated to a central index. We can see this directly
-in the integral tensors, which each carry exactly one nonzero entry:</p>
+in the integral tensors, which each carry one nonzero entry:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"h2e nonzero at:          </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">argwhere</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">h2e</span><span class="p">)</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mf">1e-12</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 <span class="go">h2e nonzero at:          [[0, 0, 0, 0]]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"h2e_momentum nonzero at: </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">argwhere</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">h2e_momentum</span><span class="p">)</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mf">1e-12</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
@@ -401,15 +402,15 @@ in the integral tensors, which each carry exactly one nonzero entry:</p>
 constructor <a class="reference internal" href="../stubs/qiskit_fermions.operators.FermionOperator.html#qiskit_fermions.operators.FermionOperator.from_1body_tril_spin_sym" title="qiskit_fermions.operators.FermionOperator.from_1body_tril_spin_sym"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_1body_tril_spin_sym()</span></code></a>, which expects
 them packed into lower-triangular ordering. The two-body part is a single number-number term, so
 rather than route it through the two-body integral machinery we build it directly with
-<a class="reference internal" href="../stubs/qiskit_fermions.operators.cre.html#qiskit_fermions.operators.cre" title="qiskit_fermions.operators.cre"><code class="xref py py-func docutils literal notranslate"><span class="pre">cre()</span></code></a>/<a class="reference internal" href="../stubs/qiskit_fermions.operators.ann.html#qiskit_fermions.operators.ann" title="qiskit_fermions.operators.ann"><code class="xref py py-func docutils literal notranslate"><span class="pre">ann()</span></code></a> – the on-site Coulomb operator <span class="math">\(U \, n_{p\uparrow} n_{p\downarrow}\)</span>
+<a class="reference internal" href="../stubs/qiskit_fermions.operators.cre.html#qiskit_fermions.operators.cre" title="qiskit_fermions.operators.cre"><code class="xref py py-func docutils literal notranslate"><span class="pre">cre()</span></code></a>/<a class="reference internal" href="../stubs/qiskit_fermions.operators.ann.html#qiskit_fermions.operators.ann" title="qiskit_fermions.operators.ann"><code class="xref py py-func docutils literal notranslate"><span class="pre">ann()</span></code></a>: the on-site Coulomb operator <span class="math">\(U \, n_{p\uparrow} n_{p\downarrow}\)</span>
 for the impurity mode <span class="math">\(p\)</span> (its <span class="math">\(\uparrow\)</span> mode at index <code class="docutils literal notranslate"><span class="pre">p</span></code>, its <span class="math">\(\downarrow\)</span> mode
 at index <code class="docutils literal notranslate"><span class="pre">p</span> <span class="pre">+</span> <span class="pre">norb</span></code> in the block-spin layout). Both constructors spin-double the <code class="docutils literal notranslate"><span class="pre">norb</span></code> spatial
 orbitals into <code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">*</span> <span class="pre">norb</span></code> fermionic modes.</p>
-<p>We keep the one-body part <span class="math">\(H_1\)</span> and the two-body part <span class="math">\(H_2\)</span> as <em>separate</em> operators
-rather than summing them eagerly – the terms <span class="math">\(H_1\)</span> and <span class="math">\(H_2\)</span> of the section-1 equations.
+<p>We keep the one-body part <span class="math">\(H_1\)</span> and the two-body part <span class="math">\(H_2\)</span> as separate operators
+rather than summing them eagerly, matching the terms <span class="math">\(H_1\)</span> and <span class="math">\(H_2\)</span> of the section-1 equations.
 Building each piece once (in both bases) lets us reuse them below: summed, they give the full
 Hamiltonian for the exact diagonalization in either basis; individually, <span class="math">\(H_2\)</span> (momentum basis)
-is exactly the operator the Trotter step evolves in step 4.</p>
+is the operator the Trotter step evolves in step 4.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.operators</span><span class="w"> </span><span class="kn">import</span> <span class="n">FermionOperator</span><span class="p">,</span> <span class="n">ann</span><span class="p">,</span> <span class="n">cre</span>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># U n_imp_up n_imp_down: the impurity's up/down modes sit at `imp` and `imp + norb` in the</span>
@@ -442,7 +443,7 @@ is exactly the operator the Trotter step evolves in step 4.</p>
 confirm the operator is correct by comparing its lowest eigenvalue in the
 <span class="math">\((\text{norb}, \text{nelec})\)</span> sector against an exact diagonalization. The
 <a class="reference internal" href="../stubs/qiskit_fermions.operators.FermionOperator.html#qiskit_fermions.operators.FermionOperator" title="qiskit_fermions.operators.FermionOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionOperator</span></code></a> exposes a SciPy <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.linalg.LinearOperator.html#scipy.sparse.linalg.LinearOperator" title="(in SciPy v1.18.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinearOperator</span></code></a> (backed by a
-native FCI matrix-vector kernel), so we can hand it straight to
+native full configuration interaction (FCI) matrix-vector kernel), so we can hand it straight to
 <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.linalg.eigsh.html#scipy.sparse.linalg.eigsh" title="(in SciPy v1.18.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.sparse.linalg.eigsh()</span></code></a>.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">scipy.sparse.linalg</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.linalg</span><span class="w"> </span><span class="kn">import</span> <span class="n">linear_operator</span>
@@ -456,7 +457,7 @@ native FCI matrix-vector kernel), so we can hand it straight to
 </pre></div>
 </div>
 <p>The payoff of the basis change is sparsity. To make it concrete, we count how many
-computational-basis determinants are needed to capture 99% of the ground-state weight – and compare
+computational-basis determinants are needed to capture 99% of the ground-state weight, and compare
 the momentum basis against the position basis. The energy is basis-independent, but the number of
 determinants is not:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">determinants_for</span><span class="p">(</span><span class="n">vec</span><span class="p">,</span> <span class="n">fraction</span><span class="o">=</span><span class="mf">0.99</span><span class="p">):</span>
@@ -475,8 +476,8 @@ determinants is not:</p>
 <span class="go">determinants for 99% weight: 21 (momentum)</span>
 </pre></div>
 </div>
-<p>The two operators share the exact same energy, but the position-basis ground state is spread over
-thousands of determinants while the momentum basis concentrates it onto a couple dozen – which is
+<p>The two operators share the same energy, but the position-basis ground state is spread over
+thousands of determinants while the momentum basis concentrates it onto a couple dozen, which is
 the whole reason SKQD sampling works in the momentum basis and not the position basis.</p>
 </section>
 <section id="prepare-the-reference-state">
@@ -484,14 +485,14 @@ the whole reason SKQD sampling works in the momentum basis and not the position 
 <p>The SKQD reference <span class="math">\(\lvert \psi_0 \rangle\)</span> is the superposition of all excitations of the
 electrons closest to the Fermi level into the nearest empty momentum modes. The <a class="reference external" href="https://arxiv.org/abs/2501.09702">SKQD</a> publication
 builds it with a hand-written network of <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.library.XXPlusYYGate" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">XXPlusYYGate</span></code></a>s.
-It <em>looks</em> strongly correlated – it
-has hundreds of nonzero computational-basis amplitudes – but a network of number-conserving two-mode
+It looks strongly correlated (it
+has hundreds of nonzero computational-basis amplitudes), but a network of number-conserving two-mode
 rotations is a single-particle (fermionic Gaussian) operation, so the state it produces is a
-<strong>single Slater determinant</strong>. That means we can prepare it with one <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.PrepareSlaterDeterminant.html#qiskit_fermions.circuit.library.PrepareSlaterDeterminant" title="qiskit_fermions.circuit.library.PrepareSlaterDeterminant"><code class="xref py py-class docutils literal notranslate"><span class="pre">PrepareSlaterDeterminant</span></code></a>
+single Slater determinant. That means we can prepare it with one <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.PrepareSlaterDeterminant.html#qiskit_fermions.circuit.library.PrepareSlaterDeterminant" title="qiskit_fermions.circuit.library.PrepareSlaterDeterminant"><code class="xref py py-class docutils literal notranslate"><span class="pre">PrepareSlaterDeterminant</span></code></a>
 gate, given the single-particle rotation the network implements.</p>
 <p>Because each <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.library.XXPlusYYGate" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">XXPlusYYGate</span></code></a> acts as a Givens rotation on a
 pair of modes, we can build that
-rotation directly in the single-particle picture – one Givens matrix per gate – instead of emitting
+rotation directly in the single-particle picture (one Givens matrix per gate) instead of emitting
 the two-qubit gates by hand. The gates form a brickwork of nearest-neighbor rotations that fans out
 from the Fermi level in expanding layers, spreading each near-Fermi electron across the empty modes
 just above it:</p>
@@ -522,14 +523,14 @@ just above it:</p>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>The rotation above is expressed in the <em>momentum</em> basis, matching the Hamiltonian: the electrons
+<p>The rotation above is expressed in the momentum basis, matching the Hamiltonian: the electrons
 near the Fermi level are the highest-energy occupied momentum modes, and the network excites them
 into the lowest-energy empty ones. This is why the reference must be built after the basis change
 of the previous step, not before.</p>
 </div>
 <p>Slater determinant preparation is done per spin sector, since each sector has its own
-(electrons, orbitals) shape. A single <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.PrepareSlaterDeterminant.html#qiskit_fermions.circuit.library.PrepareSlaterDeterminant" title="qiskit_fermions.circuit.library.PrepareSlaterDeterminant"><code class="xref py py-class docutils literal notranslate"><span class="pre">PrepareSlaterDeterminant</span></code></a> gate – an occupation (the
-lowest <code class="docutils literal notranslate"><span class="pre">nocc</span></code> modes filled) together with the single-particle rotation – prepares one sector; the
+(electrons, orbitals) shape. A single <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.PrepareSlaterDeterminant.html#qiskit_fermions.circuit.library.PrepareSlaterDeterminant" title="qiskit_fermions.circuit.library.PrepareSlaterDeterminant"><code class="xref py py-class docutils literal notranslate"><span class="pre">PrepareSlaterDeterminant</span></code></a> gate (an occupation, the
+lowest <code class="docutils literal notranslate"><span class="pre">nocc</span></code> modes filled, together with the single-particle rotation) prepares one sector; the
 same gate is applied once on the alpha modes <code class="docutils literal notranslate"><span class="pre">0..norb</span></code> and once on the beta modes
 <code class="docutils literal notranslate"><span class="pre">norb..2*norb</span></code>, since both spin sectors share the same reference occupation and rotation here:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.circuit.library</span><span class="w"> </span><span class="kn">import</span> <span class="n">PrepareSlaterDeterminant</span>
@@ -548,19 +549,19 @@ Givens-rotation synthesis for us.</p>
 <span class="math">\(e^{-i k \, \Delta t \, H}\)</span>. We split the Hamiltonian into its one-body and two-body parts,
 <span class="math">\(H = H_1 + H_2\)</span>, and Trotterize the evolution over that split. This is the decisive choice for
 circuit depth. The one-body evolution <span class="math">\(e^{-i t H_1}\)</span> is a free-fermion (fermionic Gaussian)
-operation, so it is <em>exactly</em> a single-particle basis rotation – an <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.OrbitalRotation.html#qiskit_fermions.circuit.library.OrbitalRotation" title="qiskit_fermions.circuit.library.OrbitalRotation"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrbitalRotation</span></code></a> with
-unitary <span class="math">\(e^{-i t \, \mathbf{h}_1}\)</span> – rather than something that has to be Pauli-Trotterized
+operation, so it is a single-particle basis rotation (an <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.OrbitalRotation.html#qiskit_fermions.circuit.library.OrbitalRotation" title="qiskit_fermions.circuit.library.OrbitalRotation"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrbitalRotation</span></code></a> with
+unitary <span class="math">\(e^{-i t \, \mathbf{h}_1}\)</span>) rather than something that has to be Pauli-Trotterized
 term by term. The two-body evolution <span class="math">\(e^{-i t H_2}\)</span> acts only on the single on-site
 interaction term. Building the step this way is what lets the transpiler emit a shallow brickwork of
-Givens rotations plus a single two-qubit interaction gate – exactly the shallow structure the
+Givens rotations plus a single two-qubit interaction gate, the shallow structure the
 <a class="reference external" href="https://arxiv.org/abs/2501.09702">SKQD</a> publication builds by hand.</p>
 <p>The two-body part is already in hand: it is the <code class="docutils literal notranslate"><span class="pre">two_body_momentum</span></code> operator built in step 2 (the
 single on-site term). The one-body evolution <span class="math">\(e^{-i t H_1}\)</span> is spin-independent, so it is a
 single per-sector <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.OrbitalRotation.html#qiskit_fermions.circuit.library.OrbitalRotation" title="qiskit_fermions.circuit.library.OrbitalRotation"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrbitalRotation</span></code></a> with unitary <span class="math">\(e^{-i t \, \mathbf{h}_1}\)</span> that we
-apply once to each spin sector – the same parallel structure as the reference-state preparation.</p>
+apply once to each spin sector, the same parallel structure as the reference-state preparation.</p>
 <p>Each Krylov circuit evolves for a total time <span class="math">\(k \, \Delta t\)</span>. We realize that with a
 second-order Trotter product of <span class="math">\(k\)</span> steps of size <span class="math">\(\Delta t\)</span>, so the per-step error
-stays fixed as the Krylov dimension grows. Each step sandwiches a <em>full</em> one-body rotation (one per
+stays fixed as the Krylov dimension grows. Each step sandwiches a full one-body rotation (one per
 spin sector) between two half-steps of the (cheap, single-term) two-body evolution. The Krylov
 dimension <span class="math">\(D\)</span> is simply the number of such circuits, with <code class="docutils literal notranslate"><span class="pre">dim</span></code> ranging from <code class="docutils literal notranslate"><span class="pre">0</span></code> (reference
 state only) up to <span class="math">\(D - 1\)</span>.</p>
@@ -609,7 +610,7 @@ keyword arguments are forwarded to the qubit stage; we pass <code class="docutil
 unoptimized picture of the synthesized depth. Generating the full family of Krylov circuits is then
 a loop over the Krylov dimension. We keep the untranspiled <a class="reference internal" href="../stubs/qiskit_fermions.circuit.FermionicCircuit.html#qiskit_fermions.circuit.FermionicCircuit" title="qiskit_fermions.circuit.FermionicCircuit"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicCircuit</span></code></a>s alongside
 the transpiled qubit circuits: the fermionic ones drive the exact (statevector) simulation in step
-6, while the transpiled ones – with measurements added – are what a backend would execute.</p>
+6, while the transpiled ones (with measurements added) are what a backend would execute.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.transpiler.presets</span><span class="w"> </span><span class="kn">import</span> <span class="n">generate_preset_jw_pass_manager</span>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">pass_manager</span> <span class="o">=</span> <span class="n">generate_preset_jw_pass_manager</span><span class="p">(</span><span class="n">optimization_level</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
@@ -640,15 +641,15 @@ of the time-evolution operator.</p>
 <p class="admonition-title">Note</p>
 <p>Splitting the Hamiltonian is what keeps these depths modest. The one-body evolution is a genuine
 orbital rotation, so it synthesizes to an <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.library.XXPlusYYGate" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">XXPlusYYGate</span></code></a>
-brickwork on adjacent qubits, while each half-step of the on-site interaction is a <em>single</em>
+brickwork on adjacent qubits, while each half-step of the on-site interaction is a single
 <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.library.RZZGate" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">RZZGate</span></code></a> coupling the impurity’s two spin
-modes – the cheap term the second-order product sandwiches around the rotation. Handing the whole
+modes, the cheap term the second-order product sandwiches around the rotation. Handing the whole
 Hamiltonian to one <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate instead would Pauli-Trotterize the one-body part term
-by term, dragging long Jordan-Wigner <code class="docutils literal notranslate"><span class="pre">Z</span></code>-strings through the (long-range) impurity–bath
+by term, propagating long Jordan-Wigner <code class="docutils literal notranslate"><span class="pre">Z</span></code>-strings across the (long-range) impurity-bath
 couplings and inflating the depth by an order of magnitude.</p>
 </div>
 <p>The first circuit prepares only the reference determinant, while the last carries the most Trotter
-steps (4 in this case):</p>
+steps (four in this case):</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">circuits</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">draw</span><span class="p">(</span><span class="s2">"mpl"</span><span class="p">,</span> <span class="n">fold</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">measure_arrows</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 <span class="go">&lt;Figure size ... with 1 Axes&gt;</span>
 </pre></div>
@@ -669,12 +670,12 @@ steps (4 in this case):</p>
 <section id="sample-bitstrings-from-the-krylov-circuits">
 <h2>6. Sample bitstrings from the Krylov circuits<a class="headerlink" href="#sample-bitstrings-from-the-krylov-circuits" title="Link to this heading">¶</a></h2>
 <p>On hardware, we would run the transpiled circuits and measure. Here we do the noiseless (statevector)
-version of that step to see the bitstrings SKQD would collect. We simulate each <em>untranspiled</em>
+version of that step to see the bitstrings SKQD would collect. We simulate each untranspiled
 <a class="reference internal" href="../stubs/qiskit_fermions.circuit.FermionicCircuit.html#qiskit_fermions.circuit.FermionicCircuit" title="qiskit_fermions.circuit.FermionicCircuit"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicCircuit</span></code></a> with <a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.apply_unitary.html#ffsim.apply_unitary" title="(in ffsim)"><code class="xref py py-func docutils literal notranslate"><span class="pre">ffsim.apply_unitary()</span></code></a> and sample the resulting statevector with
 <a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.sample_state_vector.html#ffsim.sample_state_vector" title="(in ffsim)"><code class="xref py py-func docutils literal notranslate"><span class="pre">ffsim.sample_state_vector()</span></code></a>.</p>
-<p>Because a <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.PrepareSlaterDeterminant.html#qiskit_fermions.circuit.library.PrepareSlaterDeterminant" title="qiskit_fermions.circuit.library.PrepareSlaterDeterminant"><code class="xref py py-class docutils literal notranslate"><span class="pre">PrepareSlaterDeterminant</span></code></a> gate is <em>validate-then-rotate</em> under simulation (it
+<p>Because a <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.PrepareSlaterDeterminant.html#qiskit_fermions.circuit.library.PrepareSlaterDeterminant" title="qiskit_fermions.circuit.library.PrepareSlaterDeterminant"><code class="xref py py-class docutils literal notranslate"><span class="pre">PrepareSlaterDeterminant</span></code></a> gate is validate-then-rotate under simulation (it
 checks that the incoming state occupies its reference determinant, then applies the rotation), the
-input is the <em>plain</em> occupation determinant – the lowest <code class="docutils literal notranslate"><span class="pre">nocc</span></code> modes filled per spin, with <strong>no</strong>
+input is the plain occupation determinant: the lowest <code class="docutils literal notranslate"><span class="pre">nocc</span></code> modes filled per spin, with no
 rotation. The gate applies <code class="docutils literal notranslate"><span class="pre">reference_rotation</span></code> itself.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">ffsim</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">Counter</span>
@@ -695,9 +696,9 @@ rotation. The gate applies <code class="docutils literal notranslate"><span clas
 </div>
 <p>Pooling the samples from all five Krylov circuits, the support is tiny: a few hundred distinct
 bitstrings out of the <span class="math">\(\binom{8}{4}^2 = 4900\)</span> determinants in the <code class="docutils literal notranslate"><span class="pre">(4,</span> <span class="pre">4)</span></code> sector. This
-concentration – a direct consequence of the momentum-basis sparsity established in step 2 – is
-exactly what makes the subsequent classical diagonalization tractable.</p>
-<p>Plotting the counts with <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.visualization.plot_histogram" title="(in Qiskit v2.5)"><code class="xref py py-func docutils literal notranslate"><span class="pre">qiskit.visualization.plot_histogram()</span></code></a> makes the sparsity visible – a
+concentration, a direct consequence of the momentum-basis sparsity established in step 2, is
+what makes the subsequent classical diagonalization tractable.</p>
+<p>Plotting the counts with <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.visualization.plot_histogram" title="(in Qiskit v2.5)"><code class="xref py py-func docutils literal notranslate"><span class="pre">qiskit.visualization.plot_histogram()</span></code></a> makes the sparsity visible: a
 handful of configurations dominate, led by the reference determinant.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit.visualization</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot_histogram</span>
 <span class="gp">&gt;&gt;&gt;</span>
@@ -717,15 +718,15 @@ the subspace the sampled configurations span and diagonalized there. We hand thi
 <a class="reference external" href="https://quantum.cloud.ibm.com/docs/addons/qiskit-addon-sqd">qiskit-addon-sqd</a> package, whose
 <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit-addon-sqd/fermion#diagonalize_fermionic_hamiltonian" title="(in Sample-based quantum diagonalization (SQD))"><code class="xref py py-func docutils literal notranslate"><span class="pre">diagonalize_fermionic_hamiltonian()</span></code></a> runs the full sample-based
 quantum diagonalization loop: it builds a subspace from batches of the sampled configurations,
-diagonalizes the Hamiltonian in it, and iteratively refines the subspace via <em>configuration
-recovery</em> – flipping occupations to repair configurations that violate the known particle-number
-symmetry. Configuration recovery is designed to undo the damage of <strong>hardware noise</strong>, which corrupts
+diagonalizes the Hamiltonian in it, and iteratively refines the subspace via configuration
+recovery: flipping occupations to repair configurations that violate the known particle-number
+symmetry. Configuration recovery is designed to undo the damage of hardware noise, which corrupts
 sampled bitstrings into the wrong particle-number sector; we sample noiselessly here, so there is
 nothing to repair on that front.</p>
 <p>The solver consumes the sampled counts as a <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.primitives.BitArray" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">BitArray</span></code></a>, which we
-build directly from the pooled <code class="docutils literal notranslate"><span class="pre">counts</span></code> of step 6. It diagonalizes in the same <em>momentum</em> basis the
+build directly from the pooled <code class="docutils literal notranslate"><span class="pre">counts</span></code> of step 6. It diagonalizes in the same momentum basis the
 rest of the construction uses, so it takes the <code class="docutils literal notranslate"><span class="pre">h1e_momentum</span></code> and <code class="docutils literal notranslate"><span class="pre">h2e_momentum</span></code> integrals from
-step 2 directly – no repacking. The recovered energy matches the exact reference to well under a
+step 2 directly, with no repacking. The recovered energy matches the exact reference to well under a
 milli-Hartree, from only a few hundred sampled configurations; because the SQD energy is a variational
 upper bound on the true ground state, it always sits at or above <code class="docutils literal notranslate"><span class="pre">reference_energy</span></code> (still in scope
 from step 2):</p>
@@ -753,13 +754,13 @@ from step 2):</p>
 <span class="go">SQD estimate: -13.4224 (exact: -13.4225)</span>
 </pre></div>
 </div>
-<p>Finally, we visualize the run: the energy’s convergence across the iterations, and the average
+<p>We visualize the run: the energy’s convergence across the iterations, and the average
 occupancy of each spatial orbital in the recovered ground state. The per-iteration energy is the
 lowest across that iteration’s batches, and the occupancy sums the <code class="docutils literal notranslate"><span class="pre">orbital_occupancies</span></code> over the
 two spin sectors. Even without noise to correct, the energy still decreases from iteration to
 iteration: each iteration diagonalizes within <code class="docutils literal notranslate"><span class="pre">num_batches</span></code> batches of only <code class="docutils literal notranslate"><span class="pre">samples_per_batch</span></code>
 configurations subsampled from the pool, and the iterative refinement due to bitstring carryover
-steadily improves which configurations land in those batches – so the recovered energy improves:</p>
+steadily improves which configurations land in those batches, so the recovered energy improves:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.ticker</span><span class="w"> </span><span class="kn">import</span> <span class="n">MaxNLocator</span>
 <span class="gp">&gt;&gt;&gt;</span>
@@ -796,7 +797,7 @@ transpiled <code class="docutils literal notranslate"><span class="pre">circuits
 6, with the resulting counts feeding the same step-7 diagonalization unchanged. Refer to the <a class="reference external" href="https://quantum.cloud.ibm.com/docs/guides/intro-to-patterns">Qiskit
 documentation</a> for running circuits,
 and to the <a class="reference external" href="https://quantum.cloud.ibm.com/docs/addons/qiskit-addon-sqd/guides/overview">SQD addon tutorials</a> for more on the
-subspace-diagonalization post-processing – including its behavior on noisy samples, where
+subspace-diagonalization post-processing, including its behavior on noisy samples, where
 configuration recovery does the most work.</p>
 <p>Read the <a class="reference internal" href="ffsim.html#ffsim-backend-explanation"><span class="std std-ref">ffsim backend guide</span></a> to understand why
 <a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.apply_unitary.html#ffsim.apply_unitary" title="(in ffsim)"><code class="xref py py-func docutils literal notranslate"><span class="pre">ffsim.apply_unitary()</span></code></a> and <a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.sample_state_vector.html#ffsim.sample_state_vector" title="(in ffsim)"><code class="xref py py-func docutils literal notranslate"><span class="pre">ffsim.sample_state_vector()</span></code></a> work natively on this package’s
@@ -881,7 +882,7 @@ momentum-basis sparsity established in step 2 sample-efficient in the first plac
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=e33f9f55"></script>
+</div><script src="../_static/documentation_options.js?v=b8abbc59"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

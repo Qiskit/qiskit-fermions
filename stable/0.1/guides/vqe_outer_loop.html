@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Running the outer VQE parameter optimization loop - Qiskit Fermions 0.1.0+c6f2913</title>
+        <title>Running the outer VQE parameter optimization loop - Qiskit Fermions 0.1.0+4cf3f3b</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.1.0+c6f2913</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.1.0+4cf3f3b</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.1.0+c6f2913</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.1.0+4cf3f3b</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -209,9 +209,9 @@
 <li class="toctree-l2"><a class="reference internal" href="lucj.html">Build an LUCJ ansatz</a></li>
 <li class="toctree-l2"><a class="reference internal" href="operators.html">Design Principles of Operator Representations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="grouping.html">Group operator terms: exploit the operator structure</a></li>
-<li class="toctree-l2"><a class="reference internal" href="mappers.html">Mapping operator representations</a></li>
-<li class="toctree-l2"><a class="reference internal" href="circuit.html">Working with fermionic circuits</a></li>
-<li class="toctree-l2"><a class="reference internal" href="transpilation.html">Transpiling fermionic circuits</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mappers.html">Map operator representations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="circuit.html">Work with fermionic circuits</a></li>
+<li class="toctree-l2"><a class="reference internal" href="transpilation.html">Transpile fermionic circuits</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ffsim.html">The ffsim simulation backend</a></li>
 <li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Running the outer VQE parameter optimization loop</a></li>
 <li class="toctree-l2"><a class="reference internal" href="merge_slater_determinant.html">Optimize Slater determinant preparation</a></li>
@@ -281,7 +281,7 @@ parametrized family of states,</p>
 \Psi(\boldsymbol{\theta}) \rangle,\]</div>
 </div>
 <p>using a classical optimizer to drive <span class="math">\(\boldsymbol{\theta}\)</span> toward the minimum. This guide
-shows how to drive that classical optimization – the VQE <strong>outer loop</strong> – around a fermionic
+shows how to drive that classical optimization (the VQE outer loop) around a fermionic
 ansatz gate, using <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.UCJ.html#qiskit_fermions.circuit.library.UCJ" title="qiskit_fermions.circuit.library.UCJ"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCJ</span></code></a> as a concrete example.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -298,9 +298,10 @@ This mirrors how <a class="reference external" href="https://qiskit-community.gi
 <h2>1. Construct the ansatz<a class="headerlink" href="#construct-the-ansatz" title="Link to this heading">¶</a></h2>
 <p>As a concrete example, we use the <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.UCJ.html#qiskit_fermions.circuit.library.UCJ" title="qiskit_fermions.circuit.library.UCJ"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCJ</span></code></a> ansatz for a hydrogen molecule in the <code class="docutils literal notranslate"><span class="pre">6-31g</span></code>
 basis, following the <a class="reference internal" href="lucj.html#lucj-getting-started"><span class="std std-ref">LUCJ guide</span></a>, which covers the classical
-calculation, the Hamiltonian construction, and the ansatz gate itself in more detail – this guide
-focuses on the optimization loop around it instead. We reuse the molecule’s CCSD <span class="math">\(t_1\)</span>/
-<span class="math">\(t_2\)</span> amplitudes as the <em>initial point</em> for the optimization, rather than for a fixed ansatz.</p>
+calculation, the Hamiltonian construction, and the ansatz gate itself in more detail; this guide
+focuses on the optimization loop around it instead. We reuse the molecule’s coupled-cluster
+singles and doubles (CCSD) <span class="math">\(t_1\)</span>/
+<span class="math">\(t_2\)</span> amplitudes as the initial point for the optimization, rather than for a fixed ansatz.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">pyscf</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">pyscf.cc</span>
 <span class="gp">&gt;&gt;&gt;</span>
@@ -345,18 +346,18 @@ focuses on the optimization loop around it instead. We reuse the molecule’s CC
 <p>The optimizer needs a flat real vector, but the ansatz tensors are constrained: each orbital
 rotation must be unitary, and each diagonal Coulomb matrix must be real symmetric.
 <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.UCJ.html#qiskit_fermions.circuit.library.UCJ.to_parameters" title="qiskit_fermions.circuit.library.UCJ.to_parameters"><code class="xref py py-meth docutils literal notranslate"><span class="pre">UCJ.to_parameters()</span></code></a> and <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.UCJ.html#qiskit_fermions.circuit.library.UCJ.from_parameters" title="qiskit_fermions.circuit.library.UCJ.from_parameters"><code class="xref py py-meth docutils literal notranslate"><span class="pre">UCJ.from_parameters()</span></code></a> handle this conversion natively,
-parametrizing the <em>unconstrained</em> generators and mapping them onto valid tensors – an orbital
+parametrizing the <em>unconstrained</em> generators and mapping them onto valid tensors: an orbital
 rotation <span class="math">\(U = \exp(A)\)</span> for a complex anti-Hermitian generator <span class="math">\(A\)</span>, and a diagonal
 Coulomb matrix written directly by its upper triangle and diagonal, then symmetrized.</p>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
 <p>The rest of this guide only ever calls <code class="docutils literal notranslate"><span class="pre">num_parameters</span></code>/<code class="docutils literal notranslate"><span class="pre">from_parameters</span></code>/<code class="docutils literal notranslate"><span class="pre">to_parameters</span></code>
-on the ansatz – never anything <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.UCJ.html#qiskit_fermions.circuit.library.UCJ" title="qiskit_fermions.circuit.library.UCJ"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCJ</span></code></a>-specific. Any ansatz gate exposing that same
+on the ansatz, never anything <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.UCJ.html#qiskit_fermions.circuit.library.UCJ" title="qiskit_fermions.circuit.library.UCJ"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCJ</span></code></a>-specific. Any ansatz gate exposing that same
 three-method interface can be dropped in here unchanged; <a class="reference internal" href="#vqe-outer-loop-ucc"><span class="std std-ref">step 6</span></a> does
-exactly that with <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.UCC.html#qiskit_fermions.circuit.library.UCC" title="qiskit_fermions.circuit.library.UCC"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCC</span></code></a>.</p>
+that with <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.UCC.html#qiskit_fermions.circuit.library.UCC" title="qiskit_fermions.circuit.library.UCC"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCC</span></code></a>.</p>
 </div>
 <p>We fix a single repetition (<code class="docutils literal notranslate"><span class="pre">n_reps=1</span></code>) here to keep the optimization fast for this guide, and
-keep the final orbital rotation from the <span class="math">\(t_1\)</span> amplitudes out of <code class="docutils literal notranslate"><span class="pre">theta</span></code> (see step 3) –
+keep the final orbital rotation from the <span class="math">\(t_1\)</span> amplitudes out of <code class="docutils literal notranslate"><span class="pre">theta</span></code> (see step 3);
 <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.UCJ.html#qiskit_fermions.circuit.library.UCJ.num_parameters" title="qiskit_fermions.circuit.library.UCJ.num_parameters"><code class="xref py py-meth docutils literal notranslate"><span class="pre">UCJ.num_parameters()</span></code></a> reports how many parameters this leaves.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="gp">&gt;&gt;&gt;</span>
@@ -370,13 +371,13 @@ keep the final orbital rotation from the <span class="math">\(t_1\)</span> ampli
 <section id="build-the-ansatz-and-evaluate-the-state-from-a-flat-parameter-vector">
 <h2>3. Build the ansatz and evaluate the state from a flat parameter vector<a class="headerlink" href="#build-the-ansatz-and-evaluate-the-state-from-a-flat-parameter-vector" title="Link to this heading">¶</a></h2>
 <p>Given <code class="docutils literal notranslate"><span class="pre">theta</span></code>, <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.UCJ.html#qiskit_fermions.circuit.library.UCJ.from_parameters" title="qiskit_fermions.circuit.library.UCJ.from_parameters"><code class="xref py py-meth docutils literal notranslate"><span class="pre">UCJ.from_parameters()</span></code></a> builds the gate directly. Rather than returning an
-energy directly, <code class="docutils literal notranslate"><span class="pre">params_to_vec</span></code> stops one step earlier and returns the ansatz <em>state vector</em> –
+energy directly, <code class="docutils literal notranslate"><span class="pre">params_to_vec</span></code> stops one step earlier and returns the ansatz state vector:
 this is the interface both optimizers used below need, and the energy is trivially recovered from
 it via the Hamiltonian’s <a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.linear_operator.html#ffsim.linear_operator" title="(in ffsim)"><code class="xref py py-func docutils literal notranslate"><span class="pre">ffsim.linear_operator()</span></code></a>.</p>
 <p>The final orbital rotation is initialized from the <span class="math">\(t_1\)</span> amplitudes and held fixed throughout:
 since that rotation already captures the singles, the optimization can focus on the
 <span class="math">\(t_2\)</span>-derived repetition tensors, and <code class="docutils literal notranslate"><span class="pre">theta</span></code> stays <span class="math">\(\mathcal{O}(N^2)\)</span> parameters
-shorter. This is a choice, not a requirement – freezing it does restrict the variational manifold,
+shorter. This is a choice, not a requirement: freezing it does restrict the variational manifold,
 so for systems with significant singles character you may well want it optimized too. Passing
 <code class="docutils literal notranslate"><span class="pre">with_final_orbital_rotation=True</span></code> to both <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.UCJ.html#qiskit_fermions.circuit.library.UCJ.num_parameters" title="qiskit_fermions.circuit.library.UCJ.num_parameters"><code class="xref py py-meth docutils literal notranslate"><span class="pre">UCJ.num_parameters()</span></code></a> and
 <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.UCJ.html#qiskit_fermions.circuit.library.UCJ.from_parameters" title="qiskit_fermions.circuit.library.UCJ.from_parameters"><code class="xref py py-meth docutils literal notranslate"><span class="pre">UCJ.from_parameters()</span></code></a> folds it into <code class="docutils literal notranslate"><span class="pre">theta</span></code>, which then also makes the two explicit
@@ -413,12 +414,12 @@ so for systems with significant singles character you may well want it optimized
 <p>Each call to <code class="docutils literal notranslate"><span class="pre">params_to_vec</span></code> builds an entirely new <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.UCJ.html#qiskit_fermions.circuit.library.UCJ" title="qiskit_fermions.circuit.library.UCJ"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCJ</span></code></a> gate: there is no persistent
 circuit carrying bound parameters, only the mapping from <code class="docutils literal notranslate"><span class="pre">theta</span></code> to tensors to a gate to a state.</p>
 </section>
-<section id="run-the-outer-optimization-loop-with-a-generic-optimizer">
-<h2>4. Run the outer optimization loop with a generic optimizer<a class="headerlink" href="#run-the-outer-optimization-loop-with-a-generic-optimizer" title="Link to this heading">¶</a></h2>
+<section id="run-the-outer-loop-with-a-generic-optimizer">
+<h2>4. Run the outer loop with a generic optimizer<a class="headerlink" href="#run-the-outer-loop-with-a-generic-optimizer" title="Link to this heading">¶</a></h2>
 <p>Starting the optimizer from <span class="math">\(\boldsymbol{\theta} = \mathbf{0}\)</span> (the identity rotation and a
 zero diagonal Coulomb matrix, i.e. the Hartree-Fock reference itself) lands on a nearby local
-minimum barely below Hartree-Fock: with only one repetition, the ansatz is not expressive enough
-near that point for a gradient-based search to find its way out unassisted. A classically computed
+minimum barely below Hartree-Fock. With only one repetition, the ansatz is not expressive enough
+near that point for a gradient-based search to escape it unassisted. A classically computed
 starting point is a much better choice, so we reuse the CCSD-initialized ansatz from step 1: calling
 <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.UCJ.html#qiskit_fermions.circuit.library.UCJ.to_parameters" title="qiskit_fermions.circuit.library.UCJ.to_parameters"><code class="xref py py-meth docutils literal notranslate"><span class="pre">to_parameters()</span></code></a> on it (with its final rotation cleared, since <code class="docutils literal notranslate"><span class="pre">theta</span></code> excludes it)
 gives <code class="docutils literal notranslate"><span class="pre">theta0</span></code>, which is then handed to <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize.html#scipy.optimize.minimize" title="(in SciPy v1.18.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.optimize.minimize()</span></code></a> together with <code class="docutils literal notranslate"><span class="pre">energy</span></code>.
@@ -440,7 +441,7 @@ float; no gradient of the fermionic ansatz is implemented.</p>
 <p class="admonition-title">Note</p>
 <p>Because <code class="docutils literal notranslate"><span class="pre">energy</span></code> relies on multi-threaded linear algebra (inside <a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.apply_unitary.html#ffsim.apply_unitary" title="(in ffsim)"><code class="xref py py-func docutils literal notranslate"><span class="pre">ffsim.apply_unitary()</span></code></a>
 and <a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.linear_operator.html#ffsim.linear_operator" title="(in ffsim)"><code class="xref py py-func docutils literal notranslate"><span class="pre">ffsim.linear_operator()</span></code></a>), and <code class="docutils literal notranslate"><span class="pre">minimize</span></code> here uses numeric finite-difference
-gradients, the exact optimization trajectory – in particular the number of iterations needed –
+gradients, the optimization trajectory (in particular the number of iterations needed)
 can vary slightly between runs, machines, and BLAS backends. We give the optimizer a generous
 iteration budget and check convergence with a tolerance rather than pinning down an exact
 iteration count.</p>
@@ -455,19 +456,19 @@ iteration count.</p>
 <span class="go">True</span>
 </pre></div>
 </div>
-<p>Even with a generous iteration budget, each <code class="docutils literal notranslate"><span class="pre">energy</span></code> evaluation only reveals a single scalar –
+<p>Even with a generous iteration budget, each <code class="docutils literal notranslate"><span class="pre">energy</span></code> evaluation only reveals a single scalar,
 a wasteful use of the full state vector <code class="docutils literal notranslate"><span class="pre">params_to_vec</span></code> already computed internally.</p>
 </section>
-<section id="run-the-outer-optimization-loop-with-ffsim-s-linear-method">
-<h2>5. Run the outer optimization loop with ffsim’s linear method<a class="headerlink" href="#run-the-outer-optimization-loop-with-ffsim-s-linear-method" title="Link to this heading">¶</a></h2>
+<section id="run-the-outer-loop-with-ffsim-s-linear-method">
+<h2>5. Run the outer loop with ffsim’s linear method<a class="headerlink" href="#run-the-outer-loop-with-ffsim-s-linear-method" title="Link to this heading">¶</a></h2>
 <p><a class="reference external" href="https://qiskit-community.github.io/ffsim/">ffsim</a> ships <a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.optimize.minimize_linear_method.html#ffsim.optimize.minimize_linear_method" title="(in ffsim)"><code class="xref py py-func docutils literal notranslate"><span class="pre">ffsim.optimize.minimize_linear_method()</span></code></a>, an optimizer purpose-built for
 wavefunction ansatzes: rather than a scalar <code class="docutils literal notranslate"><span class="pre">energy</span></code>, it takes <code class="docutils literal notranslate"><span class="pre">params_to_vec</span></code> directly (the
-function returning the <em>state</em>, as built in step 3 above) together with the Hamiltonian
-<a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.linalg.LinearOperator.html#scipy.sparse.linalg.LinearOperator" title="(in SciPy v1.18.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinearOperator</span></code></a>, and uses the extra structure this exposes –
-gradients and an approximate Hessian of the state with respect to <span class="math">\(\boldsymbol{\theta}\)</span> –
+function returning the state, as built in step 3 above) together with the Hamiltonian
+<a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.linalg.LinearOperator.html#scipy.sparse.linalg.LinearOperator" title="(in SciPy v1.18.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinearOperator</span></code></a>, and uses the extra structure this exposes
+(gradients and an approximate Hessian of the state with respect to <span class="math">\(\boldsymbol{\theta}\)</span>)
 to take much better-informed steps than a generic finite-difference method can. See <a class="reference external" href="https://qiskit-community.github.io/ffsim/how-to-guides/simulate-vqe.html">ffsim’s own
 how-to guide on simulating VQE</a> for the method’s
-background and a walkthrough using ffsim’s own ansatz classes; here, the same optimizer is applied
+background and a walkthrough using ffsim’s own ansatz classes; the same optimizer is applied
 to the <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.UCJ.html#qiskit_fermions.circuit.library.UCJ" title="qiskit_fermions.circuit.library.UCJ"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCJ</span></code></a> gate and <code class="docutils literal notranslate"><span class="pre">params_to_vec</span></code> built above, unchanged.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -492,8 +493,8 @@ disable that inner search here for a reliably reproducible trajectory.</p>
 <span class="go">linear method: -1.15167 Hartree</span>
 </pre></div>
 </div>
-<p>The exact iteration counts of both optimizers vary between runs and machines, so we don’t print
-them here – but with the same warm start, the linear method consistently needs only a small
+<p>The iteration counts of both optimizers vary between runs and machines, so we don’t print
+them here; but with the same warm start, the linear method consistently needs only a small
 fraction of L-BFGS-B’s iterations to reach the same energy, since it exploits the extra structure
 of <code class="docutils literal notranslate"><span class="pre">params_to_vec</span></code> that a generic finite-difference method cannot.</p>
 </section>
@@ -502,13 +503,13 @@ of <code class="docutils literal notranslate"><span class="pre">params_to_vec</s
 <p>Nothing above is specific to <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.UCJ.html#qiskit_fermions.circuit.library.UCJ" title="qiskit_fermions.circuit.library.UCJ"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCJ</span></code></a>. Because the loop only ever calls
 <code class="docutils literal notranslate"><span class="pre">num_parameters</span></code>/<code class="docutils literal notranslate"><span class="pre">from_parameters</span></code>/<code class="docutils literal notranslate"><span class="pre">to_parameters</span></code>, another ansatz exposing that interface
 drops straight in. <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.UCC.html#qiskit_fermions.circuit.library.UCC" title="qiskit_fermions.circuit.library.UCC"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCC</span></code></a> implements the unitary coupled-cluster ansatz
-<span class="math">\(e^{T - T^\dagger}\)</span> and exposes exactly those three methods, so the only changes are the
-class name and its shape arguments – <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.UCC.html#qiskit_fermions.circuit.library.UCC" title="qiskit_fermions.circuit.library.UCC"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCC</span></code></a> is sized by the occupied/virtual split
+<span class="math">\(e^{T - T^\dagger}\)</span> and exposes those three methods, so the only changes are the
+class name and its shape arguments: <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.UCC.html#qiskit_fermions.circuit.library.UCC" title="qiskit_fermions.circuit.library.UCC"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCC</span></code></a> is sized by the occupied/virtual split
 (<code class="docutils literal notranslate"><span class="pre">norb</span></code>, <code class="docutils literal notranslate"><span class="pre">nocc</span></code>) rather than by a repetition count.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>The variant names differ between the two classes but describe the same spin choice here:
-<a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.UCJ.html#qiskit_fermions.circuit.library.UCJ" title="qiskit_fermions.circuit.library.UCJ"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCJ</span></code></a>’s <code class="docutils literal notranslate"><span class="pre">&quot;balanced&quot;</span></code> and <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.UCC.html#qiskit_fermions.circuit.library.UCC" title="qiskit_fermions.circuit.library.UCC"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCC</span></code></a>’s <code class="docutils literal notranslate"><span class="pre">&quot;restricted&quot;</span></code> both mean <em>one</em> spatial
+<a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.UCJ.html#qiskit_fermions.circuit.library.UCJ" title="qiskit_fermions.circuit.library.UCJ"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCJ</span></code></a>’s <code class="docutils literal notranslate"><span class="pre">&quot;balanced&quot;</span></code> and <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.UCC.html#qiskit_fermions.circuit.library.UCC" title="qiskit_fermions.circuit.library.UCC"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCC</span></code></a>’s <code class="docutils literal notranslate"><span class="pre">&quot;restricted&quot;</span></code> both mean one spatial
 parametrization shared by both spin sectors. Each class follows the naming of the ffsim operators
 it mirrors (<a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.UCJOpSpinBalanced.html#ffsim.UCJOpSpinBalanced" title="(in ffsim)"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCJOpSpinBalanced</span></code></a> versus
 <a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.UCCSDOpRestrictedReal.html#ffsim.UCCSDOpRestrictedReal" title="(in ffsim)"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCCSDOpRestrictedReal</span></code></a>). Likewise <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.UCJ.html#qiskit_fermions.circuit.library.UCJ" title="qiskit_fermions.circuit.library.UCJ"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCJ</span></code></a>’s <code class="docutils literal notranslate"><span class="pre">&quot;unbalanced&quot;</span></code> and
@@ -532,10 +533,10 @@ the single-register variant <code class="docutils literal notranslate"><span cla
 </div>
 <p>Note the absent <code class="docutils literal notranslate"><span class="pre">final_orbital_rotation</span></code>: <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.UCC.html#qiskit_fermions.circuit.library.UCC" title="qiskit_fermions.circuit.library.UCC"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCC</span></code></a> carries none, because its <span class="math">\(t_1\)</span>
 amplitudes already <em>are</em> its single excitations. For <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.UCJ.html#qiskit_fermions.circuit.library.UCJ" title="qiskit_fermions.circuit.library.UCJ"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCJ</span></code></a> that trailing rotation is where
-the singles live – it only factorizes <span class="math">\(t_2\)</span> – which is why steps 3 and 4 had to hold it
-fixed outside <code class="docutils literal notranslate"><span class="pre">theta</span></code>. Here every amplitude is a parameter, so <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.UCC.html#qiskit_fermions.circuit.library.UCC.to_parameters" title="qiskit_fermions.circuit.library.UCC.to_parameters"><code class="xref py py-meth docutils literal notranslate"><span class="pre">UCC.to_parameters()</span></code></a> gives
+the singles live (it only factorizes <span class="math">\(t_2\)</span>), which is why steps 3 and 4 had to hold it
+fixed outside <code class="docutils literal notranslate"><span class="pre">theta</span></code>. Every amplitude is a parameter, so <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.UCC.html#qiskit_fermions.circuit.library.UCC.to_parameters" title="qiskit_fermions.circuit.library.UCC.to_parameters"><code class="xref py py-meth docutils literal notranslate"><span class="pre">UCC.to_parameters()</span></code></a> gives
 the warm start directly, and the whole question of freezing a rotation does not arise. Should you
-want one anyway – to widen the manifold beyond what the singles already span – append an
+want one anyway, to widen the manifold beyond what the singles already span, append an
 <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.OrbitalRotation.html#qiskit_fermions.circuit.library.OrbitalRotation" title="qiskit_fermions.circuit.library.OrbitalRotation"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrbitalRotation</span></code></a> to the circuit yourself; unlike UCJ’s flag, it is then yours to either
 keep fixed or fold into <code class="docutils literal notranslate"><span class="pre">theta</span></code> by hand.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ucc_theta0</span> <span class="o">=</span> <span class="n">UCC</span><span class="o">.</span><span class="n">from_t_amplitudes</span><span class="p">(</span><span class="n">t2</span><span class="p">,</span> <span class="n">t1</span><span class="o">=</span><span class="n">t1</span><span class="p">,</span> <span class="n">variant</span><span class="o">=</span><span class="s2">"restricted"</span><span class="p">)</span><span class="o">.</span><span class="n">to_parameters</span><span class="p">()</span>
@@ -556,7 +557,7 @@ keep fixed or fold into <code class="docutils literal notranslate"><span class="
 </pre></div>
 </div>
 <p>Both ansatzes reach the CCSD energy on this molecule. Their parameter counts differ, but be careful
-reading anything general into that at this size – the two scale quite differently. <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.UCJ.html#qiskit_fermions.circuit.library.UCJ" title="qiskit_fermions.circuit.library.UCJ"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCJ</span></code></a>’s
+reading anything general into that at this size; the two scale quite differently. <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.UCJ.html#qiskit_fermions.circuit.library.UCJ" title="qiskit_fermions.circuit.library.UCJ"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCJ</span></code></a>’s
 count is <span class="math">\(O(n_\text{orb}^2)\)</span> per repetition, while <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.UCC.html#qiskit_fermions.circuit.library.UCC" title="qiskit_fermions.circuit.library.UCC"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCC</span></code></a>’s doubles are
 <span class="math">\(O(n_\text{occ}^2 n_\text{vrt}^2)\)</span>, so UCC starts smaller on tiny systems and ends up much
 larger. At half filling the crossover is already around eight orbitals:</p>
@@ -577,7 +578,7 @@ them. What matters for this guide is that switching between the two costs three 
 <p>The two ansatzes also differ in how faithfully their circuits reproduce the gate. <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.UCJ.html#qiskit_fermions.circuit.library.UCJ" title="qiskit_fermions.circuit.library.UCJ"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCJ</span></code></a>
 synthesizes exactly, whereas <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.UCC.html#qiskit_fermions.circuit.library.UCC" title="qiskit_fermions.circuit.library.UCC"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCC</span></code></a>’s excitation terms do not commute, so its circuit
 <code class="xref py py-meth docutils literal notranslate"><span class="pre">definition()</span></code> is a first-order product formula. The simulation path used
-above applies the exponential exactly, so the optimization here is unaffected – but a circuit
+above applies the exponential exactly, so the optimization here is unaffected; but a circuit
 transpiled for hardware carries a Trotter error, tightened with a higher-order product formula.</p>
 </div>
 </section>
@@ -585,7 +586,7 @@ transpiled for hardware carries a Trotter error, tightened with a higher-order p
 <h2>Next steps<a class="headerlink" href="#next-steps" title="Link to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>See the <a class="reference internal" href="lucj.html#lucj-getting-started"><span class="std std-ref">LUCJ guide</span></a> for how <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.UCJ.html#qiskit_fermions.circuit.library.UCJ" title="qiskit_fermions.circuit.library.UCJ"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCJ</span></code></a> is normally constructed
-from coupled-cluster amplitudes, and how to transpile it onto qubits for hardware execution –
+from coupled-cluster amplitudes, and how to transpile it onto qubits for hardware execution;
 the same transpilation applies to <code class="docutils literal notranslate"><span class="pre">UCJ.from_parameters(lm_result.x,</span> <span class="pre">...)</span></code> here, built from the
 converged parameter vector from step 5.</p></li>
 <li><p>See <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.UCC.html#qiskit_fermions.circuit.library.UCC" title="qiskit_fermions.circuit.library.UCC"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCC</span></code></a> for the unitary coupled-cluster ansatz swapped in at step 6, including its
@@ -661,8 +662,8 @@ the linear method’s other hyperparameters (<code class="docutils literal notra
 <li><a class="reference internal" href="#construct-the-ansatz">1. Construct the ansatz</a></li>
 <li><a class="reference internal" href="#choose-an-unconstrained-parametrization-of-the-ansatz-tensors">2. Choose an unconstrained parametrization of the ansatz tensors</a></li>
 <li><a class="reference internal" href="#build-the-ansatz-and-evaluate-the-state-from-a-flat-parameter-vector">3. Build the ansatz and evaluate the state from a flat parameter vector</a></li>
-<li><a class="reference internal" href="#run-the-outer-optimization-loop-with-a-generic-optimizer">4. Run the outer optimization loop with a generic optimizer</a></li>
-<li><a class="reference internal" href="#run-the-outer-optimization-loop-with-ffsim-s-linear-method">5. Run the outer optimization loop with ffsim’s linear method</a></li>
+<li><a class="reference internal" href="#run-the-outer-loop-with-a-generic-optimizer">4. Run the outer loop with a generic optimizer</a></li>
+<li><a class="reference internal" href="#run-the-outer-loop-with-ffsim-s-linear-method">5. Run the outer loop with ffsim’s linear method</a></li>
 <li><a class="reference internal" href="#swap-in-a-different-ansatz">6. Swap in a different ansatz</a></li>
 <li><a class="reference internal" href="#next-steps">Next steps</a></li>
 </ul>
@@ -676,7 +677,7 @@ the linear method’s other hyperparameters (<code class="docutils literal notra
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=e33f9f55"></script>
+</div><script src="../_static/documentation_options.js?v=b8abbc59"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

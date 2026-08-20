@@ -3,12 +3,12 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="Mapping operator representations" href="mappers.html"><link rel="prev" title="Design Principles of Operator Representations" href="operators.html">
+<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="Map operator representations" href="mappers.html"><link rel="prev" title="Design Principles of Operator Representations" href="operators.html">
         <link rel="prefetch" href="../_static/images/qiskit-light-logo.svg" as="image">
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Group operator terms: exploit the operator structure - Qiskit Fermions 0.1.0+c6f2913</title>
+        <title>Group operator terms: exploit the operator structure - Qiskit Fermions 0.1.0+4cf3f3b</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.1.0+c6f2913</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.1.0+4cf3f3b</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.1.0+c6f2913</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.1.0+4cf3f3b</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -209,9 +209,9 @@
 <li class="toctree-l2"><a class="reference internal" href="lucj.html">Build an LUCJ ansatz</a></li>
 <li class="toctree-l2"><a class="reference internal" href="operators.html">Design Principles of Operator Representations</a></li>
 <li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Group operator terms: exploit the operator structure</a></li>
-<li class="toctree-l2"><a class="reference internal" href="mappers.html">Mapping operator representations</a></li>
-<li class="toctree-l2"><a class="reference internal" href="circuit.html">Working with fermionic circuits</a></li>
-<li class="toctree-l2"><a class="reference internal" href="transpilation.html">Transpiling fermionic circuits</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mappers.html">Map operator representations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="circuit.html">Work with fermionic circuits</a></li>
+<li class="toctree-l2"><a class="reference internal" href="transpilation.html">Transpile fermionic circuits</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ffsim.html">The ffsim simulation backend</a></li>
 <li class="toctree-l2"><a class="reference internal" href="vqe_outer_loop.html">Running the outer VQE parameter optimization loop</a></li>
 <li class="toctree-l2"><a class="reference internal" href="merge_slater_determinant.html">Optimize Slater determinant preparation</a></li>
@@ -271,7 +271,7 @@
 which collects routines that partition the terms of an operator based on their
 structure.</p>
 <p>As described in the <a class="reference internal" href="operators.html#term-grouping"><span class="std std-ref">operators guide</span></a>, operators can store a
-<strong>groups array</strong> - an optional part of the sparse data structure that associates each
+<strong>groups array</strong>, an optional part of the sparse data structure that associates each
 term with a group index. Terms sharing the same group index form a group, enabling
 systematic exploitation of structure in downstream processing.</p>
 <p>By grouping related terms (whether by physical properties, algebraic relationships,
@@ -320,7 +320,7 @@ group indices accordingly.</p>
 <figure class="align-default">
 <img alt="A simple directed graph on which we define our MajoranaOperator." class="plot-directive" src="../_images/grouping-1.png" />
 </figure>
-<p>Here, we have a simple two by three lattice of Majorana modes connected by
+<p>This is a simple two-by-three lattice of Majorana modes connected by
 directed edges. Each edge represents a term in our operator acting on the two
 connected modes. We want to group these terms according to their edge labels
 (shown on the graph): terms connected by edges with the same label are placed in
@@ -398,7 +398,7 @@ with local qubit encodings, <a class="reference external" href="https://arxiv.or
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Mapping operator representations</div>
+                <div class="title">Map operator representations</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
@@ -457,7 +457,7 @@ with local qubit encodings, <a class="reference external" href="https://arxiv.or
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=e33f9f55"></script>
+</div><script src="../_static/documentation_options.js?v=b8abbc59"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

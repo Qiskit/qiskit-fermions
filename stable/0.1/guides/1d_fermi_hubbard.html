@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Simulate 1D Fermi-Hubbard dynamics with flow sets - Qiskit Fermions 0.1.0+c6f2913</title>
+        <title>Simulate 1D Fermi-Hubbard dynamics with flow sets - Qiskit Fermions 0.1.0+4cf3f3b</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.1.0+c6f2913</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.1.0+4cf3f3b</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.1.0+c6f2913</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.1.0+4cf3f3b</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -209,9 +209,9 @@
 <li class="toctree-l2"><a class="reference internal" href="lucj.html">Build an LUCJ ansatz</a></li>
 <li class="toctree-l2"><a class="reference internal" href="operators.html">Design Principles of Operator Representations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="grouping.html">Group operator terms: exploit the operator structure</a></li>
-<li class="toctree-l2"><a class="reference internal" href="mappers.html">Mapping operator representations</a></li>
-<li class="toctree-l2"><a class="reference internal" href="circuit.html">Working with fermionic circuits</a></li>
-<li class="toctree-l2"><a class="reference internal" href="transpilation.html">Transpiling fermionic circuits</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mappers.html">Map operator representations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="circuit.html">Work with fermionic circuits</a></li>
+<li class="toctree-l2"><a class="reference internal" href="transpilation.html">Transpile fermionic circuits</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ffsim.html">The ffsim simulation backend</a></li>
 <li class="toctree-l2"><a class="reference internal" href="vqe_outer_loop.html">Running the outer VQE parameter optimization loop</a></li>
 <li class="toctree-l2"><a class="reference internal" href="merge_slater_determinant.html">Optimize Slater determinant preparation</a></li>
@@ -270,26 +270,26 @@
 <div class="admonition important">
 <p class="admonition-title">Important</p>
 <p>The concepts in this guide are currently available only in the Python API.
-Equivalent functionality will be made available via the C API in a future release.</p>
+Equivalent functionality will be made available in the C API in a future release.</p>
 </div>
 <p>This guide builds a circuit for the <strong>time dynamics of the one-dimensional Fermi-Hubbard
 model</strong>, from writing down the Hamiltonian to checking the evolved site densities. What
 makes the route interesting is a single idea, taken from the <em>flow set</em> framework of
-Gandon et al. <a class="footnote-reference brackets" href="#id10" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a> — the work that also motivated the <a class="reference internal" href="../stubs/qiskit_fermions.operators.TransferVertexOperator.html#qiskit_fermions.operators.TransferVertexOperator" title="qiskit_fermions.operators.TransferVertexOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransferVertexOperator</span></code></a>
+Gandon et al. <a class="footnote-reference brackets" href="#id10" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a>, the work that also motivated the <a class="reference internal" href="../stubs/qiskit_fermions.operators.TransferVertexOperator.html#qiskit_fermions.operators.TransferVertexOperator" title="qiskit_fermions.operators.TransferVertexOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransferVertexOperator</span></code></a>
 in this package:</p>
 <blockquote>
 <div><p>Instead of grouping Hamiltonian terms <em>after</em> the fermion-to-qubit mapping, group
-them <em>before</em> it, into <strong>flow sets</strong> – one-dimensional subsets of the directed
+them <em>before</em> it, into <strong>flow sets</strong>, one-dimensional subsets of the directed
 fermionic interaction graph whose transfer operators mutually commute.</p>
 </div></blockquote>
 <p>That choice drives everything below. It calls for a <strong>custom fermion-to-qubit encoding</strong>
 tailored to the flow sets, which here spends one <strong>ancilla qubit</strong> so that the qubit count
 associated with the implementation of a given Hamiltonian term no longer grows with the
-number of fermionic modes (as is the case for JW), and for a <strong>custom synthesis</strong> that
+number of fermionic modes (as is the case for Jordan-Wigner (JW)), and for a <strong>custom synthesis</strong> that
 exploits the commutativity within each set. The payoff is a circuit whose two-qubit depth
 is <strong>constant in the system size</strong>, against the linear growth of a JW-based term-by-term
-Trotterization. The plumbing that gets an encoding of your own into the transpiler —
-<a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.CustomF2QLayout.html#qiskit_fermions.transpiler.passes.CustomF2QLayout" title="qiskit_fermions.transpiler.passes.CustomF2QLayout"><code class="xref py py-class docutils literal notranslate"><span class="pre">CustomF2QLayout</span></code></a> and <a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis.html#qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis" title="qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis"><code class="xref py py-class docutils literal notranslate"><span class="pre">MapperFnEvolutionSynthesis</span></code></a> — is the part that
+Trotterization. The machinery that gets an encoding of your own into the transpiler
+(<a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.CustomF2QLayout.html#qiskit_fermions.transpiler.passes.CustomF2QLayout" title="qiskit_fermions.transpiler.passes.CustomF2QLayout"><code class="xref py py-class docutils literal notranslate"><span class="pre">CustomF2QLayout</span></code></a> and <a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis.html#qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis" title="qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis"><code class="xref py py-class docutils literal notranslate"><span class="pre">MapperFnEvolutionSynthesis</span></code></a>) is the part that
 carries over to any model.</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
@@ -308,8 +308,8 @@ operators,</p>
 T_{jk} = -\tfrac{1}{2} \left( a^\dagger_j - a_j \right)
                        \left( a^\dagger_k + a_k \right) \, ,\]</div>
 </div>
-<p>so <span class="math">\(V_j\)</span> measures the occupation of mode <span class="math">\(j\)</span> – it is <span class="math">\(+1\)</span> when empty
-and <span class="math">\(-1\)</span> when filled – while <span class="math">\(T_{jk}\)</span> transfers a fermion along the
+<p>so <span class="math">\(V_j\)</span> measures the occupation of mode <span class="math">\(j\)</span> (it is <span class="math">\(+1\)</span> when empty
+and <span class="math">\(-1\)</span> when filled), while <span class="math">\(T_{jk}\)</span> transfers a fermion along the
 <em>directed</em> edge <span class="math">\(j \to k\)</span>. Note that the two indices of <span class="math">\(T_{jk}\)</span> are <em>not</em>
 interchangeable: the <strong>first</strong> index carries the minus combination and the second the
 plus, which is what makes <span class="math">\(T_{jk}\)</span> distinct from <span class="math">\(T_{kj}\)</span> and gives the edge
@@ -321,7 +321,7 @@ that site (one arrives, one leaves) and <strong>anticommute</strong> if they <em
 both leave).</p>
 <p>The rule is easiest to see on a picture. Drawing the vertices as nodes and each
 <span class="math">\(T_{jk}\)</span> as an arrow from <span class="math">\(j\)</span> to <span class="math">\(k\)</span> gives the <em>directed</em> interaction
-graph – here for the four-site chain used throughout this guide, which carries both
+graph, here for the four-site chain used throughout this guide, which carries both
 orientations of every bond:</p>
 <p>(<a class="reference download internal" download="" href="../_downloads/84627f9604fa6a235cd680962d7e9297/1d_fermi_hubbard-1.png"><code class="xref download docutils literal notranslate"><span class="pre">png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/76662b2f90dd8a5054601c626a1fde54/1d_fermi_hubbard-1.hires.png"><code class="xref download docutils literal notranslate"><span class="pre">hires.png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/91ad15736ca877a96aef08a56facf686/1d_fermi_hubbard-1.pdf"><code class="xref download docutils literal notranslate"><span class="pre">pdf</span></code></a>)</p>
 <figure class="align-default">
@@ -330,7 +330,7 @@ orientations of every bond:</p>
 <p>Trace the rule on the figure. Take <span class="math">\(T_{1,2}\)</span> and <span class="math">\(T_{2,3}\)</span>: one arrow
 <em>arrives</em> at site 2 and the other <em>leaves</em> it, so the fermion flows straight through and
 the two operators commute. Take instead <span class="math">\(T_{1,2}\)</span> and <span class="math">\(T_{3,2}\)</span>: both arrows
-<em>point into</em> site 2 – they clash, and those two anticommute.</p>
+<em>point into</em> site 2: they clash, and those two anticommute.</p>
 <p>This is what makes flow sets possible. Pick a set of arrows forming a directed path and
 every pair either meets head-to-tail or does not meet at all, so the whole set commutes
 even though the individual operators overlap on shared sites. Evolving under a single flow
@@ -395,10 +395,10 @@ appear in two bonds, whereas the boundary sites only appear in one. Every term l
 appears in the graph drawn above: the <code class="docutils literal notranslate"><span class="pre">T(j,k)</span></code> terms are its arrows, and the <code class="docutils literal notranslate"><span class="pre">V(j)</span></code>
 terms its nodes.</p>
 </section>
-<section id="partitioning-into-flow-sets">
-<h2>2. Partitioning into flow sets<a class="headerlink" href="#partitioning-into-flow-sets" title="Link to this heading">¶</a></h2>
+<section id="partition-into-flow-sets">
+<h2>2. Partition into flow sets<a class="headerlink" href="#partition-into-flow-sets" title="Link to this heading">¶</a></h2>
 <p>Next, label each term with the flow set it belongs to. The
-<a class="reference internal" href="../stubs/qiskit_fermions.operators.TransferVertexOperator.html#qiskit_fermions.operators.TransferVertexOperator.groups" title="qiskit_fermions.operators.TransferVertexOperator.groups"><code class="xref py py-attr docutils literal notranslate"><span class="pre">groups</span></code></a> attribute exists exactly for this purpose: an
+<a class="reference internal" href="../stubs/qiskit_fermions.operators.TransferVertexOperator.html#qiskit_fermions.operators.TransferVertexOperator.groups" title="qiskit_fermions.operators.TransferVertexOperator.groups"><code class="xref py py-attr docutils literal notranslate"><span class="pre">groups</span></code></a> attribute exists for this purpose: an
 <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate over a grouped operator decomposes into one <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a>
 per group (<a class="reference internal" href="#flowsets-transpile"><span class="std std-ref">step 6</span></a> puts this to work), so the grouping decided
 here at the <em>fermionic</em> level survives into the circuit.</p>
@@ -434,15 +434,15 @@ flow property all terms within a group commute.</p>
 <p>The east/west labels used throughout this guide are <strong>geometric</strong>: with the chain drawn
 left to right and mode indices increasing in that direction, <span class="math">\(T_{j,j+1}\)</span> points
 east and <span class="math">\(T_{j+1,j}\)</span> points west. Ref. <a class="footnote-reference brackets" href="#id10" id="id3" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a> is internally inconsistent on this
-naming — its prose and its figures disagree — so this guide deliberately does <em>not</em>
+naming (its prose and its figures disagree) so this guide deliberately does <em>not</em>
 follow the prose, and instead keeps the labels tied to the picture. When cross-reading
 with the paper, match the flow sets by their Pauli weights (1 and 3 below), not by the
 compass words.</p>
 </div>
 </section>
-<section id="writing-the-custom-encoding">
-<h2>3. Writing the custom encoding<a class="headerlink" href="#writing-the-custom-encoding" title="Link to this heading">¶</a></h2>
-<p>Now the substance of this guide. Section IV B of Ref. <a class="footnote-reference brackets" href="#id10" id="id4" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a> classifies the forms that a
+<section id="write-the-custom-encoding">
+<h2>3. Write the custom encoding<a class="headerlink" href="#write-the-custom-encoding" title="Link to this heading">¶</a></h2>
+<p>Section IV B of Ref. <a class="footnote-reference brackets" href="#id10" id="id4" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a> classifies the forms that a
 local fermion-to-qubit encoding can take when restricted to a flow set. Plain
 Jordan-Wigner uses <span class="math">\(N_q = N_f\)</span> qubits and maps every hopping term to a weight-2
 Pauli. The classification shows that <strong>spending extra qubits buys structure</strong> in the
@@ -457,7 +457,7 @@ T_{j,j+1} = -\tfrac{1}{2} X_{j+1} \, , \qquad
 T_{j+1,j} = +\tfrac{1}{2} Z_j X_{j+1} Z_{j+2} \, .\]</div>
 </div>
 <p>The index <span class="math">\(j+2\)</span> in the last expression is what forces the extra qubit. The final bond
-of the chain has <span class="math">\(j = N_f - 2\)</span>, so its <span class="math">\(Z_{j+2}\)</span> lands on qubit <span class="math">\(N_f\)</span> —
+of the chain has <span class="math">\(j = N_f - 2\)</span>, so its <span class="math">\(Z_{j+2}\)</span> lands on qubit <span class="math">\(N_f\)</span>,
 one past the last fermionic mode <span class="math">\(N_f - 1\)</span>. That trailing qubit is the ancilla, and it
 is why <span class="math">\(N_q = N_f + 1\)</span> rather than <span class="math">\(N_f\)</span>. The same reach shows up in
 <span class="math">\(V_j\)</span>, whose <span class="math">\(Z_{j+1}\)</span> sits on the ancilla for <span class="math">\(j = N_f - 1\)</span>.</p>
@@ -470,7 +470,7 @@ Paulis.</p>
 the product identity <span class="math">\(T_{j,j+1} = -V_j V_{j+1} T_{j+1,j}\)</span>, which the Paulis above
 satisfy. Getting either wrong yields an operator that still obeys the commutation
 relations but no longer represents the same Hamiltonian, so it is worth verifying the
-encoding numerically — which is exactly what <a class="reference internal" href="#flowsets-verify"><span class="std std-ref">step 4</span></a> does.</p>
+encoding numerically; this happens in <a class="reference internal" href="#flowsets-verify"><span class="std std-ref">step 4</span></a>.</p>
 </div>
 <p>Writing the encoding means writing a function that maps a <strong>single</strong> generalized transfer
 operator to a Pauli string; <a class="reference internal" href="../stubs/qiskit_fermions.mappers.map_transfer_vertex_generators.html#qiskit_fermions.mappers.map_transfer_vertex_generators" title="qiskit_fermions.mappers.map_transfer_vertex_generators"><code class="xref py py-func docutils literal notranslate"><span class="pre">map_transfer_vertex_generators()</span></code></a> handles the iteration
@@ -511,7 +511,7 @@ over terms and their composition:</p>
 <p class="admonition-title">Important</p>
 <p>The signature <code class="docutils literal notranslate"><span class="pre">(operator,</span> <span class="pre">num_qubits)</span></code> is what <a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis.html#qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis.mapper_fn" title="qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis.mapper_fn"><code class="xref py py-attr docutils literal notranslate"><span class="pre">MapperFnEvolutionSynthesis.mapper_fn</span></code></a>
 expects, and the return type must be a
-<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.quantum_info.SparseObservable" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">SparseObservable</span></code></a>. Keeping to that contract is what makes
+<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.quantum_info.SparseObservable" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">SparseObservable</span></code></a>, which makes
 the function directly usable as a transpiler plugin in <a class="reference internal" href="#flowsets-transpile"><span class="std std-ref">step 6</span></a>.</p>
 </div>
 <p>Applying it to the Hamiltonian from step 1 gives the encoded operator on
@@ -538,8 +538,8 @@ the function directly usable as a transpiler plugin in <a class="reference inter
 </div>
 <p>Fourteen terms, in exactly three shapes: the hopping has become <code class="docutils literal notranslate"><span class="pre">X</span></code> and <code class="docutils literal notranslate"><span class="pre">ZXZ</span></code>, the
 interaction <code class="docutils literal notranslate"><span class="pre">ZZ</span></code>, and the leading <code class="docutils literal notranslate"><span class="pre">[]</span></code> is the identity contributing only a global
-phase. Note that the <code class="docutils literal notranslate"><span class="pre">ZZ</span></code> terms reach both nearest <em>and</em> next-nearest neighbours —
-<span class="math">\(V_jV_{j+1}\)</span> spans qubits <span class="math">\(j\)</span> through <span class="math">\(j+2\)</span> — which is the cost side of
+phase. Note that the <code class="docutils literal notranslate"><span class="pre">ZZ</span></code> terms reach both nearest <em>and</em> next-nearest neighbors;
+<span class="math">\(V_jV_{j+1}\)</span> spans qubits <span class="math">\(j\)</span> through <span class="math">\(j+2\)</span>, which is the cost side of
 delocalizing the parity.</p>
 <p>Grouping by flow set exposes the asymmetry the construction buys. Listing the Pauli
 weights present in each group:</p>
@@ -553,16 +553,16 @@ weights present in each group:</p>
 </div>
 <p>The east-oriented flow set (group 0) consists <strong>entirely of weight-1 Paulis</strong>. Its time
 evolution is therefore a layer of single-qubit rotations and needs <em>no entangling gates at
-all</em> – whereas under Jordan-Wigner every hopping term is weight-2 and requires them. This
+all</em>, whereas under Jordan-Wigner every hopping term is weight-2 and requires them. This
 is the space-time trade-off of Ref. <a class="footnote-reference brackets" href="#id10" id="id5" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a> in its simplest form: one extra qubit converts
 half of the hopping Hamiltonian into single-qubit rotations.</p>
 <p>The west-oriented flow set (group 1) pays for it at weight 3, and the interaction (group 2)
 sits at weight 2, with the weight-0 entry being the identity. Nothing here is yet a
-<em>circuit</em> claim — what a synthesis makes of these weights is the subject of steps 5
+<em>circuit</em> claim; what a synthesis makes of these weights is the subject of steps 5
 and 6.</p>
 </section>
-<section id="verifying-the-encoding">
-<span id="flowsets-verify"></span><h2>4. Verifying the encoding<a class="headerlink" href="#verifying-the-encoding" title="Link to this heading">¶</a></h2>
+<section id="verify-the-encoding">
+<span id="flowsets-verify"></span><h2>4. Verify the encoding<a class="headerlink" href="#verify-the-encoding" title="Link to this heading">¶</a></h2>
 <p>A custom encoding is only useful if it is <em>faithful</em>, and a hand-written one deserves to
 be checked rather than trusted. Because this encoding uses <span class="math">\(N_f + 1\)</span> qubits, the
 qubit Hilbert space is twice as large as the fermionic one, so the encoded Hamiltonian
@@ -578,13 +578,13 @@ occupation string: qubit <span class="math">\(j\)</span> holds <span class="math
 <p>so bit <span class="math">\(b_{j+1}\)</span> records the parity of all occupations up to and including site
 <span class="math">\(j\)</span>. There are <span class="math">\(N_f + 1\)</span> such bits for <span class="math">\(N_f\)</span> occupations, which is
 where the ancilla comes from. The occupation is recovered as the <em>difference</em> between
-neighbouring bits, <span class="math">\(n_j = b_j \oplus b_{j+1}\)</span> — so an occupied site shows up as a
+neighboring bits, <span class="math">\(n_j = b_j \oplus b_{j+1}\)</span>. An occupied site therefore shows up as a
 <strong>domain wall</strong> between two adjacent bits, which is why this is called a domain-wall (or
-Kramers-Wannier) encoding. That is also exactly why <span class="math">\(V_j = Z_j Z_{j+1}\)</span>: the
-product of two neighbouring <span class="math">\(Z\)</span>s reads off precisely that difference.</p>
+Kramers-Wannier) encoding. That is also why <span class="math">\(V_j = Z_j Z_{j+1}\)</span>: the
+product of two neighboring <span class="math">\(Z\)</span>s reads off that difference.</p>
 <p>Writing this map out for a few states makes the structure concrete (note that
 <span class="math">\(b_0 = 0\)</span> is fixed, so only <em>half</em> of the <span class="math">\(2^{N_f+1}\)</span> qubit states are in the
-image — hence an isometry rather than a unitary):</p>
+image, and hence an isometry rather than a unitary):</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">domain_wall_bits</span><span class="p">(</span><span class="n">occupations</span><span class="p">):</span>
 <span class="gp">... </span>    <span class="n">parity</span> <span class="o">=</span> <span class="mi">0</span>
 <span class="gp">... </span>    <span class="n">bits</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -643,8 +643,8 @@ give the same result as evolving it in the fermionic space first and mapping aft
 <span class="go">True</span>
 </pre></div>
 </div>
-<p>The intertwining relation holds exactly. As a corollary the spectra must agree, with
-every Jordan-Wigner eigenvalue appearing twice in the larger space — once for each
+<p>The intertwining relation holds exactly. As a corollary, the spectra must agree, with
+every Jordan-Wigner eigenvalue appearing twice in the larger space, once for each
 value of the unconstrained global parity:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">jw_spectrum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">eigvalsh</span><span class="p">(</span><span class="n">jw_matrix</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">flow_spectrum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">eigvalsh</span><span class="p">(</span><span class="n">flow_matrix</span><span class="p">)</span>
@@ -658,9 +658,9 @@ value of the unconstrained global parity:</p>
 </pre></div>
 </div>
 </section>
-<section id="building-the-fermionic-circuit">
-<h2>5. Building the fermionic circuit<a class="headerlink" href="#building-the-fermionic-circuit" title="Link to this heading">¶</a></h2>
-<p>Before any qubits enter the picture, the dynamics are expressed on the <em>fermionic</em> level.
+<section id="build-the-fermionic-circuit">
+<h2>5. Build the fermionic circuit<a class="headerlink" href="#build-the-fermionic-circuit" title="Link to this heading">¶</a></h2>
+<p>Before involving any qubits, the dynamics are expressed on the <em>fermionic</em> level.
 A <a class="reference internal" href="../stubs/qiskit_fermions.circuit.FermionicCircuit.html#qiskit_fermions.circuit.FermionicCircuit" title="qiskit_fermions.circuit.FermionicCircuit"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicCircuit</span></code></a> acts on fermionic modes rather than qubits, and an
 <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate over the Hamiltonian is the whole circuit:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.circuit</span><span class="w"> </span><span class="kn">import</span> <span class="n">FermionicCircuit</span>
@@ -679,10 +679,10 @@ A <a class="reference internal" href="../stubs/qiskit_fermions.circuit.Fermionic
 </figure>
 <p>One opaque box over all four modes. The interesting part is what it decomposes into:
 <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> splits itself group-by-group whenever its operator has
-<a class="reference internal" href="../stubs/qiskit_fermions.operators.TransferVertexOperator.html#qiskit_fermions.operators.TransferVertexOperator.groups" title="qiskit_fermions.operators.TransferVertexOperator.groups"><code class="xref py py-attr docutils literal notranslate"><span class="pre">groups</span></code></a> assigned. So a single
+<a class="reference internal" href="../stubs/qiskit_fermions.operators.TransferVertexOperator.html#qiskit_fermions.operators.TransferVertexOperator.groups" title="qiskit_fermions.operators.TransferVertexOperator.groups"><code class="xref py py-attr docutils literal notranslate"><span class="pre">groups</span></code></a> assigned, so a single
 <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit#decompose" title="(in Qiskit v2.5)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">decompose()</span></code></a> turns it into <strong>one</strong> <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a>
-<strong>per flow set</strong>, ordered by group index — east, west, then the diagonal interaction,
-carrying 3, 3 and 8 terms respectively, exactly the groups from step 2:</p>
+<strong>per flow set</strong>, ordered by group index: east, west, then the diagonal interaction,
+carrying 3, 3, and 8 terms respectively, the groups from step 2:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">flow_set_circuit</span> <span class="o">=</span> <span class="n">circuit</span><span class="o">.</span><span class="n">decompose</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">flow_set_circuit</span><span class="o">.</span><span class="n">draw</span><span class="p">(</span><span class="s2">"mpl"</span><span class="p">)</span>
 <span class="go">&lt;Figure size ... with 1 Axes&gt;</span>
@@ -697,12 +697,12 @@ synthesized independently, so the partitioning decided at the fermionic level in
 what the transpiler ends up acting on. Skip the decomposition and the grouping is simply
 ignored.</p>
 </section>
-<section id="transpiling-with-the-custom-encoding">
-<span id="flowsets-transpile"></span><h2>6. Transpiling with the custom encoding<a class="headerlink" href="#transpiling-with-the-custom-encoding" title="Link to this heading">¶</a></h2>
+<section id="transpile-with-the-custom-encoding">
+<span id="flowsets-transpile"></span><h2>6. Transpile with the custom encoding<a class="headerlink" href="#transpile-with-the-custom-encoding" title="Link to this heading">¶</a></h2>
 <p>The encoding is now ready to be used by the transpiler. Two more pieces are needed:</p>
 <p><strong>A layout.</strong> The default <a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.TrivialF2QLayout.html#qiskit_fermions.transpiler.passes.TrivialF2QLayout" title="qiskit_fermions.transpiler.passes.TrivialF2QLayout"><code class="xref py py-class docutils literal notranslate"><span class="pre">TrivialF2QLayout</span></code></a> assumes one qubit per mode, which is
 wrong here. <a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.CustomF2QLayout.html#qiskit_fermions.transpiler.passes.CustomF2QLayout" title="qiskit_fermions.transpiler.passes.CustomF2QLayout"><code class="xref py py-class docutils literal notranslate"><span class="pre">CustomF2QLayout</span></code></a> associates the fermionic register with a
-<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.QuantumRegister" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumRegister</span></code></a> of a different size — this is how ancilla
+<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.QuantumRegister" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumRegister</span></code></a> of a different size, which is how ancilla
 qubits enter the pipeline.</p>
 <p><strong>A synthesis plugin.</strong> <a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis.html#qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis" title="qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis"><code class="xref py py-class docutils literal notranslate"><span class="pre">MapperFnEvolutionSynthesis</span></code></a> takes the mapper function
 directly, maps the <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate’s Hamiltonian with it, and emits a
@@ -766,11 +766,11 @@ the circuit shows why:</p>
 <img alt="The transpiled circuit under LieTrotter's term-by-term synthesis, a long serial chain of CX ladders." class="plot-directive" src="../_images/1d_fermi_hubbard-14.png" />
 </figure>
 <p>Every term has been compiled in isolation: a basis change, a <code class="docutils literal notranslate"><span class="pre">CX</span></code> ladder down to a single
-rotation, then the ladder undone. The weight-1 flow set really is free — its terms are
-lone rotations with no ladder around them — but each weight-3 term pays for four
-<code class="docutils literal notranslate"><span class="pre">CX</span></code>s, and because the ladders are emitted one term after another nothing overlaps.</p>
-<p>So the grouping <em>has</em> been honoured at the level of the pipeline — three flow sets, three
-mapped <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.library.PauliEvolutionGate" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">PauliEvolutionGate</span></code></a>s — but it buys almost
+rotation, then the ladder undone. The weight-1 flow set really is free; its terms are
+lone rotations with no ladder around them, but each weight-3 term pays for four
+<code class="docutils literal notranslate"><span class="pre">CX</span></code>s, and because the ladders are emitted one term after another, nothing overlaps.</p>
+<p>The grouping <em>has</em> been honored at the level of the pipeline (three flow sets, three
+mapped <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.library.PauliEvolutionGate" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">PauliEvolutionGate</span></code></a>s) but it buys almost
 nothing, because <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.synthesis.LieTrotter" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">LieTrotter</span></code></a> synthesizes each one <strong>term by
 term</strong>. It does not know that the terms handed to it mutually commute, so it still compiles
 them one after another. The structural advantage is present in the <em>operator</em> and preserved by
@@ -781,19 +781,19 @@ section replaces.</p>
 <span id="flowsets-synthesis"></span><h2>7. A flow-set-aware synthesis<a class="headerlink" href="#a-flow-set-aware-synthesis" title="Link to this heading">¶</a></h2>
 <p>Recovering the advantage requires telling the synthesis about the structure. This is
 Section IV C of Ref. <a class="footnote-reference brackets" href="#id10" id="id6" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a>: because all terms of a flow set commute, they can be
-<strong>simultaneously diagonalized</strong> by a single Clifford circuit, rotated in one shared basis,
-and rotated back — instead of once per term.</p>
+<strong>simultaneously diagonalized</strong> by a single Clifford circuit, rotated in one shared basis
+and rotated back, instead of once per term.</p>
 <p>For this encoding the Clifford is remarkably simple. Conjugating by a chain of <code class="docutils literal notranslate"><span class="pre">CZ</span></code>
-gates on nearest neighbours maps</p>
+gates on nearest neighbors maps</p>
 <div class="math-wrapper docutils container">
 <div class="math">
 \[X_{j+1} \; \longmapsto \; Z_j X_{j+1} Z_{j+2}\]</div>
 </div>
-<p>simultaneously for <strong>every</strong> <span class="math">\(j\)</span>. So one <code class="docutils literal notranslate"><span class="pre">CZ</span></code> chain turns the entire weight-3
+<p>simultaneously for <strong>every</strong> <span class="math">\(j\)</span>. One <code class="docutils literal notranslate"><span class="pre">CZ</span></code> chain turns the entire weight-3
 (west) flow set into a layer of independent single-qubit <span class="math">\(X\)</span> rotations. All the
 <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.synthesis.EvolutionSynthesis" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">EvolutionSynthesis</span></code></a> interface asks for is a
 <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.synthesis.EvolutionSynthesis#synthesize" title="(in Qiskit v2.5)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">synthesize()</span></code></a> method; <code class="docutils literal notranslate"><span class="pre">reps</span></code> is here because a
-product formula is also where the number of Trotter steps belongs, exactly as in Qiskit’s
+product formula is also where the number of Trotter steps belongs, as in Qiskit’s
 own <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.synthesis.LieTrotter" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">LieTrotter</span></code></a>:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit.circuit</span><span class="w"> </span><span class="kn">import</span> <span class="n">QuantumCircuit</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit.synthesis.evolution</span><span class="w"> </span><span class="kn">import</span> <span class="n">EvolutionSynthesis</span>
@@ -806,7 +806,7 @@ own <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/q
 <span class="gp">... </span>            <span class="n">circuit</span><span class="o">.</span><span class="n">cz</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># The interaction reaches nearest (distance 1) and next-nearest (distance 2)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># neighbours, so every interior qubit carries four Rzz gates and can only do one at</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># neighbors, so every interior qubit carries four Rzz gates and can only do one at</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># a time: four layers is the best any schedule can do. These offsets achieve it.</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">rzz_layers</span><span class="p">(</span><span class="n">circuit</span><span class="p">,</span> <span class="n">angles</span><span class="p">):</span>
 <span class="gp">... </span><span class="w">    </span><span class="sd">"""Emit the diagonal Rzz gates in four layers of disjoint qubit pairs."""</span>
@@ -873,7 +873,7 @@ own <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/q
 <p>Two details are easy to miss. A custom
 <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.synthesis.EvolutionSynthesis" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">EvolutionSynthesis</span></code></a> must expose a <code class="docutils literal notranslate"><span class="pre">preserve_order</span></code>
 attribute, which the high-level-synthesis pass reads.</p>
-<p>And both helpers emit their gates in explicit layers rather than in term order, because
+<p>Both helpers emit their gates in explicit layers rather than in term order, because
 <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit#depth" title="(in Qiskit v2.5)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">depth()</span></code></a> schedules gates <em>as soon as possible in the
 order they were added</em>. Since all the gates within one of these sets commute, that order
 is ours to choose, and choosing it badly is what a term-by-term synthesis does: emitting
@@ -881,7 +881,7 @@ the overlapping <code class="docutils literal notranslate"><span class="pre">CZ<
 rather than the constant 2 the hardware could achieve.</p>
 </div>
 <p>Selecting it requires nothing more than handing it to
-<a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis.html#qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis.product_formula" title="qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis.product_formula"><code class="xref py py-attr docutils literal notranslate"><span class="pre">MapperFnEvolutionSynthesis.product_formula</span></code></a> — which is the argument
+<a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis.html#qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis.product_formula" title="qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis.product_formula"><code class="xref py py-attr docutils literal notranslate"><span class="pre">MapperFnEvolutionSynthesis.product_formula</span></code></a>, which is the argument
 <code class="docutils literal notranslate"><span class="pre">flow_set_pass_manager</span></code> takes. Nothing else about the pipeline, or the fermionic circuit
 it runs on, changes:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">pass_manager</span> <span class="o">=</span> <span class="n">flow_set_pass_manager</span><span class="p">(</span><span class="n">flow_set_circuit</span><span class="o">.</span><span class="n">register</span><span class="p">,</span> <span class="n">FlowSetSynthesis</span><span class="p">())</span>
@@ -909,7 +909,7 @@ basis and the interaction is emitted in layers of disjoint pairs.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Both drawings show the circuit after <code class="docutils literal notranslate"><span class="pre">decompose(reps=6)</span></code>, which rewrites everything
-into the <code class="docutils literal notranslate"><span class="pre">U</span></code> and <code class="docutils literal notranslate"><span class="pre">CX</span></code> basis — so the <code class="docutils literal notranslate"><span class="pre">CZ</span></code>, <code class="docutils literal notranslate"><span class="pre">Rx</span></code> and <code class="docutils literal notranslate"><span class="pre">Rzz</span></code> gates emitted by
+into the <code class="docutils literal notranslate"><span class="pre">U</span></code> and <code class="docutils literal notranslate"><span class="pre">CX</span></code> basis, so the <code class="docutils literal notranslate"><span class="pre">CZ</span></code>, <code class="docutils literal notranslate"><span class="pre">Rx</span></code> and <code class="docutils literal notranslate"><span class="pre">Rzz</span></code> gates emitted by
 <code class="docutils literal notranslate"><span class="pre">FlowSetSynthesis</span></code> are not visible as such. That is deliberate: it puts both circuits
 in the same basis, which is the only way the two-qubit counts and depths above are
 comparable. It is the <em>layer structure</em> that is worth reading off these figures, not the
@@ -947,8 +947,8 @@ Hamiltonian, well past what could be simulated by brute force:</p>
 <span class="go">[23, 47, 87, 207, 407]</span>
 </pre></div>
 </div>
-<p>The two-qubit <strong>depth stays at 12</strong> from 4 modes to 100, while <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.synthesis.LieTrotter" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">LieTrotter</span></code></a>
-grows linearly to 407 — the flow sets let it parallelize a little <em>within</em> the pipeline, but
+<p>The two-qubit <strong>depth stays at 12</strong> from four modes to 100, while <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.synthesis.LieTrotter" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">LieTrotter</span></code></a>
+grows linearly to 407. The flow sets let it parallelize a little <em>within</em> the pipeline, but
 each set is still Trotterized term by term, so the growth is only slowed, not removed:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
 <span class="gp">&gt;&gt;&gt;</span>
@@ -966,33 +966,33 @@ each set is still Trotterized term by term, so the growth is only slowed, not re
 <figure class="align-default">
 <img alt="Two-qubit depth against number of modes; LieTrotter grows linearly while the flow-set synthesis stays flat at 12." class="plot-directive" src="../_images/1d_fermi_hubbard-19.png" />
 </figure>
-<p>The gate <em>count</em> grows linearly under both — there are <span class="math">\(O(N)\)</span> terms to apply, and
-that is unavoidable — but the flow-set synthesis applies them in a constant number of
+<p>The gate <em>count</em> grows linearly under both (there are <span class="math">\(O(N)\)</span> terms to apply, and
+that is unavoidable) but the flow-set synthesis applies them in a constant number of
 parallel layers. This is the constant-depth result of Ref. <a class="footnote-reference brackets" href="#id10" id="id7" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a>.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>The depth 12 splits across the three flow sets as 0 + 4 + 8, at every chain length. The
 east flow set contributes <strong>zero</strong>: it is bare <code class="docutils literal notranslate"><span class="pre">Rx</span></code> rotations. The west flow set costs 4,
-from the two <code class="docutils literal notranslate"><span class="pre">CZ</span></code> brickwork layers going in and the two coming out — dropping the
-interaction leaves exactly that, a two-qubit depth of 4 at any chain length. The remaining
-8 is the interaction, whose <code class="docutils literal notranslate"><span class="pre">Rzz</span></code> terms act on both nearest and next-nearest neighbours
+from the two <code class="docutils literal notranslate"><span class="pre">CZ</span></code> brickwork layers going in and the two coming out; dropping the
+interaction leaves that, a two-qubit depth of 4 at any chain length. The remaining
+8 is the interaction, whose <code class="docutils literal notranslate"><span class="pre">Rzz</span></code> terms act on both nearest and next-nearest neighbors
 and so need four disjoint layers, each costing two <code class="docutils literal notranslate"><span class="pre">CX</span></code>s. Four is optimal here: every
-interior qubit carries four <code class="docutils literal notranslate"><span class="pre">Rzz</span></code> gates — two to each neighbour and two to each
-next-nearest one — and can only take part in one at a time, so no schedule can do
+interior qubit carries four <code class="docutils literal notranslate"><span class="pre">Rzz</span></code> gates (two to each neighbor and two to each
+next-nearest one) and can only take part in one at a time, so no schedule can do
 better.</p>
 <p>That two thirds of the depth is the interaction shows where this encoding really excels:
 at the hopping, and so at the dynamics of a free-fermion chain. Do note, though, that the
-interaction does not commute with the hopping — leaving it out is not an approximation to
+interaction does not commute with the hopping: leaving it out is not an approximation to
 Fermi-Hubbard but a different model. Where the balance falls for a given problem is worth
 exploring.</p>
 </div>
 </section>
-<section id="checking-the-dynamics">
-<h2>9. Checking the dynamics<a class="headerlink" href="#checking-the-dynamics" title="Link to this heading">¶</a></h2>
-<p>Finally, the physics. Under the domain-wall map an occupation pattern becomes a
+<section id="check-the-dynamics">
+<h2>9. Check the dynamics<a class="headerlink" href="#check-the-dynamics" title="Link to this heading">¶</a></h2>
+<p>Under the domain-wall map an occupation pattern becomes a
 cumulative-parity string, so the initial state is prepared differently than under
-Jordan-Wigner — a practical consequence of delocalizing the parity that is easy to
-overlook. The helper from step 4 gives the right label:</p>
+Jordan-Wigner, an easily overlooked practical consequence of delocalizing the parity. The
+helper from step 4 gives the right label:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">occupations</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">initial_label</span> <span class="o">=</span> <span class="s2">""</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">b</span><span class="p">)</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">domain_wall_bits</span><span class="p">(</span><span class="n">occupations</span><span class="p">)))</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">initial_label</span>
@@ -1002,8 +1002,8 @@ overlook. The helper from step 4 gives the right label:</p>
 <p>Now compare <code class="docutils literal notranslate"><span class="pre">FlowSetSynthesis</span></code> against <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.synthesis.LieTrotter" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">LieTrotter</span></code></a> at increasing
 numbers of Trotter steps, measuring the fidelity of the evolved state against exact matrix
 exponentiation. The step count is a property of the <em>product formula</em>, so both columns run
-the very same fermionic circuit — <code class="docutils literal notranslate"><span class="pre">circuit</span></code> from step 5, a single <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a>
-gate at the full time — and let the synthesis subdivide it:</p>
+the very same fermionic circuit (<code class="docutils literal notranslate"><span class="pre">circuit</span></code> from step 5, a single <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a>
+gate at the full time) and let the synthesis subdivide it:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit.quantum_info</span><span class="w"> </span><span class="kn">import</span> <span class="n">Statevector</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">scipy.linalg</span><span class="w"> </span><span class="kn">import</span> <span class="n">expm</span>
 <span class="gp">&gt;&gt;&gt;</span>
@@ -1035,13 +1035,13 @@ gate at the full time — and let the synthesis subdivide it:</p>
 </div>
 <p>The flow-set synthesis wins on <strong>all three</strong> axes at once: higher fidelity, fewer entangling
 gates <em>and</em> roughly half the two-qubit depth at every step count. This is not a
-depth-versus-accuracy trade — the Trotter error is genuinely smaller because each flow set
+depth-versus-accuracy trade; the Trotter error is genuinely smaller because each flow set
 is evolved <em>exactly</em>, so the only error left comes from splitting the three groups against
 each other, rather than from splitting all fourteen terms.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Which circuit goes in matters: the <em>undecomposed</em> one from step 5, holding a single
-<a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate over all fourteen terms — not the group-wise
+<a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate over all fourteen terms, not the group-wise
 <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit#decompose" title="(in Qiskit v2.5)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">decompose()</span></code></a> of <a class="reference internal" href="#flowsets-transpile"><span class="std std-ref">step 6</span></a>.
 That is what keeps the default column an honest baseline. Handing it the decomposed
 circuit would let it inherit the flow-set partitioning for free, and since Trotterizing a
@@ -1049,7 +1049,7 @@ set of <em>commuting</em> terms is exact, its fidelities would become identical 
 column’s.</p>
 <p>The flip side is that <code class="docutils literal notranslate"><span class="pre">FlowSetSynthesis</span></code> has to recover the flow sets itself, from the
 Pauli labels it is handed. That works here because the encoding gives each set a
-recognizable shape, but it is the less general route — the group-wise
+recognizable shape, but it is the less general route; the group-wise
 <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit#decompose" title="(in Qiskit v2.5)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">decompose()</span></code></a> works for <em>any</em> grouping, not just one a
 synthesis plugin happens to be able to reverse-engineer.</p>
 </div>
@@ -1108,7 +1108,7 @@ Pauli string; <a class="reference internal" href="../stubs/qiskit_fermions.mappe
 set only slowed the linear growth in depth; a term-by-term synthesis of each set still
 threw away the fact that its terms commute. Only supplying a flow-set-aware
 <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.synthesis.EvolutionSynthesis" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">EvolutionSynthesis</span></code></a> made the depth constant. Custom encodings,
-grouping and custom synthesis are complementary — all three are needed.</p></li>
+grouping and custom synthesis are complementary: all three are needed.</p></li>
 <li><p><strong>Verify it.</strong> An encoding that satisfies the commutation relations may still represent
 a different Hamiltonian if a prefactor or sign is off. Checking an intertwining relation
 (or, more cheaply, the spectrum) catches this.</p></li>
@@ -1126,8 +1126,8 @@ weight-2 rather than diagonal in single qubits, which is the counterpart cost to
 cheaper hopping terms.</p>
 </div>
 </section>
-<section id="where-this-goes-next-two-dimensions">
-<span id="flowsets-2d"></span><h2>Where this goes next: two dimensions<a class="headerlink" href="#where-this-goes-next-two-dimensions" title="Link to this heading">¶</a></h2>
+<section id="next-two-dimensions">
+<span id="flowsets-2d"></span><h2>Next: two dimensions<a class="headerlink" href="#next-two-dimensions" title="Link to this heading">¶</a></h2>
 <p>Everything above is one-dimensional, and deliberately so: on a chain the flow sets are
 just the two arrow orientations, and the encoding needs a single ancilla. Neither
 simplification survives in two dimensions, which is where local encodings earn their
@@ -1138,19 +1138,19 @@ every edge becomes a combinatorial problem in its own right rather than a two-li
 classification. The encodings also change character: instead of a single ancilla for the
 whole chain, they add one per lattice site or cell. Verstraete-Cirac pairs every fermionic
 site with its own auxiliary qubit, a qubit-to-mode ratio of <span class="math">\(2\)</span>, while Derby-Klassen places
-one at the centre of each odd plaquette for a ratio of <span class="math">\(3/2\)</span>. The register layout then
+one at the center of each odd plaquette for a ratio of <span class="math">\(3/2\)</span>. The register layout then
 has genuine two-dimensional structure, and the stabilizer group that must be projected onto
-is no longer trivial — the encoded Hamiltonian is only faithful on a <em>subspace</em>, which
+is no longer trivial; the encoded Hamiltonian is only faithful on a <em>subspace</em>, which
 changes both state preparation and the verification recipe from
 <a class="reference internal" href="#flowsets-verify"><span class="std std-ref">step 4</span></a>.</p>
-<p>The pieces this guide builds are exactly the ones that carry over —
+<p>The pieces this guide builds are the ones that carry over:
 <a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.CustomF2QLayout.html#qiskit_fermions.transpiler.passes.CustomF2QLayout" title="qiskit_fermions.transpiler.passes.CustomF2QLayout"><code class="xref py py-class docutils literal notranslate"><span class="pre">CustomF2QLayout</span></code></a> for a register whose size differs from the mode count,
 <a class="reference internal" href="../stubs/qiskit_fermions.mappers.map_transfer_vertex_generators.html#qiskit_fermions.mappers.map_transfer_vertex_generators" title="qiskit_fermions.mappers.map_transfer_vertex_generators"><code class="xref py py-func docutils literal notranslate"><span class="pre">map_transfer_vertex_generators()</span></code></a> for the encoding itself,
 <a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis.html#qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis" title="qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis"><code class="xref py py-class docutils literal notranslate"><span class="pre">MapperFnEvolutionSynthesis</span></code></a> for wiring it into the transpiler, and a custom
 <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.synthesis.EvolutionSynthesis" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">EvolutionSynthesis</span></code></a> for making the flow-set structure pay off.
 Only the encoding and the flow-set decomposition are different.</p>
-<p>The <a class="reference internal" href="2d_fermi_hubbard.html#d-fermi-hubbard"><span class="std std-ref">2D flow-set guide</span></a> picks up exactly here, working
-through the Verstraete-Cirac encoding on a square lattice — four flow sets, a depth-2
+<p>The <a class="reference internal" href="2d_fermi_hubbard.html#d-fermi-hubbard"><span class="std std-ref">2D flow-set guide</span></a> picks up here, working
+through the Verstraete-Cirac encoding on a square lattice: four flow sets, a depth-2
 Clifford for each, and the stabilizer projection the verification then needs.</p>
 <aside class="footnote-list brackets">
 <aside class="footnote brackets" id="id10" role="doc-footnote">
@@ -1223,16 +1223,16 @@ qubit encodings (2026), <a class="reference external" href="https://arxiv.org/ab
 <li><a class="reference internal" href="#">Simulate 1D Fermi-Hubbard dynamics with flow sets</a><ul>
 <li><a class="reference internal" href="#transfer-operators-and-flow-sets">Transfer operators and flow sets</a></li>
 <li><a class="reference internal" href="#the-fermi-hubbard-hamiltonian">1. The Fermi-Hubbard Hamiltonian</a></li>
-<li><a class="reference internal" href="#partitioning-into-flow-sets">2. Partitioning into flow sets</a></li>
-<li><a class="reference internal" href="#writing-the-custom-encoding">3. Writing the custom encoding</a></li>
-<li><a class="reference internal" href="#verifying-the-encoding">4. Verifying the encoding</a></li>
-<li><a class="reference internal" href="#building-the-fermionic-circuit">5. Building the fermionic circuit</a></li>
-<li><a class="reference internal" href="#transpiling-with-the-custom-encoding">6. Transpiling with the custom encoding</a></li>
+<li><a class="reference internal" href="#partition-into-flow-sets">2. Partition into flow sets</a></li>
+<li><a class="reference internal" href="#write-the-custom-encoding">3. Write the custom encoding</a></li>
+<li><a class="reference internal" href="#verify-the-encoding">4. Verify the encoding</a></li>
+<li><a class="reference internal" href="#build-the-fermionic-circuit">5. Build the fermionic circuit</a></li>
+<li><a class="reference internal" href="#transpile-with-the-custom-encoding">6. Transpile with the custom encoding</a></li>
 <li><a class="reference internal" href="#a-flow-set-aware-synthesis">7. A flow-set-aware synthesis</a></li>
 <li><a class="reference internal" href="#constant-depth-at-scale">8. Constant depth at scale</a></li>
-<li><a class="reference internal" href="#checking-the-dynamics">9. Checking the dynamics</a></li>
+<li><a class="reference internal" href="#check-the-dynamics">9. Check the dynamics</a></li>
 <li><a class="reference internal" href="#what-to-take-away">What to take away</a></li>
-<li><a class="reference internal" href="#where-this-goes-next-two-dimensions">Where this goes next: two dimensions</a></li>
+<li><a class="reference internal" href="#next-two-dimensions">Next: two dimensions</a></li>
 </ul>
 </li>
 </ul>
@@ -1244,7 +1244,7 @@ qubit encodings (2026), <a class="reference external" href="https://arxiv.org/ab
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=e33f9f55"></script>
+</div><script src="../_static/documentation_options.js?v=b8abbc59"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

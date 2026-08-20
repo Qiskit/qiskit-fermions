@@ -3,12 +3,12 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="Transpiling fermionic circuits" href="transpilation.html"><link rel="prev" title="Mapping operator representations" href="mappers.html">
+<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="Transpile fermionic circuits" href="transpilation.html"><link rel="prev" title="Map operator representations" href="mappers.html">
         <link rel="prefetch" href="../_static/images/qiskit-light-logo.svg" as="image">
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Working with fermionic circuits - Qiskit Fermions 0.1.0+c6f2913</title>
+        <title>Work with fermionic circuits - Qiskit Fermions 0.1.0+4cf3f3b</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.1.0+c6f2913</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.1.0+4cf3f3b</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.1.0+c6f2913</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.1.0+4cf3f3b</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -209,9 +209,9 @@
 <li class="toctree-l2"><a class="reference internal" href="lucj.html">Build an LUCJ ansatz</a></li>
 <li class="toctree-l2"><a class="reference internal" href="operators.html">Design Principles of Operator Representations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="grouping.html">Group operator terms: exploit the operator structure</a></li>
-<li class="toctree-l2"><a class="reference internal" href="mappers.html">Mapping operator representations</a></li>
-<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Working with fermionic circuits</a></li>
-<li class="toctree-l2"><a class="reference internal" href="transpilation.html">Transpiling fermionic circuits</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mappers.html">Map operator representations</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Work with fermionic circuits</a></li>
+<li class="toctree-l2"><a class="reference internal" href="transpilation.html">Transpile fermionic circuits</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ffsim.html">The ffsim simulation backend</a></li>
 <li class="toctree-l2"><a class="reference internal" href="vqe_outer_loop.html">Running the outer VQE parameter optimization loop</a></li>
 <li class="toctree-l2"><a class="reference internal" href="merge_slater_determinant.html">Optimize Slater determinant preparation</a></li>
@@ -265,8 +265,8 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="working-with-fermionic-circuits">
-<span id="fermionic-circuit-explanation"></span><h1>Working with fermionic circuits<a class="headerlink" href="#working-with-fermionic-circuits" title="Link to this heading">¶</a></h1>
+          <section id="work-with-fermionic-circuits">
+<span id="fermionic-circuit-explanation"></span><h1>Work with fermionic circuits<a class="headerlink" href="#work-with-fermionic-circuits" title="Link to this heading">¶</a></h1>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
 <p>The concepts in this guide are currently available only in the Python API.
@@ -302,7 +302,7 @@ gates.</p></li>
 <p>This approach addresses the limitation by keeping problem-aware knowledge in
 fermionic space, where optimization passes can exploit fermionic structure and
 commutation relations to reduce circuit depth. The fermionic circuit describes
-<em>what</em> computation to perform, while transpilation handles <em>how</em> to map it to
+what computation to perform, while transpilation handles how to map it to
 qubits, providing a cleaner separation of concerns.</p>
 </section>
 <section id="generic-mode-indexing">
@@ -322,9 +322,8 @@ It constructs a <a class="reference internal" href="../stubs/qiskit_fermions.cir
 modes, then adds fermionic gates from the <a class="reference internal" href="../pydoc/qiskit_fermions.circuit.library.html#module-qiskit_fermions.circuit.library" title="qiskit_fermions.circuit.library"><code class="xref py py-mod docutils literal notranslate"><span class="pre">qiskit_fermions.circuit.library</span></code></a>
 to implement the time evolution.</p>
 <p>The example also demonstrates how to incorporate domain knowledge into an
-operator by using <a class="reference internal" href="grouping.html#grouping-explanation"><span class="std std-ref">operator term grouping</span></a>. By
-assigning group indices to the Hamiltonian terms, structural information gets
-preserved that optimization passes can exploit throughout the transpilation
+operator by using <a class="reference internal" href="grouping.html#grouping-explanation"><span class="std std-ref">operator term grouping</span></a>. By assigning group indices to the Hamiltonian terms, structural information is
+information that optimization passes can exploit throughout the transpilation
 stack.</p>
 <div class="sd-tab-set docutils">
 <input checked="checked" id="sd-tab-item-0" name="sd-tab-set-0" type="radio">
@@ -407,7 +406,7 @@ spin semantics only at simulation time.</p></li>
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Transpiling fermionic circuits</div>
+                <div class="title">Transpile fermionic circuits</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
@@ -418,7 +417,7 @@ spin semantics only at simulation time.</p></li>
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Mapping operator representations</div>
+                <div class="title">Map operator representations</div>
                 
               </div>
             </a>
@@ -453,7 +452,7 @@ spin semantics only at simulation time.</p></li>
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">Working with fermionic circuits</a><ul>
+<li><a class="reference internal" href="#">Work with fermionic circuits</a><ul>
 <li><a class="reference internal" href="#why-use-fermionic-circuits">Why use fermionic circuits</a></li>
 <li><a class="reference internal" href="#generic-mode-indexing">Generic mode indexing</a></li>
 <li><a class="reference internal" href="#build-a-fermionic-circuit">Build a fermionic circuit</a></li>
@@ -470,7 +469,7 @@ spin semantics only at simulation time.</p></li>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=e33f9f55"></script>
+</div><script src="../_static/documentation_options.js?v=b8abbc59"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
