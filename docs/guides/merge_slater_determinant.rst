@@ -5,12 +5,12 @@ Optimize Slater determinant preparation
 
 .. important::
 
-   The concepts in this guide are currently available only in the Python API.
-   Equivalent functionality will be made available via the C API in a future release.
+   The functions described in this guide are currently available only in the Python API.
+   Equivalent functionality will be made available through the C API in a future release.
 
-An :class:`.InitializeModes` gate declares a reference mode occupation; an
+An :class:`.InitializeModes` gate declares a reference mode occupation; an 
 :class:`.OrbitalRotation` gate rotates the single-particle basis. Placed back to back, the two
-gates *prepare a Slater determinant*: the modes start in the reference determinant and are then
+gates prepare a *Slater determinant*: the modes start in the reference determinant and are then
 rotated into the target orbitals. The :class:`.PrepareSlaterDeterminant` gate captures that
 composition, and because it knows the reference occupation, transpiling it can use the rectangular
 :func:`~qiskit_fermions.linalg.givens_decomposition_slater`, which realizes only the *occupied*
@@ -19,15 +19,15 @@ is a strictly cheaper synthesis (see the payoff at the end of this guide).
 
 The :class:`.MergeSlaterDeterminantPreparation` transpiler pass detects the
 :class:`.InitializeModes`-then-:class:`.OrbitalRotation` pattern in a :class:`.FermionicCircuit` and
-rewrites it into :class:`.PrepareSlaterDeterminant` gate(s), so a later synthesis stage picks up the
-reduced decomposition automatically. Under simulation the rewrite is a no-op on the state:
+rewrites it into :class:`.PrepareSlaterDeterminant` gates, so a later synthesis stage picks up the
+reduced decomposition automatically. Under simulation, the rewrite is a no-op on the state:
 :class:`.PrepareSlaterDeterminant` is *validate-then-rotate* (it validates the reference occupation
-and then applies the rotation, just as the two separate gates do), so the merge only unlocks the
+and then applies the rotation, just as the two separate gates do), so the merge unlocks the
 cheaper synthesis without changing the prepared state.
 
-Throughout this guide we draw a circuit before and after the pass, side by side: the input on the
-left, and on the right the result of running the pass on it. Two helpers do that: ``merge``
-runs the pass on a copy of the circuit (via its :class:`.FermionicDAGCircuit`) and converts the
+Throughout this guide we draw a circuit before and after the pass, side by side; the input is on the
+left, and the result of running the pass on it is on the right. Two helpers do that: ``merge``
+runs the pass on a copy of the circuit (by using its :class:`.FermionicDAGCircuit`) and converts the
 result back to a drawable :class:`.FermionicCircuit`, and ``draw_merge`` draws both halves into a
 single before/after figure:
 
@@ -80,7 +80,7 @@ sector. Slater determinant preparation is done per spin sector because each sect
 Full-register (or spinless)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The simplest pattern: an :class:`.InitializeModes` immediately followed by an
+The simplest pattern is using :class:`.InitializeModes`, immediately followed by an
 :class:`.OrbitalRotation` on the *same* modes. This is the spinless case (one determinant over all
 modes) and also a spinful circuit whose rotation spans both sectors at once. The two gates fuse into
 a single :class:`.PrepareSlaterDeterminant`:
@@ -99,8 +99,8 @@ a single :class:`.PrepareSlaterDeterminant`:
 Per spin sector
 ~~~~~~~~~~~~~~~
 
-The same shape restricted to one spin half. Here two independent initialize-then-rotate pairs, one
-per sector, each fuse on their own into a :class:`.PrepareSlaterDeterminant`:
+This is the same shape, but restricted to one spin half. Here, two independent initialize-then-rotate pairs, one
+per sector each fuse on their own into a :class:`.PrepareSlaterDeterminant`:
 
 .. plot::
    :alt: Two per-sector initialize-and-rotate pairs, each fusing into its own preparation.
@@ -118,14 +118,14 @@ per sector, each fuse on their own into a :class:`.PrepareSlaterDeterminant`:
 Global initialization, per-spin rotations
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-A single full-register (``2 * norb``) :class:`.InitializeModes` followed by *two*
-:class:`.OrbitalRotation`\ s, one on each contiguous spin half. The pass splits the global
+This entails a single full-register (``2 * norb``) :class:`.InitializeModes` followed by *two*
+:class:`.OrbitalRotation`\ actions, one on each contiguous spin half. The pass splits the global
 occupation at the sector boundary and emits **two** :class:`.PrepareSlaterDeterminant` gates. The
-two rotations may appear in either order.
+two rotations can appear in either order.
 
 This is the shape produced by the local unitary cluster Jastrow (LUCJ) workflow (see the
-:ref:`LUCJ guide <lucj_getting_started>`):
-a user places an :class:`.InitializeModes` (typically the Hartree-Fock reference via
+:ref:`LUCJ guide <lucj_getting_started>`);
+A user places an :class:`.InitializeModes` (typically the Hartree-Fock reference by using 
 :meth:`~qiskit_fermions.circuit.library.InitializeModes.from_hartree_fock`) at the front of the
 circuit and appends a :class:`.UCJ` ansatz, whose first two per-spin orbital rotations directly
 follow the initialization once the ansatz is decomposed.
@@ -146,7 +146,7 @@ This pattern also fires when only *one* spin half is rotated by a gate directly 
 initialization, the shape produced when just one spin sector's orbital rotation happens to sit at
 the front of the circuit. The rotated half becomes a :class:`.PrepareSlaterDeterminant` with its
 rotation, and the other half is prepared with an *identity* rotation. The identity preparation
-synthesizes to nothing more than the reference X gates the :class:`.InitializeModes` would have
+synthesizes to the reference `X` gates that the :class:`.InitializeModes` would have
 emitted for that half anyway, so padding it costs no extra gates while still unlocking the reduced
 Slater synthesis on the rotated half:
 
@@ -164,11 +164,11 @@ Slater synthesis on the rotated half:
 What is left untouched
 ----------------------
 
-The pass is deliberately conservative: it only fuses when the two gates genuinely compose into a
+The pass is deliberately conservative. It only fuses when the two gates genuinely compose into a
 Slater determinant preparation, and copies everything else through unchanged. "Immediately
 followed" is understood over the circuit's data-flow graph: the :class:`.OrbitalRotation` fuses
 only when the :class:`.InitializeModes` is its *sole* predecessor across all of its modes. In the
-figures below the before and after are identical: nothing fused.
+figures below, the before and after are identical: nothing fused.
 
 An operation in between
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -227,9 +227,9 @@ six-orbital preparation all the way to a :class:`~qiskit.circuit.QuantumCircuit`
 .. note::
    The preset runs :class:`.MergeOrbitalRotations` immediately before
    :class:`.MergeSlaterDeterminantPreparation`. This matters when a *run* of consecutive
-   :class:`.OrbitalRotation` gates follows the initialization: the earlier pass first collapses the
+   :class:`.OrbitalRotation` gates follows the initialization. The earlier pass first collapses the
    run into a single rotation, which :class:`.MergeSlaterDeterminantPreparation` then contracts with
-   the initialization into one :class:`.PrepareSlaterDeterminant`. Without that ordering only the
+   the initialization into one :class:`.PrepareSlaterDeterminant`. Without that ordering, only the
    first rotation of the run would be absorbed and the rest would synthesize with the full square
    decomposition.
 
@@ -263,9 +263,9 @@ six-orbital preparation all the way to a :class:`~qiskit.circuit.QuantumCircuit`
    >>> prepared.draw("mpl", fold=-1)
    <Figure size ... with 1 Axes>
 
-Compare that to synthesizing the same orbital rotation on its own: with no preceding
+Compare that to synthesizing the same orbital rotation on its own. With no preceding
 initialization there is nothing to merge, so the preset falls back to the full square
-decomposition, which is both deeper and carries diagonal phase gates:
+decomposition, which is deeper and carries diagonal phase gates:
 
 .. plot::
    :context:

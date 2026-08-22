@@ -11,7 +11,7 @@ This is achieved by subsampling smaller time evolution operators from the
 Hamiltonian based on its coefficients, which is known as the `qDRIFT`_
 Trotterization method.
 
-This getting-started guide shows how to generate an ensemble of such randomized
+This getting started guide shows how to generate an ensemble of such randomized
 circuits.
 
 1. Hamiltonian setup
@@ -89,7 +89,7 @@ detail in :ref:`this guide <grouping_explanation>`.
    in the next step.
 
    The terms that fit this description are those that are diagonal
-   in the occupation-number basis, i.e. the products of number operators
+   in the occupation-number basis, that is, the products of number operators
    (:math:`a^\dagger_i a_i`). This includes the constant energy offset, whose
    time evolution only introduces a global phase into the circuit, the
    individual number-operators whose time evolution amounts to single-qubit Z
@@ -111,10 +111,10 @@ detail in :ref:`this guide <grouping_explanation>`.
 
           qf_ferm_op_filter_diagonal_terms(canon);
 
-   Filtering here, once, is considerably cheaper than filtering repeatedly:
+   Filtering here, once, is considerably cheaper than filtering repeatedly.
    :class:`.QDriftTrotterization` runs once per transpiled circuit, so
-   filtering the Hamiltonian beforehand, rather than on every call, avoids
-   redoing the same work for every circuit generated from it.
+   filtering the Hamiltonian initially, rather than on every call, avoids
+   redoing work for every circuit generated from it.
 
 3. Prepare the time evolution circuit
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -167,15 +167,15 @@ not use the time evolution of the entire Hamiltonian, a circuit whose depth
 would exceed the capabilities of currently available quantum computing hardware.
 
 Instead, it will subsample a fixed number of ``groups`` of Hamiltonian terms for
-each circuit, every time we transpile the circuit. Through this, we can generate
+each circuit, every time we transpile the circuit. Thus, we can generate
 multiple circuit randomizations as required by the `SqDRIFT`_ algorithm by
 repeatedly running the transpilation pipeline.
 
-This step also introduces the few parameters with which one can tweak the
-ensemble of circuits to generate:
+This step also introduces the few parameters you can use to customize the
+circuits to generate:
 
-* the number of circuits to generate: ``num_sqdrift_randomizations``
-* the length of each circuit in terms of excitation groups: ``num_groups``
+* The number of circuits to generate: ``num_sqdrift_randomizations``
+* The length of each circuit in terms of excitation groups: ``num_groups``
 
 .. tab-set-code::
 
@@ -211,18 +211,18 @@ ensemble of circuits to generate:
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Beyond the diagonal terms filtered out in the previous step, a sampled
-excitation can *still* fail to affect the sampled bitstrings: whenever it acts
+excitation can *still* fail to affect the sampled bitstrings. Whenever it acts
 entirely within a set of modes whose occupation is already fixed (all occupied
 or all unoccupied), it cannot move a particle from one to the other, so it
 leaves the state (and thus the eventual measurement outcome) unchanged.
 Setting ``filter_trivial=True`` on the :class:`.QDriftTrotterization` pass
 rejects such terms as they are sampled and re-draws a replacement, so that
-every one of the ``num_groups`` slots of the resulting circuit contributes a
+each of the ``num_groups`` slots of the resulting circuit contributes a
 non-trivial excitation.
 
 This filtering needs to know which modes start out occupied. It therefore
 requires an :class:`.InitializeModes` gate preceding the :class:`.Evolution`
-gate(s) in the circuit; :meth:`.InitializeModes.from_hartree_fock` is a
+gates in the circuit. :meth:`.InitializeModes.from_hartree_fock` is a
 convenient way to construct one. We add one here for the N2 Hartree-Fock
 reference (seven alpha and seven beta electrons in 14 spatial orbitals) and compare the
 sampled excitations with and without ``filter_trivial=True``:

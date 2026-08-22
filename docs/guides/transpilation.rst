@@ -5,8 +5,8 @@ Transpile fermionic circuits
 
 .. important::
 
-   The concepts in this guide are currently available only in the Python API.
-   Equivalent functionality will be made available via the C API in a future release.
+   The functions described in this guide are currently available only in the Python API.
+   Equivalent functionality will be made available through the C API in a future release.
 
 This guide explains how to transpile a :class:`.FermionicCircuit` to a standard
 :class:`~qiskit.circuit.QuantumCircuit`. We continue with the same time evolution
@@ -22,7 +22,7 @@ this project split the transpilation into the following stages:
    Converts the input circuit to a directed acyclic graph (DAG) data structure.
 
 **Optimization**
-   Fermionic-level optimizations that keep the circuit in fermionic space. These
+   Keeps the circuit in fermionic space. These
    passes exploit fermionic structure and commutation relations while
    problem-aware knowledge remains fully available.
 
@@ -38,7 +38,7 @@ this project split the transpilation into the following stages:
    standard quantum gates.
 
 **Qubit**
-   Standard Qiskit transpilation on the resulting qubit circuit, including
+   Transpiles the resulting qubit circuit by using standard Qiskit methods, including
    optimization, layout, and routing for your target hardware.
 
 **Output**
@@ -144,7 +144,7 @@ Advanced workflows
 ------------------
 
 The preset pass manager provides a convenient starting point. For more advanced
-use cases, you can:
+use cases, you can do the following:
 
 - Customize the transpiler passes run during each stage.
 - Implement custom fermion-to-qubit mappings by creating synthesis plugins (see

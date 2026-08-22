@@ -5,7 +5,7 @@ Work with fermionic circuits
 
 .. important::
 
-   The concepts in this guide are currently available only in the Python API.
+   The functions described in this guide are currently available only in the Python API.
    Equivalent functionality will be made available through the C API in a future
    release.
 
@@ -58,15 +58,14 @@ For example, you can implement time evolution for any operator implementing the
 Build a fermionic circuit
 -------------------------
 
-The example below implements the time evolution discussed in the previous section.
+The example below implements the time evolution described in the previous section.
 It constructs a :class:`.FermionicCircuit` by specifying the number of fermionic
 modes, then adds fermionic gates from the :mod:`qiskit_fermions.circuit.library`
 to implement the time evolution.
 
 The example also demonstrates how to incorporate domain knowledge into an
-operator by using :ref:`operator term grouping <grouping_explanation>`. By assigning group indices to the Hamiltonian terms, structural information is
-information that optimization passes can exploit throughout the transpilation
-stack.
+operator by using :ref:`operator term grouping <grouping_explanation>`. By assigning group indices to the Hamiltonian terms, optimization passes can use that information throughout the transpilation
+stack, making it *structural information*. 
 
 .. tab-set::
 
@@ -107,14 +106,14 @@ stack.
          // The C API for FermionicCircuit is not available yet.
 
 .. plot::
-   :alt: A simple FermionicCircuit with a single time evolution gate.
+   :alt: A simple `FermionicCircuit` with a single time evolution gate.
    :context: close-figs
 
    >>> circuit.draw("mpl", fold=-1)
    <Figure size ... with 1 Axes>
 
 .. plot::
-   :alt: A decomposed FermionicCircuit with several time evolution gates.
+   :alt: A decomposed `FermionicCircuit` with several time evolution gates.
    :context: close-figs
 
    >>> circuit.decompose().draw("mpl", fold=-1)
@@ -140,7 +139,7 @@ Next steps
   documentation.
 - Explore the :ref:`operators explanation guide <operators_explanation>` to understand
   how to construct fermionic Hamiltonians that you can use with fermionic circuits.
-- Review the :ref:`SQDRIFT <sqdrift_getting_started>` getting-started guide for a practical
+- Review the :ref:`SQDRIFT <sqdrift_getting_started>` getting started guide for a practical
   end-to-end example.
 - Read the :ref:`ffsim backend guide <ffsim_backend_explanation>` to understand how a
   :class:`.FermionicCircuit` can be simulated directly, and how these generic mode indices take on

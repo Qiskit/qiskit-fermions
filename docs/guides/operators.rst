@@ -72,9 +72,9 @@ Internal storage format
 
 Internally, operators are stored in arrays inspired by sparse matrix data formats:
 
-- **Coefficients array**: The complex coefficient for each term.
-- **Mode indices array**: The fermionic modes that each action acts upon.
-- **Boundaries array**: Indices marking where each term's modes begin and end in the mode array.
+- **Coefficients array**: The complex coefficient for each term
+- **Mode indices array**: The fermionic modes that each action acts upon
+- **Boundaries array**: Indices marking where each term's modes begin and end in the mode array
 
 .. important::
 
@@ -83,7 +83,7 @@ Internally, operators are stored in arrays inspired by sparse matrix data format
    that specifies the type of fermionic action acting on the respective mode
    index. In contrast, the :class:`MajoranaOperator` class does not require
    this distinction since it encodes that information in the parity of the mode
-   index. See the API documentation for your specific operator type to
+   index. See the API documentation for your operator type to
    understand the full storage format.
 
 The following examples show how these arrays are organized. First is a direct
@@ -391,7 +391,7 @@ reference of all available operations.
    individual operator implementations might offer additional convenience methods
    not part of the protocol. For example, some operators provide an
    ``is_hermitian()`` method that implements this check. Always consult
-   the API documentation for your specific operator type to discover all
+   the API documentation for your operator type to discover all
    available functionality.
 
 
@@ -423,7 +423,7 @@ operator forms for correctness and efficiency.
    fermionic normal ordering uses anticommutation relations (:math:`\{c_i, c_j^\dagger\} = \delta_{ij}`),
    while Majorana normal ordering uses different algebra conventions
    (:math:`\{\gamma_i, \gamma_j\} = 2\delta_{ij}`). Always consult the
-   documentation for your specific operator type to understand how normal
+   documentation for your operator type to understand how normal
    ordering is implemented.
 
 .. tab-set-code::

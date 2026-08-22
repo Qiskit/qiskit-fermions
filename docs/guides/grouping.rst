@@ -17,10 +17,10 @@ or problem-specific symmetries), you can unlock several benefits:
 
 - **Optimized circuit synthesis**: Grouped terms carry problem-specific
   information through the stack, enabling simpler optimization of the
-  synthesized circuits, resulting in reduced circuit depth and gate count.
+  synthesized circuits. This results in reduced circuit depth and gate count.
 
 - **Physical structure preservation**: Groups encode meaningful structure from the
-  original problem (for example, interaction patterns or symmetries), that can be exploited
+  original problem (for example, interaction patterns or symmetries) that can be exploited
   for more physically meaningful decompositions.
 
 - **Flow set selection**: Grouping can naturally encode flow sets and other graph-theoretic
@@ -44,7 +44,7 @@ according to the *line flow sets* as shown in Figure 1c of [1]_.
    group indices accordingly.
 
 .. plot::
-   :alt: A simple directed graph on which we define our MajoranaOperator.
+   :alt: A simple directed graph on which we define our `MajoranaOperator`.
    :context: close-figs
    :include-source:
 
@@ -65,7 +65,7 @@ according to the *line flow sets* as shown in Figure 1c of [1]_.
     <Figure size ... with 1 Axes>
 
 This is a simple two-by-three lattice of Majorana modes connected by
-directed edges. Each edge represents a term in our operator acting on the two
+directed edges. Each edge represents a term in our operator that acts on the two
 connected modes. We want to group these terms according to their edge labels
 (shown on the graph): terms connected by edges with the same label are placed in
 the same group. The following code shows how that can be done:
