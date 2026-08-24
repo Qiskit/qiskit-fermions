@@ -8,7 +8,7 @@ this package.
 .. note::
    These guides might refer to specific Python modules when explaining core concepts.
    Unless otherwise stated, the C API provides matching functionality, although it is not structured
-   into modules. However, the function names will correspond naturally and should be easy to navigate.
+   into modules. However, the function names correspond naturally and should be easy to navigate.
 
 Get started
 ===========

@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Running the outer VQE parameter optimization loop - Qiskit Fermions 0.2.0.dev0+c3101c4</title>
+        <title>Run the outer VQE parameter optimization loop - Qiskit Fermions 0.2.0.dev0+1c02028</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+c3101c4</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+1c02028</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+c3101c4</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+1c02028</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -207,13 +207,13 @@
 <li class="toctree-l2"><a class="reference internal" href="sqdrift.html">Generate SqDRIFT circuits</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skqd.html">Generate Krylov time-evolution circuits (SKQD)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="lucj.html">Build an LUCJ ansatz</a></li>
-<li class="toctree-l2"><a class="reference internal" href="operators.html">Design Principles of Operator Representations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="operators.html">Design principles of operator representations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="grouping.html">Group operator terms: exploit the operator structure</a></li>
 <li class="toctree-l2"><a class="reference internal" href="mappers.html">Map operator representations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="circuit.html">Work with fermionic circuits</a></li>
 <li class="toctree-l2"><a class="reference internal" href="transpilation.html">Transpile fermionic circuits</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ffsim.html">The ffsim simulation backend</a></li>
-<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Running the outer VQE parameter optimization loop</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Run the outer VQE parameter optimization loop</a></li>
 <li class="toctree-l2"><a class="reference internal" href="merge_slater_determinant.html">Optimize Slater determinant preparation</a></li>
 </ul>
 </li>
@@ -265,12 +265,12 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="running-the-outer-vqe-parameter-optimization-loop">
-<span id="vqe-outer-loop-how-to"></span><h1>Running the outer VQE parameter optimization loop<a class="headerlink" href="#running-the-outer-vqe-parameter-optimization-loop" title="Link to this heading">¶</a></h1>
+          <section id="run-the-outer-vqe-parameter-optimization-loop">
+<span id="vqe-outer-loop-how-to"></span><h1>Run the outer VQE parameter optimization loop<a class="headerlink" href="#run-the-outer-vqe-parameter-optimization-loop" title="Link to this heading">¶</a></h1>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
 <p>The concepts in this guide are currently available only in the Python API.
-Equivalent functionality will be made available through the C API in a future
+Equivalent functionality will be made available in the C API in a future
 release.</p>
 </div>
 <p>The variational quantum eigensolver (VQE) minimizes the expectation value of a Hamiltonian over a
@@ -296,12 +296,12 @@ This mirrors how <a class="reference external" href="https://qiskit-community.gi
 </div>
 <section id="construct-the-ansatz">
 <h2>1. Construct the ansatz<a class="headerlink" href="#construct-the-ansatz" title="Link to this heading">¶</a></h2>
-<p>As a concrete example, we use the <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.UCJ.html#qiskit_fermions.circuit.library.UCJ" title="qiskit_fermions.circuit.library.UCJ"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCJ</span></code></a> ansatz for a hydrogen molecule in the <code class="docutils literal notranslate"><span class="pre">6-31g</span></code>
-basis, following the <a class="reference internal" href="lucj.html#lucj-getting-started"><span class="std std-ref">LUCJ guide</span></a>, which covers the classical
+<p>As a concrete example, this guide uses the <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.UCJ.html#qiskit_fermions.circuit.library.UCJ" title="qiskit_fermions.circuit.library.UCJ"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCJ</span></code></a> ansatz for a hydrogen molecule in the
+<code class="docutils literal notranslate"><span class="pre">6-31g</span></code> basis, following the <a class="reference internal" href="lucj.html#lucj-getting-started"><span class="std std-ref">LUCJ guide</span></a>, which covers the classical
 calculation, the Hamiltonian construction, and the ansatz gate itself in more detail; this guide
-focuses on the optimization loop around it instead. We reuse the molecule’s coupled-cluster
-singles and doubles (CCSD) <span class="math">\(t_1\)</span>/
-<span class="math">\(t_2\)</span> amplitudes as the initial point for the optimization, rather than for a fixed ansatz.</p>
+focuses on the optimization loop around it instead. The molecule’s coupled-cluster singles and
+doubles (CCSD) <span class="math">\(t_1\)</span>/<span class="math">\(t_2\)</span> amplitudes serve as the initial point for the optimization,
+rather than as a fixed ansatz.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">pyscf</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">pyscf.cc</span>
 <span class="gp">&gt;&gt;&gt;</span>
@@ -356,7 +356,7 @@ on the ansatz, never anything <a class="reference internal" href="../stubs/qiski
 three-method interface can be dropped in here unchanged; <a class="reference internal" href="#vqe-outer-loop-ucc"><span class="std std-ref">step 6</span></a> does
 that with <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.UCC.html#qiskit_fermions.circuit.library.UCC" title="qiskit_fermions.circuit.library.UCC"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCC</span></code></a>.</p>
 </div>
-<p>We fix a single repetition (<code class="docutils literal notranslate"><span class="pre">n_reps=1</span></code>) here to keep the optimization fast for this guide, and
+<p>Fix a single repetition (<code class="docutils literal notranslate"><span class="pre">n_reps=1</span></code>) here to keep the optimization fast for this guide, and
 keep the final orbital rotation from the <span class="math">\(t_1\)</span> amplitudes out of <code class="docutils literal notranslate"><span class="pre">theta</span></code> (see step 3);
 <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.UCJ.html#qiskit_fermions.circuit.library.UCJ.num_parameters" title="qiskit_fermions.circuit.library.UCJ.num_parameters"><code class="xref py py-meth docutils literal notranslate"><span class="pre">UCJ.num_parameters()</span></code></a> reports how many parameters this leaves.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
@@ -378,7 +378,7 @@ it via the Hamiltonian’s <a class="reference external" href="https://qiskit-co
 since that rotation already captures the singles, the optimization can focus on the
 <span class="math">\(t_2\)</span>-derived repetition tensors, and <code class="docutils literal notranslate"><span class="pre">theta</span></code> stays <span class="math">\(\mathcal{O}(N^2)\)</span> parameters
 shorter. This is a choice, not a requirement: freezing it does restrict the variational manifold,
-so for systems with significant singles character you may well want it optimized too. Passing
+so for systems with significant singles character you might well want it optimized too. Passing
 <code class="docutils literal notranslate"><span class="pre">with_final_orbital_rotation=True</span></code> to both <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.UCJ.html#qiskit_fermions.circuit.library.UCJ.num_parameters" title="qiskit_fermions.circuit.library.UCJ.num_parameters"><code class="xref py py-meth docutils literal notranslate"><span class="pre">UCJ.num_parameters()</span></code></a> and
 <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.UCJ.html#qiskit_fermions.circuit.library.UCJ.from_parameters" title="qiskit_fermions.circuit.library.UCJ.from_parameters"><code class="xref py py-meth docutils literal notranslate"><span class="pre">UCJ.from_parameters()</span></code></a> folds it into <code class="docutils literal notranslate"><span class="pre">theta</span></code>, which then also makes the two explicit
 <code class="docutils literal notranslate"><span class="pre">final_orbital_rotation</span></code> assignments below unnecessary.</p>
@@ -417,10 +417,10 @@ circuit carrying bound parameters, only the mapping from <code class="docutils l
 <section id="run-the-outer-loop-with-a-generic-optimizer">
 <h2>4. Run the outer loop with a generic optimizer<a class="headerlink" href="#run-the-outer-loop-with-a-generic-optimizer" title="Link to this heading">¶</a></h2>
 <p>Starting the optimizer from <span class="math">\(\boldsymbol{\theta} = \mathbf{0}\)</span> (the identity rotation and a
-zero diagonal Coulomb matrix, i.e. the Hartree-Fock reference itself) lands on a nearby local
+zero diagonal Coulomb matrix, that is, the Hartree-Fock reference itself) lands on a nearby local
 minimum barely below Hartree-Fock. With only one repetition, the ansatz is not expressive enough
 near that point for a gradient-based search to escape it unassisted. A classically computed
-starting point is a much better choice, so we reuse the CCSD-initialized ansatz from step 1: calling
+starting point is a much better choice, so reuse the CCSD-initialized ansatz from step 1: calling
 <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.UCJ.html#qiskit_fermions.circuit.library.UCJ.to_parameters" title="qiskit_fermions.circuit.library.UCJ.to_parameters"><code class="xref py py-meth docutils literal notranslate"><span class="pre">to_parameters()</span></code></a> on it (with its final rotation cleared, since <code class="docutils literal notranslate"><span class="pre">theta</span></code> excludes it)
 gives <code class="docutils literal notranslate"><span class="pre">theta0</span></code>, which is then handed to <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize.html#scipy.optimize.minimize" title="(in SciPy v1.18.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.optimize.minimize()</span></code></a> together with <code class="docutils literal notranslate"><span class="pre">energy</span></code>.
 Any <code class="docutils literal notranslate"><span class="pre">scipy</span></code> gradient-free or finite-difference method works here since <code class="docutils literal notranslate"><span class="pre">energy</span></code> returns a plain
@@ -442,9 +442,9 @@ float; no gradient of the fermionic ansatz is implemented.</p>
 <p>Because <code class="docutils literal notranslate"><span class="pre">energy</span></code> relies on multi-threaded linear algebra (inside <a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.apply_unitary.html#ffsim.apply_unitary" title="(in ffsim)"><code class="xref py py-func docutils literal notranslate"><span class="pre">ffsim.apply_unitary()</span></code></a>
 and <a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.linear_operator.html#ffsim.linear_operator" title="(in ffsim)"><code class="xref py py-func docutils literal notranslate"><span class="pre">ffsim.linear_operator()</span></code></a>), and <code class="docutils literal notranslate"><span class="pre">minimize</span></code> here uses numeric finite-difference
 gradients, the optimization trajectory (in particular the number of iterations needed)
-can vary slightly between runs, machines, and BLAS backends. We give the optimizer a generous
-iteration budget and check convergence with a tolerance rather than pinning down an exact
-iteration count.</p>
+can vary slightly between runs, machines, and BLAS backends. The optimizer therefore gets a
+generous iteration budget, and convergence is checked with a tolerance rather than by pinning
+down an exact iteration count.</p>
 </div>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Hartree-Fock: </span><span class="si">{</span><span class="n">scf</span><span class="o">.</span><span class="n">e_tot</span><span class="si">:</span><span class="s2">.5f</span><span class="si">}</span><span class="s2"> Hartree"</span><span class="p">)</span>
 <span class="go">Hartree-Fock: -1.12676 Hartree</span>
@@ -475,8 +475,8 @@ to the <a class="reference internal" href="../stubs/qiskit_fermions.circuit.libr
 <p>By default, each step also runs an inner search over the <code class="docutils literal notranslate"><span class="pre">regularization</span></code>/<code class="docutils literal notranslate"><span class="pre">variation</span></code>
 hyperparameters, which can itself become numerically sensitive once the ansatz is already very
 close to the optimum, occasionally causing a step to stall. Since a good fixed <code class="docutils literal notranslate"><span class="pre">regularization</span></code>
-and <code class="docutils literal notranslate"><span class="pre">variation</span></code> are already known to work well starting this close to the CCSD solution, we
-disable that inner search here for a reliably reproducible trajectory.</p>
+and <code class="docutils literal notranslate"><span class="pre">variation</span></code> are already known to work well starting this close to the CCSD solution, that
+inner search is disabled here for a reliably reproducible trajectory.</p>
 </div>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">lm_result</span> <span class="o">=</span> <span class="n">ffsim</span><span class="o">.</span><span class="n">optimize</span><span class="o">.</span><span class="n">minimize_linear_method</span><span class="p">(</span>
 <span class="gp">... </span>    <span class="n">params_to_vec</span><span class="p">,</span>
@@ -493,8 +493,8 @@ disable that inner search here for a reliably reproducible trajectory.</p>
 <span class="go">linear method: -1.15167 Hartree</span>
 </pre></div>
 </div>
-<p>The iteration counts of both optimizers vary between runs and machines, so we don’t print
-them here; but with the same warm start, the linear method consistently needs only a small
+<p>The iteration counts of both optimizers vary between runs and machines, so they are not printed
+here; but with the same warm start, the linear method consistently needs only a small
 fraction of L-BFGS-B’s iterations to reach the same energy, since it exploits the extra structure
 of <code class="docutils literal notranslate"><span class="pre">params_to_vec</span></code> that a generic finite-difference method cannot.</p>
 </section>
@@ -637,7 +637,7 @@ the linear method’s other hyperparameters (<code class="docutils literal notra
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on 2026/08/20</div>
+              Last updated on 2026/08/24</div>
           </div>
           <div class="right-details">
             
@@ -658,7 +658,7 @@ the linear method’s other hyperparameters (<code class="docutils literal notra
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">Running the outer VQE parameter optimization loop</a><ul>
+<li><a class="reference internal" href="#">Run the outer VQE parameter optimization loop</a><ul>
 <li><a class="reference internal" href="#construct-the-ansatz">1. Construct the ansatz</a></li>
 <li><a class="reference internal" href="#choose-an-unconstrained-parametrization-of-the-ansatz-tensors">2. Choose an unconstrained parametrization of the ansatz tensors</a></li>
 <li><a class="reference internal" href="#build-the-ansatz-and-evaluate-the-state-from-a-flat-parameter-vector">3. Build the ansatz and evaluate the state from a flat parameter vector</a></li>
@@ -677,7 +677,7 @@ the linear method’s other hyperparameters (<code class="docutils literal notra
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=0bccd3c6"></script>
+</div><script src="../_static/documentation_options.js?v=19036ff4"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

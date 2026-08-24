@@ -17,8 +17,8 @@ circuits.
 1. Hamiltonian setup
 ^^^^^^^^^^^^^^^^^^^^
 
-For the purposes of this guide, we load the electronic structure Hamiltonian
-of N2 from an FCIDUMP file. Of course, there are other means of
+For the purposes of this guide, load the electronic structure Hamiltonian
+of N2 from an FCIDUMP file. There are other means of
 constructing the :class:`.FermionOperator`. Be sure to consult its
 documentation, as well as the :mod:`qiskit_fermions.operators.library`.
 
@@ -44,7 +44,7 @@ documentation, as well as the :mod:`qiskit_fermions.operators.library`.
 2. Group Hamiltonian terms
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-We exploit the many symmetries that are present in the electronic
+Exploit the many symmetries that are present in the electronic
 structure Hamiltonian by grouping related terms that have identical coefficients.
 This action changes the operator coefficient distribution that the qDRIFT
 protocol samples from, but it does not affect its convergence guarantees.
@@ -82,14 +82,14 @@ detail in :ref:`this guide <grouping_explanation>`.
 .. hint::
 
    The full electronic structure Hamiltonian contains certain terms whose
-   inclusion in a time-evolution circuit will have no impact on the perceived
-   bitstrings and, thus, only result in an increased sampling overhead.
+   inclusion in a time-evolution circuit has no impact on the perceived
+   bitstrings and, thus, only results in an increased sampling overhead.
    Therefore, it is recommended that such terms be filtered from the
    Hamiltonian at this point, before constructing the :class:`.Evolution` gate
    in the next step.
 
    The terms that fit this description are those that are diagonal
-   in the occupation-number basis, i.e. the products of number operators
+   in the occupation-number basis, that is, the products of number operators
    (:math:`a^\dagger_i a_i`). This includes the constant energy offset, whose
    time evolution only introduces a global phase into the circuit, the
    individual number-operators whose time evolution amounts to single-qubit Z
@@ -119,7 +119,7 @@ detail in :ref:`this guide <grouping_explanation>`.
 3. Prepare the time evolution circuit
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-We prepare the Hamiltonian's time evolution circuit and the
+Prepare the Hamiltonian's time evolution circuit and the
 base circuit from which to draw samples. The
 :mod:`qiskit_fermions.circuit.library` contains all the required
 components to do so, in compliance with Qiskit conventions.
@@ -143,8 +143,8 @@ components to do so, in compliance with Qiskit conventions.
        // with custom gate definitions.
 
 .. note::
-   In this example, we neither initialize the fermionic modes with particles,
-   nor measure their final state.
+   This example neither initializes the fermionic modes with particles,
+   nor measures their final state.
 
 4. Transpile the circuit with QDrift Trotterization
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -153,21 +153,21 @@ The :mod:`qiskit_fermions.transpiler` module integrates directly with Qiskit's
 transpilation pipeline, allowing the :class:`.FermionicCircuit` constructed above
 to be directly transpiled to a :external:class:`~qiskit.circuit.QuantumCircuit`.
 
-We use the :func:`.jordan_wigner` fermion-to-qubit mapping to
+Use the :func:`.jordan_wigner` fermion-to-qubit mapping to
 convert the Hamiltonian expressed in terms of fermions to be expressed in Pauli strings instead. This
 can be done directly as part of the transpilation process by using the
-:class:`.EvolutionSynthesis` transpilation pass plugin. We use
+:class:`.EvolutionSynthesis` transpilation pass plugin. Use
 :func:`.generate_preset_jw_pass_manager` to build
 :class:`.FermionicStagedPassManager`, which ensures that the
 Jordan-Wigner encoding is used consistently for all circuit instructions.
 
-Crucially, we add the :class:`.QDriftTrotterization` transpilation pass to the
-``optimization`` stage of the transpilation pipeline. This ensures that we do
-not use the time evolution of the entire Hamiltonian, a circuit whose depth
+Crucially, add the :class:`.QDriftTrotterization` transpilation pass to the
+``optimization`` stage of the transpilation pipeline. This ensures that the
+circuit does not use the time evolution of the entire Hamiltonian, whose depth
 would exceed the capabilities of currently available quantum computing hardware.
 
-Instead, it will subsample a fixed number of ``groups`` of Hamiltonian terms for
-each circuit, every time we transpile the circuit. Through this, we can generate
+Instead, it subsamples a fixed number of ``groups`` of Hamiltonian terms for
+each circuit, every time the circuit is transpiled. Through this, you can generate
 multiple circuit randomizations as required by the `SqDRIFT`_ algorithm by
 repeatedly running the transpilation pipeline.
 
@@ -203,7 +203,7 @@ ensemble of circuits to generate:
        // via this API.
 
 .. note::
-   In the example above we have fixed the ``seed`` for the random number
+   The preceding example fixes the ``seed`` for the random number
    generator used inside of the :class:`.QDriftTrotterization` transpilation
    pass.
 
@@ -223,7 +223,7 @@ non-trivial excitation.
 This filtering needs to know which modes start out occupied. It therefore
 requires an :class:`.InitializeModes` gate preceding the :class:`.Evolution`
 gate(s) in the circuit; :meth:`.InitializeModes.from_hartree_fock` is a
-convenient way to construct one. We add one here for the N2 Hartree-Fock
+convenient way to construct one. Add one here for the N2 Hartree-Fock
 reference (seven alpha and seven beta electrons in 14 spatial orbitals) and compare the
 sampled excitations with and without ``filter_trivial=True``:
 
@@ -274,7 +274,7 @@ None of the excitations sampled without filtering touch the occupied set
 occupied and an unoccupied mode; every single one is trivial and would have
 no effect on the sampled bitstrings. With ``filter_trivial=True``, all five are
 rejected and replaced by excitations that do couple an occupied mode with an
-unoccupied one, e.g. the first accepted excitation ``[0, 1, 6, 7]`` moves a
+unoccupied one. For example, the first accepted excitation ``[0, 1, 6, 7]`` moves a
 particle between occupied modes ``0``, ``1``, and ``6`` and unoccupied mode
 ``7``.
 
@@ -349,7 +349,7 @@ pass:
 Next steps
 ^^^^^^^^^^
 
-Now that we have successfully generated an ensemble of circuits, we can sample
+Now that you have successfully generated an ensemble of circuits, you can sample
 bitstrings from them. To do so, the circuits must be executed on hardware.
 Refer to the `Qiskit
 documentation <https://quantum.cloud.ibm.com/docs/guides/intro-to-patterns>`_

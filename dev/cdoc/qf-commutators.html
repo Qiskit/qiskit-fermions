@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Commutator Generators - Qiskit Fermions 0.2.0.dev0+c3101c4</title>
+        <title>Commutator Generators - Qiskit Fermions 0.2.0.dev0+1c02028</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+c3101c4</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+1c02028</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+c3101c4</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+1c02028</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -207,13 +207,13 @@
 <li class="toctree-l2"><a class="reference internal" href="../guides/sqdrift.html">Generate SqDRIFT circuits</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../guides/skqd.html">Generate Krylov time-evolution circuits (SKQD)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../guides/lucj.html">Build an LUCJ ansatz</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../guides/operators.html">Design Principles of Operator Representations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/operators.html">Design principles of operator representations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../guides/grouping.html">Group operator terms: exploit the operator structure</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../guides/mappers.html">Map operator representations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../guides/circuit.html">Work with fermionic circuits</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../guides/transpilation.html">Transpile fermionic circuits</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../guides/ffsim.html">The ffsim simulation backend</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../guides/vqe_outer_loop.html">Running the outer VQE parameter optimization loop</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/vqe_outer_loop.html">Run the outer VQE parameter optimization loop</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../guides/merge_slater_determinant.html">Optimize Slater determinant preparation</a></li>
 </ul>
 </li>
@@ -269,8 +269,8 @@
 <h1>Commutator Generators<a class="headerlink" href="#commutator-generators" title="Link to this heading">¶</a></h1>
 <p>The <a class="reference internal" href="qf-operators.html#qf-operators"><span class="std std-ref">operator representations</span></a> provide efficient functions
 for the computation of various commutators. Since these functions work with
-generic operator representations (a notion that does not exist in C) we explain
-them generically in the following three sections.
+generic operator representations (a notion that does not exist in C), they are
+explained generically in the following three sections.
 The actual functions contained in the C API for the various operator
 representations are listed at the bottom of this page.</p>
 <section id="commutator">
@@ -282,7 +282,7 @@ representations are listed at the bottom of this page.</p>
 <p class="admonition-title">Caution</p>
 <p>The function signature here is <strong>generic</strong>! A real one will replace
 <code class="docutils literal notranslate"><span class="pre">OpType</span></code> with an actual <a class="reference internal" href="qf-operators.html#qf-operators"><span class="std std-ref">operator representations</span></a>
-and <code class="docutils literal notranslate"><span class="pre">op_type</span></code> with its matching prefix (e.g. <code class="docutils literal notranslate"><span class="pre">ferm_op</span></code> for
+and <code class="docutils literal notranslate"><span class="pre">op_type</span></code> with its matching prefix (for example, <code class="docutils literal notranslate"><span class="pre">ferm_op</span></code> for
 <a class="reference internal" href="qf-ferm-op.html#c.QfFermionOperator" title="QfFermionOperator"><code class="xref c c-struct docutils literal notranslate"><span class="pre">QfFermionOperator</span></code></a>).</p>
 </div>
 <p>The commutator is defined as:</p>
@@ -330,7 +330,7 @@ and <code class="docutils literal notranslate"><span class="pre">op_type</span><
 <p class="admonition-title">Caution</p>
 <p>The function signature here is <strong>generic</strong>! A real one will replace
 <code class="docutils literal notranslate"><span class="pre">OpType</span></code> with an actual <a class="reference internal" href="qf-operators.html#qf-operators"><span class="std std-ref">operator representations</span></a>
-and <code class="docutils literal notranslate"><span class="pre">op_type</span></code> with its matching prefix (e.g. <code class="docutils literal notranslate"><span class="pre">ferm_op</span></code> for
+and <code class="docutils literal notranslate"><span class="pre">op_type</span></code> with its matching prefix (for example, <code class="docutils literal notranslate"><span class="pre">ferm_op</span></code> for
 <a class="reference internal" href="qf-ferm-op.html#c.QfFermionOperator" title="QfFermionOperator"><code class="xref c c-struct docutils literal notranslate"><span class="pre">QfFermionOperator</span></code></a>).</p>
 </div>
 <p>The anti-commutator is defined as:</p>
@@ -378,7 +378,7 @@ and <code class="docutils literal notranslate"><span class="pre">op_type</span><
 <p class="admonition-title">Caution</p>
 <p>The function signature here is <strong>generic</strong>! A real one will replace
 <code class="docutils literal notranslate"><span class="pre">OpType</span></code> with an actual <a class="reference internal" href="qf-operators.html#qf-operators"><span class="std std-ref">operator representations</span></a>
-and <code class="docutils literal notranslate"><span class="pre">op_type</span></code> with its matching prefix (e.g. <code class="docutils literal notranslate"><span class="pre">ferm_op</span></code> for
+and <code class="docutils literal notranslate"><span class="pre">op_type</span></code> with its matching prefix (for example, <code class="docutils literal notranslate"><span class="pre">ferm_op</span></code> for
 <a class="reference internal" href="qf-ferm-op.html#c.QfFermionOperator" title="QfFermionOperator"><code class="xref c c-struct docutils literal notranslate"><span class="pre">QfFermionOperator</span></code></a>).</p>
 </div>
 <p>The double-commutator is defined as follows (see also Chapter 13.6, <em>Equation of motion
@@ -500,7 +500,7 @@ Computing Perspective. Acc. Chem. Res. 54, 4229-4238 (2021).
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on 2026/08/20</div>
+              Last updated on 2026/08/24</div>
           </div>
           <div class="right-details">
             
@@ -557,7 +557,7 @@ Computing Perspective. Acc. Chem. Res. 54, 4229-4238 (2021).
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=0bccd3c6"></script>
+</div><script src="../_static/documentation_options.js?v=19036ff4"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

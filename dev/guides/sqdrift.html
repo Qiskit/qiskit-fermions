@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Generate SqDRIFT circuits - Qiskit Fermions 0.2.0.dev0+c3101c4</title>
+        <title>Generate SqDRIFT circuits - Qiskit Fermions 0.2.0.dev0+1c02028</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+c3101c4</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+1c02028</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+c3101c4</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+1c02028</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -207,13 +207,13 @@
 <li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Generate SqDRIFT circuits</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skqd.html">Generate Krylov time-evolution circuits (SKQD)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="lucj.html">Build an LUCJ ansatz</a></li>
-<li class="toctree-l2"><a class="reference internal" href="operators.html">Design Principles of Operator Representations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="operators.html">Design principles of operator representations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="grouping.html">Group operator terms: exploit the operator structure</a></li>
 <li class="toctree-l2"><a class="reference internal" href="mappers.html">Map operator representations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="circuit.html">Work with fermionic circuits</a></li>
 <li class="toctree-l2"><a class="reference internal" href="transpilation.html">Transpile fermionic circuits</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ffsim.html">The ffsim simulation backend</a></li>
-<li class="toctree-l2"><a class="reference internal" href="vqe_outer_loop.html">Running the outer VQE parameter optimization loop</a></li>
+<li class="toctree-l2"><a class="reference internal" href="vqe_outer_loop.html">Run the outer VQE parameter optimization loop</a></li>
 <li class="toctree-l2"><a class="reference internal" href="merge_slater_determinant.html">Optimize Slater determinant preparation</a></li>
 </ul>
 </li>
@@ -278,8 +278,8 @@ Trotterization method.</p>
 circuits.</p>
 <section id="hamiltonian-setup">
 <h2>1. Hamiltonian setup<a class="headerlink" href="#hamiltonian-setup" title="Link to this heading">¶</a></h2>
-<p>For the purposes of this guide, we load the electronic structure Hamiltonian
-of N2 from an FCIDUMP file. Of course, there are other means of
+<p>For the purposes of this guide, load the electronic structure Hamiltonian
+of N2 from an FCIDUMP file. There are other means of
 constructing the <a class="reference internal" href="../stubs/qiskit_fermions.operators.FermionOperator.html#qiskit_fermions.operators.FermionOperator" title="qiskit_fermions.operators.FermionOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionOperator</span></code></a>. Be sure to consult its
 documentation, as well as the <a class="reference internal" href="../pydoc/qiskit_fermions.operators.library.html#module-qiskit_fermions.operators.library" title="qiskit_fermions.operators.library"><code class="xref py py-mod docutils literal notranslate"><span class="pre">qiskit_fermions.operators.library</span></code></a>.</p>
 <div class="sd-tab-set docutils">
@@ -310,7 +310,7 @@ C</label><div class="sd-tab-content docutils">
 </section>
 <section id="group-hamiltonian-terms">
 <h2>2. Group Hamiltonian terms<a class="headerlink" href="#group-hamiltonian-terms" title="Link to this heading">¶</a></h2>
-<p>We exploit the many symmetries that are present in the electronic
+<p>Exploit the many symmetries that are present in the electronic
 structure Hamiltonian by grouping related terms that have identical coefficients.
 This action changes the operator coefficient distribution that the qDRIFT
 protocol samples from, but it does not affect its convergence guarantees.
@@ -353,13 +353,13 @@ C</label><div class="sd-tab-content docutils">
 <div class="admonition hint">
 <p class="admonition-title">Hint</p>
 <p>The full electronic structure Hamiltonian contains certain terms whose
-inclusion in a time-evolution circuit will have no impact on the perceived
-bitstrings and, thus, only result in an increased sampling overhead.
+inclusion in a time-evolution circuit has no impact on the perceived
+bitstrings and, thus, only results in an increased sampling overhead.
 Therefore, it is recommended that such terms be filtered from the
 Hamiltonian at this point, before constructing the <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate
 in the next step.</p>
 <p>The terms that fit this description are those that are diagonal
-in the occupation-number basis, i.e. the products of number operators
+in the occupation-number basis, that is, the products of number operators
 (<span class="math">\(a^\dagger_i a_i\)</span>). This includes the constant energy offset, whose
 time evolution only introduces a global phase into the circuit, the
 individual number-operators whose time evolution amounts to single-qubit Z
@@ -393,7 +393,7 @@ redoing the same work for every circuit generated from it.</p>
 </section>
 <section id="prepare-the-time-evolution-circuit">
 <h2>3. Prepare the time evolution circuit<a class="headerlink" href="#prepare-the-time-evolution-circuit" title="Link to this heading">¶</a></h2>
-<p>We prepare the Hamiltonian’s time evolution circuit and the
+<p>Prepare the Hamiltonian’s time evolution circuit and the
 base circuit from which to draw samples. The
 <a class="reference internal" href="../pydoc/qiskit_fermions.circuit.library.html#module-qiskit_fermions.circuit.library" title="qiskit_fermions.circuit.library"><code class="xref py py-mod docutils literal notranslate"><span class="pre">qiskit_fermions.circuit.library</span></code></a> contains all the required
 components to do so, in compliance with Qiskit conventions.</p>
@@ -423,8 +423,8 @@ C</label><div class="sd-tab-content docutils">
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>In this example, we neither initialize the fermionic modes with particles,
-nor measure their final state.</p>
+<p>This example neither initializes the fermionic modes with particles,
+nor measures their final state.</p>
 </div>
 </section>
 <section id="transpile-the-circuit-with-qdrift-trotterization">
@@ -432,19 +432,19 @@ nor measure their final state.</p>
 <p>The <a class="reference internal" href="../pydoc/qiskit_fermions.transpiler.html#module-qiskit_fermions.transpiler" title="qiskit_fermions.transpiler"><code class="xref py py-mod docutils literal notranslate"><span class="pre">qiskit_fermions.transpiler</span></code></a> module integrates directly with Qiskit’s
 transpilation pipeline, allowing the <a class="reference internal" href="../stubs/qiskit_fermions.circuit.FermionicCircuit.html#qiskit_fermions.circuit.FermionicCircuit" title="qiskit_fermions.circuit.FermionicCircuit"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicCircuit</span></code></a> constructed above
 to be directly transpiled to a <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumCircuit</span></code></a>.</p>
-<p>We use the <a class="reference internal" href="../stubs/qiskit_fermions.mappers.library.jordan_wigner.html#qiskit_fermions.mappers.library.jordan_wigner" title="qiskit_fermions.mappers.library.jordan_wigner"><code class="xref py py-func docutils literal notranslate"><span class="pre">jordan_wigner()</span></code></a> fermion-to-qubit mapping to
+<p>Use the <a class="reference internal" href="../stubs/qiskit_fermions.mappers.library.jordan_wigner.html#qiskit_fermions.mappers.library.jordan_wigner" title="qiskit_fermions.mappers.library.jordan_wigner"><code class="xref py py-func docutils literal notranslate"><span class="pre">jordan_wigner()</span></code></a> fermion-to-qubit mapping to
 convert the Hamiltonian expressed in terms of fermions to be expressed in Pauli strings instead. This
 can be done directly as part of the transpilation process by using the
-<code class="xref py py-class docutils literal notranslate"><span class="pre">EvolutionSynthesis</span></code> transpilation pass plugin. We use
+<code class="xref py py-class docutils literal notranslate"><span class="pre">EvolutionSynthesis</span></code> transpilation pass plugin. Use
 <a class="reference internal" href="../stubs/qiskit_fermions.transpiler.presets.generate_preset_jw_pass_manager.html#qiskit_fermions.transpiler.presets.generate_preset_jw_pass_manager" title="qiskit_fermions.transpiler.presets.generate_preset_jw_pass_manager"><code class="xref py py-func docutils literal notranslate"><span class="pre">generate_preset_jw_pass_manager()</span></code></a> to build
 <code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicStagedPassManager</span></code>, which ensures that the
 Jordan-Wigner encoding is used consistently for all circuit instructions.</p>
-<p>Crucially, we add the <a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.QDriftTrotterization.html#qiskit_fermions.transpiler.passes.QDriftTrotterization" title="qiskit_fermions.transpiler.passes.QDriftTrotterization"><code class="xref py py-class docutils literal notranslate"><span class="pre">QDriftTrotterization</span></code></a> transpilation pass to the
-<code class="docutils literal notranslate"><span class="pre">optimization</span></code> stage of the transpilation pipeline. This ensures that we do
-not use the time evolution of the entire Hamiltonian, a circuit whose depth
+<p>Crucially, add the <a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.QDriftTrotterization.html#qiskit_fermions.transpiler.passes.QDriftTrotterization" title="qiskit_fermions.transpiler.passes.QDriftTrotterization"><code class="xref py py-class docutils literal notranslate"><span class="pre">QDriftTrotterization</span></code></a> transpilation pass to the
+<code class="docutils literal notranslate"><span class="pre">optimization</span></code> stage of the transpilation pipeline. This ensures that the
+circuit does not use the time evolution of the entire Hamiltonian, whose depth
 would exceed the capabilities of currently available quantum computing hardware.</p>
-<p>Instead, it will subsample a fixed number of <code class="docutils literal notranslate"><span class="pre">groups</span></code> of Hamiltonian terms for
-each circuit, every time we transpile the circuit. Through this, we can generate
+<p>Instead, it subsamples a fixed number of <code class="docutils literal notranslate"><span class="pre">groups</span></code> of Hamiltonian terms for
+each circuit, every time the circuit is transpiled. Through this, you can generate
 multiple circuit randomizations as required by the <a class="reference external" href="https://arxiv.org/abs/2508.02578">SqDRIFT</a> algorithm by
 repeatedly running the transpilation pipeline.</p>
 <p>This step also introduces the few parameters with which one can tweak the
@@ -486,7 +486,7 @@ C</label><div class="sd-tab-content docutils">
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>In the example above we have fixed the <code class="docutils literal notranslate"><span class="pre">seed</span></code> for the random number
+<p>The preceding example fixes the <code class="docutils literal notranslate"><span class="pre">seed</span></code> for the random number
 generator used inside of the <a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.QDriftTrotterization.html#qiskit_fermions.transpiler.passes.QDriftTrotterization" title="qiskit_fermions.transpiler.passes.QDriftTrotterization"><code class="xref py py-class docutils literal notranslate"><span class="pre">QDriftTrotterization</span></code></a> transpilation
 pass.</p>
 </div>
@@ -505,7 +505,7 @@ non-trivial excitation.</p>
 <p>This filtering needs to know which modes start out occupied. It therefore
 requires an <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.InitializeModes.html#qiskit_fermions.circuit.library.InitializeModes" title="qiskit_fermions.circuit.library.InitializeModes"><code class="xref py py-class docutils literal notranslate"><span class="pre">InitializeModes</span></code></a> gate preceding the <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a>
 gate(s) in the circuit; <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.InitializeModes.html#qiskit_fermions.circuit.library.InitializeModes.from_hartree_fock" title="qiskit_fermions.circuit.library.InitializeModes.from_hartree_fock"><code class="xref py py-meth docutils literal notranslate"><span class="pre">InitializeModes.from_hartree_fock()</span></code></a> is a
-convenient way to construct one. We add one here for the N2 Hartree-Fock
+convenient way to construct one. Add one here for the N2 Hartree-Fock
 reference (seven alpha and seven beta electrons in 14 spatial orbitals) and compare the
 sampled excitations with and without <code class="docutils literal notranslate"><span class="pre">filter_trivial=True</span></code>:</p>
 <div class="sd-tab-set docutils">
@@ -561,7 +561,7 @@ C</label><div class="sd-tab-content docutils">
 occupied and an unoccupied mode; every single one is trivial and would have
 no effect on the sampled bitstrings. With <code class="docutils literal notranslate"><span class="pre">filter_trivial=True</span></code>, all five are
 rejected and replaced by excitations that do couple an occupied mode with an
-unoccupied one, e.g. the first accepted excitation <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">1,</span> <span class="pre">6,</span> <span class="pre">7]</span></code> moves a
+unoccupied one. For example, the first accepted excitation <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">1,</span> <span class="pre">6,</span> <span class="pre">7]</span></code> moves a
 particle between occupied modes <code class="docutils literal notranslate"><span class="pre">0</span></code>, <code class="docutils literal notranslate"><span class="pre">1</span></code>, and <code class="docutils literal notranslate"><span class="pre">6</span></code> and unoccupied mode
 <code class="docutils literal notranslate"><span class="pre">7</span></code>.</p>
 <p>Once an excitation is accepted, every mode in its support becomes
@@ -634,7 +634,7 @@ information contained in the circuits’ metadata!</p>
 </section>
 <section id="next-steps">
 <h2>Next steps<a class="headerlink" href="#next-steps" title="Link to this heading">¶</a></h2>
-<p>Now that we have successfully generated an ensemble of circuits, we can sample
+<p>Now that you have successfully generated an ensemble of circuits, you can sample
 bitstrings from them. To do so, the circuits must be executed on hardware.
 Refer to the <a class="reference external" href="https://quantum.cloud.ibm.com/docs/guides/intro-to-patterns">Qiskit
 documentation</a>
@@ -680,7 +680,7 @@ tutorials</a>.</p>
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on 2026/08/20</div>
+              Last updated on 2026/08/24</div>
           </div>
           <div class="right-details">
             
@@ -720,7 +720,7 @@ tutorials</a>.</p>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=0bccd3c6"></script>
+</div><script src="../_static/documentation_options.js?v=19036ff4"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
