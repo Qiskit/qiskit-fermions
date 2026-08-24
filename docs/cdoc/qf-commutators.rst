@@ -4,8 +4,8 @@ Commutator Generators
 
 The :ref:`operator representations <qf_operators>` provide efficient functions
 for the computation of various commutators. Since these functions work with
-generic operator representations (a notion that does not exist in C) we explain
-them generically in the following three sections.
+generic operator representations (a notion that does not exist in C), they are
+explained generically in the following three sections.
 The actual functions contained in the C API for the various operator
 representations are listed at the bottom of this page.
 
@@ -17,7 +17,7 @@ Commutator
     .. caution::
        The function signature here is **generic**! A real one will replace
        ``OpType`` with an actual :ref:`operator representations <qf_operators>`
-       and ``op_type`` with its matching prefix (e.g. ``ferm_op`` for
+       and ``op_type`` with its matching prefix (for example, ``ferm_op`` for
        :c:struct:`QfFermionOperator`).
 
     The commutator is defined as:
@@ -57,7 +57,7 @@ Anti-Commutator
     .. caution::
        The function signature here is **generic**! A real one will replace
        ``OpType`` with an actual :ref:`operator representations <qf_operators>`
-       and ``op_type`` with its matching prefix (e.g. ``ferm_op`` for
+       and ``op_type`` with its matching prefix (for example, ``ferm_op`` for
        :c:struct:`QfFermionOperator`).
 
     The anti-commutator is defined as:
@@ -97,7 +97,7 @@ Double-Commutator
     .. caution::
        The function signature here is **generic**! A real one will replace
        ``OpType`` with an actual :ref:`operator representations <qf_operators>`
-       and ``op_type`` with its matching prefix (e.g. ``ferm_op`` for
+       and ``op_type`` with its matching prefix (for example, ``ferm_op`` for
        :c:struct:`QfFermionOperator`).
 
     The double-commutator is defined as follows (see also Chapter 13.6, *Equation of motion

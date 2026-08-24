@@ -32,7 +32,7 @@ use qiskit_fermions_core::operators::{CoherenceError, OperatorMacro, OperatorTra
 ///
 /// @rst
 ///
-/// Any of the pointer arguments may be ``NULL`` if and only if their corresponding length is zero.
+/// Any of the pointer arguments can be ``NULL`` if and only if their corresponding length is zero.
 ///
 /// Example
 /// -------
@@ -634,7 +634,7 @@ pub unsafe extern "C" fn qf_maj_op_split_out_groups(
 ///
 /// @rst
 ///
-/// Any of the pointer arguments may be ``NULL`` if and only if their corresponding length is zero.
+/// Any of the pointer arguments can be ``NULL`` if and only if their corresponding length is zero.
 ///
 /// .. caution::
 ///    This function resets the operator's ``groups`` attribute to ``NULL``.
@@ -848,7 +848,7 @@ pub unsafe extern "C" fn qf_maj_op_adjoint(op: *const MajoranaOperator) -> *mut 
 /// @rst
 ///
 /// .. caution::
-///    This functions truncates coefficients greedily! If the acted upon operator may contain
+///    This functions truncates coefficients greedily! If the acted upon operator might contain
 ///    separate coefficients for duplicate terms consider calling :c:func:`qf_maj_op_simplify`
 ///    instead!
 ///
