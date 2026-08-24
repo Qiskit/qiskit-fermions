@@ -1,6 +1,6 @@
 .. _operators_explanation:
 
-Design Principles of Operator Representations
+Design principles of operator representations
 =============================================
 
 This guide explains the common design principles and core concepts shared across
@@ -20,7 +20,7 @@ design principles:
 
 - |term_iteration_and_reconstruction|_:
   Irrespective of the internal sparse storage, operators provide a consistent
-  iteration interface that lets you inspect, filter, and transform terms without
+  iteration interface, so you can inspect, filter, and transform terms without
   understanding the underlying data structure, then reconstruct new operators
   from modified terms.
 
@@ -181,7 +181,7 @@ Term iteration and reconstruction
 ---------------------------------
 
 Operators provide a consistent iteration interface by using :meth:`.OperatorTrait.iter_terms`
-irrespective of their internal sparse representation. This allows you to inspect, filter,
+irrespective of their internal sparse representation. You can therefore inspect, filter,
 or transform terms without needing to understand the underlying data structure.
 You can then reconstruct a new operator from the transformed terms by using
 :meth:`.OperatorTrait.from_terms`.

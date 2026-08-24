@@ -1018,9 +1018,9 @@ What to take away
   set only slowed the linear growth in depth; a term-by-term synthesis of each set still
   threw away the fact that its terms commute. Only supplying a flow-set-aware
   :class:`~qiskit.synthesis.EvolutionSynthesis` made the depth constant. Custom encodings,
-  grouping, and custom synthesis are complementary: all three are needed.
+  grouping and custom synthesis are complementary: all three are needed.
 - **Verify it.** An encoding that satisfies the commutation relations might still represent
-  a different Hamiltonian if a prefactor or sign is incorrect. Checking an intertwining relation
+  a different Hamiltonian if a prefactor or sign is off. Checking an intertwining relation
   (or, more cheaply, the spectrum) catches this.
 
 .. note::

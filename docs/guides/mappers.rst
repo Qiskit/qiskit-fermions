@@ -4,8 +4,8 @@ Map operator representations
 ============================
 
 **Mappers** are routines that transform operators from one representation to another
-while preserving mathematical equivalence. They enable you to work flexibly across
-different operator algebras and prepare operators for quantum circuit execution.
+while preserving mathematical equivalence. Use them to work flexibly across
+different operator algebras and to prepare operators for quantum circuit execution.
 
 Implement custom mappers
 ------------------------

@@ -5,11 +5,11 @@ Transpile fermionic circuits
 
 .. important::
 
-   The functions described in this guide are currently available only in the Python API.
-   Equivalent functionality will be made available through the C API in a future release.
+   The concepts in this guide are currently available only in the Python API.
+   Equivalent functionality will be made available in the C API in a future release.
 
 This guide explains how to transpile a :class:`.FermionicCircuit` to a standard
-:class:`~qiskit.circuit.QuantumCircuit`. We continue with the same time evolution
+:class:`~qiskit.circuit.QuantumCircuit`. It continues with the same time evolution
 example from the :ref:`fermionic circuits guide <fermionic_circuit_explanation>`.
 
 Transpilation stages
@@ -136,8 +136,8 @@ approaches:
    <Figure size ... with 1 Axes>
 
 Both workflows produce equivalent circuits. However, the traditional workflow
-requires you to implement optimization steps manually, whereas the
-fermionic-first approach allows you to integrate problem-aware optimizations
+requires you to implement optimization steps manually, whereas with the
+fermionic-first approach you can integrate problem-aware optimizations
 into the transpilation process.
 
 Advanced workflows

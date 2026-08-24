@@ -5,8 +5,8 @@ Build an LUCJ ansatz
 
 .. important::
 
-   The functions described in this guide are currently available only in the Python API.
-   Equivalent functionality will be made available through the C API in a future
+   The concepts in this guide are currently available only in the Python API.
+   Equivalent functionality will be made available in the C API in a future
    release.
 
 The local unitary cluster Jastrow (`LUCJ`_) ansatz is a compact, hardware-efficient
@@ -35,7 +35,7 @@ with :math:`n_{i\sigma}` the number operator on spatial orbital :math:`i` with s
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The (L)UCJ ansatz can be initialized from the amplitudes of a coupled-cluster singles and
-doubles (CCSD) calculation. We run restricted Hartree-Fock followed by CCSD for a hydrogen
+doubles (CCSD) calculation. Run restricted Hartree-Fock followed by CCSD for a hydrogen
 molecule in the ``6-31g`` basis, using `PySCF <https://pyscf.org/>`_ for the quantum chemistry.
 
 .. invisible-code-block: python
@@ -74,7 +74,7 @@ molecule in the ``6-31g`` basis, using `PySCF <https://pyscf.org/>`_ for the qua
 2. Build the molecular Hamiltonian as a fermionic operator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-We will need the Hamiltonian later to evaluate the ansatz energy. We build it directly as a
+The Hamiltonian is needed later to evaluate the ansatz energy. Build it directly as a
 :class:`.FermionOperator` from the molecular-orbital integrals: the one-body integrals ``h1e``
 (the core Hamiltonian in the MO basis), the two-body integrals ``h2e`` (from :func:`pyscf.ao2mo`),
 and the constant nuclear-repulsion energy. The electronic-integral constructors
@@ -116,7 +116,7 @@ matrices and orbital rotations, and derives an optional final orbital rotation f
 
 The number of ansatz repetitions, :math:`L`, equals the number of terms in the double
 factorization. Truncating it with the ``n_reps`` argument trades some accuracy for a shallower
-circuit. Here, we keep the two largest terms, which recovers most of the correlation energy while
+circuit; here the two largest terms are kept, which recovers most of the correlation energy while
 halving the number of layers.
 
 .. plot::
@@ -133,7 +133,7 @@ halving the number of layers.
    >>> circuit.append(InitializeModes.from_hartree_fock(norb, nelec), circuit.modes)
    >>> circuit.append(ansatz, circuit.modes)
 
-The :class:`.UCJ` gate is a pure unitary carrying no reference of its own, so we prepend an
+The :class:`.UCJ` gate is a pure unitary carrying no reference of its own, so prepend an
 :class:`.InitializeModes` gate (built with
 :meth:`~qiskit_fermions.circuit.library.InitializeModes.from_hartree_fock`) to supply the
 Hartree-Fock reference the ansatz is applied to. Decomposing the circuit reveals its anatomy: the
@@ -165,8 +165,8 @@ Because every gate in the circuit implements ffsim's :class:`ffsim.SupportsApply
 the whole :class:`.FermionicCircuit` can be applied to a fixed particle-number state vector with
 :func:`ffsim.apply_unitary`, starting from the Hartree-Fock reference. The
 :class:`.FermionOperator` likewise implements ffsim's :class:`ffsim.SupportsLinearOperator`
-protocol, so we can obtain a SciPy :class:`~scipy.sparse.linalg.LinearOperator` for it by using 
-:func:`ffsim.linear_operator`, and evaluate the ansatz energy as the expectation value of the
+protocol, so you can obtain a SciPy :class:`~scipy.sparse.linalg.LinearOperator` for it via
+:func:`ffsim.linear_operator` and evaluate the ansatz energy as the expectation value of the
 molecular Hamiltonian.
 
 .. plot::
@@ -213,7 +213,7 @@ typically smaller, number of repetitions. This trades a classical optimization u
 shallower ansatz at a target accuracy, and has no equivalent in this package.
 
 There is no need to re-implement it: an ``ffsim`` UCJ operator exposes the same tensors that
-:class:`.UCJ` is built from, so we can construct the operator with ``optimize=True`` and hand its
+:class:`.UCJ` is built from, so you can construct the operator with ``optimize=True`` and hand its
 ``diag_coulomb_mats`` / ``orbital_rotations`` / ``final_orbital_rotation`` straight to the
 :class:`.UCJ` constructor.
 
@@ -256,8 +256,8 @@ way recovers the same correlation energy at this (small) system size:
    compressed LUCJ energy: -1.14618323 Hartree
 
 .. note::
-   ``diag_coulomb_mats`` from ``optimize=True`` might carry tiny imaginary round-off values; :class:`.UCJ`
-   takes their real part and raises an error only if the imaginary part is not negligible. For a better fit at
+   ``diag_coulomb_mats`` from ``optimize=True`` might carry tiny imaginary round-off; :class:`.UCJ`
+   takes their real part and raises only if the imaginary part is not negligible. For a better fit at
    a given ``n_reps`` (at increased classical cost) see ffsim's ``multi_stage_start`` /
    ``multi_stage_step`` options.
 
@@ -271,7 +271,7 @@ The :func:`~qiskit_fermions.transpiler.presets.generate_preset_jw_pass_manager` 
 staged pipeline that maps the fermionic circuit through the Jordan-Wigner transformation and
 synthesizes each gate into a qubit-level circuit. The composite :class:`.UCJ` gate must first be
 decomposed into its primitive gates (:class:`.OrbitalRotation`, :class:`.Evolution`, ...) so the
-pipeline's optimization stage can act on them, so we pass ``circuit.decompose()``.
+pipeline's optimization stage can act on them, so pass ``circuit.decompose()``.
 
 .. skip: start if(not HAS_FFSIM)
 
@@ -306,8 +306,8 @@ A real device has a restricted qubit coupling map, and the LUCJ ansatz is design
 same-spin (``pairs_aa``) interactions form two linear chains and the alpha-beta (``pairs_ab``)
 interactions bridge them. ffsim's :external:func:`~ffsim.qiskit.generate_lucj_pass_manager` builds a
 device-aware qubit pipeline for this structure, and returns the subset of ``pairs_ab`` the
-hardware can actually accommodate. We can slot that pipeline into the preset's ``qubit`` stage while
-keeping our own fermion-to-qubit synthesis:
+hardware can actually accommodate. Slot that pipeline into the preset's ``qubit`` stage while
+keeping the package's own fermion-to-qubit synthesis:
 
 .. plot::
    :context:
@@ -339,7 +339,7 @@ keeping our own fermion-to-qubit synthesis:
    [(0, 0)]
 
 With ``pm.qubit`` now set to the device-aware pipeline, running the pass manager lays the circuit out
-on the backend's qubits and routes it to the coupling map. If we route the *unrestricted* ansatz from
+on the backend's qubits and routes it to the coupling map. For the *unrestricted* ansatz from
 step 3, whose diagonal Coulomb operator still contains alpha-beta terms the hardware cannot reach
 directly, the router must insert many ``SWAP`` gates to bridge them:
 
@@ -382,7 +382,7 @@ directly. The ansatz then matches the device topology and the router barely has 
 
 Drawing only the active qubits (``idle_wires=False``) shows the circuit restricted to the two spin
 chains and the alpha-beta bridge, expressed in the device basis gates. Layout and routing scatter the
-logical modes across the device's physical qubits, so we pass a ``wire_order`` taken from the
+logical modes across the device's physical qubits, so pass a ``wire_order`` taken from the
 circuit's final layout (:meth:`~qiskit.transpiler.TranspileLayout.final_index_layout` lists the
 physical qubit each input qubit ended on, in input-qubit order) to draw the wires back in the
 original mode order:

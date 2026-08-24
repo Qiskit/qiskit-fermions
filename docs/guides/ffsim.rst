@@ -5,8 +5,8 @@ The ffsim simulation backend
 
 .. important::
 
-   The functions described in this guide are currently available only in the Python API.
-   Equivalent functionality will be made available through the C API in a future
+   The concepts in this guide are currently available only in the Python API.
+   Equivalent functionality will be made available in the C API in a future
    release.
 
 The :ref:`getting-started guides <lucj_getting_started>` simulate fermionic circuits and
@@ -171,9 +171,9 @@ add an explicit guard before calling it:
    ...     print("rejected:", exc)
    rejected: Evolution requires an operator that conserves the (norb, nelec) sector: every term must preserve the particle number of each spin species (norb=2, nelec=(1, 1)).
 
-Calling :meth:`.SupportsLinearOperator._linear_operator_` directly on a non-conserving operator bypasses
-this guard (it is a lower-level building block, not a validated simulation entry point) and will
-return a matrix-vector product that silently zeroes the non-conserving amplitude rather than raising.
+Calling :meth:`.SupportsLinearOperator._linear_operator_` *directly* on a non-conserving operator bypasses
+this guard (it is a lower-level building block, not a validated simulation entry point) and returns
+a matrix-vector product that silently zeroes the non-conserving amplitude rather than raising.
 
 The practical consequence is that non-particle-preserving simulation is not possible in fermionic
 space, by construction of the fixed-sector representation: not as a missing feature, but

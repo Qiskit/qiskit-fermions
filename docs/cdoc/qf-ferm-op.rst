@@ -63,7 +63,7 @@ Entries in ``actions`` indicate creation (annihilation) operators by ``True`` (`
 Fermionic modes indexed by ``modes`` are considered spinless.
 
 .. note::
-   You may access **read-only copies** of these internal arrays via their respective functions:
+   You can access **read-only copies** of these internal arrays via their respective functions:
 
    - :c:func:`qf_ferm_op_get_coeffs`
    - :c:func:`qf_ferm_op_get_actions`
@@ -71,7 +71,7 @@ Fermionic modes indexed by ``modes`` are considered spinless.
    - :c:func:`qf_ferm_op_get_boundaries`
 
 This data structure allows for very efficient construction and manipulation of operators.
-However, it implies that duplicate terms may be contained in an operator at any moment.
+However, it implies that duplicate terms might be contained in an operator at any moment.
 These must be resolved manually through the use of :c:func:`qf_ferm_op_simplify`.
 
 Construction
