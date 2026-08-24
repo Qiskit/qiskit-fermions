@@ -23,7 +23,7 @@ this project split the transpilation into the following stages:
 
 **Optimization**
    Keeps the circuit in fermionic space. These
-   passes exploit fermionic structure and commutation relations while
+   passes use fermionic structure and commutation relations while
    problem-aware knowledge remains fully available.
 
 **Layout**

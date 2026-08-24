@@ -507,9 +507,9 @@ All four act on one line of the lattice at a time (a row for east/west, a column
 north/south) together with that line's ancillas, and all four have the same three-part
 shape:
 
-1. A layer of single-qubit rotations, putting each qubit in the basis its flow set needs.
-2. A first ``CX`` layer, always site-to-ancilla on the same site.
-3. A second ``CX`` layer, coupling neighbors along the line.
+- A layer of single-qubit rotations, putting each qubit in the basis its flow set needs.
+- A first ``CX`` layer, always site-to-ancilla on the same site.
+- A second ``CX`` layer, coupling neighbors along the line.
 
 Steps 2 and 3 are the only two-qubit layers, so the two-qubit depth is :math:`2`, regardless
 of how long the line is. They are written out one function per flow set below. The

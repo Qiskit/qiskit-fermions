@@ -10,7 +10,7 @@ Optimize Slater determinant preparation
 
 An :class:`.InitializeModes` gate declares a reference mode occupation; an 
 :class:`.OrbitalRotation` gate rotates the single-particle basis. Placed back to back, the two
-gates prepare a *Slater determinant*: the modes start in the reference determinant and are then
+gates prepare a *Slater determinant*; the modes start in the reference determinant and are then
 rotated into the target orbitals. The :class:`.PrepareSlaterDeterminant` gate captures that
 composition, and because it carries the reference occupation, transpiling it can use the rectangular
 :func:`~qiskit_fermions.linalg.givens_decomposition_slater`, which realizes only the *occupied*
@@ -26,8 +26,8 @@ and then applies the rotation, just as the two separate gates do), so the merge 
 cheaper synthesis without changing the prepared state.
 
 Throughout this guide, each circuit is drawn before and after the pass, side by side: the input
-on the left, and on the right the result of running the pass on it. Two helpers do that: ``merge``
-runs the pass on a copy of the circuit (via its :class:`.FermionicDAGCircuit`) and converts the
+on the left, and the result of running the pass on it on the right. Two helpers do that. ``merge``
+runs the pass on a copy of the circuit (through its :class:`.FermionicDAGCircuit`) and converts the
 result back to a drawable :class:`.FermionicCircuit`, and ``draw_merge`` draws both halves into a
 single before/after figure:
 
@@ -72,8 +72,8 @@ What gets merged
 ----------------
 
 The pass recognizes three patterns, all keyed off the block-spin mode convention that
-:class:`.InitializeModes` and :class:`.OrbitalRotation` use: for a system with ``norb`` spatial
-orbitals the modes ``0..norb`` are the spin-alpha sector and ``norb..2*norb`` are the spin-beta
+:class:`.InitializeModes` and :class:`.OrbitalRotation` use. For a system with ``norb`` spatial
+orbitals, the modes ``0..norb`` are the spin-alpha sector, and ``norb..2*norb`` are the spin-beta
 sector. Slater determinant preparation is done per spin sector because each sector has its own
 (electrons, orbitals) shape.
 
@@ -166,7 +166,7 @@ What is left untouched
 
 The pass is deliberately conservative. It only fuses when the two gates genuinely compose into a
 Slater determinant preparation, and copies everything else through unchanged. "Immediately
-followed" is understood over the circuit's data-flow graph: the :class:`.OrbitalRotation` fuses
+followed" is understood over the circuit's data-flow graph. The :class:`.OrbitalRotation` fuses
 only when the :class:`.InitializeModes` is its *sole* predecessor across all of its modes. In the
 figures below, the before and after are identical: nothing fused.
 

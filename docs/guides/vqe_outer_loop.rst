@@ -26,7 +26,7 @@ ansatz gate, using :class:`.UCJ` as a concrete example.
    (``diag_coulomb_mats``, ``orbital_rotations``), not from :class:`~qiskit.circuit.Parameter`
    objects. Their synthesis (see :class:`.GivensDecompositionOrbitalRotationSynthesis`) performs a
    numeric Givens decomposition of the rotation matrix, which has no symbolic equivalent. So rather
-   than binding parameters into one fixed circuit, this guide drives an outer loop: a classical
+   than binding parameters into one fixed circuit, this guide drives an outer loop. A classical
    optimizer proposes a flat real vector :math:`\boldsymbol{\theta}`, which
    :meth:`.UCJ.from_parameters` unpacks into a fresh ansatz gate, evaluated once per optimizer step.
    This mirrors how `ffsim`_'s VQE examples treat its equivalent UCJ operators.
@@ -97,7 +97,7 @@ The molecular Hamiltonian is built the same way as in the LUCJ guide:
 2. Choose an unconstrained parametrization of the ansatz tensors
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The optimizer needs a flat real vector, but the ansatz tensors are constrained: each orbital
+The optimizer needs a flat real vector, but the ansatz tensors are constrained. Each orbital
 rotation must be unitary, and each diagonal Coulomb matrix must be real symmetric.
 :meth:`.UCJ.to_parameters` and :meth:`.UCJ.from_parameters` handle this conversion natively,
 parametrizing the unconstrained generators and mapping them onto valid tensors: an orbital
@@ -131,12 +131,12 @@ keep the final orbital rotation from the :math:`t_1` amplitudes out of ``theta``
 Given ``theta``, :meth:`.UCJ.from_parameters` builds the gate directly. Rather than returning an
 energy directly, ``params_to_vec`` stops one step earlier and returns the ansatz state vector:
 this is the interface both optimizers used below need, and the energy is trivially recovered from
-it via the Hamiltonian's :func:`ffsim.linear_operator`.
+it through the Hamiltonian's :func:`ffsim.linear_operator`.
 
 The final orbital rotation is initialized from the :math:`t_1` amplitudes and held fixed throughout:
 since that rotation already captures the singles, the optimization can focus on the
 :math:`t_2`-derived repetition tensors, and ``theta`` stays :math:`\mathcal{O}(N^2)` parameters
-shorter. This is a choice, not a requirement: freezing it does restrict the variational manifold,
+shorter. This is a choice, not a requirement. Freezing it does restrict the variational manifold,
 so for systems with significant singles character you might well want it optimized too. Passing
 ``with_final_orbital_rotation=True`` to both :meth:`.UCJ.num_parameters` and
 :meth:`.UCJ.from_parameters` folds it into ``theta``, which then also makes the two explicit
@@ -185,9 +185,9 @@ Starting the optimizer from :math:`\boldsymbol{\theta} = \mathbf{0}` (the identi
 zero diagonal Coulomb matrix, that is, the Hartree-Fock reference itself) lands on a nearby local
 minimum barely below Hartree-Fock. With only one repetition, the ansatz is not expressive enough
 near that point for a gradient-based search to escape it unassisted. A classically computed
-starting point is a much better choice, so reuse the CCSD-initialized ansatz from step 1: calling
+starting point is a much better choice, so reuse the CCSD-initialized ansatz from step 1. Calling
 :meth:`~.UCJ.to_parameters` on it (with its final rotation cleared, since ``theta`` excludes it)
-gives ``theta0``, which is then handed to :func:`scipy.optimize.minimize` together with ``energy``.
+gives ``theta0``, which is then passed to :func:`scipy.optimize.minimize`, together with ``energy``.
 Any ``scipy`` gradient-free or finite-difference method works here since ``energy`` returns a plain
 float. No gradient of the fermionic ansatz is implemented.
 
@@ -274,7 +274,7 @@ to the :class:`.UCJ` gate and ``params_to_vec`` built above, unchanged.
 
 The iteration counts of both optimizers vary between runs and machines, so they are not printed
 here; but with the same warm start, the linear method consistently needs only a small
-fraction of L-BFGS-B's iterations to reach the same energy, since it exploits the extra structure
+fraction of L-BFGS-B's iterations to reach the same energy, since it uses the extra structure
 of ``params_to_vec`` that a generic finite-difference method cannot.
 
 .. _vqe_outer_loop_ucc:

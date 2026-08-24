@@ -101,7 +101,7 @@ the position basis, where the model is naturally defined.
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The bath part of the SIAM is a free-fermion chain, so it is diagonalized by a change to the
-momentum basis. This is the decisive step for SKQD: because the bath is translationally
+momentum basis. This is the decisive step for SKQD. Because the bath is translationally
 invariant, the ground state is not sparse in the position basis, but it is sparse in the
 momentum basis, where the bath Hamiltonian is diagonal. The single-particle orbital rotation that
 performs this change is problem-specific linear algebra.  It diagonalizes the bath hopping matrix
@@ -151,8 +151,8 @@ integrals is a standard basis change of the electronic-structure tensors:
    ... )
 
 Because the rotation leaves the impurity orbital fixed (it acts only on the bath), the on-site
-interaction is unchanged: ``h2e_momentum`` remains a single number-number term, just like ``h2e``;
-the only change is that the impurity has been relocated to a central index. This is visible directly
+interaction is unchanged. ``h2e_momentum`` remains a single number-number term, just like ``h2e``.
+The only change is that the impurity has been relocated to a central index. This is visible directly
 in the integral tensors, which each carry one nonzero entry:
 
 .. plot::
@@ -178,8 +178,8 @@ orbitals into ``2 * norb`` fermionic modes.
 
 Keep the one-body part :math:`H_1` and the two-body part :math:`H_2` as separate operators
 rather than summing them eagerly, matching the terms :math:`H_1` and :math:`H_2` of the section-1 equations.
-Building each piece once (in both bases) makes them reusable below: summed, they give the full
-Hamiltonian for the exact diagonalization in either basis; individually, :math:`H_2` (momentum basis)
+Building each piece once (in both bases) makes them reusable below. Summed, they give the full
+Hamiltonian for the exact diagonalization in either basis. Individually, :math:`H_2` (momentum basis)
 is the operator the Trotter step evolves in step 4.
 
 .. plot::
@@ -393,7 +393,7 @@ state only) to :math:`D - 1`.
    ...     return circuit
 
 .. note::
-   The fermionic circuit carries no measurements: measurement is a qubit-level concept, so add it
+   The fermionic circuit carries no measurements. Measurement is a qubit-level concept, so add it
    after transpilation, once the fermionic gates have been synthesized onto qubits. Convenience
    ``measure`` instructions on :class:`.FermionicCircuit` might be introduced in the
    `future <https://github.com/Qiskit/qiskit-fermions/issues/219>`_.
@@ -411,7 +411,7 @@ Because every fermionic gate here has a default synthesis, you can use the ready
 keyword arguments are forwarded to the qubit stage; pass ``optimization_level=0`` for a faithful,
 unoptimized picture of the synthesized depth. Generating the full family of Krylov circuits is then
 a loop over the Krylov dimension. Keep the untranspiled :class:`.FermionicCircuit`\ s alongside
-the transpiled qubit circuits: the fermionic ones drive the exact (statevector) simulation in step
+the transpiled qubit circuits. The fermionic ones drive the exact (statevector) simulation in step
 6, while the transpiled ones (with measurements added) are what a backend would execute.
 
 .. plot::
@@ -436,7 +436,7 @@ the transpiled qubit circuits: the fermionic ones drive the exact (statevector) 
    >>> krylov_dim = 5
    >>> fermionic_circuits, circuits = krylov_circuits(krylov_dim)
 
-The Krylov dimension shows up directly in the circuits' two-qubit depth: the reference-state
+The Krylov dimension shows up directly in the circuits' two-qubit depth. The reference-state
 preparation is a fixed cost, and each additional Krylov power adds another second-order Trotter step
 of the time-evolution operator.
 
@@ -516,8 +516,8 @@ Pooling the samples from all five Krylov circuits, the support is tiny: a few hu
 bitstrings out of the :math:`\binom{8}{4}^2 = 4900` determinants in the ``(4, 4)`` sector. This
 concentration, a direct consequence of the momentum-basis sparsity established in step 2, makes the subsequent classical diagonalization tractable.
 
-Plotting the counts with :func:`qiskit.visualization.plot_histogram` makes the sparsity visible: a
-handful of configurations dominate, led by the reference determinant.
+Plotting the counts with :func:`qiskit.visualization.plot_histogram` makes the sparsity visible. A few 
+configurations dominate, led by the reference determinant.
 
 .. plot::
    :alt: Histogram of the bitstrings sampled from the Krylov circuits, showing a small support.
@@ -534,8 +534,8 @@ handful of configurations dominate, led by the reference determinant.
 7. Diagonalize in the sampled subspace
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The sampled bitstrings are the input to the classical half of SKQD: the Hamiltonian is projected onto
-the subspace the sampled configurations span and diagonalized there. This is handed off to the
+The sampled bitstrings are the input to the classical half of SKQD. The Hamiltonian is projected onto
+the subspace the sampled configurations span and diagonalized there. This is passed to the
 `qiskit-addon-sqd <https://quantum.cloud.ibm.com/docs/addons/qiskit-addon-sqd>`_ package, whose
 :func:`~qiskit_addon_sqd.fermion.diagonalize_fermionic_hamiltonian` runs the full sample-based
 quantum diagonalization loop. It builds a subspace from batches of the sampled configurations,
@@ -617,7 +617,7 @@ steadily improves which configurations land in those batches, so the recovered e
    >>> fig
    <Figure size ... with 2 Axes>
 
-This closes the SKQD loop: the momentum-basis circuits of steps 1--5 produce a sparse sample (step
+This closes the SKQD loop. The momentum-basis circuits of steps 1--5 produce a sparse sample (step
 6), and the sample-based diagonalization above turns that sample back into a ground-state energy.
 
 .. skip: end

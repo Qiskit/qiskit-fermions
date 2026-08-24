@@ -25,7 +25,7 @@ fermionic Hamiltonian on a qubit-based architecture:
 3. Implement the time evolution in qubit space (using Trotterization or other
    methods).
 
-This approach has a fundamental limitation: early mapping to qubits discards
+This approach has a fundamental limitation; early mapping to qubits discards
 problem-aware knowledge about the fermionic structure. Standard optimization
 passes cannot exploit fermionic symmetries or allowed term reorderings,
 resulting in suboptimal circuits with unnecessary depths and gate counts.

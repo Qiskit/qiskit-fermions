@@ -131,7 +131,7 @@ from the custom mapper section, demonstrating equivalent results:
        qf_sparse_obs_free(qubit_op);
 
 In the Python API, some of these library mappers are also reachable through type-agnostic
-convenience mappers: :func:`.fermion_operator` and :func:`.majorana_operator` sit in front of
+convenience mappers. :func:`.fermion_operator` and :func:`.majorana_operator` sit in front of
 :func:`.majorana_to_fermion` and :func:`.fermion_to_majorana` (among others), delegating to the
 appropriate library implementation internally based on the type of object they are given,
 rather than requiring you to pick the right function yourself. See :mod:`qiskit_fermions.protocols`

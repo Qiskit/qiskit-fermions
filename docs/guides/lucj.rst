@@ -136,7 +136,7 @@ halving the number of layers.
 The :class:`.UCJ` gate is a pure unitary carrying no reference of its own, so prepend an
 :class:`.InitializeModes` gate (built with
 :meth:`~qiskit_fermions.circuit.library.InitializeModes.from_hartree_fock`) to supply the
-Hartree-Fock reference the ansatz is applied to. Decomposing the circuit reveals its anatomy: the
+Hartree-Fock reference the ansatz is applied to. Decomposing the circuit reveals its anatomy. The
 :class:`.InitializeModes` gate prepares the reference determinant, and each ansatz layer contributes
 an :class:`.OrbitalRotation` :math:`\mathcal{U}_k^\dagger`, then :math:`e^{i\mathcal{J}_k}` (an
 :class:`.Evolution` of the diagonal Coulomb operator :math:`\mathcal{J}_k`), then
@@ -302,7 +302,7 @@ Coulomb evolutions into :class:`~qiskit.circuit.library.RZZGate`\ objects:
 
 .. rubric:: Target hardware connectivity with ffsim's LUCJ pass manager
 
-A real device has a restricted qubit coupling map, and the LUCJ ansatz is designed to match it: the
+A real device has a restricted qubit coupling map, and the LUCJ ansatz is designed to match it. The
 same-spin (``pairs_aa``) interactions form two linear chains and the alpha-beta (``pairs_ab``)
 interactions bridge them. ffsim's :external:func:`~ffsim.qiskit.generate_lucj_pass_manager` builds a
 device-aware qubit pipeline for this structure, and returns the subset of ``pairs_ab`` the
@@ -398,7 +398,7 @@ original mode order:
 
 .. note::
    The exact post-layout gate counts and depth depend on the routing/optimization passes and the
-   chosen device, so they are not reproduced here. The key point is the co-design: expressing the
+   chosen device, so they are not reproduced here. The key point is the co-design; expressing the
    ansatz with a nearest-neighbor ``pairs_aa`` chain and hardware-filtered ``pairs_ab`` bridges keeps
    the synthesized circuit close to the device topology, minimizing the routing overhead (inserted
    ``SWAP`` gates). See :class:`.GivensDecompositionSlaterDeterminantSynthesis` for a related

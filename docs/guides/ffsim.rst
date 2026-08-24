@@ -89,7 +89,7 @@ by an independent native Rust FCI (full configuration interaction) kernel, not a
 around ffsim's linear algebra routines. It compiles an operator's terms into a scatter map
 over the fixed-particle-number determinant basis, then reuses that compiled form across repeated
 matrix-vector products. This is the protocol method ffsim expects
-(:class:`ffsim.SupportsLinearOperator`): it is implemented without ffsim, and it is
+(:class:`ffsim.SupportsLinearOperator`); it is implemented without ffsim, and it is
 cross-checked against ffsim's matrix elements in this package's test suite, but it does not call
 into ffsim. Handing a :class:`.FermionOperator` to :func:`scipy.sparse.linalg.eigsh` or
 :func:`scipy.sparse.linalg.expm_multiply` (as :meth:`.Evolution._apply_unitary_placed_` does
@@ -132,7 +132,7 @@ vector over the *fixed-particle-number determinant basis* for that ``(norb, nele
 mirroring ffsim's (and, transitively, PySCF's) FCI space setup, rather than the full
 :math:`2^{\text{num\_modes}}`-dimensional space a general qubit simulator would use. This is a much
 smaller space (its size is a product of binomial coefficients rather than a power of two), but it
-comes with a hard restriction: only operators and gates that preserve particle number (and, in
+comes with a hard restriction. Only operators and gates that preserve particle number (and, in
 the spinful case, each spin species' particle number individually) can be represented in it. An
 operator whose action would move amplitude to a different particle number has nowhere to go
 in this fixed-sector situation.
@@ -140,7 +140,7 @@ in this fixed-sector situation.
 The native kernel resolves this by silently dropping any term that would leave the sector, projecting
 its contribution to zero rather than raising an error, since the kernel's contract is "matrix-vector
 product on this sector," not "validate this operator." For most callers this dropping would be the
-wrong thing: applying :math:`\exp(-i t H)` for a Hamiltonian :math:`H` with a
+wrong action. Applying :math:`\exp(-i t H)` for a Hamiltonian :math:`H` with a
 non-particle-conserving term would silently turn a would-be unitary into a non-unitary,
 physically-meaningless map. So the higher-level entry points that build a unitary out of the kernel
 add an explicit guard before calling it:
@@ -176,8 +176,8 @@ this guard (it is a lower-level building block, not a validated simulation entry
 a matrix-vector product that silently zeroes the non-conserving amplitude rather than raising.
 
 The practical consequence is that non-particle-preserving simulation is not possible in fermionic
-space, by construction of the fixed-sector representation: not as a missing feature, but
-as the price of the compact FCI-space representation that makes fermionic simulation tractable. If your algorithm needs particle-number-violating operators (for example,
+space, by construction of the fixed-sector representation. This is not a missing feature, but
+is the price of the compact FCI-space representation that makes fermionic simulation tractable. If your algorithm needs particle-number-violating operators (for example,
 a qubit-native error channel, or an operator built for a mapped Hamiltonian that does not conserve
 particle numbers term by term), transpile to qubits first and simulate the resulting
 :class:`~qiskit.circuit.QuantumCircuit` with a qubit-level simulator instead. Any transpilation route works for this; the
@@ -190,14 +190,14 @@ The block-spin convention for spinful systems
 ---------------------------------------------
 
 ``nelec`` is typed ``int | tuple[int, int]``, and its type, not a separate flag, is what selects
-one of the two supported mode layouts:
+one of the supported mode layouts:
 
-- An **int** selects the **spinless** interpretation: the ``norb`` modes are treated directly as
+- An **int** selects the **spinless** interpretation. The ``norb`` modes are treated directly as
   spinless orbitals, and ``nelec`` is the total particle count.
 - A **pair** ``(n_alpha, n_beta)`` selects the **spinful** interpretation of ``2 * norb`` modes under
-  a fixed **block-spin convention**: modes ``0 .. norb`` are the alpha (spin-up) orbitals and modes
+  a fixed **block-spin convention**. Modes ``0 .. norb`` are the alpha (spin-up) orbitals and modes
   ``norb .. 2 * norb`` are the beta (spin-down) orbitals. Each spin species is conserved
-  *independently*: an alpha-only term can move an electron between alpha modes but never into a
+  *independently*; an alpha-only term can move an electron between alpha modes but never into a
   beta mode, and vice versa.
 
 This dispatch happens at every ffsim-protocol entry point in this package (gate constructors,
@@ -208,7 +208,7 @@ and it is the convention used throughout the :ref:`LUCJ <lucj_getting_started>` 
 beta occupations into modes ``norb .. norb + n_beta``). It is worth contrasting this with the
 :mod:`qiskit_fermions.operators` module and :class:`.FermionicCircuit` in general, which use
 *generic* mode indices with no inherent spin semantics (see the :ref:`fermionic circuit guide
-<fermionic_circuit_explanation>`): the block-spin meaning is imposed only when a spinful ``nelec``
+<fermionic_circuit_explanation>`). The block-spin meaning is imposed only when a spinful ``nelec``
 is supplied to a simulation call, not baked into the operator or circuit representation itself.
 
 .. plot::

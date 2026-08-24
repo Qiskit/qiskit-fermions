@@ -268,7 +268,7 @@ Like the coefficients and mode indices, operators can optionally store a **group
 that associates each term with a group index. By integrating grouping directly into the
 operator representation as part of the sparse data structure, grouping information
 naturally travels with the operator through transformations. This enables systematic
-exploitation of structure, whether from physical properties, algebraic relationships, or
+structure usage, whether from physical properties, algebraic relationships, or
 problem-specific symmetries. The structured information can then be used in downstream
 operations like circuit synthesis and decomposition by using methods like
 :meth:`.OperatorTrait.split_out_groups`.
@@ -379,7 +379,7 @@ reference of all available operations.
 .. important::
 
    The example uses ``atol=1e-10`` in both ``simplify()`` and ``equiv()``.
-   The ``atol`` (absolute tolerance) parameter specifies a threshold: coefficients
+   The ``atol`` (absolute tolerance) parameter specifies a threshold. Coefficients
    with magnitude smaller than ``atol`` are treated as zero and discarded. This is
    essential for numerical stability when comparing operators, since floating-point
    arithmetic can introduce small rounding errors that would otherwise prevent

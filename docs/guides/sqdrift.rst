@@ -44,7 +44,7 @@ documentation, as well as the :mod:`qiskit_fermions.operators.library`.
 2. Group Hamiltonian terms
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Exploit the many symmetries that are present in the electronic
+Use the many symmetries that are present in the electronic
 structure Hamiltonian by grouping related terms that have identical coefficients.
 This action changes the operator coefficient distribution that the qDRIFT
 protocol samples from, but it does not affect its convergence guarantees.
@@ -281,8 +281,8 @@ particle between occupied modes ``0``, ``1``, and ``6`` and unoccupied mode
 Once an excitation is accepted, every mode in its support becomes
 "uncertain" and, thus, eligible to play either role for later samples,
 so the occupied and unoccupied mode sets keep growing as more excitations
-get accepted. This is what makes the second accepted excitation,
-``[0, 1, 28, 29]``, acceptable at all: all four of its modes are among the
+get accepted. This is what makes the second excitation,
+``[0, 1, 28, 29]``, acceptable. All four of its modes are among the
 *originally* occupied ones, so it does not couple to any originally
 unoccupied mode. It is only accepted because modes ``0`` and ``1`` became
 uncertain (and thus eligible as the "unoccupied" side of the coupling)
@@ -290,7 +290,7 @@ once the first excitation touched them.
 
 .. note::
    Without a preceding :class:`.InitializeModes` gate, ``filter_trivial=True``
-   has no occupation information to filter against: it emits a
+   has no occupation information to filter against. It emits a
    :class:`UserWarning` and leaves the sampling unfiltered for that
    :class:`.Evolution` gate.
 
@@ -301,7 +301,7 @@ You can add an additional optimization step to the transpilation pipeline that
 minimizes the distance of the fermionic excitation spans by relabeling the
 fermionic mode indices. This optimization was introduced in the `SqDRIFT`_ paper
 and is implemented by :func:`.build_excitation_span_minimization_model`. It can
-be easily inserted into the transpiler pipeline via the :class:`.RelabelModes`
+be easily inserted into the transpiler pipeline by using the :class:`.RelabelModes`
 pass:
 
 .. invisible-code-block: python

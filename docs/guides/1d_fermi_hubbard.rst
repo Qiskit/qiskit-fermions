@@ -53,13 +53,13 @@ operators,
 so :math:`V_j` measures the occupation of mode :math:`j` (it is :math:`+1` when empty
 and :math:`-1` when filled), while :math:`T_{jk}` transfers a fermion along the
 *directed* edge :math:`j \to k`. Note that the two indices of :math:`T_{jk}` are *not*
-interchangeable: the first index carries the minus combination and the second carries the
+interchangeable. The first index carries the minus combination and the second carries the
 plus, which is what makes :math:`T_{jk}` distinct from :math:`T_{kj}` and gives the edge
 its orientation.
 
 These satisfy *mixed* commutation relations. Two transfer operators acting on **disjoint**
 sites commute trivially, since each is an *even* product of fermionic operators. The
-interesting case is a shared site: there, the two **commute** if the arrows *flow* through
+interesting case is a shared site. There, the two **commute** if the arrows *flow* through
 that site (one arrives, one leaves) and **anticommute** if they *clash* (both arrive, or
 both leave).
 
@@ -91,10 +91,10 @@ orientations of every bond:
    ... )
    <Figure size ... with 1 Axes>
 
-Trace the rule on the figure. Take :math:`T_{1,2}` and :math:`T_{2,3}`: one arrow
+Trace the rule on the figure. Look at :math:`T_{1,2}` and :math:`T_{2,3}`, for example. One arrow
 *arrives* at site 2 and the other *leaves* it, so the fermion flows straight through and
-the two operators commute. Take instead :math:`T_{1,2}` and :math:`T_{3,2}`: both arrows
-*point into* site 2: they clash, and those two anticommute.
+the two operators commute. Look instead at :math:`T_{1,2}` and :math:`T_{3,2}`. Both arrows
+*point into* site 2. They clash, and those two anticommute.
 
 This is what makes flow sets possible. Pick a set of arrows forming a directed path and
 every pair either meets head-to-tail or does not meet at all, so the whole set commutes, 
@@ -165,7 +165,7 @@ Both pieces are built directly as a :class:`.TransferVertexOperator`. Note that
 
 The interior sites pick up a coefficient of :math:`-1` on :math:`V_j` because they
 appear in two bonds, whereas the boundary sites only appear in one. Every term listed here
-appears in the graph drawn above: the ``T(j,k)`` terms are its arrows, and the ``V(j)``
+appears in the graph drawn above. The ``T(j,k)`` terms are its arrows, and the ``V(j)``
 terms its nodes.
 
 2. Partition into flow sets
@@ -207,7 +207,7 @@ interaction terms commute with everything diagonal and form a third group:
    1 [[(1, 0)], [(2, 1)], [(3, 2)]]
    2 [[], [(0, 0)], [(0, 0), (1, 1)], [(1, 1)], [(1, 1), (2, 2)], [(2, 2)], [(2, 2), (3, 3)], [(3, 3)]]
 
-Groups 0 and 1 are the two flow sets: each is a directed path along the chain, so by the
+Groups 0 and 1 are the two flow sets. Each set is a directed path along the chain, so by the
 flow property all terms within a group commute.
 
 .. note::
@@ -244,7 +244,7 @@ one past the last fermionic mode :math:`N_f - 1`. That trailing qubit is the anc
 is why :math:`N_q = N_f + 1` rather than :math:`N_f`. The same reach shows up in
 :math:`V_j`, whose :math:`Z_{j+1}` is on the ancilla for :math:`j = N_f - 1`.
 
-The payoff is visible immediately: one whole flow set is mapped to a sum of weight-1
+The payoff is visible immediately; one whole flow set is mapped to a sum of weight-1
 Paulis.
 
 .. note::
@@ -327,7 +327,7 @@ Applying it to the Hamiltonian from step 1 gives the encoded operator on
    ZZ  [2, 4]       +0.50
    ZZ  [3, 4]       -0.50
 
-Fourteen terms, in three shapes: the hopping has become ``X`` and ``ZXZ``, the
+There are 14 terms, in three shapes: the hopping has become ``X`` and ``ZXZ``, the
 interaction ``ZZ``, and the leading ``[]`` is the identity, contributing only a global
 phase. Note that the ``ZZ`` terms reach nearest *and* next-nearest neighbors;
 :math:`V_jV_{j+1}` spans qubits :math:`j` through :math:`j+2`, which is the cost of
@@ -353,8 +353,8 @@ evolution is therefore a layer of single-qubit rotations and needs *no entanglin
 is the space-time trade-off of Ref. [1]_ in its simplest form: one extra qubit converts
 half of the hopping Hamiltonian into single-qubit rotations.
 
-The west-oriented flow set (group 1) pays for it at weight 3, and the interaction (group 2)
-sits at weight 2, where the weight-0 entry is the identity. None of this is yet a
+The west-oriented flow set (group 1) pays for it at weight three, and the interaction (group 2)
+sits at weight two, where the weight-zero entry is the identity. None of this is yet a
 *circuit* claim; what a synthesis makes of these weights is the subject of steps 5
 and 6.
 
@@ -370,7 +370,7 @@ cannot equal the Jordan-Wigner one term by term. The two are related by an isome
 instead.
 
 **Where the isometry comes from:** Under Jordan-Wigner a basis state is the
-occupation string: qubit :math:`j` holds :math:`n_j`. This encoding instead stores
+occupation string; qubit :math:`j` holds :math:`n_j`. This encoding instead stores
 *cumulative parities*. Define
 
 .. math::
@@ -501,7 +501,7 @@ There is one opaque box over all four modes. The interesting part is what it dec
 :class:`.Evolution` splits itself group-by-group whenever its operator has
 :attr:`~qiskit_fermions.operators.TransferVertexOperator.groups` assigned, so a single
 :meth:`~qiskit.circuit.QuantumCircuit.decompose` turns it into **one** :class:`.Evolution`
-**per flow set**, ordered by group index: east, west, then the diagonal interaction,
+**per flow set**. This is ordered by group index: east, west, then the diagonal interaction,
 carrying 3, 3, and 8 terms respectively. The groups from step 2 are shown in the following plot:
 
 .. plot::
@@ -723,7 +723,7 @@ product formula is also where the number of Trotter steps belongs, as in Qiskit'
    Both helpers emit their gates in explicit layers rather than in term order, because
    :meth:`~qiskit.circuit.QuantumCircuit.depth` schedules gates *as soon as possible, in the
    order they were added*. Since all the gates within one of these sets commute, we can choose the order.
-   A term-by-term synthesis chooses the order badly: emitting
+   A term-by-term synthesis chooses the order badly. Emitting
    the overlapping ``CZ`` chain sequentially reports a depth that grows with the qubit count
    rather than the constant ``2`` the hardware could achieve.
 
@@ -832,7 +832,7 @@ parallel layers. This is the constant-depth result of Ref. [1]_.
    :context:
    :nofigs:
 
-   Guard the claim the prose above rests on, but which none of the visible doctests illustrate: that ``FlowSetSynthesis`` reproduces each flow set's evolution *exactly*, not
+   Note the claim the prose above rests on, but which none of the visible doctests illustrate.  ``FlowSetSynthesis`` reproduces each flow set's evolution *exactly*, not
    just to some Trotter order. The published numbers only fix behavior at the sizes and
    step counts they were written with, so a change that silently breaks exactness (such as a
    dropped ``CZ`` layer or a conjugation applied in the wrong order) could leave every
@@ -867,7 +867,7 @@ parallel layers. This is the constant-depth result of Ref. [1]_.
 
 .. note::
    The depth 12 splits across the three flow sets as 0 + 4 + 8, at every chain length. The
-   east flow set contributes **zero**: it is bare ``Rx`` rotations. The west flow set costs 4,
+   east flow set contributes **zero**; it is bare ``Rx`` rotations. The west flow set costs 4,
    from the two ``CZ`` brickwork layers going in and the two coming out; dropping the
    interaction leaves a two-qubit depth of **four** at any chain length. The remaining
    **eight** is the interaction whose ``Rzz`` terms act on both nearest and next-nearest neighbors
@@ -878,7 +878,7 @@ parallel layers. This is the constant-depth result of Ref. [1]_.
 
    Two thirds of the depth is the interaction, which shows that this encoding excels at
    the hopping, and thus at the dynamics of a free-fermion chain. However, note that the
-   interaction does not commute with the hopping: leaving it out is *not* an approximation to
+   interaction does not commute with the hopping. Leaving it out is *not* an approximation to
    Fermi-Hubbard but a different model. Where the balance falls for a given problem is worth
    exploring.
 
@@ -939,15 +939,15 @@ gate at the full time) and let the synthesis subdivide it:
    4 step(s):  flow set 0.982053 ( 88 CX, depth  48)   Lie 0.723415 (104 CX, depth  92)
    8 step(s):  flow set 0.995395 (176 CX, depth  96)   Lie 0.925807 (208 CX, depth 180)
 
-The flow-set synthesis wins on **all three** axes at once: higher fidelity, fewer entangling
+The flow-set synthesis wins on **all three** axes: higher fidelity, fewer entangling
 gates, and roughly half the two-qubit depth at every step count. This is not a
 depth-versus-accuracy trade; the Trotter error is genuinely smaller because each flow set
-is evolved *exactly*, so the only error left comes from splitting the three groups against
-each other, rather than from splitting all fourteen terms.
+is evolved *exactly*, so the only remaining error comes from splitting the three groups against
+each other, rather than from splitting all 14 terms.
 
 .. note::
    The circuit used matters. The *undecomposed* one from step 5, holding a single
-   :class:`.Evolution` gate over all fourteen terms is used - not the group-wise
+   :class:`.Evolution` gate over all 14 terms is used - not the group-wise
    :meth:`~qiskit.circuit.QuantumCircuit.decompose` from :ref:`step 6 <flowsets_transpile>`.
    That is what keeps the default column an honest baseline. Passing it the decomposed
    circuit would let it inherit the flow-set partitioning for free, and since Trotterizing a
@@ -970,7 +970,7 @@ each other, rather than from splitting all fourteen terms.
 
 As a final cross-check, the site densities :math:`\langle n_j(t) \rangle = (1 - \langle
 V_j \rangle)/2` computed in the encoded space must reproduce the Jordan-Wigner result. This
-check is about the *encoding*, not the circuit, so no Trotter approximation enters it: both time evolutions are computed exactly, by matrix exponentiation of the respective
+check is about the *encoding*, not the circuit, so no Trotter approximation enters it. Both time evolutions are computed exactly, by matrix exponentiation of the respective
 Hamiltonians. Any discrepancy would therefore point at the encoding rather than a
 product formula:
 
@@ -1010,7 +1010,7 @@ What to take away
   :class:`.Evolution` gate per flow set.
 - **Ancillas buy structure.** Spending one extra qubit turns an entire flow set into
   weight-1 Paulis, whose evolution needs no entangling gates. Ref. [1]_ observes this
-  trade-off generally: larger qubit-to-fermion ratios admit shallower evolution circuits.
+  trade-off generally. Larger qubit-to-fermion ratios admit shallower evolution circuits.
 - **A custom encoding is one function.** Map a single generalized transfer operator to a
   Pauli string; :func:`.map_transfer_vertex_generators` and
   :class:`.MapperFnEvolutionSynthesis` do the rest.
@@ -1025,7 +1025,7 @@ What to take away
 
 .. note::
    The ``FlowSetSynthesis`` above is deliberately written for *this* encoding on a 1D
-   chain: it pattern-matches the specific Pauli labels the encoding produces and raises on
+   chain. It pattern-matches the specific Pauli labels the encoding produces and raises on
    anything else, rather than silently falling back to a generic product formula. A general
    implementation would read the flow-set structure from the operator's
    :attr:`~.TransferVertexOperator.groups` and derive the diagonalizing Clifford from the
