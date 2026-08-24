@@ -222,7 +222,7 @@ non-trivial excitation.
 
 This filtering needs to know which modes start out occupied. It therefore
 requires an :class:`.InitializeModes` gate preceding the :class:`.Evolution`
-gate(s) in the circuit; :meth:`.InitializeModes.from_hartree_fock` is a
+gates in the circuit; :meth:`.InitializeModes.from_hartree_fock` is a
 convenient way to construct one. Add one here for the N2 Hartree-Fock
 reference (seven alpha and seven beta electrons in 14 spatial orbitals) and compare the
 sampled excitations with and without ``filter_trivial=True``:
