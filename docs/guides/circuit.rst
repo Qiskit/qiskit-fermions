@@ -6,7 +6,7 @@ Work with fermionic circuits
 .. important::
 
    The concepts in this guide are currently available only in the Python API.
-   Equivalent functionality will be made available through the C API in a future
+   Equivalent functionality will be made available in the C API in a future
    release.
 
 This guide explains how to use the :class:`.FermionicCircuit` to implement
@@ -64,7 +64,8 @@ modes, then adds fermionic gates from the :mod:`qiskit_fermions.circuit.library`
 to implement the time evolution.
 
 The example also demonstrates how to incorporate domain knowledge into an
-operator by using :ref:`operator term grouping <grouping_explanation>`. By assigning group indices to the Hamiltonian terms, structural information is
+operator by using :ref:`operator term grouping <grouping_explanation>`. By
+assigning group indices to the Hamiltonian terms, you preserve structural
 information that optimization passes can exploit throughout the transpilation
 stack.
 

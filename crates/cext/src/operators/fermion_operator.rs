@@ -34,7 +34,7 @@ use qiskit_fermions_core::operators::{CoherenceError, OperatorMacro, OperatorTra
 ///
 /// @rst
 ///
-/// Any of the pointer arguments may be ``NULL`` if and only if their corresponding length is zero.
+/// Any of the pointer arguments can be ``NULL`` if and only if their corresponding length is zero.
 ///
 /// Example
 /// -------
@@ -701,7 +701,7 @@ pub unsafe extern "C" fn qf_ferm_op_split_out_groups(
 ///
 /// @rst
 ///
-/// Any of the pointer arguments may be ``NULL`` if and only if their corresponding length is zero.
+/// Any of the pointer arguments can be ``NULL`` if and only if their corresponding length is zero.
 ///
 /// .. caution::
 ///    This function resets the operator's ``groups`` attribute to ``NULL``.
@@ -921,7 +921,7 @@ pub unsafe extern "C" fn qf_ferm_op_adjoint(op: *const FermionOperator) -> *mut 
 /// @rst
 ///
 /// .. caution::
-///    This functions truncates coefficients greedily! If the acted upon operator may contain
+///    This functions truncates coefficients greedily! If the acted upon operator might contain
 ///    separate coefficients for duplicate terms consider calling :c:func:`qf_ferm_op_simplify`
 ///    instead!
 ///
@@ -1029,7 +1029,7 @@ pub unsafe extern "C" fn qf_ferm_op_simplify(
 ///   lexicographically descending while annihilation ones are ascending (e.g. ``+_1 +_0 -_0 -_1``)
 ///
 /// @param op A pointer to the operator.
-/// @param sandwich A pointer to a boolean value. This pointer may be ``NULL``.
+/// @param sandwich A pointer to a boolean value. This pointer can be ``NULL``.
 ///
 /// @return A pointer to the created operator.
 ///
@@ -1038,7 +1038,7 @@ pub unsafe extern "C" fn qf_ferm_op_simplify(
 /// .. note::
 ///    When a term is being reordered, the anti-commutation relations have to be taken into
 ///    account, :math:`a_i a^\dagger_j = \delta_{ij} - a^\dagger_j a^i`, implying that the
-///    number of terms may change.
+///    number of terms might change.
 ///
 /// Example
 /// -------
