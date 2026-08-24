@@ -25,8 +25,8 @@ pub(crate) fn check_ptr<T>(ptr: *const T) -> Result<(), CInputError> {
 
 /// Create a slice of length `len` from a given pointer.
 ///
-/// If the length is zero, the function is infallible, though the returned slice may not be backed
-/// by the same pointer.  Otherwise, check if the pointer is non-null and aligned.
+/// If the length is zero, the function is infallible, though the returned slice might not be
+/// backed by the same pointer.  Otherwise, check if the pointer is non-null and aligned.
 ///
 /// # Safety
 ///
