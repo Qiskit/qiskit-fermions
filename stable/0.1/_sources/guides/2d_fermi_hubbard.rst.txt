@@ -6,7 +6,7 @@ Simulate 2D Fermi-Hubbard dynamics with flow sets
 .. important::
 
    The concepts in this guide are currently available only in the Python API.
-   Equivalent functionality will be made available via the C API in a future release.
+   Equivalent functionality will be made available in the C API in a future release.
 
 .. seealso::
    **Read the** :ref:`1D flow-set guide <1d_fermi_hubbard>` **first.** This guide is

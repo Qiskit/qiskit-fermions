@@ -3,12 +3,12 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="Simulate 1D Fermi-Hubbard dynamics with flow sets" href="1d_fermi_hubbard.html"><link rel="prev" title="Running the outer VQE parameter optimization loop" href="vqe_outer_loop.html">
+<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="Simulate 1D Fermi-Hubbard dynamics with flow sets" href="1d_fermi_hubbard.html"><link rel="prev" title="Run the outer VQE parameter optimization loop" href="vqe_outer_loop.html">
         <link rel="prefetch" href="../_static/images/qiskit-light-logo.svg" as="image">
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Optimize Slater determinant preparation - Qiskit Fermions 0.1.0+8e9cb73</title>
+        <title>Optimize Slater determinant preparation - Qiskit Fermions 0.1.0+6b82646</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.1.0+8e9cb73</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.1.0+6b82646</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.1.0+8e9cb73</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.1.0+6b82646</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -207,13 +207,13 @@
 <li class="toctree-l2"><a class="reference internal" href="sqdrift.html">Generate SqDRIFT circuits</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skqd.html">Generate Krylov time-evolution circuits (SKQD)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="lucj.html">Build an LUCJ ansatz</a></li>
-<li class="toctree-l2"><a class="reference internal" href="operators.html">Design Principles of Operator Representations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="operators.html">Design principles of operator representations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="grouping.html">Group operator terms: exploit the operator structure</a></li>
 <li class="toctree-l2"><a class="reference internal" href="mappers.html">Map operator representations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="circuit.html">Work with fermionic circuits</a></li>
 <li class="toctree-l2"><a class="reference internal" href="transpilation.html">Transpile fermionic circuits</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ffsim.html">The ffsim simulation backend</a></li>
-<li class="toctree-l2"><a class="reference internal" href="vqe_outer_loop.html">Running the outer VQE parameter optimization loop</a></li>
+<li class="toctree-l2"><a class="reference internal" href="vqe_outer_loop.html">Run the outer VQE parameter optimization loop</a></li>
 <li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Optimize Slater determinant preparation</a></li>
 </ul>
 </li>
@@ -270,13 +270,13 @@
 <div class="admonition important">
 <p class="admonition-title">Important</p>
 <p>The concepts in this guide are currently available only in the Python API.
-Equivalent functionality will be made available via the C API in a future release.</p>
+Equivalent functionality will be made available in the C API in a future release.</p>
 </div>
 <p>An <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.InitializeModes.html#qiskit_fermions.circuit.library.InitializeModes" title="qiskit_fermions.circuit.library.InitializeModes"><code class="xref py py-class docutils literal notranslate"><span class="pre">InitializeModes</span></code></a> gate declares a reference mode occupation; an
 <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.OrbitalRotation.html#qiskit_fermions.circuit.library.OrbitalRotation" title="qiskit_fermions.circuit.library.OrbitalRotation"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrbitalRotation</span></code></a> gate rotates the single-particle basis. Placed back to back, the two
 gates <em>prepare a Slater determinant</em>: the modes start in the reference determinant and are then
 rotated into the target orbitals. The <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.PrepareSlaterDeterminant.html#qiskit_fermions.circuit.library.PrepareSlaterDeterminant" title="qiskit_fermions.circuit.library.PrepareSlaterDeterminant"><code class="xref py py-class docutils literal notranslate"><span class="pre">PrepareSlaterDeterminant</span></code></a> gate captures that
-composition, and because it knows the reference occupation, transpiling it can use the rectangular
+composition, and because it carries the reference occupation, transpiling it can use the rectangular
 <a class="reference internal" href="../stubs/qiskit_fermions.linalg.givens_decomposition_slater.html#qiskit_fermions.linalg.givens_decomposition_slater" title="qiskit_fermions.linalg.givens_decomposition_slater"><code class="xref py py-func docutils literal notranslate"><span class="pre">givens_decomposition_slater()</span></code></a>, which realizes only the <em>occupied</em>
 orbitals, instead of the full square decomposition an <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.OrbitalRotation.html#qiskit_fermions.circuit.library.OrbitalRotation" title="qiskit_fermions.circuit.library.OrbitalRotation"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrbitalRotation</span></code></a> alone requires. That
 is a strictly cheaper synthesis (see the payoff at the end of this guide).</p>
@@ -287,8 +287,8 @@ reduced decomposition automatically. Under simulation the rewrite is a no-op on 
 <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.PrepareSlaterDeterminant.html#qiskit_fermions.circuit.library.PrepareSlaterDeterminant" title="qiskit_fermions.circuit.library.PrepareSlaterDeterminant"><code class="xref py py-class docutils literal notranslate"><span class="pre">PrepareSlaterDeterminant</span></code></a> is <em>validate-then-rotate</em> (it validates the reference occupation
 and then applies the rotation, just as the two separate gates do), so the merge only unlocks the
 cheaper synthesis without changing the prepared state.</p>
-<p>Throughout this guide we draw a circuit before and after the pass, side by side: the input on the
-left, and on the right the result of running the pass on it. Two helpers do that: <code class="docutils literal notranslate"><span class="pre">merge</span></code>
+<p>Throughout this guide, each circuit is drawn before and after the pass, side by side: the input
+on the left, and on the right the result of running the pass on it. Two helpers do that: <code class="docutils literal notranslate"><span class="pre">merge</span></code>
 runs the pass on a copy of the circuit (via its <a class="reference internal" href="../stubs/qiskit_fermions.circuit.FermionicDAGCircuit.html#qiskit_fermions.circuit.FermionicDAGCircuit" title="qiskit_fermions.circuit.FermionicDAGCircuit"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicDAGCircuit</span></code></a>) and converts the
 result back to a drawable <a class="reference internal" href="../stubs/qiskit_fermions.circuit.FermionicCircuit.html#qiskit_fermions.circuit.FermionicCircuit" title="qiskit_fermions.circuit.FermionicCircuit"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicCircuit</span></code></a>, and <code class="docutils literal notranslate"><span class="pre">draw_merge</span></code> draws both halves into a
 single before/after figure:</p>
@@ -373,7 +373,7 @@ per sector, each fuse on their own into a <a class="reference internal" href="..
 <p>A single full-register (<code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">*</span> <span class="pre">norb</span></code>) <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.InitializeModes.html#qiskit_fermions.circuit.library.InitializeModes" title="qiskit_fermions.circuit.library.InitializeModes"><code class="xref py py-class docutils literal notranslate"><span class="pre">InitializeModes</span></code></a> followed by <em>two</em>
 <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.OrbitalRotation.html#qiskit_fermions.circuit.library.OrbitalRotation" title="qiskit_fermions.circuit.library.OrbitalRotation"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrbitalRotation</span></code></a>s, one on each contiguous spin half. The pass splits the global
 occupation at the sector boundary and emits <strong>two</strong> <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.PrepareSlaterDeterminant.html#qiskit_fermions.circuit.library.PrepareSlaterDeterminant" title="qiskit_fermions.circuit.library.PrepareSlaterDeterminant"><code class="xref py py-class docutils literal notranslate"><span class="pre">PrepareSlaterDeterminant</span></code></a> gates. The
-two rotations may appear in either order.</p>
+two rotations might appear in either order.</p>
 <p>This is the shape produced by the local unitary cluster Jastrow (LUCJ) workflow (see the
 <a class="reference internal" href="lucj.html#lucj-getting-started"><span class="std std-ref">LUCJ guide</span></a>):
 a user places an <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.InitializeModes.html#qiskit_fermions.circuit.library.InitializeModes" title="qiskit_fermions.circuit.library.InitializeModes"><code class="xref py py-class docutils literal notranslate"><span class="pre">InitializeModes</span></code></a> (typically the Hartree-Fock reference via
@@ -467,7 +467,7 @@ than the <a class="reference internal" href="../stubs/qiskit_fermions.circuit.li
 orbitals needs at most <span class="math">\(m(n-m)\)</span> two-qubit rotations and no diagonal phase gates, versus the
 <span class="math">\(n(n-1)/2\)</span> rotations plus <span class="math">\(n\)</span> phases of the full square orbital rotation.</p>
 <p>The preset Jordan-Wigner pass manager runs <a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.MergeSlaterDeterminantPreparation.html#qiskit_fermions.transpiler.passes.MergeSlaterDeterminantPreparation" title="qiskit_fermions.transpiler.passes.MergeSlaterDeterminantPreparation"><code class="xref py py-class docutils literal notranslate"><span class="pre">MergeSlaterDeterminantPreparation</span></code></a> in its
-optimization stage, so this reduction happens automatically. We transpile a two-electron,
+optimization stage, so this reduction happens automatically. Transpile a two-electron,
 six-orbital preparation all the way to a <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumCircuit</span></code></a> and count its gates:</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -558,7 +558,7 @@ pattern.</p>
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Running the outer VQE parameter optimization loop</div>
+                <div class="title">Run the outer VQE parameter optimization loop</div>
                 
               </div>
             </a>
@@ -572,7 +572,7 @@ pattern.</p>
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on 2026/08/20</div>
+              Last updated on 2026/08/24</div>
           </div>
           <div class="right-details">
             
@@ -617,7 +617,7 @@ pattern.</p>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=44e9b748"></script>
+</div><script src="../_static/documentation_options.js?v=3fa25eb1"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

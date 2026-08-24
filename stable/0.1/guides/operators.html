@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Design Principles of Operator Representations - Qiskit Fermions 0.1.0+8e9cb73</title>
+        <title>Design principles of operator representations - Qiskit Fermions 0.1.0+6b82646</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.1.0+8e9cb73</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.1.0+6b82646</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.1.0+8e9cb73</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.1.0+6b82646</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -207,13 +207,13 @@
 <li class="toctree-l2"><a class="reference internal" href="sqdrift.html">Generate SqDRIFT circuits</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skqd.html">Generate Krylov time-evolution circuits (SKQD)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="lucj.html">Build an LUCJ ansatz</a></li>
-<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Design Principles of Operator Representations</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Design principles of operator representations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="grouping.html">Group operator terms: exploit the operator structure</a></li>
 <li class="toctree-l2"><a class="reference internal" href="mappers.html">Map operator representations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="circuit.html">Work with fermionic circuits</a></li>
 <li class="toctree-l2"><a class="reference internal" href="transpilation.html">Transpile fermionic circuits</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ffsim.html">The ffsim simulation backend</a></li>
-<li class="toctree-l2"><a class="reference internal" href="vqe_outer_loop.html">Running the outer VQE parameter optimization loop</a></li>
+<li class="toctree-l2"><a class="reference internal" href="vqe_outer_loop.html">Run the outer VQE parameter optimization loop</a></li>
 <li class="toctree-l2"><a class="reference internal" href="merge_slater_determinant.html">Optimize Slater determinant preparation</a></li>
 </ul>
 </li>
@@ -266,7 +266,7 @@
         </div>
         <article role="main" id="furo-main-content">
           <section id="design-principles-of-operator-representations">
-<span id="operators-explanation"></span><h1>Design Principles of Operator Representations<a class="headerlink" href="#design-principles-of-operator-representations" title="Link to this heading">¶</a></h1>
+<span id="operators-explanation"></span><h1>Design principles of operator representations<a class="headerlink" href="#design-principles-of-operator-representations" title="Link to this heading">¶</a></h1>
 <p>This guide explains the common design principles and core concepts shared across
 all operator representations in the <a class="reference internal" href="../pydoc/qiskit_fermions.operators.html#module-qiskit_fermions.operators" title="qiskit_fermions.operators"><code class="xref py py-mod docutils literal notranslate"><span class="pre">operators</span></code></a> module.</p>
 <section id="overview">
@@ -281,7 +281,7 @@ and computation for systems with many modes but relatively few significant
 contributions.</p></li>
 <li><p><a class="reference internal" href="#term-iteration-and-reconstruction"><strong>Term iteration and reconstruction</strong></a>:
 Irrespective of the internal sparse storage, operators provide a consistent
-iteration interface that lets you inspect, filter, and transform terms without
+iteration interface, so you can inspect, filter, and transform terms without
 understanding the underlying data structure, then reconstruct new operators
 from modified terms.</p></li>
 <li><p><a class="reference internal" href="#mode-based-indexing"><strong>Mode-based indexing</strong></a>:
@@ -437,7 +437,7 @@ type to see all available construction options.</p>
 <section id="term-iteration-and-reconstruction">
 <span id="id1"></span><h2>Term iteration and reconstruction<a class="headerlink" href="#term-iteration-and-reconstruction" title="Link to this heading">¶</a></h2>
 <p>Operators provide a consistent iteration interface by using <a class="reference internal" href="../stubs/qiskit_fermions.operators.OperatorTrait.html#qiskit_fermions.operators.OperatorTrait.iter_terms" title="qiskit_fermions.operators.OperatorTrait.iter_terms"><code class="xref py py-meth docutils literal notranslate"><span class="pre">OperatorTrait.iter_terms()</span></code></a>
-irrespective of their internal sparse representation. This allows you to inspect, filter,
+irrespective of their internal sparse representation. You can therefore inspect, filter,
 or transform terms without needing to understand the underlying data structure.
 You can then reconstruct a new operator from the transformed terms by using
 <a class="reference internal" href="../stubs/qiskit_fermions.operators.OperatorTrait.html#qiskit_fermions.operators.OperatorTrait.from_terms" title="qiskit_fermions.operators.OperatorTrait.from_terms"><code class="xref py py-meth docutils literal notranslate"><span class="pre">OperatorTrait.from_terms()</span></code></a>.</p>
@@ -779,7 +779,7 @@ your operator type to see what parameters are available.</p>
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on 2026/08/20</div>
+              Last updated on 2026/08/24</div>
           </div>
           <div class="right-details">
             
@@ -800,7 +800,7 @@ your operator type to see what parameters are available.</p>
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">Design Principles of Operator Representations</a><ul>
+<li><a class="reference internal" href="#">Design principles of operator representations</a><ul>
 <li><a class="reference internal" href="#overview">Overview</a></li>
 <li><a class="reference internal" href="#sparse-data-structure">Sparse data structure</a><ul>
 <li><a class="reference internal" href="#internal-storage-format">Internal storage format</a></li>
@@ -823,7 +823,7 @@ your operator type to see what parameters are available.</p>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=44e9b748"></script>
+</div><script src="../_static/documentation_options.js?v=3fa25eb1"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

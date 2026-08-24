@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>QfMajoranaOperator - Qiskit Fermions 0.1.0+8e9cb73</title>
+        <title>QfMajoranaOperator - Qiskit Fermions 0.1.0+6b82646</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.1.0+8e9cb73</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.1.0+6b82646</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.1.0+8e9cb73</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.1.0+6b82646</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -207,13 +207,13 @@
 <li class="toctree-l2"><a class="reference internal" href="../guides/sqdrift.html">Generate SqDRIFT circuits</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../guides/skqd.html">Generate Krylov time-evolution circuits (SKQD)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../guides/lucj.html">Build an LUCJ ansatz</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../guides/operators.html">Design Principles of Operator Representations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/operators.html">Design principles of operator representations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../guides/grouping.html">Group operator terms: exploit the operator structure</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../guides/mappers.html">Map operator representations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../guides/circuit.html">Work with fermionic circuits</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../guides/transpilation.html">Transpile fermionic circuits</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../guides/ffsim.html">The ffsim simulation backend</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../guides/vqe_outer_loop.html">Running the outer VQE parameter optimization loop</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/vqe_outer_loop.html">Run the outer VQE parameter optimization loop</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../guides/merge_slater_determinant.html">Optimize Slater determinant preparation</a></li>
 </ul>
 </li>
@@ -332,7 +332,7 @@ commonly used for sparse matrices. More concretely, a single operator contains 4
 function <a class="reference internal" href="../stubs/qiskit_fermions.operators.gamma.html#qiskit_fermions.operators.gamma" title="qiskit_fermions.operators.gamma"><code class="xref py py-func docutils literal notranslate"><span class="pre">gamma()</span></code></a>, even (odd) indices are used for <span class="math">\(\gamma\)</span> (<span class="math">\(\gamma'\)</span>).</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>You may access <strong>read-only copies</strong> of these internal arrays via their respective functions:</p>
+<p>You can access <strong>read-only copies</strong> of these internal arrays via their respective functions:</p>
 <ul class="simple">
 <li><p><a class="reference internal" href="#c.qf_maj_op_get_coeffs" title="qf_maj_op_get_coeffs"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_maj_op_get_coeffs()</span></code></a></p></li>
 <li><p><a class="reference internal" href="#c.qf_maj_op_get_modes" title="qf_maj_op_get_modes"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_maj_op_get_modes()</span></code></a></p></li>
@@ -340,7 +340,7 @@ function <a class="reference internal" href="../stubs/qiskit_fermions.operators.
 </ul>
 </div>
 <p>This data structure allows for very efficient construction and manipulation of operators.
-However, it implies that duplicate terms may be contained in an operator at any moment.
+However, it implies that duplicate terms might be contained in an operator at any moment.
 These must be resolved manually through the use of <a class="reference internal" href="#c.qf_maj_op_simplify" title="qf_maj_op_simplify"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_maj_op_simplify()</span></code></a>.</p>
 <section id="construction">
 <h3>Construction<a class="headerlink" href="#construction" title="Link to this heading">¶</a></h3>
@@ -447,7 +447,7 @@ Alternatively, an empty <a class="reference internal" href="#c.QfMajoranaOperato
 <dt class="sig sig-object c" id="c.qf_maj_op_new">
 <span class="target" id="group__qf__maj__op_1ga47fa350287d1769848adc2dbf47d78eb"></span><a class="reference internal" href="#c.QfMajoranaOperator" title="QfMajoranaOperator"><span class="n"><span class="pre">QfMajoranaOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">qf_maj_op_new</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="n"><span class="pre">num_terms</span></span>, <span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="n"><span class="pre">num_modes</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit-c/qk-complex-64#qkcomplex64" title="(in Qiskit v2.5)"><span class="n"><span class="pre">QkComplex64</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">coeffs</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">modes</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">boundaries</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.qf_maj_op_new" title="Link to this definition">¶</a><br /></dt>
 <dd><p>Constructs a new operator. </p>
-<p><p><p>Any of the pointer arguments may be <code class="docutils literal notranslate"><span class="pre">NULL</span></code> if and only if their corresponding length is zero.</p>
+<p><p><p>Any of the pointer arguments can be <code class="docutils literal notranslate"><span class="pre">NULL</span></code> if and only if their corresponding length is zero.</p>
 <section id="example">
 <h3>Example<a class="headerlink" href="#example" title="Link to this heading">¶</a></h3>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">num_terms</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">3</span><span class="p">;</span>
@@ -931,7 +931,7 @@ skipped rather than appended anywhere.</p>
 <dt class="sig sig-object c" id="c.qf_maj_op_add_term">
 <span class="target" id="group__qf__maj__op_1ga48f12eb9ad34b74145bb978afa993126"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">qf_maj_op_add_term</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.QfMajoranaOperator" title="QfMajoranaOperator"><span class="n"><span class="pre">QfMajoranaOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">op</span></span>, <span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="n"><span class="pre">num_modes</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">modes</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit-c/qk-complex-64#qkcomplex64" title="(in Qiskit v2.5)"><span class="n"><span class="pre">QkComplex64</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">coeff</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.qf_maj_op_add_term" title="Link to this definition">¶</a><br /></dt>
 <dd><p>Adds a term to an existing operator. </p>
-<p><p><p>Any of the pointer arguments may be <code class="docutils literal notranslate"><span class="pre">NULL</span></code> if and only if their corresponding length is zero.</p>
+<p><p><p>Any of the pointer arguments can be <code class="docutils literal notranslate"><span class="pre">NULL</span></code> if and only if their corresponding length is zero.</p>
 <div class="admonition caution">
 <p class="admonition-title">Caution</p>
 <p>This function resets the operator’s <code class="docutils literal notranslate"><span class="pre">groups</span></code> attribute to <code class="docutils literal notranslate"><span class="pre">NULL</span></code>.</p>
@@ -1104,7 +1104,7 @@ skipped rather than appended anywhere.</p>
 <dd><p>Removes terms whose coefficient magnitude lies below the provided threshold. </p>
 <p><p><div class="admonition caution">
 <p class="admonition-title">Caution</p>
-<p>This functions truncates coefficients greedily! If the acted upon operator may contain
+<p>This functions truncates coefficients greedily! If the acted upon operator might contain
 separate coefficients for duplicate terms consider calling <a class="reference internal" href="#c.qf_maj_op_simplify" title="qf_maj_op_simplify"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_maj_op_simplify()</span></code></a>
 instead!</p>
 </div>
@@ -1491,7 +1491,7 @@ example) operator simplification or normal-ordering can result in a different ma
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on 2026/08/20</div>
+              Last updated on 2026/08/24</div>
           </div>
           <div class="right-details">
             
@@ -1565,7 +1565,7 @@ example) operator simplification or normal-ordering can result in a different ma
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=44e9b748"></script>
+</div><script src="../_static/documentation_options.js?v=3fa25eb1"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

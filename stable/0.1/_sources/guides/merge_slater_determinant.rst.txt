@@ -6,13 +6,13 @@ Optimize Slater determinant preparation
 .. important::
 
    The concepts in this guide are currently available only in the Python API.
-   Equivalent functionality will be made available via the C API in a future release.
+   Equivalent functionality will be made available in the C API in a future release.
 
 An :class:`.InitializeModes` gate declares a reference mode occupation; an
 :class:`.OrbitalRotation` gate rotates the single-particle basis. Placed back to back, the two
 gates *prepare a Slater determinant*: the modes start in the reference determinant and are then
 rotated into the target orbitals. The :class:`.PrepareSlaterDeterminant` gate captures that
-composition, and because it knows the reference occupation, transpiling it can use the rectangular
+composition, and because it carries the reference occupation, transpiling it can use the rectangular
 :func:`~qiskit_fermions.linalg.givens_decomposition_slater`, which realizes only the *occupied*
 orbitals, instead of the full square decomposition an :class:`.OrbitalRotation` alone requires. That
 is a strictly cheaper synthesis (see the payoff at the end of this guide).
@@ -25,8 +25,8 @@ reduced decomposition automatically. Under simulation the rewrite is a no-op on 
 and then applies the rotation, just as the two separate gates do), so the merge only unlocks the
 cheaper synthesis without changing the prepared state.
 
-Throughout this guide we draw a circuit before and after the pass, side by side: the input on the
-left, and on the right the result of running the pass on it. Two helpers do that: ``merge``
+Throughout this guide, each circuit is drawn before and after the pass, side by side: the input
+on the left, and on the right the result of running the pass on it. Two helpers do that: ``merge``
 runs the pass on a copy of the circuit (via its :class:`.FermionicDAGCircuit`) and converts the
 result back to a drawable :class:`.FermionicCircuit`, and ``draw_merge`` draws both halves into a
 single before/after figure:
@@ -121,7 +121,7 @@ Global initialization, per-spin rotations
 A single full-register (``2 * norb``) :class:`.InitializeModes` followed by *two*
 :class:`.OrbitalRotation`\ s, one on each contiguous spin half. The pass splits the global
 occupation at the sector boundary and emits **two** :class:`.PrepareSlaterDeterminant` gates. The
-two rotations may appear in either order.
+two rotations might appear in either order.
 
 This is the shape produced by the local unitary cluster Jastrow (LUCJ) workflow (see the
 :ref:`LUCJ guide <lucj_getting_started>`):
@@ -221,7 +221,7 @@ orbitals needs at most :math:`m(n-m)` two-qubit rotations and no diagonal phase 
 :math:`n(n-1)/2` rotations plus :math:`n` phases of the full square orbital rotation.
 
 The preset Jordan-Wigner pass manager runs :class:`.MergeSlaterDeterminantPreparation` in its
-optimization stage, so this reduction happens automatically. We transpile a two-electron,
+optimization stage, so this reduction happens automatically. Transpile a two-electron,
 six-orbital preparation all the way to a :class:`~qiskit.circuit.QuantumCircuit` and count its gates:
 
 .. note::
