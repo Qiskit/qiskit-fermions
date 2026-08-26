@@ -164,7 +164,7 @@ class OrbitalRotation(FermionicGate):
     def _resolve_orbital_rotation(
         full: np.ndarray, norb: int, nelec: int | tuple[int, int]
     ) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
-        """Returns the per-spin rotation(s) for the embedded matrix, rejecting spin-mixing rotations.
+        """Returns the per-spin rotations for the embedded matrix, rejecting spin-mixing rotations.
 
         The spinless case returns ``full`` directly. The spinful case returns the ``(mat_a, mat_b)``
         diagonal blocks, but only when ``full`` is block-diagonal across the alpha/beta split; a
