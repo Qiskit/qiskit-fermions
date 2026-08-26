@@ -20,16 +20,16 @@ in this package:
 
 That choice drives everything below. It calls for the following:
 
-* A **custom fermion-to-qubit encoding** tailored to the flow sets, which here spends one **ancilla qubit** so the qubit count
-associated with the implementation of a given Hamiltonian term no longer grows with the
-number of fermionic modes (as is the case for Jordan-Wigner (JW)).
-* A **custom synthesis** that 
-exploits the commutativity within each set. The payoff is a circuit whose two-qubit depth
-is **constant in the system size**, against the linear growth of a JW-based term-by-term
-Trotterization. 
+* A **custom fermion-to-qubit encoding** tailored to the flow sets, which here spends one
+  **ancilla qubit** so the qubit count associated with the implementation of a
+  given Hamiltonian term no longer grows with the number of fermionic modes (as
+  is the case for Jordan-Wigner (JW)).
+* A **custom synthesis** that exploits the commutativity within each set. The payoff is a
+  circuit whose two-qubit depth is **constant in the system size**, against the linear
+  growth of a JW-based term-by-term Trotterization.
 
 The machinery that gets an encoding of your own into the transpiler
-(:class:`.CustomF2QLayout` and :class:`.MapperFnEvolutionSynthesis`) 
+(:class:`.CustomF2QLayout` and :class:`.MapperFnEvolutionSynthesis`)
 carries over to any model.
 
 .. seealso::
@@ -97,7 +97,7 @@ the two operators commute. Look instead at :math:`T_{1,2}` and :math:`T_{3,2}`. 
 *point into* site 2. They clash, and those two anticommute.
 
 This is what makes flow sets possible. Pick a set of arrows forming a directed path and
-every pair either meets head-to-tail or does not meet at all, so the whole set commutes, 
+every pair either meets head-to-tail or does not meet at all, so the whole set commutes,
 even though the individual operators overlap on shared sites. Evolving under a single flow
 set therefore incurs **no Trotter error**, and as :ref:`step 7 <flowsets_synthesis>`
 shows, it can also be done at constant circuit depth.
@@ -248,7 +248,7 @@ The payoff is visible immediately; one whole flow set is mapped to a sum of weig
 Paulis.
 
 .. note::
-   The :math:`\tfrac{1}{2}` prefactors are fixed by the normalization :math:`T_{jk}^2 = \tfrac{1}{4}`, 
+   The :math:`\tfrac{1}{2}` prefactors are fixed by the normalization :math:`T_{jk}^2 = \tfrac{1}{4}`,
    and the relative minus sign between the two orientations is fixed by
    the product identity :math:`T_{j,j+1} = -V_j V_{j+1} T_{j+1,j}`, which the Paulis above
    satisfy. Getting either wrong yields an operator that obeys the commutation
@@ -296,8 +296,8 @@ over terms and their composition:
    ...     ).simplify()
 
 .. important::
-   The :attr:`.MapperFnEvolutionSynthesis.mapper_fn` expects the signature ``(operator, num_qubits)``, and the return type must be a
-   :class:`~qiskit.quantum_info.SparseObservable`, which makes
+   The :attr:`.MapperFnEvolutionSynthesis.mapper_fn` expects the signature ``(operator, num_qubits)``,
+   and the return type must be a :class:`~qiskit.quantum_info.SparseObservable`, which makes
    the function directly usable as a transpiler plugin in. See :ref:`step 6 <flowsets_transpile>`.
 
 Applying it to the Hamiltonian from step 1 gives the encoded operator on
@@ -349,7 +349,8 @@ weights present in each group:
    2 [0, 2]
 
 The east-oriented flow set (group 0) consists **entirely of weight-1 Paulis**. Its time
-evolution is therefore a layer of single-qubit rotations and needs *no entangling gates*, whereas under Jordan-Wigner every hopping term is weight-2 and requires them. This
+evolution is therefore a layer of single-qubit rotations and needs *no entangling gates*,
+whereas under Jordan-Wigner every hopping term is weight-2 and requires them. This
 is the space-time trade-off of Ref. [1]_ in its simplest form: one extra qubit converts
 half of the hopping Hamiltonian into single-qubit rotations.
 
@@ -514,8 +515,8 @@ carrying 3, 3, and 8 terms respectively. The groups from step 2 are shown in the
    <Figure size ... with 1 Axes>
 
 This is the step that makes the grouping matter. Each of the three gates is mapped and
-synthesized independently, so the transpiler ends up acting on the partitioning decided at the fermionic level in step 2. If you skip the decomposition,  the grouping is 
-ignored.
+synthesized independently, so the transpiler ends up acting on the partitioning decided at
+the fermionic level in step 2. If you skip the decomposition,  the grouping is ignored.
 
 .. _flowsets_transpile:
 
@@ -525,14 +526,14 @@ ignored.
 The encoding is now ready to be used by the transpiler. Two more pieces are needed:
 
 * **A layout.** The default :class:`.TrivialF2QLayout` assumes one qubit per mode, which is
-wrong in this situation. :class:`.CustomF2QLayout` associates the fermionic register with a
-:class:`~qiskit.circuit.QuantumRegister` of a different size, which is how ancilla
-qubits enter the pipeline.
+  wrong in this situation. :class:`.CustomF2QLayout` associates the fermionic register with a
+  :class:`~qiskit.circuit.QuantumRegister` of a different size, which is how ancilla qubits
+  enter the pipeline.
 * **A synthesis plugin.** :class:`.MapperFnEvolutionSynthesis` takes the mapper function
-directly, maps the :class:`.Evolution` gate's Hamiltonian with it, and emits a
-:class:`~qiskit.circuit.library.PauliEvolutionGate`, preserving the :math:`e^{-itH}`
-convention. Its :attr:`~.MapperFnEvolutionSynthesis.product_formula` is left at its default
-for now.  A custom one is added in step 7.
+  directly, maps the :class:`.Evolution` gate's Hamiltonian with it, and emits a
+  :class:`~qiskit.circuit.library.PauliEvolutionGate`, preserving the :math:`e^{-itH}`
+  convention. Its :attr:`~.MapperFnEvolutionSynthesis.product_formula` is left at its
+  default for now. A custom one is added in step 7.
 
 Since every comparison below reruns this pipeline, it is worth wrapping once:
 
@@ -636,7 +637,7 @@ simultaneously for every :math:`j`. One ``CZ`` chain turns the entire weight-3
 :class:`~qiskit.synthesis.EvolutionSynthesis` interface only requests a
 :meth:`~qiskit.synthesis.EvolutionSynthesis.synthesize` method; ``reps`` is here because a
 product formula is also where the number of Trotter steps belongs, as in Qiskit's
- :class:`~qiskit.synthesis.LieTrotter`:
+:class:`~qiskit.synthesis.LieTrotter`:
 
 .. plot::
    :context:
@@ -727,7 +728,7 @@ product formula is also where the number of Trotter steps belongs, as in Qiskit'
    the overlapping ``CZ`` chain sequentially reports a depth that grows with the qubit count
    rather than the constant ``2`` the hardware could achieve.
 
-To select the order, pass it to 
+To select the order, pass it to
 :attr:`.MapperFnEvolutionSynthesis.product_formula`, which is the argument
 ``flow_set_pass_manager`` takes. Nothing else about the pipeline (or the fermionic circuit
 it runs on) changes:
@@ -832,7 +833,8 @@ parallel layers. This is the constant-depth result of Ref. [1]_.
    :context:
    :nofigs:
 
-   Note the claim the prose above rests on, but which none of the visible doctests illustrate.  ``FlowSetSynthesis`` reproduces each flow set's evolution *exactly*, not
+   Note the claim the prose above rests on, but which none of the visible doctests illustrate.
+   ``FlowSetSynthesis`` reproduces each flow set's evolution *exactly*, not
    just to some Trotter order. The published numbers only fix behavior at the sizes and
    step counts they were written with, so a change that silently breaks exactness (such as a
    dropped ``CZ`` layer or a conjugation applied in the wrong order) could leave every
@@ -957,7 +959,7 @@ each other, rather than from splitting all 14 terms.
    The flip side is that ``FlowSetSynthesis`` has to recover the flow sets from the
    Pauli labels it is handed. That works here because the encoding gives each set a
    recognizable shape, but it is the less general route; the group-wise
-   :meth:`~qiskit.circuit.QuantumCircuit.decompose` works for *any* grouping, not just one that a 
+   :meth:`~qiskit.circuit.QuantumCircuit.decompose` works for *any* grouping, not just one that a
    synthesis plugin can reverse-engineer.
 
 .. warning::
@@ -970,7 +972,8 @@ each other, rather than from splitting all 14 terms.
 
 As a final cross-check, the site densities :math:`\langle n_j(t) \rangle = (1 - \langle
 V_j \rangle)/2` computed in the encoded space must reproduce the Jordan-Wigner result. This
-check is about the *encoding*, not the circuit, so no Trotter approximation enters it. Both time evolutions are computed exactly, by matrix exponentiation of the respective
+check is about the *encoding*, not the circuit, so no Trotter approximation enters it.
+Both time evolutions are computed exactly, by matrix exponentiation of the respective
 Hamiltonians. Any discrepancy would therefore point at the encoding rather than a
 product formula:
 

@@ -19,7 +19,8 @@ Simulate 2D Fermi-Hubbard dynamics with flow sets
    stages referenced throughout, and the :ref:`mappers guide <mappers_explanation>` for the
    general recipe for writing a custom mapper.
 
-The 1D guide ended by mentioning that local encodings are needed when working with two dimensions. This guide takes that step, for the **two-dimensional Fermi-Hubbard model on a
+The 1D guide ended by mentioning that local encodings are needed when working with two dimensions.
+This guide takes that step, for the **two-dimensional Fermi-Hubbard model on a
 square lattice**, using the **Verstraete-Cirac (VC) encoding** [2]_.
 
 There are three differences from the 1D problem, forming the basis of this work:
@@ -39,7 +40,7 @@ There are three differences from the 1D problem, forming the basis of this work:
 The payoff is the same shape as in 1D: the two-qubit depth of one Trotter step becomes
 constant in the lattice size, at :math:`24` (:math:`16` for the hopping, matching
 Ref. [1]_, plus :math:`8` for the interaction), while a term-by-term Trotterization of the
- same encoded Hamiltonian grows linearly. The gate count still grows with the number
+same encoded Hamiltonian grows linearly. The gate count still grows with the number
 of bonds, of course; what becomes size-independent is how many layers those gates occupy.
 Depths throughout are counted on an abstract, fully connected register; mapping the encoding
 onto a device's restricted coupling map is its own problem, which is discussed at the end.
@@ -100,11 +101,12 @@ orientations, as the chain did in 1D, but now the bonds run along two axes:
    <Figure size ... with 1 Axes>
 
 The commutation rule is the 1D one, unchanged: two transfer operators sharing a site
-**commute** when the arrows flow through it and **anticommute** when they clash. However, a site now has up to four incident bonds rather than two, so the
+**commute** when the arrows flow through it and **anticommute** when they clash. However,
+a site now has up to four incident bonds rather than two, so the
 arrows through it can clash in more ways, and a set of arrows that never clashes is no
 longer a single path. Reading the horizontal arrows left-to-right gives one such set, the
-vertical arrows from top-to-bottom gives another, and reversing each gives two more.  These are the east, west,
-north, and south flow sets that organize everything that follows.
+vertical arrows from top-to-bottom gives another, and reversing each gives two more.
+These are the east, west, north, and south flow sets that organize everything that follows.
 
 The Verstraete-Cirac encoding
 -----------------------------
@@ -264,7 +266,7 @@ disconnection is a gift rather than a complication, as step 6 shows.
 
 The encoding is one function that maps a single generalized transfer operator to a Pauli
 string, which is handed to :func:`.map_transfer_vertex_generators`. Compared with the 1D version, the
-body has more cases: diagonal, horizontal, vertical, and the reverse orientations through 
+body has more cases: diagonal, horizontal, vertical, and the reverse orientations through
 :math:`T_{kj} = -V_j V_k T_{jk}`.
 
 There is one problem. :func:`.map_transfer_vertex_generators` calls back with a generator and
@@ -677,7 +679,8 @@ synthesis rather than only a demonstration.
 
    Nothing above actually runs the four Cliffords, so note their two claims here: two-qubit
    depth 2, and distinct weight-1 images. The constant-depth result rests on those claims, and
-   both are swept over every flow set, every line of a lattice, and several sizes. Thus, if a rotation was put on the site where it belonged on the ancilla, it would pass a single-line spot
+   both are swept over every flow set, every line of a lattice, and several sizes. Thus,
+   if a rotation was put on the site where it belonged on the ancilla, it would pass a single-line spot
    check but fail a longer one.
 
    Consider what this does not claim, deliberately. Exchanging a control and target in one of the

@@ -229,7 +229,7 @@ float. No gradient of the fermionic ansatz is implemented.
    >>> bool(abs(result.fun - ccsd.e_tot) < 1e-4)
    True
 
-Even with a generous iteration budget, each ``energy`` evaluation only reveals a single scalar, which is 
+Even with a generous iteration budget, each ``energy`` evaluation only reveals a single scalar, which is
 a wasteful use of the full state vector ``params_to_vec`` already computed internally.
 
 5. Run the outer loop with ffsim's linear method
@@ -240,7 +240,7 @@ wavefunction ansatzes. Rather than a scalar ``energy``, it takes ``params_to_vec
 function returning the state, as built in step 3 above) together with the Hamiltonian
 :class:`~scipy.sparse.linalg.LinearOperator`.  It then uses the extra structure this exposes
 (gradients and an approximate Hessian of the state with respect to :math:`\boldsymbol{\theta}`)
-to take better informed steps than a generic finite-difference method can. See `ffsim's 
+to take better informed steps than a generic finite-difference method can. See `ffsim's
 how-to guide on simulating VQE
 <https://qiskit-community.github.io/ffsim/how-to-guides/simulate-vqe.html>`_ for the method's
 background and a walkthrough using ffsim's ansatz classes. The same optimizer is applied
@@ -383,7 +383,7 @@ Next steps
 ^^^^^^^^^^
 
 - See the :ref:`LUCJ guide <lucj_getting_started>` for how :class:`.UCJ` is normally constructed
-  from coupled-cluster amplitudes, and how to transpile it onto qubits for hardware execution. 
+  from coupled-cluster amplitudes, and how to transpile it onto qubits for hardware execution.
   The same transpilation applies to ``UCJ.from_parameters(lm_result.x, ...)`` here, built from the
   converged parameter vector from step 5.
 - See :class:`.UCC` for the unitary coupled-cluster ansatz swapped in at step 6, including its

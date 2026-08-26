@@ -516,7 +516,7 @@ Pooling the samples from all five Krylov circuits, the support is tiny: a few hu
 bitstrings out of the :math:`\binom{8}{4}^2 = 4900` determinants in the ``(4, 4)`` sector. This
 concentration, a direct consequence of the momentum-basis sparsity established in step 2, makes the subsequent classical diagonalization tractable.
 
-Plotting the counts with :func:`qiskit.visualization.plot_histogram` makes the sparsity visible. A few 
+Plotting the counts with :func:`qiskit.visualization.plot_histogram` makes the sparsity visible. A few
 configurations dominate, led by the reference determinant.
 
 .. plot::

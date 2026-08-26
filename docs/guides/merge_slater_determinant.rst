@@ -8,7 +8,7 @@ Optimize Slater determinant preparation
    The concepts in this guide are currently available only in the Python API.
    Equivalent functionality will be made available in the C API in a future release.
 
-An :class:`.InitializeModes` gate declares a reference mode occupation; an 
+An :class:`.InitializeModes` gate declares a reference mode occupation; an
 :class:`.OrbitalRotation` gate rotates the single-particle basis. Placed back to back, the two
 gates prepare a *Slater determinant*; the modes start in the reference determinant and are then
 rotated into the target orbitals. The :class:`.PrepareSlaterDeterminant` gate captures that
@@ -125,7 +125,7 @@ two rotations might appear in either order.
 
 This is the shape produced by the local unitary cluster Jastrow (LUCJ) workflow (see the
 :ref:`LUCJ guide <lucj_getting_started>`);
-A user places an :class:`.InitializeModes` (typically the Hartree-Fock reference by using 
+A user places an :class:`.InitializeModes` (typically the Hartree-Fock reference by using
 :meth:`~qiskit_fermions.circuit.library.InitializeModes.from_hartree_fock`) at the front of the
 circuit and appends a :class:`.UCJ` ansatz, whose first two per-spin orbital rotations directly
 follow the initialization once the ansatz is decomposed.

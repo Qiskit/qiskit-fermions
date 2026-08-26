@@ -109,7 +109,7 @@ in packed (lower-triangular) `chemist` ordering, which is what PySCF produces.
 
 The :class:`.UCJ` gate assembles the ansatz directly from the coupled-cluster amplitudes. Its
 :meth:`~qiskit_fermions.circuit.library.UCJ.from_t_amplitudes` constructor performs a *double
-factorization* of the :math:`t_2` amplitudes (by using 
+factorization* of the :math:`t_2` amplitudes (by using
 :func:`~qiskit_fermions.linalg.double_factorized_t2`) to obtain the per-layer diagonal Coulomb
 matrices and orbital rotations, and derives an optional final orbital rotation from the
 :math:`t_1` amplitudes.

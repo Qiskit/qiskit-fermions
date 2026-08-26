@@ -32,7 +32,7 @@ for this package's own protocols, which follow the same design):
   :class:`scipy.sparse.linalg.LinearOperator` view of the object on that same sector.
 
 Rather than invent a separate simulation interface, every fermionic gate in
-:mod:`qiskit_fermions.circuit.library` and :class:`.FermionOperator` implement these 
+:mod:`qiskit_fermions.circuit.library` and :class:`.FermionOperator` implement these
 protocols. The direct payoff is that ffsim's tools work natively on this package's objects,
 with no conversion step, :func:`ffsim.apply_unitary` can simulate a :class:`.FermionicCircuit`
 end to end, :func:`ffsim.linear_operator` (or plain :func:`scipy.sparse.linalg.eigsh`) can
