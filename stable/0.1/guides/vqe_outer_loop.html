@@ -3,12 +3,12 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="Optimize Slater determinant preparation" href="merge_slater_determinant.html"><link rel="prev" title="The ffsim simulation backend" href="ffsim.html">
+<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="Build an LUCJ ansatz" href="lucj.html"><link rel="prev" title="Work with fermionic circuits" href="circuit.html">
         <link rel="prefetch" href="../_static/images/qiskit-light-logo.svg" as="image">
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Run the outer VQE parameter optimization loop - Qiskit Fermions 0.1.0+86d2e13</title>
+        <title>VQE optimization at the fermionic level - Qiskit Fermions 0.1.0+3c7f3e5</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.1.0+86d2e13</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.1.0+3c7f3e5</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.1.0+86d2e13</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.1.0+3c7f3e5</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -204,25 +204,22 @@
 </ul>
 </li>
 <li class="toctree-l1 current has-children"><a class="reference internal" href="index.html"> Guides</a><input aria-label="Toggle navigation of  Guides" checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="sqdrift.html">Generate SqDRIFT circuits</a></li>
-<li class="toctree-l2"><a class="reference internal" href="skqd.html">Generate Krylov time-evolution circuits (SKQD)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="lucj.html">Build an LUCJ ansatz</a></li>
 <li class="toctree-l2"><a class="reference internal" href="operators.html">Design principles of operator representations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="grouping.html">Group operator terms: use the operator structure</a></li>
 <li class="toctree-l2"><a class="reference internal" href="mappers.html">Map operator representations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="circuit.html">Work with fermionic circuits</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">VQE optimization at the fermionic level</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lucj.html">Build an LUCJ ansatz</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sqdrift.html">Generate SqDRIFT circuits</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skqd.html">Generate Krylov time-evolution circuits (SKQD)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="transpilation.html">Transpile fermionic circuits</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ffsim.html">The ffsim simulation backend</a></li>
-<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Run the outer VQE parameter optimization loop</a></li>
 <li class="toctree-l2"><a class="reference internal" href="merge_slater_determinant.html">Optimize Slater determinant preparation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1d_fermi_hubbard.html">Simulate 1D Fermi-Hubbard dynamics with flow sets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="2d_fermi_hubbard.html">Simulate 2D Fermi-Hubbard dynamics with flow sets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ffsim.html">The ffsim simulation backend</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference external" href="https://github.com/Qiskit/qiskit-fermions"> GitHub</a></li>
-</ul>
-<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="1d_fermi_hubbard.html">Simulate 1D Fermi-Hubbard dynamics with flow sets</a></li>
-<li class="toctree-l1"><a class="reference internal" href="2d_fermi_hubbard.html">Simulate 2D Fermi-Hubbard dynamics with flow sets</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API reference</span></p>
 <ul>
@@ -265,8 +262,8 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="run-the-outer-vqe-parameter-optimization-loop">
-<span id="vqe-outer-loop-how-to"></span><h1>Run the outer VQE parameter optimization loop<a class="headerlink" href="#run-the-outer-vqe-parameter-optimization-loop" title="Link to this heading">¶</a></h1>
+          <section id="vqe-optimization-at-the-fermionic-level">
+<span id="vqe-outer-loop-how-to"></span><h1>VQE optimization at the fermionic level<a class="headerlink" href="#vqe-optimization-at-the-fermionic-level" title="Link to this heading">¶</a></h1>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
 <p>The concepts in this guide are currently available only in the Python API.
@@ -606,23 +603,23 @@ the linear method’s other hyperparameters (<code class="docutils literal notra
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="merge_slater_determinant.html">
+          <a class="next-page" href="lucj.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Optimize Slater determinant preparation</div>
+                <div class="title">Build an LUCJ ansatz</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="ffsim.html">
+          <a class="prev-page" href="circuit.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">The ffsim simulation backend</div>
+                <div class="title">Work with fermionic circuits</div>
                 
               </div>
             </a>
@@ -657,7 +654,7 @@ the linear method’s other hyperparameters (<code class="docutils literal notra
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">Run the outer VQE parameter optimization loop</a><ul>
+<li><a class="reference internal" href="#">VQE optimization at the fermionic level</a><ul>
 <li><a class="reference internal" href="#construct-the-ansatz">1. Construct the ansatz</a></li>
 <li><a class="reference internal" href="#choose-an-unconstrained-parametrization-of-the-ansatz-tensors">2. Choose an unconstrained parametrization of the ansatz tensors</a></li>
 <li><a class="reference internal" href="#build-the-ansatz-and-evaluate-the-state-from-a-flat-parameter-vector">3. Build the ansatz and evaluate the state from a flat parameter vector</a></li>
@@ -676,7 +673,7 @@ the linear method’s other hyperparameters (<code class="docutils literal notra
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=28cdfdf7"></script>
+</div><script src="../_static/documentation_options.js?v=a5d824b6"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
