@@ -11,7 +11,7 @@ This is achieved by subsampling smaller time evolution operators from the
 Hamiltonian based on its coefficients, which is known as the `qDRIFT`_
 Trotterization method.
 
-This getting-started guide shows how to generate an ensemble of such randomized
+This getting started guide shows how to generate an ensemble of such randomized
 circuits.
 
 1. Hamiltonian setup
@@ -44,7 +44,7 @@ documentation, as well as the :mod:`qiskit_fermions.operators.library`.
 2. Group Hamiltonian terms
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Exploit the many symmetries that are present in the electronic
+Use the many symmetries that are present in the electronic
 structure Hamiltonian by grouping related terms that have identical coefficients.
 This action changes the operator coefficient distribution that the qDRIFT
 protocol samples from, but it does not affect its convergence guarantees.
@@ -111,10 +111,10 @@ detail in :ref:`this guide <grouping_explanation>`.
 
           qf_ferm_op_filter_diagonal_terms(canon);
 
-   Filtering here, once, is considerably cheaper than filtering repeatedly:
+   Filtering here, once, is considerably cheaper than filtering repeatedly.
    :class:`.QDriftTrotterization` runs once per transpiled circuit, so
-   filtering the Hamiltonian beforehand, rather than on every call, avoids
-   redoing the same work for every circuit generated from it.
+   filtering the Hamiltonian initially, rather than on every call, avoids
+   redoing work for every circuit generated from it.
 
 3. Prepare the time evolution circuit
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -171,11 +171,11 @@ each circuit, every time the circuit is transpiled. Through this, you can genera
 multiple circuit randomizations as required by the `SqDRIFT`_ algorithm by
 repeatedly running the transpilation pipeline.
 
-This step also introduces the few parameters with which one can tweak the
-ensemble of circuits to generate:
+This step also introduces the few parameters you can use to customize the
+circuits to generate:
 
-* the number of circuits to generate: ``num_sqdrift_randomizations``
-* the length of each circuit in terms of excitation groups: ``num_groups``
+* The number of circuits to generate: ``num_sqdrift_randomizations``
+* The length of each circuit in terms of excitation groups: ``num_groups``
 
 .. tab-set-code::
 
@@ -211,18 +211,18 @@ ensemble of circuits to generate:
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Beyond the diagonal terms filtered out in the previous step, a sampled
-excitation can *still* fail to affect the sampled bitstrings: whenever it acts
+excitation can *still* fail to affect the sampled bitstrings. Whenever it acts
 entirely within a set of modes whose occupation is already fixed (all occupied
 or all unoccupied), it cannot move a particle from one to the other, so it
 leaves the state (and thus the eventual measurement outcome) unchanged.
 Setting ``filter_trivial=True`` on the :class:`.QDriftTrotterization` pass
 rejects such terms as they are sampled and re-draws a replacement, so that
-every one of the ``num_groups`` slots of the resulting circuit contributes a
+each of the ``num_groups`` slots of the resulting circuit contributes a
 non-trivial excitation.
 
 This filtering needs to know which modes start out occupied. It therefore
 requires an :class:`.InitializeModes` gate preceding the :class:`.Evolution`
-gate(s) in the circuit; :meth:`.InitializeModes.from_hartree_fock` is a
+gates in the circuit; :meth:`.InitializeModes.from_hartree_fock` is a
 convenient way to construct one. Add one here for the N2 Hartree-Fock
 reference (seven alpha and seven beta electrons in 14 spatial orbitals) and compare the
 sampled excitations with and without ``filter_trivial=True``:
@@ -281,8 +281,8 @@ particle between occupied modes ``0``, ``1``, and ``6`` and unoccupied mode
 Once an excitation is accepted, every mode in its support becomes
 "uncertain" and, thus, eligible to play either role for later samples,
 so the occupied and unoccupied mode sets keep growing as more excitations
-get accepted. This is what makes the second accepted excitation,
-``[0, 1, 28, 29]``, acceptable at all: all four of its modes are among the
+get accepted. This is what makes the second excitation,
+``[0, 1, 28, 29]``, acceptable. All four of its modes are among the
 *originally* occupied ones, so it does not couple to any originally
 unoccupied mode. It is only accepted because modes ``0`` and ``1`` became
 uncertain (and thus eligible as the "unoccupied" side of the coupling)
@@ -290,7 +290,7 @@ once the first excitation touched them.
 
 .. note::
    Without a preceding :class:`.InitializeModes` gate, ``filter_trivial=True``
-   has no occupation information to filter against: it emits a
+   has no occupation information to filter against. It emits a
    :class:`UserWarning` and leaves the sampling unfiltered for that
    :class:`.Evolution` gate.
 
@@ -301,7 +301,7 @@ You can add an additional optimization step to the transpilation pipeline that
 minimizes the distance of the fermionic excitation spans by relabeling the
 fermionic mode indices. This optimization was introduced in the `SqDRIFT`_ paper
 and is implemented by :func:`.build_excitation_span_minimization_model`. It can
-be easily inserted into the transpiler pipeline via the :class:`.RelabelModes`
+be easily inserted into the transpiler pipeline by using the :class:`.RelabelModes`
 pass:
 
 .. invisible-code-block: python
