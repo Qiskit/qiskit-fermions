@@ -1,7 +1,7 @@
 .. _vqe_outer_loop_how_to:
 
-Run the outer VQE parameter optimization loop
-=============================================
+VQE optimization at the fermionic level
+=======================================
 
 .. important::
 

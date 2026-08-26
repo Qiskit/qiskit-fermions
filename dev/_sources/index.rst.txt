@@ -129,8 +129,8 @@ References
    :hidden:
    :caption: Tutorials
 
-   Simulate 1D Fermi-Hubbard dynamics with flow sets <guides/1d_fermi_hubbard>
-   Simulate 2D Fermi-Hubbard dynamics with flow sets <guides/2d_fermi_hubbard>
+..
+  _Link to any tutorials from the IQP that relate to qiskit-fermions here!
 
 .. toctree::
    :hidden:

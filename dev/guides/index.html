@@ -3,12 +3,12 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="Generate SqDRIFT circuits" href="sqdrift.html"><link rel="prev" title="Install the Python API" href="../install-py.html">
+<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="Design principles of operator representations" href="operators.html"><link rel="prev" title="Install the Python API" href="../install-py.html">
         <link rel="prefetch" href="../_static/images/qiskit-light-logo.svg" as="image">
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Overview - Qiskit Fermions 0.2.0.dev0+7c96ed6</title>
+        <title>Overview - Qiskit Fermions 0.2.0.dev0+cd27fcf</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+7c96ed6</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+cd27fcf</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+7c96ed6</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+cd27fcf</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -204,25 +204,22 @@
 </ul>
 </li>
 <li class="toctree-l1 current has-children current-page"><a class="current reference internal" href="#"> Guides</a><input aria-label="Toggle navigation of  Guides" checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="sqdrift.html">Generate SqDRIFT circuits</a></li>
-<li class="toctree-l2"><a class="reference internal" href="skqd.html">Generate Krylov time-evolution circuits (SKQD)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="lucj.html">Build an LUCJ ansatz</a></li>
 <li class="toctree-l2"><a class="reference internal" href="operators.html">Design principles of operator representations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="grouping.html">Group operator terms: use the operator structure</a></li>
 <li class="toctree-l2"><a class="reference internal" href="mappers.html">Map operator representations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="circuit.html">Work with fermionic circuits</a></li>
+<li class="toctree-l2"><a class="reference internal" href="vqe_outer_loop.html">VQE optimization at the fermionic level</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lucj.html">Build an LUCJ ansatz</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sqdrift.html">Generate SqDRIFT circuits</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skqd.html">Generate Krylov time-evolution circuits (SKQD)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="transpilation.html">Transpile fermionic circuits</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ffsim.html">The ffsim simulation backend</a></li>
-<li class="toctree-l2"><a class="reference internal" href="vqe_outer_loop.html">Run the outer VQE parameter optimization loop</a></li>
 <li class="toctree-l2"><a class="reference internal" href="merge_slater_determinant.html">Optimize Slater determinant preparation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="1d_fermi_hubbard.html">Simulate 1D Fermi-Hubbard dynamics with flow sets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="2d_fermi_hubbard.html">Simulate 2D Fermi-Hubbard dynamics with flow sets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ffsim.html">The ffsim simulation backend</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference external" href="https://github.com/Qiskit/qiskit-fermions"> GitHub</a></li>
-</ul>
-<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="1d_fermi_hubbard.html">Simulate 1D Fermi-Hubbard dynamics with flow sets</a></li>
-<li class="toctree-l1"><a class="reference internal" href="2d_fermi_hubbard.html">Simulate 2D Fermi-Hubbard dynamics with flow sets</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API reference</span></p>
 <ul>
@@ -275,58 +272,75 @@ this package.</p>
 Unless otherwise stated, the C API provides matching functionality, although it is not structured
 into modules. However, the function names correspond naturally and should be easy to navigate.</p>
 </div>
-<section id="get-started">
-<h2>Get started<a class="headerlink" href="#get-started" title="Link to this heading">¶</a></h2>
-<p>This section lists some simple goal-oriented guides to get you started with
-specific example applications:</p>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="sqdrift.html">Generate SqDRIFT circuits</a></li>
-<li class="toctree-l1"><a class="reference internal" href="skqd.html">Generate Krylov time-evolution circuits (SKQD)</a></li>
-<li class="toctree-l1"><a class="reference internal" href="lucj.html">Build an LUCJ ansatz</a></li>
-</ul>
-</div>
-<p>You can also start with these more extensive end-to-end examples:</p>
-<ul class="simple">
-<li><p><a class="reference internal" href="1d_fermi_hubbard.html#d-fermi-hubbard"><span class="std std-ref">Simulate 1D Fermi-Hubbard dynamics with flow sets</span></a></p></li>
-<li><p><a class="reference internal" href="2d_fermi_hubbard.html#d-fermi-hubbard"><span class="std std-ref">Simulate 2D Fermi-Hubbard dynamics with flow sets</span></a></p></li>
-</ul>
-</section>
-<section id="explanations">
-<h2>Explanations<a class="headerlink" href="#explanations" title="Link to this heading">¶</a></h2>
-<p>This section lists guides for explaining various concepts and components from
-this package:</p>
+<section id="operators-and-their-structure">
+<h2>Operators and their structure<a class="headerlink" href="#operators-and-their-structure" title="Link to this heading">¶</a></h2>
+<p>Fermionic operators can be represented in different forms and you can map between these forms as well
+as qubit operators using different <cite>mappers</cite>. Start here if you are building a Hamiltonian.</p>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="operators.html">Design principles of operator representations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="grouping.html">Group operator terms: use the operator structure</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mappers.html">Map operator representations</a></li>
+</ul>
+</div>
+</section>
+<section id="fermionic-circuits">
+<h2>Fermionic circuits<a class="headerlink" href="#fermionic-circuits" title="Link to this heading">¶</a></h2>
+<p>You can express circuits directly on the fermionic level rather than mapping to qubits first.</p>
+<div class="toctree-wrapper compound">
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="circuit.html">Work with fermionic circuits</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vqe_outer_loop.html">VQE optimization at the fermionic level</a></li>
+</ul>
+</div>
+<section id="circuit-examples">
+<h3>Circuit examples<a class="headerlink" href="#circuit-examples" title="Link to this heading">¶</a></h3>
+<p>These guides provide you with concrete examples for different specific use cases:</p>
+<section id="chemistry">
+<h4>Chemistry<a class="headerlink" href="#chemistry" title="Link to this heading">¶</a></h4>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="lucj.html">Build an LUCJ ansatz</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sqdrift.html">Generate SqDRIFT circuits</a></li>
+</ul>
+</div>
+</section>
+<section id="lattice-models">
+<h4>Lattice models<a class="headerlink" href="#lattice-models" title="Link to this heading">¶</a></h4>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="skqd.html">Generate Krylov time-evolution circuits (SKQD)</a></li>
+</ul>
+</div>
+</section>
+</section>
+</section>
+<section id="transpiling-fermionic-circuits">
+<h2>Transpiling fermionic circuits<a class="headerlink" href="#transpiling-fermionic-circuits" title="Link to this heading">¶</a></h2>
+<p>Guides explaining how a <a class="reference internal" href="../stubs/qiskit_fermions.circuit.FermionicCircuit.html#qiskit_fermions.circuit.FermionicCircuit" title="qiskit_fermions.circuit.FermionicCircuit"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicCircuit</span></code></a> becomes a <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumCircuit</span></code></a>.</p>
+<div class="toctree-wrapper compound">
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="transpilation.html">Transpile fermionic circuits</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ffsim.html">The ffsim simulation backend</a></li>
-</ul>
-</div>
-</section>
-<section id="how-tos">
-<h2>How-tos<a class="headerlink" href="#how-tos" title="Link to this heading">¶</a></h2>
-<p>This section lists goal-oriented guides for accomplishing specific tasks with
-particular components of this package:</p>
-<section id="circuits">
-<h3>Circuits<a class="headerlink" href="#circuits" title="Link to this heading">¶</a></h3>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="vqe_outer_loop.html">Run the outer VQE parameter optimization loop</a></li>
-</ul>
-</div>
-</section>
-<section id="transpiler-passes">
-<h3>Transpiler passes<a class="headerlink" href="#transpiler-passes" title="Link to this heading">¶</a></h3>
-<div class="toctree-wrapper compound">
-<ul>
 <li class="toctree-l1"><a class="reference internal" href="merge_slater_determinant.html">Optimize Slater determinant preparation</a></li>
 </ul>
 </div>
 </section>
+<section id="workflow-examples">
+<h2>Workflow examples<a class="headerlink" href="#workflow-examples" title="Link to this heading">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="1d_fermi_hubbard.html">Simulate 1D Fermi-Hubbard dynamics with flow sets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="2d_fermi_hubbard.html">Simulate 2D Fermi-Hubbard dynamics with flow sets</a></li>
+</ul>
+</div>
+</section>
+<section id="workflow-validation">
+<h2>Workflow validation<a class="headerlink" href="#workflow-validation" title="Link to this heading">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="ffsim.html">The ffsim simulation backend</a></li>
+</ul>
+</div>
 </section>
 </section>
 
@@ -335,12 +349,12 @@ particular components of this package:</p>
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="sqdrift.html">
+          <a class="next-page" href="operators.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Generate SqDRIFT circuits</div>
+                <div class="title">Design principles of operator representations</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
@@ -387,13 +401,18 @@ particular components of this package:</p>
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">Overview</a><ul>
-<li><a class="reference internal" href="#get-started">Get started</a></li>
-<li><a class="reference internal" href="#explanations">Explanations</a></li>
-<li><a class="reference internal" href="#how-tos">How-tos</a><ul>
-<li><a class="reference internal" href="#circuits">Circuits</a></li>
-<li><a class="reference internal" href="#transpiler-passes">Transpiler passes</a></li>
+<li><a class="reference internal" href="#operators-and-their-structure">Operators and their structure</a></li>
+<li><a class="reference internal" href="#fermionic-circuits">Fermionic circuits</a><ul>
+<li><a class="reference internal" href="#circuit-examples">Circuit examples</a><ul>
+<li><a class="reference internal" href="#chemistry">Chemistry</a></li>
+<li><a class="reference internal" href="#lattice-models">Lattice models</a></li>
 </ul>
 </li>
+</ul>
+</li>
+<li><a class="reference internal" href="#transpiling-fermionic-circuits">Transpiling fermionic circuits</a></li>
+<li><a class="reference internal" href="#workflow-examples">Workflow examples</a></li>
+<li><a class="reference internal" href="#workflow-validation">Workflow validation</a></li>
 </ul>
 </li>
 </ul>
@@ -405,7 +424,7 @@ particular components of this package:</p>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=24db4722"></script>
+</div><script src="../_static/documentation_options.js?v=a567620d"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
