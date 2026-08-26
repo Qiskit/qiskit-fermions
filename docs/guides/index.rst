@@ -85,8 +85,9 @@ Workflow examples
    1d_fermi_hubbard
    2d_fermi_hubbard
 
+
 Workflow validation
--------------------
+===================
 
 .. toctree::
    :maxdepth: 1
