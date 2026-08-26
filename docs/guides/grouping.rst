@@ -1,7 +1,7 @@
 .. _grouping_explanation:
 
-Group operator terms: exploit the operator structure
-====================================================
+Group operator terms: use the operator structure
+================================================
 
 Grouping is one of the operations under :mod:`qiskit_fermions.operators.terms`,
 which collects routines that partition the terms of an operator based on their
@@ -9,18 +9,17 @@ structure.
 
 As described in the :ref:`operators guide <term_grouping>`, operators can store a
 **groups array**, an optional part of the sparse data structure that associates each
-term with a group index. Terms sharing the same group index form a group, enabling
-systematic exploitation of structure in downstream processing.
+term with a group index. Terms sharing the same group index form a group. This lets you use systematically use of the structure in downstream processing.
 
 By grouping related terms (whether by physical properties, algebraic relationships,
 or problem-specific symmetries), you can unlock several benefits:
 
 - **Optimized circuit synthesis**: Grouped terms carry problem-specific
   information through the stack, enabling simpler optimization of the
-  synthesized circuits, resulting in reduced circuit depth and gate count.
+  synthesized circuits. This results in reduced circuit depth and gate count.
 
 - **Physical structure preservation**: Groups encode meaningful structure from the
-  original problem (for example, interaction patterns or symmetries), that can be exploited
+  original problem (for example, interaction patterns or symmetries) that can be used
   for more physically meaningful decompositions.
 
 - **Flow set selection**: Grouping can naturally encode flow sets and other graph-theoretic
@@ -67,7 +66,7 @@ according to the *line flow sets* as shown in Figure 1c of [1]_.
 This is a simple two-by-three lattice of Majorana modes connected by
 directed edges. Each edge represents a term in the operator acting on the two
 connected modes. The goal is to group these terms according to their edge labels
-(shown on the graph): terms connected by edges with the same label are placed in
+(shown on the graph). Terms connected by edges with the same label are placed in
 the same group. The following code shows how that can be done:
 
 .. tab-set-code::
