@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Work with fermionic circuits - Qiskit Fermions 0.1.0+6b82646</title>
+        <title>Work with fermionic circuits - Qiskit Fermions 0.1.0+86d2e13</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.1.0+6b82646</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.1.0+86d2e13</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.1.0+6b82646</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.1.0+86d2e13</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -208,7 +208,7 @@
 <li class="toctree-l2"><a class="reference internal" href="skqd.html">Generate Krylov time-evolution circuits (SKQD)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="lucj.html">Build an LUCJ ansatz</a></li>
 <li class="toctree-l2"><a class="reference internal" href="operators.html">Design principles of operator representations</a></li>
-<li class="toctree-l2"><a class="reference internal" href="grouping.html">Group operator terms: exploit the operator structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grouping.html">Group operator terms: use the operator structure</a></li>
 <li class="toctree-l2"><a class="reference internal" href="mappers.html">Map operator representations</a></li>
 <li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Work with fermionic circuits</a></li>
 <li class="toctree-l2"><a class="reference internal" href="transpilation.html">Transpile fermionic circuits</a></li>
@@ -287,7 +287,7 @@ c^\dagger_p c_q\)</span>).</p></li>
 <li><p>Implement the time evolution in qubit space (using Trotterization or other
 methods).</p></li>
 </ol>
-<p>This approach has a fundamental limitation: early mapping to qubits discards
+<p>This approach has a fundamental limitation; early mapping to qubits discards
 problem-aware knowledge about the fermionic structure. Standard optimization
 passes cannot exploit fermionic symmetries or allowed term reorderings,
 resulting in suboptimal circuits with unnecessary depths and gate counts.</p>
@@ -317,7 +317,7 @@ For example, you can implement time evolution for any operator implementing the
 </section>
 <section id="build-a-fermionic-circuit">
 <h2>Build a fermionic circuit<a class="headerlink" href="#build-a-fermionic-circuit" title="Link to this heading">¶</a></h2>
-<p>The example below implements the time evolution discussed in the previous section.
+<p>The example below implements the time evolution described in the previous section.
 It constructs a <a class="reference internal" href="../stubs/qiskit_fermions.circuit.FermionicCircuit.html#qiskit_fermions.circuit.FermionicCircuit" title="qiskit_fermions.circuit.FermionicCircuit"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicCircuit</span></code></a> by specifying the number of fermionic
 modes, then adds fermionic gates from the <a class="reference internal" href="../pydoc/qiskit_fermions.circuit.library.html#module-qiskit_fermions.circuit.library" title="qiskit_fermions.circuit.library"><code class="xref py py-mod docutils literal notranslate"><span class="pre">qiskit_fermions.circuit.library</span></code></a>
 to implement the time evolution.</p>
@@ -363,11 +363,11 @@ C</label><div class="sd-tab-content docutils">
 </div>
 <p>(<a class="reference download internal" download="" href="../_downloads/008ac416f05dfdde5f2a0fd60c59361d/circuit-2.png"><code class="xref download docutils literal notranslate"><span class="pre">png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/9d33959bfab0db79bf22709d9f85bbc0/circuit-2.hires.png"><code class="xref download docutils literal notranslate"><span class="pre">hires.png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/7f6f501d6de6d3208fbba283bc726fc1/circuit-2.pdf"><code class="xref download docutils literal notranslate"><span class="pre">pdf</span></code></a>)</p>
 <figure class="align-default">
-<img alt="A simple FermionicCircuit with a single time evolution gate." class="plot-directive" src="../_images/circuit-2.png" />
+<img alt="A simple `FermionicCircuit` with a single time evolution gate." class="plot-directive" src="../_images/circuit-2.png" />
 </figure>
 <p>(<a class="reference download internal" download="" href="../_downloads/3a728c150b44b67952e92f0ce0fb6564/circuit-3.png"><code class="xref download docutils literal notranslate"><span class="pre">png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/da68cf24aca3c0b5dd43da2ff433d517/circuit-3.hires.png"><code class="xref download docutils literal notranslate"><span class="pre">hires.png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/46d86286bf90337d28ca9084213b4348/circuit-3.pdf"><code class="xref download docutils literal notranslate"><span class="pre">pdf</span></code></a>)</p>
 <figure class="align-default">
-<img alt="A decomposed FermionicCircuit with several time evolution gates." class="plot-directive" src="../_images/circuit-3.png" />
+<img alt="A decomposed `FermionicCircuit` with several time evolution gates." class="plot-directive" src="../_images/circuit-3.png" />
 </figure>
 <p>Notice how the operator term grouping is preserved even in simple operations
 like decomposition. This demonstrates how structural information flows through the circuit
@@ -388,7 +388,7 @@ qubits, refer to the <a class="reference internal" href="transpilation.html#tran
 documentation.</p></li>
 <li><p>Explore the <a class="reference internal" href="operators.html#operators-explanation"><span class="std std-ref">operators explanation guide</span></a> to understand
 how to construct fermionic Hamiltonians that you can use with fermionic circuits.</p></li>
-<li><p>Review the <a class="reference internal" href="sqdrift.html#sqdrift-getting-started"><span class="std std-ref">SQDRIFT</span></a> getting-started guide for a practical
+<li><p>Review the <a class="reference internal" href="sqdrift.html#sqdrift-getting-started"><span class="std std-ref">SQDRIFT</span></a> getting started guide for a practical
 end-to-end example.</p></li>
 <li><p>Read the <a class="reference internal" href="ffsim.html#ffsim-backend-explanation"><span class="std std-ref">ffsim backend guide</span></a> to understand how a
 <a class="reference internal" href="../stubs/qiskit_fermions.circuit.FermionicCircuit.html#qiskit_fermions.circuit.FermionicCircuit" title="qiskit_fermions.circuit.FermionicCircuit"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicCircuit</span></code></a> can be simulated directly, and how these generic mode indices take on
@@ -432,7 +432,7 @@ spin semantics only at simulation time.</p></li>
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on 2026/08/24</div>
+              Last updated on 2026/08/26</div>
           </div>
           <div class="right-details">
             
@@ -470,7 +470,7 @@ spin semantics only at simulation time.</p></li>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=3fa25eb1"></script>
+</div><script src="../_static/documentation_options.js?v=28cdfdf7"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

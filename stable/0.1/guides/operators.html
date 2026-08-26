@@ -3,12 +3,12 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="Group operator terms: exploit the operator structure" href="grouping.html"><link rel="prev" title="Build an LUCJ ansatz" href="lucj.html">
+<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="Group operator terms: use the operator structure" href="grouping.html"><link rel="prev" title="Build an LUCJ ansatz" href="lucj.html">
         <link rel="prefetch" href="../_static/images/qiskit-light-logo.svg" as="image">
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Design principles of operator representations - Qiskit Fermions 0.1.0+6b82646</title>
+        <title>Design principles of operator representations - Qiskit Fermions 0.1.0+86d2e13</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.1.0+6b82646</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.1.0+86d2e13</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.1.0+6b82646</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.1.0+86d2e13</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -208,7 +208,7 @@
 <li class="toctree-l2"><a class="reference internal" href="skqd.html">Generate Krylov time-evolution circuits (SKQD)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="lucj.html">Build an LUCJ ansatz</a></li>
 <li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Design principles of operator representations</a></li>
-<li class="toctree-l2"><a class="reference internal" href="grouping.html">Group operator terms: exploit the operator structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grouping.html">Group operator terms: use the operator structure</a></li>
 <li class="toctree-l2"><a class="reference internal" href="mappers.html">Map operator representations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="circuit.html">Work with fermionic circuits</a></li>
 <li class="toctree-l2"><a class="reference internal" href="transpilation.html">Transpile fermionic circuits</a></li>
@@ -321,9 +321,9 @@ and must be explicitly combined if needed.</p>
 <h3>Internal storage format<a class="headerlink" href="#internal-storage-format" title="Link to this heading">¶</a></h3>
 <p>Internally, operators are stored in arrays inspired by sparse matrix data formats:</p>
 <ul class="simple">
-<li><p><strong>Coefficients array</strong>: The complex coefficient for each term.</p></li>
-<li><p><strong>Mode indices array</strong>: The fermionic modes that each action acts upon.</p></li>
-<li><p><strong>Boundaries array</strong>: Indices marking where each term’s modes begin and end in the mode array.</p></li>
+<li><p><strong>Coefficients array</strong>: The complex coefficient for each term</p></li>
+<li><p><strong>Mode indices array</strong>: The fermionic modes that each action acts upon</p></li>
+<li><p><strong>Boundaries array</strong>: Indices marking where each term’s modes begin and end in the mode array</p></li>
 </ul>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
@@ -332,7 +332,7 @@ and must be explicitly combined if needed.</p>
 that specifies the type of fermionic action acting on the respective mode
 index. In contrast, the <code class="xref py py-class docutils literal notranslate"><span class="pre">MajoranaOperator</span></code> class does not require
 this distinction since it encodes that information in the parity of the mode
-index. See the API documentation for your specific operator type to
+index. See the API documentation for your operator type to
 understand the full storage format.</p>
 </div>
 <p>The following examples show how these arrays are organized. First is a direct
@@ -518,7 +518,7 @@ coexist with them in the module.</p>
 that associates each term with a group index. By integrating grouping directly into the
 operator representation as part of the sparse data structure, grouping information
 naturally travels with the operator through transformations. This enables systematic
-exploitation of structure, whether from physical properties, algebraic relationships, or
+structure usage, whether from physical properties, algebraic relationships, or
 problem-specific symmetries. The structured information can then be used in downstream
 operations like circuit synthesis and decomposition by using methods like
 <a class="reference internal" href="../stubs/qiskit_fermions.operators.OperatorTrait.html#qiskit_fermions.operators.OperatorTrait.split_out_groups" title="qiskit_fermions.operators.OperatorTrait.split_out_groups"><code class="xref py py-meth docutils literal notranslate"><span class="pre">OperatorTrait.split_out_groups()</span></code></a>.</p>
@@ -633,7 +633,7 @@ C</label><div class="sd-tab-content docutils">
 <div class="admonition important">
 <p class="admonition-title">Important</p>
 <p>The example uses <code class="docutils literal notranslate"><span class="pre">atol=1e-10</span></code> in both <code class="docutils literal notranslate"><span class="pre">simplify()</span></code> and <code class="docutils literal notranslate"><span class="pre">equiv()</span></code>.
-The <code class="docutils literal notranslate"><span class="pre">atol</span></code> (absolute tolerance) parameter specifies a threshold: coefficients
+The <code class="docutils literal notranslate"><span class="pre">atol</span></code> (absolute tolerance) parameter specifies a threshold. Coefficients
 with magnitude smaller than <code class="docutils literal notranslate"><span class="pre">atol</span></code> are treated as zero and discarded. This is
 essential for numerical stability when comparing operators, since floating-point
 arithmetic can introduce small rounding errors that would otherwise prevent
@@ -645,7 +645,7 @@ equivalent operators from being recognized as such.</p>
 individual operator implementations might offer additional convenience methods
 not part of the protocol. For example, some operators provide an
 <code class="docutils literal notranslate"><span class="pre">is_hermitian()</span></code> method that implements this check. Always consult
-the API documentation for your specific operator type to discover all
+the API documentation for your operator type to discover all
 available functionality.</p>
 </div>
 </section>
@@ -671,7 +671,7 @@ different commutation relations appropriate to their algebra. For example,
 fermionic normal ordering uses anticommutation relations (<span class="math">\(\{c_i, c_j^\dagger\} = \delta_{ij}\)</span>),
 while Majorana normal ordering uses different algebra conventions
 (<span class="math">\(\{\gamma_i, \gamma_j\} = 2\delta_{ij}\)</span>). Always consult the
-documentation for your specific operator type to understand how normal
+documentation for your operator type to understand how normal
 ordering is implemented.</p>
 </div>
 <div class="sd-tab-set docutils">
@@ -754,7 +754,7 @@ your operator type to see what parameters are available.</p>
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Group operator terms: exploit the operator structure</div>
+                <div class="title">Group operator terms: use the operator structure</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
@@ -779,7 +779,7 @@ your operator type to see what parameters are available.</p>
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on 2026/08/24</div>
+              Last updated on 2026/08/26</div>
           </div>
           <div class="right-details">
             
@@ -823,7 +823,7 @@ your operator type to see what parameters are available.</p>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=3fa25eb1"></script>
+</div><script src="../_static/documentation_options.js?v=28cdfdf7"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

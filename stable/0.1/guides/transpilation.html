@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Transpile fermionic circuits - Qiskit Fermions 0.1.0+6b82646</title>
+        <title>Transpile fermionic circuits - Qiskit Fermions 0.1.0+86d2e13</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.1.0+6b82646</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.1.0+86d2e13</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.1.0+6b82646</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.1.0+86d2e13</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -208,7 +208,7 @@
 <li class="toctree-l2"><a class="reference internal" href="skqd.html">Generate Krylov time-evolution circuits (SKQD)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="lucj.html">Build an LUCJ ansatz</a></li>
 <li class="toctree-l2"><a class="reference internal" href="operators.html">Design principles of operator representations</a></li>
-<li class="toctree-l2"><a class="reference internal" href="grouping.html">Group operator terms: exploit the operator structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grouping.html">Group operator terms: use the operator structure</a></li>
 <li class="toctree-l2"><a class="reference internal" href="mappers.html">Map operator representations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="circuit.html">Work with fermionic circuits</a></li>
 <li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Transpile fermionic circuits</a></li>
@@ -282,8 +282,8 @@ this project split the transpilation into the following stages:</p>
 <dl class="simple">
 <dt><strong>Input</strong></dt><dd><p>Converts the input circuit to a directed acyclic graph (DAG) data structure.</p>
 </dd>
-<dt><strong>Optimization</strong></dt><dd><p>Fermionic-level optimizations that keep the circuit in fermionic space. These
-passes exploit fermionic structure and commutation relations while
+<dt><strong>Optimization</strong></dt><dd><p>Keeps the circuit in fermionic space. These
+passes use fermionic structure and commutation relations while
 problem-aware knowledge remains fully available.</p>
 </dd>
 <dt><strong>Layout</strong></dt><dd><p>Maps fermionic mode registers to quantum registers. For occupation-basis
@@ -295,7 +295,7 @@ from the number of fermionic modes.</p>
 mapping. <a class="reference internal" href="../stubs/qiskit_fermions.circuit.FermionicGate.html#qiskit_fermions.circuit.FermionicGate" title="qiskit_fermions.circuit.FermionicGate"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicGate</span></code></a> instances are transformed into sequences of
 standard quantum gates.</p>
 </dd>
-<dt><strong>Qubit</strong></dt><dd><p>Standard Qiskit transpilation on the resulting qubit circuit, including
+<dt><strong>Qubit</strong></dt><dd><p>Transpiles the resulting qubit circuit by using standard Qiskit methods, including
 optimization, layout, and routing for your target hardware.</p>
 </dd>
 <dt><strong>Output</strong></dt><dd><p>Converts the internal DAG data structure to the desired output format.</p>
@@ -384,7 +384,7 @@ into the transpilation process.</p>
 <section id="advanced-workflows">
 <h2>Advanced workflows<a class="headerlink" href="#advanced-workflows" title="Link to this heading">¶</a></h2>
 <p>The preset pass manager provides a convenient starting point. For more advanced
-use cases, you can:</p>
+use cases, you can do the following:</p>
 <ul class="simple">
 <li><p>Customize the transpiler passes run during each stage.</p></li>
 <li><p>Implement custom fermion-to-qubit mappings by creating synthesis plugins (see
@@ -429,7 +429,7 @@ use cases, you can:</p>
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on 2026/08/24</div>
+              Last updated on 2026/08/26</div>
           </div>
           <div class="right-details">
             
@@ -468,7 +468,7 @@ use cases, you can:</p>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=3fa25eb1"></script>
+</div><script src="../_static/documentation_options.js?v=28cdfdf7"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

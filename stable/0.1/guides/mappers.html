@@ -3,12 +3,12 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="Work with fermionic circuits" href="circuit.html"><link rel="prev" title="Group operator terms: exploit the operator structure" href="grouping.html">
+<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="Work with fermionic circuits" href="circuit.html"><link rel="prev" title="Group operator terms: use the operator structure" href="grouping.html">
         <link rel="prefetch" href="../_static/images/qiskit-light-logo.svg" as="image">
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Map operator representations - Qiskit Fermions 0.1.0+6b82646</title>
+        <title>Map operator representations - Qiskit Fermions 0.1.0+86d2e13</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.1.0+6b82646</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.1.0+86d2e13</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.1.0+6b82646</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.1.0+86d2e13</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -208,7 +208,7 @@
 <li class="toctree-l2"><a class="reference internal" href="skqd.html">Generate Krylov time-evolution circuits (SKQD)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="lucj.html">Build an LUCJ ansatz</a></li>
 <li class="toctree-l2"><a class="reference internal" href="operators.html">Design principles of operator representations</a></li>
-<li class="toctree-l2"><a class="reference internal" href="grouping.html">Group operator terms: exploit the operator structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grouping.html">Group operator terms: use the operator structure</a></li>
 <li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Map operator representations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="circuit.html">Work with fermionic circuits</a></li>
 <li class="toctree-l2"><a class="reference internal" href="transpilation.html">Transpile fermionic circuits</a></li>
@@ -272,7 +272,7 @@ while preserving mathematical equivalence. Use them to work flexibly across
 different operator algebras and to prepare operators for quantum circuit execution.</p>
 <section id="implement-custom-mappers">
 <h2>Implement custom mappers<a class="headerlink" href="#implement-custom-mappers" title="Link to this heading">¶</a></h2>
-<p>The mappers module is designed to make it straightforward to implement custom
+<p>The mappers module makes it straightforward to implement custom
 mappings. Mappers work by transforming the fundamental
 actions (creation, annihilation, Majorana, and so on) that compose an operator, then
 combining these transformed actions according to the target representation’s rules.</p>
@@ -328,7 +328,7 @@ C</label><div class="sd-tab-content docutils">
 <li><p><strong>Define action transformation</strong>: Specify how each action (indexed by mode) maps
 to the target representation. In the example above, Majorana actions map to Pauli
 strings according to Jordan-Wigner rules.</p></li>
-<li><p><strong>Use one of the provided mapping functions</strong>: the <a class="reference internal" href="../pydoc/qiskit_fermions.mappers.html#module-qiskit_fermions.mappers" title="qiskit_fermions.mappers"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mappers</span></code></a>
+<li><p><strong>Use one of the provided mapping functions</strong>: The <a class="reference internal" href="../pydoc/qiskit_fermions.mappers.html#module-qiskit_fermions.mappers" title="qiskit_fermions.mappers"><code class="xref py py-mod docutils literal notranslate"><span class="pre">mappers</span></code></a>
 module provides utility functions to handle iterating over the operator terms and
 subsequent applications of the custom action map for the operator
 representations provided by the <a class="reference internal" href="../pydoc/qiskit_fermions.operators.html#module-qiskit_fermions.operators" title="qiskit_fermions.operators"><code class="xref py py-mod docutils literal notranslate"><span class="pre">operators</span></code></a> module. For example,
@@ -342,14 +342,14 @@ term in the operator while preserving mathematical equivalence.</p>
 <div class="admonition hint">
 <p class="admonition-title">Hint</p>
 <p>You can also iterate the terms of an operator manually rather than
-using one of the provided iterator functions. See the section on <a class="reference external" href="term_iteration_and_reconstruction">term iteration</a> in the operators guide for more details on that.</p>
+using one of the provided iterator functions. See the section on <a class="reference external" href="term_iteration_and_reconstruction">term iteration</a> in the operators guide for details.</p>
 </div>
 </section>
 <section id="library-implementations">
 <h2>Library implementations<a class="headerlink" href="#library-implementations" title="Link to this heading">¶</a></h2>
 <p>The <a class="reference internal" href="../pydoc/qiskit_fermions.mappers.library.html#module-qiskit_fermions.mappers.library" title="qiskit_fermions.mappers.library"><code class="xref py py-mod docutils literal notranslate"><span class="pre">qiskit_fermions.mappers.library</span></code></a> module provides efficient, thoroughly
 tested implementations of common mappings. These follow the same underlying pattern
-as custom mappers but are optimized for production use and available in both the
+as custom mappers but are optimized for production use and are available in both the
 Python and C APIs.</p>
 <p>The example below applies a library mapper to the same <a class="reference internal" href="../stubs/qiskit_fermions.operators.MajoranaOperator.html#qiskit_fermions.operators.MajoranaOperator" title="qiskit_fermions.operators.MajoranaOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">MajoranaOperator</span></code></a>
 from the custom mapper section, demonstrating equivalent results:</p>
@@ -397,7 +397,7 @@ C</label><div class="sd-tab-content docutils">
 </div>
 </div>
 <p>In the Python API, some of these library mappers are also reachable through type-agnostic
-convenience mappers: <a class="reference internal" href="../stubs/qiskit_fermions.mappers.library.fermion_operator.html#qiskit_fermions.mappers.library.fermion_operator" title="qiskit_fermions.mappers.library.fermion_operator"><code class="xref py py-func docutils literal notranslate"><span class="pre">fermion_operator()</span></code></a> and <a class="reference internal" href="../stubs/qiskit_fermions.mappers.library.majorana_operator.html#qiskit_fermions.mappers.library.majorana_operator" title="qiskit_fermions.mappers.library.majorana_operator"><code class="xref py py-func docutils literal notranslate"><span class="pre">majorana_operator()</span></code></a> sit in front of
+convenience mappers. <a class="reference internal" href="../stubs/qiskit_fermions.mappers.library.fermion_operator.html#qiskit_fermions.mappers.library.fermion_operator" title="qiskit_fermions.mappers.library.fermion_operator"><code class="xref py py-func docutils literal notranslate"><span class="pre">fermion_operator()</span></code></a> and <a class="reference internal" href="../stubs/qiskit_fermions.mappers.library.majorana_operator.html#qiskit_fermions.mappers.library.majorana_operator" title="qiskit_fermions.mappers.library.majorana_operator"><code class="xref py py-func docutils literal notranslate"><span class="pre">majorana_operator()</span></code></a> sit in front of
 <a class="reference internal" href="../stubs/qiskit_fermions.mappers.library.majorana_to_fermion.html#qiskit_fermions.mappers.library.majorana_to_fermion" title="qiskit_fermions.mappers.library.majorana_to_fermion"><code class="xref py py-func docutils literal notranslate"><span class="pre">majorana_to_fermion()</span></code></a> and <a class="reference internal" href="../stubs/qiskit_fermions.mappers.library.fermion_to_majorana.html#qiskit_fermions.mappers.library.fermion_to_majorana" title="qiskit_fermions.mappers.library.fermion_to_majorana"><code class="xref py py-func docutils literal notranslate"><span class="pre">fermion_to_majorana()</span></code></a> (among others), delegating to the
 appropriate library implementation internally based on the type of object they are given,
 rather than requiring you to pick the right function yourself. See <a class="reference internal" href="../pydoc/qiskit_fermions.protocols.html#module-qiskit_fermions.protocols" title="qiskit_fermions.protocols"><code class="xref py py-mod docutils literal notranslate"><span class="pre">qiskit_fermions.protocols</span></code></a>
@@ -426,7 +426,7 @@ for how this dispatch is implemented internally.</p>
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Group operator terms: exploit the operator structure</div>
+                <div class="title">Group operator terms: use the operator structure</div>
                 
               </div>
             </a>
@@ -440,7 +440,7 @@ for how this dispatch is implemented internally.</p>
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on 2026/08/24</div>
+              Last updated on 2026/08/26</div>
           </div>
           <div class="right-details">
             
@@ -475,7 +475,7 @@ for how this dispatch is implemented internally.</p>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=3fa25eb1"></script>
+</div><script src="../_static/documentation_options.js?v=28cdfdf7"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

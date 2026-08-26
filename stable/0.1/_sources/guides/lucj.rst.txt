@@ -109,12 +109,12 @@ in packed (lower-triangular) `chemist` ordering, which is what PySCF produces.
 
 The :class:`.UCJ` gate assembles the ansatz directly from the coupled-cluster amplitudes. Its
 :meth:`~qiskit_fermions.circuit.library.UCJ.from_t_amplitudes` constructor performs a *double
-factorization* of the :math:`t_2` amplitudes (via
+factorization* of the :math:`t_2` amplitudes (by using
 :func:`~qiskit_fermions.linalg.double_factorized_t2`) to obtain the per-layer diagonal Coulomb
 matrices and orbital rotations, and derives an optional final orbital rotation from the
 :math:`t_1` amplitudes.
 
-The number of ansatz repetitions :math:`L` equals the number of terms in the double
+The number of ansatz repetitions, :math:`L`, equals the number of terms in the double
 factorization. Truncating it with the ``n_reps`` argument trades some accuracy for a shallower
 circuit; here the two largest terms are kept, which recovers most of the correlation energy while
 halving the number of layers.
@@ -136,7 +136,7 @@ halving the number of layers.
 The :class:`.UCJ` gate is a pure unitary carrying no reference of its own, so prepend an
 :class:`.InitializeModes` gate (built with
 :meth:`~qiskit_fermions.circuit.library.InitializeModes.from_hartree_fock`) to supply the
-Hartree-Fock reference the ansatz is applied to. Decomposing the circuit reveals its anatomy: the
+Hartree-Fock reference the ansatz is applied to. Decomposing the circuit reveals its anatomy. The
 :class:`.InitializeModes` gate prepares the reference determinant, and each ansatz layer contributes
 an :class:`.OrbitalRotation` :math:`\mathcal{U}_k^\dagger`, then :math:`e^{i\mathcal{J}_k}` (an
 :class:`.Evolution` of the diagonal Coulomb operator :math:`\mathcal{J}_k`), then
@@ -205,7 +205,7 @@ two repetitions:
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The :class:`.UCJ` gate above is initialized from an *exact* double factorization of the :math:`t_2`
-amplitudes: the number of ansatz repetitions :math:`L` is whatever that factorization yields (up to
+amplitudes. The number of ansatz repetitions :math:`L` is whatever that factorization yields (up to
 the ``n_reps`` truncation), and each layer reproduces one factorized term exactly. `ffsim`_
 additionally offers an optimized ("compressed") double factorization, its
 ``from_t_amplitudes(..., optimize=True)``, which variationally fits the amplitudes with a chosen,
@@ -266,7 +266,7 @@ way recovers the same correlation energy at this (small) system size:
 6. Transpile the ansatz to a qubit circuit
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-To run the ansatz on hardware it must be lowered from fermionic modes to qubits.
+To run the ansatz on hardware, it must be lowered from fermionic modes to qubits.
 The :func:`~qiskit_fermions.transpiler.presets.generate_preset_jw_pass_manager` preset builds a
 staged pipeline that maps the fermionic circuit through the Jordan-Wigner transformation and
 synthesizes each gate into a qubit-level circuit. The composite :class:`.UCJ` gate must first be
@@ -288,9 +288,9 @@ pipeline's optimization stage can act on them, so pass ``circuit.decompose()``.
    >>> print(dict(sorted(transpiled.count_ops().items())))
    {'p': 16, 'rzz': 12, 'x': 2, 'xx_plus_yy': 28}
 
-Without a target device this maps onto ``2 * norb`` qubits with all-to-all connectivity assumed; the
-orbital rotations synthesize into :class:`~qiskit.circuit.library.XXPlusYYGate`\ s and the diagonal
-Coulomb evolutions into :class:`~qiskit.circuit.library.RZZGate`\ s:
+Without a target device, this maps onto ``2 * norb`` qubits with all-to-all connectivity assumed; the
+orbital rotations synthesize into :class:`~qiskit.circuit.library.XXPlusYYGate`\ objects and the diagonal
+Coulomb evolutions into :class:`~qiskit.circuit.library.RZZGate`\ objects:
 
 .. plot::
    :alt: The Jordan-Wigner transpiled LUCJ circuit.
@@ -302,7 +302,7 @@ Coulomb evolutions into :class:`~qiskit.circuit.library.RZZGate`\ s:
 
 .. rubric:: Target hardware connectivity with ffsim's LUCJ pass manager
 
-A real device has a restricted qubit coupling map, and the LUCJ ansatz is designed to match it: the
+A real device has a restricted qubit coupling map, and the LUCJ ansatz is designed to match it. The
 same-spin (``pairs_aa``) interactions form two linear chains and the alpha-beta (``pairs_ab``)
 interactions bridge them. ffsim's :external:func:`~ffsim.qiskit.generate_lucj_pass_manager` builds a
 device-aware qubit pipeline for this structure, and returns the subset of ``pairs_ab`` the
@@ -357,7 +357,7 @@ directly, the router must insert many ``SWAP`` gates to bridge them:
 
 .. rubric:: Restrict the ansatz to the hardware-implementable interactions
 
-The fix is to feed ``allowed_pairs_ab`` back into the ansatz construction, via the
+The fix is to feed ``allowed_pairs_ab`` back into the ansatz construction, through the
 ``interaction_pairs`` argument of :meth:`~qiskit_fermions.circuit.library.UCJ.from_t_amplitudes`,
 so the diagonal Coulomb operator only contains alpha-beta terms the coupling map can implement
 directly. The ansatz then matches the device topology and the router barely has to touch it:
@@ -384,7 +384,7 @@ Drawing only the active qubits (``idle_wires=False``) shows the circuit restrict
 chains and the alpha-beta bridge, expressed in the device basis gates. Layout and routing scatter the
 logical modes across the device's physical qubits, so pass a ``wire_order`` taken from the
 circuit's final layout (:meth:`~qiskit.transpiler.TranspileLayout.final_index_layout` lists the
-physical qubit each input qubit ended up on, in input-qubit order) to draw the wires back in the
+physical qubit each input qubit ended on, in input-qubit order) to draw the wires back in the
 original mode order:
 
 .. plot::
@@ -398,11 +398,11 @@ original mode order:
 
 .. note::
    The exact post-layout gate counts and depth depend on the routing/optimization passes and the
-   chosen device, so they are not reproduced here. The key point is the co-design: expressing the
+   chosen device, so they are not reproduced here. The key point is the co-design; expressing the
    ansatz with a nearest-neighbor ``pairs_aa`` chain and hardware-filtered ``pairs_ab`` bridges keeps
    the synthesized circuit close to the device topology, minimizing the routing overhead (inserted
    ``SWAP`` gates). See :class:`.GivensDecompositionSlaterDeterminantSynthesis` for a related
-   synthesis choice (``minimize_2q_gate_count``) trading two-qubit gate count against routed depth.
+   synthesis choice (``minimize_2q_gate_count``), trading two-qubit gate count against routed depth.
 
 .. skip: end
 

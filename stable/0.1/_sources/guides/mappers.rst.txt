@@ -10,7 +10,7 @@ different operator algebras and to prepare operators for quantum circuit executi
 Implement custom mappers
 ------------------------
 
-The mappers module is designed to make it straightforward to implement custom
+The mappers module makes it straightforward to implement custom
 mappings. Mappers work by transforming the fundamental
 actions (creation, annihilation, Majorana, and so on) that compose an operator, then
 combining these transformed actions according to the target representation's rules.
@@ -63,7 +63,7 @@ The key steps to implement any custom mapper are:
    to the target representation. In the example above, Majorana actions map to Pauli
    strings according to Jordan-Wigner rules.
 
-2. **Use one of the provided mapping functions**: the :mod:`~qiskit_fermions.mappers`
+2. **Use one of the provided mapping functions**: The :mod:`~qiskit_fermions.mappers`
    module provides utility functions to handle iterating over the operator terms and
    subsequent applications of the custom action map for the operator
    representations provided by the :mod:`~qiskit_fermions.operators` module. For example,
@@ -80,14 +80,14 @@ term in the operator while preserving mathematical equivalence.
 
    You can also iterate the terms of an operator manually rather than
    using one of the provided iterator functions. See the section on `term iteration
-   <term_iteration_and_reconstruction>`_ in the operators guide for more details on that.
+   <term_iteration_and_reconstruction>`_ in the operators guide for details.
 
 Library implementations
 -----------------------
 
 The :mod:`qiskit_fermions.mappers.library` module provides efficient, thoroughly
 tested implementations of common mappings. These follow the same underlying pattern
-as custom mappers but are optimized for production use and available in both the
+as custom mappers but are optimized for production use and are available in both the
 Python and C APIs.
 
 The example below applies a library mapper to the same :class:`.MajoranaOperator`
@@ -131,7 +131,7 @@ from the custom mapper section, demonstrating equivalent results:
        qf_sparse_obs_free(qubit_op);
 
 In the Python API, some of these library mappers are also reachable through type-agnostic
-convenience mappers: :func:`.fermion_operator` and :func:`.majorana_operator` sit in front of
+convenience mappers. :func:`.fermion_operator` and :func:`.majorana_operator` sit in front of
 :func:`.majorana_to_fermion` and :func:`.fermion_to_majorana` (among others), delegating to the
 appropriate library implementation internally based on the type of object they are given,
 rather than requiring you to pick the right function yourself. See :mod:`qiskit_fermions.protocols`

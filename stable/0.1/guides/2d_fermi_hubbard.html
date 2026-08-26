@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Simulate 2D Fermi-Hubbard dynamics with flow sets - Qiskit Fermions 0.1.0+6b82646</title>
+        <title>Simulate 2D Fermi-Hubbard dynamics with flow sets - Qiskit Fermions 0.1.0+86d2e13</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.1.0+6b82646</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.1.0+86d2e13</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.1.0+6b82646</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.1.0+86d2e13</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -208,7 +208,7 @@
 <li class="toctree-l2"><a class="reference internal" href="skqd.html">Generate Krylov time-evolution circuits (SKQD)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="lucj.html">Build an LUCJ ansatz</a></li>
 <li class="toctree-l2"><a class="reference internal" href="operators.html">Design principles of operator representations</a></li>
-<li class="toctree-l2"><a class="reference internal" href="grouping.html">Group operator terms: exploit the operator structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="grouping.html">Group operator terms: use the operator structure</a></li>
 <li class="toctree-l2"><a class="reference internal" href="mappers.html">Map operator representations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="circuit.html">Work with fermionic circuits</a></li>
 <li class="toctree-l2"><a class="reference internal" href="transpilation.html">Transpile fermionic circuits</a></li>
@@ -275,42 +275,50 @@ Equivalent functionality will be made available in the C API in a future release
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <p><strong>Read the</strong> <a class="reference internal" href="1d_fermi_hubbard.html#d-fermi-hubbard"><span class="std std-ref">1D flow-set guide</span></a> <strong>first.</strong> This guide is
-its two-dimensional sequel and does not repeat the material developed there: transfer
+its two-dimensional sequel and does not repeat the information developed there: transfer
 and vertex operators, what a flow set is, how <a class="reference internal" href="../stubs/qiskit_fermions.operators.TransferVertexOperator.html#qiskit_fermions.operators.TransferVertexOperator.groups" title="qiskit_fermions.operators.TransferVertexOperator.groups"><code class="xref py py-attr docutils literal notranslate"><span class="pre">groups</span></code></a>
 survives into the circuit, and how a custom encoding is wired into the transpiler
-through <a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis.html#qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis" title="qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis"><code class="xref py py-class docutils literal notranslate"><span class="pre">MapperFnEvolutionSynthesis</span></code></a>. Only what <em>changes</em> in two dimensions is
-spelled out below.</p>
-<p>See also the <a class="reference internal" href="transpilation.html#transpilation-explanation"><span class="std std-ref">transpilation guide</span></a> for the transpiler
+through <a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis.html#qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis" title="qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis"><code class="xref py py-class docutils literal notranslate"><span class="pre">MapperFnEvolutionSynthesis</span></code></a>.</p>
+<p>See the <a class="reference internal" href="transpilation.html#transpilation-explanation"><span class="std std-ref">transpilation guide</span></a> for the transpiler
 stages referenced throughout, and the <a class="reference internal" href="mappers.html#mappers-explanation"><span class="std std-ref">mappers guide</span></a> for the
 general recipe for writing a custom mapper.</p>
 </div>
-<p>The 1D guide closed by pointing at two dimensions as the place where local encodings earn
-their keep. This guide takes that step, for the <strong>two-dimensional Fermi-Hubbard model on a
+<p>The 1D guide ended by mentioning that local encodings are needed when working with two dimensions.
+This guide takes that step, for the <strong>two-dimensional Fermi-Hubbard model on a
 square lattice</strong>, using the <strong>Verstraete-Cirac (VC) encoding</strong> <a class="footnote-reference brackets" href="#id18" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></a>.</p>
-<p>Three things change, and they are the whole story:</p>
-<ol class="arabic simple">
-<li><p><strong>The flow sets multiply.</strong> A chain has two arrow orientations; a square lattice has
-four (east, west, north, south), and each is a <em>union</em> of vertex-disjoint directed
-paths (one per lattice row or column) rather than a single path.</p></li>
-<li><p><strong>The encoding gains an ancilla per site</strong>, not one for the whole system, giving a
-qubit-to-mode ratio of <span class="math">\(2\)</span>. Transfer operators become weight-3 (horizontal) and
-weight-4 (vertical) Paulis, and each of the four flow sets maps to its <em>own</em> Pauli
-shape, so each needs its <em>own</em> diagonalizing Clifford.</p></li>
-<li><p><strong>The encoded Hamiltonian is only faithful on a subspace</strong>: the joint <span class="math">\(+1\)</span>
-eigenspace of the plaquette constraints that every 2D local encoding carries <a class="footnote-reference brackets" href="#id18" id="id2" role="doc-noteref"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></a> <a class="footnote-reference brackets" href="#id19" id="id3" role="doc-noteref"><span class="fn-bracket">[</span>3<span class="fn-bracket">]</span></a>.
-In 1D the encoding was a plain isometry and the verification was a spectrum check; here
-the comparison has to be projected, as <a class="reference internal" href="#flowsets-2d-stabilizers"><span class="std std-ref">step 9</span></a> works out.</p></li>
-</ol>
+<p>There are three differences from the 1D problem, forming the basis of this work:</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt><strong>The flow sets multiply.</strong> A chain has two arrow orientations; a square lattice has</dt><dd><p>four (east, west, north, south), and each is a union of vertex-disjoint directed
+paths (one per lattice row or column) rather than a single path.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><strong>The encoding gains an ancilla per site</strong>, not one for the whole system, giving a</dt><dd><p>qubit-to-mode ratio of <span class="math">\(2\)</span>. Transfer operators become weight-3 (horizontal) and
+weight-4 (vertical) Paulis, and each of the four flow sets maps to its own Pauli
+shape, so each needs its own diagonalizing Clifford.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><strong>The encoded Hamiltonian is only faithful on a subspace</strong>: the joint <span class="math">\(+1\)</span></dt><dd><p>eigenspace of the plaquette constraints that every 2D local encoding carries <a class="footnote-reference brackets" href="#id18" id="id2" role="doc-noteref"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></a> <a class="footnote-reference brackets" href="#id19" id="id3" role="doc-noteref"><span class="fn-bracket">[</span>3<span class="fn-bracket">]</span></a>.
+In 1D the encoding was a plain isometry and the verification was a spectrum check. Here,
+the comparison has to be projected, as <a class="reference internal" href="#flowsets-2d-stabilizers"><span class="std std-ref">step 9</span></a> illustrates.</p>
+</dd>
+</dl>
+</li>
+</ul>
 <p>The payoff is the same shape as in 1D: the two-qubit depth of one Trotter step becomes
 constant in the lattice size, at <span class="math">\(24\)</span> (<span class="math">\(16\)</span> for the hopping, matching
 Ref. <a class="footnote-reference brackets" href="#id17" id="id4" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a>, plus <span class="math">\(8\)</span> for the interaction), while a term-by-term Trotterization of the
-very same encoded Hamiltonian grows linearly. The gate count still grows with the number
+same encoded Hamiltonian grows linearly. The gate count still grows with the number
 of bonds, of course; what becomes size-independent is how many layers those gates occupy.
 Depths throughout are counted on an abstract, fully connected register; mapping the encoding
-onto a device’s restricted coupling map is its own problem, discussed at the end.</p>
+onto a device’s restricted coupling map is its own problem, which is discussed at the end.</p>
 <section id="the-lattice-and-its-four-orientations">
 <h2>The lattice and its four orientations<a class="headerlink" href="#the-lattice-and-its-four-orientations" title="Link to this heading">¶</a></h2>
-<p>The directed interaction graph is where the first of those three changes is visible. Sites
+<p>The first change is visible on the directed interaction graph. Sites
 are numbered in row-major order, <code class="docutils literal notranslate"><span class="pre">site(r,</span> <span class="pre">c)</span> <span class="pre">=</span> <span class="pre">r</span> <span class="pre">*</span> <span class="pre">cols</span> <span class="pre">+</span> <span class="pre">c</span></code>, and every bond carries both
 orientations, as the chain did in 1D, but now the bonds run along two axes:</p>
 <p>(<a class="reference download internal" download="" href="../_downloads/b09788e76bcd4ef224faac085d50f1ad/2d_fermi_hubbard-1.png"><code class="xref download docutils literal notranslate"><span class="pre">png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/b8fcbd8eb4eb0f5c0d29756b9e6df927/2d_fermi_hubbard-1.hires.png"><code class="xref download docutils literal notranslate"><span class="pre">hires.png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/5740128404ec0867d1d63dc93592aff3/2d_fermi_hubbard-1.pdf"><code class="xref download docutils literal notranslate"><span class="pre">pdf</span></code></a>)</p>
@@ -318,17 +326,17 @@ orientations, as the chain did in 1D, but now the bonds run along two axes:</p>
 <img alt="A 3x3 square lattice with both orientations of every horizontal and vertical bond drawn as arrows, the center site carrying all four." class="plot-directive" src="../_images/2d_fermi_hubbard-1.png" />
 </figure>
 <p>The commutation rule is the 1D one, unchanged: two transfer operators sharing a site
-<strong>commute</strong> when the arrows flow through it and <strong>anticommute</strong> when they clash. What the
-picture adds is that a site now has up to four incident bonds rather than two, so the
+<strong>commute</strong> when the arrows flow through it and <strong>anticommute</strong> when they clash. However,
+a site now has up to four incident bonds rather than two, so the
 arrows through it can clash in more ways, and a set of arrows that never clashes is no
 longer a single path. Reading the horizontal arrows left-to-right gives one such set, the
-vertical arrows top-to-bottom another, and reversing each gives two more: the east, west,
-north and south flow sets that organize everything below.</p>
+vertical arrows from top-to-bottom gives another, and reversing each gives two more.
+These are the east, west, north, and south flow sets that organize everything that follows.</p>
 </section>
 <section id="the-verstraete-cirac-encoding">
 <h2>The Verstraete-Cirac encoding<a class="headerlink" href="#the-verstraete-cirac-encoding" title="Link to this heading">¶</a></h2>
-<p>VC pairs every fermionic mode <span class="math">\(j\)</span> with its own auxiliary qubit. With <span class="math">\(N\)</span>
-lattice sites, mode <span class="math">\(j\)</span> lives on qubit <span class="math">\(j\)</span> and its ancilla on qubit
+<p>Verstraete-Cirac (VC) pairs every fermionic mode <span class="math">\(j\)</span> with its own auxiliary qubit. With <span class="math">\(N\)</span>
+lattice sites, mode <span class="math">\(j\)</span> lives on qubit <span class="math">\(j\)</span> and its ancilla is on qubit
 <span class="math">\(N + j\)</span>, so the register holds <span class="math">\(2N\)</span> qubits. Vertex operators stay as simple as
 they can be,</p>
 <div class="math-wrapper docutils container">
@@ -343,34 +351,34 @@ site, and a vertical edge with <span class="math">\(j\)</span> the northern site
 \[T_{jk}^{\text{horizontal}} = \tfrac{1}{2} X_j X_k Z_{N+j} \, , \qquad
 T_{jk}^{\text{vertical}}   = \tfrac{1}{2} X_j Y_k X_{N+j} Y_{N+k} \, ,\]</div>
 </div>
-<p>a weight-3 “triangle” and a weight-4 “square”. Which arrow each one is matters: with
-<span class="math">\(j\)</span> the western site, <span class="math">\(j \to k\)</span> points east, and with <span class="math">\(j\)</span> the northern
-site it points south. The reverse orientations follow from the identity
-<span class="math">\(T_{kj} = -V_j V_k T_{jk}\)</span>, which turns the <code class="docutils literal notranslate"><span class="pre">XXZ</span></code> triangle into a <code class="docutils literal notranslate"><span class="pre">YYZ</span></code> one and
+<p>a weight-3 “triangle” and a weight-4 “square”. Identifying each arrow matters: with
+<span class="math">\(j\)</span> as the western site, <span class="math">\(j \to k\)</span> points east, but with <span class="math">\(j\)</span> as the northern
+site, it points south. The reverse orientations follow from the identity
+<span class="math">\(T_{kj} = -V_j V_k T_{jk}\)</span>, which turns the <code class="docutils literal notranslate"><span class="pre">XXZ</span></code> triangle into <code class="docutils literal notranslate"><span class="pre">YYZ</span></code>, and
 the <code class="docutils literal notranslate"><span class="pre">XYXY</span></code> square into <code class="docutils literal notranslate"><span class="pre">YXXY</span></code>. Those four distinct labels are the four flow
-sets, and tracking them is what the rest of this guide does.</p>
+sets, and the rest of this guide tracks them.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p><strong>These are not quite Eq. (A1) of Ref.</strong> <a class="footnote-reference brackets" href="#id17" id="id5" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a>, which is stated “up to single-qubit
+<p><strong>These are not quite Eq. (A1) of Ref.</strong> <a class="footnote-reference brackets" href="#id17" id="id5" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a>, which states “up to single-qubit
 rotations” and differs in three ways worth naming, since a reader checking the paper
 will notice:</p>
 <ul class="simple">
-<li><p><strong>The prefactor.</strong> Eq. (A1) carries none. The <span class="math">\(\tfrac12\)</span> here is what makes
+<li><p><strong>The prefactor:</strong> Eq. (A1) carries none. The <span class="math">\(\tfrac12\)</span> here is what makes
 <span class="math">\(T_{jk}^2 = \tfrac14\)</span>, matching the normalization
 <span class="math">\(T_{jk} = -\tfrac12 (a^\dagger_j - a_j)(a^\dagger_k + a_k)\)</span> that
 <a class="reference internal" href="../stubs/qiskit_fermions.operators.TransferVertexOperator.html#qiskit_fermions.operators.TransferVertexOperator" title="qiskit_fermions.operators.TransferVertexOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransferVertexOperator</span></code></a> uses. The paper only ever needs its transfer
 operators inside <span class="math">\(\exp(-i\,dt\,H)\)</span>, where a scale factor is absorbed into the
 rotation angle; here they have to be <em>operators</em> that satisfy an identity.</p></li>
-<li><p><strong>Orientation.</strong> Eq. (A1) selects letters by the row parity of <span class="math">\(j\)</span>, which for a
+<li><p><strong>Orientation:</strong> Eq. (A1) selects letters by the row parity of <span class="math">\(j\)</span>, which for a
 horizontal edge is the same for both endpoints, so it does not distinguish
 <span class="math">\(T_{jk}\)</span> from <span class="math">\(T_{kj}\)</span>. The paper recovers the orientation separately, by
 conjugating with a layer of <span class="math">\(R^Z(\pi/2)\)</span>. This guide instead folds it into the
 encoding, deriving the reverse from <span class="math">\(T_{kj} = -V_j V_k T_{jk}\)</span>, which is what
-makes the two orientations land on visibly different Paulis in step 3.</p></li>
-<li><p><strong>The vertical shape.</strong> Eq. (A1) alternates <code class="docutils literal notranslate"><span class="pre">XXXX</span></code> and <code class="docutils literal notranslate"><span class="pre">YYYY</span></code> by row parity, where
-this guide uses a single <code class="docutils literal notranslate"><span class="pre">XYXY</span></code>. These are two ways of getting the <em>same</em> thing: a
+makes the two orientations land on different Paulis in step 3.</p></li>
+<li><p><strong>The vertical shape:</strong> Eq. (A1) alternates <code class="docutils literal notranslate"><span class="pre">XXXX</span></code> and <code class="docutils literal notranslate"><span class="pre">YYYY</span></code> by row parity, where
+this guide uses a single <code class="docutils literal notranslate"><span class="pre">XYXY</span></code>. These are two ways of getting the same thing: a
 letter asymmetry that makes a vertical edge clash correctly with the horizontal edges
-meeting it. Do not read the difference as a free basis choice: dropping the parity
+meeting it. Do not read the difference as a free basis choice. Dropping the parity
 alternation and using a single <code class="docutils literal notranslate"><span class="pre">XXXX</span></code> breaks the algebra outright, which is why the
 distinct letters are checked rather than assumed.</p></li>
 </ul>
@@ -385,9 +393,9 @@ whose diagonalizing Cliffords Ref. <a class="footnote-reference brackets" href="
 </section>
 <section id="the-hamiltonian-on-a-square-lattice">
 <h2>1. The Hamiltonian on a square lattice<a class="headerlink" href="#the-hamiltonian-on-a-square-lattice" title="Link to this heading">¶</a></h2>
-<p>The construction is the 1D one with a two-dimensional edge list. Sites keep the row-major
+<p>The construction is the same as in 1D, but with a two-dimensional edge list. Sites keep the row-major
 numbering used for the figure above, <code class="docutils literal notranslate"><span class="pre">site(r,</span> <span class="pre">c)</span> <span class="pre">=</span> <span class="pre">r</span> <span class="pre">*</span> <span class="pre">cols</span> <span class="pre">+</span> <span class="pre">c</span></code>, so that horizontal bonds
-connect consecutive indices and vertical bonds connect indices differing by <code class="docutils literal notranslate"><span class="pre">cols</span></code>:</p>
+connect consecutive indices, and vertical bonds connect indices differing by <code class="docutils literal notranslate"><span class="pre">cols</span></code>:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">defaultdict</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.operators</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransferVertexOperator</span>
 <span class="gp">&gt;&gt;&gt;</span>
@@ -427,7 +435,7 @@ vertical edges, and the sign of the difference picks the orientation. Everything
 <strong>east</strong> or <strong>west</strong> as it points right or left along a row, and <strong>north</strong> or <strong>south</strong> as
 it points up or down a column. Since the numbering runs row-major, east and south are the
 index-increasing directions. Nothing downstream depends on the names (they only label
-groups), but four of them are easy to confuse, so it is worth fixing them against the
+groups), but they are easy to confuse, so it is worth fixing them against the
 picture. Ref. <a class="footnote-reference brackets" href="#id17" id="id7" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a> names its square-lattice flow sets the same way.</p>
 </div>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">EAST</span><span class="p">,</span> <span class="n">WEST</span><span class="p">,</span> <span class="n">NORTH</span><span class="p">,</span> <span class="n">SOUTH</span><span class="p">,</span> <span class="n">DIAGONAL</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
@@ -468,12 +476,12 @@ disconnection is a gift rather than a complication, as step 6 shows.</p>
 </section>
 <section id="encode-the-operator">
 <span id="flowsets-2d-encoding"></span><h2>3. Encode the operator<a class="headerlink" href="#encode-the-operator" title="Link to this heading">¶</a></h2>
-<p>The encoding is one function mapping a single generalized transfer operator to a Pauli
-string, handed to <a class="reference internal" href="../stubs/qiskit_fermions.mappers.map_transfer_vertex_generators.html#qiskit_fermions.mappers.map_transfer_vertex_generators" title="qiskit_fermions.mappers.map_transfer_vertex_generators"><code class="xref py py-func docutils literal notranslate"><span class="pre">map_transfer_vertex_generators()</span></code></a>. Compared with the 1D version the
-body just has more cases: diagonal, horizontal, vertical, and the reverse orientations via
+<p>The encoding is one function that maps a single generalized transfer operator to a Pauli
+string, which is handed to <a class="reference internal" href="../stubs/qiskit_fermions.mappers.map_transfer_vertex_generators.html#qiskit_fermions.mappers.map_transfer_vertex_generators" title="qiskit_fermions.mappers.map_transfer_vertex_generators"><code class="xref py py-func docutils literal notranslate"><span class="pre">map_transfer_vertex_generators()</span></code></a>. Compared with the 1D version, the
+body has more cases: diagonal, horizontal, vertical, and the reverse orientations through
 <span class="math">\(T_{kj} = -V_j V_k T_{jk}\)</span>.</p>
-<p>There is one wrinkle. <a class="reference internal" href="../stubs/qiskit_fermions.mappers.map_transfer_vertex_generators.html#qiskit_fermions.mappers.map_transfer_vertex_generators" title="qiskit_fermions.mappers.map_transfer_vertex_generators"><code class="xref py py-func docutils literal notranslate"><span class="pre">map_transfer_vertex_generators()</span></code></a> calls back with a generator and
-nothing else, while deciding a bond’s Pauli string also needs <code class="docutils literal notranslate"><span class="pre">cols</span></code> to recover row/column
+<p>There is one problem. <a class="reference internal" href="../stubs/qiskit_fermions.mappers.map_transfer_vertex_generators.html#qiskit_fermions.mappers.map_transfer_vertex_generators" title="qiskit_fermions.mappers.map_transfer_vertex_generators"><code class="xref py py-func docutils literal notranslate"><span class="pre">map_transfer_vertex_generators()</span></code></a> calls back with a generator and
+nothing else, while deciding a bond’s Pauli string also needs <code class="docutils literal notranslate"><span class="pre">cols</span></code> to recover row and column
 coordinates from a mode index. Rather than nest the functions to close over it,
 <a class="reference external" href="https://docs.python.org/3/library/functools.html#functools.partial" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">functools.partial()</span></code></a> binds it, which keeps both functions at the top level and
 independently callable.</p>
@@ -530,7 +538,7 @@ independently callable.</p>
 <span class="go">18</span>
 </pre></div>
 </div>
-<p>The point of grouping before mapping shows up immediately: each flow set encodes to a
+<p>The point of grouping before mapping can be seen immediately: each flow set encodes to a
 single Pauli shape, uniform across the whole set.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">names</span><span class="p">):</span>
 <span class="gp">... </span>    <span class="n">observable</span> <span class="o">=</span> <span class="n">encoding</span><span class="p">(</span><span class="n">hamiltonian</span><span class="o">.</span><span class="n">split_out_groups</span><span class="p">()[</span><span class="n">index</span><span class="p">],</span> <span class="n">num_qubits</span><span class="p">)</span>
@@ -544,9 +552,9 @@ single Pauli shape, uniform across the whole set.</p>
 </pre></div>
 </div>
 <p>The four hopping shapes are distinct, so each flow set gets its own Clifford in
-<a class="reference internal" href="#flowsets-2d-synthesis"><span class="std std-ref">step 5</span></a>. The reverse orientations are genuinely different
-Paulis, not the same ones relabeled; this is the concrete reason a 2D flow-set synthesis
-needs four circuits where the 1D one needed one.</p>
+<a class="reference internal" href="#flowsets-2d-synthesis"><span class="std std-ref">step 5</span></a>. The reverse orientations are different
+Paulis, not the same ones relabeled; this is the why a 2D flow-set synthesis
+needs four circuits, where the 1D synthesis needs one.</p>
 </section>
 <section id="transpile-with-the-custom-encoding">
 <span id="flowsets-2d-transpile"></span><h2>4. Transpile with the custom encoding<a class="headerlink" href="#transpile-with-the-custom-encoding" title="Link to this heading">¶</a></h2>
@@ -596,7 +604,7 @@ single ancilla.</p>
 <span class="go">5</span>
 </pre></div>
 </div>
-<p>Five gates, carrying the 6, 6, 6, 6 and 22 terms counted in step 2. Each is mapped and
+<p>Five gates, carrying the 6, 6, 6, 6, and 22 terms counted in step 2. Each is mapped and
 synthesized independently, so the partition decided at the fermionic level survives all the
 way into the circuit:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">pass_manager</span> <span class="o">=</span> <span class="n">flow_set_pass_manager</span><span class="p">(</span><span class="n">flow_set_circuit</span><span class="o">.</span><span class="n">register</span><span class="p">,</span> <span class="n">encoding</span><span class="p">,</span> <span class="n">LieTrotter</span><span class="p">())</span>
@@ -619,22 +627,22 @@ depth grows with the lattice.</p>
 </section>
 <section id="a-depth-2-clifford-per-flow-set">
 <span id="flowsets-2d-synthesis"></span><h2>5. A depth-2 Clifford per flow set<a class="headerlink" href="#a-depth-2-clifford-per-flow-set" title="Link to this heading">¶</a></h2>
-<p>The mechanism is the 1D one: conjugate a whole commuting flow set by a Clifford that maps
-every one of its terms to a distinct weight-1 Pauli, so that the evolution of the entire
-set costs only single-qubit rotations. In 1D one brickwork of <code class="docutils literal notranslate"><span class="pre">CZ</span></code> gates did this.</p>
-<p>In 2D each flow set needs its own circuit, following Section IV C and Fig. 7 of Ref. <a class="footnote-reference brackets" href="#id17" id="id8" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a>.
+<p>The mechanism is the same as in 1D: conjugate a whole commuting flow set by a Clifford that maps
+each of its terms to a distinct weight-1 Pauli, so that the evolution of the entire
+set costs only single-qubit rotations. In 1D, one brickwork of <code class="docutils literal notranslate"><span class="pre">CZ</span></code> gates did this.</p>
+<p>In 2D, each flow set needs its own circuit, following Section IV C and Fig. 7 of Ref. <a class="footnote-reference brackets" href="#id17" id="id8" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a>.
 All four act on one line of the lattice at a time (a row for east/west, a column for
 north/south) together with that line’s ancillas, and all four have the same three-part
 shape:</p>
-<ol class="arabic simple">
-<li><p>a layer of single-qubit rotations, putting each qubit in the basis its flow set needs;</p></li>
-<li><p>a first <code class="docutils literal notranslate"><span class="pre">CX</span></code> layer, always site-to-ancilla on the same site;</p></li>
-<li><p>a second <code class="docutils literal notranslate"><span class="pre">CX</span></code> layer, coupling neighbors along the line.</p></li>
-</ol>
-<p>Steps 2 and 3 are the only two-qubit layers, so the two-qubit depth is <span class="math">\(2\)</span> regardless
+<ul class="simple">
+<li><p>A layer of single-qubit rotations, putting each qubit in the basis its flow set needs.</p></li>
+<li><p>A first <code class="docutils literal notranslate"><span class="pre">CX</span></code> layer, always site-to-ancilla on the same site.</p></li>
+<li><p>A second <code class="docutils literal notranslate"><span class="pre">CX</span></code> layer, coupling neighbors along the line.</p></li>
+</ul>
+<p>Steps 2 and 3 are the only two-qubit layers, so the two-qubit depth is <span class="math">\(2\)</span>, regardless
 of how long the line is. They are written out one function per flow set below. The
 rotations are what they are because they were found, by conjugating each flow set’s
-terms and requiring distinct weight-1 images, so treat them as given and lean on the
+terms and requiring distinct weight-1 images, so treat them as given and rely on the
 check that follows.</p>
 <p>The two horizontal sets are the simplest. Their terms are weight-3, <code class="docutils literal notranslate"><span class="pre">XXZ</span></code> and <code class="docutils literal notranslate"><span class="pre">YYZ</span></code>, and
 differ only by the extra <span class="math">\(S\)</span> that turns <span class="math">\(X\)</span> into <span class="math">\(Y\)</span> on the sites:</p>
@@ -703,9 +711,9 @@ alternates too, coupling sites on even positions and ancillas on odd ones (or th
 </pre></div>
 </div>
 <p>Drawn on a single three-site line (its sites first, then their ancillas) the whole
-mechanism fits in one picture. The triangle shape is the plainer of the two: a basis change
-on the ancillas, then two <code class="docutils literal notranslate"><span class="pre">CX</span></code> layers, the first pairing each site with its own ancilla
-and the second reaching to the next site along the line.</p>
+mechanism fits in one picture. The triangle shape is the clearer of the two: a basis change
+on the ancillas, then two <code class="docutils literal notranslate"><span class="pre">CX</span></code> layers, the first pairs each site with its own ancilla
+and the second reaches to the next site along the line.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">line</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>  <span class="c1"># three sites, with ancillas on qubits 3, 4, 5</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">triangle</span> <span class="o">=</span> <span class="n">QuantumCircuit</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">east_clifford</span><span class="p">(</span><span class="n">triangle</span><span class="p">,</span> <span class="n">line</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">mode</span><span class="p">:</span> <span class="mi">3</span> <span class="o">+</span> <span class="n">mode</span><span class="p">)</span>
@@ -732,12 +740,12 @@ and its second <code class="docutils literal notranslate"><span class="pre">CX</
 <p>Both are two <code class="docutils literal notranslate"><span class="pre">CX</span></code> layers deep, and adding sites to the line widens them without deepening
 them; that is the whole constant-depth claim, visible by inspection. The west and north
 Cliffords differ only in their single-qubit layers, so they are not drawn separately.</p>
-<p>What the synthesis still needs is where each term ends up. A line of <span class="math">\(L\)</span> sites carries
+<p>What the synthesis still needs is determining where each term ends up. A line of <span class="math">\(L\)</span> sites carries
 <span class="math">\(L - 1\)</span> bonds, each contributing one term, so the helper below returns one entry per
-bond: the qubit that term lands on, and the single-qubit Pauli it became. Crucially these are
-read off the conjugation rather than predicted: unlike 1D, where one <code class="docutils literal notranslate"><span class="pre">CZ</span></code> brickwork
+bond: the qubit that the term landed on, and the single-qubit Pauli it became. Crucially, these are
+read off the conjugation rather than predicted.  Unlike 1D, where one <code class="docutils literal notranslate"><span class="pre">CZ</span></code> brickwork
 maps <span class="math">\(X_{j+1} \mapsto Z_j X_{j+1} Z_{j+2}\)</span> in closed form, there is no such formula
-here, and the ancillas of a column line are not even contiguous. The only thing that differs
+here, and the ancillas of a column line are not contiguous. The only thing that differs
 between the flow sets is the Pauli string going in, which step 3 already printed:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit.quantum_info</span><span class="w"> </span><span class="kn">import</span> <span class="n">Clifford</span><span class="p">,</span> <span class="n">SparsePauliOp</span>
 <span class="gp">&gt;&gt;&gt;</span>
@@ -762,11 +770,11 @@ between the flow sets is the Pauli string going in, which step 3 already printed
 <span class="gp">... </span>    <span class="k">return</span> <span class="n">supports</span>
 </pre></div>
 </div>
-<p>The images must come out distinct as well as weight-1, so that each term can be rotated
+<p>The images must come out distinct and weight-1, so that each term can be rotated
 independently on its own qubit; the two-qubit depth of <span class="math">\(2\)</span> is already visible in the
-four constructions above, each emitting exactly two <code class="docutils literal notranslate"><span class="pre">CX</span></code> layers whatever the line length.
-Both properties are checked below across every flow set, every line and several lattice
-sizes. Step 6 then calls <code class="docutils literal notranslate"><span class="pre">clifford_supports</span></code> for real, so it is a working part of the
+four constructions above, each emitting two <code class="docutils literal notranslate"><span class="pre">CX</span></code> layers irrespective of the line length.
+Below, both properties are checked across every flow set, every line, and several lattice
+sizes. Step 6 then calls <code class="docutils literal notranslate"><span class="pre">clifford_supports</span></code>, so it is a working part of the
 synthesis rather than only a demonstration.</p>
 </section>
 <section id="flow-set-aware-synthesis">
@@ -780,7 +788,7 @@ cheaper than one might fear:</p>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
 <p>The components of a single flow set are vertex-disjoint: the west set’s rows share
-no qubit. So all of a flow set’s Cliffords can be emitted together and they share the
+no qubits. So all of a flow set’s Cliffords can be emitted together and they share the
 same two two-qubit layers, rather than queueing up one row after another. A flow set
 therefore costs a fixed number of layers (two for the Clifford and two for its inverse)
 no matter how many rows or columns the lattice has, which is why the total
@@ -907,8 +915,8 @@ depth ends up constant.</p>
 shapes and raises on anything else rather than falling back silently. It also assumes the
 one-flow-set-per-gate split above, and says so; more than one hopping shape in a single
 gate means the grouping was not applied, which is an error rather than something to work
-around. <code class="docutils literal notranslate"><span class="pre">reps</span></code> is here for the same reason as in 1D: a product formula is where the number
-of Trotter steps belongs, as in Qiskit’s own <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.synthesis.LieTrotter" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">LieTrotter</span></code></a>.</p>
+around. <code class="docutils literal notranslate"><span class="pre">reps</span></code> is here for the same reason as in 1D: the number
+of Trotter steps belongs in a product formula, as in Qiskit’s own <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.synthesis.LieTrotter" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">LieTrotter</span></code></a>.</p>
 </section>
 <section id="the-result-constant-depth">
 <h2>7. The result: constant depth<a class="headerlink" href="#the-result-constant-depth" title="Link to this heading">¶</a></h2>
@@ -955,20 +963,20 @@ edge makes the difference plain:</p>
 <img alt="Two-qubit depth and CX count against lattice edge; LieTrotter grows linearly while the flow-set synthesis stays flat at 24." class="plot-directive" src="../_images/2d_fermi_hubbard-17.png" />
 </figure>
 <p>The two-qubit depth is 24 and constant from <span class="math">\(3 \times 3\)</span> to <span class="math">\(8 \times 8\)</span>
-(that is 18 qubits up to 128) while <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.synthesis.LieTrotter" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">LieTrotter</span></code></a> applied to
-the identical encoded Hamiltonian grows linearly with the lattice edge, from 47 to 92. The
+(that is 18 qubits up to 128), while <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.synthesis.LieTrotter" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">LieTrotter</span></code></a> applied to
+the identically encoded Hamiltonian grows linearly with the lattice edge, from 47 to 92. The
 gate count grows under both, since there are <span class="math">\(O(N)\)</span> terms to apply either way; what
 the flow sets remove is the growth in how many layers those gates occupy.</p>
-<p>The budget splits cleanly into 16 for the hopping and 8 for the interaction:</p>
+<p>The budget splits into 16 for the hopping and eight for the interaction:</p>
 <ul class="simple">
 <li><p>Each of the four flow sets costs <span class="math">\(2 + 2\)</span> two-qubit layers: its Clifford going in
-and the inverse coming out, both depth 2 by construction, with only single-qubit rotations
+and the inverse coming out, both depth two by construction, with only single-qubit rotations
 in between. That is <span class="math">\(4 \times 4 = 16\)</span>, which is the figure Ref. <a class="footnote-reference brackets" href="#id17" id="id9" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a> quotes,
 since it counts the hopping terms only. Setting <span class="math">\(U = 0\)</span> in the code above reproduces
 it.</p></li>
-<li><p>The diagonal group adds the remaining 8. Its <code class="docutils literal notranslate"><span class="pre">Rzz</span></code> gates pack into four layers, and each
-<code class="docutils literal notranslate"><span class="pre">Rzz</span></code> decomposes into two <code class="docutils literal notranslate"><span class="pre">CX</span></code> around a single-qubit rotation, so <span class="math">\(4 \times 2 = 8\)</span>.
-Four layers is optimal: on a square lattice the interaction reaches only nearest
+<li><p>The diagonal group adds the remaining eight. Its <code class="docutils literal notranslate"><span class="pre">Rzz</span></code> gates pack into four layers, and each
+<code class="docutils literal notranslate"><span class="pre">Rzz</span></code> decomposes into two <code class="docutils literal notranslate"><span class="pre">CX</span></code> gates around a single-qubit rotation, so <span class="math">\(4 \times 2 = 8\)</span>.
+Four layers is optimal: on a square lattice, the interaction reaches only nearest
 neighbors, so every interior site carries four <code class="docutils literal notranslate"><span class="pre">Rzz</span></code> gates (one per bond) and can
 take part in only one at a time.</p></li>
 </ul>
@@ -1031,7 +1039,7 @@ show it. Requiring the same phase across several random states is what closes th
 </section>
 <section id="verify-the-physics-on-the-stabilizer-subspace">
 <span id="flowsets-2d-stabilizers"></span><h2>9. Verify the physics on the stabilizer subspace<a class="headerlink" href="#verify-the-physics-on-the-stabilizer-subspace" title="Link to this heading">¶</a></h2>
-<p>This is the genuinely two-dimensional wrinkle. In 1D the encoding was an isometry, and
+<p>This is the two-dimensional wrinkle. In 1D, the encoding was an isometry, and
 comparing spectra against a Jordan-Wigner reference was enough. VC is not an isometry: it
 uses <span class="math">\(2N\)</span> qubits for <span class="math">\(N\)</span> modes, so a <span class="math">\(2^{2N}\)</span>-dimensional space holds a
 <span class="math">\(2^N\)</span>-dimensional physical one. This is generic to local encodings in two dimensions
@@ -1113,12 +1121,11 @@ no <span class="math">\(2^{18} \times 2^{18}\)</span> matrices required:</p>
 <span class="go">True True</span>
 </pre></div>
 </div>
-<p>With the stabilizers in hand the comparison needs no basis correspondence at all, because
+<p>With the stabilizers in hand, the comparison needs no basis correspondence, because
 <span class="math">\(V_j = Z_j\)</span> means the occupations live on the same physical qubits in both
 pictures. So: write a product state directly on the physical qubits with the ancillas in
 <span class="math">\(|0\rangle\)</span>, project it onto the stabilizer subspace, evolve with the encoded
-Hamiltonian, and read the site densities <span class="math">\(\langle n_j \rangle = (1 - \langle Z_j
-\rangle)/2\)</span> off both sides.</p>
+Hamiltonian, and read the site densities <span class="math">\(\langle n_j \rangle = (1 - \langle Z_j \rangle)/2\)</span> off both sides.</p>
 <p>Every step here stays at the level of a vector. The projector is applied one
 <span class="math">\((1 + S)/2\)</span> factor at a time instead of being multiplied out, and the time evolution
 uses <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.linalg.expm_multiply.html#scipy.sparse.linalg.expm_multiply" title="(in SciPy v1.18.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">expm_multiply()</span></code></a>, which computes
@@ -1199,10 +1206,10 @@ fixed budget: here <span class="math">\(16\)</span> for the four flow sets plus 
 interaction group.</p></li>
 <li><p><strong>Each orientation is its own Pauli shape.</strong> <span class="math">\(T_{kj} = -V_j V_k T_{jk}\)</span> turns
 <code class="docutils literal notranslate"><span class="pre">XXZ</span></code> into <code class="docutils literal notranslate"><span class="pre">YYZ</span></code> and <code class="docutils literal notranslate"><span class="pre">XYXY</span></code> into <code class="docutils literal notranslate"><span class="pre">YXXY</span></code>, so the four flow sets need four
-Cliffords. Assuming one Clifford covers both orientations of an axis is the easiest way to
+Cliffords. Assuming that one Clifford covers both orientations of an axis is the easiest way to
 get a 2D flow-set synthesis wrong.</p></li>
-<li><p><strong>Read supports off the conjugation.</strong> In 1D one <code class="docutils literal notranslate"><span class="pre">CZ</span></code> brickwork gives the images in
-closed form; in 2D there is no such formula, and column lines have non-contiguous ancillas,
+<li><p><strong>Read supports off the conjugation.</strong> In 1D, one <code class="docutils literal notranslate"><span class="pre">CZ</span></code> brickwork gives the images in
+closed form. In 2D there is no such formula, and column lines have non-contiguous ancillas,
 so a hand-derived guess at where each term lands is fragile. Conjugating and inspecting the
 result costs one <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.quantum_info.Clifford" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Clifford</span></code></a> construction and cannot be wrong;
 it also means an equally valid Clifford that lands the terms elsewhere keeps working.</p></li>
@@ -1212,14 +1219,14 @@ it reads one Pauli shape off the first term and picks the matching Clifford. Ass
 and raising when it does not hold, is what keeps <code class="docutils literal notranslate"><span class="pre">synthesize</span></code> short.</p></li>
 <li><p><strong>Verify on the subspace.</strong> A <span class="math">\(2N\)</span>-qubit encoding of <span class="math">\(N\)</span> modes is faithful
 only where the stabilizers say it is. Because VC keeps <span class="math">\(V_j = Z_j\)</span>, the cheapest
-honest check is to project a product state and compare densities: no intertwiner and
-no spectral matching, which is unreliable anyway when the restricted Hamiltonian is
+reliable check is to project a product state and compare densities: no intertwiner and
+no spectral matching, which is unreliable when the restricted Hamiltonian is
 degenerate.</p></li>
 </ul>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>The encoded Hamiltonian commutes with the stabilizers, so the projection only has to be
-applied to the initial state: the evolution preserves the subspace by itself. On real
+applied to the initial state. The evolution preserves the subspace by itself. On real
 hardware this is also what makes the encoding useful as an error-detection resource:
 the stabilizers can be measured.</p>
 </div>
@@ -1232,7 +1239,7 @@ its diagonalizing Cliffords in closed form, but Derby-Klassen spends one ancilla
 plaquette instead of one per site, for a qubit-to-mode ratio of <span class="math">\(3/2\)</span> rather than
 <span class="math">\(2\)</span>. Its transfer operators have different Pauli shapes, so a port amounts to
 rewriting the encoding function of <a class="reference internal" href="#flowsets-2d-encoding"><span class="std std-ref">step 3</span></a> and finding
-the Clifford for each new shape; the grouping, the layout and the synthesis scaffolding
+the Clifford for each new shape; the grouping, the layout, and the synthesis scaffolding
 carry over untouched.</p>
 <p>The second is the lattice itself. Everything here assumes open boundaries and a single
 fermionic species. Periodic boundaries close each line into a cycle: the arrows still all
@@ -1251,9 +1258,9 @@ abstract register where any pair of qubits can interact, and the reported depths
 counted in that setting. Real devices have a restricted coupling map, and mapping this
 encoding onto one is a substantial problem in its own right: the VC register is a
 <span class="math">\(2N\)</span>-qubit graph whose gates run between a site and its own ancilla, between
-neighboring sites, and between neighboring ancillas, so a layout has to keep all three
-kinds of pair adjacent at once. If it cannot, the transpiler inserts <code class="docutils literal notranslate"><span class="pre">SWAP</span></code> gates, and
-the layers they add are exactly what the constant-depth construction was buying back.
+neighboring sites and between neighboring ancillas, so a layout has to keep all three
+kinds of pairs adjacent simultaneously. If it cannot, the transpiler inserts <code class="docutils literal notranslate"><span class="pre">SWAP</span></code> gates, and
+the layers they add are what the constant-depth construction was buying back.
 Ref. <a class="footnote-reference brackets" href="#id17" id="id16" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a> likewise quotes its depth figure under an assumed square connectivity graph with
 <code class="docutils literal notranslate"><span class="pre">CX</span></code> as the only native entangler. Finding good layouts and routing strategies for local
 encodings on a given device topology is beyond this guide’s scope.</p>
@@ -1317,7 +1324,7 @@ dimensions, <a class="reference external" href="https://doi.org/10.1103/PRXQuant
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on 2026/08/24</div>
+              Last updated on 2026/08/26</div>
           </div>
           <div class="right-details">
             
@@ -1363,7 +1370,7 @@ dimensions, <a class="reference external" href="https://doi.org/10.1103/PRXQuant
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=3fa25eb1"></script>
+</div><script src="../_static/documentation_options.js?v=28cdfdf7"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
