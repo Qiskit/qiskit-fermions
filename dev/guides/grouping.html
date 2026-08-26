@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Group operator terms: exploit the operator structure - Qiskit Fermions 0.2.0.dev0+1c02028</title>
+        <title>Group operator terms: use the operator structure - Qiskit Fermions 0.2.0.dev0+7c96ed6</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+1c02028</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+7c96ed6</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+1c02028</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+7c96ed6</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -208,7 +208,7 @@
 <li class="toctree-l2"><a class="reference internal" href="skqd.html">Generate Krylov time-evolution circuits (SKQD)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="lucj.html">Build an LUCJ ansatz</a></li>
 <li class="toctree-l2"><a class="reference internal" href="operators.html">Design principles of operator representations</a></li>
-<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Group operator terms: exploit the operator structure</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Group operator terms: use the operator structure</a></li>
 <li class="toctree-l2"><a class="reference internal" href="mappers.html">Map operator representations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="circuit.html">Work with fermionic circuits</a></li>
 <li class="toctree-l2"><a class="reference internal" href="transpilation.html">Transpile fermionic circuits</a></li>
@@ -265,23 +265,22 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="group-operator-terms-exploit-the-operator-structure">
-<span id="grouping-explanation"></span><h1>Group operator terms: exploit the operator structure<a class="headerlink" href="#group-operator-terms-exploit-the-operator-structure" title="Link to this heading">¶</a></h1>
+          <section id="group-operator-terms-use-the-operator-structure">
+<span id="grouping-explanation"></span><h1>Group operator terms: use the operator structure<a class="headerlink" href="#group-operator-terms-use-the-operator-structure" title="Link to this heading">¶</a></h1>
 <p>Grouping is one of the operations under <a class="reference internal" href="../pydoc/qiskit_fermions.operators.terms.html#module-qiskit_fermions.operators.terms" title="qiskit_fermions.operators.terms"><code class="xref py py-mod docutils literal notranslate"><span class="pre">qiskit_fermions.operators.terms</span></code></a>,
 which collects routines that partition the terms of an operator based on their
 structure.</p>
 <p>As described in the <a class="reference internal" href="operators.html#term-grouping"><span class="std std-ref">operators guide</span></a>, operators can store a
 <strong>groups array</strong>, an optional part of the sparse data structure that associates each
-term with a group index. Terms sharing the same group index form a group, enabling
-systematic exploitation of structure in downstream processing.</p>
+term with a group index. Terms sharing the same group index form a group. This lets you use systematically use of the structure in downstream processing.</p>
 <p>By grouping related terms (whether by physical properties, algebraic relationships,
 or problem-specific symmetries), you can unlock several benefits:</p>
 <ul class="simple">
 <li><p><strong>Optimized circuit synthesis</strong>: Grouped terms carry problem-specific
 information through the stack, enabling simpler optimization of the
-synthesized circuits, resulting in reduced circuit depth and gate count.</p></li>
+synthesized circuits. This results in reduced circuit depth and gate count.</p></li>
 <li><p><strong>Physical structure preservation</strong>: Groups encode meaningful structure from the
-original problem (for example, interaction patterns or symmetries), that can be exploited
+original problem (for example, interaction patterns or symmetries) that can be used
 for more physically meaningful decompositions.</p></li>
 <li><p><strong>Flow set selection</strong>: Grouping can naturally encode flow sets and other graph-theoretic
 structures relevant to quantum simulation, as shown in <a class="footnote-reference brackets" href="#id3" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a>.</p></li>
@@ -323,7 +322,7 @@ group indices accordingly.</p>
 <p>This is a simple two-by-three lattice of Majorana modes connected by
 directed edges. Each edge represents a term in the operator acting on the two
 connected modes. The goal is to group these terms according to their edge labels
-(shown on the graph): terms connected by edges with the same label are placed in
+(shown on the graph). Terms connected by edges with the same label are placed in
 the same group. The following code shows how that can be done:</p>
 <div class="sd-tab-set docutils">
 <input checked="checked" id="sd-tab-item-0" name="sd-tab-set-0" type="radio">
@@ -423,7 +422,7 @@ with local qubit encodings, <a class="reference external" href="https://arxiv.or
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on 2026/08/24</div>
+              Last updated on 2026/08/26</div>
           </div>
           <div class="right-details">
             
@@ -444,7 +443,7 @@ with local qubit encodings, <a class="reference external" href="https://arxiv.or
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">Group operator terms: exploit the operator structure</a><ul>
+<li><a class="reference internal" href="#">Group operator terms: use the operator structure</a><ul>
 <li><a class="reference internal" href="#usage">Usage</a></li>
 </ul>
 </li>
@@ -457,7 +456,7 @@ with local qubit encodings, <a class="reference external" href="https://arxiv.or
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=19036ff4"></script>
+</div><script src="../_static/documentation_options.js?v=24db4722"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
