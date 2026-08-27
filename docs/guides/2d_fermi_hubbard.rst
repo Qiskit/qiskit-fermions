@@ -6,57 +6,56 @@ Simulate 2D Fermi-Hubbard dynamics with flow sets
 .. important::
 
    The concepts in this guide are currently available only in the Python API.
-   Equivalent functionality will be made available via the C API in a future release.
+   Equivalent functionality will be made available in the C API in a future release.
 
 .. seealso::
    **Read the** :ref:`1D flow-set guide <1d_fermi_hubbard>` **first.** This guide is
-   its two-dimensional sequel and does not repeat the material developed there: transfer
+   its two-dimensional sequel and does not repeat the information developed there: transfer
    and vertex operators, what a flow set is, how :attr:`~.TransferVertexOperator.groups`
    survives into the circuit, and how a custom encoding is wired into the transpiler
-   through :class:`.MapperFnEvolutionSynthesis`. Only what *changes* in two dimensions is
-   spelled out below.
+   through :class:`.MapperFnEvolutionSynthesis`.
 
-   See also the :ref:`transpilation guide <transpilation_explanation>` for the transpiler
+   See the :ref:`transpilation guide <transpilation_explanation>` for the transpiler
    stages referenced throughout, and the :ref:`mappers guide <mappers_explanation>` for the
    general recipe for writing a custom mapper.
 
-The 1D guide closed by pointing at two dimensions as the place where local encodings earn
-their keep. This guide takes that step, for the **two-dimensional Fermi-Hubbard model on a
+The 1D guide ended by mentioning that local encodings are needed when working with two dimensions.
+This guide takes that step, for the **two-dimensional Fermi-Hubbard model on a
 square lattice**, using the **Verstraete-Cirac (VC) encoding** [2]_.
 
-Three things change, and they are the whole story:
+There are three differences from the 1D problem, forming the basis of this work:
 
-1. **The flow sets multiply.** A chain has two arrow orientations; a square lattice has
-   four (east, west, north, south), and each is a *union* of vertex-disjoint directed
-   paths -- one per lattice row or column -- rather than a single path.
-2. **The encoding gains an ancilla per site**, not one for the whole system, giving a
+* **The flow sets multiply.** A chain has two arrow orientations; a square lattice has
+   four (east, west, north, south), and each is a union of vertex-disjoint directed
+   paths (one per lattice row or column) rather than a single path.
+* **The encoding gains an ancilla per site**, not one for the whole system, giving a
    qubit-to-mode ratio of :math:`2`. Transfer operators become weight-3 (horizontal) and
-   weight-4 (vertical) Paulis, and each of the four flow sets maps to its *own* Pauli
-   shape, so each needs its *own* diagonalizing Clifford.
-3. **The encoded Hamiltonian is only faithful on a subspace** --- the joint :math:`+1`
+   weight-4 (vertical) Paulis, and each of the four flow sets maps to its own Pauli
+   shape, so each needs its own diagonalizing Clifford.
+* **The encoded Hamiltonian is only faithful on a subspace**: the joint :math:`+1`
    eigenspace of the plaquette constraints that every 2D local encoding carries [2]_ [3]_.
-   In 1D the encoding was a plain isometry and the verification was a spectrum check; here
-   the comparison has to be projected, as :ref:`step 9 <flowsets_2d_stabilizers>` works out.
+   In 1D the encoding was a plain isometry and the verification was a spectrum check. Here,
+   the comparison has to be projected, as :ref:`step 9 <flowsets_2d_stabilizers>` illustrates.
 
-The payoff is the same shape as in 1D: the two-qubit *depth* of one Trotter step becomes
-**constant in the lattice size**, at :math:`24` --- :math:`16` for the hopping, matching
-Ref. [1]_, plus :math:`8` for the interaction --- while a term-by-term Trotterization of the
-very same encoded Hamiltonian grows linearly. The gate *count* still grows with the number
-of bonds, of course --- what becomes size-independent is how many layers those gates occupy.
+The payoff is the same shape as in 1D: the two-qubit depth of one Trotter step becomes
+constant in the lattice size, at :math:`24` (:math:`16` for the hopping, matching
+Ref. [1]_, plus :math:`8` for the interaction), while a term-by-term Trotterization of the
+same encoded Hamiltonian grows linearly. The gate count still grows with the number
+of bonds, of course; what becomes size-independent is how many layers those gates occupy.
 Depths throughout are counted on an abstract, fully connected register; mapping the encoding
-onto a device's restricted coupling map is its own problem, discussed at the end.
+onto a device's restricted coupling map is its own problem, which is discussed at the end.
 
 The lattice and its four orientations
 -------------------------------------
 
-The directed interaction graph is where the first of those three changes is visible. Sites
+The first change is visible on the directed interaction graph. Sites
 are numbered in row-major order, ``site(r, c) = r * cols + c``, and every bond carries both
-orientations, exactly as the chain did in 1D --- but now the bonds run along two axes:
+orientations, as the chain did in 1D, but now the bonds run along two axes:
 
 .. plot::
    :context: close-figs
    :alt: A 3x3 square lattice with both orientations of every horizontal and vertical bond
-         drawn as arrows, the centre site carrying all four.
+         drawn as arrows, the center site carrying all four.
 
    >>> import matplotlib.pyplot as plt
    >>> import numpy as np
@@ -102,31 +101,18 @@ orientations, exactly as the chain did in 1D --- but now the bonds run along two
    <Figure size ... with 1 Axes>
 
 The commutation rule is the 1D one, unchanged: two transfer operators sharing a site
-**commute** when the arrows flow through it and **anticommute** when they clash. What the
-picture adds is that a site now has up to *four* incident bonds rather than two, so the
-arrows through it can clash in more ways --- and a set of arrows that never clashes is no
+**commute** when the arrows flow through it and **anticommute** when they clash. However,
+a site now has up to four incident bonds rather than two, so the
+arrows through it can clash in more ways, and a set of arrows that never clashes is no
 longer a single path. Reading the horizontal arrows left-to-right gives one such set, the
-vertical arrows top-to-bottom another, and reversing each gives two more: the **east, west,
-north and south** flow sets that organize everything below.
-
-.. plot::
-   :context:
-   :nofigs:
-
-   Release the figure above now that the plot directive has captured it. Sybil shares
-   pyplot's state across all guides, so a figure left open here gets drawn into by the
-   next guide that calls ``mpl_draw`` without an explicit ``ax=``. The directive's
-   ``close-figs`` option does not cover that, since Sybil only executes the doctests.
-   ``close("all")`` rather than ``close(figure)``, because the directive re-runs the block
-   once per output format and only the last of those figures is bound to ``figure``.
-
-   >>> plt.close("all")
+vertical arrows from top-to-bottom gives another, and reversing each gives two more.
+These are the east, west, north, and south flow sets that organize everything that follows.
 
 The Verstraete-Cirac encoding
 -----------------------------
 
-VC pairs every fermionic mode :math:`j` with its own auxiliary qubit. With :math:`N`
-lattice sites, mode :math:`j` lives on qubit :math:`j` and its ancilla on qubit
+Verstraete-Cirac (VC) pairs every fermionic mode :math:`j` with its own auxiliary qubit. With :math:`N`
+lattice sites, mode :math:`j` lives on qubit :math:`j` and its ancilla is on qubit
 :math:`N + j`, so the register holds :math:`2N` qubits. Vertex operators stay as simple as
 they can be,
 
@@ -143,39 +129,39 @@ site, and a vertical edge with :math:`j` the northern site,
    T_{jk}^{\text{horizontal}} = \tfrac{1}{2} X_j X_k Z_{N+j} \, , \qquad
    T_{jk}^{\text{vertical}}   = \tfrac{1}{2} X_j Y_k X_{N+j} Y_{N+k} \, ,
 
-a weight-3 "triangle" and a weight-4 "square". Note which *arrow* each one is: with
-:math:`j` the western site, :math:`j \to k` points **east**, and with :math:`j` the northern
-site it points **south**. The reverse orientations follow from the identity
-:math:`T_{kj} = -V_j V_k T_{jk}`, which turns the ``XXZ`` triangle into a ``YYZ`` one and
-the ``XYXY`` square into ``YXXY``. Those four distinct labels are exactly the four flow
-sets, and tracking them is what the rest of this guide does.
+a weight-3 "triangle" and a weight-4 "square". Identifying each arrow matters: with
+:math:`j` as the western site, :math:`j \to k` points east, but with :math:`j` as the northern
+site, it points south. The reverse orientations follow from the identity
+:math:`T_{kj} = -V_j V_k T_{jk}`, which turns the ``XXZ`` triangle into ``YYZ``, and
+the ``XYXY`` square into ``YXXY``. Those four distinct labels are the four flow
+sets, and the rest of this guide tracks them.
 
 .. note::
-   **These are not quite Eq. (A1) of Ref.** [1]_, which is stated "up to single-qubit
+   **These are not quite Eq. (A1) of Ref.** [1]_, which states "up to single-qubit
    rotations" and differs in three ways worth naming, since a reader checking the paper
    will notice:
 
-   * **The prefactor.** Eq. (A1) carries none. The :math:`\tfrac12` here is what makes
+   * **The prefactor:** Eq. (A1) carries none. The :math:`\tfrac12` here is what makes
      :math:`T_{jk}^2 = \tfrac14`, matching the normalization
      :math:`T_{jk} = -\tfrac12 (a^\dagger_j - a_j)(a^\dagger_k + a_k)` that
      :class:`.TransferVertexOperator` uses. The paper only ever needs its transfer
      operators inside :math:`\exp(-i\,dt\,H)`, where a scale factor is absorbed into the
      rotation angle; here they have to be *operators* that satisfy an identity.
-   * **Orientation.** Eq. (A1) selects letters by the row parity of :math:`j`, which for a
-     horizontal edge is the same for both endpoints --- so it does not distinguish
+   * **Orientation:** Eq. (A1) selects letters by the row parity of :math:`j`, which for a
+     horizontal edge is the same for both endpoints, so it does not distinguish
      :math:`T_{jk}` from :math:`T_{kj}`. The paper recovers the orientation separately, by
      conjugating with a layer of :math:`R^Z(\pi/2)`. This guide instead folds it into the
      encoding, deriving the reverse from :math:`T_{kj} = -V_j V_k T_{jk}`, which is what
-     makes the two orientations land on visibly different Paulis in step 3.
-   * **The vertical shape.** Eq. (A1) alternates ``XXXX`` and ``YYYY`` by row parity, where
-     this guide uses a single ``XYXY``. These are two ways of getting the *same* thing: a
+     makes the two orientations land on different Paulis in step 3.
+   * **The vertical shape:** Eq. (A1) alternates ``XXXX`` and ``YYYY`` by row parity, where
+     this guide uses a single ``XYXY``. These are two ways of getting the same thing: a
      letter asymmetry that makes a vertical edge clash correctly with the horizontal edges
-     meeting it. Do not read the difference as a free basis choice --- dropping the parity
+     meeting it. Do not read the difference as a free basis choice. Dropping the parity
      alternation and using a single ``XXXX`` breaks the algebra outright, which is why the
      distinct letters are checked rather than assumed.
 
 .. note::
-   Note that the ancilla is attached to a *site*, giving the ratio :math:`2`; it is the
+   The ancilla is attached to a *site*, giving the ratio :math:`2`; it is the
    Derby-Klassen encoding that places an auxiliary qubit per (odd) plaquette, for the
    smaller ratio :math:`3/2`. VC is used here because its transfer operators are the ones
    whose diagonalizing Cliffords Ref. [1]_ gives in closed form.
@@ -183,9 +169,9 @@ sets, and tracking them is what the rest of this guide does.
 1. The Hamiltonian on a square lattice
 --------------------------------------
 
-The construction is the 1D one with a two-dimensional edge list. Sites keep the row-major
+The construction is the same as in 1D, but with a two-dimensional edge list. Sites keep the row-major
 numbering used for the figure above, ``site(r, c) = r * cols + c``, so that horizontal bonds
-connect consecutive indices and vertical bonds connect indices differing by ``cols``:
+connect consecutive indices, and vertical bonds connect indices differing by ``cols``:
 
 .. plot::
    :context:
@@ -229,8 +215,8 @@ vertical edges, and the sign of the difference picks the orientation. Everything
    **Orientation convention.** The names are simply read off the figure above: an arrow is
    **east** or **west** as it points right or left along a row, and **north** or **south** as
    it points up or down a column. Since the numbering runs row-major, east and south are the
-   index-increasing directions. Nothing downstream depends on the names --- they only label
-   groups --- but four of them are easy to confuse, so it is worth fixing them against the
+   index-increasing directions. Nothing downstream depends on the names (they only label
+   groups), but they are easy to confuse, so it is worth fixing them against the
    picture. Ref. [1]_ names its square-lattice flow sets the same way.
 
 .. plot::
@@ -268,23 +254,23 @@ vertical edges, and the sign of the difference picks the orientation. Everything
    diagonal  22
 
 Within one flow set every arrow either meets another head-to-tail or does not meet it at
-all, exactly as in 1D --- so a flow set still commutes term-by-term and its evolution
-carries no Trotter error. What is new is that a flow set is now *disconnected*: the east
+all, as in 1D, so a flow set still commutes term-by-term and its evolution
+carries no Trotter error. What is new is that a flow set is now disconnected: the east
 set of a ``rows x cols`` lattice consists of ``rows`` independent left-to-right paths. That
 disconnection is a gift rather than a complication, as step 6 shows.
 
 .. _flowsets_2d_encoding:
 
-3. Encoding the operator
-------------------------
+3. Encode the operator
+----------------------
 
-The encoding is one function mapping a single generalized transfer operator to a Pauli
-string, handed to :func:`.map_transfer_vertex_generators`. Compared with the 1D version the
-body just has more cases: diagonal, horizontal, vertical, and the reverse orientations via
+The encoding is one function that maps a single generalized transfer operator to a Pauli
+string, which is handed to :func:`.map_transfer_vertex_generators`. Compared with the 1D version, the
+body has more cases: diagonal, horizontal, vertical, and the reverse orientations through
 :math:`T_{kj} = -V_j V_k T_{jk}`.
 
-There is one wrinkle: :func:`.map_transfer_vertex_generators` calls back with a generator and
-nothing else, while deciding a bond's Pauli string also needs ``cols`` to recover row/column
+There is one problem. :func:`.map_transfer_vertex_generators` calls back with a generator and
+nothing else, while deciding a bond's Pauli string also needs ``cols`` to recover row and column
 coordinates from a mode index. Rather than nest the functions to close over it,
 :func:`functools.partial` binds it, which keeps both functions at the top level and
 independently callable.
@@ -346,8 +332,8 @@ independently callable.
    >>> num_qubits
    18
 
-The point of grouping before mapping shows up immediately: each flow set encodes to a
-*single* Pauli shape, uniform across the whole set.
+The point of grouping before mapping can be seen immediately: each flow set encodes to a
+single Pauli shape, uniform across the whole set.
 
 .. plot::
    :context:
@@ -365,24 +351,24 @@ The point of grouping before mapping shows up immediately: each flow set encodes
    diagonal  ['', 'Z', 'ZZ']
 
 The four hopping shapes are distinct, so each flow set gets its own Clifford in
-:ref:`step 5 <flowsets_2d_synthesis>`. The reverse orientations are genuinely different
-Paulis, not the same ones relabelled --- this is the concrete reason a 2D flow-set synthesis
-needs four circuits where the 1D one needed one.
+:ref:`step 5 <flowsets_2d_synthesis>`. The reverse orientations are different
+Paulis, not the same ones relabeled; this is the why a 2D flow-set synthesis
+needs four circuits, where the 1D synthesis needs one.
 
 .. plot::
    :context:
    :nofigs:
 
-   Guard the property the encoding actually has to satisfy, and which none of the visible
-   output pins down: the **mixed commutation relations**. Two transfer operators sharing a
+   Note the property the encoding actually has to satisfy, and which none of the visible
+   output illustrates: the **mixed commutation relations**. Two transfer operators sharing a
    site must commute when the arrows flow through it and anticommute when they clash, and
    :math:`T_{jk}^2 = \tfrac14` must hold for the normalization to be right. Every printed
-   Pauli shape above can stay correct while these are violated --- the shapes only say which
-   letters appear, not whether the parities work out --- so a plausible-looking edit to the
-   encoding can silently produce an operator algebra that is not the fermionic one.
+   Pauli shape above can stay correct while these are violated (the shapes only say which
+   letters appear, not whether the parities work out), so a plausible-looking edit to the
+   encoding can silently produce a non-fermionic operator.
 
-   Checked on :math:`3 \times 3`, which has an interior site of degree 4 and vertically
-   stacked edges, over both orientations of every bond. This is what makes the distinct
+   Checked on :math:`3 \times 3`, which has an interior site of degree four and vertically
+   stacked edges, over both orientations of every bond. This makes the distinct
    letters in ``XYXY`` load-bearing rather than cosmetic: replacing it with ``XXXX`` keeps
    all four printed shapes plausible but fails 32 of these 88 pairs.
 
@@ -429,8 +415,8 @@ needs four circuits where the 1D one needed one.
 
 .. _flowsets_2d_transpile:
 
-4. Transpiling with the custom encoding
----------------------------------------
+4. Transpile with the custom encoding
+-------------------------------------
 
 This stage is the 1D one with a wider qubit register:
 :class:`.CustomF2QLayout` maps the :math:`N`-mode register onto :math:`2N` qubits,
@@ -483,7 +469,7 @@ single ancilla.
    >>> flow_set_circuit.count_ops()["Evolution"]
    5
 
-Five gates, carrying the 6, 6, 6, 6 and 22 terms counted in step 2. Each is mapped and
+Five gates, carrying the 6, 6, 6, 6, and 22 terms counted in step 2. Each is mapped and
 synthesized independently, so the partition decided at the fermionic level survives all the
 way into the circuit:
 
@@ -506,7 +492,7 @@ way into the circuit:
    (144, 47)
 
 That is the baseline: the encoding and the grouping are both in place, but
-:class:`~qiskit.synthesis.LieTrotter` synthesizes each flow set **term by term**, and the
+:class:`~qiskit.synthesis.LieTrotter` synthesizes each flow set term by term, and the
 depth grows with the lattice.
 
 .. _flowsets_2d_synthesis:
@@ -514,23 +500,23 @@ depth grows with the lattice.
 5. A depth-2 Clifford per flow set
 ----------------------------------
 
-The mechanism is the 1D one: conjugate a whole commuting flow set by a Clifford that maps
-every one of its terms to a *distinct weight-1* Pauli, so that the evolution of the entire
-set costs only single-qubit rotations. In 1D one brickwork of ``CZ`` gates did this.
+The mechanism is the same as in 1D: conjugate a whole commuting flow set by a Clifford that maps
+each of its terms to a distinct weight-1 Pauli, so that the evolution of the entire
+set costs only single-qubit rotations. In 1D, one brickwork of ``CZ`` gates did this.
 
-In 2D each flow set needs its own circuit, following Section IV C and Fig. 7 of Ref. [1]_.
-All four act on one *line* of the lattice at a time --- a row for east/west, a column for
-north/south --- together with that line's ancillas, and all four have the same three-part
+In 2D, each flow set needs its own circuit, following Section IV C and Fig. 7 of Ref. [1]_.
+All four act on one line of the lattice at a time (a row for east/west, a column for
+north/south) together with that line's ancillas, and all four have the same three-part
 shape:
 
-1. a layer of single-qubit rotations, putting each qubit in the basis its flow set needs;
-2. a first ``CX`` layer, always site-to-ancilla on the same site;
-3. a second ``CX`` layer, coupling neighbours along the line.
+- A layer of single-qubit rotations, putting each qubit in the basis its flow set needs.
+- A first ``CX`` layer, always site-to-ancilla on the same site.
+- A second ``CX`` layer, coupling neighbors along the line.
 
-Steps 2 and 3 are the only two-qubit layers, so the two-qubit depth is :math:`2` regardless
+Steps 2 and 3 are the only two-qubit layers, so the two-qubit depth is :math:`2`, regardless
 of how long the line is. They are written out one function per flow set below. The
-rotations are what they are because they were *found* --- by conjugating each flow set's
-terms and requiring distinct weight-1 images --- so treat them as given and lean on the
+rotations are what they are because they were found, by conjugating each flow set's
+terms and requiring distinct weight-1 images, so treat them as given and rely on the
 check that follows.
 
 The two horizontal sets are the simplest. Their terms are weight-3, ``XXZ`` and ``YYZ``, and
@@ -609,10 +595,10 @@ alternates too, coupling sites on even positions and ancillas on odd ones (or th
    ...         else:
    ...             circuit.cx(ancilla(j), ancilla(k))
 
-Drawn on a single three-site line --- its sites first, then their ancillas --- the whole
-mechanism fits in one picture. The triangle shape is the plainer of the two: a basis change
-on the ancillas, then two ``CX`` layers, the first pairing each site with its *own* ancilla
-and the second reaching to the next site along the line.
+Drawn on a single three-site line (its sites first, then their ancillas) the whole
+mechanism fits in one picture. The triangle shape is the clearer of the two: a basis change
+on the ancillas, then two ``CX`` layers, the first pairs each site with its own ancilla
+and the second reaches to the next site along the line.
 
 .. plot::
    :context: close-figs
@@ -626,7 +612,7 @@ and the second reaching to the next site along the line.
    >>> triangle.draw("mpl")
    <Figure size ... with 1 Axes>
 
-The square shape needs more single-qubit work --- the rotations alternate along the line ---
+The square shape needs more single-qubit work (the rotations alternate along the line)
 and its second ``CX`` layer alternates between coupling sites and coupling ancillas:
 
 .. plot::
@@ -640,24 +626,16 @@ and its second ``CX`` layer alternates between coupling sites and coupling ancil
    >>> square.draw("mpl")
    <Figure size ... with 1 Axes>
 
-.. plot::
-   :context:
-   :nofigs:
-
-   Release the figures, as after the lattice drawing near the top.
-
-   >>> plt.close("all")
-
 Both are two ``CX`` layers deep, and adding sites to the line widens them without deepening
-them --- that is the whole constant-depth claim, visible by inspection. The west and north
+them; that is the whole constant-depth claim, visible by inspection. The west and north
 Cliffords differ only in their single-qubit layers, so they are not drawn separately.
 
-What the synthesis still needs is *where* each term ends up. A line of :math:`L` sites carries
+What the synthesis still needs is determining where each term ends up. A line of :math:`L` sites carries
 :math:`L - 1` bonds, each contributing one term, so the helper below returns one entry per
-bond: the qubit that term lands on, and the single-qubit Pauli it became. Crucially these are
-**read off** the conjugation rather than predicted --- unlike 1D, where one ``CZ`` brickwork
+bond: the qubit that the term landed on, and the single-qubit Pauli it became. Crucially, these are
+read off the conjugation rather than predicted.  Unlike 1D, where one ``CZ`` brickwork
 maps :math:`X_{j+1} \mapsto Z_j X_{j+1} Z_{j+2}` in closed form, there is no such formula
-here, and the ancillas of a column line are not even contiguous. The only thing that differs
+here, and the ancillas of a column line are not contiguous. The only thing that differs
 between the flow sets is the Pauli string going in, which step 3 already printed:
 
 .. plot::
@@ -688,28 +666,28 @@ between the flow sets is the Pauli string going in, which step 3 already printed
    ...     return supports
 
 
-The images must come out *distinct* as well as weight-1, so that each term can be rotated
+The images must come out distinct and weight-1, so that each term can be rotated
 independently on its own qubit; the two-qubit depth of :math:`2` is already visible in the
-four constructions above, each emitting exactly two ``CX`` layers whatever the line length.
-Both properties are checked below across every flow set, every line and several lattice
-sizes. Step 6 then calls ``clifford_supports`` for real, so it is a working part of the
+four constructions above, each emitting two ``CX`` layers irrespective of the line length.
+Below, both properties are checked across every flow set, every line, and several lattice
+sizes. Step 6 then calls ``clifford_supports``, so it is a working part of the
 synthesis rather than only a demonstration.
 
 .. plot::
    :context:
    :nofigs:
 
-   Nothing above actually *runs* the four Cliffords, so pin their two claims here: two-qubit
-   depth 2, and distinct weight-1 images. Both are what the constant-depth result rests on, and
-   both are swept over every flow set, every line of a lattice, and several sizes -- a slip that
-   put a rotation on the site where it belonged on the ancilla would survive a single-line spot
-   check but break a longer one.
+   Nothing above actually runs the four Cliffords, so note their two claims here: two-qubit
+   depth 2, and distinct weight-1 images. The constant-depth result rests on those claims, and
+   both are swept over every flow set, every line of a lattice, and several sizes. Thus,
+   if a rotation was put on the site where it belonged on the ancilla, it would pass a single-line spot
+   check but fail a longer one.
 
-   Note what this does *not* pin, deliberately. Exchanging a control and target in one of the
-   second ``CX`` layers still diagonalizes the flow set --- the terms simply land on the
-   ancillas instead of the sites --- and the synthesis stays correct, because
+   Consider what this does not claim, deliberately. Exchanging a control and target in one of the
+   second ``CX`` layers still diagonalizes the flow set (the terms land on the
+   ancillas instead of the sites) and the synthesis stays correct, because
    ``clifford_supports`` reads the supports off the conjugation rather than assuming them.
-   There is more than one valid Clifford here, and the sweep is checking the property that
+   There is more than one valid Clifford here, and the sweep checks the property that
    matters (distinct, weight-1, constant depth) rather than one particular circuit.
 
    >>> def cliffords_are_depth_two_and_distinct(rows, cols):
@@ -745,18 +723,18 @@ synthesis rather than only a demonstration.
 ---------------------------
 
 The synthesis gets a helpful head start. Because :class:`.Evolution` splits itself group by
-group, ``synthesize`` is called **once per flow set** --- five times here, four hopping sets
-plus the diagonal group --- so every hopping term it sees shares one Pauli shape, and one
+group, ``synthesize`` is called once per flow set (five times here, four hopping sets
+plus the diagonal group) so every hopping term it sees shares one Pauli shape, and one
 Clifford diagonalizes all of them. It only has to read that shape off the first term and sort
 the rest by which line they sit on. Then comes the observation that makes two dimensions
-*cheaper* than one might fear:
+cheaper than one might fear:
 
 .. important::
-   The components of a single flow set are **vertex-disjoint** --- the west set's rows share
-   no qubit. So all of a flow set's Cliffords can be emitted together and they *share* the
+   The components of a single flow set are vertex-disjoint: the west set's rows share
+   no qubits. So all of a flow set's Cliffords can be emitted together and they share the
    same two two-qubit layers, rather than queueing up one row after another. A flow set
    therefore costs a fixed number of layers (two for the Clifford and two for its inverse)
-   no matter how many rows or columns the lattice has, which is precisely why the total
+   no matter how many rows or columns the lattice has, which is why the total
    depth ends up constant.
 
 .. plot::
@@ -880,19 +858,19 @@ the rest by which line they sit on. Then comes the observation that makes two di
    ...                     raise ValueError(f"unexpected Pauli term: {label} on {indices}")
    ...         rzz_layers(circuit, rzz, self.cols)
 
-As in 1D, this is deliberately written for *this* encoding: it recognizes the four Pauli
+As in 1D, this is deliberately written for this encoding: it recognizes the four Pauli
 shapes and raises on anything else rather than falling back silently. It also assumes the
-one-flow-set-per-gate split above, and says so --- more than one hopping shape in a single
+one-flow-set-per-gate split above, and says so; more than one hopping shape in a single
 gate means the grouping was not applied, which is an error rather than something to work
-around. ``reps`` is here for the same reason as in 1D: a product formula is where the number
-of Trotter steps belongs, exactly as in Qiskit's own :class:`~qiskit.synthesis.LieTrotter`.
+around. ``reps`` is here for the same reason as in 1D: the number
+of Trotter steps belongs in a product formula, as in Qiskit's own :class:`~qiskit.synthesis.LieTrotter`.
 
 7. The result: constant depth
 -----------------------------
 
 Everything so far ran on the single :math:`3 \times 3` lattice built in step 1. Comparing the
-two synthesis paths across *growing* lattices needs that whole sequence -- operator,
-grouping, encoding, circuit, pass manager -- repeated per size, so it is worth wrapping once:
+two synthesis paths across growing lattices needs that whole sequence (operator,
+grouping, encoding, circuit, pass manager) repeated per size, so it is worth wrapping once:
 
 .. plot::
    :context:
@@ -939,40 +917,31 @@ edge makes the difference plain:
    >>> figure
    <Figure size ... with 2 Axes>
 
-.. plot::
-   :context:
-   :nofigs:
+The two-qubit depth is 24 and constant from :math:`3 \times 3` to :math:`8 \times 8`
+(that is 18 qubits up to 128), while :class:`~qiskit.synthesis.LieTrotter` applied to
+the identically encoded Hamiltonian grows linearly with the lattice edge, from 47 to 92. The
+gate count grows under both, since there are :math:`O(N)` terms to apply either way; what
+the flow sets remove is the growth in how many layers those gates occupy.
 
-   Release the figure above now that the plot directive has captured it, as in the lattice
-   drawing near the top.
+The budget splits into 16 for the hopping and eight for the interaction:
 
-   >>> plt.close("all")
-
-The two-qubit depth is **24 and constant** from :math:`3 \times 3` to :math:`8 \times 8`
---- that is 18 qubits up to 128 --- while :class:`~qiskit.synthesis.LieTrotter` applied to
-the identical encoded Hamiltonian grows linearly with the lattice edge, from 47 to 92. The
-gate *count* grows under both, since there are :math:`O(N)` terms to apply either way; what
-the flow sets remove is the growth in how many *layers* those gates occupy.
-
-The budget splits cleanly into 16 for the hopping and 8 for the interaction:
-
-* Each of the four flow sets costs :math:`2 + 2` two-qubit layers --- its Clifford going in
-  and the inverse coming out, both depth 2 by construction, with only single-qubit rotations
-  in between. That is :math:`4 \times 4 = 16`, which is exactly the figure Ref. [1]_ quotes,
+* Each of the four flow sets costs :math:`2 + 2` two-qubit layers: its Clifford going in
+  and the inverse coming out, both depth two by construction, with only single-qubit rotations
+  in between. That is :math:`4 \times 4 = 16`, which is the figure Ref. [1]_ quotes,
   since it counts the hopping terms only. Setting :math:`U = 0` in the code above reproduces
   it.
-* The diagonal group adds the remaining 8. Its ``Rzz`` gates pack into four layers, and each
-  ``Rzz`` decomposes into two ``CX`` around a single-qubit rotation, so :math:`4 \times 2 = 8`.
-  Four layers is optimal: on a square lattice the interaction reaches only nearest
-  neighbours, so every interior site carries four ``Rzz`` gates --- one per bond --- and can
+* The diagonal group adds the remaining eight. Its ``Rzz`` gates pack into four layers, and each
+  ``Rzz`` decomposes into two ``CX`` gates around a single-qubit rotation, so :math:`4 \times 2 = 8`.
+  Four layers is optimal: on a square lattice, the interaction reaches only nearest
+  neighbors, so every interior site carries four ``Rzz`` gates (one per bond) and can
   take part in only one at a time.
 
 Nothing in either sum refers to the lattice size, which is the whole point.
 
 .. _flowsets_2d_verify:
 
-8. Verifying the circuit
-------------------------
+8. Verify the circuit
+---------------------
 
 The flow-set synthesis and :class:`~qiskit.synthesis.LieTrotter` describe the same Trotter
 step of the same encoded Hamiltonian, so their unitaries must agree up to a global phase.
@@ -1026,8 +995,8 @@ Random statevectors detect any discrepancy far more cheaply than building the fu
 
 .. note::
    Both halves of that check matter. A unit-modulus overlap on a single state is necessary
-   but not sufficient --- a synthesis that got a *state-dependent* phase wrong would still
-   show it. Requiring the *same* phase across several random states is what closes the gap.
+   but not sufficient: a synthesis that got a state-dependent phase wrong would still
+   show it. Requiring the same phase across several random states is what closes the gap.
 
 .. plot::
    :context:
@@ -1036,9 +1005,9 @@ Random statevectors detect any discrepancy far more cheaply than building the fu
    The visible check above runs on a square lattice, where a row line and a column line have
    the same length. That symmetry hides a whole class of mistake: an index confusion between
    ``rows`` and ``cols``, or between a row line and a column line, can cancel out on
-   :math:`3 \times 3` and still be wrong everywhere else. Repeat the check here on the two
+   :math:`3 \times 3` and still be wrong everywhere else. Repeat the check on the two
    rectangular lattices, which are transposes of each other, so the row and column paths are
-   exercised at genuinely different lengths.
+   exercised at different lengths.
 
    >>> all(agrees_up_to_one_phase(r, c) == (True, True) for r, c in [(2, 3), (3, 2)])
    True
@@ -1052,23 +1021,23 @@ Random statevectors detect any discrepancy far more cheaply than building the fu
 
 .. _flowsets_2d_stabilizers:
 
-9. Verifying the physics on the stabilizer subspace
----------------------------------------------------
+9. Verify the physics on the stabilizer subspace
+------------------------------------------------
 
-Here is the genuinely two-dimensional wrinkle. In 1D the encoding was an isometry, and
-comparing spectra against a Jordan-Wigner reference was enough. VC is *not* an isometry: it
+This is the two-dimensional wrinkle. In 1D, the encoding was an isometry, and
+comparing spectra against a Jordan-Wigner reference was enough. VC is not an isometry: it
 uses :math:`2N` qubits for :math:`N` modes, so a :math:`2^{2N}`-dimensional space holds a
 :math:`2^N`-dimensional physical one. This is generic to local encodings in two dimensions
---- the surplus qubits are constrained by local commuting symmetries, one per plaquette
-[2]_ [3]_ --- and it means the encoded Hamiltonian represents the fermionic one faithfully
+(the surplus qubits are constrained by local commuting symmetries, one per plaquette
+[2]_ [3]_) and it means the encoded Hamiltonian represents the fermionic one faithfully
 only on the joint :math:`+1` eigenspace of those constraints.
 
 .. warning::
    The word **stabilizer** does double duty in this subject, and the two meanings are
-   unrelated. Ref. [1]_ uses it for the commuting transfer operators of a *flow set*, which
+   unrelated. Ref. [1]_ uses it for the commuting transfer operators of a flow set, which
    form a stabilizer group that the Cliffords of :ref:`step 5 <flowsets_2d_synthesis>`
-   diagonalize --- a compilation device, and the sense meant everywhere above. This section
-   uses it in the error-correction sense: operators whose :math:`+1` eigenspace *is* the
+   diagonalize (a compilation device, and the sense meant everywhere above). This section
+   uses it in the error-correction sense: operators whose :math:`+1` eigenspace is the
    physical subspace. Ref. [1]_ explicitly flags this collision and sets the second meaning
    aside; the plaquette constraints below are a property of the VC encoding [2]_, not a
    result of the flow-set framework.
@@ -1127,8 +1096,8 @@ leading coefficient then fixes the sign and scale.
 
 Each generator has weight :math:`6`, spread over two of its plaquette's physical qubits and
 four ancillas. They are involutory and commute with the encoded Hamiltonian, so the physical
-subspace is preserved by the dynamics. Both properties are statements about *operators*, so
-they are checked symbolically on the :class:`~qiskit.quantum_info.SparsePauliOp` algebra ---
+subspace is preserved by the dynamics. Both properties are statements about operators, so
+they are checked symbolically on the :class:`~qiskit.quantum_info.SparsePauliOp` algebra,
 no :math:`2^{18} \times 2^{18}` matrices required:
 
 .. plot::
@@ -1147,14 +1116,13 @@ no :math:`2^{18} \times 2^{18}` matrices required:
    True True
    True True
 
-With the stabilizers in hand the comparison needs no basis correspondence at all, because
-:math:`V_j = Z_j` means the occupations live on the *same* physical qubits in both
+With the stabilizers in hand, the comparison needs no basis correspondence, because
+:math:`V_j = Z_j` means the occupations live on the same physical qubits in both
 pictures. So: write a product state directly on the physical qubits with the ancillas in
 :math:`|0\rangle`, project it onto the stabilizer subspace, evolve with the encoded
-Hamiltonian, and read the site densities :math:`\langle n_j \rangle = (1 - \langle Z_j
-\rangle)/2` off both sides.
+Hamiltonian, and read the site densities :math:`\langle n_j \rangle = (1 - \langle Z_j \rangle)/2` off both sides.
 
-Every step here stays at the level of a *vector*. The projector is applied one
+Every step here stays at the level of a vector. The projector is applied one
 :math:`(1 + S)/2` factor at a time instead of being multiplied out, and the time evolution
 uses :func:`~scipy.sparse.linalg.expm_multiply`, which computes
 :math:`e^{-iHt} |\psi\rangle` without ever forming :math:`e^{-iHt}`. Since the encoded
@@ -1235,65 +1203,65 @@ What to take away
 - **Disjointness is what makes 2D constant-depth.** A flow set decomposes into
   vertex-disjoint lines, so its Cliffords are emitted in parallel and share two two-qubit
   layers no matter how large the lattice is. Four flow sets and a diagonal group then give a
-  fixed budget --- here :math:`16` for the four flow sets plus :math:`8` for the diagonal
+  fixed budget: here :math:`16` for the four flow sets plus :math:`8` for the diagonal
   interaction group.
 - **Each orientation is its own Pauli shape.** :math:`T_{kj} = -V_j V_k T_{jk}` turns
   ``XXZ`` into ``YYZ`` and ``XYXY`` into ``YXXY``, so the four flow sets need four
-  Cliffords. Assuming one Clifford covers both orientations of an axis is the easiest way to
+  Cliffords. Assuming that one Clifford covers both orientations of an axis is the easiest way to
   get a 2D flow-set synthesis wrong.
-- **Read supports off the conjugation.** In 1D one ``CZ`` brickwork gives the images in
-  closed form; in 2D there is no such formula, and column lines have non-contiguous ancillas,
+- **Read supports off the conjugation.** In 1D, one ``CZ`` brickwork gives the images in
+  closed form. In 2D there is no such formula, and column lines have non-contiguous ancillas,
   so a hand-derived guess at where each term lands is fragile. Conjugating and inspecting the
-  result costs one :class:`~qiskit.quantum_info.Clifford` construction and cannot be wrong ---
+  result costs one :class:`~qiskit.quantum_info.Clifford` construction and cannot be wrong;
   it also means an equally valid Clifford that lands the terms elsewhere keeps working.
 - **Let the grouping do the sorting.** Because :class:`.Evolution` splits itself per group,
   the synthesis is handed one flow set at a time and never has to re-derive the partition:
-  it reads one Pauli shape off the first term and picks the matching Clifford. Assuming that
-  --- and raising when it does not hold --- is what keeps ``synthesize`` short.
+  it reads one Pauli shape off the first term and picks the matching Clifford. Assuming that,
+  and raising when it does not hold, is what keeps ``synthesize`` short.
 - **Verify on the subspace.** A :math:`2N`-qubit encoding of :math:`N` modes is faithful
   only where the stabilizers say it is. Because VC keeps :math:`V_j = Z_j`, the cheapest
-  honest check is to project a product state and compare *densities* --- no intertwiner and
-  no spectral matching, which is unreliable anyway when the restricted Hamiltonian is
+  reliable check is to project a product state and compare densities: no intertwiner and
+  no spectral matching, which is unreliable when the restricted Hamiltonian is
   degenerate.
 
 .. note::
    The encoded Hamiltonian commutes with the stabilizers, so the projection only has to be
-   applied to the *initial state*: the evolution preserves the subspace by itself. On real
-   hardware this is also what makes the encoding useful as an error-detection resource ---
+   applied to the initial state. The evolution preserves the subspace by itself. On real
+   hardware this is also what makes the encoding useful as an error-detection resource:
    the stabilizers can be measured.
 
-Where this goes next
---------------------
+Next
+----
 
-Two directions extend what is above, and both are changes of *ingredient* rather than of
+Two directions extend what is above, and both are changes of ingredient rather than of
 method. The first is the encoding: Verstraete-Cirac was chosen here because Ref. [1]_ gives
 its diagonalizing Cliffords in closed form, but Derby-Klassen spends one ancilla per odd
 plaquette instead of one per site, for a qubit-to-mode ratio of :math:`3/2` rather than
 :math:`2`. Its transfer operators have different Pauli shapes, so a port amounts to
 rewriting the encoding function of :ref:`step 3 <flowsets_2d_encoding>` and finding
-the Clifford for each new shape --- the grouping, the layout and the synthesis scaffolding
+the Clifford for each new shape; the grouping, the layout, and the synthesis scaffolding
 carry over untouched.
 
 The second is the lattice itself. Everything here assumes open boundaries and a single
 fermionic species. Periodic boundaries close each line into a cycle: the arrows still all
 commute, since each meets the next head-to-tail, but the two Clifford shapes of
-:ref:`step 5 <flowsets_2d_synthesis>` are built for a line *with endpoints* --- a cycle of
+:ref:`step 5 <flowsets_2d_synthesis>` are built for a line with endpoints. A cycle of
 :math:`L` sites carries :math:`L` bonds per orientation where a line carries :math:`L - 1`,
 so the wrap-around bond has no place in the construction and needs handling of its own. A
 spinful model is easier: it doubles the register and adds on-site interaction terms to the
 diagonal group, without touching the flow sets. Neither disturbs the constant-depth
-argument, but both change the bookkeeping --- which, as the first takeaway says, is the part
+argument, but both change the bookkeeping, which, as the first takeaway says, is the part
 that two dimensions makes bigger.
 
 .. important::
    **Hardware connectivity is not addressed here.** Every circuit above is built on an
    abstract register where any pair of qubits can interact, and the reported depths are
    counted in that setting. Real devices have a restricted coupling map, and mapping this
-   encoding onto one is a substantial problem in its own right --- the VC register is a
+   encoding onto one is a substantial problem in its own right: the VC register is a
    :math:`2N`-qubit graph whose gates run between a site and its own ancilla, between
-   neighbouring sites, and between neighbouring ancillas, so a layout has to keep all three
-   kinds of pair adjacent at once. If it cannot, the transpiler inserts ``SWAP`` gates, and
-   the layers they add are exactly what the constant-depth construction was buying back.
+   neighboring sites and between neighboring ancillas, so a layout has to keep all three
+   kinds of pairs adjacent simultaneously. If it cannot, the transpiler inserts ``SWAP`` gates, and
+   the layers they add are what the constant-depth construction was buying back.
    Ref. [1]_ likewise quotes its depth figure under an assumed square connectivity graph with
    ``CX`` as the only native entangler. Finding good layouts and routing strategies for local
    encodings on a given device topology is beyond this guide's scope.

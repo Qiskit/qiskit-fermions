@@ -18,7 +18,7 @@ partitioning them based on their structure.
 Grouping
 --------
 
-Please refer to :ref:`grouping_explanation` for a detailed explanation of this module's
+Refer to :ref:`grouping_explanation` for a detailed explanation of this module's
 functionality.
 
 Members

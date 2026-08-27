@@ -3,22 +3,23 @@
 Generate SqDRIFT circuits
 =========================
 
-With `SQD`_, you must choose an ansatz from which to sample bitstrings.
+With sample-based quantum diagonalization (`SQD`_), you must choose an ansatz from which to sample
+bitstrings.
 The `SqDRIFT`_ variant uses an ensemble of time evolution circuits
 constructed directly from the target Hamiltonian instead.
 This is achieved by subsampling smaller time evolution operators from the
 Hamiltonian based on its coefficients, which is known as the `qDRIFT`_
 Trotterization method.
 
-This getting-started guide shows how to generate an ensemble of such randomized
+This getting started guide shows how to generate an ensemble of such randomized
 circuits.
 
 1. Hamiltonian setup
 ^^^^^^^^^^^^^^^^^^^^
 
-For the purposes of this guide, we load the electronic structure Hamiltonian
-of N2 from an FCIDUMP file. Of course, there are other means of
-constructing the :class:`.FermionOperator`. Be sure to check out its
+For the purposes of this guide, load the electronic structure Hamiltonian
+of N2 from an FCIDUMP file. There are other means of
+constructing the :class:`.FermionOperator`. Be sure to consult its
 documentation, as well as the :mod:`qiskit_fermions.operators.library`.
 
 .. tab-set-code::
@@ -43,7 +44,7 @@ documentation, as well as the :mod:`qiskit_fermions.operators.library`.
 2. Group Hamiltonian terms
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-In this step, we exploit the many symmetries that are present in the electronic
+Use the many symmetries that are present in the electronic
 structure Hamiltonian by grouping related terms that have identical coefficients.
 This action changes the operator coefficient distribution that the qDRIFT
 protocol samples from, but it does not affect its convergence guarantees.
@@ -81,14 +82,14 @@ detail in :ref:`this guide <grouping_explanation>`.
 .. hint::
 
    The full electronic structure Hamiltonian contains certain terms whose
-   inclusion in a time-evolution circuit will have no impact on the perceived
-   bitstrings and, thus, only result in an increased sampling overhead.
+   inclusion in a time-evolution circuit has no impact on the perceived
+   bitstrings and, thus, only results in an increased sampling overhead.
    Therefore, it is recommended that such terms be filtered from the
    Hamiltonian at this point, before constructing the :class:`.Evolution` gate
    in the next step.
 
-   The terms that fit this description are exactly those that are *diagonal*
-   in the occupation-number basis, i.e. the products of number operators
+   The terms that fit this description are those that are diagonal
+   in the occupation-number basis, that is, the products of number operators
    (:math:`a^\dagger_i a_i`). This includes the constant energy offset, whose
    time evolution only introduces a global phase into the circuit, the
    individual number-operators whose time evolution amounts to single-qubit Z
@@ -110,15 +111,15 @@ detail in :ref:`this guide <grouping_explanation>`.
 
           qf_ferm_op_filter_diagonal_terms(canon);
 
-   Filtering here, once, is considerably cheaper than filtering repeatedly:
+   Filtering here, once, is considerably cheaper than filtering repeatedly.
    :class:`.QDriftTrotterization` runs once per transpiled circuit, so
-   filtering the Hamiltonian beforehand -- rather than on every call -- avoids
-   redoing the same work for every circuit generated from it.
+   filtering the Hamiltonian initially, rather than on every call, avoids
+   redoing work for every circuit generated from it.
 
 3. Prepare the time evolution circuit
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-In this step, we prepare the Hamiltonian's time evolution circuit and the
+Prepare the Hamiltonian's time evolution circuit and the
 base circuit from which to draw samples. The
 :mod:`qiskit_fermions.circuit.library` contains all the required
 components to do so, in compliance with Qiskit conventions.
@@ -142,8 +143,8 @@ components to do so, in compliance with Qiskit conventions.
        // with custom gate definitions.
 
 .. note::
-   In this example, we neither initialize the fermionic modes with particles,
-   nor measure their final state.
+   This example neither initializes the fermionic modes with particles,
+   nor measures their final state.
 
 4. Transpile the circuit with QDrift Trotterization
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -152,29 +153,29 @@ The :mod:`qiskit_fermions.transpiler` module integrates directly with Qiskit's
 transpilation pipeline, allowing the :class:`.FermionicCircuit` constructed above
 to be directly transpiled to a :external:class:`~qiskit.circuit.QuantumCircuit`.
 
-Here, we are using the :func:`.jordan_wigner` fermion-to-qubit mapping to
+Use the :func:`.jordan_wigner` fermion-to-qubit mapping to
 convert the Hamiltonian expressed in terms of fermions to be expressed in Pauli strings instead. This
 can be done directly as part of the transpilation process by using the
-:class:`.EvolutionSynthesis` transpilation pass plugin. Here, we are using
+:class:`.EvolutionSynthesis` transpilation pass plugin. Use
 :func:`.generate_preset_jw_pass_manager` to build
 :class:`.FermionicStagedPassManager`, which ensures that the
 Jordan-Wigner encoding is used consistently for all circuit instructions.
 
-Crucially, we add the :class:`.QDriftTrotterization` transpilation pass to the
-``optimization`` stage of the transpilation pipeline. This ensures that we do
-not use the time evolution of the entire Hamiltonian, a circuit whose depth
+Crucially, add the :class:`.QDriftTrotterization` transpilation pass to the
+``optimization`` stage of the transpilation pipeline. This ensures that the
+circuit does not use the time evolution of the entire Hamiltonian, whose depth
 would exceed the capabilities of currently available quantum computing hardware.
 
-Instead, it will subsample a fixed number of ``groups`` of Hamiltonian terms for
-each circuit, every time we transpile the circuit. Through this, we can generate
+Instead, it subsamples a fixed number of ``groups`` of Hamiltonian terms for
+each circuit, every time the circuit is transpiled. Through this, you can generate
 multiple circuit randomizations as required by the `SqDRIFT`_ algorithm by
 repeatedly running the transpilation pipeline.
 
-This step also introduces the few parameters with which one can tweak the
-ensemble of circuits to generate:
+This step also introduces the few parameters you can use to customize the
+circuits to generate:
 
-* the number of circuits to generate: ``num_sqdrift_randomizations``
-* the length of each circuit in terms of excitation groups: ``num_groups``
+* The number of circuits to generate: ``num_sqdrift_randomizations``
+* The length of each circuit in terms of excitation groups: ``num_groups``
 
 .. tab-set-code::
 
@@ -202,7 +203,7 @@ ensemble of circuits to generate:
        // via this API.
 
 .. note::
-   In the example above we have fixed the ``seed`` for the random number
+   The preceding example fixes the ``seed`` for the random number
    generator used inside of the :class:`.QDriftTrotterization` transpilation
    pass.
 
@@ -210,20 +211,20 @@ ensemble of circuits to generate:
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Beyond the diagonal terms filtered out in the previous step, a sampled
-excitation can *still* fail to affect the sampled bitstrings: whenever it acts
+excitation can *still* fail to affect the sampled bitstrings. Whenever it acts
 entirely within a set of modes whose occupation is already fixed (all occupied
 or all unoccupied), it cannot move a particle from one to the other, so it
-leaves the state -- and thus the eventual measurement outcome -- unchanged.
+leaves the state (and thus the eventual measurement outcome) unchanged.
 Setting ``filter_trivial=True`` on the :class:`.QDriftTrotterization` pass
 rejects such terms as they are sampled and re-draws a replacement, so that
-every one of the ``num_groups`` slots of the resulting circuit contributes a
+each of the ``num_groups`` slots of the resulting circuit contributes a
 non-trivial excitation.
 
 This filtering needs to know which modes start out occupied. It therefore
 requires an :class:`.InitializeModes` gate preceding the :class:`.Evolution`
-gate(s) in the circuit; :meth:`.InitializeModes.from_hartree_fock` is a
-convenient way to construct one. We add one here for the N2 Hartree-Fock
-reference (7 alpha and 7 beta electrons in 14 spatial orbitals) and compare the
+gates in the circuit; :meth:`.InitializeModes.from_hartree_fock` is a
+convenient way to construct one. Add one here for the N2 Hartree-Fock
+reference (seven alpha and seven beta electrons in 14 spatial orbitals) and compare the
 sampled excitations with and without ``filter_trivial=True``:
 
 .. tab-set-code::
@@ -270,26 +271,26 @@ sampled excitations with and without ``filter_trivial=True``:
 
 None of the excitations sampled without filtering touch the occupied set
 (``0-6`` and ``28-34``) at all, so none of them can move a particle between an
-occupied and an unoccupied mode -- every single one is trivial and would have
+occupied and an unoccupied mode; every single one is trivial and would have
 no effect on the sampled bitstrings. With ``filter_trivial=True``, all five are
 rejected and replaced by excitations that do couple an occupied mode with an
-unoccupied one, e.g. the first accepted excitation ``[0, 1, 6, 7]`` moves a
+unoccupied one. For example, the first accepted excitation ``[0, 1, 6, 7]`` moves a
 particle between occupied modes ``0``, ``1``, and ``6`` and unoccupied mode
 ``7``.
 
 Once an excitation is accepted, every mode in its support becomes
-"uncertain" and, thus, eligible to play either role for later samples --
+"uncertain" and, thus, eligible to play either role for later samples,
 so the occupied and unoccupied mode sets keep growing as more excitations
-get accepted. This is what makes the second accepted excitation,
-``[0, 1, 28, 29]``, acceptable at all: all four of its modes are among the
+get accepted. This is what makes the second excitation,
+``[0, 1, 28, 29]``, acceptable. All four of its modes are among the
 *originally* occupied ones, so it does not couple to any originally
 unoccupied mode. It is only accepted because modes ``0`` and ``1`` became
-uncertain -- and thus eligible as the "unoccupied" side of the coupling --
+uncertain (and thus eligible as the "unoccupied" side of the coupling)
 once the first excitation touched them.
 
 .. note::
    Without a preceding :class:`.InitializeModes` gate, ``filter_trivial=True``
-   has no occupation information to filter against: it emits a
+   has no occupation information to filter against. It emits a
    :class:`UserWarning` and leaves the sampling unfiltered for that
    :class:`.Evolution` gate.
 
@@ -300,7 +301,7 @@ You can add an additional optimization step to the transpilation pipeline that
 minimizes the distance of the fermionic excitation spans by relabeling the
 fermionic mode indices. This optimization was introduced in the `SqDRIFT`_ paper
 and is implemented by :func:`.build_excitation_span_minimization_model`. It can
-be easily inserted into the transpiler pipeline via the :class:`.RelabelModes`
+be easily inserted into the transpiler pipeline by using the :class:`.RelabelModes`
 pass:
 
 .. invisible-code-block: python
@@ -348,7 +349,7 @@ pass:
 Next steps
 ^^^^^^^^^^
 
-Now that we have successfully generated an ensemble of circuits, we can sample
+Now that you have successfully generated an ensemble of circuits, you can sample
 bitstrings from them. To do so, the circuits must be executed on hardware.
 Refer to the `Qiskit
 documentation <https://quantum.cloud.ibm.com/docs/guides/intro-to-patterns>`_

@@ -1,22 +1,22 @@
 .. _mappers_explanation:
 
-Mapping operator representations
-================================
+Map operator representations
+============================
 
 **Mappers** are routines that transform operators from one representation to another
-while preserving mathematical equivalence. They enable you to work flexibly across
-different operator algebras and prepare operators for quantum circuit execution.
+while preserving mathematical equivalence. Use them to work flexibly across
+different operator algebras and to prepare operators for quantum circuit execution.
 
-Implementing custom mappers
----------------------------
+Implement custom mappers
+------------------------
 
-The mappers module is designed to make it straightforward to implement custom
-mappings. The key insight is that mappers work by transforming the fundamental
+The mappers module makes it straightforward to implement custom
+mappings. Mappers work by transforming the fundamental
 actions (creation, annihilation, Majorana, and so on) that compose an operator, then
 combining these transformed actions according to the target representation's rules.
 
-Implementing a Jordan-Wigner transformation that maps
-a :class:`.MajoranaOperator` to a qubit operator using :func:`.map_majorana_action_generators` is a concrete example:
+As a concrete example, consider a Jordan-Wigner transformation that maps
+a :class:`.MajoranaOperator` to a qubit operator using :func:`.map_majorana_action_generators`:
 
 .. tab-set-code::
 
@@ -63,7 +63,7 @@ The key steps to implement any custom mapper are:
    to the target representation. In the example above, Majorana actions map to Pauli
    strings according to Jordan-Wigner rules.
 
-2. **Use one of the provided mapping functions**: the :mod:`~qiskit_fermions.mappers`
+2. **Use one of the provided mapping functions**: The :mod:`~qiskit_fermions.mappers`
    module provides utility functions to handle iterating over the operator terms and
    subsequent applications of the custom action map for the operator
    representations provided by the :mod:`~qiskit_fermions.operators` module. For example,
@@ -78,19 +78,19 @@ term in the operator while preserving mathematical equivalence.
 
 .. hint::
 
-   Of course, you can also iterate the terms of an operator manually rather than
+   You can also iterate the terms of an operator manually rather than
    using one of the provided iterator functions. See the section on `term iteration
-   <term_iteration_and_reconstruction>`_ in the operators guide for more details on that.
+   <term_iteration_and_reconstruction>`_ in the operators guide for details.
 
 Library implementations
 -----------------------
 
 The :mod:`qiskit_fermions.mappers.library` module provides efficient, thoroughly
 tested implementations of common mappings. These follow the same underlying pattern
-as custom mappers but are optimized for production use and available in both the
+as custom mappers but are optimized for production use and are available in both the
 Python and C APIs.
 
-Following is an example showing a library mapper applied to the same :class:`.MajoranaOperator`
+The example below applies a library mapper to the same :class:`.MajoranaOperator`
 from the custom mapper section, demonstrating equivalent results:
 
 .. tab-set-code::
@@ -131,8 +131,8 @@ from the custom mapper section, demonstrating equivalent results:
        qf_sparse_obs_free(qubit_op);
 
 In the Python API, some of these library mappers are also reachable through type-agnostic
-convenience mappers -- :func:`.fermion_operator` and :func:`.majorana_operator` sit in front of
+convenience mappers. :func:`.fermion_operator` and :func:`.majorana_operator` sit in front of
 :func:`.majorana_to_fermion` and :func:`.fermion_to_majorana` (among others), delegating to the
-appropriate library implementation under the hood based on the type of object they are given,
+appropriate library implementation internally based on the type of object they are given,
 rather than requiring you to pick the right function yourself. See :mod:`qiskit_fermions.protocols`
-for how this dispatch is implemented under the hood.
+for how this dispatch is implemented internally.

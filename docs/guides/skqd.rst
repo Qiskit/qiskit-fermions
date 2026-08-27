@@ -6,11 +6,12 @@ Generate Krylov time-evolution circuits (SKQD)
 .. important::
 
    The concepts in this guide are currently available only in the Python API.
-   Equivalent functionality will be made available through the C API in a future
+   Equivalent functionality will be made available in the C API in a future
    release.
 
 Sample-based Krylov Quantum Diagonalization (`SKQD`_) is a quantum-centric variant of subspace
-diagonalization. Rather than sampling a single variational ansatz (as in plain `SQD`_) or an
+diagonalization. Rather than sampling a single variational ansatz (as in plain sample-based
+quantum diagonalization (`SQD`_)) or an
 ensemble of randomized time-evolution circuits (as in :ref:`SqDRIFT <sqdrift_getting_started>`), it
 samples a *Krylov* basis: the family of states
 
@@ -24,14 +25,14 @@ fixed time step :math:`\Delta t`. Bitstrings sampled from these :math:`D` circui
 Krylov subspace in which the Hamiltonian is subsequently diagonalized classically.
 
 This guide reproduces the circuit-construction step of the `SKQD`_ algorithm for the
-single-impurity Anderson model (SIAM) -- a magnetic impurity coupled to a non-interacting bath --
+single-impurity Anderson model (SIAM), a magnetic impurity coupled to a non-interacting bath,
 following the `SKQD`_ publication.
 
 .. note::
    The SKQD sampling step works only if the ground state is **sparse** in the computational basis:
    the classical diagonalization must be able to reconstruct it from a manageable number of sampled
-   bitstrings. As we will see, that sparsity is not automatic -- it is a property of the
-   *single-particle basis* in which the problem is expressed. Getting the basis right is the crux of
+   bitstrings. As shown below, that sparsity is not automatic; it is a property of the
+   single-particle basis in which the problem is expressed. Getting the basis right is the crux of
    this construction.
 
 .. invisible-code-block: python
@@ -41,7 +42,7 @@ following the `SKQD`_ publication.
 .. skip: start if(not HAS_FFSIM)
 
 1. Build the SIAM Hamiltonian as a fermionic operator
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The single-impurity Anderson model places one interacting impurity orbital (index :math:`0`) in
 contact with a non-interacting bath of :math:`L` sites arranged as a chain. Its Hamiltonian splits
@@ -68,10 +69,10 @@ and the two-body part carrying the on-site Coulomb repulsion :math:`U` on the im
 
    H_2 = U \, a^\dagger_{0\uparrow} a_{0\uparrow} a^\dagger_{0\downarrow} a_{0\downarrow}.
 
-We work at the particle-hole-symmetric point :math:`\mu = -U/2`. These two parts map directly onto
-the one-body integrals ``h1e`` (bath hopping, impurity hybridization, impurity on-site energy) and
-the single two-body integral ``h2e`` (the impurity Coulomb term). We first assemble them in the
-*position* basis, where the model is naturally defined.
+This guide works at the particle-hole-symmetric point :math:`\mu = -U/2`. These two parts map
+directly onto the one-body integrals ``h1e`` (bath hopping, impurity hybridization, impurity on-site
+energy) and the single two-body integral ``h2e`` (the impurity Coulomb term). First assemble them in
+the position basis, where the model is naturally defined.
 
 .. plot::
    :context:
@@ -100,10 +101,10 @@ the single two-body integral ``h2e`` (the impurity Coulomb term). We first assem
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The bath part of the SIAM is a free-fermion chain, so it is diagonalized by a change to the
-*momentum* basis. This is the decisive step for SKQD: because the bath is translationally
-invariant, the ground state is **not** sparse in the position basis, but it *is* sparse in the
+momentum basis. This is the decisive step for SKQD. Because the bath is translationally
+invariant, the ground state is not sparse in the position basis, but it is sparse in the
 momentum basis, where the bath Hamiltonian is diagonal. The single-particle orbital rotation that
-performs this change is problem-specific linear algebra -- it diagonalizes the bath hopping matrix
+performs this change is problem-specific linear algebra.  It diagonalizes the bath hopping matrix
 while leaving the impurity orbital untouched, then relocates the impurity to a central site:
 
 .. plot::
@@ -127,8 +128,8 @@ while leaving the impurity orbital untouched, then relocates the impurity to a c
    ...
    >>> orbital_rotation = momentum_basis(norb)
 
-Unlike a variational workflow, here we rotate the **Hamiltonian integrals** into the momentum basis,
-so that the whole circuit -- Hamiltonian and state alike -- lives in the basis where the ground
+Unlike a variational workflow, this rotates the Hamiltonian integrals into the momentum basis,
+so that the whole circuit (Hamiltonian and state alike) lives in the basis where the ground
 state is sparse and the sampled bitstrings are therefore informative. Rotating the one- and two-body
 integrals is a standard basis change of the electronic-structure tensors:
 
@@ -150,9 +151,9 @@ integrals is a standard basis change of the electronic-structure tensors:
    ... )
 
 Because the rotation leaves the impurity orbital fixed (it acts only on the bath), the on-site
-interaction stays put: ``h2e_momentum`` remains a *single* number-number term, just like ``h2e`` --
-the only change is that the impurity has been relocated to a central index. We can see this directly
-in the integral tensors, which each carry exactly one nonzero entry:
+interaction is unchanged. ``h2e_momentum`` remains a single number-number term, just like ``h2e``.
+The only change is that the impurity has been relocated to a central index. This is visible directly
+in the integral tensors, which each carry one nonzero entry:
 
 .. plot::
    :context:
@@ -166,20 +167,20 @@ in the integral tensors, which each carry exactly one nonzero entry:
 
 This locality is what keeps the interaction cheap to synthesize later.
 
-We assemble the one-body integrals into a :class:`.FermionOperator` with the electronic-integral
+Assemble the one-body integrals into a :class:`.FermionOperator` with the electronic-integral
 constructor :meth:`~qiskit_fermions.operators.FermionOperator.from_1body_tril_spin_sym`, which expects
 them packed into lower-triangular ordering. The two-body part is a single number-number term, so
-rather than route it through the two-body integral machinery we build it directly with
-:func:`.cre`/:func:`.ann` -- the on-site Coulomb operator :math:`U \, n_{p\uparrow} n_{p\downarrow}`
+rather than routing it through the two-body integral machinery, build it directly with
+:func:`.cre`/:func:`.ann`: the on-site Coulomb operator :math:`U \, n_{p\uparrow} n_{p\downarrow}`
 for the impurity mode :math:`p` (its :math:`\uparrow` mode at index ``p``, its :math:`\downarrow` mode
 at index ``p + norb`` in the block-spin layout). Both constructors spin-double the ``norb`` spatial
 orbitals into ``2 * norb`` fermionic modes.
 
-We keep the one-body part :math:`H_1` and the two-body part :math:`H_2` as *separate* operators
-rather than summing them eagerly -- the terms :math:`H_1` and :math:`H_2` of the section-1 equations.
-Building each piece once (in both bases) lets us reuse them below: summed, they give the full
-Hamiltonian for the exact diagonalization in either basis; individually, :math:`H_2` (momentum basis)
-is exactly the operator the Trotter step evolves in step 4.
+Keep the one-body part :math:`H_1` and the two-body part :math:`H_2` as separate operators
+rather than summing them eagerly, matching the terms :math:`H_1` and :math:`H_2` of the section-1 equations.
+Building each piece once (in both bases) makes them reusable below. Summed, they give the full
+Hamiltonian for the exact diagonalization in either basis. Individually, :math:`H_2` (momentum basis)
+is the operator the Trotter step evolves in step 4.
 
 .. plot::
    :context:
@@ -213,11 +214,11 @@ is exactly the operator the Trotter step evolves in step 4.
    ...     (one_body_momentum + two_body_momentum).normal_ordered().simplify(atol=1e-14)
    ... )
 
-The basis change is a unitary similarity transform, so it leaves the spectrum untouched: we can
-confirm the operator is correct by comparing its lowest eigenvalue in the
+The basis change is a unitary similarity transform, so it leaves the spectrum untouched. Confirm the
+operator is correct by comparing its lowest eigenvalue in the
 :math:`(\text{norb}, \text{nelec})` sector against an exact diagonalization. The
 :class:`.FermionOperator` exposes a SciPy :class:`~scipy.sparse.linalg.LinearOperator` (backed by a
-native FCI matrix-vector kernel), so we can hand it straight to
+native full configuration interaction (FCI) matrix-vector kernel), so it can be handed straight to
 :func:`scipy.sparse.linalg.eigsh`.
 
 .. plot::
@@ -235,8 +236,8 @@ native FCI matrix-vector kernel), so we can hand it straight to
    >>> print(f"exact ground-state energy: {reference_energy:.6f}")
    exact ground-state energy: -13.422492
 
-The payoff of the basis change is sparsity. To make it concrete, we count how many
-computational-basis determinants are needed to capture 99% of the ground-state weight -- and compare
+The payoff of the basis change is sparsity. To make it concrete, count how many
+computational-basis determinants are needed to capture 99% of the ground-state weight, and compare
 the momentum basis against the position basis. The energy is basis-independent, but the number of
 determinants is not:
 
@@ -260,26 +261,25 @@ determinants is not:
    >>> print(f"determinants for 99% weight: {determinants_for(ground_state)} (momentum)")
    determinants for 99% weight: 21 (momentum)
 
-The two operators share the exact same energy, but the position-basis ground state is spread over
-thousands of determinants while the momentum basis concentrates it onto a couple dozen -- which is
-the whole reason SKQD sampling works in the momentum basis and not the position basis.
+The two operators share the same energy, but the position-basis ground state is spread over
+thousands of determinants, while the momentum basis concentrates it onto around 20, which is
+why SKQD sampling works in the momentum basis and not the position basis.
 
 3. Prepare the reference state
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The SKQD reference :math:`\lvert \psi_0 \rangle` is the superposition of all excitations of the
 electrons closest to the Fermi level into the nearest empty momentum modes. The `SKQD`_ publication
 builds it with a hand-written network of :external:class:`~qiskit.circuit.library.XXPlusYYGate`\ s.
-It *looks* strongly correlated -- it
-has hundreds of nonzero computational-basis amplitudes -- but a network of number-conserving two-mode
+It looks strongly correlated (it
+has hundreds of nonzero computational-basis amplitudes), but a network of number-conserving two-mode
 rotations is a single-particle (fermionic Gaussian) operation, so the state it produces is a
-**single Slater determinant**. That means we can prepare it with one :class:`.PrepareSlaterDeterminant`
+single Slater determinant. That means you can prepare it with one :class:`.PrepareSlaterDeterminant`
 gate, given the single-particle rotation the network implements.
 
 Because each :external:class:`~qiskit.circuit.library.XXPlusYYGate` acts as a Givens rotation on a
-pair of modes, we can build that
-rotation directly in the single-particle picture -- one Givens matrix per gate -- instead of emitting
-the two-qubit gates by hand. The gates form a brickwork of nearest-neighbor rotations that fans out
+pair of modes, that rotation can be built directly in the single-particle picture (one Givens
+matrix per gate) instead of emitting the two-qubit gates by hand. The gates form a brickwork of nearest-neighbor rotations that fans out
 from the Fermi level in expanding layers, spreading each near-Fermi electron across the empty modes
 just above it:
 
@@ -313,14 +313,14 @@ just above it:
    >>> reference_rotation = fermi_level_rotation(norb, nelec[0])
 
 .. note::
-   The rotation above is expressed in the *momentum* basis, matching the Hamiltonian: the electrons
+   The rotation above is expressed in the momentum basis, matching the Hamiltonian. The electrons
    near the Fermi level are the highest-energy occupied momentum modes, and the network excites them
    into the lowest-energy empty ones. This is why the reference must be built after the basis change
    of the previous step, not before.
 
 Slater determinant preparation is done per spin sector, since each sector has its own
-(electrons, orbitals) shape. A single :class:`.PrepareSlaterDeterminant` gate -- an occupation (the
-lowest ``nocc`` modes filled) together with the single-particle rotation -- prepares one sector; the
+(electrons, orbitals) shape. A single :class:`.PrepareSlaterDeterminant` gate (an occupation, the
+lowest ``nocc`` modes filled, together with the single-particle rotation) prepares one sector; the
 same gate is applied once on the alpha modes ``0..norb`` and once on the beta modes
 ``norb..2*norb``, since both spin sectors share the same reference occupation and rotation here:
 
@@ -335,34 +335,33 @@ same gate is applied once on the alpha modes ``0..norb`` and once on the beta mo
    >>> reference_preparation = PrepareSlaterDeterminant(occupation, reference_rotation)
 
 This declarative gate replaces the hand-coded :external:class:`~qiskit.circuit.library.XXPlusYYGate`
-network; the transpiler generates the
-Givens-rotation synthesis for us.
+network; the transpiler generates the Givens-rotation synthesis.
 
 4. Assemble the Krylov circuits
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Each Krylov circuit is the reference-state preparation followed by evolution under
-:math:`e^{-i k \, \Delta t \, H}`. We split the Hamiltonian into its one-body and two-body parts,
+:math:`e^{-i k \, \Delta t \, H}`. Split the Hamiltonian into its one-body and two-body parts,
 :math:`H = H_1 + H_2`, and Trotterize the evolution over that split. This is the decisive choice for
 circuit depth. The one-body evolution :math:`e^{-i t H_1}` is a free-fermion (fermionic Gaussian)
-operation, so it is *exactly* a single-particle basis rotation -- an :class:`.OrbitalRotation` with
-unitary :math:`e^{-i t \, \mathbf{h}_1}` -- rather than something that has to be Pauli-Trotterized
+operation, so it is a single-particle basis rotation (an :class:`.OrbitalRotation` with
+unitary :math:`e^{-i t \, \mathbf{h}_1}`) rather than something that has to be Pauli-Trotterized
 term by term. The two-body evolution :math:`e^{-i t H_2}` acts only on the single on-site
-interaction term. Building the step this way is what lets the transpiler emit a shallow brickwork of
-Givens rotations plus a single two-qubit interaction gate -- exactly the shallow structure the
+interaction term. Building the step this way lets the transpiler emit a shallow brickwork of
+Givens rotations plus a single two-qubit interaction gate, the shallow structure that the
 `SKQD`_ publication builds by hand.
 
-The two-body part is already in hand: it is the ``two_body_momentum`` operator built in step 2 (the
+We already have the two-body part. It is the ``two_body_momentum`` operator built in step 2 (the
 single on-site term). The one-body evolution :math:`e^{-i t H_1}` is spin-independent, so it is a
-single per-sector :class:`.OrbitalRotation` with unitary :math:`e^{-i t \, \mathbf{h}_1}` that we
-apply once to each spin sector -- the same parallel structure as the reference-state preparation.
+single per-sector :class:`.OrbitalRotation` with unitary :math:`e^{-i t \, \mathbf{h}_1}` applied
+once to each spin sector, the same parallel structure as the reference-state preparation.
 
-Each Krylov circuit evolves for a total time :math:`k \, \Delta t`. We realize that with a
+Each Krylov circuit evolves for a total time :math:`k \, \Delta t`. That is realized with a
 second-order Trotter product of :math:`k` steps of size :math:`\Delta t`, so the per-step error
-stays fixed as the Krylov dimension grows. Each step sandwiches a *full* one-body rotation (one per
+stays fixed as the Krylov dimension grows. Each step sandwiches a full one-body rotation (one per
 spin sector) between two half-steps of the (cheap, single-term) two-body evolution. The Krylov
-dimension :math:`D` is simply the number of such circuits, with ``dim`` ranging from ``0`` (reference
-state only) up to :math:`D - 1`.
+dimension :math:`D` is the number of such circuits, with ``dim`` ranging from ``0`` (reference
+state only) to :math:`D - 1`.
 
 .. plot::
    :context:
@@ -394,26 +393,26 @@ state only) up to :math:`D - 1`.
    ...     return circuit
 
 .. note::
-   The fermionic circuit carries no measurements: measurement is a qubit-level concept, so we add it
+   The fermionic circuit carries no measurements. Measurement is a qubit-level concept, so add it
    after transpilation, once the fermionic gates have been synthesized onto qubits. Convenience
-   ``measure`` instructions on :class:`.FermionicCircuit` may be introduced in the
+   ``measure`` instructions on :class:`.FermionicCircuit` might be introduced in the
    `future <https://github.com/Qiskit/qiskit-fermions/issues/219>`_.
 
 5. Transpile to qubit circuits
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Transpiling a :class:`.FermionicCircuit` maps its fermionic gates to qubit gates. We use the
+Transpiling a :class:`.FermionicCircuit` maps its fermionic gates to qubit gates. This uses the
 Jordan-Wigner :func:`.jordan_wigner` mapping. The :class:`.OrbitalRotation` gates synthesize into a
 brickwork of Givens rotations, and the single-term :class:`.Evolution` lowers to a single two-qubit
 interaction gate.
 
-Because every fermionic gate here has a default synthesis, we can use the ready-made
+Because every fermionic gate here has a default synthesis, you can use the ready-made
 :func:`.generate_preset_jw_pass_manager` directly rather than hand-assembling the stages. Any
-keyword arguments are forwarded to the qubit stage; we pass ``optimization_level=0`` for a faithful,
+keyword arguments are forwarded to the qubit stage; pass ``optimization_level=0`` for a faithful,
 unoptimized picture of the synthesized depth. Generating the full family of Krylov circuits is then
-a loop over the Krylov dimension. We keep the untranspiled :class:`.FermionicCircuit`\ s alongside
-the transpiled qubit circuits: the fermionic ones drive the exact (statevector) simulation in step
-6, while the transpiled ones -- with measurements added -- are what a backend would execute.
+a loop over the Krylov dimension. Keep the untranspiled :class:`.FermionicCircuit`\ s alongside
+the transpiled qubit circuits. The fermionic ones drive the exact (statevector) simulation in step
+6, while the transpiled ones (with measurements added) are what a backend would execute.
 
 .. plot::
    :context:
@@ -437,7 +436,7 @@ the transpiled qubit circuits: the fermionic ones drive the exact (statevector) 
    >>> krylov_dim = 5
    >>> fermionic_circuits, circuits = krylov_circuits(krylov_dim)
 
-The Krylov dimension shows up directly in the circuits' two-qubit depth: the reference-state
+The Krylov dimension shows up directly in the circuits' two-qubit depth. The reference-state
 preparation is a fixed cost, and each additional Krylov power adds another second-order Trotter step
 of the time-evolution operator.
 
@@ -451,17 +450,17 @@ of the time-evolution operator.
    [4, 12, 21, 30, 39]
 
 .. note::
-   Splitting the Hamiltonian is what keeps these depths modest. The one-body evolution is a genuine
+   Splitting the Hamiltonian keeps these depths modest. The one-body evolution is a genuine
    orbital rotation, so it synthesizes to an :external:class:`~qiskit.circuit.library.XXPlusYYGate`
-   brickwork on adjacent qubits, while each half-step of the on-site interaction is a *single*
+   brickwork on adjacent qubits. Each half step of the on-site interaction is a single
    :external:class:`~qiskit.circuit.library.RZZGate` coupling the impurity's two spin
-   modes -- the cheap term the second-order product sandwiches around the rotation. Handing the whole
+   modes; the cheap term that the second-order product sandwiches around the rotation. Handing the whole
    Hamiltonian to one :class:`.Evolution` gate instead would Pauli-Trotterize the one-body part term
-   by term, dragging long Jordan-Wigner ``Z``-strings through the (long-range) impurity--bath
+   by term, propagating long Jordan-Wigner ``Z``-strings across the (long-range) impurity-bath
    couplings and inflating the depth by an order of magnitude.
 
 The first circuit prepares only the reference determinant, while the last carries the most Trotter
-steps (4 in this case):
+steps (four in this case):
 
 .. plot::
    :alt: The reference-state preparation circuit (Krylov dimension 0).
@@ -480,16 +479,16 @@ steps (4 in this case):
    <Figure size ... with 1 Axes>
 
 6. Sample bitstrings from the Krylov circuits
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-On hardware, we would run the transpiled circuits and measure. Here we do the noiseless (statevector)
-version of that step to see the bitstrings SKQD would collect. We simulate each *untranspiled*
+On hardware, you would run the transpiled circuits and measure. This is the noiseless (statevector)
+version of that step, showing the bitstrings SKQD would collect. Simulate each untranspiled
 :class:`.FermionicCircuit` with :func:`ffsim.apply_unitary` and sample the resulting statevector with
 :func:`ffsim.sample_state_vector`.
 
-Because a :class:`.PrepareSlaterDeterminant` gate is *validate-then-rotate* under simulation (it
-checks that the incoming state occupies its reference determinant, then applies the rotation), the
-input is the *plain* occupation determinant -- the lowest ``nocc`` modes filled per spin, with **no**
+A :class:`.PrepareSlaterDeterminant` gate is validate-then-rotate under simulation (it
+checks that the incoming state occupies its reference determinant, then applies the rotation). Therefore, the
+input is the plain occupation determinant: the lowest ``nocc`` modes filled per spin, with no
 rotation. The gate applies ``reference_rotation`` itself.
 
 .. plot::
@@ -515,11 +514,10 @@ rotation. The gate applies ``reference_rotation`` itself.
 
 Pooling the samples from all five Krylov circuits, the support is tiny: a few hundred distinct
 bitstrings out of the :math:`\binom{8}{4}^2 = 4900` determinants in the ``(4, 4)`` sector. This
-concentration -- a direct consequence of the momentum-basis sparsity established in step 2 -- is
-exactly what makes the subsequent classical diagonalization tractable.
+concentration, a direct consequence of the momentum-basis sparsity established in step 2, makes the subsequent classical diagonalization tractable.
 
-Plotting the counts with :func:`qiskit.visualization.plot_histogram` makes the sparsity visible -- a
-handful of configurations dominate, led by the reference determinant.
+Plotting the counts with :func:`qiskit.visualization.plot_histogram` makes the sparsity visible. A few
+configurations dominate, led by the reference determinant.
 
 .. plot::
    :alt: Histogram of the bitstrings sampled from the Krylov circuits, showing a small support.
@@ -534,26 +532,26 @@ handful of configurations dominate, led by the reference determinant.
 .. skip: end
 
 7. Diagonalize in the sampled subspace
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The sampled bitstrings are the input to the classical half of SKQD: the Hamiltonian is projected onto
-the subspace the sampled configurations span and diagonalized there. We hand this off to the
+The sampled bitstrings are the input to the classical half of SKQD. The Hamiltonian is projected onto
+the subspace the sampled configurations span and diagonalized there. This is passed to the
 `qiskit-addon-sqd <https://quantum.cloud.ibm.com/docs/addons/qiskit-addon-sqd>`_ package, whose
 :func:`~qiskit_addon_sqd.fermion.diagonalize_fermionic_hamiltonian` runs the full sample-based
-quantum diagonalization loop: it builds a subspace from batches of the sampled configurations,
-diagonalizes the Hamiltonian in it, and iteratively refines the subspace via *configuration
-recovery* -- flipping occupations to repair configurations that violate the known particle-number
-symmetry. Configuration recovery is designed to undo the damage of **hardware noise**, which corrupts
-sampled bitstrings into the wrong particle-number sector; we sample noiselessly here, so there is
-nothing to repair on that front.
+quantum diagonalization loop. It builds a subspace from batches of the sampled configurations,
+diagonalizes the Hamiltonian in it, and iteratively refines the subspace by using configuration
+recovery: flipping occupations to repair configurations that violate the known particle-number
+symmetry. Configuration recovery is designed to undo the damage of hardware noise, which corrupts
+sampled bitstrings into the wrong particle-number sector; the sampling here is noiseless, so
+there is nothing to repair on that front.
 
 .. skip: start if(not (HAS_FFSIM and HAS_QISKIT_ADDON_SQD))
 
-The solver consumes the sampled counts as a :external:class:`~qiskit.primitives.BitArray`, which we
-build directly from the pooled ``counts`` of step 6. It diagonalizes in the same *momentum* basis the
+The solver consumes the sampled counts as a :external:class:`~qiskit.primitives.BitArray`, built
+directly from the pooled ``counts`` of step 6. It diagonalizes in the same momentum basis the
 rest of the construction uses, so it takes the ``h1e_momentum`` and ``h2e_momentum`` integrals from
-step 2 directly -- no repacking. The recovered energy matches the exact reference to well under a
-milli-Hartree, from only a few hundred sampled configurations; because the SQD energy is a variational
+step 2 directly, with no repacking. The recovered energy matches the exact reference to well under a
+milli-Hartree, from only a few hundred sampled configurations. Because the SQD energy is a variational
 upper bound on the true ground state, it always sits at or above ``reference_energy`` (still in scope
 from step 2):
 
@@ -585,13 +583,13 @@ from step 2):
    >>> print(f"SQD estimate: {result.energy:.4f} (exact: {reference_energy:.4f})")
    SQD estimate: -13.4224 (exact: -13.4225)
 
-Finally, we visualize the run: the energy's convergence across the iterations, and the average
+Visualize the run: the energy's convergence across the iterations, and the average
 occupancy of each spatial orbital in the recovered ground state. The per-iteration energy is the
 lowest across that iteration's batches, and the occupancy sums the ``orbital_occupancies`` over the
-two spin sectors. Even without noise to correct, the energy still decreases from iteration to
-iteration: each iteration diagonalizes within ``num_batches`` batches of only ``samples_per_batch``
+two spin sectors. Even without noise to correct, the energy decreases from iteration to
+iteration. Each iteration diagonalizes within ``num_batches`` batches of only ``samples_per_batch``
 configurations subsampled from the pool, and the iterative refinement due to bitstring carryover
-steadily improves which configurations land in those batches -- so the recovered energy improves:
+steadily improves which configurations land in those batches, so the recovered energy improves:
 
 .. plot::
    :alt: SQD energy convergence and the average occupancy per spatial orbital.
@@ -619,7 +617,7 @@ steadily improves which configurations land in those batches -- so the recovered
    >>> fig
    <Figure size ... with 2 Axes>
 
-This closes the SKQD loop: the momentum-basis circuits of steps 1--5 produce a sparse sample (step
+This closes the SKQD loop. The momentum-basis circuits of steps 1--5 produce a sparse sample (step
 6), and the sample-based diagonalization above turns that sample back into a ground-state energy.
 
 .. skip: end
@@ -628,18 +626,18 @@ Next steps
 ^^^^^^^^^^
 
 This guide ran the whole SKQD pipeline on a noiseless statevector simulator. On hardware, the
-transpiled ``circuits`` would be executed and measured in place of the statevector sampling of step
-6, with the resulting counts feeding the same step-7 diagonalization unchanged. Refer to the `Qiskit
-documentation <https://quantum.cloud.ibm.com/docs/guides/intro-to-patterns>`_ for running circuits,
+transpiled ``circuits`` would be executed and measured in place of the statevector sampling in step
+6, with the resulting counts feeding the step-7 diagonalization unchanged. Refer to the `Qiskit
+documentation <https://quantum.cloud.ibm.com/docs/guides/intro-to-patterns>`_ for help running circuits,
 and to the `SQD addon tutorials
-<https://quantum.cloud.ibm.com/docs/addons/qiskit-addon-sqd/guides/overview>`_ for more on the
-subspace-diagonalization post-processing -- including its behavior on noisy samples, where
+<https://quantum.cloud.ibm.com/docs/addons/qiskit-addon-sqd/guides/overview>`_ for information about the
+subspace-diagonalization post-processing, including its behavior on noisy samples, where
 configuration recovery does the most work.
 
 Read the :ref:`ffsim backend guide <ffsim_backend_explanation>` to understand why
 :func:`ffsim.apply_unitary` and :func:`ffsim.sample_state_vector` work natively on this package's
-fermionic circuits, and why the fixed-particle-number sector used in step 6 is what makes the
-momentum-basis sparsity established in step 2 sample-efficient in the first place.
+fermionic circuits, and why the fixed-particle-number sector used in step 6 makes the
+momentum-basis sparsity established in step 2 sample-efficient.
 
 
 .. _SQD: https://arxiv.org/abs/2405.05068

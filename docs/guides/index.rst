@@ -8,32 +8,13 @@ this package.
 .. note::
    These guides might refer to specific Python modules when explaining core concepts.
    Unless otherwise stated, the C API provides matching functionality, although it is not structured
-   into modules. However, the function names will correspond naturally and should be easy to navigate.
+   into modules. However, the function names correspond naturally and should be easy to navigate.
 
-Getting started
-===============
+Operators and their structure
+=============================
 
-This section lists some simple goal-oriented guides to get you started with
-specific example applications:
-
-.. toctree::
-   :maxdepth: 1
-   :glob:
-
-   sqdrift
-   skqd
-   lucj
-
-You can also start with these more extensive end-to-end tutorials:
-
-* :ref:`1d_fermi_hubbard`
-* :ref:`2d_fermi_hubbard`
-
-Explanations
-============
-
-This section lists guides for explaining various concepts and components from
-this package:
+Fermionic operators can be represented in different forms and you can map between these forms as well
+as qubit operators using different `mappers`. Start here if you are building a Hamiltonian.
 
 .. toctree::
    :maxdepth: 1
@@ -42,30 +23,74 @@ this package:
    operators
    grouping
    mappers
-   circuit
-   transpilation
-   ffsim
 
-How-Tos
-=======
 
-This section lists goal-oriented guides for accomplishing specific tasks with
-particular components of this package:
+Fermionic circuits
+==================
 
-Circuits
---------
+You can express circuits directly on the fermionic level rather than mapping to qubits first.
 
 .. toctree::
    :maxdepth: 1
    :glob:
 
+   circuit
    vqe_outer_loop
 
-Transpiler passes
------------------
+Circuit examples
+----------------
+
+These guides provide you with concrete examples for different specific use cases:
+
+Chemistry
+^^^^^^^^^
 
 .. toctree::
    :maxdepth: 1
    :glob:
 
+   lucj
+   sqdrift
+
+Lattice models
+^^^^^^^^^^^^^^
+
+.. toctree::
+   :maxdepth: 1
+   :glob:
+
+   skqd
+
+
+Transpiling fermionic circuits
+==============================
+
+Guides explaining how a :class:`.FermionicCircuit` becomes a :class:`~qiskit.circuit.QuantumCircuit`.
+
+.. toctree::
+   :maxdepth: 1
+   :glob:
+
+   transpilation
    merge_slater_determinant
+
+
+Workflow examples
+=================
+
+.. toctree::
+   :maxdepth: 1
+   :glob:
+
+   1d_fermi_hubbard
+   2d_fermi_hubbard
+
+
+Workflow validation
+===================
+
+.. toctree::
+   :maxdepth: 1
+   :glob:
+
+   ffsim

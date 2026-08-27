@@ -1,15 +1,15 @@
 .. _transpilation_explanation:
 
-Transpiling fermionic circuits
-==============================
+Transpile fermionic circuits
+============================
 
 .. important::
 
    The concepts in this guide are currently available only in the Python API.
-   Equivalent functionality will be made available via the C API in a future release.
+   Equivalent functionality will be made available in the C API in a future release.
 
 This guide explains how to transpile a :class:`.FermionicCircuit` to a standard
-:class:`~qiskit.circuit.QuantumCircuit`. We continue with the same time evolution
+:class:`~qiskit.circuit.QuantumCircuit`. It continues with the same time evolution
 example from the :ref:`fermionic circuits guide <fermionic_circuit_explanation>`.
 
 Transpilation stages
@@ -19,11 +19,11 @@ As explained in :mod:`qiskit_fermions.transpiler`, the preset pass managers in
 this project split the transpilation into the following stages:
 
 **Input**
-   Converts the input circuit to a DAG data structure.
+   Converts the input circuit to a directed acyclic graph (DAG) data structure.
 
 **Optimization**
-   Fermionic-level optimizations that keep the circuit in fermionic space. These
-   passes exploit fermionic structure and commutation relations while
+   Keeps the circuit in fermionic space. These
+   passes use fermionic structure and commutation relations while
    problem-aware knowledge remains fully available.
 
 **Layout**
@@ -38,7 +38,7 @@ this project split the transpilation into the following stages:
    standard quantum gates.
 
 **Qubit**
-   Standard Qiskit transpilation on the resulting qubit circuit, including
+   Transpiles the resulting qubit circuit by using standard Qiskit methods, including
    optimization, layout, and routing for your target hardware.
 
 **Output**
@@ -136,15 +136,15 @@ approaches:
    <Figure size ... with 1 Axes>
 
 Both workflows produce equivalent circuits. However, the traditional workflow
-requires you to implement optimization steps manually, whereas the
-fermionic-first approach allows you to integrate problem-aware optimizations
+requires you to implement optimization steps manually, whereas with the
+fermionic-first approach you can integrate problem-aware optimizations
 into the transpilation process.
 
 Advanced workflows
 ------------------
 
 The preset pass manager provides a convenient starting point. For more advanced
-use cases, you can:
+use cases, you can do the following:
 
 - Customize the transpiler passes run during each stage.
 - Implement custom fermion-to-qubit mappings by creating synthesis plugins (see

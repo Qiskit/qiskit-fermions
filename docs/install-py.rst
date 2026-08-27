@@ -5,7 +5,7 @@ Prerequisites
 ^^^^^^^^^^^^^
 
 First, create a minimal environment with only Python installed in it.
-We recommend using `Python virtual environments
+Use `Python virtual environments
 <https://docs.python.org/3.10/tutorial/venv.html>`__.
 
 .. code:: sh
@@ -96,7 +96,7 @@ The next step is to install ``qiskit-fermions`` to the virtual environment.
 
 You can optionally verify that the installation was successful. The simplest
 test is to try and import one of the classes provided by the ``qiskit-fermions``
-package, for example like so:
+package, as in the following example:
 
 .. code:: sh
 

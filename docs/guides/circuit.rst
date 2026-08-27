@@ -1,12 +1,12 @@
 .. _fermionic_circuit_explanation:
 
-Working with fermionic circuits
-===============================
+Work with fermionic circuits
+============================
 
 .. important::
 
    The concepts in this guide are currently available only in the Python API.
-   Equivalent functionality will be made available through the C API in a future
+   Equivalent functionality will be made available in the C API in a future
    release.
 
 This guide explains how to use the :class:`.FermionicCircuit` to implement
@@ -25,7 +25,7 @@ fermionic Hamiltonian on a qubit-based architecture:
 3. Implement the time evolution in qubit space (using Trotterization or other
    methods).
 
-This approach has a fundamental limitation: early mapping to qubits discards
+This approach has a fundamental limitation; early mapping to qubits discards
 problem-aware knowledge about the fermionic structure. Standard optimization
 passes cannot exploit fermionic symmetries or allowed term reorderings,
 resulting in suboptimal circuits with unnecessary depths and gate counts.
@@ -41,7 +41,7 @@ The :class:`.FermionicCircuit` enables a better workflow:
 This approach addresses the limitation by keeping problem-aware knowledge in
 fermionic space, where optimization passes can exploit fermionic structure and
 commutation relations to reduce circuit depth. The fermionic circuit describes
-*what* computation to perform, while transpilation handles *how* to map it to
+what computation to perform, while transpilation handles how to map it to
 qubits, providing a cleaner separation of concerns.
 
 Generic mode indexing
@@ -58,15 +58,15 @@ For example, you can implement time evolution for any operator implementing the
 Build a fermionic circuit
 -------------------------
 
-The example below implements the time evolution discussed in the previous section.
+The example below implements the time evolution described in the previous section.
 It constructs a :class:`.FermionicCircuit` by specifying the number of fermionic
 modes, then adds fermionic gates from the :mod:`qiskit_fermions.circuit.library`
 to implement the time evolution.
 
 The example also demonstrates how to incorporate domain knowledge into an
 operator by using :ref:`operator term grouping <grouping_explanation>`. By
-assigning group indices to the Hamiltonian terms, structural information gets
-preserved that optimization passes can exploit throughout the transpilation
+assigning group indices to the Hamiltonian terms, you preserve structural
+information that optimization passes can exploit throughout the transpilation
 stack.
 
 .. tab-set::
@@ -108,14 +108,14 @@ stack.
          // The C API for FermionicCircuit is not available yet.
 
 .. plot::
-   :alt: A simple FermionicCircuit with a single time evolution gate.
+   :alt: A simple `FermionicCircuit` with a single time evolution gate.
    :context: close-figs
 
    >>> circuit.draw("mpl", fold=-1)
    <Figure size ... with 1 Axes>
 
 .. plot::
-   :alt: A decomposed FermionicCircuit with several time evolution gates.
+   :alt: A decomposed `FermionicCircuit` with several time evolution gates.
    :context: close-figs
 
    >>> circuit.decompose().draw("mpl", fold=-1)
@@ -124,7 +124,7 @@ stack.
 Notice how the operator term grouping is preserved even in simple operations
 like decomposition. This demonstrates how structural information flows through the circuit
 stack. To understand the full transpilation to
-qubits, refer to the `Transpiling fermionic circuits <transpilation>`__  guide.
+qubits, refer to the :ref:`Transpiling fermionic circuits <transpilation_explanation>` guide.
 
 Transpile fermionic circuits
 ----------------------------
@@ -141,7 +141,7 @@ Next steps
   documentation.
 - Explore the :ref:`operators explanation guide <operators_explanation>` to understand
   how to construct fermionic Hamiltonians that you can use with fermionic circuits.
-- Review the :ref:`SQDRIFT <sqdrift_getting_started>` getting-started guide for a practical
+- Review the :ref:`SQDRIFT <sqdrift_getting_started>` getting started guide for a practical
   end-to-end example.
 - Read the :ref:`ffsim backend guide <ffsim_backend_explanation>` to understand how a
   :class:`.FermionicCircuit` can be simulated directly, and how these generic mode indices take on
