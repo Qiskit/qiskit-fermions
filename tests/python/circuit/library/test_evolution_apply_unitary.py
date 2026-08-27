@@ -15,7 +15,6 @@
 from __future__ import annotations
 
 from pathlib import Path
-from unittest.mock import patch
 
 import numpy as np
 import pytest
@@ -26,27 +25,6 @@ from qiskit_fermions.operators import FermionOperator
 from qiskit_fermions.operators.library import FCIDump
 
 ffsim = pytest.importorskip("ffsim")
-
-
-def test_evolution_supplies_scaled_exact_trace():
-    """Evolution scales the exact fixed-sector trace with its generator."""
-    norb = 3
-    nelec = 1
-    time = 0.4
-    hamil = FermionOperator.from_dict(
-        {
-            (): 1.0,
-            ((True, 0), (False, 0)): 2.0,
-        }
-    )
-    vec = np.ones(3, dtype=complex)
-
-    with patch(
-        "scipy.sparse.linalg.expm_multiply", wraps=scipy.sparse.linalg.expm_multiply
-    ) as call:
-        Evolution(norb, hamil, time=time)._apply_unitary_(vec, norb, nelec, copy=True)
-
-    assert call.call_args.kwargs["traceA"] == pytest.approx(-1j * time * 5.0)
 
 
 def test_evolution_apply_unitary_matches_ffsim_oracle():

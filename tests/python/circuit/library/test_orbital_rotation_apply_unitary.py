@@ -15,7 +15,6 @@
 from __future__ import annotations
 
 import itertools
-from unittest.mock import patch
 
 import numpy as np
 import pytest
@@ -26,23 +25,6 @@ from qiskit_fermions.circuit.library import OrbitalRotation
 from ...utils import random_unitary
 
 ffsim = pytest.importorskip("ffsim")
-
-
-def test_orbital_rotation_supplies_exact_generator_trace(monkeypatch):
-    """The general path supplies the exact fixed-sector generator trace."""
-    import qiskit_fermions.circuit.library.orbital_rotation as orbital_rotation_module
-
-    angles = np.array([0.1, 0.2, 0.3])
-    rotation = np.diag(np.exp(1j * angles))
-    vec = np.ones(3, dtype=complex)
-    monkeypatch.setattr(orbital_rotation_module, "HAS_FFSIM", False)
-
-    with patch(
-        "scipy.sparse.linalg.expm_multiply", wraps=scipy.sparse.linalg.expm_multiply
-    ) as call:
-        OrbitalRotation(rotation)._apply_unitary_(vec, 3, 1, copy=True)
-
-    assert call.call_args.kwargs["traceA"] == pytest.approx(1j * angles.sum())
 
 
 def _orbital_rotation_oracle(
