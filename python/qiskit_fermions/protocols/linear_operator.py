@@ -14,7 +14,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Protocol, cast
+from typing import TYPE_CHECKING, Protocol
 
 import numpy as np
 import scipy.sparse.linalg
@@ -85,8 +85,7 @@ def scipy_linear_operator_from_fci(  # noqa: D417
     This is attached to the operator classes as ``_linear_operator_`` at import time (see
     :mod:`qiskit_fermions.operators`): the native operator classes are compiled types whose
     instances cannot themselves subclass SciPy's :class:`~scipy.sparse.linalg.LinearOperator`, so
-    the protocol method is provided in Python. The wrapper carries the native kernel's exact
-    fixed-sector trace as private metadata for internal matrix-exponential callers.
+    the protocol method is provided in Python.
 
     Args:
         norb: the number of spatial orbitals.
@@ -96,8 +95,30 @@ def scipy_linear_operator_from_fci(  # noqa: D417
     Returns:
         A :class:`scipy.sparse.linalg.LinearOperator` applying this operator on the requested sector.
     """
-    kernel = self._fci_linear_operator_(norb, nelec)
+    return scipy_linear_operator_from_kernel(self._fci_linear_operator_(norb, nelec))
 
+
+def scipy_linear_operator_from_kernel(
+    kernel: FciLinearOperator,
+) -> scipy.sparse.linalg.LinearOperator:
+    """Wraps a native FCI kernel in a SciPy :class:`~scipy.sparse.linalg.LinearOperator`.
+
+    The native kernel requires a contiguous one-dimensional ``complex128`` vector, whereas SciPy's
+    machinery may feed a :class:`~scipy.sparse.linalg.LinearOperator` real probe vectors (from its
+    one-norm estimator) or non-contiguous ``(dim, 1)`` column slices, so the ``matvec``/``rmatvec``
+    wrappers coerce their input.
+
+    This deliberately returns only the SciPy operator and not the kernel's ``trace``: a SciPy
+    ``LinearOperator`` has nowhere to carry that metadata, and composing one (scaling, adding) drops
+    any attribute attached to it. Callers that need the exact trace should hold on to the ``kernel``
+    they passed in and read its ``trace`` directly.
+
+    Args:
+        kernel: the native FCI matrix-vector kernel to wrap.
+
+    Returns:
+        A :class:`scipy.sparse.linalg.LinearOperator` applying ``kernel`` on its sector.
+    """
     # Bind the coercion handles once per operator (not once per matvec): SciPy hands a
     # LinearOperator real probe vectors or non-contiguous (dim, 1) columns, which the native kernel
     # cannot slice directly.
@@ -110,11 +131,9 @@ def scipy_linear_operator_from_fci(  # noqa: D417
     def rmatvec(vec):
         return kernel.rmatvec(ascontiguousarray(vec, complex128).reshape(-1))
 
-    operator = scipy.sparse.linalg.LinearOperator(
+    return scipy.sparse.linalg.LinearOperator(
         shape=kernel.shape,
         matvec=matvec,
         rmatvec=rmatvec,
         dtype=kernel.dtype,
     )
-    cast(Any, operator)._trace = kernel.trace
-    return operator

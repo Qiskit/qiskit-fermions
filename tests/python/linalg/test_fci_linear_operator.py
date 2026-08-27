@@ -46,9 +46,9 @@ def test_fci_linear_operator_trace_spinless():
         }
     )
 
-    linop = op._linear_operator_(3, 2)
+    kernel = op._fci_linear_operator_(3, 2)
 
-    assert linop._trace == pytest.approx(8.5)
+    assert kernel.trace == pytest.approx(8.5)
 
 
 def test_fci_linear_operator_trace_spinful():
@@ -63,9 +63,9 @@ def test_fci_linear_operator_trace_spinful():
         }
     )
 
-    linop = op._linear_operator_(2, (1, 1))
+    kernel = op._fci_linear_operator_(2, (1, 1))
 
-    assert linop._trace == pytest.approx(18.0)
+    assert kernel.trace == pytest.approx(18.0)
 
 
 def test_fci_linear_operator_matvec_matches_ffsim():
