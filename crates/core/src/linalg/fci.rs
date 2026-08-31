@@ -29,6 +29,8 @@
 //!   (valid only if `p` is occupied) both carry the sign ``(-1)^m`` where `m` is the number of
 //!   occupied orbitals with index strictly greater than `p`.
 
+use std::ops::Range;
+
 use num_complex::Complex64;
 
 /// The largest number of spatial orbitals supported by the bitmask representation.
@@ -689,6 +691,24 @@ fn swap_if(swap: bool, a: usize, b: usize) -> (usize, usize) {
     if swap { (b, a) } else { (a, b) }
 }
 
+/// Sums `value[k]` over the entries `k` in `range` that sit on the diagonal (`src[k] == dst[k]`).
+///
+/// Every trace contribution in [`CompiledSector::trace`] has this shape -- only the value being
+/// summed and the index range differ -- because a scatter `src -> dst` lands on the matrix diagonal
+/// exactly when its two addresses coincide. Taking the addresses as slices lets this serve both the
+/// whole-array [`ScaledTransitions`] and a single CSR segment of [`PhasedTransitions`]; the `Into`
+/// bound on the summand covers the phase blocks, which store `i8` but accumulate in `f64`.
+fn diagonal_sum<T, V>(range: Range<usize>, src: &[usize], dst: &[usize], value: &[V]) -> T
+where
+    T: std::iter::Sum<T>,
+    V: Copy + Into<T>,
+{
+    range
+        .filter(|&k| src[k] == dst[k])
+        .map(|k| value[k].into())
+        .sum()
+}
+
 impl CompiledSector {
     /// The FCI dimension of the sector this map was compiled for.
     #[inline]
@@ -704,33 +724,32 @@ impl CompiledSector {
                 .filter_map(|&(src, dst, weight)| (src == dst).then_some(weight))
                 .sum(),
             CompiledKind::Spinful(spinful) => {
-                let diagonal_sum = |transitions: &ScaledTransitions| {
-                    (0..transitions.scale.len())
-                        .filter_map(|k| {
-                            (transitions.src[k] == transitions.dst[k])
-                                .then_some(transitions.scale[k])
-                        })
-                        .sum::<Complex64>()
+                // An identity spin block contributes its own dimension as a multiplicity: every
+                // determinant of the untouched block repeats the other block's diagonal entry.
+                let scaled_trace = |transitions: &ScaledTransitions| {
+                    diagonal_sum::<Complex64, _>(
+                        0..transitions.scale.len(),
+                        &transitions.src,
+                        &transitions.dst,
+                        &transitions.scale,
+                    )
+                };
+                // One mixed term's trace within a single spin block: its CSR segment only.
+                let phased_trace = |block: &PhasedTransitions, term: usize| {
+                    diagonal_sum::<f64, _>(
+                        block.indptr[term]..block.indptr[term + 1],
+                        &block.src,
+                        &block.dst,
+                        &block.phase,
+                    )
                 };
                 let mut trace = spinful.scalar * (spinful.dim_a * spinful.dim_b) as f64;
-                trace += diagonal_sum(&spinful.alpha_only) * spinful.dim_b as f64;
-                trace += diagonal_sum(&spinful.beta_only) * spinful.dim_a as f64;
+                trace += scaled_trace(&spinful.alpha_only) * spinful.dim_b as f64;
+                trace += scaled_trace(&spinful.beta_only) * spinful.dim_a as f64;
                 for (term, &coeff) in spinful.mixed_coeffs.iter().enumerate() {
-                    let alpha_trace: f64 = (spinful.mixed_alpha.indptr[term]
-                        ..spinful.mixed_alpha.indptr[term + 1])
-                        .filter_map(|k| {
-                            (spinful.mixed_alpha.src[k] == spinful.mixed_alpha.dst[k])
-                                .then_some(f64::from(spinful.mixed_alpha.phase[k]))
-                        })
-                        .sum();
-                    let beta_trace: f64 = (spinful.mixed_beta.indptr[term]
-                        ..spinful.mixed_beta.indptr[term + 1])
-                        .filter_map(|k| {
-                            (spinful.mixed_beta.src[k] == spinful.mixed_beta.dst[k])
-                                .then_some(f64::from(spinful.mixed_beta.phase[k]))
-                        })
-                        .sum();
-                    trace += coeff * alpha_trace * beta_trace;
+                    trace += coeff
+                        * phased_trace(&spinful.mixed_alpha, term)
+                        * phased_trace(&spinful.mixed_beta, term);
                 }
                 trace
             }
