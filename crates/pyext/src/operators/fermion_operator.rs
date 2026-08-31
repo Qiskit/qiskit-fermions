@@ -1277,10 +1277,11 @@ impl PyFermionOperator {
                     .compile_fci_spinless(&sector)
                     .map_err(crate::value_err)?,
             );
+            let trace = compiled.trace();
             let (compiled_mv, compiled_rmv) = (Arc::clone(&compiled), compiled);
             let matvec = Box::new(move |vec: &[Complex64]| compiled_mv.apply(vec));
             let rmatvec = Box::new(move |vec: &[Complex64]| compiled_rmv.apply_conj(vec));
-            Ok(FciLinearOperator::new(dim, matvec, rmatvec))
+            Ok(FciLinearOperator::new(dim, trace, matvec, rmatvec))
         } else {
             let (n_alpha, n_beta) = nelec.extract::<(u32, u32)>()?;
             let sector = SpinfulSector::new(norb, n_alpha, n_beta).map_err(crate::value_err)?;
@@ -1290,10 +1291,11 @@ impl PyFermionOperator {
                     .compile_fci_spinful(&sector)
                     .map_err(crate::value_err)?,
             );
+            let trace = compiled.trace();
             let (compiled_mv, compiled_rmv) = (Arc::clone(&compiled), compiled);
             let matvec = Box::new(move |vec: &[Complex64]| compiled_mv.apply(vec));
             let rmatvec = Box::new(move |vec: &[Complex64]| compiled_rmv.apply_conj(vec));
-            Ok(FciLinearOperator::new(dim, matvec, rmatvec))
+            Ok(FciLinearOperator::new(dim, trace, matvec, rmatvec))
         }
     }
 }

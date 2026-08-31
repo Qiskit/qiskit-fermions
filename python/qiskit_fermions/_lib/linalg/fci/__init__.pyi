@@ -34,6 +34,11 @@ class FciLinearOperator:
         r"""
         The dtype of the operator, always ``numpy.dtype("complex128")``.
         """
+    @property
+    def trace(self) -> builtins.complex:
+        r"""
+        The exact trace of the operator on this FCI sector.
+        """
     def matvec(self, vec: numpy.typing.NDArray[numpy.complex128]) -> numpy.typing.NDArray[numpy.complex128]:
         r"""
         Applies the operator to a state vector: returns ``op @ vec``.

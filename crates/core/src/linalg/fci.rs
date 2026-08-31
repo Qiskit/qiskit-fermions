@@ -29,6 +29,8 @@
 //!   (valid only if `p` is occupied) both carry the sign ``(-1)^m`` where `m` is the number of
 //!   occupied orbitals with index strictly greater than `p`.
 
+use std::ops::Range;
+
 use num_complex::Complex64;
 
 /// The largest number of spatial orbitals supported by the bitmask representation.
@@ -689,11 +691,69 @@ fn swap_if(swap: bool, a: usize, b: usize) -> (usize, usize) {
     if swap { (b, a) } else { (a, b) }
 }
 
+/// Sums `value[k]` over the entries `k` in `range` that sit on the diagonal (`src[k] == dst[k]`).
+///
+/// Every trace contribution in [`CompiledSector::trace`] has this shape -- only the value being
+/// summed and the index range differ -- because a scatter `src -> dst` lands on the matrix diagonal
+/// exactly when its two addresses coincide. Taking the addresses as slices lets this serve both the
+/// whole-array [`ScaledTransitions`] and a single CSR segment of [`PhasedTransitions`]; the `Into`
+/// bound on the summand covers the phase blocks, which store `i8` but accumulate in `f64`.
+fn diagonal_sum<T, V>(range: Range<usize>, src: &[usize], dst: &[usize], value: &[V]) -> T
+where
+    T: std::iter::Sum<T>,
+    V: Copy + Into<T>,
+{
+    range
+        .filter(|&k| src[k] == dst[k])
+        .map(|k| value[k].into())
+        .sum()
+}
+
 impl CompiledSector {
     /// The FCI dimension of the sector this map was compiled for.
     #[inline]
     pub fn dim(&self) -> usize {
         self.dim
+    }
+
+    /// The exact trace of the compiled operator on this FCI sector.
+    pub fn trace(&self) -> Complex64 {
+        match &self.kind {
+            CompiledKind::Spinless { entries } => entries
+                .iter()
+                .filter_map(|&(src, dst, weight)| (src == dst).then_some(weight))
+                .sum(),
+            CompiledKind::Spinful(spinful) => {
+                // An identity spin block contributes its own dimension as a multiplicity: every
+                // determinant of the untouched block repeats the other block's diagonal entry.
+                let scaled_trace = |transitions: &ScaledTransitions| {
+                    diagonal_sum::<Complex64, _>(
+                        0..transitions.scale.len(),
+                        &transitions.src,
+                        &transitions.dst,
+                        &transitions.scale,
+                    )
+                };
+                // One mixed term's trace within a single spin block: its CSR segment only.
+                let phased_trace = |block: &PhasedTransitions, term: usize| {
+                    diagonal_sum::<f64, _>(
+                        block.indptr[term]..block.indptr[term + 1],
+                        &block.src,
+                        &block.dst,
+                        &block.phase,
+                    )
+                };
+                let mut trace = spinful.scalar * (spinful.dim_a * spinful.dim_b) as f64;
+                trace += scaled_trace(&spinful.alpha_only) * spinful.dim_b as f64;
+                trace += scaled_trace(&spinful.beta_only) * spinful.dim_a as f64;
+                for (term, &coeff) in spinful.mixed_coeffs.iter().enumerate() {
+                    trace += coeff
+                        * phased_trace(&spinful.mixed_alpha, term)
+                        * phased_trace(&spinful.mixed_beta, term);
+                }
+                trace
+            }
+        }
     }
 
     /// Applies the compiled operator to a state vector: `out = op @ vec`.
@@ -1569,6 +1629,70 @@ mod tests {
                 "mismatch at {i}: {x} vs {y}\n  got:      {a:?}\n  expected: {b:?}"
             );
         }
+    }
+
+    fn reference_trace(
+        norb: u32,
+        n_alpha: u32,
+        n_beta: Option<u32>,
+        terms: &[(Complex64, Vec<bool>, Vec<u32>)],
+    ) -> Complex64 {
+        let table = BinomialTable::new(norb);
+        let dim = table.num_strings(norb, n_alpha)
+            * n_beta.map_or(1, |n_beta| table.num_strings(norb, n_beta));
+        let mut trace = Complex64::new(0.0, 0.0);
+        for diagonal in 0..dim {
+            let mut basis = vec![Complex64::new(0.0, 0.0); dim];
+            basis[diagonal] = Complex64::new(1.0, 0.0);
+            trace += reference_matvec(norb, n_alpha, n_beta, terms, &basis)[diagonal];
+        }
+        trace
+    }
+
+    #[test]
+    fn compiled_trace_matches_reference() {
+        let spinless_terms = vec![
+            (Complex64::new(1.2, -0.1), vec![], vec![]),
+            (Complex64::new(0.5, 0.2), vec![true, false], vec![0, 0]),
+            (Complex64::new(0.7, 0.0), vec![true, false], vec![0, 1]),
+            (
+                Complex64::new(1.3, -0.4),
+                vec![true, false, true, false],
+                vec![0, 0, 2, 2],
+            ),
+        ];
+        let spinless = SpinlessSector::new(4, 2)
+            .compile(term_views(&spinless_terms))
+            .unwrap();
+        let expected = reference_trace(4, 2, None, &spinless_terms);
+        assert!((spinless.trace() - expected).norm() < 1e-12);
+
+        let norb = 3;
+        let spinful_terms = vec![
+            (Complex64::new(0.8, 0.1), vec![], vec![]),
+            (Complex64::new(0.4, 0.0), vec![true, false], vec![0, 0]),
+            (
+                Complex64::new(-0.2, 0.3),
+                vec![true, false],
+                vec![norb, norb],
+            ),
+            (
+                Complex64::new(1.1, -0.2),
+                vec![true, false, true, false],
+                vec![0, 0, norb, norb],
+            ),
+            (
+                Complex64::new(0.6, 0.0),
+                vec![true, true, false, false],
+                vec![0, norb + 2, norb, 2],
+            ),
+        ];
+        let spinful = SpinfulSector::new(norb, 2, 1)
+            .unwrap()
+            .compile(term_views(&spinful_terms))
+            .unwrap();
+        let expected = reference_trace(norb, 2, Some(1), &spinful_terms);
+        assert!((spinful.trace() - expected).norm() < 1e-12);
     }
 
     #[test]

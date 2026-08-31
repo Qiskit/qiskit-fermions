@@ -16,12 +16,10 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-import scipy.sparse.linalg
-
-from qiskit_fermions.linalg import linear_operator
 from qiskit_fermions.operators import OperatorTrait
 
 from .. import FermionicGate
+from ._expm_multiply import _expm_multiply_fci
 
 if TYPE_CHECKING:
     import numpy as np
@@ -113,8 +111,8 @@ class Evolution(FermionicGate):
         """Applies ``exp(-i * time * operator)`` after relabeling the operator to global modes.
 
         The operator is relabeled onto its global modes and turned into a ``scipy`` ``LinearOperator``
-        via :func:`.linear_operator` (backed by a native FCI matrix-vector kernel), then applied to the
-        vector via ``scipy.sparse.linalg.expm_multiply``. This mirrors ffsim's own ``_apply_unitary_``
+        backed by a native FCI matrix-vector kernel, then applied to the vector via
+        ``scipy.sparse.linalg.expm_multiply``. This mirrors ffsim's own ``_apply_unitary_``
         implementations (e.g. for its UCCSD operators).
 
         Args:
@@ -178,9 +176,4 @@ class Evolution(FermionicGate):
                 + (" of each spin species" if not isinstance(nelec, int) else "")
                 + f" (norb={norb}, nelec={nelec})."
             )
-        linop = linear_operator(operator, norb, nelec)
-        # ``traceA`` is only a balancing hint for scipy (it factors out ``exp(traceA / n)`` to
-        # improve conditioning), not a correctness input: an inexact value costs at most some
-        # numerical conditioning. Passing 0.0 avoids scipy estimating the trace itself and mirrors
-        # ffsim's own ``_apply_unitary_`` implementations.
-        return scipy.sparse.linalg.expm_multiply(-1j * self.params[0] * linop, vec, traceA=0.0)
+        return _expm_multiply_fci(operator, vec, norb, nelec, scale=-1j * self.params[0])

@@ -15,15 +15,14 @@
 from __future__ import annotations
 
 import numbers
-from typing import cast
 
 import numpy as np
 import scipy.linalg
-import scipy.sparse.linalg
 
 from qiskit_fermions.utils.optionals import HAS_FFSIM
 
 from .. import FermionicGate
+from ._expm_multiply import _expm_multiply_fci
 
 
 class OrbitalRotation(FermionicGate):
@@ -120,10 +119,9 @@ class OrbitalRotation(FermionicGate):
         - **General path**: otherwise (i.e. when ``ffsim`` is unavailable) the rotation is applied as
           the evolution :math:`\exp(G)` under its generator
           :math:`G = \sum_{ij} \log(U)_{ij} a^\dagger_i a_j`, where :math:`U` is the embedded matrix.
-          :math:`G` is turned into a ``scipy`` ``LinearOperator`` via
-          :func:`.linear_operator` (backed by the native FCI matrix-vector kernel) and applied via
-          :func:`scipy.sparse.linalg.expm_multiply`. This mirrors
-          :meth:`.Evolution._apply_unitary_placed_`.
+          :math:`G` is turned into a ``scipy`` ``LinearOperator`` backed by the native FCI
+          matrix-vector kernel and applied via :func:`scipy.sparse.linalg.expm_multiply`. This
+          mirrors :meth:`.Evolution._apply_unitary_placed_`.
 
         Args:
             vec: the state vector to act on.
@@ -203,7 +201,6 @@ class OrbitalRotation(FermionicGate):
         ``logm`` preserves that block-diagonal structure, so the generator ``G`` conserves the
         ``(norb, nelec)`` sector and no amplitude is dropped.
         """
-        from qiskit_fermions.linalg import linear_operator
         from qiskit_fermions.operators import FermionOperator
 
         if copy:
@@ -224,10 +221,4 @@ class OrbitalRotation(FermionicGate):
         }
         generator = FermionOperator.from_dict(terms)  # type: ignore[arg-type]
 
-        # ``_linear_operator_`` is monkeypatched onto ``FermionOperator`` at import time (in
-        # ``qiskit_fermions.operators``); the stubs type ``from_dict``'s result as the compiled
-        # ``_lib`` type, which does not carry the patched method, so mypy still needs the ignore.
-        linop = linear_operator(generator, norb, nelec)  # type: ignore[arg-type]
-        # ``traceA=0.0`` mirrors Evolution._apply_unitary_placed_: it is only a scipy conditioning
-        # hint (it factors out ``exp(traceA / n)``), not a correctness input.
-        return cast(np.ndarray, scipy.sparse.linalg.expm_multiply(linop, vec, traceA=0.0))
+        return _expm_multiply_fci(generator, vec, norb, nelec)

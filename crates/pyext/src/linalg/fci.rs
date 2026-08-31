@@ -42,6 +42,7 @@ type Matvec = Box<dyn Fn(&[Complex64]) -> Result<Vec<Complex64>, FciMatvecError>
 #[pyclass(module = "qiskit_fermions.linalg.fci", name = "FciLinearOperator")]
 pub struct FciLinearOperator {
     dim: usize,
+    trace: Complex64,
     matvec: Matvec,
     rmatvec: Matvec,
 }
@@ -52,9 +53,10 @@ impl FciLinearOperator {
     /// `dim` is the FCI sector dimension (the length of the state vectors this operator acts on) and
     /// is exposed to Python as the square :attr:`shape` `(dim, dim)`. `matvec` applies the operator;
     /// `rmatvec` applies its adjoint (`A.H @ v`), which SciPy's `expm_multiply` requires.
-    pub fn new(dim: usize, matvec: Matvec, rmatvec: Matvec) -> Self {
+    pub fn new(dim: usize, trace: Complex64, matvec: Matvec, rmatvec: Matvec) -> Self {
         Self {
             dim,
+            trace,
             matvec,
             rmatvec,
         }
@@ -91,6 +93,12 @@ impl FciLinearOperator {
     fn dtype<'py>(&self, py: Python<'py>) -> PyResult<Bound<'py, PyAny>> {
         let numpy = py.import("numpy")?;
         numpy.getattr("dtype")?.call1(("complex128",))
+    }
+
+    /// The exact trace of the operator on this FCI sector.
+    #[getter]
+    fn trace(&self) -> Complex64 {
+        self.trace
     }
 
     /// Applies the operator to a state vector: returns ``op @ vec``.
