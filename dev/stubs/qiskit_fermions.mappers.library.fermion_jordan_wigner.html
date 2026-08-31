@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>fermion_jordan_wigner - Qiskit Fermions 0.2.0.dev0+d564ef5</title>
+        <title>fermion_jordan_wigner - Qiskit Fermions 0.2.0.dev0+ecdcc8a</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+d564ef5</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+ecdcc8a</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+d564ef5</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+ecdcc8a</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -283,14 +283,46 @@ identity).</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>The mapped qubit operator. The result is <cite>not</cite> simplified; call
-<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.quantum_info.SparseObservable#simplify" title="(in Qiskit v2.5)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">simplify()</span></code></a> to combine duplicate terms.</p>
+<dd class="field-even"><p>The mapped qubit operator. The result is <cite>not</cite> guaranteed to be fully simplified; call
+<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.quantum_info.SparseObservable#simplify" title="(in Qiskit v2.5)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">simplify()</span></code></a> to combine any remaining duplicate
+terms. Duplicates are merged as the result is assembled, to bound the memory required, so
+the exact number of terms returned may vary with the number of threads used. This does not
+affect the operator that the result represents.</p>
 </dd>
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – if <code class="docutils literal notranslate"><span class="pre">num_qubits</span></code> is too small to hold the operator’s support, i.e. if it is
     not larger than the largest mode index acted upon by <code class="docutils literal notranslate"><span class="pre">op</span></code>.</p>
 </dd>
 </dl>
+<section id="memory-usage">
+<h2>Memory usage<a class="headerlink" href="#memory-usage" title="Link to this heading">¶</a></h2>
+<p>This mapping is parallelized for speed, and that choice costs memory. Each worker thread
+accumulates into an observable of its own, and the terms are handed to whichever thread is free
+rather than partitioned by which Pauli strings they produce, so every thread ends up holding
+roughly a full copy of the mapped operator. Peak memory therefore grows with the number of
+threads: expect on the order of the mapped operator’s size <em>times</em> the thread count, plus the
+input operator.</p>
+<p>If memory matters more than wall-clock time, there are two things to reach for:</p>
+<ul>
+<li><p>Reduce the thread count, using rayon’s <code class="docutils literal notranslate"><span class="pre">RAYON_NUM_THREADS</span></code> environment variable. Peak memory
+falls roughly in proportion, and the mapping takes correspondingly longer.</p></li>
+<li><p>Map the operator in batches and combine the results yourself, which bounds the peak by the
+batch size at the cost of repeating the merging work:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">itertools</span>
+
+<span class="n">terms</span> <span class="o">=</span> <span class="n">op</span><span class="o">.</span><span class="n">iter_terms</span><span class="p">()</span>
+<span class="n">total</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="k">while</span> <span class="n">batch</span> <span class="o">:=</span> <span class="nb">list</span><span class="p">(</span><span class="n">itertools</span><span class="o">.</span><span class="n">islice</span><span class="p">(</span><span class="n">terms</span><span class="p">,</span> <span class="mi">100_000</span><span class="p">)):</span>
+    <span class="n">partial</span> <span class="o">=</span> <span class="n">fermion_jordan_wigner</span><span class="p">(</span><span class="n">FermionOperator</span><span class="o">.</span><span class="n">from_terms</span><span class="p">(</span><span class="n">batch</span><span class="p">),</span> <span class="n">num_qubits</span><span class="p">)</span>
+    <span class="n">partial</span> <span class="o">=</span> <span class="n">partial</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span>
+    <span class="n">total</span> <span class="o">=</span> <span class="n">partial</span> <span class="k">if</span> <span class="n">total</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">(</span><span class="n">total</span> <span class="o">+</span> <span class="n">partial</span><span class="p">)</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Note that the terms are streamed rather than materialized: <code class="docutils literal notranslate"><span class="pre">list(op.iter_terms())</span></code> on a
+large operator costs more than the mapping itself.</p>
+</li>
+</ul>
+</section>
 <section id="definition">
 <h2>Definition<a class="headerlink" href="#definition" title="Link to this heading">¶</a></h2>
 <p>The Jordan-Wigner transformation maps fermionic creation and annihilation operators to spin (or
@@ -389,7 +421,7 @@ Zeitschrift für Physik 47, No. 9. (1928), pp. 631–651,
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=a6df3ca7"></script>
+</div><script src="../_static/documentation_options.js?v=1a0b0276"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

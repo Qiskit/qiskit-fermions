@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Mapper Library - Qiskit Fermions 0.2.0.dev0+d564ef5</title>
+        <title>Mapper Library - Qiskit Fermions 0.2.0.dev0+ecdcc8a</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+d564ef5</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+ecdcc8a</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+d564ef5</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+ecdcc8a</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -316,6 +316,24 @@ Zeitschrift für Physik 47, No. 9. (1928), pp. 631–651,
 <a class="reference external" href="https://link.springer.com/article/10.1007/BF01331938">doi:10.1007/BF01331938</a>.</p>
 </aside>
 </aside>
+</section>
+<section id="memory-usage">
+<h2>Memory usage<a class="headerlink" href="#memory-usage" title="Link to this heading">¶</a></h2>
+<p>The result is not guaranteed to be fully simplified: duplicate terms are merged as it is
+assembled, to bound the memory required, but some may remain. Call <code class="docutils literal notranslate"><span class="pre">qk_obs_canonicalize</span></code> if you
+need them all combined. The exact number of terms returned may therefore vary with the number of
+threads used, which does not affect the operator that the result represents.</p>
+<p>This mapping is parallelized for speed, and that choice costs memory. Each worker thread
+accumulates into an observable of its own, and the terms are handed to whichever thread is free
+rather than partitioned by which Pauli strings they produce, so every thread ends up holding
+roughly a full copy of the mapped operator. Peak memory therefore grows with the number of
+threads: expect on the order of the mapped operator’s size <em>times</em> the thread count, plus the
+input operator.</p>
+<p>If memory matters more than wall-clock time, reduce the thread count through rayon’s
+<code class="docutils literal notranslate"><span class="pre">RAYON_NUM_THREADS</span></code> environment variable – peak memory falls roughly in proportion, and the
+mapping takes correspondingly longer – or map the operator in batches and add the partial results
+together yourself, which bounds the peak by the batch size at the cost of repeating the merging
+work.</p>
 </section>
 <section id="example">
 <h2>Example<a class="headerlink" href="#example" title="Link to this heading">¶</a></h2>
@@ -482,7 +500,7 @@ creation (annihilation) operator acting on the <span class="math">\(j\)</span>-t
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=a6df3ca7"></script>
+</div><script src="../_static/documentation_options.js?v=1a0b0276"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
