@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Evolution - Qiskit Fermions 0.2.0.dev0+cd27fcf</title>
+        <title>Evolution - Qiskit Fermions 0.2.0.dev0+d564ef5</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+cd27fcf</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+d564ef5</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+cd27fcf</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+d564ef5</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -311,8 +311,8 @@ negative value evolves backwards in time.</p></li>
 <span class="sig-name descname"><span class="pre">_apply_unitary_placed_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norb</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nelec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">copy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freg_indices</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qiskit_fermions.circuit.library.Evolution._apply_unitary_placed_" title="Link to this definition">¶</a></dt>
 <dd><p>Applies <code class="docutils literal notranslate"><span class="pre">exp(-i</span> <span class="pre">*</span> <span class="pre">time</span> <span class="pre">*</span> <span class="pre">operator)</span></code> after relabeling the operator to global modes.</p>
 <p>The operator is relabeled onto its global modes and turned into a <code class="docutils literal notranslate"><span class="pre">scipy</span></code> <code class="docutils literal notranslate"><span class="pre">LinearOperator</span></code>
-via <a class="reference internal" href="qiskit_fermions.linalg.linear_operator.html#qiskit_fermions.linalg.linear_operator" title="qiskit_fermions.linalg.linear_operator"><code class="xref py py-func docutils literal notranslate"><span class="pre">linear_operator()</span></code></a> (backed by a native FCI matrix-vector kernel), then applied to the
-vector via <code class="docutils literal notranslate"><span class="pre">scipy.sparse.linalg.expm_multiply</span></code>. This mirrors ffsim’s own <code class="docutils literal notranslate"><span class="pre">_apply_unitary_</span></code>
+backed by a native FCI matrix-vector kernel, then applied to the vector via
+<code class="docutils literal notranslate"><span class="pre">scipy.sparse.linalg.expm_multiply</span></code>. This mirrors ffsim’s own <code class="docutils literal notranslate"><span class="pre">_apply_unitary_</span></code>
 implementations (e.g. for its UCCSD operators).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -374,7 +374,7 @@ applied, mirroring the transpiler’s synthesis pass.</p></li>
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on 2026/08/26</div>
+              Last updated on 2026/08/31</div>
           </div>
           <div class="right-details">
             
@@ -412,7 +412,7 @@ applied, mirroring the transpiler’s synthesis pass.</p></li>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=a567620d"></script>
+</div><script src="../_static/documentation_options.js?v=a6df3ca7"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
