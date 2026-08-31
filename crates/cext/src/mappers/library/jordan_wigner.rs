@@ -59,6 +59,27 @@ use qiskit_fermions_core::operators::fermion_operator::FermionOperator;
 ///        Zeitschrift für Physik 47, No. 9. (1928), pp. 631–651,
 ///        `doi:10.1007/BF01331938 <https://link.springer.com/article/10.1007/BF01331938>`_.
 ///
+/// Memory usage
+/// ------------
+///
+/// The result is not guaranteed to be fully simplified: duplicate terms are merged as it is
+/// assembled, to bound the memory required, but some may remain. Call ``qk_obs_canonicalize`` if you
+/// need them all combined. The exact number of terms returned may therefore vary with the number of
+/// threads used, which does not affect the operator that the result represents.
+///
+/// This mapping is parallelized for speed, and that choice costs memory. Each worker thread
+/// accumulates into an observable of its own, and the terms are handed to whichever thread is free
+/// rather than partitioned by which Pauli strings they produce, so every thread ends up holding
+/// roughly a full copy of the mapped operator. Peak memory therefore grows with the number of
+/// threads: expect on the order of the mapped operator's size *times* the thread count, plus the
+/// input operator.
+///
+/// If memory matters more than wall-clock time, reduce the thread count through rayon's
+/// ``RAYON_NUM_THREADS`` environment variable -- peak memory falls roughly in proportion, and the
+/// mapping takes correspondingly longer -- or map the operator in batches and add the partial results
+/// together yourself, which bounds the peak by the batch size at the cost of repeating the merging
+/// work.
+///
 /// Example
 /// -------
 ///
