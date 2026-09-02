@@ -106,6 +106,27 @@ class OperatorTrait(Protocol):
     def adjoint(self) -> Self:
         """Returns the adjoint of this operator."""
 
+    def is_hermitian(self, atol: float = 1e-8) -> bool:
+        """Returns whether this operator is Hermitian.
+
+        The check reduces the difference of this operator and its :meth:`adjoint` to a normal form
+        (see :meth:`normal_ordered`) and compares the result against :meth:`zero`. It is therefore
+        only as strong as the normal form that the specific operator type reduces through.
+
+        .. note::
+           A ``True`` result is always reliable. A ``False`` result is reliable only for operator
+           types whose normal form is a genuine canonical form; for the others this check is
+           *conservative* and can return ``False`` for an operator that is in fact Hermitian.
+           Consult the specific implementation to find out which of the two applies.
+
+        Args:
+            atol: The numerical accuracy upto which coefficients are considered equal. This value
+                defaults to ``1e-8``.
+
+        Returns:
+            Whether this operator is Hermitian.
+        """
+
     def get_support(self) -> frozenset[int]:
         """Returns the set of mode indices which this operator acts upon."""
 

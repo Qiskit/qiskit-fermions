@@ -1,0 +1,12 @@
+---
+features:
+  - |
+    The :meth:`~qiskit_fermions.operators.OperatorTrait.is_hermitian` method is now part of the
+    :class:`~qiskit_fermions.operators.OperatorTrait` protocol. Every operator class already
+    provided it, so it can now be called on any value typed as an ``OperatorTrait`` rather than only
+    on a concrete operator class.
+
+    Note that the strength of this check varies by operator type, which the protocol documents as
+    its weakest guarantee: a ``True`` result is always reliable, while a ``False`` result is
+    conservative for operator types whose normal form is not a genuine canonical form. See
+    :meth:`~qiskit_fermions.operators.TransferVertexOperator.is_hermitian` for the one such case.

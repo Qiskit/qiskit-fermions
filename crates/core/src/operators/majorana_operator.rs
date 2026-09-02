@@ -126,15 +126,6 @@ impl MajoranaOperator {
         self.boundaries.push(self.modes.len());
     }
 
-    pub fn num_groups(&self) -> Option<u32> {
-        let self_groups = self.groups.as_ref()?;
-        if self_groups.is_empty() {
-            Some(0)
-        } else {
-            Some(self_groups.iter().max().unwrap() + 1)
-        }
-    }
-
     /// Splits this operator into new operators based on its [`groups`](Self::groups).
     ///
     /// If `group_indices` is `None`, every group is materialized once, in index order (`0` to
@@ -201,12 +192,6 @@ impl MajoranaOperator {
             boundaries,
             groups: None,
         }
-    }
-
-    pub fn is_hermitian(&self, atol: f64) -> bool {
-        let mut diff = (self.__sub__(&self.adjoint())).normal_ordered(false, true);
-        diff.ichop(atol);
-        diff.equiv(&Self::zero(), atol)
     }
 
     pub fn max_rank(&self) -> u32 {
@@ -366,6 +351,12 @@ impl OperatorTrait for MajoranaOperator {
             }
         }
         true
+    }
+
+    fn is_hermitian(&self, atol: f64) -> bool {
+        let mut diff = self.__sub__(&self.adjoint()).normal_ordered(false, true);
+        diff.ichop(atol);
+        diff.equiv(&Self::zero(), atol)
     }
 
     fn simplify(&self, atol: f64) -> Self {

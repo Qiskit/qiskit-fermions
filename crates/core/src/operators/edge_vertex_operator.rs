@@ -144,15 +144,6 @@ impl EdgeVertexOperator {
         self.boundaries.push(self.left_indices.len());
     }
 
-    pub fn num_groups(&self) -> Option<u32> {
-        let self_groups = self.groups.as_ref()?;
-        if self_groups.is_empty() {
-            Some(0)
-        } else {
-            Some(self_groups.iter().max().unwrap() + 1)
-        }
-    }
-
     /// Splits this operator into new operators based on its [`groups`](Self::groups).
     ///
     /// If `group_indices` is `None`, every group is materialized once, in index order (`0` to
@@ -218,12 +209,6 @@ impl EdgeVertexOperator {
         self.iter()
             .for_each(|term| result.__iadd__(&_normal_ordered_term(term, ascending, reduce)));
         result
-    }
-
-    pub fn is_hermitian(&self, atol: f64) -> bool {
-        let mut diff = (self.__sub__(&self.adjoint())).normal_ordered(true, true);
-        diff.ichop(atol);
-        diff.equiv(&Self::zero(), atol)
     }
 }
 
@@ -496,6 +481,16 @@ impl OperatorTrait for EdgeVertexOperator {
             }
         }
         true
+    }
+
+    /// Exact: [`normal_ordered`](Self::normal_ordered) with `reduce` contracts every reducible pair
+    /// of adjacent generators, *including* fusing two edge operators that share one index via
+    /// `E_ab E_bc = -i E_ac`, so a term that only cancels against its adjoint after such a
+    /// contraction is still recognized as zero.
+    fn is_hermitian(&self, atol: f64) -> bool {
+        let mut diff = self.__sub__(&self.adjoint()).normal_ordered(true, true);
+        diff.ichop(atol);
+        diff.equiv(&Self::zero(), atol)
     }
 
     fn simplify(&self, atol: f64) -> Self {

@@ -144,15 +144,6 @@ impl TransferVertexOperator {
         self.boundaries.push(self.left_indices.len());
     }
 
-    pub fn num_groups(&self) -> Option<u32> {
-        let self_groups = self.groups.as_ref()?;
-        if self_groups.is_empty() {
-            Some(0)
-        } else {
-            Some(self_groups.iter().max().unwrap() + 1)
-        }
-    }
-
     /// Splits this operator into new operators based on its [`groups`](Self::groups).
     ///
     /// If `group_indices` is `None`, every group is materialized once, in index order (`0` to
@@ -216,12 +207,6 @@ impl TransferVertexOperator {
         self.iter()
             .for_each(|term| result.__iadd__(&_normal_ordered_term(term, reduce)));
         result
-    }
-
-    pub fn is_hermitian(&self, atol: f64) -> bool {
-        let mut diff = (self.__sub__(&self.adjoint())).normal_ordered(true);
-        diff.ichop(atol);
-        diff.equiv(&Self::zero(), atol)
     }
 }
 
@@ -438,6 +423,22 @@ impl OperatorTrait for TransferVertexOperator {
             }
         }
         true
+    }
+
+    /// Conservative: may return `false` for an operator that is in fact Hermitian. A `true` result
+    /// is always reliable.
+    ///
+    /// [`normal_ordered`](Self::normal_ordered) only contracts pairs that combine into a *shorter*
+    /// term, and two transfer operators sharing a single mode do not: `T_jk T_jl` can only be
+    /// rewritten into another length-two product, and neither form is more canonical, so such
+    /// products are left alone. A term that would cancel against its adjoint only after rewriting
+    /// one is therefore not recognized as zero.
+    /// [`EdgeVertexOperator`](crate::operators::edge_vertex_operator::EdgeVertexOperator) has no
+    /// such gap, because there the analogous product *fuses*.
+    fn is_hermitian(&self, atol: f64) -> bool {
+        let mut diff = self.__sub__(&self.adjoint()).normal_ordered(true);
+        diff.ichop(atol);
+        diff.equiv(&Self::zero(), atol)
     }
 
     fn simplify(&self, atol: f64) -> Self {

@@ -57,6 +57,8 @@ pub trait OperatorTrait {
     fn one() -> Self;
     fn equiv(&self, other: &Self, atol: f64) -> bool;
 
+    fn is_hermitian(&self, atol: f64) -> bool;
+
     fn adjoint(&self) -> Self;
     fn simplify(&self, atol: f64) -> Self;
 
@@ -406,3 +408,48 @@ pub mod library;
 pub mod majorana_operator;
 pub mod terms;
 pub mod transfer_vertex_operator;
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    use crate::operators::edge_vertex_operator::EdgeVertexOperator;
+    use crate::operators::fermion_operator::FermionOperator;
+    use crate::operators::majorana_operator::MajoranaOperator;
+    use crate::operators::transfer_vertex_operator::TransferVertexOperator;
+
+    /// Calls [`OperatorTrait::is_hermitian`] through a generic bound.
+    ///
+    /// The bound is the point of this helper: it can only resolve if `is_hermitian` is reachable
+    /// through the trait itself, so it would fail to compile if the method were merely inherent on
+    /// each operator type. It also pins the trait implementation as the one that runs, which an
+    /// inherent method of the same name would otherwise silently shadow at every concrete call
+    /// site.
+    fn is_hermitian_via_trait<T: OperatorTrait + OperatorMacro>(op: &T, atol: f64) -> bool {
+        op.is_hermitian(atol)
+    }
+
+    /// Asserts the trait-level contract that holds for *every* operator type.
+    ///
+    /// The multiplicative identity is Hermitian and `i` times it is anti-Hermitian, both of which
+    /// are expressible without knowing the term vocabulary of any specific operator type. The
+    /// anti-Hermitian case is what gives this test teeth: without it, an implementation that
+    /// unconditionally returned `true` would pass.
+    fn assert_is_hermitian_contract<T: OperatorTrait + OperatorMacro>() {
+        let one = T::one();
+        assert!(is_hermitian_via_trait(&one, 1e-8));
+
+        let imaginary = one.__mul__(Complex64::new(0.0, 1.0));
+        assert!(!is_hermitian_via_trait(&imaginary, 1e-8));
+
+        assert!(is_hermitian_via_trait(&T::zero(), 1e-8));
+    }
+
+    #[test]
+    fn test_is_hermitian_through_trait_bound() {
+        assert_is_hermitian_contract::<FermionOperator>();
+        assert_is_hermitian_contract::<MajoranaOperator>();
+        assert_is_hermitian_contract::<EdgeVertexOperator>();
+        assert_is_hermitian_contract::<TransferVertexOperator>();
+    }
+}
