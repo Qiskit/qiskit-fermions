@@ -156,6 +156,8 @@
 
   
 
+  
+
 
 
   
@@ -171,6 +173,7 @@
    .. automethod:: group_weights
    .. automethod:: has_groups
    .. automethod:: ichop
+   .. automethod:: is_hermitian
    .. automethod:: iter_terms
    .. automethod:: iter_terms_with_groups
    .. automethod:: normal_ordered

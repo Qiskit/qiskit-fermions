@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>OperatorTrait - Qiskit Fermions 0.2.0.dev0+f3f4a4e</title>
+        <title>OperatorTrait - Qiskit Fermions 0.2.0.dev0+c458e00</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+f3f4a4e</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+c458e00</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+f3f4a4e</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+c458e00</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -394,6 +394,34 @@ not copy the group indices out of the operator in order to inspect them.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="qiskit_fermions.operators.OperatorTrait.is_hermitian">
+<span class="sig-name descname"><span class="pre">is_hermitian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-08</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qiskit_fermions.operators.OperatorTrait.is_hermitian" title="Link to this definition">¶</a></dt>
+<dd><p>Returns whether this operator is Hermitian.</p>
+<p>The check reduces the difference of this operator and its <a class="reference internal" href="#qiskit_fermions.operators.OperatorTrait.adjoint" title="qiskit_fermions.operators.OperatorTrait.adjoint"><code class="xref py py-meth docutils literal notranslate"><span class="pre">adjoint()</span></code></a> to a normal form
+(see <a class="reference internal" href="#qiskit_fermions.operators.OperatorTrait.normal_ordered" title="qiskit_fermions.operators.OperatorTrait.normal_ordered"><code class="xref py py-meth docutils literal notranslate"><span class="pre">normal_ordered()</span></code></a>) and compares the result against <a class="reference internal" href="#qiskit_fermions.operators.OperatorTrait.zero" title="qiskit_fermions.operators.OperatorTrait.zero"><code class="xref py py-meth docutils literal notranslate"><span class="pre">zero()</span></code></a>. It is therefore
+only as strong as the normal form that the specific operator type reduces through.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>A <code class="docutils literal notranslate"><span class="pre">True</span></code> result is always reliable. A <code class="docutils literal notranslate"><span class="pre">False</span></code> result is reliable only for operator
+types whose normal form is a genuine canonical form; for the others this check is
+<em>conservative</em> and can return <code class="docutils literal notranslate"><span class="pre">False</span></code> for an operator that is in fact Hermitian.
+Consult the specific implementation to find out which of the two applies.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>atol</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a>) – The numerical accuracy upto which coefficients are considered equal. This value
+defaults to <code class="docutils literal notranslate"><span class="pre">1e-8</span></code>.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Whether this operator is Hermitian.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="qiskit_fermions.operators.OperatorTrait.iter_terms">
 <span class="sig-name descname"><span class="pre">iter_terms</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qiskit_fermions.operators.OperatorTrait.iter_terms" title="Link to this definition">¶</a></dt>
 <dd><p>Iterates over the terms of this operator.</p>
@@ -564,6 +592,7 @@ the requested indices are built, in the given order.</p>
 <li><a class="reference internal" href="#qiskit_fermions.operators.OperatorTrait.group_weights"><code class="docutils literal notranslate"><span class="pre">OperatorTrait.group_weights()</span></code></a></li>
 <li><a class="reference internal" href="#qiskit_fermions.operators.OperatorTrait.has_groups"><code class="docutils literal notranslate"><span class="pre">OperatorTrait.has_groups()</span></code></a></li>
 <li><a class="reference internal" href="#qiskit_fermions.operators.OperatorTrait.ichop"><code class="docutils literal notranslate"><span class="pre">OperatorTrait.ichop()</span></code></a></li>
+<li><a class="reference internal" href="#qiskit_fermions.operators.OperatorTrait.is_hermitian"><code class="docutils literal notranslate"><span class="pre">OperatorTrait.is_hermitian()</span></code></a></li>
 <li><a class="reference internal" href="#qiskit_fermions.operators.OperatorTrait.iter_terms"><code class="docutils literal notranslate"><span class="pre">OperatorTrait.iter_terms()</span></code></a></li>
 <li><a class="reference internal" href="#qiskit_fermions.operators.OperatorTrait.iter_terms_with_groups"><code class="docutils literal notranslate"><span class="pre">OperatorTrait.iter_terms_with_groups()</span></code></a></li>
 <li><a class="reference internal" href="#qiskit_fermions.operators.OperatorTrait.normal_ordered"><code class="docutils literal notranslate"><span class="pre">OperatorTrait.normal_ordered()</span></code></a></li>
@@ -586,7 +615,7 @@ the requested indices are built, in the given order.</p>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=bd34faf3"></script>
+</div><script src="../_static/documentation_options.js?v=35dc5790"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
