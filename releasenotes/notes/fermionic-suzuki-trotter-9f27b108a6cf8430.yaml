@@ -1,0 +1,26 @@
+---
+features:
+  - |
+    Added :class:`~qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter`, a higher-order
+    product formula for decomposing an :class:`.Evolution` gate in fermionic space. Where
+    :class:`~qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter` applies each factor once,
+    this composes them symmetrically to cancel lower-order error terms, and its ``reps`` argument
+    divides the evolution into several shorter steps::
+
+        Evolution(num_modes, operator, time=1.0, synthesis=FermionicSuzukiTrotter(order=2, reps=4))
+
+    Because it operates on the fermionic operator, it splits it along its
+    :attr:`~qiskit_fermions.operators.OperatorTrait.groups` where they are assigned -- a partition that
+    is no longer available to a product formula applied after the fermion-to-qubit mapping. On a
+    six-mode Fermi-Hubbard chain grouped into three flow sets, ``order=2`` with ``reps=4`` reached a
+    Trotter error roughly two times lower than a second-order qubit-side formula, at slightly fewer
+    two-qubit gates.
+
+    :class:`~qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter` is the first-order member
+    of this family and is now implemented as such, which also gives it the ``reps`` argument it
+    previously lacked. The two are interchangeable at equal ``reps``.
+
+    Note that a higher order buys accuracy with depth: an order-``k`` formula emits roughly
+    ``5**((k-2)/2)`` times as many factors as an order-2 one. Note also that the accuracy of a
+    decomposed circuit is governed by the weaker of the fermionic and the fermion-to-qubit formula, so
+    raising the order here while the latter stays first-order buys little.

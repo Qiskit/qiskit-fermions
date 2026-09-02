@@ -40,14 +40,17 @@ mapped operator, where the grouping is no longer available.
 .. autosummary::
    :toctree: ../stubs/
 
-   FermionicLieTrotter
    FermionicEvolutionSynthesis
+   FermionicLieTrotter
+   FermionicSuzukiTrotter
 """
 
 from .evolution_synthesis import FermionicEvolutionSynthesis
 from .lie_trotter import FermionicLieTrotter
+from .suzuki_trotter import FermionicSuzukiTrotter
 
 __all__ = [
     "FermionicEvolutionSynthesis",
     "FermionicLieTrotter",
+    "FermionicSuzukiTrotter",
 ]

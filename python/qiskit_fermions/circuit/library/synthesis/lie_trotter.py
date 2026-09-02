@@ -14,17 +14,10 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
-from .evolution_synthesis import FermionicEvolutionSynthesis
-
-if TYPE_CHECKING:
-    from qiskit_fermions.circuit import FermionicCircuit
-
-    from ..evolution import Evolution
+from .suzuki_trotter import FermionicSuzukiTrotter
 
 
-class FermionicLieTrotter(FermionicEvolutionSynthesis):
+class FermionicLieTrotter(FermionicSuzukiTrotter):
     r"""The first-order Lie-Trotter product formula, applied in fermionic space.
 
     Given an :class:`.Evolution` gate with the evolution time :math:`t`, this synthesizes the
@@ -34,80 +27,41 @@ class FermionicLieTrotter(FermionicEvolutionSynthesis):
 
         e^{-i t \sum_j H_j} \approx \prod_j e^{-i t H_j},
 
-    emitting one :class:`.Evolution` gate per factor :math:`H_j`, each evolving for the `full` time
-    :math:`t`.
+    emitting one :class:`.Evolution` gate per factor :math:`H_j`, each evolving for the whole time
+    :math:`t` -- or, with :attr:`~.FermionicLieTrotter.reps` repetitions, for :math:`t/\texttt{reps}`
+    apiece across that many sweeps.
 
-    How the evolved operator is split into the :math:`H_j` depends on the operator itself: when it has
-    :attr:`~qiskit_fermions.operators.OperatorTrait.groups` assigned (see
-    :ref:`grouping_explanation`), each group becomes one factor; otherwise every individual term does.
-    Each factor is reduced to act only on the modes it actually touches, so the emitted gate spans as
-    few modes as possible.
+    The operator is split into the :math:`H_j`, and each factor narrowed to the modes it actually
+    touches, exactly as described for :class:`.FermionicSuzukiTrotter`.
+
+    First order is the degenerate case of the Suzuki recursion, so this is implemented as a
+    :class:`.FermionicSuzukiTrotter` with the order fixed to ``1``; the two are interchangeable at
+    equal :attr:`~.FermionicLieTrotter.reps`. It keeps a name of its own because it is the default
+    synthesis of an :class:`.Evolution` gate, and because a plain first-order product formula is more
+    recognizable under that name than as an argument to a higher-order one.
 
     .. note::
        This product formula is `exact` only when the factors mutually commute. Grouping an operator so
        that each group collects mutually commuting terms therefore both shortens the circuit and
-       reduces the Trotter error.
+       reduces the Trotter error. Where the factors do not commute, an even
+       :attr:`~.FermionicSuzukiTrotter.order` reduces the error further at the same grouping.
 
        Note also that applying it at all is optional: leaving the gate undecomposed and letting the
        fermion-to-qubit stage handle the whole operator incurs no Trotter error at this level. See
        :mod:`~qiskit_fermions.circuit.library.synthesis`.
 
-    .. caution::
-       Each factor :math:`H_j` must itself be Hermitian for :math:`e^{-i t H_j}` to be unitary. This
-       does `not` follow from their sum being Hermitian: splitting a Hermitian operator can produce
-       non-Hermitian groups (for example, separating :math:`a^\dagger_0 a_1` from its conjugate
-       partner :math:`a^\dagger_1 a_0`). It is the caller's responsibility to group accordingly; this
-       is not verified.
+    The Hermiticity requirement on the individual factors, described in the
+    :class:`.FermionicSuzukiTrotter` documentation, applies here too.
     """
 
-    def synthesize(self, gate: Evolution) -> FermionicCircuit:
-        """Synthesizes the gate into one :class:`.Evolution` factor per group (or per term).
-
-        See the class documentation for the product formula this implements.
+    def __init__(self, reps: int = 1) -> None:
+        """Initializing an instance of this synthesis method can be done with the argument below.
 
         Args:
-            gate: the gate to synthesize.
+            reps: the number of times to repeat the formula, each repetition evolving for
+                ``time / reps``.
 
-        Returns:
-            A :class:`.FermionicCircuit` holding one narrowed :class:`.Evolution` gate per factor.
+        Raises:
+            ValueError: if ``reps`` is not positive.
         """
-        # deferred import: `qiskit_fermions.circuit` imports this subpackage's siblings at module load
-        from qiskit_fermions.circuit import FermionicCircuit
-
-        from ..evolution import Evolution
-
-        definition = FermionicCircuit(gate.num_modes)
-
-        # when the operator being evolved has groups use those for the decomposition, otherwise
-        # decompose into all individual terms
-        iterator = (
-            gate.operator.split_out_groups
-            if gate.operator.has_groups()
-            else gate.operator.iter_terms
-        )
-
-        for item in iterator():
-            if isinstance(item, tuple):
-                # iterating over terms rather than operator groups
-                item = gate.operator.__class__.from_terms([item])
-
-            # reduce each operator to act only on the non-idle part of the register
-            active = item.get_support()
-            num_active = len(active)
-            active_idx = iter(range(num_active))
-            idle_idx = iter(range(num_active, gate.num_modes))
-            permutation = [
-                next(active_idx) if idx in active else next(idle_idx)
-                for idx in range(gate.num_modes)
-            ]
-            relabeled = item.relabel_modes(permutation)
-
-            # the factors are marked atomic: splitting them again would discard the very partition
-            # this formula chose, and for a single-term factor there would be nothing left to split
-            # anyway -- it would just re-emit itself indefinitely
-            definition.append(
-                Evolution(num_active, relabeled, time=gate.params[0], atomic=True),
-                [definition.modes[idx] for idx in sorted(active)],
-            )
-
-        return definition
+        super().__init__(order=1, reps=reps)

@@ -22,6 +22,7 @@ from qiskit_fermions.circuit.library import Evolution
 from qiskit_fermions.circuit.library.synthesis import (
     FermionicEvolutionSynthesis,
     FermionicLieTrotter,
+    FermionicSuzukiTrotter,
 )
 from qiskit_fermions.operators import FermionOperator
 
@@ -62,6 +63,33 @@ def test_default_synthesis_is_lie_trotter():
     evo = Evolution(4, _hopping(grouped=False), time=1.5)
 
     assert isinstance(evo.synthesis, FermionicLieTrotter)
+
+
+def test_is_the_first_order_suzuki_formula():
+    """First order is the degenerate case of the Suzuki recursion, so it is implemented as one."""
+    synthesis = FermionicLieTrotter()
+
+    assert isinstance(synthesis, FermionicSuzukiTrotter)
+    assert synthesis.order == 1
+
+
+def test_reps_repeats_the_sweep(subtests):
+    """Each repetition evolves for a fraction of the time, so the factor count scales with it."""
+    hamil = _hopping(grouped=True)  # two groups
+
+    for reps, expected in ((1, 2), (2, 4), (4, 8)):
+        with subtests.test(f"reps={reps}"):
+            evo = Evolution(4, hamil, time=1.5, synthesis=FermionicLieTrotter(reps=reps))
+
+            definition = evo.definition
+            assert definition.count_ops() == {"Evolution": expected}
+            for instruction in definition.data:
+                assert instruction.operation.params[0] == pytest.approx(1.5 / reps)
+
+
+def test_rejects_non_positive_reps():
+    with pytest.raises(ValueError, match="must be positive"):
+        FermionicLieTrotter(reps=0)
 
 
 def test_synthesis_is_read_only():
