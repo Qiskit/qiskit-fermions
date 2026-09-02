@@ -130,9 +130,20 @@ from the custom mapper section, demonstrating equivalent results:
        qf_maj_op_free(maj_op);
        qf_sparse_obs_free(qubit_op);
 
+.. note::
+   The two-step above is written out to show two library mappers composing. In the Python API you
+   would map a :class:`.MajoranaOperator` in one step instead, with
+   :func:`.majorana_jordan_wigner`, and likewise for the other operator types
+   (:func:`.edge_vertex_jordan_wigner`, :func:`.transfer_vertex_jordan_wigner`). Going via a
+   :class:`.FermionOperator` is not only longer but more expensive: every generator of these algebras
+   maps onto a single Pauli string, whereas each fermionic action maps onto a two-term sum, so the
+   detour inflates the intermediate result only to merge it back down again.
+
 In the Python API, some of these library mappers are also reachable through type-agnostic
 convenience mappers. :func:`.fermion_operator` and :func:`.majorana_operator` sit in front of
 :func:`.majorana_to_fermion` and :func:`.fermion_to_majorana` (among others), delegating to the
 appropriate library implementation internally based on the type of object they are given,
-rather than requiring you to pick the right function yourself. See :mod:`qiskit_fermions.protocols`
-for how this dispatch is implemented internally.
+rather than requiring you to pick the right function yourself. The same applies to
+:func:`.jordan_wigner`, which dispatches to whichever of the four direct implementations matches the
+operator it is given. See :mod:`qiskit_fermions.protocols` for how this dispatch is implemented
+internally.

@@ -431,7 +431,7 @@ give the same result as evolving it in the fermionic space first and mapping aft
 
    >>> import numpy as np
    >>> from qiskit.quantum_info import SparsePauliOp
-   >>> from qiskit_fermions.mappers.library import jordan_wigner, transfer_vertex_to_fermion
+   >>> from qiskit_fermions.mappers.library import transfer_vertex_jordan_wigner
    >>>
    >>> def to_matrix(observable):
    ...     # SparseObservable carries no dense-matrix method, so route through
@@ -452,7 +452,7 @@ give the same result as evolving it in the fermionic space first and mapping aft
    True
    >>>
    >>> jw_matrix = to_matrix(
-   ...     jordan_wigner(transfer_vertex_to_fermion(hamiltonian), num_sites).simplify()
+   ...     transfer_vertex_jordan_wigner(hamiltonian, num_sites).simplify()
    ... )
    >>> flow_matrix = to_matrix(flow_set_encoding(hamiltonian, num_qubits))
    >>> np.allclose(flow_matrix @ isometry, isometry @ jw_matrix)

@@ -1,0 +1,30 @@
+---
+features:
+  - |
+    Added direct Jordan-Wigner mappers for the three remaining operator data structures:
+    :func:`~qiskit_fermions.mappers.library.majorana_jordan_wigner`,
+    :func:`~qiskit_fermions.mappers.library.edge_vertex_jordan_wigner` and
+    :func:`~qiskit_fermions.mappers.library.transfer_vertex_jordan_wigner`. Previously the only
+    mapper producing a qubit operator was
+    :func:`~qiskit_fermions.mappers.library.fermion_jordan_wigner`, so mapping a
+    :class:`~qiskit_fermions.operators.MajoranaOperator`,
+    :class:`~qiskit_fermions.operators.EdgeVertexOperator` or
+    :class:`~qiskit_fermions.operators.TransferVertexOperator` meant converting it to a
+    :class:`~qiskit_fermions.operators.FermionOperator` first.
+
+    Mapping directly is markedly cheaper than that detour. Under Jordan-Wigner every generator of
+    these three algebras maps onto a *single* Pauli string -- a vertex operator becomes the weight-1
+    Pauli :math:`Z_l`, and an edge or transfer operator becomes one string whose :math:`Z` chain
+    spans only the modes strictly between its two endpoints -- whereas each fermionic creation or
+    annihilation operator maps onto a two-term sum. Routing a length-:math:`L` term through a
+    :class:`~qiskit_fermions.operators.FermionOperator` therefore inflates what is one Pauli string
+    into as many as :math:`4^L` terms, only for them to be merged back down again.
+
+    For example, the 1D and 2D Fermi-Hubbard guides previously mapped their Hamiltonians with
+    ``jordan_wigner(transfer_vertex_to_fermion(hamiltonian), num_sites)`` and now call
+    :func:`~qiskit_fermions.mappers.library.transfer_vertex_jordan_wigner` directly.
+  - |
+    :func:`~qiskit_fermions.mappers.library.jordan_wigner` now dispatches on all four operator types
+    rather than only :class:`~qiskit_fermions.operators.FermionOperator`, delegating to whichever
+    direct implementation matches the operator it is given. Passing one of the other three operator
+    types previously raised a :class:`TypeError`.
