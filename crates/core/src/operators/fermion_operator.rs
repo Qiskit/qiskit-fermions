@@ -201,12 +201,6 @@ impl FermionOperator {
         result
     }
 
-    pub fn is_hermitian(&self, atol: f64) -> bool {
-        let mut diff = (self.__sub__(&self.adjoint())).normal_ordered(None);
-        diff.ichop(atol);
-        diff.equiv(&Self::zero(), atol)
-    }
-
     pub fn max_rank(&self) -> u32 {
         self.boundaries
             .windows(2)
@@ -433,6 +427,12 @@ impl OperatorTrait for FermionOperator {
             }
         }
         true
+    }
+
+    fn is_hermitian(&self, atol: f64) -> bool {
+        let mut diff = self.__sub__(&self.adjoint()).normal_ordered(None);
+        diff.ichop(atol);
+        diff.equiv(&Self::zero(), atol)
     }
 
     fn simplify(&self, atol: f64) -> Self {

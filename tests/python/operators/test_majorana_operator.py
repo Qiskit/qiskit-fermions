@@ -359,23 +359,32 @@ class TestMajoranaOperator:
             expected = cls.from_dict({(gamma(0, True), gamma(0, True), gamma(0, False)): -1})
             assert op.normal_ordered(reduce=False).equiv(expected)
 
-    def test_is_hermitian(self):
+    def test_is_hermitian(self, subtests):
         cls = self.get_class()
 
-        op = cls.from_dict(
-            {
-                (
-                    gamma(0, False),
-                    gamma(0, True),
-                    gamma(1, False),
-                    gamma(1, True),
-                ): 1.00001j,
-                (gamma(1, True), gamma(1, False), gamma(0, True), gamma(0, False)): -1j,
-            }
-        )
+        with subtests.test("atol boundary"):
+            op = cls.from_dict(
+                {
+                    (
+                        gamma(0, False),
+                        gamma(0, True),
+                        gamma(1, False),
+                        gamma(1, True),
+                    ): 1.00001j,
+                    (gamma(1, True), gamma(1, False), gamma(0, True), gamma(0, False)): -1j,
+                }
+            )
 
-        assert not op.is_hermitian()
-        assert op.is_hermitian(1e-4)
+            assert not op.is_hermitian()
+            assert op.is_hermitian(1e-4)
+
+        with subtests.test("symmetrized operator is Hermitian"):
+            op = cls.from_dict({(gamma(0, True), gamma(1, False)): 1.0 + 1.0j})
+            assert not op.is_hermitian()
+            assert (op + op.adjoint()).is_hermitian()
+
+        with subtests.test("imaginary identity is not Hermitian"):
+            assert not (cls.one() * 1j).is_hermitian()
 
     def test_max_rank(self, subtests):
         cls = self.get_class()

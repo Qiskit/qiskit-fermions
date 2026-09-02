@@ -389,18 +389,27 @@ class TestFermionOperator:
             )
             assert op.normal_ordered(sandwich=False).equiv(expected)
 
-    def test_is_hermitian(self):
+    def test_is_hermitian(self, subtests):
         cls = self.get_class()
 
-        op = cls.from_dict(
-            {
-                ((True, 0), (False, 1)): 1.00001j,
-                ((True, 1), (False, 0)): -1j,
-            }
-        )
+        with subtests.test("atol boundary"):
+            op = cls.from_dict(
+                {
+                    ((True, 0), (False, 1)): 1.00001j,
+                    ((True, 1), (False, 0)): -1j,
+                }
+            )
 
-        assert not op.is_hermitian()
-        assert op.is_hermitian(1e-4)
+            assert not op.is_hermitian()
+            assert op.is_hermitian(1e-4)
+
+        with subtests.test("symmetrized operator is Hermitian"):
+            op = cls.from_dict({((True, 0), (False, 1)): 1.0})
+            assert not op.is_hermitian()
+            assert (op + op.adjoint()).is_hermitian()
+
+        with subtests.test("imaginary identity is not Hermitian"):
+            assert not (cls.one() * 1j).is_hermitian()
 
     def test_max_rank(self, subtests):
         cls = self.get_class()

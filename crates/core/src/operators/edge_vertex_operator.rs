@@ -219,12 +219,6 @@ impl EdgeVertexOperator {
             .for_each(|term| result.__iadd__(&_normal_ordered_term(term, ascending, reduce)));
         result
     }
-
-    pub fn is_hermitian(&self, atol: f64) -> bool {
-        let mut diff = (self.__sub__(&self.adjoint())).normal_ordered(true, true);
-        diff.ichop(atol);
-        diff.equiv(&Self::zero(), atol)
-    }
 }
 
 /// Rewrites `(left, right)` into the orientation selected by `ascending`, returning the rewritten
@@ -496,6 +490,16 @@ impl OperatorTrait for EdgeVertexOperator {
             }
         }
         true
+    }
+
+    /// Exact: [`normal_ordered`](Self::normal_ordered) with `reduce` contracts every reducible pair
+    /// of adjacent generators, *including* fusing two edge operators that share one index via
+    /// `E_ab E_bc = -i E_ac`, so a term that only cancels against its adjoint after such a
+    /// contraction is still recognized as zero.
+    fn is_hermitian(&self, atol: f64) -> bool {
+        let mut diff = self.__sub__(&self.adjoint()).normal_ordered(true, true);
+        diff.ichop(atol);
+        diff.equiv(&Self::zero(), atol)
     }
 
     fn simplify(&self, atol: f64) -> Self {

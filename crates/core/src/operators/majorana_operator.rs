@@ -203,12 +203,6 @@ impl MajoranaOperator {
         }
     }
 
-    pub fn is_hermitian(&self, atol: f64) -> bool {
-        let mut diff = (self.__sub__(&self.adjoint())).normal_ordered(false, true);
-        diff.ichop(atol);
-        diff.equiv(&Self::zero(), atol)
-    }
-
     pub fn max_rank(&self) -> u32 {
         self.boundaries
             .windows(2)
@@ -366,6 +360,12 @@ impl OperatorTrait for MajoranaOperator {
             }
         }
         true
+    }
+
+    fn is_hermitian(&self, atol: f64) -> bool {
+        let mut diff = self.__sub__(&self.adjoint()).normal_ordered(false, true);
+        diff.ichop(atol);
+        diff.equiv(&Self::zero(), atol)
     }
 
     fn simplify(&self, atol: f64) -> Self {
