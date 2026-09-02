@@ -1,6 +1,0 @@
-﻿map\_node\_single\_register
-===========================
-
-.. currentmodule:: qiskit_fermions.transpiler.passes.utils
-
-.. autofunction:: map_node_single_register

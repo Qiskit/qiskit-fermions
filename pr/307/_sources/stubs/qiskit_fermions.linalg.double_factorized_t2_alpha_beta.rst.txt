@@ -1,6 +1,0 @@
-﻿double\_factorized\_t2\_alpha\_beta
-===================================
-
-.. currentmodule:: qiskit_fermions.linalg
-
-.. autofunction:: double_factorized_t2_alpha_beta
