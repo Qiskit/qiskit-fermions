@@ -102,8 +102,11 @@ class FermionicLieTrotter(FermionicEvolutionSynthesis):
             ]
             relabeled = item.relabel_modes(permutation)
 
+            # the factors are marked atomic: splitting them again would discard the very partition
+            # this formula chose, and for a single-term factor there would be nothing left to split
+            # anyway -- it would just re-emit itself indefinitely
             definition.append(
-                Evolution(num_active, relabeled, time=gate.params[0]),
+                Evolution(num_active, relabeled, time=gate.params[0], atomic=True),
                 [definition.modes[idx] for idx in sorted(active)],
             )
 

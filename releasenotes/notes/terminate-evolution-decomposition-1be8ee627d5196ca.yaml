@@ -1,0 +1,28 @@
+---
+fixes:
+  - |
+    Fixed a decomposition of the :class:`.Evolution` gate that never terminated. The evolution of a
+    single operator term used to decompose into an identical single-term :class:`.Evolution`, so
+    repeated expansion made no progress. Most visibly this made ``inverse()`` raise a
+    ``RecursionError``, since it recurses through the gate's definition.
+
+    A factor emitted by a
+    :class:`~qiskit_fermions.circuit.library.synthesis.FermionicEvolutionSynthesis` is
+    now marked :attr:`.Evolution.atomic` and is left in place by
+    :meth:`~.FermionicCircuit.decompose` instead of being expanded again. Decomposing an
+    :class:`.Evolution` repeatedly therefore reaches a fixed point.
+  - |
+    Fixed :meth:`~.FermionicCircuit.decompose` producing non-unitary factors when applied more than
+    twice to an operator carrying groups. Each group was split further, term by term, but an
+    individual term is generally not Hermitian even when the group containing it is -- the conjugate
+    pairs of a :class:`.UCC` cluster generator being the motivating example. The exponential of such a
+    factor is not unitary.
+
+    The fermion-to-qubit stage rejected those factors with a ``ValueError`` about complex
+    coefficients, but state-vector simulation applied them without complaint and returned a
+    non-normalized state. Since a group is now atomic, the split that produced them no longer happens.
+  - |
+    ``Evolution.inverse()`` is now implemented directly, returning an :class:`.Evolution` that evolves
+    the same operator for the negated time and preserves the gate's :attr:`~.Evolution.synthesis`
+    method. Previously the inherited implementation recursed through the gate's definition and returned
+    a plain :class:`~qiskit.circuit.Gate`, discarding both the operator and the synthesis method.

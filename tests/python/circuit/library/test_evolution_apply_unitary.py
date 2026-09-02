@@ -279,3 +279,29 @@ def test_evolution_apply_unitary_matches_ffsim_molecular_hamiltonian():
     expected = scipy.sparse.linalg.expm_multiply(-1j * time * linop, initial, traceA=0.0)
 
     np.testing.assert_allclose(result, expected, atol=1e-10)
+
+
+def test_decomposed_evolution_stays_unitary_at_any_depth():
+    """Regression test for a silently non-unitary decomposition.
+
+    Splitting a group of conjugate-paired terms term-by-term produced individually non-Hermitian
+    factors, whose exponential is not unitary. The transpiler rejected those factors outright, but
+    ``expm_multiply`` applied them happily: this state vector came back with a norm of ~1.80 rather
+    than 1, with no error raised anywhere.
+    """
+    norb, nelec, time = 4, (1, 1), 1.5
+    hamil = FermionOperator.from_terms_with_groups(
+        [
+            (((True, 0), (False, 1)), -1.0, 0),
+            (((True, 1), (False, 0)), -1.0, 0),
+            (((True, 1), (False, 2)), -1.0, 1),
+            (((True, 2), (False, 1)), -1.0, 1),
+        ]
+    )
+    circ = FermionicCircuit(norb)
+    circ.append(Evolution(norb, hamil, time=time), circ.modes)
+
+    vec0 = ffsim.slater_determinant(norb, ([0], [0]))
+    for reps in (1, 2, 3, 5):
+        result = circ.decompose(reps=reps)._apply_unitary_(vec0, norb, nelec, copy=True)
+        assert np.isclose(np.linalg.norm(result), 1.0), f"not unitary at reps={reps}"
