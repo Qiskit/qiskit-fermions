@@ -11,11 +11,13 @@
 // that they have been altered from the originals.
 
 use crate::pointers::const_ptr_as_ref;
+use qiskit_fermions_core::operators::edge_vertex_operator::EdgeVertexOperator;
 use qiskit_fermions_core::operators::fermion_operator::FermionOperator;
 use qiskit_fermions_core::operators::library::commutators::{
     anti_commutator, commutator, double_commutator,
 };
 use qiskit_fermions_core::operators::majorana_operator::MajoranaOperator;
+use qiskit_fermions_core::operators::transfer_vertex_operator::TransferVertexOperator;
 
 macro_rules! impl_commutators {
     ($name:ty, $prefix:ident) => {
@@ -72,3 +74,5 @@ macro_rules! impl_commutators {
 // declare the generated C function signatures in cbindgen.toml!
 impl_commutators!(FermionOperator, ferm_op);
 impl_commutators!(MajoranaOperator, maj_op);
+impl_commutators!(EdgeVertexOperator, edge_op);
+impl_commutators!(TransferVertexOperator, transfer_op);

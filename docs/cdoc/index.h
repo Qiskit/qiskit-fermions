@@ -23,6 +23,14 @@
  */
 
 /**
+ * @defgroup qf_edge_op qf_edge_op
+ */
+
+/**
+ * @defgroup qf_transfer_op qf_transfer_op
+ */
+
+/**
  * @defgroup qf_operator_terms qf_operator_terms
  */
 

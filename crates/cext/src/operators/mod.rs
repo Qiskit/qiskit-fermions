@@ -10,7 +10,9 @@
 // copyright notice, and modified files need to carry a notice indicating
 // that they have been altered from the originals.
 
+pub mod edge_vertex_operator;
 pub mod fermion_operator;
 pub mod library;
 pub mod majorana_operator;
 pub mod terms;
+pub mod transfer_vertex_operator;

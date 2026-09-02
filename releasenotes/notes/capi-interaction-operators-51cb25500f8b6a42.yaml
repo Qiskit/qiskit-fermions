@@ -1,0 +1,21 @@
+---
+features:
+  - |
+    Added a C API for the edge-vertex and transfer-vertex operator representations, which were
+    previously available only from Python. This includes two new opaque structs,
+    :c:struct:`QfEdgeVertexOperator` and :c:struct:`QfTransferVertexOperator`, each one with an
+    equivalent set of functions to the existing operator structs.
+
+    Both operators store two parallel index arrays, ``left_indices`` and ``right_indices``, in
+    place of the single ``modes`` array the Majorana operator uses. Because a generator is always
+    identified by exactly one ``(left, right)`` pair, the two arrays necessarily have the same
+    length and the constructors therefore take a single ``num_indices`` argument covering both.
+  - |
+    Added ``qf_edge_op_canonical_order`` and ``qf_transfer_op_canonical_order``, along with the
+    commutator, anti-commutator and double-commutator functions for both new operator types
+    (``qf_edge_op_commutator`` and friends).
+  - |
+    Added C API functions for the edge-vertex and transfer-vertex mappers:
+    :c:func:`qf_edge_vertex_to_fermion`, :c:func:`qf_edge_vertex_to_majorana`,
+    :c:func:`qf_transfer_vertex_to_fermion`, :c:func:`qf_transfer_vertex_to_majorana`, and
+    :c:func:`qf_transfer_vertex_to_edge_vertex`.
