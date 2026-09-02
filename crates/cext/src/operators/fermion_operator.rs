@@ -1116,7 +1116,7 @@ pub unsafe extern "C" fn qf_ferm_op_normal_ordered(
 ///     bool actions2[2] = {true, false};
 ///     uint32_t modes2[2] = {1, 0};
 ///     QkComplex64 coeff2 = {0.0, -1};
-///     qf_ferm_op_add_term(op, 2, actions2, modes2, &coeff1);
+///     qf_ferm_op_add_term(op, 2, actions2, modes2, &coeff2);
 ///
 ///     assert(qf_ferm_op_is_hermitian(op, 1e-4));
 ///     assert(!qf_ferm_op_is_hermitian(op, 1e-8));
