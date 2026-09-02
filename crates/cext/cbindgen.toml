@@ -27,6 +27,20 @@ QfMajoranaOperator *qf_maj_op_commutator(const QfMajoranaOperator *op_a, const Q
 QfMajoranaOperator *qf_maj_op_anti_commutator(const QfMajoranaOperator *op_a, const QfMajoranaOperator *op_b);
 /// @ingroup qf_commutators
 QfMajoranaOperator *qf_maj_op_double_commutator(const QfMajoranaOperator *op_a, const QfMajoranaOperator *op_b, const QfMajoranaOperator *op_c, bool sign);
+
+/// @ingroup qf_commutators
+QfEdgeVertexOperator *qf_edge_op_commutator(const QfEdgeVertexOperator *op_a, const QfEdgeVertexOperator *op_b);
+/// @ingroup qf_commutators
+QfEdgeVertexOperator *qf_edge_op_anti_commutator(const QfEdgeVertexOperator *op_a, const QfEdgeVertexOperator *op_b);
+/// @ingroup qf_commutators
+QfEdgeVertexOperator *qf_edge_op_double_commutator(const QfEdgeVertexOperator *op_a, const QfEdgeVertexOperator *op_b, const QfEdgeVertexOperator *op_c, bool sign);
+
+/// @ingroup qf_commutators
+QfTransferVertexOperator *qf_transfer_op_commutator(const QfTransferVertexOperator *op_a, const QfTransferVertexOperator *op_b);
+/// @ingroup qf_commutators
+QfTransferVertexOperator *qf_transfer_op_anti_commutator(const QfTransferVertexOperator *op_a, const QfTransferVertexOperator *op_b);
+/// @ingroup qf_commutators
+QfTransferVertexOperator *qf_transfer_op_double_commutator(const QfTransferVertexOperator *op_a, const QfTransferVertexOperator *op_b, const QfTransferVertexOperator *op_c, bool sign);
 """
 
 [parse]
@@ -41,4 +55,6 @@ prefix_with_name = true
 "ExitCode" = "QfExitCode"
 "FermionOperator" = "QfFermionOperator"
 "MajoranaOperator" = "QfMajoranaOperator"
+"EdgeVertexOperator" = "QfEdgeVertexOperator"
+"TransferVertexOperator" = "QfTransferVertexOperator"
 "FCIDump" = "QfFCIDump"
