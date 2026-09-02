@@ -417,6 +417,19 @@ fn push_z_string(bit_terms: &mut Vec<ffi::QkBitTerm>, indices: &mut Vec<u32>, qu
     }
 }
 
+/// Returns the largest fermionic mode index the two index buffers of a vertex-type operator act on.
+fn max_paired_index(left_indices: &[u32], right_indices: &[u32]) -> Option<u32> {
+    // Both endpoints must be checked: an operator whose largest index only ever appears on the right
+    // would otherwise pass a left-only check and abort inside the `qk_obs_*` calls.
+    left_indices
+        .iter()
+        .max()
+        .into_iter()
+        .chain(right_indices.iter().max())
+        .max()
+        .copied()
+}
+
 /// Maps a single Majorana operator onto its Pauli image.
 ///
 /// With the [`MajoranaOperator`] convention that even indices carry `gamma = a^dagger + a` and odd
@@ -449,6 +462,34 @@ fn map_majorana_action(action: MajoranaAction, num_qubits: u32) -> *mut ffi::QkO
         &mut bit_terms,
         &mut indices,
     )
+}
+
+pub fn majorana_jordan_wigner(
+    maj_op: &MajoranaOperator,
+    num_qubits: u32,
+) -> Result<*mut ffi::QkObs, CoherenceError> {
+    // Majorana index `m` acts on fermionic mode `m / 2`, so it is that quotient -- not the index
+    // itself -- which has to fit within `num_qubits`. `max_mode` reports the quotient for the same
+    // reason: the error speaks of a "mode index", and `gamma_7` needs 4 qubits, not 8.
+    if let Some(&max_maj) = maj_op.modes.iter().max()
+        && max_maj / 2 >= num_qubits
+    {
+        return Err(CoherenceError::NumQubitsTooSmall {
+            num_qubits,
+            max_mode: max_maj / 2,
+        });
+    }
+
+    Ok(map_operator(
+        maj_op.iter(),
+        num_qubits,
+        |term, num_qubits| {
+            (
+                compose_actions(term.iter(), num_qubits, map_majorana_action),
+                qk_coeff(term.coeff),
+            )
+        },
+    ))
 }
 
 /// Maps a single generalized edge operator onto its Pauli image.
@@ -509,6 +550,31 @@ fn map_edge_action(action: EdgeAction, num_qubits: u32) -> *mut ffi::QkObs {
     )
 }
 
+pub fn edge_vertex_jordan_wigner(
+    inter_op: &EdgeVertexOperator,
+    num_qubits: u32,
+) -> Result<*mut ffi::QkObs, CoherenceError> {
+    if let Some(max_mode) = max_paired_index(&inter_op.left_indices, &inter_op.right_indices)
+        && max_mode >= num_qubits
+    {
+        return Err(CoherenceError::NumQubitsTooSmall {
+            num_qubits,
+            max_mode,
+        });
+    }
+
+    Ok(map_operator(
+        inter_op.iter(),
+        num_qubits,
+        |term, num_qubits| {
+            (
+                compose_actions(term.iter(), num_qubits, map_edge_action),
+                qk_coeff(term.coeff),
+            )
+        },
+    ))
+}
+
 /// Maps a single generalized transfer operator onto its Pauli image.
 ///
 /// Writing `lo`/`hi` for the smaller/larger of the two indices, the images are
@@ -555,72 +621,6 @@ fn map_transfer_action(action: TransferAction, num_qubits: u32) -> *mut ffi::QkO
         &mut bit_terms,
         &mut indices,
     )
-}
-
-/// Returns the largest fermionic mode index the two index buffers of a vertex-type operator act on.
-fn max_paired_index(left_indices: &[u32], right_indices: &[u32]) -> Option<u32> {
-    // Both endpoints must be checked: an operator whose largest index only ever appears on the right
-    // would otherwise pass a left-only check and abort inside the `qk_obs_*` calls.
-    left_indices
-        .iter()
-        .max()
-        .into_iter()
-        .chain(right_indices.iter().max())
-        .max()
-        .copied()
-}
-
-pub fn majorana_jordan_wigner(
-    maj_op: &MajoranaOperator,
-    num_qubits: u32,
-) -> Result<*mut ffi::QkObs, CoherenceError> {
-    // Majorana index `m` acts on fermionic mode `m / 2`, so it is that quotient -- not the index
-    // itself -- which has to fit within `num_qubits`. `max_mode` reports the quotient for the same
-    // reason: the error speaks of a "mode index", and `gamma_7` needs 4 qubits, not 8.
-    if let Some(&max_maj) = maj_op.modes.iter().max()
-        && max_maj / 2 >= num_qubits
-    {
-        return Err(CoherenceError::NumQubitsTooSmall {
-            num_qubits,
-            max_mode: max_maj / 2,
-        });
-    }
-
-    Ok(map_operator(
-        maj_op.iter(),
-        num_qubits,
-        |term, num_qubits| {
-            (
-                compose_actions(term.iter(), num_qubits, map_majorana_action),
-                qk_coeff(term.coeff),
-            )
-        },
-    ))
-}
-
-pub fn edge_vertex_jordan_wigner(
-    inter_op: &EdgeVertexOperator,
-    num_qubits: u32,
-) -> Result<*mut ffi::QkObs, CoherenceError> {
-    if let Some(max_mode) = max_paired_index(&inter_op.left_indices, &inter_op.right_indices)
-        && max_mode >= num_qubits
-    {
-        return Err(CoherenceError::NumQubitsTooSmall {
-            num_qubits,
-            max_mode,
-        });
-    }
-
-    Ok(map_operator(
-        inter_op.iter(),
-        num_qubits,
-        |term, num_qubits| {
-            (
-                compose_actions(term.iter(), num_qubits, map_edge_action),
-                qk_coeff(term.coeff),
-            )
-        },
-    ))
 }
 
 pub fn transfer_vertex_jordan_wigner(
