@@ -4,32 +4,7 @@ features:
     Added direct Jordan-Wigner mappers for the three remaining operator data structures:
     :func:`~qiskit_fermions.mappers.library.majorana_jordan_wigner`,
     :func:`~qiskit_fermions.mappers.library.edge_vertex_jordan_wigner` and
-    :func:`~qiskit_fermions.mappers.library.transfer_vertex_jordan_wigner`. Previously the only
-    mapper producing a qubit operator was
-    :func:`~qiskit_fermions.mappers.library.fermion_jordan_wigner`, so mapping a
-    :class:`~qiskit_fermions.operators.MajoranaOperator`,
-    :class:`~qiskit_fermions.operators.EdgeVertexOperator` or
-    :class:`~qiskit_fermions.operators.TransferVertexOperator` meant converting it to a
-    :class:`~qiskit_fermions.operators.FermionOperator` first.
-
-    Besides being more direct, this avoids an intermediate blowup. Under Jordan-Wigner every
-    generator of these three algebras maps onto a *single* Pauli string -- a vertex operator becomes
-    the weight-1 Pauli :math:`Z_l`, and an edge or transfer operator becomes one string whose
-    :math:`Z` chain spans only the modes strictly between its two endpoints -- whereas each fermionic
-    creation or annihilation operator maps onto a two-term sum. Routing a term that is a product of
-    :math:`L` generators through a :class:`~qiskit_fermions.operators.FermionOperator` therefore
-    inflates what is one Pauli string into as many as :math:`4^L` terms, only for them to be merged
-    back down again.
-
-    The saving accordingly grows with the length of the terms, and is only worth reaching for when
-    they are products of several generators: measured on terms of :math:`L` transfer operators, the
-    direct mapper was about 2x faster at :math:`L=2`, 7x at :math:`L=3` and 28x at :math:`L=4`. For
-    the single-generator terms that a hopping Hamiltonian consists of there is no blowup to avoid, and
-    the two routes cost about the same.
-
-    The 1D and 2D Fermi-Hubbard guides previously mapped their Hamiltonians with
-    ``jordan_wigner(transfer_vertex_to_fermion(hamiltonian), num_sites)`` and now call
-    :func:`~qiskit_fermions.mappers.library.transfer_vertex_jordan_wigner` directly.
+    :func:`~qiskit_fermions.mappers.library.transfer_vertex_jordan_wigner`.
   - |
     :func:`~qiskit_fermions.mappers.library.jordan_wigner` now dispatches on all four operator types
     rather than only :class:`~qiskit_fermions.operators.FermionOperator`, delegating to whichever
@@ -38,8 +13,4 @@ features:
   - |
     Added the same three mappers to the C API, alongside the existing
     :c:func:`qf_ferm_op_jordan_wigner`: :c:func:`qf_maj_op_jordan_wigner`,
-    :c:func:`qf_edge_op_jordan_wigner` and :c:func:`qf_transfer_op_jordan_wigner`. Like their
-    fermionic counterpart they write the mapped
-    :external+cqiskit:doc:`QkObs <cdoc/qk-obs>` through an out-parameter and return a
-    ``QfExitCode``, which is ``QfExitCode_ValueError`` when ``num_qubits`` is too small to hold the
-    operator's support.
+    :c:func:`qf_edge_op_jordan_wigner` and :c:func:`qf_transfer_op_jordan_wigner`.
