@@ -89,6 +89,8 @@ from .synthesis import (
     GivensDecompositionSlaterDeterminantSynthesis,
     MapperFnEvolutionSynthesis,
     TrivialOccupationInitializeModesSynthesis,
+    group_wise,
+    simplify,
 )
 
 __all__ = [
@@ -106,4 +108,6 @@ __all__ = [
     "RelabelModes",
     "TrivialF2QLayout",
     "TrivialOccupationInitializeModesSynthesis",
+    "group_wise",
+    "simplify",
 ]

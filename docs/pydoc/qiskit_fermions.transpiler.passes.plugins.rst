@@ -53,3 +53,17 @@ they act upon:
    GivensDecompositionSlaterDeterminantSynthesis
    MapperFnEvolutionSynthesis
    TrivialOccupationInitializeModesSynthesis
+
+
+Additional helper functions
+---------------------------
+
+The Pauli term order that a mapper function produces is preserved through synthesis, since a product
+formula synthesizes the terms in the order it receives them. These adapters wrap a mapper function to
+choose that order:
+
+.. autosummary::
+   :toctree: ../stubs/
+
+   group_wise
+   simplify

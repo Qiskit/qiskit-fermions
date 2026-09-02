@@ -12,7 +12,7 @@
 
 """Synthesis passes."""
 
-from .evolution import MapperFnEvolutionSynthesis
+from .evolution import MapperFnEvolutionSynthesis, group_wise, simplify
 from .initialize_modes import TrivialOccupationInitializeModesSynthesis
 from .orbital_rotation import GivensDecompositionOrbitalRotationSynthesis
 from .plugin import F2QSynthesisPlugin, F2QSynthesisPluginManager
@@ -28,4 +28,6 @@ __all__ = [
     "GivensDecompositionSlaterDeterminantSynthesis",
     "MapperFnEvolutionSynthesis",
     "TrivialOccupationInitializeModesSynthesis",
+    "group_wise",
+    "simplify",
 ]
