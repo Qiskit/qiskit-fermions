@@ -76,7 +76,7 @@ style = [
 ]
 lint = [
     {include-group = "style"},
-    "mypy==2.1.0",
+    "mypy==2.3.1",
     "reno>=4.1",
     "toml>=0.10.2",
 ]
