@@ -144,15 +144,6 @@ impl EdgeVertexOperator {
         self.boundaries.push(self.left_indices.len());
     }
 
-    pub fn num_groups(&self) -> Option<u32> {
-        let self_groups = self.groups.as_ref()?;
-        if self_groups.is_empty() {
-            Some(0)
-        } else {
-            Some(self_groups.iter().max().unwrap() + 1)
-        }
-    }
-
     /// Splits this operator into new operators based on its [`groups`](Self::groups).
     ///
     /// If `group_indices` is `None`, every group is materialized once, in index order (`0` to
