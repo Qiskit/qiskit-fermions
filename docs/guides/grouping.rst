@@ -104,7 +104,7 @@ the same group. The following code shows how that can be done:
        uint64_t num_terms = 7;
        uint64_t num_modes = 14;
        uint32_t modes[14] = {0, 1, 1, 2, 3, 0, 1, 4, 5, 2, 5, 4, 4, 3};
-       QkComplex67 coeffs[7] = {{1.0, 0.0}, {1.0, 0.0}, {1.0, 0.0}, {1.0, 0.0},
+       QkComplex64 coeffs[7] = {{1.0, 0.0}, {1.0, 0.0}, {1.0, 0.0}, {1.0, 0.0},
                                 {1.0, 0.0}, {1.0, 0.0}, {1.0, 0.0}};
        uint32_t boundaries[8] = {0, 2, 4, 6, 8, 10, 12, 14};
        QfMajoranaOperator *op = qf_maj_op_new(num_terms, num_modes, coeffs, modes, boundaries);
