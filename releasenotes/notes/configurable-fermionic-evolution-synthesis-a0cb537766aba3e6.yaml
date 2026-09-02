@@ -1,0 +1,22 @@
+---
+features:
+  - |
+    How an :class:`.Evolution` gate gets decomposed in fermionic space is now configurable through its
+    new keyword-only ``synthesis`` argument, mirroring the ``synthesis`` argument of Qiskit's
+    :class:`~qiskit.circuit.library.PauliEvolutionGate`. The available methods live in the new
+    :mod:`qiskit_fermions.circuit.library.synthesis` module, which provides the
+    :class:`~qiskit_fermions.circuit.library.synthesis.FermionicEvolutionSynthesis` interface and its
+    first-order :class:`~qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter`
+    implementation.
+
+    This fermion-to-fermion step is optional: an :class:`.Evolution` gate can be handed straight to the
+    fermion-to-qubit stage regardless of how many terms its operator holds. Decomposing it beforehand
+    is a choice, taken to obtain cheaper factors or to expose structure (such as mutually commuting
+    :attr:`~qiskit_fermions.operators.OperatorTrait.groups`) that the later stage can exploit.
+    Because both sides of the rewrite stay in fermionic space, that structure survives it, which is
+    what these methods can exploit and Qiskit's :class:`~qiskit.synthesis.EvolutionSynthesis` cannot.
+
+    The default is unchanged: leaving ``synthesis`` at ``None`` uses
+    :class:`~qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter`, which reproduces exactly
+    the decomposition that :class:`.Evolution` performed before, so existing circuits synthesize
+    identically.

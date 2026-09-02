@@ -31,6 +31,10 @@ This module provides a library of :class:`.FermionicGate` implementations.
    PrepareSlaterDeterminant
    UCC
    UCJ
+
+Should an :class:`.Evolution` gate be decomposed in fermionic space (an optional step) how that is
+done is determined by a synthesis method from the
+:mod:`~qiskit_fermions.circuit.library.synthesis` module.
 """
 
 from .evolution import Evolution
