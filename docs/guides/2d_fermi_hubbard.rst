@@ -917,7 +917,6 @@ edge makes the difference plain:
    >>> figure
    <Figure size ... with 2 Axes>
 
-
 The two-qubit depth is 24 and constant from :math:`3 \times 3` to :math:`8 \times 8`
 (that is 18 qubits up to 128), while :class:`~qiskit.synthesis.LieTrotter` applied to
 the identically encoded Hamiltonian grows linearly with the lattice edge, from 47 to 92. The
