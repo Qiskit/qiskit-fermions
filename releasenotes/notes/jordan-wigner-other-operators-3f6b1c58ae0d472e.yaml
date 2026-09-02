@@ -35,3 +35,11 @@ features:
     rather than only :class:`~qiskit_fermions.operators.FermionOperator`, delegating to whichever
     direct implementation matches the operator it is given. Passing one of the other three operator
     types previously raised a :class:`TypeError`.
+  - |
+    Added the same three mappers to the C API, alongside the existing
+    :c:func:`qf_ferm_op_jordan_wigner`: :c:func:`qf_maj_op_jordan_wigner`,
+    :c:func:`qf_edge_op_jordan_wigner` and :c:func:`qf_transfer_op_jordan_wigner`. Like their
+    fermionic counterpart they write the mapped
+    :external+cqiskit:doc:`QkObs <cdoc/qk-obs>` through an out-parameter and return a
+    ``QfExitCode``, which is ``QfExitCode_ValueError`` when ``num_qubits`` is too small to hold the
+    operator's support.

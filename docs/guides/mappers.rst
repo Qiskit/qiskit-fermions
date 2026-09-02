@@ -131,10 +131,11 @@ from the custom mapper section, demonstrating equivalent results:
        qf_sparse_obs_free(qubit_op);
 
 .. note::
-   The two-step above is written out to show two library mappers composing. In the Python API you
-   would map a :class:`.MajoranaOperator` in one step instead, with
-   :func:`.majorana_jordan_wigner`, and likewise for the other operator types
-   (:func:`.edge_vertex_jordan_wigner`, :func:`.transfer_vertex_jordan_wigner`). Going via a
+   The two-step above is written out to show two library mappers composing. In practice you would map
+   a :class:`.MajoranaOperator` in one step instead, with :func:`.majorana_jordan_wigner`
+   (:c:func:`qf_maj_op_jordan_wigner` in the C API), and likewise for the other operator types --
+   :func:`.edge_vertex_jordan_wigner` and :func:`.transfer_vertex_jordan_wigner`
+   (:c:func:`qf_edge_op_jordan_wigner`, :c:func:`qf_transfer_op_jordan_wigner`). Going via a
    :class:`.FermionOperator` also inflates the intermediate result: every generator of these algebras
    maps onto a single Pauli string, whereas each fermionic action maps onto a two-term sum, so a term
    built from several generators expands only to be merged back down again. That saving grows with the
