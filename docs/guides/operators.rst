@@ -123,13 +123,13 @@ construction using the sparse arrays:
        #include <qiskit_fermions.h>
 
        // Construct first operator: 1.0 * c_0 a_1
-       QkComplex67 coeff1[1] = {{1.0, 0.0}};
+       QkComplex64 coeff1[1] = {{1.0, 0.0}};
        uint32_t modes1[2] = {0, 1};
        uint32_t boundaries1[2] = {0, 2};
        QfFermionOperator *op1 = qf_ferm_op_new(1, 2, coeff1, modes1, boundaries1);
 
        // Construct second operator: 1.0 * c_2 a_3
-       QkComplex67 coeff2[1] = {{1.0, 0.0}};
+       QkComplex64 coeff2[1] = {{1.0, 0.0}};
        uint32_t modes2[2] = {2, 3};
        uint32_t boundaries2[2] = {0, 2};
        QfFermionOperator *op2 = qf_ferm_op_new(1, 2, coeff2, modes2, boundaries2);
@@ -296,7 +296,7 @@ the :ref:`grouping <grouping_explanation>` guide.
        #include <qiskit_fermions.h>
 
        // Create operator with 3 terms
-       QkComplex67 coeffs[3] = {{1.0, 0.0}, {1.0, 0.0}, {1.0, 0.0}};
+       QkComplex64 coeffs[3] = {{1.0, 0.0}, {1.0, 0.0}, {1.0, 0.0}};
        uint32_t modes[4] = {0, 1, 2, 3};
        uint32_t boundaries[4] = {0, 1, 2, 4};
        QfMajoranaOperator *op = qf_maj_op_new(3, 4, coeffs, modes, boundaries);
@@ -354,7 +354,7 @@ reference of all available operations.
        #include <qiskit_fermions.h>
 
        // Construct a Hermitian operator: H = +0 -1 + +1 -0
-       QkComplex67 coeffs[2] = {{1.0, 0.0}, {1.0, 0.0}};
+       QkComplex64 coeffs[2] = {{1.0, 0.0}, {1.0, 0.0}};
        uint32_t modes[4] = {0, 1, 1, 0};
        uint32_t boundaries[3] = {0, 2, 4};
        QfFermionOperator *op = qf_ferm_op_new(2, 4, coeffs, modes, boundaries);
@@ -452,12 +452,12 @@ operator forms for correctness and efficiency.
        #include <stdbool.h>
 
        // Two different representations of the same operator
-       QkComplex67 coeff1[1] = {{1.0, 0.0}};
+       QkComplex64 coeff1[1] = {{1.0, 0.0}};
        uint32_t modes1[2] = {0, 0};
        uint32_t boundaries1[3] = {0, 2};
        QfFermionOperator *op1 = qf_ferm_op_new(1, 2, coeff1, modes1, boundaries1);
 
-       QkComplex67 coeff2[2] = {{1.0, 0.0}, {-1.0, 0.0}};
+       QkComplex64 coeff2[2] = {{1.0, 0.0}, {-1.0, 0.0}};
        uint32_t modes2[2] = {0, 0};
        uint32_t boundaries2[3] = {0, 0, 2};
        QfFermionOperator *op2 = qf_ferm_op_new(2, 2, coeff2, modes2, boundaries2);
