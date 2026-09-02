@@ -91,44 +91,6 @@ unsafe fn compact(obs: *mut ffi::QkObs) -> *mut ffi::QkObs {
     compacted
 }
 
-fn map_action(action: FermionAction, num_qubits: u32) -> *mut ffi::QkObs {
-    let fer_idx = *action.1 as usize;
-    let im = if *action.0 { -0.5 } else { 0.5 };
-    let mut coeffs: Vec<QkComplex64> = vec![
-        QkComplex64 { re: 0.5, im: 0.0 },
-        QkComplex64 { re: 0.0, im },
-    ];
-
-    let mut bit_terms = Vec::<ffi::QkBitTerm>::new();
-    let mut indices = Vec::<u32>::new();
-    for qb_idx in 0..fer_idx {
-        bit_terms.push(QkBitTermZ);
-        indices.push(qb_idx as u32);
-    }
-    bit_terms.push(QkBitTermX);
-    indices.push(fer_idx as u32);
-    for qb_idx in 0..fer_idx {
-        bit_terms.push(QkBitTermZ);
-        indices.push(qb_idx as u32);
-    }
-    bit_terms.push(QkBitTermY);
-    indices.push(fer_idx as u32);
-
-    let mut boundaries: Vec<usize> = vec![0, fer_idx + 1, 2 * fer_idx + 2];
-
-    unsafe {
-        ffi::qk_obs_new(
-            num_qubits,
-            coeffs.len().try_into().unwrap(),
-            bit_terms.len().try_into().unwrap(),
-            coeffs.as_mut_ptr(),
-            bit_terms.as_mut_ptr(),
-            indices.as_mut_ptr(),
-            boundaries.as_mut_ptr(),
-        )
-    }
-}
-
 // NOTE: https://stackoverflow.com/a/50341075
 struct Wrapper {
     ptr: *mut ffi::QkObs,
@@ -344,6 +306,55 @@ fn qk_coeff(coeff: num_complex::Complex64) -> QkComplex64 {
     }
 }
 
+/// Maps a single fermionic action onto its Pauli image.
+///
+/// Unlike the generators of the other three algebras, a creation or annihilation operator maps onto
+/// a *two*-term sum,
+///
+/// ```text
+///     a^dagger_j  ->  Z_0 ... Z_{j-1} (X_j - i Y_j) / 2
+///     a_j         ->  Z_0 ... Z_{j-1} (X_j + i Y_j) / 2
+/// ```
+///
+/// which is why composing a term of `L` fermionic actions can produce up to `2^L` Pauli strings.
+fn map_fermion_action(action: FermionAction, num_qubits: u32) -> *mut ffi::QkObs {
+    let fer_idx = *action.1 as usize;
+    let im = if *action.0 { -0.5 } else { 0.5 };
+    let mut coeffs: Vec<QkComplex64> = vec![
+        QkComplex64 { re: 0.5, im: 0.0 },
+        QkComplex64 { re: 0.0, im },
+    ];
+
+    let mut bit_terms = Vec::<ffi::QkBitTerm>::new();
+    let mut indices = Vec::<u32>::new();
+    for qb_idx in 0..fer_idx {
+        bit_terms.push(QkBitTermZ);
+        indices.push(qb_idx as u32);
+    }
+    bit_terms.push(QkBitTermX);
+    indices.push(fer_idx as u32);
+    for qb_idx in 0..fer_idx {
+        bit_terms.push(QkBitTermZ);
+        indices.push(qb_idx as u32);
+    }
+    bit_terms.push(QkBitTermY);
+    indices.push(fer_idx as u32);
+
+    let mut boundaries: Vec<usize> = vec![0, fer_idx + 1, 2 * fer_idx + 2];
+
+    unsafe {
+        ffi::qk_obs_new(
+            num_qubits,
+            coeffs.len().try_into().unwrap(),
+            bit_terms.len().try_into().unwrap(),
+            coeffs.as_mut_ptr(),
+            bit_terms.as_mut_ptr(),
+            indices.as_mut_ptr(),
+            boundaries.as_mut_ptr(),
+        )
+    }
+}
+
 pub fn fermion_jordan_wigner(
     fer_op: &FermionOperator,
     num_qubits: u32,
@@ -365,7 +376,7 @@ pub fn fermion_jordan_wigner(
         num_qubits,
         |term, num_qubits| {
             (
-                compose_actions(term.iter(), num_qubits, map_action),
+                compose_actions(term.iter(), num_qubits, map_fermion_action),
                 qk_coeff(term.coeff),
             )
         },
