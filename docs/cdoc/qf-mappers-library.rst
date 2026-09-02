@@ -13,6 +13,15 @@ routines.
   :c:func:`qf_ferm_op_jordan_wigner`           Map a :c:struct:`QfFermionOperator` to a
                                                :external+cqiskit:doc:`QkObs <cdoc/qk-obs>` under
                                                the Jordan-Wigner transformation.
+  :c:func:`qf_maj_op_jordan_wigner`            Map a :c:struct:`QfMajoranaOperator` to a
+                                               :external+cqiskit:doc:`QkObs <cdoc/qk-obs>` under
+                                               the Jordan-Wigner transformation.
+  :c:func:`qf_edge_op_jordan_wigner`           Map a :c:struct:`QfEdgeVertexOperator` to a
+                                               :external+cqiskit:doc:`QkObs <cdoc/qk-obs>` under
+                                               the Jordan-Wigner transformation.
+  :c:func:`qf_transfer_op_jordan_wigner`       Map a :c:struct:`QfTransferVertexOperator` to a
+                                               :external+cqiskit:doc:`QkObs <cdoc/qk-obs>` under
+                                               the Jordan-Wigner transformation.
   :c:func:`qf_fermion_to_majorana`             Map a :c:struct:`QfFermionOperator` to a
                                                :c:struct:`QfMajoranaOperator`.
   :c:func:`qf_majorana_to_fermion`             Map a :c:struct:`QfMajoranaOperator` to a

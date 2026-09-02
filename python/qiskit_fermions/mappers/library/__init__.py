@@ -44,6 +44,9 @@ The functions below are the native, efficient mapper implementations backing thi
    :toctree: ../stubs/
 
    fermion_jordan_wigner
+   majorana_jordan_wigner
+   edge_vertex_jordan_wigner
+   transfer_vertex_jordan_wigner
    fermion_to_majorana
    majorana_to_fermion
    edge_vertex_to_fermion
@@ -60,7 +63,10 @@ from qiskit_fermions._lib.mappers.mappers_library.edge_vertex import (
     edge_vertex_to_majorana,
 )
 from qiskit_fermions._lib.mappers.mappers_library.jordan_wigner import (
+    edge_vertex_jordan_wigner,
     fermion_jordan_wigner,
+    majorana_jordan_wigner,
+    transfer_vertex_jordan_wigner,
 )
 from qiskit_fermions._lib.mappers.mappers_library.majorana_fermion import (
     fermion_to_majorana,
@@ -77,14 +83,17 @@ from .jordan_wigner import jordan_wigner
 from .majorana_operator import majorana_operator
 
 __all__ = [
+    "edge_vertex_jordan_wigner",
     "edge_vertex_to_fermion",
     "edge_vertex_to_majorana",
     "fermion_jordan_wigner",
     "fermion_operator",
     "fermion_to_majorana",
     "jordan_wigner",
+    "majorana_jordan_wigner",
     "majorana_operator",
     "majorana_to_fermion",
+    "transfer_vertex_jordan_wigner",
     "transfer_vertex_to_edge_vertex",
     "transfer_vertex_to_fermion",
     "transfer_vertex_to_majorana",

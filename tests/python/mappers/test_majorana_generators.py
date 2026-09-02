@@ -18,7 +18,13 @@ from qiskit_fermions.operators import MajoranaAction, MajoranaOperator
 
 
 def jordan_wigner(op: MajoranaOperator, num_qubits: int) -> SparsePauliOp:
-    """Custom Jordan-Wigner transformation."""
+    """Custom Jordan-Wigner transformation.
+
+    This is a deliberately minimal implementation, written to exercise
+    :func:`~qiskit_fermions.mappers.map_majorana_action_generators`. It is single-threaded and has
+    none of the memory bounding of the real thing. Use
+    :func:`~qiskit_fermions.mappers.library.majorana_jordan_wigner` instead of copying this.
+    """
 
     @cache
     def map_action(mode: MajoranaAction) -> SparsePauliOp:

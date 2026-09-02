@@ -38,6 +38,11 @@ def map_fermion_action_generators(
        The output type ``T`` must support multiplication by a scalar via ``__mul__``.
        If ``compose=None`` it must also support composition of two instances via ``__and__``.
 
+    .. note::
+       The mapping written out below is a minimal illustration of this function rather than a
+       replacement for :func:`.fermion_jordan_wigner`, which is parallelized and bounds the memory it
+       uses while assembling the result.
+
     .. doctest::
 
         >>> from qiskit_fermions.mappers import map_fermion_action_generators

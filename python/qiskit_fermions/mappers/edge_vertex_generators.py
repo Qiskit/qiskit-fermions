@@ -38,6 +38,12 @@ def map_edge_vertex_generators(
        The output type ``T`` must support multiplication by a scalar via ``__mul__``.
        If ``compose=None`` it must also support composition of two instances via ``__and__``.
 
+    .. note::
+       The mapping written out below is a deliberately minimal illustration of this function, not a
+       replacement for :func:`.edge_vertex_jordan_wigner`: it covers only nearest-neighbor
+       interactions, and it is neither parallelized nor memory-bounded. Reach for the library
+       function rather than copying this one.
+
     .. doctest::
 
         >>> from qiskit_fermions.mappers import map_edge_vertex_generators
@@ -45,19 +51,22 @@ def map_edge_vertex_generators(
         >>> from qiskit.quantum_info import SparsePauliOp
         >>>
         >>> def jordan_wigner_nearest_neighbor(mode: EdgeAction) -> SparsePauliOp:
-        ...     match abs(mode[0] - mode[1]):
-        ...         case 0:
-        ...             pauli = "Z"
-        ...             qubits = [mode[0]]
-        ...         case 1:
-        ...             pauli = "XY"
-        ...             qubits = [mode[0], mode[1]]
-        ...         case _:
-        ...             raise NotImplementedError(
-        ...                 "This mapping only handles nearest neighbor interactions"
-        ...             )
-        ...
-        ...     return SparsePauliOp.from_sparse_list([(pauli, qubits, 1.0)], num_qubits=num_qubits)
+        ...     left, right = mode
+        ...     if left == right:
+        ...         return SparsePauliOp.from_sparse_list(
+        ...             [("Z", [left], 1.0)], num_qubits=num_qubits
+        ...         )
+        ...     if abs(left - right) != 1:
+        ...         raise NotImplementedError(
+        ...             "This mapping only handles nearest neighbor interactions"
+        ...         )
+        ...     # The orientation must be compared rather than differenced: an edge operator is
+        ...     # antisymmetric, so the sign depends on the index order while the string does not.
+        ...     lo, hi = min(left, right), max(left, right)
+        ...     coeff = -1.0 if left < right else 1.0
+        ...     return SparsePauliOp.from_sparse_list(
+        ...         [("YX", [lo, hi], coeff)], num_qubits=num_qubits
+        ...     )
         >>>
         >>> num_qubits = 4
         >>> def identity() -> SparsePauliOp:
@@ -70,7 +79,7 @@ def map_edge_vertex_generators(
         ... })
         >>> qop = map_edge_vertex_generators(op, jordan_wigner_nearest_neighbor, identity)
         >>> print([(label, complex(coeff)) for label, coeff in sorted(qop.label_iter())])
-        [('IIII', 0j), ('IIIZ', (2+0j)), ('IIYX', (0.5+0j)), ('IYYI', 1j)]
+        [('IIII', 0j), ('IIIZ', (2+0j)), ('IIXY', (-0.5+0j)), ('IXXI', 1j)]
 
     Args:
         operator: the operator to be mapped.

@@ -10,11 +10,30 @@
 // copyright notice, and modified files need to carry a notice indicating
 // that they have been altered from the originals.
 
+use crate::operators::edge_vertex_operator::PyEdgeVertexOperator;
 use crate::operators::fermion_operator::PyFermionOperator;
+use crate::operators::majorana_operator::PyMajoranaOperator;
+use crate::operators::transfer_vertex_operator::PyTransferVertexOperator;
 use pyo3::prelude::*;
 use pyo3_stub_gen::derive::*;
-use qiskit_fermions_core::mappers::library::jordan_wigner::fermion_jordan_wigner;
+use qiskit_fermions_core::mappers::library::jordan_wigner::{
+    edge_vertex_jordan_wigner, fermion_jordan_wigner, majorana_jordan_wigner,
+    transfer_vertex_jordan_wigner,
+};
 use qiskit_pyo3_ffi as ffi;
+
+/// Converts a mapped `QkObs` into the Python `SparseObservable` that owns it.
+///
+/// # Safety
+///
+/// `obs` must be a valid, uniquely-owned `QkObs` pointer; ownership transfers to Python.
+unsafe fn into_py_obs(obs: *mut qiskit_pyo3_ffi::QkObs) -> Py<PyAny> {
+    unsafe {
+        let py = Python::assume_attached();
+        let py_obs = ffi::qk_obs_to_python(obs);
+        Bound::from_owned_ptr(py, py_obs).into()
+    }
+}
 
 /// Map a :class:`.FermionOperator` to a :class:`~qiskit.quantum_info.SparseObservable` under the
 /// Jordan-Wigner transformation. [1]_
@@ -125,15 +144,267 @@ pub fn py_fermion_jordan_wigner(
     // NOTE: borrowed rather than taken by value. `PyFermionOperator` is `Clone`, so extracting it
     // by value would copy every term buffer of the input operator purely to read it.
     let obs = fermion_jordan_wigner(&op.borrow().inner, num_qubits).map_err(crate::value_err)?;
-    unsafe {
-        let py = Python::assume_attached();
-        let py_obs = ffi::qk_obs_to_python(obs);
-        Ok(Bound::from_owned_ptr(py, py_obs).into())
-    }
+    Ok(unsafe { into_py_obs(obs) })
+}
+
+/// Map a :class:`.MajoranaOperator` to a :class:`~qiskit.quantum_info.SparseObservable` under the
+/// Jordan-Wigner transformation. [1]_
+///
+/// Majorana mode :math:`m` acts on the fermionic mode :math:`\lfloor m/2 \rfloor`, which is mapped to
+/// the qubit of the same index. This follows Qiskit's little-endian qubit ordering.
+///
+/// Args:
+///     op: the Majorana operator to map.
+///     num_qubits: the number of qubits for the resulting qubit operator. Note that this is counted
+///         in *fermionic* modes, so it must be strictly greater than the largest Majorana index in
+///         ``op`` divided by two (any additional qubits are padded with the identity).
+///
+/// Returns:
+///     The mapped qubit operator. The result is `not` guaranteed to be fully simplified; call
+///     :meth:`~qiskit.quantum_info.SparseObservable.simplify` to combine any remaining duplicate
+///     terms. Duplicates are merged as the result is assembled, to bound the memory required, so
+///     the exact number of terms returned may vary with the number of threads used. This does not
+///     affect the operator that the result represents.
+///
+/// Raises:
+///     ValueError: if ``num_qubits`` is too small to hold the operator's support, i.e. if it is not
+///         larger than the largest *fermionic* mode acted upon by ``op``.
+///
+/// Definition
+/// ==========
+///
+/// With the :class:`.MajoranaOperator` convention that even indices carry
+/// :math:`\gamma_j = a^\dagger_j + a_j` and odd ones :math:`\gamma'_j = i(a^\dagger_j - a_j)`, a
+/// single Majorana operator maps onto a single Pauli string,
+///
+/// .. math::
+///
+///    \gamma_j \rightarrow \bigotimes_{k\lt j} \sigma^Z_k \otimes \sigma^X_j ~~\text{and}~~
+///    \gamma'_j \rightarrow \bigotimes_{k\lt j} \sigma^Z_k \otimes \sigma^Y_j \, .
+///
+/// This is also what makes it cheaper than converting to a :class:`.FermionOperator` first and
+/// calling :func:`.fermion_jordan_wigner`: each fermionic action maps onto a *two*-term sum, so that
+/// route inflates a single Pauli string into up to :math:`4^L` terms for a term built from :math:`L`
+/// Majorana operators, before merging them back down. The saving therefore grows with the length of
+/// the terms; for single-operator terms there is no blowup to avoid and the two routes cost about the
+/// same.
+///
+/// Usage
+/// =====
+///
+/// .. doctest::
+///
+///     >>> from qiskit_fermions.mappers.library import majorana_jordan_wigner
+///     >>> from qiskit_fermions.operators import MajoranaOperator, gamma
+///     >>> mop = MajoranaOperator.from_dict(
+///     ...     {
+///     ...         (gamma(0, False), gamma(1, False)): 0.5,
+///     ...         (gamma(0, True), gamma(1, True)): 0.5,
+///     ...     }
+///     ... )
+///     >>> majorana_jordan_wigner(mop, 2).simplify()
+///     <SparseObservable with 2 terms on 2 qubits: (0+0.5j)(Y_1 X_0) + (0-0.5j)(X_1 Y_0)>
+///
+/// .. [1] P. Jordan and E. Wigner, Über das Paulische Äquivalenzverbot,
+///        Zeitschrift für Physik 47, No. 9. (1928), pp. 631–651,
+///        `doi:10.1007/BF01331938 <https://link.springer.com/article/10.1007/BF01331938>`_.
+#[gen_stub_pyfunction(module = "qiskit_fermions._lib.mappers.mappers_library.jordan_wigner")]
+#[pyfunction(name = "majorana_jordan_wigner")]
+#[gen_stub(override_return_type(type_repr="qiskit.quantum_info.SparseObservable", imports=("qiskit.quantum_info")))]
+pub fn py_majorana_jordan_wigner(
+    op: &Bound<PyMajoranaOperator>,
+    num_qubits: u32,
+) -> PyResult<Py<PyAny>> {
+    // NOTE: borrowed rather than taken by value, as in `py_fermion_jordan_wigner` above.
+    let obs = majorana_jordan_wigner(&op.borrow().inner, num_qubits).map_err(crate::value_err)?;
+    Ok(unsafe { into_py_obs(obs) })
+}
+
+/// Map an :class:`.EdgeVertexOperator` to a :class:`~qiskit.quantum_info.SparseObservable` under the
+/// Jordan-Wigner transformation. [1]_
+///
+/// Fermionic mode :math:`j` is mapped to qubit :math:`j` of the resulting
+/// :class:`~qiskit.quantum_info.SparseObservable`, following Qiskit's little-endian qubit ordering.
+///
+/// Args:
+///     op: the edge-vertex operator to map.
+///     num_qubits: the number of qubits for the resulting qubit operator. This must be strictly
+///         greater than the largest mode index in ``op`` (any additional qubits are padded with the
+///         identity).
+///
+/// Returns:
+///     The mapped qubit operator. The result is `not` guaranteed to be fully simplified; call
+///     :meth:`~qiskit.quantum_info.SparseObservable.simplify` to combine any remaining duplicate
+///     terms. Duplicates are merged as the result is assembled, to bound the memory required, so
+///     the exact number of terms returned may vary with the number of threads used. This does not
+///     affect the operator that the result represents.
+///
+/// Raises:
+///     ValueError: if ``num_qubits`` is too small to hold the operator's support, i.e. if it is
+///         not larger than the largest mode index acted upon by ``op``.
+///
+/// Definition
+/// ==========
+///
+/// Writing :math:`l_\text{min}` and :math:`l_\text{max}` for the smaller and larger of the two
+/// indices, the generalized edge operators map onto single Pauli strings,
+///
+/// .. math::
+///
+///    \begin{align}
+///    V_l = E_{ll} &\rightarrow \sigma^Z_l \, , \nonumber \\
+///    E_{lr} &\rightarrow \mp \, \sigma^Y_{l_\text{min}}
+///            \left( \bigotimes_{l_\text{min} \lt k \lt l_\text{max}} \sigma^Z_k \right)
+///            \sigma^X_{l_\text{max}} \nonumber
+///    \end{align}
+///
+/// where the sign is negative for :math:`l \lt r` and positive otherwise. The :math:`\sigma^Z`
+/// chains of the two underlying Majorana operators cancel below the lower index, which is why the
+/// :math:`\sigma^Z` string spans only the modes strictly *between* the two endpoints.
+///
+/// .. note::
+///    Reversing the two indices leaves the Pauli string unchanged and flips only the sign, which is
+///    the antisymmetry :math:`E_{lr} = -E_{rl}`. Contrast :func:`.transfer_vertex_jordan_wigner`,
+///    where the coefficient is the same for both orientations and the Pauli letters change instead.
+///
+/// .. note::
+///    These Pauli strings differ from those in Eq. (10) of [2]_ by an exchange of :math:`\sigma^X`
+///    and :math:`\sigma^Y` on the two endpoints. This is a single-qubit basis choice -- both
+///    conventions satisfy every defining relation of the algebra -- and the one used here is the one
+///    consistent with :func:`.edge_vertex_to_fermion`, so that mapping an operator directly agrees
+///    with converting it to a :class:`.FermionOperator` first.
+///
+/// Mapping directly also avoids an intermediate blowup: each fermionic action maps onto a *two*-term
+/// sum, so routing a term built from :math:`L` edge operators through a :class:`.FermionOperator`
+/// inflates a single Pauli string into up to :math:`4^L` terms before merging them back down. The
+/// saving grows with the length of the terms; for single-operator terms the two routes cost about the
+/// same.
+///
+/// Usage
+/// =====
+///
+/// .. doctest::
+///
+///     >>> from qiskit_fermions.mappers.library import edge_vertex_jordan_wigner
+///     >>> from qiskit_fermions.operators import EdgeVertexOperator
+///     >>> eop = EdgeVertexOperator.from_dict({((0, 0),): 2.0, ((0, 1),): 0.5})
+///     >>> edge_vertex_jordan_wigner(eop, 2).simplify()
+///     <SparseObservable with 2 terms on 2 qubits: (2+0j)(Z_0) + (-0.5+0j)(X_1 Y_0)>
+///
+/// .. [1] P. Jordan and E. Wigner, Über das Paulische Äquivalenzverbot,
+///        Zeitschrift für Physik 47, No. 9. (1928), pp. 631–651,
+///        `doi:10.1007/BF01331938 <https://link.springer.com/article/10.1007/BF01331938>`_.
+/// .. [2] L. Gandon et al., Fermionic quantum simulation with flow sets,
+///        `arXiv:2512.11418 <https://arxiv.org/abs/2512.11418>`_.
+#[gen_stub_pyfunction(module = "qiskit_fermions._lib.mappers.mappers_library.jordan_wigner")]
+#[pyfunction(name = "edge_vertex_jordan_wigner")]
+#[gen_stub(override_return_type(type_repr="qiskit.quantum_info.SparseObservable", imports=("qiskit.quantum_info")))]
+pub fn py_edge_vertex_jordan_wigner(
+    op: &Bound<PyEdgeVertexOperator>,
+    num_qubits: u32,
+) -> PyResult<Py<PyAny>> {
+    // NOTE: borrowed rather than taken by value, as in `py_fermion_jordan_wigner` above.
+    let obs =
+        edge_vertex_jordan_wigner(&op.borrow().inner, num_qubits).map_err(crate::value_err)?;
+    Ok(unsafe { into_py_obs(obs) })
+}
+
+/// Map a :class:`.TransferVertexOperator` to a :class:`~qiskit.quantum_info.SparseObservable` under
+/// the Jordan-Wigner transformation. [1]_
+///
+/// Fermionic mode :math:`j` is mapped to qubit :math:`j` of the resulting
+/// :class:`~qiskit.quantum_info.SparseObservable`, following Qiskit's little-endian qubit ordering.
+///
+/// Args:
+///     op: the transfer-vertex operator to map.
+///     num_qubits: the number of qubits for the resulting qubit operator. This must be strictly
+///         greater than the largest mode index in ``op`` (any additional qubits are padded with the
+///         identity).
+///
+/// Returns:
+///     The mapped qubit operator. The result is `not` guaranteed to be fully simplified; call
+///     :meth:`~qiskit.quantum_info.SparseObservable.simplify` to combine any remaining duplicate
+///     terms. Duplicates are merged as the result is assembled, to bound the memory required, so
+///     the exact number of terms returned may vary with the number of threads used. This does not
+///     affect the operator that the result represents.
+///
+/// Raises:
+///     ValueError: if ``num_qubits`` is too small to hold the operator's support, i.e. if it is
+///         not larger than the largest mode index acted upon by ``op``.
+///
+/// Definition
+/// ==========
+///
+/// Writing :math:`l_\text{min}` and :math:`l_\text{max}` for the smaller and larger of the two
+/// indices, the generalized transfer operators map onto single Pauli strings,
+///
+/// .. math::
+///
+///    \begin{align}
+///    V_l = T_{ll} &\rightarrow \sigma^Z_l \, , \nonumber \\
+///    T_{lr} &\rightarrow -\frac{1}{2} \, \sigma^P_{l_\text{min}}
+///            \left( \bigotimes_{l_\text{min} \lt k \lt l_\text{max}} \sigma^Z_k \right)
+///            \sigma^P_{l_\text{max}} \nonumber
+///    \end{align}
+///
+/// where :math:`P = X` for :math:`l \lt r` and :math:`P = Y` otherwise.
+///
+/// .. note::
+///    The index order works the opposite way round to :func:`.edge_vertex_jordan_wigner`: the
+///    coefficient is :math:`-1/2` for **both** orientations and it is the Pauli letters that swap.
+///    :math:`T_{lr}` and :math:`T_{rl}` are genuinely different operators, with no antisymmetry
+///    relating them.
+///
+/// .. note::
+///    As for :func:`.edge_vertex_jordan_wigner`, these Pauli strings differ from Eq. (10) of [2]_ by
+///    a single-qubit basis choice; the convention used here is the one consistent with
+///    :func:`.transfer_vertex_to_fermion`.
+///
+/// Mapping directly also avoids an intermediate blowup: each fermionic action maps onto a *two*-term
+/// sum, so routing a term built from :math:`L` transfer operators through a
+/// :class:`.FermionOperator` inflates a single Pauli string into up to :math:`4^L` terms. The saving
+/// grows with the length of the terms; for single-operator terms the two routes cost about the same.
+///
+/// Usage
+/// =====
+///
+/// .. doctest::
+///
+///     >>> from qiskit_fermions.mappers.library import transfer_vertex_jordan_wigner
+///     >>> from qiskit_fermions.operators import TransferVertexOperator
+///     >>> top = TransferVertexOperator.from_dict({((0, 1),): 1.0, ((1, 0),): 1.0})
+///     >>> transfer_vertex_jordan_wigner(top, 2).simplify()
+///     <SparseObservable with 2 terms on 2 qubits: (-0.5+0j)(X_1 X_0) + (-0.5+0j)(Y_1 Y_0)>
+///
+/// .. [1] P. Jordan and E. Wigner, Über das Paulische Äquivalenzverbot,
+///        Zeitschrift für Physik 47, No. 9. (1928), pp. 631–651,
+///        `doi:10.1007/BF01331938 <https://link.springer.com/article/10.1007/BF01331938>`_.
+/// .. [2] L. Gandon et al., Fermionic quantum simulation with flow sets,
+///        `arXiv:2512.11418 <https://arxiv.org/abs/2512.11418>`_.
+#[gen_stub_pyfunction(module = "qiskit_fermions._lib.mappers.mappers_library.jordan_wigner")]
+#[pyfunction(name = "transfer_vertex_jordan_wigner")]
+#[gen_stub(override_return_type(type_repr="qiskit.quantum_info.SparseObservable", imports=("qiskit.quantum_info")))]
+pub fn py_transfer_vertex_jordan_wigner(
+    op: &Bound<PyTransferVertexOperator>,
+    num_qubits: u32,
+) -> PyResult<Py<PyAny>> {
+    // NOTE: borrowed rather than taken by value, as in `py_fermion_jordan_wigner` above.
+    let obs =
+        transfer_vertex_jordan_wigner(&op.borrow().inner, num_qubits).map_err(crate::value_err)?;
+    Ok(unsafe { into_py_obs(obs) })
 }
 
 #[pymodule]
 pub mod jordan_wigner {
     #[pymodule_export]
     use super::py_fermion_jordan_wigner;
+
+    #[pymodule_export]
+    use super::py_majorana_jordan_wigner;
+
+    #[pymodule_export]
+    use super::py_edge_vertex_jordan_wigner;
+
+    #[pymodule_export]
+    use super::py_transfer_vertex_jordan_wigner;
 }

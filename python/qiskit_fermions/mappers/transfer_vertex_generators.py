@@ -38,6 +38,12 @@ def map_transfer_vertex_generators(
        The output type ``T`` must support multiplication by a scalar via ``__mul__``.
        If ``compose=None`` it must also support composition of two instances via ``__and__``.
 
+    .. note::
+       The mapping written out below is a deliberately minimal illustration of this function, not a
+       replacement for :func:`.transfer_vertex_jordan_wigner`: it covers only nearest-neighbor
+       interactions, and it is neither parallelized nor memory-bounded. Reach for the library
+       function rather than copying this one.
+
     .. doctest::
 
         >>> from qiskit_fermions.mappers import map_transfer_vertex_generators
@@ -45,21 +51,22 @@ def map_transfer_vertex_generators(
         >>> from qiskit.quantum_info import SparsePauliOp
         >>>
         >>> def jordan_wigner_nearest_neighbor(mode: TransferAction) -> SparsePauliOp:
-        ...     match abs(mode[0] - mode[1]):
-        ...         case 0:
-        ...             pauli = "Z"
-        ...             qubits = [mode[0]]
-        ...             coeff = 1.0
-        ...         case 1:
-        ...             pauli = "YY"
-        ...             qubits = [mode[0], mode[1]]
-        ...             coeff = -0.5
-        ...         case _:
-        ...             raise NotImplementedError(
-        ...                 "This mapping only handles nearest neighbor interactions"
-        ...             )
-        ...
-        ...     return SparsePauliOp.from_sparse_list([(pauli, qubits, coeff)], num_qubits=num_qubits)
+        ...     left, right = mode
+        ...     if left == right:
+        ...         return SparsePauliOp.from_sparse_list(
+        ...             [("Z", [left], 1.0)], num_qubits=num_qubits
+        ...         )
+        ...     if abs(left - right) != 1:
+        ...         raise NotImplementedError(
+        ...             "This mapping only handles nearest neighbor interactions"
+        ...         )
+        ...     # `T_lr` and `T_rl` differ, so the orientation must be compared rather than
+        ...     # differenced. The coefficient is -1/2 either way; the Pauli letters swap instead.
+        ...     lo, hi = min(left, right), max(left, right)
+        ...     pauli = "XX" if left < right else "YY"
+        ...     return SparsePauliOp.from_sparse_list(
+        ...         [(pauli, [lo, hi], -0.5)], num_qubits=num_qubits
+        ...     )
         >>>
         >>> num_qubits = 4
         >>> def identity() -> SparsePauliOp:
@@ -72,7 +79,7 @@ def map_transfer_vertex_generators(
         ... })
         >>> qop = map_transfer_vertex_generators(op, jordan_wigner_nearest_neighbor, identity)
         >>> print([(label, complex(coeff)) for label, coeff in sorted(qop.label_iter())])
-        [('IIII', 0j), ('IIIZ', (2+0j)), ('IIYY', (-0.25+0j)), ('IYXI', 0.5j)]
+        [('IIII', 0j), ('IIIZ', (2+0j)), ('IIXX', (-0.25+0j)), ('IXYI', -0.5j)]
 
     Args:
         operator: the operator to be mapped.

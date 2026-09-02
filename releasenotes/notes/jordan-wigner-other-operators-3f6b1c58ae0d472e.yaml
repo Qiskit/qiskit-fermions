@@ -1,0 +1,16 @@
+---
+features:
+  - |
+    Added direct Jordan-Wigner mappers for the three remaining operator data structures:
+    :func:`~qiskit_fermions.mappers.library.majorana_jordan_wigner`,
+    :func:`~qiskit_fermions.mappers.library.edge_vertex_jordan_wigner` and
+    :func:`~qiskit_fermions.mappers.library.transfer_vertex_jordan_wigner`.
+  - |
+    :func:`~qiskit_fermions.mappers.library.jordan_wigner` now dispatches on all four operator types
+    rather than only :class:`~qiskit_fermions.operators.FermionOperator`, delegating to whichever
+    direct implementation matches the operator it is given. Passing one of the other three operator
+    types previously raised a :class:`TypeError`.
+  - |
+    Added the same three mappers to the C API, alongside the existing
+    :c:func:`qf_ferm_op_jordan_wigner`: :c:func:`qf_maj_op_jordan_wigner`,
+    :c:func:`qf_edge_op_jordan_wigner` and :c:func:`qf_transfer_op_jordan_wigner`.
