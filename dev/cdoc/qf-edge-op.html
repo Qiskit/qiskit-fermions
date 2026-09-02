@@ -1,0 +1,1612 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html">
+        <link rel="prefetch" href="../_static/images/qiskit-light-logo.svg" as="image">
+        <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
+
+    <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
+        <title>QfEdgeVertexOperator - Qiskit Fermions 0.2.0.dev0+0aa6e24</title>
+      <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
+    <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/katex-math.css?v=05624691" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style><link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:ital,wght@0,400;0,600;1,400;1,600&display=swap" rel="stylesheet"></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M14 2H2C1.73478 2 1.48043 2.10536 1.29289 2.29289C1.10536 2.48043 1 2.73478 1 3V13C1 13.2652 1.10536 13.5196 1.29289 13.7071C1.48043 13.8946 1.73478 14 2 14H14C14.2652 14 14.5196 13.8946 14.7071 13.7071C14.8946 13.5196 15 13.2652 15 13V3C15 2.73478 14.8946 2.48043 14.7071 2.29289C14.5196 2.10536 14.2652 2 14 2V2ZM2 3H10V13H2V3ZM14 13H11V3H14V13Z" fill="currentColor"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M14 3H2V4H14V3Z" fill="currentColor"/>
+      <path d="M14 12H2V13H14V12Z" fill="currentColor"/>
+      <path d="M14 6H2V7H14V6Z" fill="currentColor"/>
+      <path d="M14 9H2V10H14V9Z" fill="currentColor"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M11 8L6.00005 13L5.30005 12.3L9.60005 8L5.30005 3.7L6.00005 3L11 8Z" fill="currentColor"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M15 13H1V14H15V13Z" fill="currentColor"/>
+      <path d="M12.7 4.5C13.1 4.1 13.1 3.5 12.7 3.1L10.9 1.3C10.5 0.9 9.9 0.9 9.5 1.3L2 8.8V12H5.2L12.7 4.5ZM10.2 2L12 3.8L10.5 5.3L8.7 3.5L10.2 2ZM3 11V9.2L8 4.2L9.8 6L4.8 11H3Z" fill="currentColor"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M11 13.0002C11.5523 13.0002 12 12.5525 12 12.0002C12 11.4479 11.5523 11.0002 11 11.0002C10.4477 11.0002 10 11.4479 10 12.0002C10 12.5525 10.4477 13.0002 11 13.0002Z" fill="currentColor"/>
+      <path d="M14.8884 11.7394C14.5795 10.9524 14.0464 10.2734 13.3552 9.78646C12.664 9.29954 11.8451 9.02615 11 9.00017C10.1549 9.02615 9.33604 9.29954 8.64484 9.78646C7.95365 10.2734 7.42052 10.9524 7.11155 11.7394L7 12.0002L7.11155 12.2609C7.42052 13.0479 7.95365 13.727 8.64484 14.2139C9.33604 14.7008 10.1549 14.9742 11 15.0002C11.8451 14.9742 12.664 14.7008 13.3552 14.2139C14.0464 13.727 14.5795 13.0479 14.8884 12.2609L15 12.0002L14.8884 11.7394ZM11 14.0002C10.6044 14.0002 10.2178 13.8829 9.88886 13.6631C9.55996 13.4433 9.30362 13.131 9.15224 12.7655C9.00087 12.4001 8.96126 11.998 9.03843 11.61C9.1156 11.222 9.30608 10.8657 9.58579 10.586C9.86549 10.3063 10.2219 10.1158 10.6098 10.0386C10.9978 9.96143 11.3999 10.001 11.7654 10.1524C12.1308 10.3038 12.4432 10.5601 12.6629 10.889C12.8827 11.2179 13 11.6046 13 12.0002C12.9994 12.5304 12.7885 13.0388 12.4136 13.4137C12.0386 13.7887 11.5303 13.9996 11 14.0002Z" fill="currentColor"/>
+      <path d="M6 14.0002H4V2.00017H8V5.00017C8.00077 5.26515 8.10637 5.51906 8.29374 5.70643C8.48111 5.8938 8.73502 5.99941 9 6.00017H12V8.00017H13V5.00017C13.0018 4.93446 12.9893 4.86913 12.9634 4.80871C12.9375 4.74828 12.8988 4.6942 12.85 4.65017L9.35 1.15017C9.30599 1.10134 9.2519 1.06263 9.19147 1.03674C9.13104 1.01084 9.06572 0.998364 9 1.00017H4C3.73502 1.00094 3.48111 1.10654 3.29374 1.29391C3.10637 1.48128 3.00077 1.73519 3 2.00017V14.0002C3.00077 14.2652 3.10637 14.5191 3.29374 14.7064C3.48111 14.8938 3.73502 14.9994 4 15.0002H6V14.0002ZM9 2.20017L11.8 5.00017H9V2.20017Z" fill="currentColor"/>
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+0aa6e24</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  
+  <div class="sidebar-logo-container">
+    <img class="sidebar-logo only-light" src="../_static/images/qiskit-light-logo.svg" alt="Light Logo"/>
+    <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
+  </div>
+  
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+0aa6e24</span>
+  
+</a>
+<form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <ul>
+<li class="toctree-l1"><a class="reference internal" href="../index.html"> Documentation Home</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../install.html"> Installation Instructions</a><input aria-label="Toggle navigation of  Installation Instructions" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../install-c.html"> C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../install-py.html"> Python</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../guides/index.html"> Guides</a><input aria-label="Toggle navigation of  Guides" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../guides/operators.html">Design principles of operator representations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/grouping.html">Group operator terms: use the operator structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/mappers.html">Map operator representations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/circuit.html">Work with fermionic circuits</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/vqe_outer_loop.html">VQE optimization at the fermionic level</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/lucj.html">Build an LUCJ ansatz</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/sqdrift.html">Generate SqDRIFT circuits</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/skqd.html">Generate Krylov time-evolution circuits (SKQD)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/transpilation.html">Transpile fermionic circuits</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/merge_slater_determinant.html">Optimize Slater determinant preparation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/1d_fermi_hubbard.html">Simulate 1D Fermi-Hubbard dynamics with flow sets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/2d_fermi_hubbard.html">Simulate 2D Fermi-Hubbard dynamics with flow sets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/ffsim.html">The ffsim simulation backend</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/Qiskit/qiskit-fermions"> GitHub</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="../pydoc/index.html">Python API reference</a></li>
+<li class="toctree-l1"><a class="reference external" href="../cdoc/index.html">C API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../release-notes.html">Release notes</a></li>
+</ul>
+
+</div></div>
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="../_sources/cdoc/qf-edge-op.rst.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="qfedgevertexoperator">
+<h1>QfEdgeVertexOperator<a class="headerlink" href="#qfedgevertexoperator" title="Link to this heading">¶</a></h1>
+<dl class="c struct">
+<dt class="sig sig-object c" id="c.QfEdgeVertexOperator">
+<span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">QfEdgeVertexOperator</span></span></span><a class="headerlink" href="#c.QfEdgeVertexOperator" title="Link to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<p>An edge-vertex operator.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This is an opaque data structure to the C API whose internals are implemented entirely in Rust.
+The remainder of this page describes the design and related functions to work with this struct.</p>
+</div>
+<hr class="docutils" />
+<section id="definition">
+<span id="qf-edge-op-definition"></span><h2>Definition<a class="headerlink" href="#definition" title="Link to this heading">¶</a></h2>
+<p>This operator is defined in terms of the edge-vertex (<span class="math">\(E_{jk}\)</span>, <span class="math">\(V_j\)</span>) operators:</p>
+<div class="math-wrapper docutils container">
+<div class="math">
+\[\begin{align}
+V_j    &= -i \gamma_{2j-1} \gamma_{2j}
+        = 1 - 2 a^\dagger_j a_j \, , \nonumber \\
+E_{jk} &= -i \gamma_{2j-1} \gamma_{2k-1}
+        = -i (a_j a_k + a_j a^\dagger_k + a^\dagger_j a_k + a^\dagger_j a^\dagger_k)
+        = -E_{kj} \nonumber
+\end{align}\]</div>
+</div>
+<p>which fulfill the following mixed fermionic-bosonic commutation relations for <span class="math">\(j \neq k \neq
+l \neq m\)</span>: <a class="footnote-reference brackets" href="#id2" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a></p>
+<div class="math-wrapper docutils container">
+<div class="math">
+\[\begin{align}
+\left\{ E_{jk}, V_k \right\} &= 0 \nonumber \\
+\left\{ E_{jk}, E_{kl} \right\} &= 0 \nonumber \\
+\left[ V_k, V_l \right] &= 0 \nonumber \\
+\left[ E_{jk}, V_l \right] &= 0 \nonumber \\
+\left[ E_{jk}, E_{lm} \right] &= 0 \nonumber \, .
+\end{align}\]</div>
+</div>
+<p>In summary, edge and vertex operators commute, unless they share <em>exactly one</em> index, in which case
+they anticommute.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The relations above are stated for <span class="math">\(j \neq k \neq l \neq m\)</span>, so they do not cover two edge
+operators spanning the <em>same</em> pair of modes. Those commute: since <span class="math">\(E_{kj} = -E_{jk}\)</span>, such
+a pair is collinear, and every operator commutes with itself. This is why the condition is
+“exactly one” shared index rather than “at least one”.</p>
+</div>
+<p>We can abuse the notation a little bit and define <span class="math">\(V_j = E_{jj}\)</span> which reflects how the
+internal data structure of this operator works. This makes the definition of the entire operator the
+following:</p>
+<div class="math-wrapper docutils container">
+<div class="math">
+\[\text{\texttt{EdgeVertexOperator}} = \sum_i c_i \bigotimes_{lr} E_{lr} \, ,\]</div>
+</div>
+<p>where <span class="math">\(lr\)</span> indexes the involved operator terms and <span class="math">\(c_i\)</span> is the (complex) coefficient
+making up the linear combination of products. The indices <span class="math">\(l\)</span> and <span class="math">\(r\)</span> can take any value
+between 0 and the number of fermionic modes acted upon by the operator minus 1.</p>
+<p>We will refer to <span class="math">\(E_{lr}\)</span> as <cite>generalized</cite> edge operators.</p>
+<hr class="docutils" />
+</section>
+<section id="implementation">
+<span id="qf-edge-op-implementation"></span><h2>Implementation<a class="headerlink" href="#implementation" title="Link to this heading">¶</a></h2>
+<p>This struct stores the terms and coefficients in multiple sparse vectors, akin to the
+<a class="reference external" href="https://en.wikipedia.org/wiki/Sparse_matrix#Compressed_sparse_row_(CSR,_CRS_or_Yale_format)">compressed sparse row format</a>
+commonly used for sparse matrices. More concretely, a single operator contains 4 arrays:</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">coeffs</span></code></p></td>
+<td><p>A vector of complex coefficients consisting of two 64-bit floating point numbers.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">left_indices</span></code></p></td>
+<td><p>A vector of 32-bit integers storing the <cite>left</cite> fermionic mode indices (<span class="math">\(l\)</span>).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">right_indices</span></code></p></td>
+<td><p>A vector of 32-bit integers storing the <cite>right</cite> fermionic mode indices (<span class="math">\(r\)</span>).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">boundaries</span></code></p></td>
+<td><p>A vector of integers indicating the boundaries between terms.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Fermionic modes indexed by <code class="docutils literal notranslate"><span class="pre">left_indices</span></code> and <code class="docutils literal notranslate"><span class="pre">right_indices</span></code> are considered spinless. The two
+index arrays always have the same length, since every generator is identified by exactly one
+<code class="docutils literal notranslate"><span class="pre">(left,</span> <span class="pre">right)</span></code> pair; this is why the constructor takes a single <code class="docutils literal notranslate"><span class="pre">num_indices</span></code> length for both.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>You can access <strong>read-only borrows</strong> of these internal arrays via their respective functions:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#c.qf_edge_op_get_coeffs" title="qf_edge_op_get_coeffs"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_edge_op_get_coeffs()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#c.qf_edge_op_get_left_indices" title="qf_edge_op_get_left_indices"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_edge_op_get_left_indices()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#c.qf_edge_op_get_right_indices" title="qf_edge_op_get_right_indices"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_edge_op_get_right_indices()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#c.qf_edge_op_get_boundaries" title="qf_edge_op_get_boundaries"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_edge_op_get_boundaries()</span></code></a></p></li>
+</ul>
+<p>The returned pointers stay valid only until the operator is modified or freed, and must not be
+freed by the caller.</p>
+</div>
+<p>This data structure allows for very efficient construction and manipulation of operators.
+However, it implies that duplicate terms might be contained in an operator at any moment.
+These must be resolved manually through the use of <a class="reference internal" href="#c.qf_edge_op_simplify" title="qf_edge_op_simplify"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_edge_op_simplify()</span></code></a>.</p>
+<section id="construction">
+<h3>Construction<a class="headerlink" href="#construction" title="Link to this heading">¶</a></h3>
+<p>A new operator can be constructed directly by specifying the corresponding arrays outlined above.
+Alternatively, an empty <a class="reference internal" href="#c.QfEdgeVertexOperator" title="QfEdgeVertexOperator"><code class="xref c c-struct docutils literal notranslate"><span class="pre">QfEdgeVertexOperator</span></code></a> can be initialized with
+<a class="reference internal" href="#c.qf_edge_op_zero" title="qf_edge_op_zero"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_edge_op_zero()</span></code></a> and terms can be added iteratively via <a class="reference internal" href="#c.qf_edge_op_add_term" title="qf_edge_op_add_term"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_edge_op_add_term()</span></code></a>.</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#c.qf_edge_op_new" title="qf_edge_op_new"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_edge_op_new()</span></code></a></p></td>
+<td><p>Constructs a new operator from the provided arrays.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#c.qf_edge_op_zero" title="qf_edge_op_zero"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_edge_op_zero()</span></code></a></p></td>
+<td><p>Constructs the additive identity operator.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#c.qf_edge_op_one" title="qf_edge_op_one"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_edge_op_one()</span></code></a></p></td>
+<td><p>Constructs the multiplicative identity operator.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#c.qf_edge_op_add_term" title="qf_edge_op_add_term"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_edge_op_add_term()</span></code></a></p></td>
+<td><p>Adds a term to an existing <code class="docutils literal notranslate"><span class="pre">QfEdgeVertexOperator</span></code>.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>A <a class="reference internal" href="#c.QfEdgeVertexOperator" title="QfEdgeVertexOperator"><code class="xref c c-struct docutils literal notranslate"><span class="pre">QfEdgeVertexOperator</span></code></a> can be freed with <a class="reference internal" href="#c.qf_edge_op_free" title="qf_edge_op_free"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_edge_op_free()</span></code></a>.</p>
+</div>
+</section>
+<section id="arithmetics">
+<h3>Arithmetics<a class="headerlink" href="#arithmetics" title="Link to this heading">¶</a></h3>
+<p>The following functions provide arithmetic manipulation:</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#c.qf_edge_op_add" title="qf_edge_op_add"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_edge_op_add()</span></code></a></p></td>
+<td><p>Adds two operators together.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#c.qf_edge_op_mul" title="qf_edge_op_mul"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_edge_op_mul()</span></code></a></p></td>
+<td><p>Multiplies an operator by a scalar.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#c.qf_edge_op_compose" title="qf_edge_op_compose"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_edge_op_compose()</span></code></a></p></td>
+<td><p>Composes two operators with each other.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#c.qf_edge_op_adjoint" title="qf_edge_op_adjoint"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_edge_op_adjoint()</span></code></a></p></td>
+<td><p>Returns the Hermitian conjugate operator.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="manipulation">
+<h3>Manipulation<a class="headerlink" href="#manipulation" title="Link to this heading">¶</a></h3>
+<p>The following functions provide operator manipulation logic:</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#c.qf_edge_op_ichop" title="qf_edge_op_ichop"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_edge_op_ichop()</span></code></a></p></td>
+<td><p>Removes terms with small coefficient magnitudes.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#c.qf_edge_op_simplify" title="qf_edge_op_simplify"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_edge_op_simplify()</span></code></a></p></td>
+<td><p>Returns an equivalent but simplified operator.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#c.qf_edge_op_normal_ordered" title="qf_edge_op_normal_ordered"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_edge_op_normal_ordered()</span></code></a></p></td>
+<td><p>Returns an equivalent operator with normal ordered terms.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#c.qf_edge_op_relabel_modes" title="qf_edge_op_relabel_modes"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_edge_op_relabel_modes()</span></code></a></p></td>
+<td><p>Relabels the modes of an operator.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="properties">
+<h3>Properties<a class="headerlink" href="#properties" title="Link to this heading">¶</a></h3>
+<p>The following functions exist to check certain properties of an operator.</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#c.qf_edge_op_is_hermitian" title="qf_edge_op_is_hermitian"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_edge_op_is_hermitian()</span></code></a></p></td>
+<td><p>Returns whether an operator is Hermitian.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#c.qf_edge_op_len" title="qf_edge_op_len"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_edge_op_len()</span></code></a></p></td>
+<td><p>Returns the number of terms in this operator.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="mapping">
+<h3>Mapping<a class="headerlink" href="#mapping" title="Link to this heading">¶</a></h3>
+<p>The following functions map this operator into another representation:</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="qf-mappers-library.html#c.qf_edge_vertex_to_fermion" title="qf_edge_vertex_to_fermion"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_edge_vertex_to_fermion()</span></code></a></p></td>
+<td><p>Maps to a <a class="reference internal" href="qf-ferm-op.html#c.QfFermionOperator" title="QfFermionOperator"><code class="xref c c-struct docutils literal notranslate"><span class="pre">QfFermionOperator</span></code></a>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="qf-mappers-library.html#c.qf_edge_vertex_to_majorana" title="qf_edge_vertex_to_majorana"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_edge_vertex_to_majorana()</span></code></a></p></td>
+<td><p>Maps to a <a class="reference internal" href="qf-maj-op.html#c.QfMajoranaOperator" title="QfMajoranaOperator"><code class="xref c c-struct docutils literal notranslate"><span class="pre">QfMajoranaOperator</span></code></a>.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr class="docutils" />
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="id2" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">1</a><span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="https://arxiv.org/abs/2512.11418">https://arxiv.org/abs/2512.11418</a></p>
+</aside>
+</aside>
+</section>
+</section>
+<section id="members">
+<h2>Members<a class="headerlink" href="#members" title="Link to this heading">¶</a></h2>
+<dl class="c function">
+<dt class="sig sig-object c" id="c.qf_edge_op_new">
+<span class="target" id="group__qf__edge__op_1ga83a3e476bd3c801874a902b904a56d5b"></span><a class="reference internal" href="#c.QfEdgeVertexOperator" title="QfEdgeVertexOperator"><span class="n"><span class="pre">QfEdgeVertexOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">qf_edge_op_new</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="n"><span class="pre">num_terms</span></span>, <span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="n"><span class="pre">num_indices</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit-c/qk-complex-64#qkcomplex64" title="(in Qiskit v2.5)"><span class="n"><span class="pre">QkComplex64</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">coeffs</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">left_indices</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">right_indices</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">boundaries</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.qf_edge_op_new" title="Link to this definition">¶</a><br /></dt>
+<dd><p>Constructs a new operator. </p>
+<p><p><p>Any of the pointer arguments can be <code class="docutils literal notranslate"><span class="pre">NULL</span></code> if and only if their corresponding length is zero.</p>
+<p>A generator with equal indices is a vertex operator, <span class="math">\(V_j = E_{jj}\)</span>; one with differing
+indices is a (generalized) edge operator, <span class="math">\(E_{jk}\)</span>.</p>
+<section id="example">
+<h3>Example<a class="headerlink" href="#example" title="Link to this heading">¶</a></h3>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="c1">// this builds `1.0 + (-1.0) * V(0) E(0,1)`</span>
+<span class="linenos">2</span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">num_terms</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span>
+<span class="linenos">3</span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">num_indices</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span>
+<span class="linenos">4</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">left_indices</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">};</span>
+<span class="linenos">5</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">right_indices</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">};</span>
+<span class="linenos">6</span><span class="n">QkComplex64</span><span class="w"> </span><span class="n">coeffs</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{{</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="mf">-1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">}};</span>
+<span class="linenos">7</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">boundaries</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">};</span>
+<span class="linenos">8</span><span class="n">QfEdgeVertexOperator</span><span class="w"> </span><span class="o">*</span><span class="n">op</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_edge_op_new</span><span class="p">(</span><span class="n">num_terms</span><span class="p">,</span><span class="w"> </span><span class="n">num_indices</span><span class="p">,</span><span class="w"> </span><span class="n">coeffs</span><span class="p">,</span>
+<span class="linenos">9</span><span class="w">                                          </span><span class="n">left_indices</span><span class="p">,</span><span class="w"> </span><span class="n">right_indices</span><span class="p">,</span><span class="w"> </span><span class="n">boundaries</span><span class="p">);</span>
+</pre></div>
+</div>
+</section>
+</p>
+ </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>num_terms</strong> – The number of terms in the operator. </p></li>
+<li><p><strong>num_indices</strong> – The number of generators summed over all terms. Both index arrays have this same length, since every generator is identified by exactly one <code class="docutils literal notranslate"><span class="pre">(left,</span> <span class="pre">right)</span></code> pair. </p></li>
+<li><p><strong>coeffs</strong> – A pointer to an array of term coefficients. The length of this array should be <code class="docutils literal notranslate"><span class="pre">num_terms</span></code>. </p></li>
+<li><p><strong>left_indices</strong> – A pointer to an array of left-hand mode indices over all terms. The length of this array should be <code class="docutils literal notranslate"><span class="pre">num_indices</span></code>. </p></li>
+<li><p><strong>right_indices</strong> – A pointer to an array of right-hand mode indices over all terms. The length of this array should be <code class="docutils literal notranslate"><span class="pre">num_indices</span></code>. </p></li>
+<li><p><strong>boundaries</strong> – A pointer to an array of the boundaries between terms. The length of this array should be <code class="docutils literal notranslate"><span class="pre">num_terms</span> <span class="pre">+</span> <span class="pre">1</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A pointer to the created operator.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.qf_edge_op_free">
+<span class="target" id="group__qf__edge__op_1ga0aad6a60f04cb9fda596ca6f29f68114"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">qf_edge_op_free</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.QfEdgeVertexOperator" title="QfEdgeVertexOperator"><span class="n"><span class="pre">QfEdgeVertexOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">op</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.qf_edge_op_free" title="Link to this definition">¶</a><br /></dt>
+<dd><p>Frees an existing operator. </p>
+<p><p><section id="id3">
+<h3>Example<a class="headerlink" href="#id3" title="Link to this heading">¶</a></h3>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="n">QfEdgeVertexOperator</span><span class="w"> </span><span class="o">*</span><span class="n">op</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_edge_op_one</span><span class="p">();</span>
+<span class="linenos">2</span><span class="n">qf_edge_op_free</span><span class="p">(</span><span class="n">op</span><span class="p">);</span>
+</pre></div>
+</div>
+</section>
+</p>
+ </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>op</strong> – A pointer to the edge-vertex operator to be freed.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.qf_edge_op_get_coeffs">
+<span class="target" id="group__qf__edge__op_1ga0908e7eb568719d6cd1ad0dfe931a6b4"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">qf_edge_op_get_coeffs</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.QfEdgeVertexOperator" title="QfEdgeVertexOperator"><span class="n"><span class="pre">QfEdgeVertexOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">op</span></span>, <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit-c/qk-complex-64#qkcomplex64" title="(in Qiskit v2.5)"><span class="n"><span class="pre">QkComplex64</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">coeffs_out</span></span>, <span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">coeffs_len</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.qf_edge_op_get_coeffs" title="Link to this definition">¶</a><br /></dt>
+<dd><p>Provides read-only access to the operator’s coefficients. </p>
+<p><p><div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p>The explanation of the internal data structure, <a class="reference internal" href="#qf-edge-op-implementation"><span class="std std-ref">here</span></a>.</p>
+</div>
+<section id="id4">
+<h3>Example<a class="headerlink" href="#id4" title="Link to this heading">¶</a></h3>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">num_terms</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span>
+<span class="linenos"> 2</span><span class="n">QkComplex64</span><span class="w"> </span><span class="n">coeffs</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{{</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">-1.0</span><span class="p">}};</span>
+<span class="linenos"> 3</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">boundaries</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">};</span>
+<span class="linenos"> 4</span><span class="n">QfEdgeVertexOperator</span><span class="w"> </span><span class="o">*</span><span class="n">op</span><span class="w"> </span><span class="o">=</span>
+<span class="linenos"> 5</span><span class="w">    </span><span class="n">qf_edge_op_new</span><span class="p">(</span><span class="n">num_terms</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">coeffs</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">,</span><span class="w"> </span><span class="n">boundaries</span><span class="p">);</span>
+<span class="linenos"> 6</span>
+<span class="linenos"> 7</span><span class="n">QkComplex64</span><span class="w"> </span><span class="o">*</span><span class="n">coeffs_out</span><span class="p">;</span>
+<span class="linenos"> 8</span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">coeffs_len</span><span class="p">;</span>
+<span class="linenos"> 9</span>
+<span class="linenos">10</span><span class="n">qf_edge_op_get_coeffs</span><span class="p">(</span><span class="n">op</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">coeffs_out</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">coeffs_len</span><span class="p">);</span>
+<span class="linenos">11</span>
+<span class="linenos">12</span><span class="n">assert</span><span class="p">(</span><span class="n">coeffs_len</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span>
+</pre></div>
+</div>
+</section>
+</p>
+ </p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This function borrows the operator’s internal buffer rather than copying it. The returned
+pointer stays valid only until the operator is modified or freed; do not free it yourself.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>op</strong> – A pointer to the edge-vertex operator whose coefficients to access. </p></li>
+<li><p><strong>coeffs_out</strong> – A pointer to the array of complex values into which to write the coefficients. </p></li>
+<li><p><strong>coeffs_len</strong> – A pointer to the integer into which to write the length of the output array.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.qf_edge_op_get_left_indices">
+<span class="target" id="group__qf__edge__op_1ga7fba805465b1796cc80aa4b03b872284"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">qf_edge_op_get_left_indices</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.QfEdgeVertexOperator" title="QfEdgeVertexOperator"><span class="n"><span class="pre">QfEdgeVertexOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">op</span></span>, <span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">left_indices_out</span></span>, <span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">left_indices_len</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.qf_edge_op_get_left_indices" title="Link to this definition">¶</a><br /></dt>
+<dd><p>Provides read-only access to the operator’s left-hand mode indices. </p>
+<p><p><div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p>The explanation of the internal data structure, <a class="reference internal" href="#qf-edge-op-implementation"><span class="std std-ref">here</span></a>.</p>
+</div>
+<section id="id5">
+<h3>Example<a class="headerlink" href="#id5" title="Link to this heading">¶</a></h3>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">num_terms</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="linenos"> 2</span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">num_indices</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span>
+<span class="linenos"> 3</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">left_indices</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">};</span>
+<span class="linenos"> 4</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">right_indices</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">};</span>
+<span class="linenos"> 5</span><span class="n">QkComplex64</span><span class="w"> </span><span class="n">coeffs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{{</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">}};</span>
+<span class="linenos"> 6</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">boundaries</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">};</span>
+<span class="linenos"> 7</span><span class="n">QfEdgeVertexOperator</span><span class="w"> </span><span class="o">*</span><span class="n">op</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_edge_op_new</span><span class="p">(</span><span class="n">num_terms</span><span class="p">,</span><span class="w"> </span><span class="n">num_indices</span><span class="p">,</span><span class="w"> </span><span class="n">coeffs</span><span class="p">,</span>
+<span class="linenos"> 8</span><span class="w">                                          </span><span class="n">left_indices</span><span class="p">,</span><span class="w"> </span><span class="n">right_indices</span><span class="p">,</span><span class="w"> </span><span class="n">boundaries</span><span class="p">);</span>
+<span class="linenos"> 9</span>
+<span class="linenos">10</span><span class="kt">uint32_t</span><span class="w"> </span><span class="o">*</span><span class="n">left_out</span><span class="p">;</span>
+<span class="linenos">11</span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">left_len</span><span class="p">;</span>
+<span class="linenos">12</span>
+<span class="linenos">13</span><span class="n">qf_edge_op_get_left_indices</span><span class="p">(</span><span class="n">op</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">left_out</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">left_len</span><span class="p">);</span>
+<span class="linenos">14</span>
+<span class="linenos">15</span><span class="n">assert</span><span class="p">(</span><span class="n">left_len</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span>
+</pre></div>
+</div>
+</section>
+</p>
+ </p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This function borrows the operator’s internal buffer rather than copying it. The returned
+pointer stays valid only until the operator is modified or freed; do not free it yourself.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>op</strong> – A pointer to the edge-vertex operator whose left indices to access. </p></li>
+<li><p><strong>left_indices_out</strong> – A pointer to the array of integers into which to write the indices. </p></li>
+<li><p><strong>left_indices_len</strong> – A pointer to the integer into which to write the length of the output array.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.qf_edge_op_get_right_indices">
+<span class="target" id="group__qf__edge__op_1ga2babb0d153495097a625d02b9779e031"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">qf_edge_op_get_right_indices</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.QfEdgeVertexOperator" title="QfEdgeVertexOperator"><span class="n"><span class="pre">QfEdgeVertexOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">op</span></span>, <span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">right_indices_out</span></span>, <span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">right_indices_len</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.qf_edge_op_get_right_indices" title="Link to this definition">¶</a><br /></dt>
+<dd><p>Provides read-only access to the operator’s right-hand mode indices. </p>
+<p><p><div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p>The explanation of the internal data structure, <a class="reference internal" href="#qf-edge-op-implementation"><span class="std std-ref">here</span></a>.</p>
+</div>
+<section id="id6">
+<h3>Example<a class="headerlink" href="#id6" title="Link to this heading">¶</a></h3>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">num_terms</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="linenos"> 2</span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">num_indices</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span>
+<span class="linenos"> 3</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">left_indices</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">};</span>
+<span class="linenos"> 4</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">right_indices</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">};</span>
+<span class="linenos"> 5</span><span class="n">QkComplex64</span><span class="w"> </span><span class="n">coeffs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{{</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">}};</span>
+<span class="linenos"> 6</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">boundaries</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">};</span>
+<span class="linenos"> 7</span><span class="n">QfEdgeVertexOperator</span><span class="w"> </span><span class="o">*</span><span class="n">op</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_edge_op_new</span><span class="p">(</span><span class="n">num_terms</span><span class="p">,</span><span class="w"> </span><span class="n">num_indices</span><span class="p">,</span><span class="w"> </span><span class="n">coeffs</span><span class="p">,</span>
+<span class="linenos"> 8</span><span class="w">                                          </span><span class="n">left_indices</span><span class="p">,</span><span class="w"> </span><span class="n">right_indices</span><span class="p">,</span><span class="w"> </span><span class="n">boundaries</span><span class="p">);</span>
+<span class="linenos"> 9</span>
+<span class="linenos">10</span><span class="kt">uint32_t</span><span class="w"> </span><span class="o">*</span><span class="n">right_out</span><span class="p">;</span>
+<span class="linenos">11</span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">right_len</span><span class="p">;</span>
+<span class="linenos">12</span>
+<span class="linenos">13</span><span class="n">qf_edge_op_get_right_indices</span><span class="p">(</span><span class="n">op</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">right_out</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">right_len</span><span class="p">);</span>
+<span class="linenos">14</span>
+<span class="linenos">15</span><span class="n">assert</span><span class="p">(</span><span class="n">right_len</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span>
+</pre></div>
+</div>
+</section>
+</p>
+ </p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This function borrows the operator’s internal buffer rather than copying it. The returned
+pointer stays valid only until the operator is modified or freed; do not free it yourself.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>op</strong> – A pointer to the edge-vertex operator whose right indices to access. </p></li>
+<li><p><strong>right_indices_out</strong> – A pointer to the array of integers into which to write the indices. </p></li>
+<li><p><strong>right_indices_len</strong> – A pointer to the integer into which to write the length of the output array.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.qf_edge_op_get_boundaries">
+<span class="target" id="group__qf__edge__op_1ga5be45121a8d7eb12d3a37095d11ef055"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">qf_edge_op_get_boundaries</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.QfEdgeVertexOperator" title="QfEdgeVertexOperator"><span class="n"><span class="pre">QfEdgeVertexOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">op</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">boundaries_out</span></span>, <span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">boundaries_len</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.qf_edge_op_get_boundaries" title="Link to this definition">¶</a><br /></dt>
+<dd><p>Provides read-only access to the indices indicating the boundaries between operator terms. </p>
+<p><p><div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p>The explanation of the internal data structure, <a class="reference internal" href="#qf-edge-op-implementation"><span class="std std-ref">here</span></a>.</p>
+</div>
+<section id="id7">
+<h3>Example<a class="headerlink" href="#id7" title="Link to this heading">¶</a></h3>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">num_terms</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="linenos"> 2</span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">num_indices</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span>
+<span class="linenos"> 3</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">left_indices</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">};</span>
+<span class="linenos"> 4</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">right_indices</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">};</span>
+<span class="linenos"> 5</span><span class="n">QkComplex64</span><span class="w"> </span><span class="n">coeffs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{{</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">}};</span>
+<span class="linenos"> 6</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">boundaries</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">};</span>
+<span class="linenos"> 7</span><span class="n">QfEdgeVertexOperator</span><span class="w"> </span><span class="o">*</span><span class="n">op</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_edge_op_new</span><span class="p">(</span><span class="n">num_terms</span><span class="p">,</span><span class="w"> </span><span class="n">num_indices</span><span class="p">,</span><span class="w"> </span><span class="n">coeffs</span><span class="p">,</span>
+<span class="linenos"> 8</span><span class="w">                                          </span><span class="n">left_indices</span><span class="p">,</span><span class="w"> </span><span class="n">right_indices</span><span class="p">,</span><span class="w"> </span><span class="n">boundaries</span><span class="p">);</span>
+<span class="linenos"> 9</span>
+<span class="linenos">10</span><span class="kt">size_t</span><span class="w"> </span><span class="o">*</span><span class="n">boundaries_out</span><span class="p">;</span>
+<span class="linenos">11</span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">boundaries_len</span><span class="p">;</span>
+<span class="linenos">12</span>
+<span class="linenos">13</span><span class="n">qf_edge_op_get_boundaries</span><span class="p">(</span><span class="n">op</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">boundaries_out</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">boundaries_len</span><span class="p">);</span>
+<span class="linenos">14</span>
+<span class="linenos">15</span><span class="n">assert</span><span class="p">(</span><span class="n">boundaries_len</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span>
+</pre></div>
+</div>
+</section>
+</p>
+ </p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This function borrows the operator’s internal buffer rather than copying it. The returned
+pointer stays valid only until the operator is modified or freed; do not free it yourself.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>op</strong> – A pointer to the edge-vertex operator whose boundaries to access. </p></li>
+<li><p><strong>boundaries_out</strong> – A pointer to the array of integers into which to write the boundaries. </p></li>
+<li><p><strong>boundaries_len</strong> – A pointer to the integer into which to write the length of the output array.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.qf_edge_op_zero">
+<span class="target" id="group__qf__edge__op_1ga607f52e1ee180939c1e0faa8785f4365"></span><a class="reference internal" href="#c.QfEdgeVertexOperator" title="QfEdgeVertexOperator"><span class="n"><span class="pre">QfEdgeVertexOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">qf_edge_op_zero</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.qf_edge_op_zero" title="Link to this definition">¶</a><br /></dt>
+<dd><p>Constructs the additive identity operator. </p>
+<p><p><p>Adding the operator that is constructed by this method to another one has no effect.</p>
+<section id="id8">
+<h3>Example<a class="headerlink" href="#id8" title="Link to this heading">¶</a></h3>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="n">QfEdgeVertexOperator</span><span class="w"> </span><span class="o">*</span><span class="n">zero</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_edge_op_zero</span><span class="p">();</span>
+<span class="linenos">2</span>
+<span class="linenos">3</span><span class="n">QfEdgeVertexOperator</span><span class="w"> </span><span class="o">*</span><span class="n">op_plus_zero</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_edge_op_add</span><span class="p">(</span><span class="n">op</span><span class="p">,</span><span class="w"> </span><span class="n">zero</span><span class="p">);</span>
+<span class="linenos">4</span>
+<span class="linenos">5</span><span class="n">assert</span><span class="p">(</span><span class="n">qf_edge_op_equal</span><span class="p">(</span><span class="n">op</span><span class="p">,</span><span class="w"> </span><span class="n">op_plus_zero</span><span class="p">));</span>
+</pre></div>
+</div>
+</section>
+</p>
+ </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A pointer to the created operator.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.qf_edge_op_one">
+<span class="target" id="group__qf__edge__op_1ga5874ad19be318b2eff2045b2a50ffd39"></span><a class="reference internal" href="#c.QfEdgeVertexOperator" title="QfEdgeVertexOperator"><span class="n"><span class="pre">QfEdgeVertexOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">qf_edge_op_one</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.qf_edge_op_one" title="Link to this definition">¶</a><br /></dt>
+<dd><p>Constructs the multiplicative identity operator. </p>
+<p><p><p>Composing the operator that is constructed by this method with another one has no effect.</p>
+<section id="id9">
+<h3>Example<a class="headerlink" href="#id9" title="Link to this heading">¶</a></h3>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="n">QfEdgeVertexOperator</span><span class="w"> </span><span class="o">*</span><span class="n">one</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_edge_op_one</span><span class="p">();</span>
+<span class="linenos">2</span>
+<span class="linenos">3</span><span class="n">QfEdgeVertexOperator</span><span class="w"> </span><span class="o">*</span><span class="n">op_times_one</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_edge_op_compose</span><span class="p">(</span><span class="n">op</span><span class="p">,</span><span class="w"> </span><span class="n">one</span><span class="p">);</span>
+<span class="linenos">4</span>
+<span class="linenos">5</span><span class="n">assert</span><span class="p">(</span><span class="n">qf_edge_op_equal</span><span class="p">(</span><span class="n">op</span><span class="p">,</span><span class="w"> </span><span class="n">op_times_one</span><span class="p">));</span>
+</pre></div>
+</div>
+</section>
+</p>
+ </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A pointer to the created operator.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.qf_edge_op_has_groups">
+<span class="target" id="group__qf__edge__op_1ga6155b565508ff1dd3d5f5d3625f61c75"></span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">qf_edge_op_has_groups</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.QfEdgeVertexOperator" title="QfEdgeVertexOperator"><span class="n"><span class="pre">QfEdgeVertexOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">op</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.qf_edge_op_has_groups" title="Link to this definition">¶</a><br /></dt>
+<dd><p>Checks whether an operator has its <code class="docutils literal notranslate"><span class="pre">groups</span></code> attribute set. </p>
+<p><p><div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p>The explanation on <a class="reference internal" href="../guides/grouping.html#grouping-explanation"><span class="std std-ref">Group operator terms: use the operator structure</span></a>.</p>
+</div>
+<section id="id10">
+<h3>Example<a class="headerlink" href="#id10" title="Link to this heading">¶</a></h3>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="n">QfEdgeVertexOperator</span><span class="w"> </span><span class="o">*</span><span class="n">op</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">...;</span>
+<span class="linenos">2</span>
+<span class="linenos">3</span><span class="kt">bool</span><span class="w"> </span><span class="n">has_groups</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_edge_op_has_groups</span><span class="p">(</span><span class="n">op</span><span class="p">);</span>
+</pre></div>
+</div>
+</section>
+</p>
+ </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>op</strong> – A pointer to the edge-vertex operator to check.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Whether the operator tracks group indices.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.qf_edge_op_num_groups">
+<span class="target" id="group__qf__edge__op_1ga2030322b215b9a1bc95942784d9c6337"></span><span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">qf_edge_op_num_groups</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.QfEdgeVertexOperator" title="QfEdgeVertexOperator"><span class="n"><span class="pre">QfEdgeVertexOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">op</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.qf_edge_op_num_groups" title="Link to this definition">¶</a><br /></dt>
+<dd><p>Gets the number of groups from an operator. </p>
+<p><p><div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p>The explanation on <a class="reference internal" href="../guides/grouping.html#grouping-explanation"><span class="std std-ref">Group operator terms: use the operator structure</span></a>.</p>
+</div>
+<section id="id11">
+<h3>Example<a class="headerlink" href="#id11" title="Link to this heading">¶</a></h3>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="n">QfEdgeVertexOperator</span><span class="w"> </span><span class="o">*</span><span class="n">op</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">...;</span>
+<span class="linenos">2</span>
+<span class="linenos">3</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">num_groups</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_edge_op_num_groups</span><span class="p">(</span><span class="n">op</span><span class="p">);</span>
+</pre></div>
+</div>
+</section>
+</p>
+ </p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The number of groups is evaluated lazily as the largest occurring group index plus 1.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>op</strong> – A pointer to the edge-vertex operator whose number of groups to get.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The number of group indices from the operator’s <code class="docutils literal notranslate"><span class="pre">groups</span></code> attribute.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.qf_edge_op_group_weights">
+<span class="target" id="group__qf__edge__op_1ga8598293630fd1eadbf661a0aba0b161c"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">qf_edge_op_group_weights</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.QfEdgeVertexOperator" title="QfEdgeVertexOperator"><span class="n"><span class="pre">QfEdgeVertexOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">op</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">weights_out</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.qf_edge_op_group_weights" title="Link to this definition">¶</a><br /></dt>
+<dd><p>Gets the mean absolute coefficient magnitude of each group. </p>
+<p><p><p>The <code class="docutils literal notranslate"><span class="pre">i</span></code>-th entry is the sum of <code class="docutils literal notranslate"><span class="pre">abs(coeff)</span></code> over the terms in group <code class="docutils literal notranslate"><span class="pre">i</span></code>, divided by the
+number of terms in that group. This is the sampling weight of a randomized product formula
+(e.g. qDRIFT) that draws whole groups rather than individual terms, and is computed in a single
+pass over the operator rather than by reducing <a class="reference internal" href="#c.qf_edge_op_get_coeffs" title="qf_edge_op_get_coeffs"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_edge_op_get_coeffs()</span></code></a> and
+<a class="reference internal" href="#c.qf_edge_op_get_groups" title="qf_edge_op_get_groups"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_edge_op_get_groups()</span></code></a> (one value per <em>ungrouped</em> term each) on the caller’s side.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p>The explanation on <a class="reference internal" href="../guides/grouping.html#grouping-explanation"><span class="std std-ref">Group operator terms: use the operator structure</span></a>.</p>
+</div>
+<section id="id12">
+<h3>Example<a class="headerlink" href="#id12" title="Link to this heading">¶</a></h3>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="n">QfEdgeVertexOperator</span><span class="w"> </span><span class="o">*</span><span class="n">op</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">...;</span>
+<span class="linenos">2</span>
+<span class="linenos">3</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">groups_in</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">};</span>
+<span class="linenos">4</span><span class="n">qf_edge_op_set_groups</span><span class="p">(</span><span class="n">op</span><span class="p">,</span><span class="w"> </span><span class="n">groups_in</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">);</span>
+<span class="linenos">5</span>
+<span class="linenos">6</span><span class="kt">double</span><span class="w"> </span><span class="n">weights</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span>
+<span class="linenos">7</span><span class="n">qf_edge_op_group_weights</span><span class="p">(</span><span class="n">op</span><span class="p">,</span><span class="w"> </span><span class="n">weights</span><span class="p">);</span>
+</pre></div>
+</div>
+</section>
+</p>
+ </p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>A group index that no term carries weighs <code class="docutils literal notranslate"><span class="pre">0.0</span></code>, which keeps it out of the sample.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>op</strong> – A pointer to the edge-vertex operator whose group weights to compute. </p></li>
+<li><p><strong>weights_out</strong> – A pointer to the array of doubles into which to write the weights. Must be sized to :c:func:<code class="docutils literal notranslate"><a class="reference internal" href="#group__qf__edge__op_1ga2030322b215b9a1bc95942784d9c6337"><span class="std std-ref"><span class="pre">qf_edge_op_num_groups</span></span></a></code>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.qf_edge_op_get_groups">
+<span class="target" id="group__qf__edge__op_1gaa1596dd149480ccc4e4ceab1e4edba44"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">qf_edge_op_get_groups</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.QfEdgeVertexOperator" title="QfEdgeVertexOperator"><span class="n"><span class="pre">QfEdgeVertexOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">op</span></span>, <span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">groups_out</span></span>, <span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">groups_len</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.qf_edge_op_get_groups" title="Link to this definition">¶</a><br /></dt>
+<dd><p>Gets the group indices for all operator terms. </p>
+<p><p><div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p>The explanation on <a class="reference internal" href="../guides/grouping.html#grouping-explanation"><span class="std std-ref">Group operator terms: use the operator structure</span></a>.</p>
+</div>
+<section id="id13">
+<h3>Example<a class="headerlink" href="#id13" title="Link to this heading">¶</a></h3>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="n">QfEdgeVertexOperator</span><span class="w"> </span><span class="o">*</span><span class="n">op</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">...;</span>
+<span class="linenos">2</span><span class="kt">uint32_t</span><span class="w"> </span><span class="o">*</span><span class="n">groups_out</span><span class="p">;</span>
+<span class="linenos">3</span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">groups_len</span><span class="p">;</span>
+<span class="linenos">4</span>
+<span class="linenos">5</span><span class="n">qf_edge_op_get_groups</span><span class="p">(</span><span class="n">op</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">groups_out</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">groups_len</span><span class="p">);</span>
+</pre></div>
+</div>
+</section>
+</p>
+ </p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This function borrows the operator’s internal buffer rather than copying it. The returned
+pointer stays valid only until the operator is modified or freed; do not free it yourself.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>op</strong> – A pointer to the edge-vertex operator whose group indices to get. </p></li>
+<li><p><strong>groups_out</strong> – A pointer to the integer array into which to write the group indices. </p></li>
+<li><p><strong>groups_len</strong> – A pointer to the integer into which to write the length of the output array.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.qf_edge_op_set_groups">
+<span class="target" id="group__qf__edge__op_1ga0277b441cd1e92b8311ba808283aa88d"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">qf_edge_op_set_groups</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.QfEdgeVertexOperator" title="QfEdgeVertexOperator"><span class="n"><span class="pre">QfEdgeVertexOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">op</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">groups_in</span></span>, <span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="n"><span class="pre">groups_len</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.qf_edge_op_set_groups" title="Link to this definition">¶</a><br /></dt>
+<dd><p>Sets the <code class="docutils literal notranslate"><span class="pre">groups</span></code> attribute of the provided operator. </p>
+<p><p><div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p>The explanation on <a class="reference internal" href="../guides/grouping.html#grouping-explanation"><span class="std std-ref">Group operator terms: use the operator structure</span></a>.</p>
+</div>
+<section id="id14">
+<h3>Example<a class="headerlink" href="#id14" title="Link to this heading">¶</a></h3>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="n">QfEdgeVertexOperator</span><span class="w"> </span><span class="o">*</span><span class="n">op</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">...;</span>
+<span class="linenos">2</span>
+<span class="linenos">3</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">num_terms</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">4</span><span class="p">;</span>
+<span class="linenos">4</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">groups_in</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">};</span>
+<span class="linenos">5</span><span class="n">qf_edge_op_set_groups</span><span class="p">(</span><span class="n">op</span><span class="p">,</span><span class="w"> </span><span class="n">groups_in</span><span class="p">,</span><span class="w"> </span><span class="n">num_terms</span><span class="p">);</span>
+</pre></div>
+</div>
+</section>
+</p>
+ </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>op</strong> – A pointer to the edge-vertex operator whose <code class="docutils literal notranslate"><span class="pre">groups</span></code> attribute to write. </p></li>
+<li><p><strong>groups_in</strong> – A pointer to the <code class="docutils literal notranslate"><span class="pre">groups</span></code> integer array to write into the operator. </p></li>
+<li><p><strong>groups_len</strong> – The number of terms in the <code class="docutils literal notranslate"><span class="pre">groups_in</span></code> array.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.qf_edge_op_del_groups">
+<span class="target" id="group__qf__edge__op_1ga561d535143a448c600b93de539d1296a"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">qf_edge_op_del_groups</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.QfEdgeVertexOperator" title="QfEdgeVertexOperator"><span class="n"><span class="pre">QfEdgeVertexOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">op</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.qf_edge_op_del_groups" title="Link to this definition">¶</a><br /></dt>
+<dd><p>Deletes the <code class="docutils literal notranslate"><span class="pre">groups</span></code> attribute from the provided operator. </p>
+<p><p><div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p>The explanation on <a class="reference internal" href="../guides/grouping.html#grouping-explanation"><span class="std std-ref">Group operator terms: use the operator structure</span></a>.</p>
+</div>
+<section id="id15">
+<h3>Example<a class="headerlink" href="#id15" title="Link to this heading">¶</a></h3>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="n">QfEdgeVertexOperator</span><span class="w"> </span><span class="o">*</span><span class="n">op</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">...;</span>
+<span class="linenos">2</span>
+<span class="linenos">3</span><span class="n">qf_edge_op_del_groups</span><span class="p">(</span><span class="n">op</span><span class="p">);</span>
+</pre></div>
+</div>
+</section>
+</p>
+ </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>op</strong> – A pointer to the edge-vertex operator whose <code class="docutils literal notranslate"><span class="pre">groups</span></code> attribute to delete.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.qf_edge_op_split_out_groups">
+<span class="target" id="group__qf__edge__op_1ga09fef75a9def99bd4b13eaa7a5304bfa"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">qf_edge_op_split_out_groups</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.QfEdgeVertexOperator" title="QfEdgeVertexOperator"><span class="n"><span class="pre">QfEdgeVertexOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">op</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">group_indices</span></span>, <span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="n"><span class="pre">num_indices</span></span>, <a class="reference internal" href="#c.QfEdgeVertexOperator" title="QfEdgeVertexOperator"><span class="n"><span class="pre">QfEdgeVertexOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">group_ops_out</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.qf_edge_op_split_out_groups" title="Link to this definition">¶</a><br /></dt>
+<dd><p>Splits this operator into a list of new operators based on its <code class="docutils literal notranslate"><span class="pre">groups</span></code> attribute. </p>
+<p><p><p>A duplicate index in <code class="docutils literal notranslate"><span class="pre">group_indices</span></code> is written once per occurrence in <code class="docutils literal notranslate"><span class="pre">group_ops_out</span></code>.
+Requesting only a small number of groups out of a much larger total is significantly cheaper
+than requesting all of them, since terms belonging to a group that is not requested are
+skipped rather than appended anywhere.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p>The explanation on <a class="reference internal" href="../guides/grouping.html#grouping-explanation"><span class="std std-ref">Group operator terms: use the operator structure</span></a>.</p>
+</div>
+<section id="id16">
+<h3>Example<a class="headerlink" href="#id16" title="Link to this heading">¶</a></h3>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="n">QfEdgeVertexOperator</span><span class="w"> </span><span class="o">*</span><span class="n">op</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">...;</span>
+<span class="linenos"> 2</span>
+<span class="linenos"> 3</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">groups_in</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">};</span>
+<span class="linenos"> 4</span><span class="n">qf_edge_op_set_groups</span><span class="p">(</span><span class="n">op</span><span class="p">,</span><span class="w"> </span><span class="n">groups_in</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">);</span>
+<span class="linenos"> 5</span>
+<span class="linenos"> 6</span><span class="c1">// build every group, in index order</span>
+<span class="linenos"> 7</span><span class="n">QfEdgeVertexOperator</span><span class="w"> </span><span class="o">*</span><span class="n">group_ops</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span>
+<span class="linenos"> 8</span><span class="n">qf_edge_op_split_out_groups</span><span class="p">(</span><span class="n">op</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">group_ops</span><span class="p">);</span>
+<span class="linenos"> 9</span>
+<span class="linenos">10</span><span class="c1">// build only group 1</span>
+<span class="linenos">11</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">group_indices</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">1</span><span class="p">};</span>
+<span class="linenos">12</span><span class="n">QfEdgeVertexOperator</span><span class="w"> </span><span class="o">*</span><span class="n">group_op</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>
+<span class="linenos">13</span><span class="n">qf_edge_op_split_out_groups</span><span class="p">(</span><span class="n">op</span><span class="p">,</span><span class="w"> </span><span class="n">group_indices</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">group_op</span><span class="p">);</span>
+</pre></div>
+</div>
+</section>
+</p>
+ </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>op</strong> – A pointer to the edge-vertex operator whose <code class="docutils literal notranslate"><span class="pre">groups</span></code> to split out. </p></li>
+<li><p><strong>group_indices</strong> – A pointer to the array of group indices for which to build operators, in the desired output order. May be <code class="docutils literal notranslate"><span class="pre">NULL</span></code>, in which case every group is built, in index order (equivalent to passing every index from <code class="docutils literal notranslate"><span class="pre">0</span></code> to :c:func:<code class="docutils literal notranslate"><a class="reference internal" href="#group__qf__edge__op_1ga2030322b215b9a1bc95942784d9c6337"><span class="std std-ref"><span class="pre">qf_edge_op_num_groups</span></span></a></code> <code class="docutils literal notranslate"><span class="pre">-</span> <span class="pre">1</span></code>). </p></li>
+<li><p><strong>num_indices</strong> – The number of indices in the <code class="docutils literal notranslate"><span class="pre">group_indices</span></code> array. Ignored if <code class="docutils literal notranslate"><span class="pre">group_indices</span></code> is <code class="docutils literal notranslate"><span class="pre">NULL</span></code>. </p></li>
+<li><p><strong>group_ops_out</strong> – A pointer to the array of :c:struct:<code class="docutils literal notranslate"><span class="pre">QfEdgeVertexOperator</span></code> into which to write the operators for each requested group. Must be sized to <code class="docutils literal notranslate"><span class="pre">num_indices</span></code> when <code class="docutils literal notranslate"><span class="pre">group_indices</span></code> is non-<code class="docutils literal notranslate"><span class="pre">NULL</span></code>, or to :c:func:<code class="docutils literal notranslate"><a class="reference internal" href="#group__qf__edge__op_1ga2030322b215b9a1bc95942784d9c6337"><span class="std std-ref"><span class="pre">qf_edge_op_num_groups</span></span></a></code> when it is <code class="docutils literal notranslate"><span class="pre">NULL</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.qf_edge_op_add_term">
+<span class="target" id="group__qf__edge__op_1gaf3eb07e6de7eab921c40f9609e3c9278"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">qf_edge_op_add_term</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.QfEdgeVertexOperator" title="QfEdgeVertexOperator"><span class="n"><span class="pre">QfEdgeVertexOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">op</span></span>, <span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="n"><span class="pre">num_indices</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">left_indices</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">right_indices</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit-c/qk-complex-64#qkcomplex64" title="(in Qiskit v2.5)"><span class="n"><span class="pre">QkComplex64</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">coeff</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.qf_edge_op_add_term" title="Link to this definition">¶</a><br /></dt>
+<dd><p>Adds a term to an existing operator. </p>
+<p><p><p>Any of the pointer arguments can be <code class="docutils literal notranslate"><span class="pre">NULL</span></code> if and only if their corresponding length is zero.</p>
+<div class="admonition caution">
+<p class="admonition-title">Caution</p>
+<p>This function resets the operator’s <code class="docutils literal notranslate"><span class="pre">groups</span></code> attribute to <code class="docutils literal notranslate"><span class="pre">NULL</span></code>.</p>
+</div>
+<section id="id17">
+<h3>Example<a class="headerlink" href="#id17" title="Link to this heading">¶</a></h3>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="n">QfEdgeVertexOperator</span><span class="w"> </span><span class="o">*</span><span class="n">one</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_edge_op_one</span><span class="p">();</span>
+<span class="linenos">2</span>
+<span class="linenos">3</span><span class="n">QfEdgeVertexOperator</span><span class="w"> </span><span class="o">*</span><span class="n">op</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_edge_op_zero</span><span class="p">();</span>
+<span class="linenos">4</span><span class="n">QkComplex64</span><span class="w"> </span><span class="n">coeff</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">};</span>
+<span class="linenos">5</span>
+<span class="linenos">6</span><span class="n">qf_edge_op_add_term</span><span class="p">(</span><span class="n">op</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">coeff</span><span class="p">);</span>
+<span class="linenos">7</span>
+<span class="linenos">8</span><span class="n">assert</span><span class="p">(</span><span class="n">qf_edge_op_equal</span><span class="p">(</span><span class="n">op</span><span class="p">,</span><span class="w"> </span><span class="n">one</span><span class="p">));</span>
+</pre></div>
+</div>
+</section>
+</p>
+ </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>op</strong> – A pointer to the edge-vertex operator to be modified. </p></li>
+<li><p><strong>num_indices</strong> – The length of both index arrays. </p></li>
+<li><p><strong>left_indices</strong> – A pointer to an array of left-hand mode indices. The length of this array should be <code class="docutils literal notranslate"><span class="pre">num_indices</span></code>. </p></li>
+<li><p><strong>right_indices</strong> – A pointer to an array of right-hand mode indices. The length of this array should be <code class="docutils literal notranslate"><span class="pre">num_indices</span></code>. </p></li>
+<li><p><strong>coeff</strong> – A pointer to the complex coefficient.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.qf_edge_op_add">
+<span class="target" id="group__qf__edge__op_1gaa82f3afa897a7f79111f099580e46f1c"></span><a class="reference internal" href="#c.QfEdgeVertexOperator" title="QfEdgeVertexOperator"><span class="n"><span class="pre">QfEdgeVertexOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">qf_edge_op_add</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.QfEdgeVertexOperator" title="QfEdgeVertexOperator"><span class="n"><span class="pre">QfEdgeVertexOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">left</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.QfEdgeVertexOperator" title="QfEdgeVertexOperator"><span class="n"><span class="pre">QfEdgeVertexOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">right</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.qf_edge_op_add" title="Link to this definition">¶</a><br /></dt>
+<dd><p>Adds two operators together. </p>
+<p><p><section id="id18">
+<h3>Example<a class="headerlink" href="#id18" title="Link to this heading">¶</a></h3>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="n">QfEdgeVertexOperator</span><span class="w"> </span><span class="o">*</span><span class="n">one</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_edge_op_one</span><span class="p">();</span>
+<span class="linenos">2</span><span class="n">QfEdgeVertexOperator</span><span class="w"> </span><span class="o">*</span><span class="n">zero</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_edge_op_zero</span><span class="p">();</span>
+<span class="linenos">3</span>
+<span class="linenos">4</span><span class="n">QfEdgeVertexOperator</span><span class="w"> </span><span class="o">*</span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_edge_op_add</span><span class="p">(</span><span class="n">one</span><span class="p">,</span><span class="w"> </span><span class="n">zero</span><span class="p">);</span>
+<span class="linenos">5</span>
+<span class="linenos">6</span><span class="n">assert</span><span class="p">(</span><span class="n">qf_edge_op_equal</span><span class="p">(</span><span class="n">result</span><span class="p">,</span><span class="w"> </span><span class="n">one</span><span class="p">));</span>
+</pre></div>
+</div>
+</section>
+</p>
+ </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>left</strong> – A pointer to the left operator. </p></li>
+<li><p><strong>right</strong> – A pointer to the right operator.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A pointer to the resulting operator.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.qf_edge_op_mul">
+<span class="target" id="group__qf__edge__op_1ga4fd0b6252b6109686f4d8c18679a230e"></span><a class="reference internal" href="#c.QfEdgeVertexOperator" title="QfEdgeVertexOperator"><span class="n"><span class="pre">QfEdgeVertexOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">qf_edge_op_mul</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.QfEdgeVertexOperator" title="QfEdgeVertexOperator"><span class="n"><span class="pre">QfEdgeVertexOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">op</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit-c/qk-complex-64#qkcomplex64" title="(in Qiskit v2.5)"><span class="n"><span class="pre">QkComplex64</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">scalar</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.qf_edge_op_mul" title="Link to this definition">¶</a><br /></dt>
+<dd><p>Multiplies an operator by a scalar. </p>
+<p><p><section id="id19">
+<h3>Example<a class="headerlink" href="#id19" title="Link to this heading">¶</a></h3>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="n">QfEdgeVertexOperator</span><span class="w"> </span><span class="o">*</span><span class="n">one</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_edge_op_one</span><span class="p">();</span>
+<span class="linenos">2</span><span class="n">QkComplex64</span><span class="w"> </span><span class="n">coeff</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mf">2.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">};</span>
+<span class="linenos">3</span><span class="n">QfEdgeVertexOperator</span><span class="w"> </span><span class="o">*</span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_edge_op_mul</span><span class="p">(</span><span class="n">one</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">coeff</span><span class="p">);</span>
+<span class="linenos">4</span>
+<span class="linenos">5</span><span class="n">QfEdgeVertexOperator</span><span class="w"> </span><span class="o">*</span><span class="n">expected</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_edge_op_zero</span><span class="p">();</span>
+<span class="linenos">6</span><span class="n">qf_edge_op_add_term</span><span class="p">(</span><span class="n">expected</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">coeff</span><span class="p">);</span>
+<span class="linenos">7</span>
+<span class="linenos">8</span><span class="n">assert</span><span class="p">(</span><span class="n">qf_edge_op_equal</span><span class="p">(</span><span class="n">result</span><span class="p">,</span><span class="w"> </span><span class="n">expected</span><span class="p">));</span>
+</pre></div>
+</div>
+</section>
+</p>
+ </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>op</strong> – A pointer to the operator. </p></li>
+<li><p><strong>scalar</strong> – A pointer to the scalar.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A pointer to the resulting operator.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.qf_edge_op_compose">
+<span class="target" id="group__qf__edge__op_1gaa20018493a4822a00d4cfa3513d67475"></span><a class="reference internal" href="#c.QfEdgeVertexOperator" title="QfEdgeVertexOperator"><span class="n"><span class="pre">QfEdgeVertexOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">qf_edge_op_compose</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.QfEdgeVertexOperator" title="QfEdgeVertexOperator"><span class="n"><span class="pre">QfEdgeVertexOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">left</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.QfEdgeVertexOperator" title="QfEdgeVertexOperator"><span class="n"><span class="pre">QfEdgeVertexOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">right</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.qf_edge_op_compose" title="Link to this definition">¶</a><br /></dt>
+<dd><p>Composes two operators with each other. </p>
+<p><p><section id="id20">
+<h3>Example<a class="headerlink" href="#id20" title="Link to this heading">¶</a></h3>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="n">QfEdgeVertexOperator</span><span class="w"> </span><span class="o">*</span><span class="n">one</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_edge_op_one</span><span class="p">();</span>
+<span class="linenos">2</span><span class="n">QfEdgeVertexOperator</span><span class="w"> </span><span class="o">*</span><span class="n">zero</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_edge_op_zero</span><span class="p">();</span>
+<span class="linenos">3</span>
+<span class="linenos">4</span><span class="n">QfEdgeVertexOperator</span><span class="w"> </span><span class="o">*</span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_edge_op_compose</span><span class="p">(</span><span class="n">one</span><span class="p">,</span><span class="w"> </span><span class="n">zero</span><span class="p">);</span>
+<span class="linenos">5</span>
+<span class="linenos">6</span><span class="n">assert</span><span class="p">(</span><span class="n">qf_edge_op_equal</span><span class="p">(</span><span class="n">result</span><span class="p">,</span><span class="w"> </span><span class="n">zero</span><span class="p">));</span>
+</pre></div>
+</div>
+</section>
+</p>
+ </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>left</strong> – A pointer to the left operator. </p></li>
+<li><p><strong>right</strong> – A pointer to the right operator.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A pointer to the resulting operator.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.qf_edge_op_adjoint">
+<span class="target" id="group__qf__edge__op_1gad5c10ed4aa613a4292e1af90f6f01569"></span><a class="reference internal" href="#c.QfEdgeVertexOperator" title="QfEdgeVertexOperator"><span class="n"><span class="pre">QfEdgeVertexOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">qf_edge_op_adjoint</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.QfEdgeVertexOperator" title="QfEdgeVertexOperator"><span class="n"><span class="pre">QfEdgeVertexOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">op</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.qf_edge_op_adjoint" title="Link to this definition">¶</a><br /></dt>
+<dd><p>Returns the Hermitian conjugate (or adjoint) of an operator. </p>
+<p>This affects the terms and coefficients as follows:</p>
+<p><ul class="simple">
+<li><p>the generators in each term reverse their order</p></li>
+<li><p>the coefficients are complex conjugated</p></li>
+</ul>
+</p>
+<p><p><section id="id21">
+<h3>Example<a class="headerlink" href="#id21" title="Link to this heading">¶</a></h3>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="n">QfEdgeVertexOperator</span><span class="w"> </span><span class="o">*</span><span class="n">op</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_edge_op_zero</span><span class="p">();</span>
+<span class="linenos"> 2</span><span class="n">QkComplex64</span><span class="w"> </span><span class="n">coeff</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">};</span>
+<span class="linenos"> 3</span><span class="n">qf_edge_op_add_term</span><span class="p">(</span><span class="n">op</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">coeff</span><span class="p">);</span>
+<span class="linenos"> 4</span>
+<span class="linenos"> 5</span><span class="n">QfEdgeVertexOperator</span><span class="w"> </span><span class="o">*</span><span class="n">adjoint</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_edge_op_adjoint</span><span class="p">(</span><span class="n">op</span><span class="p">);</span>
+<span class="linenos"> 6</span>
+<span class="linenos"> 7</span><span class="n">QfEdgeVertexOperator</span><span class="w"> </span><span class="o">*</span><span class="n">expected</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_edge_op_zero</span><span class="p">();</span>
+<span class="linenos"> 8</span><span class="n">QkComplex64</span><span class="w"> </span><span class="n">coeff_adj</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">-1.0</span><span class="p">};</span>
+<span class="linenos"> 9</span><span class="n">qf_edge_op_add_term</span><span class="p">(</span><span class="n">expected</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">coeff_adj</span><span class="p">);</span>
+<span class="linenos">10</span>
+<span class="linenos">11</span><span class="n">assert</span><span class="p">(</span><span class="n">qf_edge_op_equal</span><span class="p">(</span><span class="n">adjoint</span><span class="p">,</span><span class="w"> </span><span class="n">expected</span><span class="p">));</span>
+</pre></div>
+</div>
+</section>
+</p>
+ </p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Reversing the operator string is essential: the edge and vertex generators anticommute when
+they share exactly one index, so <code class="docutils literal notranslate"><span class="pre">BA</span> <span class="pre">!=</span> <span class="pre">AB</span></code> in general.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>op</strong> – A pointer to the operator.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A pointer to the created operator.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.qf_edge_op_ichop">
+<span class="target" id="group__qf__edge__op_1ga15843a19b131bb29982dc19b0bf6f3f9"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">qf_edge_op_ichop</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.QfEdgeVertexOperator" title="QfEdgeVertexOperator"><span class="n"><span class="pre">QfEdgeVertexOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">op</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n"><span class="pre">atol</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.qf_edge_op_ichop" title="Link to this definition">¶</a><br /></dt>
+<dd><p>Removes terms whose coefficient magnitude lies below the provided threshold. </p>
+<p><p><div class="admonition caution">
+<p class="admonition-title">Caution</p>
+<p>This functions truncates coefficients greedily! If the acted upon operator might contain
+separate coefficients for duplicate terms consider calling <a class="reference internal" href="#c.qf_edge_op_simplify" title="qf_edge_op_simplify"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_edge_op_simplify()</span></code></a>
+instead!</p>
+</div>
+<section id="id22">
+<h3>Example<a class="headerlink" href="#id22" title="Link to this heading">¶</a></h3>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="n">QfEdgeVertexOperator</span><span class="w"> </span><span class="o">*</span><span class="n">op</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_edge_op_zero</span><span class="p">();</span>
+<span class="linenos">2</span><span class="n">QkComplex64</span><span class="w"> </span><span class="n">coeff</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mf">1e-8</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">};</span>
+<span class="linenos">3</span><span class="n">qf_edge_op_add_term</span><span class="p">(</span><span class="n">op</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">coeff</span><span class="p">);</span>
+<span class="linenos">4</span>
+<span class="linenos">5</span><span class="n">qf_edge_op_ichop</span><span class="p">(</span><span class="n">op</span><span class="p">,</span><span class="w"> </span><span class="mf">1e-6</span><span class="p">);</span>
+<span class="linenos">6</span>
+<span class="linenos">7</span><span class="n">QfEdgeVertexOperator</span><span class="w"> </span><span class="o">*</span><span class="n">expected</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_edge_op_zero</span><span class="p">();</span>
+<span class="linenos">8</span>
+<span class="linenos">9</span><span class="n">assert</span><span class="p">(</span><span class="n">qf_edge_op_equal</span><span class="p">(</span><span class="n">op</span><span class="p">,</span><span class="w"> </span><span class="n">expected</span><span class="p">));</span>
+</pre></div>
+</div>
+</section>
+</p>
+ </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>op</strong> – A pointer to the operator. </p></li>
+<li><p><strong>atol</strong> – The absolute tolerance for coefficient truncation.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.qf_edge_op_simplify">
+<span class="target" id="group__qf__edge__op_1ga01ae3de681c0a11a1a4d74de924dd2bc"></span><a class="reference internal" href="#c.QfEdgeVertexOperator" title="QfEdgeVertexOperator"><span class="n"><span class="pre">QfEdgeVertexOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">qf_edge_op_simplify</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.QfEdgeVertexOperator" title="QfEdgeVertexOperator"><span class="n"><span class="pre">QfEdgeVertexOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">op</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n"><span class="pre">atol</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.qf_edge_op_simplify" title="Link to this definition">¶</a><br /></dt>
+<dd><p>Returns an equivalent but simplified operator. </p>
+<p><p><p>The simplification process first sums all coefficients that belong to equal terms and then
+only retains those whose total coefficient exceeds the specified tolerance (just like
+<a class="reference internal" href="#c.qf_edge_op_ichop" title="qf_edge_op_ichop"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_edge_op_ichop()</span></code></a>).</p>
+<p>When an operator has been arithmetically manipulated or constructed in a way that does not
+guarantee unique terms, this method should be called before applying any method that
+filters numerically small coefficients to avoid loss of information.</p>
+<section id="id23">
+<h3>Example<a class="headerlink" href="#id23" title="Link to this heading">¶</a></h3>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="n">QfEdgeVertexOperator</span><span class="w"> </span><span class="o">*</span><span class="n">op</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_edge_op_zero</span><span class="p">();</span>
+<span class="linenos">2</span><span class="n">QkComplex64</span><span class="w"> </span><span class="n">coeff</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mf">1e-5</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">};</span>
+<span class="linenos">3</span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">100</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="linenos">4</span><span class="w">  </span><span class="n">qf_edge_op_add_term</span><span class="p">(</span><span class="n">op</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">coeff</span><span class="p">);</span>
+<span class="linenos">5</span><span class="p">}</span>
+<span class="linenos">6</span>
+<span class="linenos">7</span><span class="n">QfEdgeVertexOperator</span><span class="w"> </span><span class="o">*</span><span class="n">canon</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_edge_op_simplify</span><span class="p">(</span><span class="n">op</span><span class="p">,</span><span class="w"> </span><span class="mf">1e-4</span><span class="p">);</span>
+<span class="linenos">8</span>
+<span class="linenos">9</span><span class="n">assert</span><span class="p">(</span><span class="n">qf_edge_op_len</span><span class="p">(</span><span class="n">canon</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
+</pre></div>
+</div>
+</section>
+</p>
+ </p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This groups terms by their exact stored index arrays. Two terms that are mathematically
+equal but stored with different generator orientations (recall <code class="docutils literal notranslate"><span class="pre">E_kj</span> <span class="pre">=</span> <span class="pre">-E_jk</span></code>) are not
+recognized as duplicates; call <a class="reference internal" href="#c.qf_edge_op_normal_ordered" title="qf_edge_op_normal_ordered"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_edge_op_normal_ordered()</span></code></a> first to bring them into
+a common form.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>op</strong> – A pointer to the edge-vertex operator to be simplified. </p></li>
+<li><p><strong>atol</strong> – The absolute tolerance for coefficient truncation.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>An equivalent but simplified operator.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.qf_edge_op_normal_ordered">
+<span class="target" id="group__qf__edge__op_1ga823398e30675a1a3ff8f4d890d33a903"></span><a class="reference internal" href="#c.QfEdgeVertexOperator" title="QfEdgeVertexOperator"><span class="n"><span class="pre">QfEdgeVertexOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">qf_edge_op_normal_ordered</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.QfEdgeVertexOperator" title="QfEdgeVertexOperator"><span class="n"><span class="pre">QfEdgeVertexOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">op</span></span>, <span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="n"><span class="pre">ascending</span></span>, <span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="n"><span class="pre">reduce</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.qf_edge_op_normal_ordered" title="Link to this definition">¶</a><br /></dt>
+<dd><p>Returns an equivalent operator with normal ordered terms. </p>
+<p><p><p>The <code class="docutils literal notranslate"><span class="pre">ascending</span></code> flag fixes the orientation convention of the generalized edge operators:
+because <span class="math">\(E_{kj} = -E_{jk}\)</span>, every edge operator has two representations, and this picks
+<span class="math">\(j &lt; k\)</span> (<code class="docutils literal notranslate"><span class="pre">true</span></code>) or <span class="math">\(j &gt; k\)</span> (<code class="docutils literal notranslate"><span class="pre">false</span></code>), absorbing the sign into the coefficient.
+Vertex operators <span class="math">\(V_j = E_{jj}\)</span> are unaffected.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">reduce</span></code> flag additionally contracts adjacent generators, which is what makes the result
+a genuine canonical form. The rules are <span class="math">\(V_j V_j = 1\)</span>, <span class="math">\(E_{jk} E_{jk} = 1\)</span>,
+<span class="math">\(E_{jk} E_{kj} = -1\)</span>, and the <em>fusion</em> rule
+<span class="math">\(E_{ab} E_{bc} = -i E_{ac}\)</span> for distinct <span class="math">\(a, b, c\)</span>.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="qf-transfer-op.html#c.qf_transfer_op_normal_ordered" title="qf_transfer_op_normal_ordered"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_transfer_op_normal_ordered()</span></code></a>, which takes no <code class="docutils literal notranslate"><span class="pre">ascending</span></code> flag because the
+transfer operators <span class="math">\(T_{jk}\)</span> and <span class="math">\(T_{kj}\)</span> are genuinely <em>different</em> operators
+rather than two representations of one.</p>
+</div>
+<section id="id24">
+<h3>Example<a class="headerlink" href="#id24" title="Link to this heading">¶</a></h3>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1">// `E(1,0)` normal-orders to `-E(0,1)` when ascending</span>
+<span class="linenos"> 2</span><span class="n">QfEdgeVertexOperator</span><span class="w"> </span><span class="o">*</span><span class="n">op</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_edge_op_zero</span><span class="p">();</span>
+<span class="linenos"> 3</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">left</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">1</span><span class="p">};</span>
+<span class="linenos"> 4</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">right</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="p">};</span>
+<span class="linenos"> 5</span><span class="n">QkComplex64</span><span class="w"> </span><span class="n">coeff</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">};</span>
+<span class="linenos"> 6</span><span class="n">qf_edge_op_add_term</span><span class="p">(</span><span class="n">op</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">left</span><span class="p">,</span><span class="w"> </span><span class="n">right</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">coeff</span><span class="p">);</span>
+<span class="linenos"> 7</span>
+<span class="linenos"> 8</span><span class="n">QfEdgeVertexOperator</span><span class="w"> </span><span class="o">*</span><span class="n">ordered</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_edge_op_normal_ordered</span><span class="p">(</span><span class="n">op</span><span class="p">,</span><span class="w"> </span><span class="nb">true</span><span class="p">,</span><span class="w"> </span><span class="nb">true</span><span class="p">);</span>
+<span class="linenos"> 9</span>
+<span class="linenos">10</span><span class="n">QfEdgeVertexOperator</span><span class="w"> </span><span class="o">*</span><span class="n">expected</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_edge_op_zero</span><span class="p">();</span>
+<span class="linenos">11</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">left_exp</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="p">};</span>
+<span class="linenos">12</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">right_exp</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">1</span><span class="p">};</span>
+<span class="linenos">13</span><span class="n">QkComplex64</span><span class="w"> </span><span class="n">coeff_exp</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mf">-1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">};</span>
+<span class="linenos">14</span><span class="n">qf_edge_op_add_term</span><span class="p">(</span><span class="n">expected</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">left_exp</span><span class="p">,</span><span class="w"> </span><span class="n">right_exp</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">coeff_exp</span><span class="p">);</span>
+<span class="linenos">15</span>
+<span class="linenos">16</span><span class="n">assert</span><span class="p">(</span><span class="n">qf_edge_op_equal</span><span class="p">(</span><span class="n">ordered</span><span class="p">,</span><span class="w"> </span><span class="n">expected</span><span class="p">));</span>
+</pre></div>
+</div>
+</section>
+</p>
+ </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>op</strong> – A pointer to the operator. </p></li>
+<li><p><strong>ascending</strong> – Whether the indices of each edge operator should ascend or descend. </p></li>
+<li><p><strong>reduce</strong> – Whether to contract adjacent generators via the algebra’s identities.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A pointer to the created operator.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.qf_edge_op_is_hermitian">
+<span class="target" id="group__qf__edge__op_1ga4fcc63dea66889b333f969d23f8a4b3e"></span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">qf_edge_op_is_hermitian</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.QfEdgeVertexOperator" title="QfEdgeVertexOperator"><span class="n"><span class="pre">QfEdgeVertexOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">op</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n"><span class="pre">atol</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.qf_edge_op_is_hermitian" title="Link to this definition">¶</a><br /></dt>
+<dd><p>Checks whether an operator is Hermitian. </p>
+<p><p><section id="id25">
+<h3>Example<a class="headerlink" href="#id25" title="Link to this heading">¶</a></h3>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="c1">// `V(0) E(0,1)` is *not* Hermitian: the two generators share the index 0 and therefore</span>
+<span class="linenos">2</span><span class="c1">// anticommute.</span>
+<span class="linenos">3</span><span class="n">QfEdgeVertexOperator</span><span class="w"> </span><span class="o">*</span><span class="n">op</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_edge_op_zero</span><span class="p">();</span>
+<span class="linenos">4</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">left</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">};</span>
+<span class="linenos">5</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">right</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">};</span>
+<span class="linenos">6</span><span class="n">QkComplex64</span><span class="w"> </span><span class="n">coeff</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">};</span>
+<span class="linenos">7</span><span class="n">qf_edge_op_add_term</span><span class="p">(</span><span class="n">op</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="n">left</span><span class="p">,</span><span class="w"> </span><span class="n">right</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">coeff</span><span class="p">);</span>
+<span class="linenos">8</span>
+<span class="linenos">9</span><span class="n">assert</span><span class="p">(</span><span class="o">!</span><span class="n">qf_edge_op_is_hermitian</span><span class="p">(</span><span class="n">op</span><span class="p">,</span><span class="w"> </span><span class="mf">1e-10</span><span class="p">));</span>
+</pre></div>
+</div>
+</section>
+</p>
+ </p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This check is implemented using <a class="reference internal" href="#c.qf_edge_op_equiv" title="qf_edge_op_equiv"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_edge_op_equiv()</span></code></a> on the
+<a class="reference internal" href="#c.qf_edge_op_normal_ordered" title="qf_edge_op_normal_ordered"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_edge_op_normal_ordered()</span></code></a> difference of <code class="docutils literal notranslate"><span class="pre">op</span></code> and its
+<a class="reference internal" href="#c.qf_edge_op_adjoint" title="qf_edge_op_adjoint"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_edge_op_adjoint()</span></code></a> and <a class="reference internal" href="#c.qf_edge_op_zero" title="qf_edge_op_zero"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_edge_op_zero()</span></code></a>.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>op</strong> – A pointer to the edge-vertex operator to be checked. </p></li>
+<li><p><strong>atol</strong> – The absolute tolerance upto which coefficients are considered equal.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Whether the provided operator is Hermitian.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.qf_edge_op_equal">
+<span class="target" id="group__qf__edge__op_1gabef77c1aa232a1d0784e8c61361bda29"></span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">qf_edge_op_equal</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.QfEdgeVertexOperator" title="QfEdgeVertexOperator"><span class="n"><span class="pre">QfEdgeVertexOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">left</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.QfEdgeVertexOperator" title="QfEdgeVertexOperator"><span class="n"><span class="pre">QfEdgeVertexOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">right</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.qf_edge_op_equal" title="Link to this definition">¶</a><br /></dt>
+<dd><p>Compare two operators for equality. </p>
+<p>Equality in this context means an exact match of the internal data arrays.</p>
+<p><p><section id="id26">
+<h3>Example<a class="headerlink" href="#id26" title="Link to this heading">¶</a></h3>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="n">QfEdgeVertexOperator</span><span class="w"> </span><span class="o">*</span><span class="n">one</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_edge_op_one</span><span class="p">();</span>
+<span class="linenos">2</span><span class="n">QfEdgeVertexOperator</span><span class="w"> </span><span class="o">*</span><span class="n">zero</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_edge_op_zero</span><span class="p">();</span>
+<span class="linenos">3</span>
+<span class="linenos">4</span><span class="n">assert</span><span class="p">(</span><span class="n">qf_edge_op_equal</span><span class="p">(</span><span class="n">one</span><span class="p">,</span><span class="w"> </span><span class="n">one</span><span class="p">));</span>
+<span class="linenos">5</span><span class="n">assert</span><span class="p">(</span><span class="o">!</span><span class="n">qf_edge_op_equal</span><span class="p">(</span><span class="n">one</span><span class="p">,</span><span class="w"> </span><span class="n">zero</span><span class="p">));</span>
+</pre></div>
+</div>
+</section>
+</p>
+ </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>left</strong> – A pointer to the left operator. </p></li>
+<li><p><strong>right</strong> – A pointer to the right operator.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Whether the two operators are equal.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.qf_edge_op_equiv">
+<span class="target" id="group__qf__edge__op_1gaeaa302a752dccf5a1a943f35966bb537"></span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">qf_edge_op_equiv</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.QfEdgeVertexOperator" title="QfEdgeVertexOperator"><span class="n"><span class="pre">QfEdgeVertexOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">left</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.QfEdgeVertexOperator" title="QfEdgeVertexOperator"><span class="n"><span class="pre">QfEdgeVertexOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">right</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n"><span class="pre">atol</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.qf_edge_op_equiv" title="Link to this definition">¶</a><br /></dt>
+<dd><p>Compare two operators for equivalence. </p>
+<p>Equivalence in this context means approximate equality up to the specified absolute tolerance. To be more precise, this method returns <code class="docutils literal notranslate"><span class="pre">True</span></code>, when all the absolute values of the coefficients in the difference <code class="docutils literal notranslate"><span class="pre">other</span> <span class="pre">-</span> <span class="pre">self</span></code> are below the specified threshold <code class="docutils literal notranslate"><span class="pre">atol</span></code>.</p>
+<p><p><section id="id27">
+<h3>Example<a class="headerlink" href="#id27" title="Link to this heading">¶</a></h3>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="n">QfEdgeVertexOperator</span><span class="w"> </span><span class="o">*</span><span class="n">zero</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_edge_op_zero</span><span class="p">();</span>
+<span class="linenos">2</span>
+<span class="linenos">3</span><span class="n">QfEdgeVertexOperator</span><span class="w"> </span><span class="o">*</span><span class="n">op</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_edge_op_zero</span><span class="p">();</span>
+<span class="linenos">4</span><span class="n">QkComplex64</span><span class="w"> </span><span class="n">coeff</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mf">1e-7</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">};</span>
+<span class="linenos">5</span><span class="n">qf_edge_op_add_term</span><span class="p">(</span><span class="n">op</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">coeff</span><span class="p">);</span>
+<span class="linenos">6</span>
+<span class="linenos">7</span><span class="n">assert</span><span class="p">(</span><span class="n">qf_edge_op_equiv</span><span class="p">(</span><span class="n">op</span><span class="p">,</span><span class="w"> </span><span class="n">zero</span><span class="p">,</span><span class="w"> </span><span class="mf">1e-6</span><span class="p">));</span>
+<span class="linenos">8</span><span class="n">assert</span><span class="p">(</span><span class="o">!</span><span class="n">qf_edge_op_equiv</span><span class="p">(</span><span class="n">op</span><span class="p">,</span><span class="w"> </span><span class="n">zero</span><span class="p">,</span><span class="w"> </span><span class="mf">1e-8</span><span class="p">));</span>
+</pre></div>
+</div>
+</section>
+</p>
+ </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>left</strong> – A pointer to the left operator. </p></li>
+<li><p><strong>right</strong> – A pointer to the right operator. </p></li>
+<li><p><strong>atol</strong> – The absolute tolerance for coefficient equivalence.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Whether the two operators are equivalent.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.qf_edge_op_len">
+<span class="target" id="group__qf__edge__op_1gab5d921777521bd69b1c242ee91c34017"></span><span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">qf_edge_op_len</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.QfEdgeVertexOperator" title="QfEdgeVertexOperator"><span class="n"><span class="pre">QfEdgeVertexOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">op</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.qf_edge_op_len" title="Link to this definition">¶</a><br /></dt>
+<dd><p>Returns the length (or number of terms) of the provided operator. </p>
+<p><p><section id="id28">
+<h3>Example<a class="headerlink" href="#id28" title="Link to this heading">¶</a></h3>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="n">QfEdgeVertexOperator</span><span class="w"> </span><span class="o">*</span><span class="n">op</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_edge_op_zero</span><span class="p">();</span>
+<span class="linenos">2</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">left</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">};</span>
+<span class="linenos">3</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">right</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">};</span>
+<span class="linenos">4</span><span class="n">QkComplex64</span><span class="w"> </span><span class="n">coeff</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">};</span>
+<span class="linenos">5</span><span class="n">qf_edge_op_add_term</span><span class="p">(</span><span class="n">op</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="n">left</span><span class="p">,</span><span class="w"> </span><span class="n">right</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">coeff</span><span class="p">);</span>
+<span class="linenos">6</span>
+<span class="linenos">7</span><span class="n">assert</span><span class="p">(</span><span class="n">qf_edge_op_len</span><span class="p">(</span><span class="n">op</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
+</pre></div>
+</div>
+</section>
+</p>
+ </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>op</strong> – A pointer to the edge-vertex operator.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The length (or number of terms) of the operator.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.qf_edge_op_relabel_modes">
+<span class="target" id="group__qf__edge__op_1gafeb54e4ffc281c2b0c06580ea46a1ddb"></span><a class="reference internal" href="qf-exit-code.html#c.QfExitCode" title="QfExitCode"><span class="n"><span class="pre">QfExitCode</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">qf_edge_op_relabel_modes</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.QfEdgeVertexOperator" title="QfEdgeVertexOperator"><span class="n"><span class="pre">QfEdgeVertexOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">op</span></span>, <span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="n"><span class="pre">num_modes</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">permutation</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.qf_edge_op_relabel_modes" title="Link to this definition">¶</a><br /></dt>
+<dd><p>Relabels the modes of the provided operator. </p>
+<p><p><section id="id29">
+<h3>Example<a class="headerlink" href="#id29" title="Link to this heading">¶</a></h3>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="n">QfEdgeVertexOperator</span><span class="w"> </span><span class="o">*</span><span class="n">op</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_edge_op_zero</span><span class="p">();</span>
+<span class="linenos"> 2</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">left</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">};</span>
+<span class="linenos"> 3</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">right</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">};</span>
+<span class="linenos"> 4</span><span class="n">QkComplex64</span><span class="w"> </span><span class="n">coeff</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">};</span>
+<span class="linenos"> 5</span><span class="n">qf_edge_op_add_term</span><span class="p">(</span><span class="n">op</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="n">left</span><span class="p">,</span><span class="w"> </span><span class="n">right</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">coeff</span><span class="p">);</span>
+<span class="linenos"> 6</span>
+<span class="linenos"> 7</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">permutation</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">};</span>
+<span class="linenos"> 8</span>
+<span class="linenos"> 9</span><span class="n">QfExitCode</span><span class="w"> </span><span class="n">exit</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_edge_op_relabel_modes</span><span class="p">(</span><span class="n">op</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="n">permutation</span><span class="p">);</span>
+<span class="linenos">10</span>
+<span class="linenos">11</span><span class="n">assert</span><span class="p">(</span><span class="n">exit</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">QfExitCode_Success</span><span class="p">);</span>
+</pre></div>
+</div>
+</section>
+</p>
+ </p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Both index arrays are relabelled. Unlike most operations, this preserves the operator’s
+<code class="docutils literal notranslate"><span class="pre">groups</span></code> attribute, since relabelling permutes mode indices without reordering, splitting
+or merging terms.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>op</strong> – A pointer to the edge-vertex operator. </p></li>
+<li><p><strong>num_modes</strong> – The number of mode indices in the provided permutation list. </p></li>
+<li><p><strong>permutation</strong> – The index permutation list.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>An exit code.<ul class="simple">
+<li><p><code class="docutils literal notranslate"><a class="reference internal" href="qf-exit-code.html#group__qf__exit__code_1gga89daaa15e32524338df290dbd873caf1a3e14e3ca9bf1cb919c6913131132da37"><span class="std std-ref"><span class="pre">QfExitCode_Success</span></span></a></code> upon success</p></li>
+<li><p><code class="docutils literal notranslate"><a class="reference internal" href="qf-exit-code.html#group__qf__exit__code_1gga89daaa15e32524338df290dbd873caf1a01f24cac283f08bcfa375ff2a59772ef"><span class="std std-ref"><span class="pre">QfExitCode_DuplicateIndexError</span></span></a></code> if duplicate indices were found in the permutation</p></li>
+<li><p><code class="docutils literal notranslate"><a class="reference internal" href="qf-exit-code.html#group__qf__exit__code_1gga89daaa15e32524338df290dbd873caf1ae5c84289c900faf721fde93e2f249e3b"><span class="std std-ref"><span class="pre">QfExitCode_IndexError</span></span></a></code> for any other index errors, such as invalid indices.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
+          
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2026, Qiskit addons team
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            <div class="last-updated">
+              Last updated on 2026/09/02</div>
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">QfEdgeVertexOperator</a><ul>
+<li><a class="reference internal" href="#c.QfEdgeVertexOperator"><code class="docutils literal notranslate"><span class="pre">QfEdgeVertexOperator</span></code></a></li>
+<li><a class="reference internal" href="#definition">Definition</a></li>
+<li><a class="reference internal" href="#implementation">Implementation</a><ul>
+<li><a class="reference internal" href="#construction">Construction</a></li>
+<li><a class="reference internal" href="#arithmetics">Arithmetics</a></li>
+<li><a class="reference internal" href="#manipulation">Manipulation</a></li>
+<li><a class="reference internal" href="#properties">Properties</a></li>
+<li><a class="reference internal" href="#mapping">Mapping</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#members">Members</a><ul>
+<li><a class="reference internal" href="#c.qf_edge_op_new"><code class="docutils literal notranslate"><span class="pre">qf_edge_op_new()</span></code></a></li>
+<li><a class="reference internal" href="#c.qf_edge_op_free"><code class="docutils literal notranslate"><span class="pre">qf_edge_op_free()</span></code></a></li>
+<li><a class="reference internal" href="#c.qf_edge_op_get_coeffs"><code class="docutils literal notranslate"><span class="pre">qf_edge_op_get_coeffs()</span></code></a></li>
+<li><a class="reference internal" href="#c.qf_edge_op_get_left_indices"><code class="docutils literal notranslate"><span class="pre">qf_edge_op_get_left_indices()</span></code></a></li>
+<li><a class="reference internal" href="#c.qf_edge_op_get_right_indices"><code class="docutils literal notranslate"><span class="pre">qf_edge_op_get_right_indices()</span></code></a></li>
+<li><a class="reference internal" href="#c.qf_edge_op_get_boundaries"><code class="docutils literal notranslate"><span class="pre">qf_edge_op_get_boundaries()</span></code></a></li>
+<li><a class="reference internal" href="#c.qf_edge_op_zero"><code class="docutils literal notranslate"><span class="pre">qf_edge_op_zero()</span></code></a></li>
+<li><a class="reference internal" href="#c.qf_edge_op_one"><code class="docutils literal notranslate"><span class="pre">qf_edge_op_one()</span></code></a></li>
+<li><a class="reference internal" href="#c.qf_edge_op_has_groups"><code class="docutils literal notranslate"><span class="pre">qf_edge_op_has_groups()</span></code></a></li>
+<li><a class="reference internal" href="#c.qf_edge_op_num_groups"><code class="docutils literal notranslate"><span class="pre">qf_edge_op_num_groups()</span></code></a></li>
+<li><a class="reference internal" href="#c.qf_edge_op_group_weights"><code class="docutils literal notranslate"><span class="pre">qf_edge_op_group_weights()</span></code></a></li>
+<li><a class="reference internal" href="#c.qf_edge_op_get_groups"><code class="docutils literal notranslate"><span class="pre">qf_edge_op_get_groups()</span></code></a></li>
+<li><a class="reference internal" href="#c.qf_edge_op_set_groups"><code class="docutils literal notranslate"><span class="pre">qf_edge_op_set_groups()</span></code></a></li>
+<li><a class="reference internal" href="#c.qf_edge_op_del_groups"><code class="docutils literal notranslate"><span class="pre">qf_edge_op_del_groups()</span></code></a></li>
+<li><a class="reference internal" href="#c.qf_edge_op_split_out_groups"><code class="docutils literal notranslate"><span class="pre">qf_edge_op_split_out_groups()</span></code></a></li>
+<li><a class="reference internal" href="#c.qf_edge_op_add_term"><code class="docutils literal notranslate"><span class="pre">qf_edge_op_add_term()</span></code></a></li>
+<li><a class="reference internal" href="#c.qf_edge_op_add"><code class="docutils literal notranslate"><span class="pre">qf_edge_op_add()</span></code></a></li>
+<li><a class="reference internal" href="#c.qf_edge_op_mul"><code class="docutils literal notranslate"><span class="pre">qf_edge_op_mul()</span></code></a></li>
+<li><a class="reference internal" href="#c.qf_edge_op_compose"><code class="docutils literal notranslate"><span class="pre">qf_edge_op_compose()</span></code></a></li>
+<li><a class="reference internal" href="#c.qf_edge_op_adjoint"><code class="docutils literal notranslate"><span class="pre">qf_edge_op_adjoint()</span></code></a></li>
+<li><a class="reference internal" href="#c.qf_edge_op_ichop"><code class="docutils literal notranslate"><span class="pre">qf_edge_op_ichop()</span></code></a></li>
+<li><a class="reference internal" href="#c.qf_edge_op_simplify"><code class="docutils literal notranslate"><span class="pre">qf_edge_op_simplify()</span></code></a></li>
+<li><a class="reference internal" href="#c.qf_edge_op_normal_ordered"><code class="docutils literal notranslate"><span class="pre">qf_edge_op_normal_ordered()</span></code></a></li>
+<li><a class="reference internal" href="#c.qf_edge_op_is_hermitian"><code class="docutils literal notranslate"><span class="pre">qf_edge_op_is_hermitian()</span></code></a></li>
+<li><a class="reference internal" href="#c.qf_edge_op_equal"><code class="docutils literal notranslate"><span class="pre">qf_edge_op_equal()</span></code></a></li>
+<li><a class="reference internal" href="#c.qf_edge_op_equiv"><code class="docutils literal notranslate"><span class="pre">qf_edge_op_equiv()</span></code></a></li>
+<li><a class="reference internal" href="#c.qf_edge_op_len"><code class="docutils literal notranslate"><span class="pre">qf_edge_op_len()</span></code></a></li>
+<li><a class="reference internal" href="#c.qf_edge_op_relabel_modes"><code class="docutils literal notranslate"><span class="pre">qf_edge_op_relabel_modes()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../_static/documentation_options.js?v=bf997f3f"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=6dbb43f8"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../_static/katex.min.js?v=5cc8ed51"></script>
+    <script src="../_static/auto-render.min.js?v=af98beb9"></script>
+    <script src="../_static/katex_autorenderer.js?v=bebc588a"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    </body>
+</html>

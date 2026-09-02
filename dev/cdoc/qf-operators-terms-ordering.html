@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Ordering Functions - Qiskit Fermions 0.2.0.dev0+c458e00</title>
+        <title>Ordering Functions - Qiskit Fermions 0.2.0.dev0+0aa6e24</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+c458e00</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+0aa6e24</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+c458e00</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+0aa6e24</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -345,6 +345,90 @@ no groups, neither does the result.</p>
 </dl>
 </dd></dl>
 
+<dl class="c function">
+<dt class="sig sig-object c" id="c.qf_edge_op_canonical_order">
+<span class="target" id="group__qf__operator__terms__ordering_1ga35724462fabf2f0e1fa4fdf52112ab1d"></span><a class="reference internal" href="qf-edge-op.html#c.QfEdgeVertexOperator" title="QfEdgeVertexOperator"><span class="n"><span class="pre">QfEdgeVertexOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">qf_edge_op_canonical_order</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="qf-edge-op.html#c.QfEdgeVertexOperator" title="QfEdgeVertexOperator"><span class="n"><span class="pre">QfEdgeVertexOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">op</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.qf_edge_op_canonical_order" title="Link to this definition">¶</a><br /></dt>
+<dd><p>Returns a copy of an edge-vertex operator with its terms in a canonical order. </p>
+<p><p><p>The terms are sorted into a canonical order that depends only on each term’s structure (the
+operator string it represents) and not on its coefficient. The order is therefore deterministic
+for a given set of terms regardless of how the operator was assembled. The terms themselves are
+left untouched — this only reorders them, it does not simplify or normal-order the operator.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="n">QfEdgeVertexOperator</span><span class="w"> </span><span class="o">*</span><span class="n">op</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_edge_op_zero</span><span class="p">();</span>
+<span class="linenos"> 2</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">left_a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">1</span><span class="p">};</span>
+<span class="linenos"> 3</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">right_a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">2</span><span class="p">};</span>
+<span class="linenos"> 4</span><span class="n">QkComplex64</span><span class="w"> </span><span class="n">coeff_a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">};</span>
+<span class="linenos"> 5</span><span class="n">qf_edge_op_add_term</span><span class="p">(</span><span class="n">op</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">left_a</span><span class="p">,</span><span class="w"> </span><span class="n">right_a</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">coeff_a</span><span class="p">);</span>
+<span class="linenos"> 6</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">left_b</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="p">};</span>
+<span class="linenos"> 7</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">right_b</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">1</span><span class="p">};</span>
+<span class="linenos"> 8</span><span class="n">QkComplex64</span><span class="w"> </span><span class="n">coeff_b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mf">2.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">};</span>
+<span class="linenos"> 9</span><span class="n">qf_edge_op_add_term</span><span class="p">(</span><span class="n">op</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">left_b</span><span class="p">,</span><span class="w"> </span><span class="n">right_b</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">coeff_b</span><span class="p">);</span>
+<span class="linenos">10</span>
+<span class="linenos">11</span><span class="n">QfEdgeVertexOperator</span><span class="w"> </span><span class="o">*</span><span class="n">ordered</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_edge_op_canonical_order</span><span class="p">(</span><span class="n">op</span><span class="p">);</span>
+</pre></div>
+</div>
+</p>
+ </p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Any group indices (see <a class="reference internal" href="qf-edge-op.html#c.qf_edge_op_get_groups" title="qf_edge_op_get_groups"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_edge_op_get_groups()</span></code></a>) are preserved: each term carries its
+group index along as it moves, since a group index is a per-term tag independent of term
+order. Terms of the same group are simply no longer contiguous afterwards. If the input has
+no groups, neither does the result.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>op</strong> – A pointer to the operator whose terms are to be reordered.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A pointer to the created operator.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.qf_transfer_op_canonical_order">
+<span class="target" id="group__qf__operator__terms__ordering_1ga450ce23cbce562cf95d359d4a48274b1"></span><a class="reference internal" href="qf-transfer-op.html#c.QfTransferVertexOperator" title="QfTransferVertexOperator"><span class="n"><span class="pre">QfTransferVertexOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">qf_transfer_op_canonical_order</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="qf-transfer-op.html#c.QfTransferVertexOperator" title="QfTransferVertexOperator"><span class="n"><span class="pre">QfTransferVertexOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">op</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.qf_transfer_op_canonical_order" title="Link to this definition">¶</a><br /></dt>
+<dd><p>Returns a copy of a transfer-vertex operator with its terms in a canonical order. </p>
+<p><p><p>The terms are sorted into a canonical order that depends only on each term’s structure (the
+operator string it represents) and not on its coefficient. The order is therefore deterministic
+for a given set of terms regardless of how the operator was assembled. The terms themselves are
+left untouched — this only reorders them, it does not simplify or normal-order the operator.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="n">QfTransferVertexOperator</span><span class="w"> </span><span class="o">*</span><span class="n">op</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_transfer_op_zero</span><span class="p">();</span>
+<span class="linenos"> 2</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">left_a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">1</span><span class="p">};</span>
+<span class="linenos"> 3</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">right_a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">2</span><span class="p">};</span>
+<span class="linenos"> 4</span><span class="n">QkComplex64</span><span class="w"> </span><span class="n">coeff_a</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">};</span>
+<span class="linenos"> 5</span><span class="n">qf_transfer_op_add_term</span><span class="p">(</span><span class="n">op</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">left_a</span><span class="p">,</span><span class="w"> </span><span class="n">right_a</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">coeff_a</span><span class="p">);</span>
+<span class="linenos"> 6</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">left_b</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="p">};</span>
+<span class="linenos"> 7</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">right_b</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">1</span><span class="p">};</span>
+<span class="linenos"> 8</span><span class="n">QkComplex64</span><span class="w"> </span><span class="n">coeff_b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mf">2.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">};</span>
+<span class="linenos"> 9</span><span class="n">qf_transfer_op_add_term</span><span class="p">(</span><span class="n">op</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">left_b</span><span class="p">,</span><span class="w"> </span><span class="n">right_b</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">coeff_b</span><span class="p">);</span>
+<span class="linenos">10</span>
+<span class="linenos">11</span><span class="n">QfTransferVertexOperator</span><span class="w"> </span><span class="o">*</span><span class="n">ordered</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_transfer_op_canonical_order</span><span class="p">(</span><span class="n">op</span><span class="p">);</span>
+</pre></div>
+</div>
+</p>
+ </p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Any group indices (see <a class="reference internal" href="qf-transfer-op.html#c.qf_transfer_op_get_groups" title="qf_transfer_op_get_groups"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_transfer_op_get_groups()</span></code></a>) are preserved: each term carries
+its group index along as it moves, since a group index is a per-term tag independent of term
+order. Terms of the same group are simply no longer contiguous afterwards. If the input has
+no groups, neither does the result.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>op</strong> – A pointer to the operator whose terms are to be reordered.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A pointer to the created operator.</p>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 
         </article>
@@ -388,6 +472,8 @@ no groups, neither does the result.</p>
 <li><a class="reference internal" href="#">Ordering Functions</a><ul>
 <li><a class="reference internal" href="#c.qf_ferm_op_canonical_order"><code class="docutils literal notranslate"><span class="pre">qf_ferm_op_canonical_order()</span></code></a></li>
 <li><a class="reference internal" href="#c.qf_maj_op_canonical_order"><code class="docutils literal notranslate"><span class="pre">qf_maj_op_canonical_order()</span></code></a></li>
+<li><a class="reference internal" href="#c.qf_edge_op_canonical_order"><code class="docutils literal notranslate"><span class="pre">qf_edge_op_canonical_order()</span></code></a></li>
+<li><a class="reference internal" href="#c.qf_transfer_op_canonical_order"><code class="docutils literal notranslate"><span class="pre">qf_transfer_op_canonical_order()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -399,7 +485,7 @@ no groups, neither does the result.</p>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=35dc5790"></script>
+</div><script src="../_static/documentation_options.js?v=bf997f3f"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
