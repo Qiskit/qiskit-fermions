@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Map operator representations - Qiskit Fermions 0.2.0.dev0+0aa6e24</title>
+        <title>Map operator representations - Qiskit Fermions 0.2.0.dev0+6e49231</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+0aa6e24</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+6e49231</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+0aa6e24</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+6e49231</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -393,12 +393,27 @@ C</label><div class="sd-tab-content docutils">
 </div>
 </div>
 </div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The two-step above is written out to show two library mappers composing. In practice you would map
+a <a class="reference internal" href="../stubs/qiskit_fermions.operators.MajoranaOperator.html#qiskit_fermions.operators.MajoranaOperator" title="qiskit_fermions.operators.MajoranaOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">MajoranaOperator</span></code></a> in one step instead, with <a class="reference internal" href="../stubs/qiskit_fermions.mappers.library.majorana_jordan_wigner.html#qiskit_fermions.mappers.library.majorana_jordan_wigner" title="qiskit_fermions.mappers.library.majorana_jordan_wigner"><code class="xref py py-func docutils literal notranslate"><span class="pre">majorana_jordan_wigner()</span></code></a>
+(<a class="reference internal" href="../cdoc/qf-mappers-library.html#c.qf_maj_op_jordan_wigner" title="qf_maj_op_jordan_wigner"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_maj_op_jordan_wigner()</span></code></a> in the C API), and likewise for the other operator types –
+<a class="reference internal" href="../stubs/qiskit_fermions.mappers.library.edge_vertex_jordan_wigner.html#qiskit_fermions.mappers.library.edge_vertex_jordan_wigner" title="qiskit_fermions.mappers.library.edge_vertex_jordan_wigner"><code class="xref py py-func docutils literal notranslate"><span class="pre">edge_vertex_jordan_wigner()</span></code></a> and <a class="reference internal" href="../stubs/qiskit_fermions.mappers.library.transfer_vertex_jordan_wigner.html#qiskit_fermions.mappers.library.transfer_vertex_jordan_wigner" title="qiskit_fermions.mappers.library.transfer_vertex_jordan_wigner"><code class="xref py py-func docutils literal notranslate"><span class="pre">transfer_vertex_jordan_wigner()</span></code></a>
+(<a class="reference internal" href="../cdoc/qf-mappers-library.html#c.qf_edge_op_jordan_wigner" title="qf_edge_op_jordan_wigner"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_edge_op_jordan_wigner()</span></code></a>, <a class="reference internal" href="../cdoc/qf-mappers-library.html#c.qf_transfer_op_jordan_wigner" title="qf_transfer_op_jordan_wigner"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_transfer_op_jordan_wigner()</span></code></a>). Going via a
+<a class="reference internal" href="../stubs/qiskit_fermions.operators.FermionOperator.html#qiskit_fermions.operators.FermionOperator" title="qiskit_fermions.operators.FermionOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionOperator</span></code></a> also inflates the intermediate result: every generator of these algebras
+maps onto a single Pauli string, whereas each fermionic action maps onto a two-term sum, so a term
+built from several generators expands only to be merged back down again. That saving grows with the
+length of the terms; for the single-generator terms of a hopping Hamiltonian the two routes cost
+about the same.</p>
+</div>
 <p>In the Python API, some of these library mappers are also reachable through type-agnostic
 convenience mappers. <a class="reference internal" href="../stubs/qiskit_fermions.mappers.library.fermion_operator.html#qiskit_fermions.mappers.library.fermion_operator" title="qiskit_fermions.mappers.library.fermion_operator"><code class="xref py py-func docutils literal notranslate"><span class="pre">fermion_operator()</span></code></a> and <a class="reference internal" href="../stubs/qiskit_fermions.mappers.library.majorana_operator.html#qiskit_fermions.mappers.library.majorana_operator" title="qiskit_fermions.mappers.library.majorana_operator"><code class="xref py py-func docutils literal notranslate"><span class="pre">majorana_operator()</span></code></a> sit in front of
 <a class="reference internal" href="../stubs/qiskit_fermions.mappers.library.majorana_to_fermion.html#qiskit_fermions.mappers.library.majorana_to_fermion" title="qiskit_fermions.mappers.library.majorana_to_fermion"><code class="xref py py-func docutils literal notranslate"><span class="pre">majorana_to_fermion()</span></code></a> and <a class="reference internal" href="../stubs/qiskit_fermions.mappers.library.fermion_to_majorana.html#qiskit_fermions.mappers.library.fermion_to_majorana" title="qiskit_fermions.mappers.library.fermion_to_majorana"><code class="xref py py-func docutils literal notranslate"><span class="pre">fermion_to_majorana()</span></code></a> (among others), delegating to the
 appropriate library implementation internally based on the type of object they are given,
-rather than requiring you to pick the right function yourself. See <a class="reference internal" href="../pydoc/qiskit_fermions.protocols.html#module-qiskit_fermions.protocols" title="qiskit_fermions.protocols"><code class="xref py py-mod docutils literal notranslate"><span class="pre">qiskit_fermions.protocols</span></code></a>
-for how this dispatch is implemented internally.</p>
+rather than requiring you to pick the right function yourself. The same applies to
+<a class="reference internal" href="../stubs/qiskit_fermions.mappers.library.jordan_wigner.html#qiskit_fermions.mappers.library.jordan_wigner" title="qiskit_fermions.mappers.library.jordan_wigner"><code class="xref py py-func docutils literal notranslate"><span class="pre">jordan_wigner()</span></code></a>, which dispatches to whichever of the four direct implementations matches the
+operator it is given. See <a class="reference internal" href="../pydoc/qiskit_fermions.protocols.html#module-qiskit_fermions.protocols" title="qiskit_fermions.protocols"><code class="xref py py-mod docutils literal notranslate"><span class="pre">qiskit_fermions.protocols</span></code></a> for how this dispatch is implemented
+internally.</p>
 </section>
 </section>
 
@@ -472,7 +487,7 @@ for how this dispatch is implemented internally.</p>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=bf997f3f"></script>
+</div><script src="../_static/documentation_options.js?v=7f6214c4"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

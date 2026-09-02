@@ -1054,7 +1054,7 @@ leading coefficient then fixes the sign and scale.
    :include-source:
 
    >>> from qiskit.quantum_info import SparsePauliOp
-   >>> from qiskit_fermions.mappers.library import jordan_wigner, transfer_vertex_to_fermion
+   >>> from qiskit_fermions.mappers.library import transfer_vertex_jordan_wigner
    >>>
    >>> def plaquette_loops(rows, cols):
    ...     """The directed edge loop around each square face."""
@@ -1077,8 +1077,8 @@ leading coefficient then fixes the sign and scale.
    ...         qubit_side = encoding(loop_operator, num_qubits)
    ...         # the same loop mapped the conventional way, then widened from the N sites
    ...         # onto the full 2N-qubit register so the two can be multiplied
-   ...         fermionic = jordan_wigner(
-   ...             transfer_vertex_to_fermion(loop_operator), num_sites
+   ...         fermionic = transfer_vertex_jordan_wigner(
+   ...             loop_operator, num_sites
    ...         ).apply_layout(list(range(num_sites)), num_qubits=num_qubits)
    ...         stabilizer = SparsePauliOp.from_sparse_observable(
    ...             qubit_side.compose(fermionic).simplify()
@@ -1139,7 +1139,7 @@ this section cheap.
    >>> # an exact evolution time, unrelated to the Trotter step above
    >>> evolution_time = 0.6
    >>> reference = SparsePauliOp.from_sparse_observable(
-   ...     jordan_wigner(transfer_vertex_to_fermion(hamiltonian), num_sites).simplify()
+   ...     transfer_vertex_jordan_wigner(hamiltonian, num_sites).simplify()
    ... )
    >>>
    >>> occupation = [1, 0, 1, 0, 1, 0, 0, 1, 0]  # site occupations of the initial state

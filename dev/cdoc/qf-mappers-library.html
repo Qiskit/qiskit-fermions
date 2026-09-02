@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Mapper Library - Qiskit Fermions 0.2.0.dev0+0aa6e24</title>
+        <title>Mapper Library - Qiskit Fermions 0.2.0.dev0+6e49231</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+0aa6e24</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+6e49231</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+0aa6e24</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+6e49231</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -274,31 +274,46 @@ routines.</p>
 <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit-c/qk-obs" title="(in Qiskit v2.5)"><span class="xref std std-doc">QkObs</span></a> under
 the Jordan-Wigner transformation.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#c.qf_fermion_to_majorana" title="qf_fermion_to_majorana"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_fermion_to_majorana()</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#c.qf_maj_op_jordan_wigner" title="qf_maj_op_jordan_wigner"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_maj_op_jordan_wigner()</span></code></a></p></td>
+<td><p>Map a <a class="reference internal" href="qf-maj-op.html#c.QfMajoranaOperator" title="QfMajoranaOperator"><code class="xref c c-struct docutils literal notranslate"><span class="pre">QfMajoranaOperator</span></code></a> to a
+<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit-c/qk-obs" title="(in Qiskit v2.5)"><span class="xref std std-doc">QkObs</span></a> under
+the Jordan-Wigner transformation.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#c.qf_edge_op_jordan_wigner" title="qf_edge_op_jordan_wigner"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_edge_op_jordan_wigner()</span></code></a></p></td>
+<td><p>Map a <a class="reference internal" href="qf-edge-op.html#c.QfEdgeVertexOperator" title="QfEdgeVertexOperator"><code class="xref c c-struct docutils literal notranslate"><span class="pre">QfEdgeVertexOperator</span></code></a> to a
+<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit-c/qk-obs" title="(in Qiskit v2.5)"><span class="xref std std-doc">QkObs</span></a> under
+the Jordan-Wigner transformation.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#c.qf_transfer_op_jordan_wigner" title="qf_transfer_op_jordan_wigner"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_transfer_op_jordan_wigner()</span></code></a></p></td>
+<td><p>Map a <a class="reference internal" href="qf-transfer-op.html#c.QfTransferVertexOperator" title="QfTransferVertexOperator"><code class="xref c c-struct docutils literal notranslate"><span class="pre">QfTransferVertexOperator</span></code></a> to a
+<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit-c/qk-obs" title="(in Qiskit v2.5)"><span class="xref std std-doc">QkObs</span></a> under
+the Jordan-Wigner transformation.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#c.qf_fermion_to_majorana" title="qf_fermion_to_majorana"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_fermion_to_majorana()</span></code></a></p></td>
 <td><p>Map a <a class="reference internal" href="qf-ferm-op.html#c.QfFermionOperator" title="QfFermionOperator"><code class="xref c c-struct docutils literal notranslate"><span class="pre">QfFermionOperator</span></code></a> to a
 <a class="reference internal" href="qf-maj-op.html#c.QfMajoranaOperator" title="QfMajoranaOperator"><code class="xref c c-struct docutils literal notranslate"><span class="pre">QfMajoranaOperator</span></code></a>.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#c.qf_majorana_to_fermion" title="qf_majorana_to_fermion"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_majorana_to_fermion()</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#c.qf_majorana_to_fermion" title="qf_majorana_to_fermion"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_majorana_to_fermion()</span></code></a></p></td>
 <td><p>Map a <a class="reference internal" href="qf-maj-op.html#c.QfMajoranaOperator" title="QfMajoranaOperator"><code class="xref c c-struct docutils literal notranslate"><span class="pre">QfMajoranaOperator</span></code></a> to a
 <a class="reference internal" href="qf-ferm-op.html#c.QfFermionOperator" title="QfFermionOperator"><code class="xref c c-struct docutils literal notranslate"><span class="pre">QfFermionOperator</span></code></a>.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#c.qf_edge_vertex_to_fermion" title="qf_edge_vertex_to_fermion"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_edge_vertex_to_fermion()</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#c.qf_edge_vertex_to_fermion" title="qf_edge_vertex_to_fermion"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_edge_vertex_to_fermion()</span></code></a></p></td>
 <td><p>Map a <a class="reference internal" href="qf-edge-op.html#c.QfEdgeVertexOperator" title="QfEdgeVertexOperator"><code class="xref c c-struct docutils literal notranslate"><span class="pre">QfEdgeVertexOperator</span></code></a> to a
 <a class="reference internal" href="qf-ferm-op.html#c.QfFermionOperator" title="QfFermionOperator"><code class="xref c c-struct docutils literal notranslate"><span class="pre">QfFermionOperator</span></code></a>.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#c.qf_edge_vertex_to_majorana" title="qf_edge_vertex_to_majorana"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_edge_vertex_to_majorana()</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#c.qf_edge_vertex_to_majorana" title="qf_edge_vertex_to_majorana"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_edge_vertex_to_majorana()</span></code></a></p></td>
 <td><p>Map a <a class="reference internal" href="qf-edge-op.html#c.QfEdgeVertexOperator" title="QfEdgeVertexOperator"><code class="xref c c-struct docutils literal notranslate"><span class="pre">QfEdgeVertexOperator</span></code></a> to a
 <a class="reference internal" href="qf-maj-op.html#c.QfMajoranaOperator" title="QfMajoranaOperator"><code class="xref c c-struct docutils literal notranslate"><span class="pre">QfMajoranaOperator</span></code></a>.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#c.qf_transfer_vertex_to_fermion" title="qf_transfer_vertex_to_fermion"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_transfer_vertex_to_fermion()</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#c.qf_transfer_vertex_to_fermion" title="qf_transfer_vertex_to_fermion"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_transfer_vertex_to_fermion()</span></code></a></p></td>
 <td><p>Map a <a class="reference internal" href="qf-transfer-op.html#c.QfTransferVertexOperator" title="QfTransferVertexOperator"><code class="xref c c-struct docutils literal notranslate"><span class="pre">QfTransferVertexOperator</span></code></a> to a
 <a class="reference internal" href="qf-ferm-op.html#c.QfFermionOperator" title="QfFermionOperator"><code class="xref c c-struct docutils literal notranslate"><span class="pre">QfFermionOperator</span></code></a>.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#c.qf_transfer_vertex_to_majorana" title="qf_transfer_vertex_to_majorana"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_transfer_vertex_to_majorana()</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#c.qf_transfer_vertex_to_majorana" title="qf_transfer_vertex_to_majorana"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_transfer_vertex_to_majorana()</span></code></a></p></td>
 <td><p>Map a <a class="reference internal" href="qf-transfer-op.html#c.QfTransferVertexOperator" title="QfTransferVertexOperator"><code class="xref c c-struct docutils literal notranslate"><span class="pre">QfTransferVertexOperator</span></code></a> to a
 <a class="reference internal" href="qf-maj-op.html#c.QfMajoranaOperator" title="QfMajoranaOperator"><code class="xref c c-struct docutils literal notranslate"><span class="pre">QfMajoranaOperator</span></code></a>.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#c.qf_transfer_vertex_to_edge_vertex" title="qf_transfer_vertex_to_edge_vertex"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_transfer_vertex_to_edge_vertex()</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#c.qf_transfer_vertex_to_edge_vertex" title="qf_transfer_vertex_to_edge_vertex"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_transfer_vertex_to_edge_vertex()</span></code></a></p></td>
 <td><p>Map a <a class="reference internal" href="qf-transfer-op.html#c.QfTransferVertexOperator" title="QfTransferVertexOperator"><code class="xref c c-struct docutils literal notranslate"><span class="pre">QfTransferVertexOperator</span></code></a> to a
 <a class="reference internal" href="qf-edge-op.html#c.QfEdgeVertexOperator" title="QfEdgeVertexOperator"><code class="xref c c-struct docutils literal notranslate"><span class="pre">QfEdgeVertexOperator</span></code></a>.</p></td>
 </tr>
@@ -389,7 +404,7 @@ defined <a class="reference internal" href="qf-edge-op.html#qf-edge-op-definitio
 <dd><p>Applies the Jordan-Wigner transformation to an operator. </p>
 <p><p><p>Map a <a class="reference internal" href="qf-ferm-op.html#c.QfFermionOperator" title="QfFermionOperator"><code class="xref c c-struct docutils literal notranslate"><span class="pre">QfFermionOperator</span></code></a> to a
 <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit-c/qk-obs" title="(in Qiskit v2.5)"><span class="xref std std-doc">QkObs</span></a> under the Jordan-Wigner
-transformation. <a class="footnote-reference brackets" href="#id5" id="id3" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a></p>
+transformation. <a class="reference internal" href="#jw-ferm" id="id3"><span>[JW-ferm]</span></a></p>
 <section id="id4">
 <h2>Definition<a class="headerlink" href="#id4" title="Link to this heading">¶</a></h2>
 <p>The Jordan-Wigner transformation maps fermionic creation and annihilation operators to spin (or
@@ -405,14 +420,14 @@ acting on the <span class="math">\(j\)</span>-th spin-less fermionic mode, <span
 <span class="math">\(\sigma^\pm = (\sigma^X \pm \mathrm{i} \sigma^Y) / 2\)</span>.</p>
 <p>This mapping preserves the fermionic anti-commutation relations by introducing a chain of
 <span class="math">\(\sigma^Z\)</span> operators on all qubits preceding the acted-upon index <span class="math">\(j\)</span>.</p>
-<aside class="footnote-list brackets">
-<aside class="footnote brackets" id="id5" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id3">1</a><span class="fn-bracket">]</span></span>
+<div role="list" class="citation-list">
+<div class="citation" id="jw-ferm" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id3">JW-ferm</a><span class="fn-bracket">]</span></span>
 <p>P. Jordan and E. Wigner, Über das Paulische Äquivalenzverbot,
 Zeitschrift für Physik 47, No. 9. (1928), pp. 631–651,
 <a class="reference external" href="https://link.springer.com/article/10.1007/BF01331938">doi:10.1007/BF01331938</a>.</p>
-</aside>
-</aside>
+</div>
+</div>
 </section>
 <section id="memory-usage">
 <h2>Memory usage<a class="headerlink" href="#memory-usage" title="Link to this heading">¶</a></h2>
@@ -432,8 +447,8 @@ mapping takes correspondingly longer – or map the operator in batches and add 
 together yourself, which bounds the peak by the batch size at the cost of repeating the merging
 work.</p>
 </section>
-<section id="id6">
-<h2>Example<a class="headerlink" href="#id6" title="Link to this heading">¶</a></h2>
+<section id="id5">
+<h2>Example<a class="headerlink" href="#id5" title="Link to this heading">¶</a></h2>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="c1">// define some kind of fermionic operator</span>
 <span class="linenos">2</span><span class="n">QfFermionOperator</span><span class="w"> </span><span class="o">*</span><span class="n">hamil</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_ferm_op_one</span><span class="p">();</span>
 <span class="linenos">3</span>
@@ -462,11 +477,242 @@ work.</p>
 </dd></dl>
 
 <dl class="c function">
+<dt class="sig sig-object c" id="c.qf_maj_op_jordan_wigner">
+<span class="target" id="group__qf__mapper__library_1ga3a8fa5c0b5ffe24c4df2a7e1c627c401"></span><a class="reference internal" href="qf-exit-code.html#c.QfExitCode" title="QfExitCode"><span class="n"><span class="pre">QfExitCode</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">qf_maj_op_jordan_wigner</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="qf-maj-op.html#c.QfMajoranaOperator" title="QfMajoranaOperator"><span class="n"><span class="pre">QfMajoranaOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">op</span></span>, <span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n"><span class="pre">num_qubits</span></span>, <span class="n"><span class="pre">QkObs</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">out</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.qf_maj_op_jordan_wigner" title="Link to this definition">¶</a><br /></dt>
+<dd><p>Applies the Jordan-Wigner transformation to a Majorana operator. </p>
+<p><p><p>Map a <a class="reference internal" href="qf-maj-op.html#c.QfMajoranaOperator" title="QfMajoranaOperator"><code class="xref c c-struct docutils literal notranslate"><span class="pre">QfMajoranaOperator</span></code></a> to a
+<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit-c/qk-obs" title="(in Qiskit v2.5)"><span class="xref std std-doc">QkObs</span></a> under the Jordan-Wigner
+transformation. <a class="reference internal" href="#jw-maj" id="id6"><span>[JW-maj]</span></a></p>
+<section id="id7">
+<h2>Definition<a class="headerlink" href="#id7" title="Link to this heading">¶</a></h2>
+<p>With the <a class="reference internal" href="qf-maj-op.html#c.QfMajoranaOperator" title="QfMajoranaOperator"><code class="xref c c-struct docutils literal notranslate"><span class="pre">QfMajoranaOperator</span></code></a> convention that even indices carry
+<span class="math">\(\gamma_j = a^\dagger_j + a_j\)</span> and odd ones <span class="math">\(\gamma'_j = i(a^\dagger_j - a_j)\)</span>, the
+Majorana index <span class="math">\(m\)</span> acts on the fermionic mode <span class="math">\(\lfloor m/2 \rfloor\)</span> and maps onto a
+single Pauli string,</p>
+<div class="math-wrapper docutils container">
+<div class="math">
+\[\gamma_j \rightarrow \bigotimes_{k\lt j} \sigma^Z_k \otimes \sigma^X_j ~~\text{and}~~
+\gamma'_j \rightarrow \bigotimes_{k\lt j} \sigma^Z_k \otimes \sigma^Y_j \, .\]</div>
+</div>
+<p>This also avoids an intermediate blowup relative to converting to a
+<a class="reference internal" href="qf-ferm-op.html#c.QfFermionOperator" title="QfFermionOperator"><code class="xref c c-struct docutils literal notranslate"><span class="pre">QfFermionOperator</span></code></a> first: each fermionic action maps onto a <em>two</em>-term sum, so that
+route inflates a single Pauli string into up to <span class="math">\(4^L\)</span> terms for a term built from <span class="math">\(L\)</span>
+Majorana operators. The saving grows with the length of the terms; for single-operator terms the
+two routes cost about the same.</p>
+<div role="list" class="citation-list">
+<div class="citation" id="jw-maj" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id6">JW-maj</a><span class="fn-bracket">]</span></span>
+<p>P. Jordan and E. Wigner, Über das Paulische Äquivalenzverbot,
+Zeitschrift für Physik 47, No. 9. (1928), pp. 631–651,
+<a class="reference external" href="https://link.springer.com/article/10.1007/BF01331938">doi:10.1007/BF01331938</a>.</p>
+</div>
+</div>
+</section>
+<section id="id9">
+<h2>Memory usage<a class="headerlink" href="#id9" title="Link to this heading">¶</a></h2>
+<p>See <a class="reference internal" href="#c.qf_ferm_op_jordan_wigner" title="qf_ferm_op_jordan_wigner"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_ferm_op_jordan_wigner()</span></code></a>; the same parallelization and merging behaviour applies.</p>
+</section>
+<section id="id10">
+<h2>Example<a class="headerlink" href="#id10" title="Link to this heading">¶</a></h2>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="c1">// define some kind of Majorana operator</span>
+<span class="linenos">2</span><span class="n">QfMajoranaOperator</span><span class="w"> </span><span class="o">*</span><span class="n">hamil</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_maj_op_one</span><span class="p">();</span>
+<span class="linenos">3</span>
+<span class="linenos">4</span><span class="c1">// and map it to a qubit operator</span>
+<span class="linenos">5</span><span class="n">QkObs</span><span class="w"> </span><span class="o">*</span><span class="n">result</span><span class="p">;</span>
+<span class="linenos">6</span><span class="n">QfExitCode</span><span class="w"> </span><span class="n">exit</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_maj_op_jordan_wigner</span><span class="p">(</span><span class="n">hamil</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">result</span><span class="p">);</span>
+<span class="linenos">7</span>
+<span class="linenos">8</span><span class="n">assert</span><span class="p">(</span><span class="n">exit</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">QfExitCode_Success</span><span class="p">);</span>
+</pre></div>
+</div>
+</section>
+</p>
+ </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>op</strong> – A pointer to the Majorana operator to be mapped. </p></li>
+<li><p><strong>num_qubits</strong> – The number of qubits of the resulting operator. Note that this is counted in <em>fermionic</em> modes, so it must be strictly greater than the largest Majorana index acted upon by <code class="docutils literal notranslate"><span class="pre">op</span></code> divided by two. </p></li>
+<li><p><strong>out</strong> – A pointer to where the created qubit operator will be written on success. It is left untouched if the transformation fails.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>An exit code. This is <code class="docutils literal notranslate"><span class="pre">&gt;0</span></code> if an error occurred. In particular, a <code class="docutils literal notranslate"><a class="reference internal" href="qf-exit-code.html#group__qf__exit__code_1gga89daaa15e32524338df290dbd873caf1a869710ce98addf007187616631c85470"><span class="std std-ref"><span class="pre">QfExitCode_ValueError</span></span></a></code> is returned if <code class="docutils literal notranslate"><span class="pre">num_qubits</span></code> is too small to hold the operator’s support.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.qf_edge_op_jordan_wigner">
+<span class="target" id="group__qf__mapper__library_1ga81940775e9cdf927f0ef3493f362c4bf"></span><a class="reference internal" href="qf-exit-code.html#c.QfExitCode" title="QfExitCode"><span class="n"><span class="pre">QfExitCode</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">qf_edge_op_jordan_wigner</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="qf-edge-op.html#c.QfEdgeVertexOperator" title="QfEdgeVertexOperator"><span class="n"><span class="pre">QfEdgeVertexOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">op</span></span>, <span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n"><span class="pre">num_qubits</span></span>, <span class="n"><span class="pre">QkObs</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">out</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.qf_edge_op_jordan_wigner" title="Link to this definition">¶</a><br /></dt>
+<dd><p>Applies the Jordan-Wigner transformation to an edge-vertex operator. </p>
+<p><p><p>Map a <a class="reference internal" href="qf-edge-op.html#c.QfEdgeVertexOperator" title="QfEdgeVertexOperator"><code class="xref c c-struct docutils literal notranslate"><span class="pre">QfEdgeVertexOperator</span></code></a> to a
+<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit-c/qk-obs" title="(in Qiskit v2.5)"><span class="xref std std-doc">QkObs</span></a> under the Jordan-Wigner
+transformation. <a class="reference internal" href="#jw-edge" id="id11"><span>[JW-edge]</span></a></p>
+<section id="id12">
+<h2>Definition<a class="headerlink" href="#id12" title="Link to this heading">¶</a></h2>
+<p>Writing <span class="math">\(l_\text{min}\)</span> and <span class="math">\(l_\text{max}\)</span> for the smaller and larger of the two
+indices, the generalized edge operators map onto single Pauli strings,</p>
+<div class="math-wrapper docutils container">
+<div class="math">
+\[\begin{align}
+V_l = E_{ll} &\rightarrow \sigma^Z_l \, , \nonumber \\
+E_{lr} &\rightarrow \mp \, \sigma^Y_{l_\text{min}}
+        \left( \bigotimes_{l_\text{min} \lt k \lt l_\text{max}} \sigma^Z_k \right)
+        \sigma^X_{l_\text{max}} \nonumber
+\end{align}\]</div>
+</div>
+<p>where the sign is negative for <span class="math">\(l \lt r\)</span> and positive otherwise. The <span class="math">\(\sigma^Z\)</span> chains
+of the two underlying Majorana operators cancel below the lower index, which is why the
+<span class="math">\(\sigma^Z\)</span> string spans only the modes strictly <em>between</em> the two endpoints.</p>
+<div role="list" class="citation-list">
+<div class="citation" id="jw-edge" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id11">JW-edge</a><span class="fn-bracket">]</span></span>
+<p>P. Jordan and E. Wigner, Über das Paulische Äquivalenzverbot,
+Zeitschrift für Physik 47, No. 9. (1928), pp. 631–651,
+<a class="reference external" href="https://link.springer.com/article/10.1007/BF01331938">doi:10.1007/BF01331938</a>.</p>
+</div>
+<div class="citation" id="gandon-edge" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id13">Gandon-edge</a><span class="fn-bracket">]</span></span>
+<p>L. Gandon et al., Fermionic quantum simulation with flow sets,
+<a class="reference external" href="https://arxiv.org/abs/2512.11418">arXiv:2512.11418</a>.</p>
+</div>
+</div>
+</section>
+<section id="id15">
+<h2>Memory usage<a class="headerlink" href="#id15" title="Link to this heading">¶</a></h2>
+<p>See <a class="reference internal" href="#c.qf_ferm_op_jordan_wigner" title="qf_ferm_op_jordan_wigner"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_ferm_op_jordan_wigner()</span></code></a>; the same parallelization and merging behaviour applies.</p>
+</section>
+<section id="id16">
+<h2>Example<a class="headerlink" href="#id16" title="Link to this heading">¶</a></h2>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="c1">// define some kind of edge-vertex operator</span>
+<span class="linenos">2</span><span class="n">QfEdgeVertexOperator</span><span class="w"> </span><span class="o">*</span><span class="n">hamil</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_edge_op_one</span><span class="p">();</span>
+<span class="linenos">3</span>
+<span class="linenos">4</span><span class="c1">// and map it to a qubit operator</span>
+<span class="linenos">5</span><span class="n">QkObs</span><span class="w"> </span><span class="o">*</span><span class="n">result</span><span class="p">;</span>
+<span class="linenos">6</span><span class="n">QfExitCode</span><span class="w"> </span><span class="n">exit</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_edge_op_jordan_wigner</span><span class="p">(</span><span class="n">hamil</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">result</span><span class="p">);</span>
+<span class="linenos">7</span>
+<span class="linenos">8</span><span class="n">assert</span><span class="p">(</span><span class="n">exit</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">QfExitCode_Success</span><span class="p">);</span>
+</pre></div>
+</div>
+</section>
+</p>
+ </p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Reversing the two indices leaves the Pauli string unchanged and flips only the sign, which is
+the antisymmetry <span class="math">\(E_{lr} = -E_{rl}\)</span>. Contrast
+<a class="reference internal" href="#c.qf_transfer_op_jordan_wigner" title="qf_transfer_op_jordan_wigner"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_transfer_op_jordan_wigner()</span></code></a>, where the coefficient is the same for both
+orientations and the Pauli letters change instead.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>These Pauli strings differ from those in Eq. (10) of <a class="reference internal" href="#gandon-edge" id="id13"><span>[Gandon-edge]</span></a> by an exchange of <span class="math">\(\sigma^X\)</span>
+and <span class="math">\(\sigma^Y\)</span> on the two endpoints. This is a single-qubit basis choice – both
+conventions satisfy every defining relation of the algebra – and the one used here is the one
+consistent with <a class="reference internal" href="#c.qf_edge_vertex_to_fermion" title="qf_edge_vertex_to_fermion"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_edge_vertex_to_fermion()</span></code></a>, so that mapping an operator directly
+agrees with converting it to a <a class="reference internal" href="qf-ferm-op.html#c.QfFermionOperator" title="QfFermionOperator"><code class="xref c c-struct docutils literal notranslate"><span class="pre">QfFermionOperator</span></code></a> first.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>op</strong> – A pointer to the edge-vertex operator to be mapped. </p></li>
+<li><p><strong>num_qubits</strong> – The number of qubits of the resulting operator. This must be strictly greater than the largest mode index acted upon by <code class="docutils literal notranslate"><span class="pre">op</span></code>. </p></li>
+<li><p><strong>out</strong> – A pointer to where the created qubit operator will be written on success. It is left untouched if the transformation fails.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>An exit code. This is <code class="docutils literal notranslate"><span class="pre">&gt;0</span></code> if an error occurred. In particular, a <code class="docutils literal notranslate"><a class="reference internal" href="qf-exit-code.html#group__qf__exit__code_1gga89daaa15e32524338df290dbd873caf1a869710ce98addf007187616631c85470"><span class="std std-ref"><span class="pre">QfExitCode_ValueError</span></span></a></code> is returned if <code class="docutils literal notranslate"><span class="pre">num_qubits</span></code> is too small to hold the operator’s support.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.qf_transfer_op_jordan_wigner">
+<span class="target" id="group__qf__mapper__library_1gaee76d0fa23efab249362591de08ca7e4"></span><a class="reference internal" href="qf-exit-code.html#c.QfExitCode" title="QfExitCode"><span class="n"><span class="pre">QfExitCode</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">qf_transfer_op_jordan_wigner</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="qf-transfer-op.html#c.QfTransferVertexOperator" title="QfTransferVertexOperator"><span class="n"><span class="pre">QfTransferVertexOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">op</span></span>, <span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n"><span class="pre">num_qubits</span></span>, <span class="n"><span class="pre">QkObs</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">out</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.qf_transfer_op_jordan_wigner" title="Link to this definition">¶</a><br /></dt>
+<dd><p>Applies the Jordan-Wigner transformation to a transfer-vertex operator. </p>
+<p><p><p>Map a <a class="reference internal" href="qf-transfer-op.html#c.QfTransferVertexOperator" title="QfTransferVertexOperator"><code class="xref c c-struct docutils literal notranslate"><span class="pre">QfTransferVertexOperator</span></code></a> to a
+<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit-c/qk-obs" title="(in Qiskit v2.5)"><span class="xref std std-doc">QkObs</span></a> under the Jordan-Wigner
+transformation. <a class="reference internal" href="#jw-transfer" id="id17"><span>[JW-transfer]</span></a></p>
+<section id="id18">
+<h2>Definition<a class="headerlink" href="#id18" title="Link to this heading">¶</a></h2>
+<p>Writing <span class="math">\(l_\text{min}\)</span> and <span class="math">\(l_\text{max}\)</span> for the smaller and larger of the two
+indices, the generalized transfer operators map onto single Pauli strings,</p>
+<div class="math-wrapper docutils container">
+<div class="math">
+\[\begin{align}
+V_l = T_{ll} &\rightarrow \sigma^Z_l \, , \nonumber \\
+T_{lr} &\rightarrow -\frac{1}{2} \, \sigma^P_{l_\text{min}}
+        \left( \bigotimes_{l_\text{min} \lt k \lt l_\text{max}} \sigma^Z_k \right)
+        \sigma^P_{l_\text{max}} \nonumber
+\end{align}\]</div>
+</div>
+<p>where <span class="math">\(P = X\)</span> for <span class="math">\(l \lt r\)</span> and <span class="math">\(P = Y\)</span> otherwise.</p>
+<div role="list" class="citation-list">
+<div class="citation" id="jw-transfer" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id17">JW-transfer</a><span class="fn-bracket">]</span></span>
+<p>P. Jordan and E. Wigner, Über das Paulische Äquivalenzverbot,
+Zeitschrift für Physik 47, No. 9. (1928), pp. 631–651,
+<a class="reference external" href="https://link.springer.com/article/10.1007/BF01331938">doi:10.1007/BF01331938</a>.</p>
+</div>
+<div class="citation" id="gandon-transfer" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id19">Gandon-transfer</a><span class="fn-bracket">]</span></span>
+<p>L. Gandon et al., Fermionic quantum simulation with flow sets,
+<a class="reference external" href="https://arxiv.org/abs/2512.11418">arXiv:2512.11418</a>.</p>
+</div>
+</div>
+</section>
+<section id="id22">
+<h2>Memory usage<a class="headerlink" href="#id22" title="Link to this heading">¶</a></h2>
+<p>See <a class="reference internal" href="#c.qf_ferm_op_jordan_wigner" title="qf_ferm_op_jordan_wigner"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_ferm_op_jordan_wigner()</span></code></a>; the same parallelization and merging behaviour applies.</p>
+</section>
+<section id="id23">
+<h2>Example<a class="headerlink" href="#id23" title="Link to this heading">¶</a></h2>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="c1">// define some kind of transfer-vertex operator</span>
+<span class="linenos">2</span><span class="n">QfTransferVertexOperator</span><span class="w"> </span><span class="o">*</span><span class="n">hamil</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_transfer_op_one</span><span class="p">();</span>
+<span class="linenos">3</span>
+<span class="linenos">4</span><span class="c1">// and map it to a qubit operator</span>
+<span class="linenos">5</span><span class="n">QkObs</span><span class="w"> </span><span class="o">*</span><span class="n">result</span><span class="p">;</span>
+<span class="linenos">6</span><span class="n">QfExitCode</span><span class="w"> </span><span class="n">exit</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_transfer_op_jordan_wigner</span><span class="p">(</span><span class="n">hamil</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">result</span><span class="p">);</span>
+<span class="linenos">7</span>
+<span class="linenos">8</span><span class="n">assert</span><span class="p">(</span><span class="n">exit</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">QfExitCode_Success</span><span class="p">);</span>
+</pre></div>
+</div>
+</section>
+</p>
+ </p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The index order works the opposite way round to <a class="reference internal" href="#c.qf_edge_op_jordan_wigner" title="qf_edge_op_jordan_wigner"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_edge_op_jordan_wigner()</span></code></a>: the
+coefficient is <span class="math">\(-1/2\)</span> for <strong>both</strong> orientations and it is the Pauli letters that swap.
+<span class="math">\(T_{lr}\)</span> and <span class="math">\(T_{rl}\)</span> are genuinely different operators, with no antisymmetry
+relating them.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>As for <a class="reference internal" href="#c.qf_edge_op_jordan_wigner" title="qf_edge_op_jordan_wigner"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_edge_op_jordan_wigner()</span></code></a>, these Pauli strings differ from Eq. (10) of <a class="reference internal" href="#gandon-transfer" id="id19"><span>[Gandon-transfer]</span></a> by
+a single-qubit basis choice; the convention used here is the one consistent with
+<a class="reference internal" href="#c.qf_transfer_vertex_to_fermion" title="qf_transfer_vertex_to_fermion"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_transfer_vertex_to_fermion()</span></code></a>.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>op</strong> – A pointer to the transfer-vertex operator to be mapped. </p></li>
+<li><p><strong>num_qubits</strong> – The number of qubits of the resulting operator. This must be strictly greater than the largest mode index acted upon by <code class="docutils literal notranslate"><span class="pre">op</span></code>. </p></li>
+<li><p><strong>out</strong> – A pointer to where the created qubit operator will be written on success. It is left untouched if the transformation fails.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>An exit code. This is <code class="docutils literal notranslate"><span class="pre">&gt;0</span></code> if an error occurred. In particular, a <code class="docutils literal notranslate"><a class="reference internal" href="qf-exit-code.html#group__qf__exit__code_1gga89daaa15e32524338df290dbd873caf1a869710ce98addf007187616631c85470"><span class="std std-ref"><span class="pre">QfExitCode_ValueError</span></span></a></code> is returned if <code class="docutils literal notranslate"><span class="pre">num_qubits</span></code> is too small to hold the operator’s support.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
 <dt class="sig sig-object c" id="c.qf_fermion_to_majorana">
 <span class="target" id="group__qf__mapper__library_1gab3f9a34c26814e82d73a39b1512117b2"></span><a class="reference internal" href="qf-maj-op.html#c.QfMajoranaOperator" title="QfMajoranaOperator"><span class="n"><span class="pre">QfMajoranaOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">qf_fermion_to_majorana</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="qf-ferm-op.html#c.QfFermionOperator" title="QfFermionOperator"><span class="n"><span class="pre">QfFermionOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">fer_op</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.qf_fermion_to_majorana" title="Link to this definition">¶</a><br /></dt>
 <dd><p>Map a <code class="docutils literal notranslate"><span class="pre">QfFermionOperator</span></code> to a <code class="docutils literal notranslate"><span class="pre">QfMajoranaOperator</span></code>. </p>
-<p><p><section id="id7">
-<h2>Definition<a class="headerlink" href="#id7" title="Link to this heading">¶</a></h2>
+<p><p><section id="id24">
+<h2>Definition<a class="headerlink" href="#id24" title="Link to this heading">¶</a></h2>
 <p>This function implements the simple transformation:</p>
 <div class="math-wrapper docutils container">
 <div class="math">
@@ -478,8 +724,8 @@ acting on the <span class="math">\(j\)</span>-th spin-less fermionic mode, and <
 the two Majorana fermion operators. In the case of the <a class="reference internal" href="qf-maj-op.html#c.QfMajoranaOperator" title="QfMajoranaOperator"><code class="xref c c-struct docutils literal notranslate"><span class="pre">QfMajoranaOperator</span></code></a> these
 will be stored on the even and odd Majorana modes, respectively.</p>
 </section>
-<section id="id8">
-<h2>Example<a class="headerlink" href="#id8" title="Link to this heading">¶</a></h2>
+<section id="id25">
+<h2>Example<a class="headerlink" href="#id25" title="Link to this heading">¶</a></h2>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="c1">// define some kind of fermionic operator</span>
 <span class="linenos">2</span><span class="n">QfFermionOperator</span><span class="w"> </span><span class="o">*</span><span class="n">fer_op</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_ferm_op_one</span><span class="p">();</span>
 <span class="linenos">3</span>
@@ -506,8 +752,8 @@ will be stored on the even and odd Majorana modes, respectively.</p>
 <dt class="sig sig-object c" id="c.qf_majorana_to_fermion">
 <span class="target" id="group__qf__mapper__library_1gae16aad9e5991cef07acff462b60ba65a"></span><a class="reference internal" href="qf-ferm-op.html#c.QfFermionOperator" title="QfFermionOperator"><span class="n"><span class="pre">QfFermionOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">qf_majorana_to_fermion</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="qf-maj-op.html#c.QfMajoranaOperator" title="QfMajoranaOperator"><span class="n"><span class="pre">QfMajoranaOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">maj_op</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.qf_majorana_to_fermion" title="Link to this definition">¶</a><br /></dt>
 <dd><p>Map a <code class="docutils literal notranslate"><span class="pre">QfMajoranaOperator</span></code> to a <code class="docutils literal notranslate"><span class="pre">QfFermionOperator</span></code>. </p>
-<p><p><section id="id9">
-<h2>Definition<a class="headerlink" href="#id9" title="Link to this heading">¶</a></h2>
+<p><p><section id="id26">
+<h2>Definition<a class="headerlink" href="#id26" title="Link to this heading">¶</a></h2>
 <p>This function implements the simple transformation:</p>
 <div class="math-wrapper docutils container">
 <div class="math">
@@ -518,8 +764,8 @@ will be stored on the even and odd Majorana modes, respectively.</p>
 even and odd modes, respectively), and <span class="math">\(a^\dagger_j\)</span> (<span class="math">\(a_j\)</span>) is the fermionic
 creation (annihilation) operator acting on the <span class="math">\(j\)</span>-th spin-less fermionic mode.</p>
 </section>
-<section id="id10">
-<h2>Example<a class="headerlink" href="#id10" title="Link to this heading">¶</a></h2>
+<section id="id27">
+<h2>Example<a class="headerlink" href="#id27" title="Link to this heading">¶</a></h2>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="c1">// define some kind of majorana operator</span>
 <span class="linenos">2</span><span class="n">QfMajoranaOperator</span><span class="w"> </span><span class="o">*</span><span class="n">maj_op</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_maj_op_one</span><span class="p">();</span>
 <span class="linenos">3</span>
@@ -546,13 +792,13 @@ creation (annihilation) operator acting on the <span class="math">\(j\)</span>-t
 <dt class="sig sig-object c" id="c.qf_transfer_vertex_to_fermion">
 <span class="target" id="group__qf__mapper__library_1gac2f783c52a47e39e4c69e2e9f6d9da7c"></span><a class="reference internal" href="qf-ferm-op.html#c.QfFermionOperator" title="QfFermionOperator"><span class="n"><span class="pre">QfFermionOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">qf_transfer_vertex_to_fermion</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="qf-transfer-op.html#c.QfTransferVertexOperator" title="QfTransferVertexOperator"><span class="n"><span class="pre">QfTransferVertexOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">transfer_op</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.qf_transfer_vertex_to_fermion" title="Link to this definition">¶</a><br /></dt>
 <dd><p>Map a <code class="docutils literal notranslate"><span class="pre">QfTransferVertexOperator</span></code> to a <code class="docutils literal notranslate"><span class="pre">QfFermionOperator</span></code>. </p>
-<p><p><section id="id11">
-<h2>Definition<a class="headerlink" href="#id11" title="Link to this heading">¶</a></h2>
+<p><p><section id="id28">
+<h2>Definition<a class="headerlink" href="#id28" title="Link to this heading">¶</a></h2>
 <p>This function decomposes the transfer and vertex operators in terms of the fermionic creation
 and annihilation operators, as defined <a class="reference internal" href="qf-transfer-op.html#qf-transfer-op-definition"><span class="std std-ref">here</span></a>.</p>
 </section>
-<section id="id12">
-<h2>Example<a class="headerlink" href="#id12" title="Link to this heading">¶</a></h2>
+<section id="id29">
+<h2>Example<a class="headerlink" href="#id29" title="Link to this heading">¶</a></h2>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="c1">// define some kind of transfer-vertex operator</span>
 <span class="linenos">2</span><span class="n">QfTransferVertexOperator</span><span class="w"> </span><span class="o">*</span><span class="n">transfer_op</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_transfer_op_one</span><span class="p">();</span>
 <span class="linenos">3</span>
@@ -585,13 +831,13 @@ terms, the result generally contains duplicate terms; call
 <dt class="sig sig-object c" id="c.qf_transfer_vertex_to_majorana">
 <span class="target" id="group__qf__mapper__library_1gafe37fb5a999800e7e11adb34de198899"></span><a class="reference internal" href="qf-maj-op.html#c.QfMajoranaOperator" title="QfMajoranaOperator"><span class="n"><span class="pre">QfMajoranaOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">qf_transfer_vertex_to_majorana</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="qf-transfer-op.html#c.QfTransferVertexOperator" title="QfTransferVertexOperator"><span class="n"><span class="pre">QfTransferVertexOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">transfer_op</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.qf_transfer_vertex_to_majorana" title="Link to this definition">¶</a><br /></dt>
 <dd><p>Map a <code class="docutils literal notranslate"><span class="pre">QfTransferVertexOperator</span></code> to a <code class="docutils literal notranslate"><span class="pre">QfMajoranaOperator</span></code>. </p>
-<p><p><section id="id13">
-<h2>Definition<a class="headerlink" href="#id13" title="Link to this heading">¶</a></h2>
+<p><p><section id="id30">
+<h2>Definition<a class="headerlink" href="#id30" title="Link to this heading">¶</a></h2>
 <p>This function decomposes the transfer and vertex operators in terms of the Majorana operators,
 as defined <a class="reference internal" href="qf-transfer-op.html#qf-transfer-op-definition"><span class="std std-ref">here</span></a>.</p>
 </section>
-<section id="id14">
-<h2>Example<a class="headerlink" href="#id14" title="Link to this heading">¶</a></h2>
+<section id="id31">
+<h2>Example<a class="headerlink" href="#id31" title="Link to this heading">¶</a></h2>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="c1">// define some kind of transfer-vertex operator</span>
 <span class="linenos">2</span><span class="n">QfTransferVertexOperator</span><span class="w"> </span><span class="o">*</span><span class="n">transfer_op</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_transfer_op_one</span><span class="p">();</span>
 <span class="linenos">3</span>
@@ -623,14 +869,14 @@ as defined <a class="reference internal" href="qf-transfer-op.html#qf-transfer-o
 <dt class="sig sig-object c" id="c.qf_transfer_vertex_to_edge_vertex">
 <span class="target" id="group__qf__mapper__library_1gad6879bc6bbbbb4cc16ad39d8087c61dc"></span><a class="reference internal" href="qf-edge-op.html#c.QfEdgeVertexOperator" title="QfEdgeVertexOperator"><span class="n"><span class="pre">QfEdgeVertexOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">qf_transfer_vertex_to_edge_vertex</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="qf-transfer-op.html#c.QfTransferVertexOperator" title="QfTransferVertexOperator"><span class="n"><span class="pre">QfTransferVertexOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">transfer_op</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.qf_transfer_vertex_to_edge_vertex" title="Link to this definition">¶</a><br /></dt>
 <dd><p>Map a <code class="docutils literal notranslate"><span class="pre">QfTransferVertexOperator</span></code> to a <code class="docutils literal notranslate"><span class="pre">QfEdgeVertexOperator</span></code>. </p>
-<p><p><section id="id15">
-<h2>Definition<a class="headerlink" href="#id15" title="Link to this heading">¶</a></h2>
+<p><p><section id="id32">
+<h2>Definition<a class="headerlink" href="#id32" title="Link to this heading">¶</a></h2>
 <p>This function rewrites each transfer operator in terms of the edge and vertex operators. A
 vertex operator maps to itself, whereas a transfer operator <span class="math">\(T_{jk}\)</span> becomes a
 length-two product of an edge and a vertex operator.</p>
 </section>
-<section id="id16">
-<h2>Example<a class="headerlink" href="#id16" title="Link to this heading">¶</a></h2>
+<section id="id33">
+<h2>Example<a class="headerlink" href="#id33" title="Link to this heading">¶</a></h2>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="c1">// define some kind of transfer-vertex operator</span>
 <span class="linenos">2</span><span class="n">QfTransferVertexOperator</span><span class="w"> </span><span class="o">*</span><span class="n">transfer_op</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_transfer_op_one</span><span class="p">();</span>
 <span class="linenos">3</span>
@@ -703,6 +949,9 @@ and then on to a fermionic one agrees with mapping it to a fermionic operator di
 <li><a class="reference internal" href="#c.qf_edge_vertex_to_fermion"><code class="docutils literal notranslate"><span class="pre">qf_edge_vertex_to_fermion()</span></code></a></li>
 <li><a class="reference internal" href="#c.qf_edge_vertex_to_majorana"><code class="docutils literal notranslate"><span class="pre">qf_edge_vertex_to_majorana()</span></code></a></li>
 <li><a class="reference internal" href="#c.qf_ferm_op_jordan_wigner"><code class="docutils literal notranslate"><span class="pre">qf_ferm_op_jordan_wigner()</span></code></a></li>
+<li><a class="reference internal" href="#c.qf_maj_op_jordan_wigner"><code class="docutils literal notranslate"><span class="pre">qf_maj_op_jordan_wigner()</span></code></a></li>
+<li><a class="reference internal" href="#c.qf_edge_op_jordan_wigner"><code class="docutils literal notranslate"><span class="pre">qf_edge_op_jordan_wigner()</span></code></a></li>
+<li><a class="reference internal" href="#c.qf_transfer_op_jordan_wigner"><code class="docutils literal notranslate"><span class="pre">qf_transfer_op_jordan_wigner()</span></code></a></li>
 <li><a class="reference internal" href="#c.qf_fermion_to_majorana"><code class="docutils literal notranslate"><span class="pre">qf_fermion_to_majorana()</span></code></a></li>
 <li><a class="reference internal" href="#c.qf_majorana_to_fermion"><code class="docutils literal notranslate"><span class="pre">qf_majorana_to_fermion()</span></code></a></li>
 <li><a class="reference internal" href="#c.qf_transfer_vertex_to_fermion"><code class="docutils literal notranslate"><span class="pre">qf_transfer_vertex_to_fermion()</span></code></a></li>
@@ -719,7 +968,7 @@ and then on to a fermionic one agrees with mapping it to a fermionic operator di
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=bf997f3f"></script>
+</div><script src="../_static/documentation_options.js?v=7f6214c4"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

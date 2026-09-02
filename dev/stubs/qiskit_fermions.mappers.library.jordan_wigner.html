@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>jordan_wigner - Qiskit Fermions 0.2.0.dev0+0aa6e24</title>
+        <title>jordan_wigner - Qiskit Fermions 0.2.0.dev0+6e49231</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+0aa6e24</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+6e49231</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+0aa6e24</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+6e49231</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -269,16 +269,18 @@
 <span class="sig-name descname"><span class="pre">jordan_wigner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">operator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_qubits</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qiskit_fermions.mappers.library.jordan_wigner" title="Link to this definition">¶</a></dt>
 <dd><p>Map an operator to a <code class="docutils literal notranslate"><span class="pre">SparseObservable</span></code> under the Jordan-Wigner transformation.</p>
 <p>This is the type-agnostic entry point to the Jordan-Wigner transformation. It dispatches on the
-concrete type of <code class="docutils literal notranslate"><span class="pre">operator</span></code> to the appropriate direct implementation. Today only
-<a class="reference internal" href="qiskit_fermions.operators.FermionOperator.html#qiskit_fermions.operators.FermionOperator" title="qiskit_fermions.operators.FermionOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionOperator</span></code></a> is supported, delegating to <a class="reference internal" href="qiskit_fermions.mappers.library.fermion_jordan_wigner.html#qiskit_fermions.mappers.library.fermion_jordan_wigner" title="qiskit_fermions.mappers.library.fermion_jordan_wigner"><code class="xref py py-func docutils literal notranslate"><span class="pre">fermion_jordan_wigner()</span></code></a>; any other
-operator type raises a <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#TypeError" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeError</span></code></a> until a direct implementation exists for it.</p>
+concrete type of <code class="docutils literal notranslate"><span class="pre">operator</span></code> to the appropriate direct implementation:
+<a class="reference internal" href="qiskit_fermions.mappers.library.fermion_jordan_wigner.html#qiskit_fermions.mappers.library.fermion_jordan_wigner" title="qiskit_fermions.mappers.library.fermion_jordan_wigner"><code class="xref py py-func docutils literal notranslate"><span class="pre">fermion_jordan_wigner()</span></code></a>, <a class="reference internal" href="qiskit_fermions.mappers.library.majorana_jordan_wigner.html#qiskit_fermions.mappers.library.majorana_jordan_wigner" title="qiskit_fermions.mappers.library.majorana_jordan_wigner"><code class="xref py py-func docutils literal notranslate"><span class="pre">majorana_jordan_wigner()</span></code></a>,
+<a class="reference internal" href="qiskit_fermions.mappers.library.edge_vertex_jordan_wigner.html#qiskit_fermions.mappers.library.edge_vertex_jordan_wigner" title="qiskit_fermions.mappers.library.edge_vertex_jordan_wigner"><code class="xref py py-func docutils literal notranslate"><span class="pre">edge_vertex_jordan_wigner()</span></code></a> or <a class="reference internal" href="qiskit_fermions.mappers.library.transfer_vertex_jordan_wigner.html#qiskit_fermions.mappers.library.transfer_vertex_jordan_wigner" title="qiskit_fermions.mappers.library.transfer_vertex_jordan_wigner"><code class="xref py py-func docutils literal notranslate"><span class="pre">transfer_vertex_jordan_wigner()</span></code></a>. Anything that is
+not one of the four operator types raises a <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#TypeError" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeError</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>operator</strong> (<a class="reference internal" href="qiskit_fermions.operators.OperatorTrait.html#qiskit_fermions.operators.OperatorTrait" title="qiskit_fermions.operators.operator_trait.OperatorTrait"><em>OperatorTrait</em></a>) – the operator to map.</p></li>
 <li><p><strong>num_qubits</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – the number of qubits for the resulting qubit operator. This must be strictly
 greater than the largest mode index in <code class="docutils literal notranslate"><span class="pre">operator</span></code> (any additional qubits are padded
-with the identity).</p></li>
+with the identity). Note that for a <a class="reference internal" href="qiskit_fermions.operators.MajoranaOperator.html#qiskit_fermions.operators.MajoranaOperator" title="qiskit_fermions.operators.MajoranaOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">MajoranaOperator</span></code></a> the bound is counted in
+<em>fermionic</em> modes, i.e. in the largest Majorana index divided by two.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -301,13 +303,13 @@ with the identity).</p></li>
 <span class="go">&lt;SparseObservable with 2 terms on 2 qubits: (0.05+0j)() + (-0.05+0j)(Z_0)&gt;</span>
 </pre></div>
 </div>
-<p>An operator type without a direct implementation raises a <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#TypeError" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeError</span></code></a>:</p>
-<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.operators</span><span class="w"> </span><span class="kn">import</span> <span class="n">MajoranaOperator</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">mop</span> <span class="o">=</span> <span class="n">MajoranaOperator</span><span class="o">.</span><span class="n">from_dict</span><span class="p">({(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span> <span class="mf">1.0</span><span class="p">})</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">jordan_wigner</span><span class="p">(</span><span class="n">mop</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<p>Every operator type has a direct implementation, so the dispatch is total over them. Anything
+else – an object that is not a fermionic operator at all – raises a <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#TypeError" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeError</span></code></a>:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit.quantum_info</span><span class="w"> </span><span class="kn">import</span> <span class="n">SparseObservable</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">jordan_wigner</span><span class="p">(</span><span class="n">SparseObservable</span><span class="o">.</span><span class="n">identity</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="mi">2</span><span class="p">)</span>
 <span class="gt">Traceback (most recent call last):</span>
 <span class="c">...</span>
-<span class="gr">TypeError</span>: <span class="n">jordan_wigner does not support operator type 'MajoranaOperator'; only FermionOperator is supported today.</span>
+<span class="gr">TypeError</span>: <span class="n">jordan_wigner does not support operator type 'SparseObservable'.</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -365,7 +367,7 @@ with the identity).</p></li>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=bf997f3f"></script>
+</div><script src="../_static/documentation_options.js?v=7f6214c4"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>map_edge_vertex_generators - Qiskit Fermions 0.2.0.dev0+0aa6e24</title>
+        <title>map_edge_vertex_generators - Qiskit Fermions 0.2.0.dev0+6e49231</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+0aa6e24</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+6e49231</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+0aa6e24</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+6e49231</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -278,24 +278,34 @@ generator, this allows mapping to arbitrary output types.</p>
 <p>The output type <code class="docutils literal notranslate"><span class="pre">T</span></code> must support multiplication by a scalar via <code class="docutils literal notranslate"><span class="pre">__mul__</span></code>.
 If <code class="docutils literal notranslate"><span class="pre">compose=None</span></code> it must also support composition of two instances via <code class="docutils literal notranslate"><span class="pre">__and__</span></code>.</p>
 </div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The mapping written out below is a deliberately minimal illustration of this function, not a
+replacement for <a class="reference internal" href="qiskit_fermions.mappers.library.edge_vertex_jordan_wigner.html#qiskit_fermions.mappers.library.edge_vertex_jordan_wigner" title="qiskit_fermions.mappers.library.edge_vertex_jordan_wigner"><code class="xref py py-func docutils literal notranslate"><span class="pre">edge_vertex_jordan_wigner()</span></code></a>: it covers only nearest-neighbor
+interactions, and it is neither parallelized nor memory-bounded. Reach for the library
+function rather than copying this one.</p>
+</div>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.mappers</span><span class="w"> </span><span class="kn">import</span> <span class="n">map_edge_vertex_generators</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.operators</span><span class="w"> </span><span class="kn">import</span> <span class="n">EdgeAction</span><span class="p">,</span> <span class="n">EdgeVertexOperator</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit.quantum_info</span><span class="w"> </span><span class="kn">import</span> <span class="n">SparsePauliOp</span>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">jordan_wigner_nearest_neighbor</span><span class="p">(</span><span class="n">mode</span><span class="p">:</span> <span class="n">EdgeAction</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SparsePauliOp</span><span class="p">:</span>
-<span class="gp">... </span>    <span class="k">match</span> <span class="nb">abs</span><span class="p">(</span><span class="n">mode</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">mode</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
-<span class="gp">... </span>        <span class="k">case</span> <span class="mi">0</span><span class="p">:</span>
-<span class="gp">... </span>            <span class="n">pauli</span> <span class="o">=</span> <span class="s2">"Z"</span>
-<span class="gp">... </span>            <span class="n">qubits</span> <span class="o">=</span> <span class="p">[</span><span class="n">mode</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
-<span class="gp">... </span>        <span class="k">case</span> <span class="mi">1</span><span class="p">:</span>
-<span class="gp">... </span>            <span class="n">pauli</span> <span class="o">=</span> <span class="s2">"XY"</span>
-<span class="gp">... </span>            <span class="n">qubits</span> <span class="o">=</span> <span class="p">[</span><span class="n">mode</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">mode</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
-<span class="gp">... </span>        <span class="k">case</span><span class="w"> </span><span class="k">_</span><span class="p">:</span>
-<span class="gp">... </span>            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
-<span class="gp">... </span>                <span class="s2">"This mapping only handles nearest neighbor interactions"</span>
-<span class="gp">... </span>            <span class="p">)</span>
-<span class="gp">...</span>
-<span class="gp">... </span>    <span class="k">return</span> <span class="n">SparsePauliOp</span><span class="o">.</span><span class="n">from_sparse_list</span><span class="p">([(</span><span class="n">pauli</span><span class="p">,</span> <span class="n">qubits</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)],</span> <span class="n">num_qubits</span><span class="o">=</span><span class="n">num_qubits</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="n">left</span><span class="p">,</span> <span class="n">right</span> <span class="o">=</span> <span class="n">mode</span>
+<span class="gp">... </span>    <span class="k">if</span> <span class="n">left</span> <span class="o">==</span> <span class="n">right</span><span class="p">:</span>
+<span class="gp">... </span>        <span class="k">return</span> <span class="n">SparsePauliOp</span><span class="o">.</span><span class="n">from_sparse_list</span><span class="p">(</span>
+<span class="gp">... </span>            <span class="p">[(</span><span class="s2">"Z"</span><span class="p">,</span> <span class="p">[</span><span class="n">left</span><span class="p">],</span> <span class="mf">1.0</span><span class="p">)],</span> <span class="n">num_qubits</span><span class="o">=</span><span class="n">num_qubits</span>
+<span class="gp">... </span>        <span class="p">)</span>
+<span class="gp">... </span>    <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">left</span> <span class="o">-</span> <span class="n">right</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+<span class="gp">... </span>        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+<span class="gp">... </span>            <span class="s2">"This mapping only handles nearest neighbor interactions"</span>
+<span class="gp">... </span>        <span class="p">)</span>
+<span class="gp">... </span>    <span class="c1"># The orientation must be compared rather than differenced: an edge operator is</span>
+<span class="gp">... </span>    <span class="c1"># antisymmetric, so the sign depends on the index order while the string does not.</span>
+<span class="gp">... </span>    <span class="n">lo</span><span class="p">,</span> <span class="n">hi</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="n">coeff</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.0</span> <span class="k">if</span> <span class="n">left</span> <span class="o">&lt;</span> <span class="n">right</span> <span class="k">else</span> <span class="mf">1.0</span>
+<span class="gp">... </span>    <span class="k">return</span> <span class="n">SparsePauliOp</span><span class="o">.</span><span class="n">from_sparse_list</span><span class="p">(</span>
+<span class="gp">... </span>        <span class="p">[(</span><span class="s2">"YX"</span><span class="p">,</span> <span class="p">[</span><span class="n">lo</span><span class="p">,</span> <span class="n">hi</span><span class="p">],</span> <span class="n">coeff</span><span class="p">)],</span> <span class="n">num_qubits</span><span class="o">=</span><span class="n">num_qubits</span>
+<span class="gp">... </span>    <span class="p">)</span>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">num_qubits</span> <span class="o">=</span> <span class="mi">4</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">identity</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">SparsePauliOp</span><span class="p">:</span>
@@ -308,7 +318,7 @@ If <code class="docutils literal notranslate"><span class="pre">compose=None</sp
 <span class="gp">... </span><span class="p">})</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">qop</span> <span class="o">=</span> <span class="n">map_edge_vertex_generators</span><span class="p">(</span><span class="n">op</span><span class="p">,</span> <span class="n">jordan_wigner_nearest_neighbor</span><span class="p">,</span> <span class="n">identity</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">([(</span><span class="n">label</span><span class="p">,</span> <span class="nb">complex</span><span class="p">(</span><span class="n">coeff</span><span class="p">))</span> <span class="k">for</span> <span class="n">label</span><span class="p">,</span> <span class="n">coeff</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">qop</span><span class="o">.</span><span class="n">label_iter</span><span class="p">())])</span>
-<span class="go">[('IIII', 0j), ('IIIZ', (2+0j)), ('IIYX', (0.5+0j)), ('IYYI', 1j)]</span>
+<span class="go">[('IIII', 0j), ('IIIZ', (2+0j)), ('IIXY', (-0.5+0j)), ('IXXI', 1j)]</span>
 </pre></div>
 </div>
 <dl class="field-list simple">
@@ -384,7 +394,7 @@ instances. If this is not provided, it will default to using <a class="reference
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=bf997f3f"></script>
+</div><script src="../_static/documentation_options.js?v=7f6214c4"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

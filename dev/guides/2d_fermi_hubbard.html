@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Simulate 2D Fermi-Hubbard dynamics with flow sets - Qiskit Fermions 0.2.0.dev0+0aa6e24</title>
+        <title>Simulate 2D Fermi-Hubbard dynamics with flow sets - Qiskit Fermions 0.2.0.dev0+6e49231</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+0aa6e24</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+6e49231</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+0aa6e24</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+6e49231</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -1060,7 +1060,7 @@ under Jordan-Wigner. Both loop products are single Paulis (up to normalization),
 composing them cancels the physical content and leaves the constraint; dividing by the
 leading coefficient then fixes the sign and scale.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit.quantum_info</span><span class="w"> </span><span class="kn">import</span> <span class="n">SparsePauliOp</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.mappers.library</span><span class="w"> </span><span class="kn">import</span> <span class="n">jordan_wigner</span><span class="p">,</span> <span class="n">transfer_vertex_to_fermion</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.mappers.library</span><span class="w"> </span><span class="kn">import</span> <span class="n">transfer_vertex_jordan_wigner</span>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">plaquette_loops</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">cols</span><span class="p">):</span>
 <span class="gp">... </span><span class="w">    </span><span class="sd">"""The directed edge loop around each square face."""</span>
@@ -1083,8 +1083,8 @@ leading coefficient then fixes the sign and scale.</p>
 <span class="gp">... </span>        <span class="n">qubit_side</span> <span class="o">=</span> <span class="n">encoding</span><span class="p">(</span><span class="n">loop_operator</span><span class="p">,</span> <span class="n">num_qubits</span><span class="p">)</span>
 <span class="gp">... </span>        <span class="c1"># the same loop mapped the conventional way, then widened from the N sites</span>
 <span class="gp">... </span>        <span class="c1"># onto the full 2N-qubit register so the two can be multiplied</span>
-<span class="gp">... </span>        <span class="n">fermionic</span> <span class="o">=</span> <span class="n">jordan_wigner</span><span class="p">(</span>
-<span class="gp">... </span>            <span class="n">transfer_vertex_to_fermion</span><span class="p">(</span><span class="n">loop_operator</span><span class="p">),</span> <span class="n">num_sites</span>
+<span class="gp">... </span>        <span class="n">fermionic</span> <span class="o">=</span> <span class="n">transfer_vertex_jordan_wigner</span><span class="p">(</span>
+<span class="gp">... </span>            <span class="n">loop_operator</span><span class="p">,</span> <span class="n">num_sites</span>
 <span class="gp">... </span>        <span class="p">)</span><span class="o">.</span><span class="n">apply_layout</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">num_sites</span><span class="p">)),</span> <span class="n">num_qubits</span><span class="o">=</span><span class="n">num_qubits</span><span class="p">)</span>
 <span class="gp">... </span>        <span class="n">stabilizer</span> <span class="o">=</span> <span class="n">SparsePauliOp</span><span class="o">.</span><span class="n">from_sparse_observable</span><span class="p">(</span>
 <span class="gp">... </span>            <span class="n">qubit_side</span><span class="o">.</span><span class="n">compose</span><span class="p">(</span><span class="n">fermionic</span><span class="p">)</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span>
@@ -1134,7 +1134,7 @@ this section cheap.</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># an exact evolution time, unrelated to the Trotter step above</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">evolution_time</span> <span class="o">=</span> <span class="mf">0.6</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">reference</span> <span class="o">=</span> <span class="n">SparsePauliOp</span><span class="o">.</span><span class="n">from_sparse_observable</span><span class="p">(</span>
-<span class="gp">... </span>    <span class="n">jordan_wigner</span><span class="p">(</span><span class="n">transfer_vertex_to_fermion</span><span class="p">(</span><span class="n">hamiltonian</span><span class="p">),</span> <span class="n">num_sites</span><span class="p">)</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span>
+<span class="gp">... </span>    <span class="n">transfer_vertex_jordan_wigner</span><span class="p">(</span><span class="n">hamiltonian</span><span class="p">,</span> <span class="n">num_sites</span><span class="p">)</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span>
 <span class="gp">... </span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">occupation</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>  <span class="c1"># site occupations of the initial state</span>
@@ -1367,7 +1367,7 @@ dimensions, <a class="reference external" href="https://doi.org/10.1103/PRXQuant
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=bf997f3f"></script>
+</div><script src="../_static/documentation_options.js?v=7f6214c4"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
