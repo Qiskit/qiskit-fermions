@@ -416,8 +416,9 @@ fn push_z_string(bit_terms: &mut Vec<ffi::QkBitTerm>, indices: &mut Vec<u32>, qu
 /// ```
 ///
 /// with coefficient exactly `1`. This is a *single* Pauli string, where a fermionic action maps onto
-/// a two-term sum -- which is what makes mapping these operators directly cheaper than routing them
-/// through a [`FermionOperator`] first.
+/// a two-term sum -- so routing a term of `L` Majorana operators through a [`FermionOperator`] first
+/// would inflate one Pauli string into up to `4^L` terms before merging them back down. The saving
+/// grows with the length of the terms; for single-operator terms the two routes cost about the same.
 fn map_majorana_action(action: MajoranaAction, num_qubits: u32) -> *mut ffi::QkObs {
     let qubit = *action / 2;
 

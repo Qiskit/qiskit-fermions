@@ -135,9 +135,11 @@ from the custom mapper section, demonstrating equivalent results:
    would map a :class:`.MajoranaOperator` in one step instead, with
    :func:`.majorana_jordan_wigner`, and likewise for the other operator types
    (:func:`.edge_vertex_jordan_wigner`, :func:`.transfer_vertex_jordan_wigner`). Going via a
-   :class:`.FermionOperator` is not only longer but more expensive: every generator of these algebras
-   maps onto a single Pauli string, whereas each fermionic action maps onto a two-term sum, so the
-   detour inflates the intermediate result only to merge it back down again.
+   :class:`.FermionOperator` also inflates the intermediate result: every generator of these algebras
+   maps onto a single Pauli string, whereas each fermionic action maps onto a two-term sum, so a term
+   built from several generators expands only to be merged back down again. That saving grows with the
+   length of the terms; for the single-generator terms of a hopping Hamiltonian the two routes cost
+   about the same.
 
 In the Python API, some of these library mappers are also reachable through type-agnostic
 convenience mappers. :func:`.fermion_operator` and :func:`.majorana_operator` sit in front of

@@ -182,10 +182,12 @@ pub fn py_fermion_jordan_wigner(
 ///    \gamma_j \rightarrow \bigotimes_{k\lt j} \sigma^Z_k \otimes \sigma^X_j ~~\text{and}~~
 ///    \gamma'_j \rightarrow \bigotimes_{k\lt j} \sigma^Z_k \otimes \sigma^Y_j \, .
 ///
-/// Mapping a :class:`.MajoranaOperator` with this function is cheaper than converting it to a
-/// :class:`.FermionOperator` first and calling :func:`.fermion_jordan_wigner`: each fermionic action
-/// maps onto a *two*-term sum, so that route inflates a single Pauli string into up to
-/// :math:`4^L` terms for a length-:math:`L` term before merging them back down.
+/// This is also what makes it cheaper than converting to a :class:`.FermionOperator` first and
+/// calling :func:`.fermion_jordan_wigner`: each fermionic action maps onto a *two*-term sum, so that
+/// route inflates a single Pauli string into up to :math:`4^L` terms for a term built from :math:`L`
+/// Majorana operators, before merging them back down. The saving therefore grows with the length of
+/// the terms; for single-operator terms there is no blowup to avoid and the two routes cost about the
+/// same.
 ///
 /// Usage
 /// =====
@@ -272,9 +274,11 @@ pub fn py_majorana_jordan_wigner(
 ///    consistent with :func:`.edge_vertex_to_fermion`, so that mapping an operator directly agrees
 ///    with converting it to a :class:`.FermionOperator` first.
 ///
-/// Mapping directly is cheaper than that conversion, though: each fermionic action maps onto a
-/// *two*-term sum, so routing a length-:math:`L` term through a :class:`.FermionOperator` inflates a
-/// single Pauli string into up to :math:`4^L` terms before merging them back down.
+/// Mapping directly also avoids an intermediate blowup: each fermionic action maps onto a *two*-term
+/// sum, so routing a term built from :math:`L` edge operators through a :class:`.FermionOperator`
+/// inflates a single Pauli string into up to :math:`4^L` terms before merging them back down. The
+/// saving grows with the length of the terms; for single-operator terms the two routes cost about the
+/// same.
 ///
 /// Usage
 /// =====
@@ -356,9 +360,10 @@ pub fn py_edge_vertex_jordan_wigner(
 ///    a single-qubit basis choice; the convention used here is the one consistent with
 ///    :func:`.transfer_vertex_to_fermion`.
 ///
-/// Mapping directly is cheaper than converting to a :class:`.FermionOperator` first, since each
-/// fermionic action maps onto a *two*-term sum and so inflates a single Pauli string into up to
-/// :math:`4^L` terms for a length-:math:`L` term.
+/// Mapping directly also avoids an intermediate blowup: each fermionic action maps onto a *two*-term
+/// sum, so routing a term built from :math:`L` transfer operators through a
+/// :class:`.FermionOperator` inflates a single Pauli string into up to :math:`4^L` terms. The saving
+/// grows with the length of the terms; for single-operator terms the two routes cost about the same.
 ///
 /// Usage
 /// =====

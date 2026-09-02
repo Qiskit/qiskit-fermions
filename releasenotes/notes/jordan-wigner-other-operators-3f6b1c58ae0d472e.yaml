@@ -12,15 +12,22 @@ features:
     :class:`~qiskit_fermions.operators.TransferVertexOperator` meant converting it to a
     :class:`~qiskit_fermions.operators.FermionOperator` first.
 
-    Mapping directly is markedly cheaper than that detour. Under Jordan-Wigner every generator of
-    these three algebras maps onto a *single* Pauli string -- a vertex operator becomes the weight-1
-    Pauli :math:`Z_l`, and an edge or transfer operator becomes one string whose :math:`Z` chain
-    spans only the modes strictly between its two endpoints -- whereas each fermionic creation or
-    annihilation operator maps onto a two-term sum. Routing a length-:math:`L` term through a
-    :class:`~qiskit_fermions.operators.FermionOperator` therefore inflates what is one Pauli string
-    into as many as :math:`4^L` terms, only for them to be merged back down again.
+    Besides being more direct, this avoids an intermediate blowup. Under Jordan-Wigner every
+    generator of these three algebras maps onto a *single* Pauli string -- a vertex operator becomes
+    the weight-1 Pauli :math:`Z_l`, and an edge or transfer operator becomes one string whose
+    :math:`Z` chain spans only the modes strictly between its two endpoints -- whereas each fermionic
+    creation or annihilation operator maps onto a two-term sum. Routing a term that is a product of
+    :math:`L` generators through a :class:`~qiskit_fermions.operators.FermionOperator` therefore
+    inflates what is one Pauli string into as many as :math:`4^L` terms, only for them to be merged
+    back down again.
 
-    For example, the 1D and 2D Fermi-Hubbard guides previously mapped their Hamiltonians with
+    The saving accordingly grows with the length of the terms, and is only worth reaching for when
+    they are products of several generators: measured on terms of :math:`L` transfer operators, the
+    direct mapper was about 2x faster at :math:`L=2`, 7x at :math:`L=3` and 28x at :math:`L=4`. For
+    the single-generator terms that a hopping Hamiltonian consists of there is no blowup to avoid, and
+    the two routes cost about the same.
+
+    The 1D and 2D Fermi-Hubbard guides previously mapped their Hamiltonians with
     ``jordan_wigner(transfer_vertex_to_fermion(hamiltonian), num_sites)`` and now call
     :func:`~qiskit_fermions.mappers.library.transfer_vertex_jordan_wigner` directly.
   - |
