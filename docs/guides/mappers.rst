@@ -115,7 +115,7 @@ from the custom mapper section, demonstrating equivalent results:
        uint64_t num_terms = 2;
        uint64_t num_modes = 3;
        uint32_t modes[3] = {0, 1, 2};
-       QkComplex67 coeffs[2] = {{1.0, 0.0}, {0.5, 0.0}};
+       QkComplex64 coeffs[2] = {{1.0, 0.0}, {0.5, 0.0}};
        uint32_t boundaries[3] = {0, 2, 3};
        QfMajoranaOperator *maj_op = qf_maj_op_new(num_terms, num_modes, coeffs, modes, boundaries);
 

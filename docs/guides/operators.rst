@@ -123,13 +123,13 @@ construction using the sparse arrays:
        #include <qiskit_fermions.h>
 
        // Construct first operator: 1.0 * c_0 a_1
-       QkComplex67 coeff1[1] = {{1.0, 0.0}};
+       QkComplex64 coeff1[1] = {{1.0, 0.0}};
        uint32_t modes1[2] = {0, 1};
        uint32_t boundaries1[2] = {0, 2};
        QfFermionOperator *op1 = qf_ferm_op_new(1, 2, coeff1, modes1, boundaries1);
 
        // Construct second operator: 1.0 * c_2 a_3
-       QkComplex67 coeff2[1] = {{1.0, 0.0}};
+       QkComplex64 coeff2[1] = {{1.0, 0.0}};
        uint32_t modes2[2] = {2, 3};
        uint32_t boundaries2[2] = {0, 2};
        QfFermionOperator *op2 = qf_ferm_op_new(1, 2, coeff2, modes2, boundaries2);
@@ -296,7 +296,7 @@ the :ref:`grouping <grouping_explanation>` guide.
        #include <qiskit_fermions.h>
 
        // Create operator with 3 terms
-       QkComplex67 coeffs[3] = {{1.0, 0.0}, {1.0, 0.0}, {1.0, 0.0}};
+       QkComplex64 coeffs[3] = {{1.0, 0.0}, {1.0, 0.0}, {1.0, 0.0}};
        uint32_t modes[4] = {0, 1, 2, 3};
        uint32_t boundaries[4] = {0, 1, 2, 4};
        QfMajoranaOperator *op = qf_maj_op_new(3, 4, coeffs, modes, boundaries);
@@ -340,13 +340,8 @@ reference of all available operations.
        ...     (cre(1), ann(0)): 1.0
        ... })
        >>>
-       >>> # Check if the operator is Hermitian by verifying H - H† = 0
-       >>> adjoint = op.adjoint()
-       >>> difference = op - adjoint
-       >>> difference = difference.normal_ordered()
-       >>> difference = difference.simplify(atol=1e-10)
-       >>> is_hermitian = difference.equiv(FermionOperator.zero(), atol=1e-10)
-       >>> print(f"Operator is Hermitian: {is_hermitian}")
+       >>> # Check if the operator is Hermitian
+       >>> print(f"Operator is Hermitian: {op.is_hermitian(atol=1e-10)}")
        Operator is Hermitian: True
 
     .. code-block:: c
@@ -354,45 +349,51 @@ reference of all available operations.
        #include <qiskit_fermions.h>
 
        // Construct a Hermitian operator: H = +0 -1 + +1 -0
-       QkComplex67 coeffs[2] = {{1.0, 0.0}, {1.0, 0.0}};
+       QkComplex64 coeffs[2] = {{1.0, 0.0}, {1.0, 0.0}};
        uint32_t modes[4] = {0, 1, 1, 0};
        uint32_t boundaries[3] = {0, 2, 4};
        QfFermionOperator *op = qf_ferm_op_new(2, 4, coeffs, modes, boundaries);
 
-       // Check if Hermitian: compute H - H†, normal-order, and simplify
-       QfFermionOperator *adjoint = qf_ferm_op_adjoint(op);
-       QfFermionOperator *difference = qf_ferm_op_sub(op, adjoint);
-       QfFermionOperator *normal_ordered = qf_ferm_op_normal_ordered(difference);
-       qf_ferm_op_ichop(normal_ordered, 1e-10);
-
-       QfFermionOperator *zero = qf_ferm_op_zero();
-       bool is_hermitian = qf_ferm_op_equiv(normal_ordered, zero, 1e-10);
+       // Check if the operator is Hermitian
+       bool is_hermitian = qf_ferm_op_is_hermitian(op, 1e-10);
        printf("Operator is Hermitian: %s\n", is_hermitian ? "true" : "false");
 
        // Clean up
        qf_ferm_op_free(op);
-       qf_ferm_op_free(adjoint);
-       qf_ferm_op_free(difference);
-       qf_ferm_op_free(normal_ordered);
-       qf_ferm_op_free(zero);
+
+.. note::
+
+   :meth:`~.OperatorTrait.is_hermitian` verifies that :math:`H - H^\dagger = 0` by reducing that
+   difference to a normal form and comparing it against :meth:`~.OperatorTrait.zero`. Spelled out
+   in terms of the other protocol operations, it performs the following:
+
+   .. code-block:: python
+
+      >>> difference = (op - op.adjoint()).normal_ordered().simplify(atol=1e-10)
+      >>> difference.equiv(FermionOperator.zero(), atol=1e-10)
+      True
+
+   The strength of this check depends on the operator type, because it depends on how completely
+   that type's normal form contracts adjacent generators. A ``True`` result is always reliable, but
+   for some types a ``False`` result is conservative: see
+   :meth:`~.OperatorTrait.is_hermitian` for details.
 
 .. important::
 
-   The example uses ``atol=1e-10`` in both ``simplify()`` and ``equiv()``.
-   The ``atol`` (absolute tolerance) parameter specifies a threshold. Coefficients
-   with magnitude smaller than ``atol`` are treated as zero and discarded. This is
-   essential for numerical stability when comparing operators, since floating-point
-   arithmetic can introduce small rounding errors that would otherwise prevent
-   equivalent operators from being recognized as such.
+   The example uses ``atol=1e-10``. The ``atol`` (absolute tolerance) parameter specifies a
+   threshold. Coefficients with magnitude smaller than ``atol`` are treated as zero and discarded.
+   This is essential for numerical stability when comparing operators, since floating-point
+   arithmetic can introduce small rounding errors that would otherwise prevent equivalent operators
+   from being recognized as such.
 
 .. hint::
 
    While the :class:`.OperatorTrait` protocol provides a common interface,
    individual operator implementations might offer additional convenience methods
-   not part of the protocol. For example, some operators provide an
-   ``is_hermitian()`` method that implements this check. Always consult
-   the API documentation for your operator type to discover all
-   available functionality.
+   not part of the protocol. For example, :class:`.FermionOperator` and
+   :class:`.MajoranaOperator` provide a ``max_rank()`` method that reports the
+   length of their longest term. Always consult the API documentation for your
+   operator type to discover all available functionality.
 
 
 .. |operator_term_ordering| replace:: **Operator term ordering and normal forms**
@@ -452,12 +453,12 @@ operator forms for correctness and efficiency.
        #include <stdbool.h>
 
        // Two different representations of the same operator
-       QkComplex67 coeff1[1] = {{1.0, 0.0}};
+       QkComplex64 coeff1[1] = {{1.0, 0.0}};
        uint32_t modes1[2] = {0, 0};
        uint32_t boundaries1[3] = {0, 2};
        QfFermionOperator *op1 = qf_ferm_op_new(1, 2, coeff1, modes1, boundaries1);
 
-       QkComplex67 coeff2[2] = {{1.0, 0.0}, {-1.0, 0.0}};
+       QkComplex64 coeff2[2] = {{1.0, 0.0}, {-1.0, 0.0}};
        uint32_t modes2[2] = {0, 0};
        uint32_t boundaries2[3] = {0, 0, 2};
        QfFermionOperator *op2 = qf_ferm_op_new(2, 2, coeff2, modes2, boundaries2);
