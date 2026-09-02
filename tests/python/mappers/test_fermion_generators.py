@@ -18,7 +18,15 @@ from qiskit_fermions.operators import FermionAction, FermionOperator
 
 
 def jordan_wigner(op: FermionOperator, layout: dict[int, int]) -> SparsePauliOp:
-    """Custom Jordan-Wigner transformation."""
+    """Custom Jordan-Wigner transformation onto a non-trivial qubit layout.
+
+    This is a deliberately minimal implementation, written to exercise
+    :func:`~qiskit_fermions.mappers.map_fermion_action_generators`. It is single-threaded and has
+    none of the memory bounding of the real thing, so
+    :func:`~qiskit_fermions.mappers.library.fermion_jordan_wigner` is what to reach for in general.
+    Note, though, that the ``layout`` indirection below is a genuine capability that the library
+    function does not offer: it maps mode ``j`` onto qubit ``layout[j]`` rather than onto qubit ``j``.
+    """
     num_qubits = max(layout.values()) + 1
 
     @cache
