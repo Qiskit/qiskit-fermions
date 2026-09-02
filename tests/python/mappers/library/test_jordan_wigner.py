@@ -13,8 +13,22 @@
 import numpy as np
 import pytest
 from qiskit.quantum_info import SparseObservable
-from qiskit_fermions.mappers.library import fermion_jordan_wigner, jordan_wigner
-from qiskit_fermions.operators import FermionOperator, MajoranaOperator
+from qiskit_fermions.mappers.library import (
+    edge_vertex_jordan_wigner,
+    edge_vertex_to_fermion,
+    fermion_jordan_wigner,
+    jordan_wigner,
+    majorana_jordan_wigner,
+    majorana_to_fermion,
+    transfer_vertex_jordan_wigner,
+    transfer_vertex_to_fermion,
+)
+from qiskit_fermions.operators import (
+    EdgeVertexOperator,
+    FermionOperator,
+    MajoranaOperator,
+    TransferVertexOperator,
+)
 
 
 def test_fermion_jordan_wigner():
@@ -136,7 +150,158 @@ def test_fermion_jordan_wigner_merges_identity_terms():
 
 
 def test_jordan_wigner_unsupported_type_raises():
-    # any operator type without a direct implementation must raise TypeError (not silently fail)
-    maj_op = MajoranaOperator.from_dict({(0, 1): 1.0})
-    with pytest.raises(TypeError, match="MajoranaOperator"):
-        jordan_wigner(maj_op, 2)
+    # All four operator types now have a direct implementation, so the guard is exercised with
+    # something that is not a fermionic operator at all. It must raise rather than fail obscurely
+    # deeper in, and it is what any future operator type will land on until it gains one.
+    with pytest.raises(TypeError, match="SparseObservable"):
+        jordan_wigner(SparseObservable.identity(2), 2)
+
+
+# The mapped image of every generator below is a *single* Pauli string, unlike a fermionic action
+# which maps onto a two-term sum. Each expectation is therefore one sparse-list entry, hand-computed
+# from the definitions in the corresponding docstring.
+
+
+def test_majorana_jordan_wigner():
+    num_qubits = 3
+    # gamma_0 gamma_3 = (X_0)(Z_0 Y_1): the two images overlap on qubit 0, where X * Z = -i Y, so the
+    # product is a weight-2 string carrying that phase rather than the naive X_0 Y_1.
+    #
+    # gamma_4 keeps its full Z-string, since nothing cancels against it.
+    op = MajoranaOperator.from_dict({(0, 3): 1.0, (4,): 0.5})
+    qop = majorana_jordan_wigner(op, num_qubits)
+    assert isinstance(qop, SparseObservable)
+    expected = SparseObservable.from_sparse_list(
+        [
+            ("YY", [0, 1], -1.0j),
+            ("ZZX", [0, 1, 2], 0.5),
+        ],
+        num_qubits,
+    )
+    assert (qop - expected).simplify() == SparseObservable.zero(num_qubits)
+
+
+def test_edge_vertex_jordan_wigner():
+    num_qubits = 4
+    # A vertex is a bare Z; an edge is Y..X with the Z-string spanning only the modes strictly
+    # between its endpoints, and its sign flips with the index order (E_lr = -E_rl).
+    op = EdgeVertexOperator.from_dict({((2, 2),): 2.0, ((0, 3),): 0.5, ((3, 0),): 0.5})
+    qop = edge_vertex_jordan_wigner(op, num_qubits)
+    assert isinstance(qop, SparseObservable)
+    expected = SparseObservable.from_sparse_list(
+        [
+            ("Z", [2], 2.0),
+            ("YZZX", [0, 1, 2, 3], -0.5),
+            ("YZZX", [0, 1, 2, 3], 0.5),
+        ],
+        num_qubits,
+    )
+    assert (qop - expected).simplify() == SparseObservable.zero(num_qubits)
+
+
+def test_transfer_vertex_jordan_wigner():
+    num_qubits = 3
+    # The coefficient is -1/2 for *both* orientations; it is the Pauli letters that swap, which is
+    # the opposite of how the edge operator behaves.
+    op = TransferVertexOperator.from_dict({((1, 1),): 2.0, ((0, 2),): 1.0, ((2, 0),): 1.0})
+    qop = transfer_vertex_jordan_wigner(op, num_qubits)
+    assert isinstance(qop, SparseObservable)
+    expected = SparseObservable.from_sparse_list(
+        [
+            ("Z", [1], 2.0),
+            ("XZX", [0, 1, 2], -0.5),
+            ("YZY", [0, 1, 2], -0.5),
+        ],
+        num_qubits,
+    )
+    assert (qop - expected).simplify() == SparseObservable.zero(num_qubits)
+
+
+@pytest.mark.parametrize(
+    "mapper,op,num_qubits",
+    [
+        # gamma_7 acts on fermionic mode 3, so it needs 4 qubits rather than 8: the bound for a
+        # MajoranaOperator is counted in fermionic modes.
+        (majorana_jordan_wigner, MajoranaOperator.from_dict({(7,): 1.0}), 3),
+        # The largest index sits in the *right* buffer, which a left-only check would miss.
+        (edge_vertex_jordan_wigner, EdgeVertexOperator.from_dict({((0, 3),): 1.0}), 3),
+        (transfer_vertex_jordan_wigner, TransferVertexOperator.from_dict({((0, 3),): 1.0}), 3),
+    ],
+)
+def test_jordan_wigner_num_qubits_too_small(mapper, op, num_qubits):
+    # too few qubits must raise a catchable ValueError instead of aborting the interpreter
+    with pytest.raises(ValueError):
+        mapper(op, num_qubits)
+
+    # exactly enough qubits succeeds
+    assert isinstance(mapper(op, num_qubits + 1), SparseObservable)
+
+
+@pytest.mark.parametrize(
+    "direct,op",
+    [
+        (majorana_jordan_wigner, MajoranaOperator.from_dict({(0, 3): 1.0, (2, 5, 1): -0.5j})),
+        (
+            edge_vertex_jordan_wigner,
+            EdgeVertexOperator.from_dict({((0, 0),): 2.0, ((0, 2),): 0.5, ((2, 0),): -1.0j}),
+        ),
+        (
+            transfer_vertex_jordan_wigner,
+            TransferVertexOperator.from_dict(
+                {((1, 1),): 2.0, ((0, 2),): 0.5, ((2, 0),): -1.0j, ((1, 2), (0, 1)): 0.25}
+            ),
+        ),
+    ],
+)
+def test_jordan_wigner_dispatches_to_direct_implementation(direct, op):
+    # the type-agnostic entry point must delegate each operator type to its direct implementation
+    num_qubits = 3
+    dispatched = jordan_wigner(op, num_qubits)
+    assert isinstance(dispatched, SparseObservable)
+    assert (dispatched - direct(op, num_qubits)).simplify() == SparseObservable.zero(num_qubits)
+
+
+@pytest.mark.parametrize(
+    "direct,to_fermion,op",
+    [
+        (
+            majorana_jordan_wigner,
+            majorana_to_fermion,
+            # An odd-length term is not Hermitian and is where a stray factor of i would hide; a
+            # repeated index makes the Z-strings cancel to the identity; the complex coefficient
+            # catches a conjugation error; the empty term maps onto the identity.
+            MajoranaOperator.from_dict(
+                {(0,): 1.0, (0, 3): -0.5 + 2.0j, (2, 5, 1): 1.0, (1, 1): 0.75, (): 1.25}
+            ),
+        ),
+        (
+            edge_vertex_jordan_wigner,
+            edge_vertex_to_fermion,
+            # Both orderings of the same pair appear together, so an antisymmetry error cannot hide
+            # by being present on both sides of the comparison.
+            EdgeVertexOperator.from_dict(
+                {((0, 0),): 2.0, ((0, 2),): 0.5, ((2, 0),): -1.0j, ((1, 1), (1, 2)): 0.25}
+            ),
+        ),
+        (
+            transfer_vertex_jordan_wigner,
+            transfer_vertex_to_fermion,
+            TransferVertexOperator.from_dict(
+                {((1, 1),): 2.0, ((0, 1),): 0.5, ((1, 0),): -1.0j, ((1, 2), (0, 1)): 0.25}
+            ),
+        ),
+    ],
+)
+def test_jordan_wigner_matches_route_via_fermion(direct, to_fermion, op):
+    # Cross-validates the direct Pauli images against converting to a FermionOperator first. The two
+    # routes share no code, so a sign error in the image tables cannot cancel out -- which is what
+    # makes this the load-bearing check on the algebra rather than a redundancy test.
+    #
+    # The converter route is *not* the production path precisely because each fermionic action maps
+    # onto a two-term sum, inflating a single Pauli string into up to 4**L terms for a length-L term.
+    # These operators are kept small so that blowup stays cheap.
+    num_qubits = 3
+    via_fermion = fermion_jordan_wigner(to_fermion(op), num_qubits)
+    assert (direct(op, num_qubits) - via_fermion).simplify(1e-12) == SparseObservable.zero(
+        num_qubits
+    )
