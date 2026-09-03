@@ -691,8 +691,8 @@ product formula is also where the number of Trotter steps belongs, as in Qiskit'
    ...         east, west, diagonal = [], [], {}
    ...
    ...         for label, indices, coeff in evolution.operator.to_sparse_list():
-   ...             # as in Qiskit's own product formulas, `reps` steps divide the time --
-   ...             # and hence every rotation angle -- by `reps`
+   ...             # as in Qiskit's own product formulas, `reps` steps divide the time
+   ...             # (and hence every rotation angle) by `reps`
    ...             angle = 2 * evolution.time * coeff.real / self.reps
    ...             match label, indices:
    ...                 case "", _:  # the identity contributes only a global phase
@@ -763,8 +763,8 @@ product formula is also where the number of Trotter steps belongs, as in Qiskit'
    is not would be worse than failing.
 
    A product formula that respects the operator's
-   :attr:`~qiskit_fermions.operators.OperatorTrait.groups` directly -- rather than relying on a
-   prior decomposition -- avoids the constraint entirely; see
+   :attr:`~qiskit_fermions.operators.OperatorTrait.groups` directly (rather than relying on a
+   prior decomposition) avoids the constraint entirely; see
    `issue #298 <https://github.com/Qiskit/qiskit-fermions/issues/298>`_.
 
 To select the order, pass it to

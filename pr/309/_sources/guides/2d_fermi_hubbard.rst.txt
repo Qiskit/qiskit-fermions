@@ -1055,8 +1055,8 @@ is not: the two differ by a vertex operator on each bond's source site,
 Around a closed loop every site is the source of exactly one bond, so the loop collects one
 :math:`V_j` per site -- which is exactly the **local parity** of the plaquette's four sites. That
 local parity is what makes the difference: the Hamiltonian hops particles across the plaquette
-boundary, so it conserves only the *global* parity. The bare transfer loop therefore fails to commute with it, while the edge loop -- which
-carries the parity factor -- commutes.
+boundary, so it conserves only the *global* parity. The bare transfer loop therefore fails to commute with it, while the edge loop (which
+carries the parity factor) commutes.
 
 Since the encoding is defined on transfer operators, mapping an edge operator needs the relation
 above. That is a five-line callback, and it slots into

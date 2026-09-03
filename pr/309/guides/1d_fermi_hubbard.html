@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Simulate 1D Fermi-Hubbard dynamics with flow sets - Qiskit Fermions 0.2.0.dev0+7cc5a25</title>
+        <title>Simulate 1D Fermi-Hubbard dynamics with flow sets - Qiskit Fermions 0.2.0.dev0+94830f4</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+7cc5a25</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+94830f4</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+7cc5a25</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+94830f4</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -842,8 +842,8 @@ product formula is also where the number of Trotter steps belongs, as in Qiskit�
 <span class="gp">... </span>        <span class="n">east</span><span class="p">,</span> <span class="n">west</span><span class="p">,</span> <span class="n">diagonal</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">{}</span>
 <span class="gp">...</span>
 <span class="gp">... </span>        <span class="k">for</span> <span class="n">label</span><span class="p">,</span> <span class="n">indices</span><span class="p">,</span> <span class="n">coeff</span> <span class="ow">in</span> <span class="n">evolution</span><span class="o">.</span><span class="n">operator</span><span class="o">.</span><span class="n">to_sparse_list</span><span class="p">():</span>
-<span class="gp">... </span>            <span class="c1"># as in Qiskit's own product formulas, `reps` steps divide the time --</span>
-<span class="gp">... </span>            <span class="c1"># and hence every rotation angle -- by `reps`</span>
+<span class="gp">... </span>            <span class="c1"># as in Qiskit's own product formulas, `reps` steps divide the time</span>
+<span class="gp">... </span>            <span class="c1"># (and hence every rotation angle) by `reps`</span>
 <span class="gp">... </span>            <span class="n">angle</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">evolution</span><span class="o">.</span><span class="n">time</span> <span class="o">*</span> <span class="n">coeff</span><span class="o">.</span><span class="n">real</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">reps</span>
 <span class="gp">... </span>            <span class="k">match</span> <span class="n">label</span><span class="p">,</span> <span class="n">indices</span><span class="p">:</span>
 <span class="gp">... </span>                <span class="k">case</span><span class="w"> </span><span class="s2">""</span><span class="p">,</span> <span class="k">_</span><span class="p">:</span>  <span class="c1"># the identity contributes only a global phase</span>
@@ -913,8 +913,8 @@ large <code class="docutils literal notranslate"><span class="pre">reps</span></
 a gate carrying a single flow set – silently returning a circuit that looks Trotterized but
 is not would be worse than failing.</p>
 <p>A product formula that respects the operator’s
-<a class="reference internal" href="../stubs/qiskit_fermions.operators.OperatorTrait.html#qiskit_fermions.operators.OperatorTrait.groups" title="qiskit_fermions.operators.OperatorTrait.groups"><code class="xref py py-attr docutils literal notranslate"><span class="pre">groups</span></code></a> directly – rather than relying on a
-prior decomposition – avoids the constraint entirely; see
+<a class="reference internal" href="../stubs/qiskit_fermions.operators.OperatorTrait.html#qiskit_fermions.operators.OperatorTrait.groups" title="qiskit_fermions.operators.OperatorTrait.groups"><code class="xref py py-attr docutils literal notranslate"><span class="pre">groups</span></code></a> directly (rather than relying on a
+prior decomposition) avoids the constraint entirely; see
 <a class="reference external" href="https://github.com/Qiskit/qiskit-fermions/issues/298">issue #298</a>.</p>
 </div>
 <p>To select the order, pass it to
@@ -1280,7 +1280,7 @@ qubit encodings (2026), <a class="reference external" href="https://arxiv.org/ab
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=85316dff"></script>
+</div><script src="../_static/documentation_options.js?v=c7216ed9"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
