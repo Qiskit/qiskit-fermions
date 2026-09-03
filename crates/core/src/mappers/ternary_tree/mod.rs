@@ -115,6 +115,24 @@ impl PauliLabel {
     }
 }
 
+/// Recovers a label from its discriminant, rejecting every byte that is not one.
+///
+/// This is how a label read from foreign memory becomes a [`PauliLabel`]: a caller across the C API
+/// can hand over any byte, and every value but these three is an invalid `PauliLabel`, so it must
+/// be checked as a plain `u8` before it becomes one. The rejected byte is returned as the error.
+impl TryFrom<u8> for PauliLabel {
+    type Error = u8;
+
+    fn try_from(value: u8) -> Result<Self, Self::Error> {
+        match value {
+            v if v == PauliLabel::X as u8 => Ok(PauliLabel::X),
+            v if v == PauliLabel::Y as u8 => Ok(PauliLabel::Y),
+            v if v == PauliLabel::Z as u8 => Ok(PauliLabel::Z),
+            other => Err(other),
+        }
+    }
+}
+
 /// [`PauliLabel::iter`] and [`PauliLabel::slot`] must agree: `iter` yields the labels in slot
 /// order, and `slot` names the index of each. A caller that zips a node's three links against
 /// `iter` would otherwise mislabel every edge while the tree still satisfied every structural
@@ -1146,6 +1164,18 @@ mod tests {
         assert!(expected > u32::MAX as usize);
         assert_eq!(tree.total_leg_depth(), expected);
         assert_eq!(tree.max_weight(), n);
+    }
+
+    #[test]
+    fn test_label_round_trips_through_its_discriminant() {
+        for label in PauliLabel::ALL {
+            assert_eq!(PauliLabel::try_from(label as u8), Ok(label));
+        }
+        // `0` is the identity's natural encoding and the value a zero-initialized C struct holds,
+        // so it is the likeliest invalid byte to arrive.
+        for byte in [0u8, 4, u8::MAX] {
+            assert_eq!(PauliLabel::try_from(byte), Err(byte));
+        }
     }
 
     #[test]

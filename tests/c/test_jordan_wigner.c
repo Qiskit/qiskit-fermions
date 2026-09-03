@@ -271,6 +271,39 @@ static int test_vertex_num_qubits_too_small(void) {
     return Ok;
 }
 
+// A NULL pointer is reported rather than aborting the process.
+static int test_null_pointers(void) {
+    QkObs *result = NULL;
+
+    QfFermionOperator *ferm_op = qf_ferm_op_zero();
+    QfMajoranaOperator *maj_op = qf_maj_op_zero();
+    QfEdgeVertexOperator *edge_op = qf_edge_op_zero();
+    QfTransferVertexOperator *transfer_op = qf_transfer_op_zero();
+
+    int result_code = Ok;
+    if (qf_ferm_op_jordan_wigner(NULL, 2, &result) != QfExitCode_NullPointerError ||
+        qf_maj_op_jordan_wigner(NULL, 2, &result) != QfExitCode_NullPointerError ||
+        qf_edge_op_jordan_wigner(NULL, 2, &result) != QfExitCode_NullPointerError ||
+        qf_transfer_op_jordan_wigner(NULL, 2, &result) != QfExitCode_NullPointerError) {
+        result_code = RuntimeError;
+    }
+    if (qf_ferm_op_jordan_wigner(ferm_op, 2, NULL) != QfExitCode_NullPointerError ||
+        qf_maj_op_jordan_wigner(maj_op, 2, NULL) != QfExitCode_NullPointerError ||
+        qf_edge_op_jordan_wigner(edge_op, 2, NULL) != QfExitCode_NullPointerError ||
+        qf_transfer_op_jordan_wigner(transfer_op, 2, NULL) != QfExitCode_NullPointerError) {
+        result_code = RuntimeError;
+    }
+    if (result != NULL) {
+        result_code = NullptrError;
+    }
+
+    qf_ferm_op_free(ferm_op);
+    qf_maj_op_free(maj_op);
+    qf_edge_op_free(edge_op);
+    qf_transfer_op_free(transfer_op);
+    return result_code;
+}
+
 int test_jordan_wigner(void) {
     int num_failed = 0;
     num_failed += RUN_TEST(test_mapping);
@@ -280,6 +313,7 @@ int test_jordan_wigner(void) {
     num_failed += RUN_TEST(test_transfer_vertex_mapping);
     num_failed += RUN_TEST(test_majorana_num_qubits_too_small);
     num_failed += RUN_TEST(test_vertex_num_qubits_too_small);
+    num_failed += RUN_TEST(test_null_pointers);
 
     fflush(stderr);
     fprintf(stderr, "=== Number of failed subtests: %i\n", num_failed);

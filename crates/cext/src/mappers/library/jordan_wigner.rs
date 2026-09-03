@@ -11,7 +11,7 @@
 // that they have been altered from the originals.
 
 use crate::exit_codes::ExitCode;
-use crate::pointers::const_ptr_as_ref;
+use crate::pointers::{check_ptr, const_ptr_as_ref};
 
 use qiskit_fermions_core::mappers::library::jordan_wigner::{
     edge_vertex_jordan_wigner, fermion_jordan_wigner, majorana_jordan_wigner,
@@ -33,8 +33,8 @@ use qiskit_fermions_core::operators::transfer_vertex_operator::TransferVertexOpe
 ///        untouched if the transformation fails.
 ///
 /// @return An exit code. This is ``>0`` if an error occurred. In particular, a
-///         ``QfExitCode_ValueError`` is returned if ``num_qubits`` is too small to hold the
-///         operator's support.
+///         ``QfExitCode_NullPointerError`` is returned if ``op`` or ``out`` is ``NULL``, and a
+///         ``QfExitCode_ValueError`` if ``num_qubits`` is too small to hold the operator's support.
 ///
 /// @rst
 ///
@@ -108,12 +108,17 @@ pub unsafe extern "C" fn qf_ferm_op_jordan_wigner(
     num_qubits: u32,
     out: *mut *mut qiskit_sys::QkObs,
 ) -> ExitCode {
-    // SAFETY: Per documentation, the pointers are non-null and aligned.
+    // Checked rather than left to `const_ptr_as_ref`, whose panic on a null pointer cannot unwind
+    // across `extern "C"` and would abort the caller's process.
+    if let Err(err) = check_ptr(op).and_then(|()| check_ptr(out)) {
+        return err.into();
+    }
+    // SAFETY: Checked non-null and aligned above, and valid per documentation.
     let op = unsafe { const_ptr_as_ref(op) };
 
     match fermion_jordan_wigner(op, num_qubits) {
         Ok(obs) => {
-            // SAFETY: Per documentation, `out` is non-null and aligned.
+            // SAFETY: Checked non-null and aligned above.
             unsafe { out.write(obs) };
             ExitCode::Success
         }
@@ -133,8 +138,8 @@ pub unsafe extern "C" fn qf_ferm_op_jordan_wigner(
 ///        untouched if the transformation fails.
 ///
 /// @return An exit code. This is ``>0`` if an error occurred. In particular, a
-///         ``QfExitCode_ValueError`` is returned if ``num_qubits`` is too small to hold the
-///         operator's support.
+///         ``QfExitCode_NullPointerError`` is returned if ``op`` or ``out`` is ``NULL``, and a
+///         ``QfExitCode_ValueError`` if ``num_qubits`` is too small to hold the operator's support.
 ///
 /// @rst
 ///
@@ -192,12 +197,17 @@ pub unsafe extern "C" fn qf_maj_op_jordan_wigner(
     num_qubits: u32,
     out: *mut *mut qiskit_sys::QkObs,
 ) -> ExitCode {
-    // SAFETY: Per documentation, the pointers are non-null and aligned.
+    // Checked rather than left to `const_ptr_as_ref`, whose panic on a null pointer cannot unwind
+    // across `extern "C"` and would abort the caller's process.
+    if let Err(err) = check_ptr(op).and_then(|()| check_ptr(out)) {
+        return err.into();
+    }
+    // SAFETY: Checked non-null and aligned above, and valid per documentation.
     let op = unsafe { const_ptr_as_ref(op) };
 
     match majorana_jordan_wigner(op, num_qubits) {
         Ok(obs) => {
-            // SAFETY: Per documentation, `out` is non-null and aligned.
+            // SAFETY: Checked non-null and aligned above.
             unsafe { out.write(obs) };
             ExitCode::Success
         }
@@ -216,8 +226,8 @@ pub unsafe extern "C" fn qf_maj_op_jordan_wigner(
 ///        untouched if the transformation fails.
 ///
 /// @return An exit code. This is ``>0`` if an error occurred. In particular, a
-///         ``QfExitCode_ValueError`` is returned if ``num_qubits`` is too small to hold the
-///         operator's support.
+///         ``QfExitCode_NullPointerError`` is returned if ``op`` or ``out`` is ``NULL``, and a
+///         ``QfExitCode_ValueError`` if ``num_qubits`` is too small to hold the operator's support.
 ///
 /// @rst
 ///
@@ -290,12 +300,17 @@ pub unsafe extern "C" fn qf_edge_op_jordan_wigner(
     num_qubits: u32,
     out: *mut *mut qiskit_sys::QkObs,
 ) -> ExitCode {
-    // SAFETY: Per documentation, the pointers are non-null and aligned.
+    // Checked rather than left to `const_ptr_as_ref`, whose panic on a null pointer cannot unwind
+    // across `extern "C"` and would abort the caller's process.
+    if let Err(err) = check_ptr(op).and_then(|()| check_ptr(out)) {
+        return err.into();
+    }
+    // SAFETY: Checked non-null and aligned above, and valid per documentation.
     let op = unsafe { const_ptr_as_ref(op) };
 
     match edge_vertex_jordan_wigner(op, num_qubits) {
         Ok(obs) => {
-            // SAFETY: Per documentation, `out` is non-null and aligned.
+            // SAFETY: Checked non-null and aligned above.
             unsafe { out.write(obs) };
             ExitCode::Success
         }
@@ -314,8 +329,8 @@ pub unsafe extern "C" fn qf_edge_op_jordan_wigner(
 ///        untouched if the transformation fails.
 ///
 /// @return An exit code. This is ``>0`` if an error occurred. In particular, a
-///         ``QfExitCode_ValueError`` is returned if ``num_qubits`` is too small to hold the
-///         operator's support.
+///         ``QfExitCode_NullPointerError`` is returned if ``op`` or ``out`` is ``NULL``, and a
+///         ``QfExitCode_ValueError`` if ``num_qubits`` is too small to hold the operator's support.
 ///
 /// @rst
 ///
@@ -384,12 +399,17 @@ pub unsafe extern "C" fn qf_transfer_op_jordan_wigner(
     num_qubits: u32,
     out: *mut *mut qiskit_sys::QkObs,
 ) -> ExitCode {
-    // SAFETY: Per documentation, the pointers are non-null and aligned.
+    // Checked rather than left to `const_ptr_as_ref`, whose panic on a null pointer cannot unwind
+    // across `extern "C"` and would abort the caller's process.
+    if let Err(err) = check_ptr(op).and_then(|()| check_ptr(out)) {
+        return err.into();
+    }
+    // SAFETY: Checked non-null and aligned above, and valid per documentation.
     let op = unsafe { const_ptr_as_ref(op) };
 
     match transfer_vertex_jordan_wigner(op, num_qubits) {
         Ok(obs) => {
-            // SAFETY: Per documentation, `out` is non-null and aligned.
+            // SAFETY: Checked non-null and aligned above.
             unsafe { out.write(obs) };
             ExitCode::Success
         }
