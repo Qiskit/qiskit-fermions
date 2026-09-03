@@ -1,0 +1,48 @@
+---
+features:
+  - |
+    Added a framework for ternary-tree fermion-to-qubit encodings, along with mappers for all four
+    operator representations: :class:`~qiskit_fermions.mappers.TernaryTree`,
+    :class:`~qiskit_fermions.mappers.TernaryTreeEncoding`,
+    :func:`~qiskit_fermions.mappers.library.fermion_ternary_tree`,
+    :func:`~qiskit_fermions.mappers.library.majorana_ternary_tree`,
+    :func:`~qiskit_fermions.mappers.library.edge_vertex_ternary_tree` and
+    :func:`~qiskit_fermions.mappers.library.transfer_vertex_ternary_tree`. In the Python API,
+    :func:`~qiskit_fermions.mappers.library.ternary_tree` is the type-agnostic entry point that
+    dispatches to whichever of the four matches the operator it is given, mirroring
+    :func:`~qiskit_fermions.mappers.library.jordan_wigner`.
+
+    A ternary tree on :math:`N` nodes defines an encoding of :math:`N` fermionic modes onto :math:`N`
+    qubits. Each node is a qubit carrying three downward links labelled :math:`X`, :math:`Y` and
+    :math:`Z`; a link either descends to a child or terminates in a *leg*, and each leg's path to the
+    root spells a Pauli string. Every encoding of this family is one particular tree, so a single
+    mapper implementation covers all of them:
+
+    .. list-table::
+       :header-rows: 1
+
+       * - Encoding
+         - Construction
+         - Pauli weight
+       * - Jordan-Wigner
+         - ``TernaryTree.chain(n, "Z")``
+         - :math:`n`
+       * - Parity
+         - ``TernaryTree.chain(n, "X")``
+         - :math:`n`
+       * - Balanced
+         - ``TernaryTree.breadth_first(n, 3)``
+         - :math:`\lceil \log_3(2n+1) \rceil`
+       * - Binary-branching
+         - ``TernaryTree.breadth_first(n, 2, "ZXY")``
+         - :math:`\lfloor \log_2 n \rfloor + 1`
+
+    These two constructors cover only the uniform families. Arbitrary trees (Bravyi-Kitaev, or the
+    irregular ones grown from a device's coupling graph, whose branching follows that connectivity) are
+    built by passing a parent-and-label specification to :class:`~qiskit_fermions.mappers.TernaryTree`
+    directly, which is the general interface.
+  - |
+    Added :meth:`~qiskit_fermions.mappers.TernaryTreeEncoding.total_parity`, which builds the total
+    fermionic parity observable of a ternary-tree encoding, :math:`\prod_j (1 - 2 n_j)`. A tree's
+    :math:`2N+1` legs pair into :math:`2N` Majorana operators, leaving exactly one over, and that
+    leftover is this operator.
