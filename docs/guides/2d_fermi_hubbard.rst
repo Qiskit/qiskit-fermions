@@ -1069,9 +1069,6 @@ above. That is a five-line callback, and it slots into
    :include-source:
 
    >>> from qiskit.quantum_info import SparsePauliOp
-<<<<<<< HEAD
-   >>> from qiskit_fermions.mappers.library import jordan_wigner, transfer_vertex_to_fermion
-=======
    >>> from qiskit_fermions.mappers import map_edge_vertex_generators
    >>> from qiskit_fermions.operators import EdgeVertexOperator
    >>>
@@ -1096,7 +1093,6 @@ above. That is a five-line callback, and it slots into
    ...         identity=lambda: SparseObservable.identity(width),
    ...         compose=SparseObservable.compose,
    ...     ).simplify()
->>>>>>> bae161c (Fix the Trotterization and the plaquette stabilizers in the flow-set guides (#309))
    >>>
    >>> def plaquette_loops(rows, cols):
    ...     """The directed edge loop around each square face."""
@@ -1113,22 +1109,9 @@ above. That is a five-line callback, and it slots into
    ...     num_qubits = 2 * rows * cols
    ...     out = []
    ...     for loop in plaquette_loops(rows, cols):
-<<<<<<< HEAD
-   ...         loop_operator = TransferVertexOperator.from_dict({tuple(loop): 1.0})
-   ...         qubit_side = encoding(loop_operator, num_qubits)
-   ...         # the same loop mapped the conventional way, then widened from the N sites
-   ...         # onto the full 2N-qubit register so the two can be multiplied
-   ...         fermionic = jordan_wigner(
-   ...             transfer_vertex_to_fermion(loop_operator), num_sites
-   ...         ).apply_layout(list(range(num_sites)), num_qubits=num_qubits)
-   ...         stabilizer = SparsePauliOp.from_sparse_observable(
-   ...             qubit_side.compose(fermionic).simplify()
-   ...         )
-=======
    ...         loop_operator = EdgeVertexOperator.from_dict({tuple(loop): 1.0})
    ...         encoded_loop = vc_edge_encoding(loop_operator, num_qubits, cols)
    ...         stabilizer = SparsePauliOp.from_sparse_observable(encoded_loop)
->>>>>>> bae161c (Fix the Trotterization and the plaquette stabilizers in the flow-set guides (#309))
    ...         out.append(stabilizer / stabilizer.coeffs[0])
    ...     return out
    >>>
@@ -1225,7 +1208,7 @@ this section cheap.
    :include-source:
 
    >>> from scipy.sparse.linalg import expm_multiply
-   >>> from qiskit_fermions.mappers.library import transfer_vertex_jordan_wigner
+   >>> from qiskit_fermions.mappers.library import jordan_wigner, transfer_vertex_to_fermion
    >>>
    >>> # an exact evolution time, unrelated to the Trotter step above
    >>> evolution_time = 0.6
