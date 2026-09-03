@@ -650,6 +650,10 @@ product formula is also where the number of Trotter steps belongs, as in Qiskit'
    >>> def cz_brickwork(circuit):
    ...     # emit even and odd bonds as two layers, so the CZs are scheduled in
    ...     # parallel: a chain of overlapping CZs has depth 2, not num_qubits - 1
+   ...     #
+   ...     # NOTE: CZ gates are diagonal, so they all commute and each is its own inverse.
+   ...     # This whole layer is therefore self-inverse, which is why the conjugation below
+   ...     # calls it twice rather than calling it and then its inverse.
    ...     for offset in (0, 1):
    ...         for j in range(offset, circuit.num_qubits - 1, 2):
    ...             circuit.cz(j, j + 1)
@@ -678,6 +682,8 @@ product formula is also where the number of Trotter steps belongs, as in Qiskit'
    ...     preserve_order = True
    ...
    ...     def __init__(self, reps=1):
+   ...         # `reps` Trotter steps of the WHOLE Hamiltonian; see the caution below for why
+   ...         # this synthesis must not be handed one flow set at a time when reps > 1
    ...         self.reps = reps
    ...
    ...     def synthesize(self, evolution):
@@ -685,8 +691,8 @@ product formula is also where the number of Trotter steps belongs, as in Qiskit'
    ...         east, west, diagonal = [], [], {}
    ...
    ...         for label, indices, coeff in evolution.operator.to_sparse_list():
-   ...             # as in Qiskit's own product formulas, `reps` Trotter steps divide the
-   ...             # time -- and hence every rotation angle -- by `reps`
+   ...             # as in Qiskit's own product formulas, `reps` steps divide the time
+   ...             # (and hence every rotation angle) by `reps`
    ...             angle = 2 * evolution.time * coeff.real / self.reps
    ...             match label, indices:
    ...                 case "", _:  # the identity contributes only a global phase
@@ -700,6 +706,15 @@ product formula is also where the number of Trotter steps belongs, as in Qiskit'
    ...                 case _:
    ...                     raise ValueError(f"unexpected Pauli term: {label} on {indices}")
    ...
+   ...         # A Trotter step must cycle BETWEEN the flow sets, so the repetition has to wrap
+   ...         # the whole sweep. If this gate carried only one set, repeating it would merely
+   ...         # split that set's own evolution into equal pieces -- see the caution below.
+   ...         if self.reps > 1 and sum(map(bool, (east, west, diagonal))) < 2:
+   ...             raise ValueError(
+   ...                 "reps > 1 needs the whole Hamiltonian in one Evolution gate, but this "
+   ...                 "gate holds a single flow set; do not decompose() before transpiling."
+   ...             )
+   ...
    ...         for _ in range(self.reps):
    ...             # east flow set: bare rotations, no entangling gates at all
    ...             for qubit, angle in east:
@@ -712,7 +727,8 @@ product formula is also where the number of Trotter steps belongs, as in Qiskit'
    ...                     circuit.rx(angle, qubit)
    ...                 cz_brickwork(circuit)
    ...
-   ...             rzz_layers(circuit, diagonal)
+   ...             if diagonal:
+   ...                 rzz_layers(circuit, diagonal)
    ...
    ...         return circuit
 
@@ -727,6 +743,29 @@ product formula is also where the number of Trotter steps belongs, as in Qiskit'
    A term-by-term synthesis chooses the order badly. Emitting
    the overlapping ``CZ`` chain sequentially reports a depth that grows with the qubit count
    rather than the constant ``2`` the hardware could achieve.
+
+.. caution::
+   The ``reps`` argument above is only a genuine Trotterization when this synthesis receives
+   the **whole** encoded Hamiltonian, as the Trotter-step comparison further below does. If the
+   fermionic circuit is decomposed into one :class:`.Evolution` gate per flow set first, then
+   ``synthesize`` is called once per set, and the loop repeats *within* a set instead of
+   cycling between them:
+
+   .. code-block:: text
+
+      what a decomposed circuit gives:   A(t/2) A(t/2) B(t/2) B(t/2)
+      what a Trotterization needs:       A(t/2) B(t/2) A(t/2) B(t/2)
+
+   The first form buys nothing at all: consecutive exponentials of the *same* operator commute,
+   so ``A(t/2) A(t/2)`` is just ``A(t)`` and the error stays at its ``reps=1`` value however
+   large ``reps`` grows. That is why ``synthesize`` above rejects ``reps > 1`` when it is handed
+   a gate carrying a single flow set -- silently returning a circuit that looks Trotterized but
+   is not would be worse than failing.
+
+   A product formula that respects the operator's
+   :attr:`~qiskit_fermions.operators.OperatorTrait.groups` directly (rather than relying on a
+   prior decomposition) avoids the constraint entirely; see
+   `issue #298 <https://github.com/Qiskit/qiskit-fermions/issues/298>`_.
 
 To select the order, pass it to
 :attr:`.MapperFnEvolutionSynthesis.product_formula`, which is the argument
