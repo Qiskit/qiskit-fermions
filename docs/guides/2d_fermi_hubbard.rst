@@ -768,8 +768,8 @@ cheaper than one might fear:
    ...
    ...     preserve_order = True
    ...
-   ...     def __init__(self, rows, cols, reps=1):
-   ...         self.rows, self.cols, self.reps = rows, cols, reps
+   ...     def __init__(self, rows, cols):
+   ...         self.rows, self.cols = rows, cols
    ...
    ...     def rows_of_lattice(self):
    ...         return [[r * self.cols + c for c in range(self.cols)] for r in range(self.rows)]
@@ -781,10 +781,8 @@ cheaper than one might fear:
    ...         num_qubits = 2 * self.rows * self.cols
    ...         ancilla = partial(ancilla_qubit, num_sites=self.rows * self.cols)
    ...         circuit = QuantumCircuit(evolution.operator.num_qubits)
-   ...         # as in Qiskit's own product formulas, `reps` Trotter steps divide the time --
-   ...         # and hence every rotation angle -- by `reps`
    ...         terms = [
-   ...             (label, indices, 2 * evolution.time * coeff.real / self.reps)
+   ...             (label, indices, 2 * evolution.time * coeff.real)
    ...             for label, indices, coeff in evolution.operator.to_sparse_list()
    ...         ]
    ...
@@ -818,42 +816,38 @@ cheaper than one might fear:
    ...             rotations[line].append((slot, angle))
    ...
    ...         active = sorted(rotations)
-   ...         for _ in range(self.reps):
-   ...             # the lines of one flow set are vertex-disjoint, so all of their Cliffords
-   ...             # are emitted together and share the same two two-qubit layers
-   ...             conjugation = QuantumCircuit(num_qubits)
-   ...             for line in active:
-   ...                 clifford_function(conjugation, lines[line], ancilla)
-   ...             circuit.compose(conjugation, inplace=True)
-   ...             for line in active:
-   ...                 supports = clifford_supports(
-   ...                     Clifford(conjugation), shapes[0], lines[line], ancilla, num_qubits
-   ...                 )
-   ...                 for slot, angle in rotations[line]:
-   ...                     match supports[slot]:
-   ...                         case qubit, "X":
-   ...                             circuit.rx(angle, qubit)
-   ...                         case qubit, "Y":
-   ...                             circuit.ry(angle, qubit)
-   ...                         case qubit, "Z":
-   ...                             circuit.rz(angle, qubit)
-   ...             circuit.compose(conjugation.inverse(), inplace=True)
+   ...         # the lines of one flow set are vertex-disjoint, so all of their Cliffords
+   ...         # are emitted together and share the same two two-qubit layers
+   ...         conjugation = QuantumCircuit(num_qubits)
+   ...         for line in active:
+   ...             clifford_function(conjugation, lines[line], ancilla)
+   ...         circuit.compose(conjugation, inplace=True)
+   ...         for line in active:
+   ...             supports = clifford_supports(
+   ...                 Clifford(conjugation), shapes[0], lines[line], ancilla, num_qubits
+   ...             )
+   ...             for slot, angle in rotations[line]:
+   ...                 match supports[slot]:
+   ...                     case qubit, "X":
+   ...                         circuit.rx(angle, qubit)
+   ...                     case qubit, "Y":
+   ...                         circuit.ry(angle, qubit)
+   ...                     case qubit, "Z":
+   ...                         circuit.rz(angle, qubit)
+   ...         circuit.compose(conjugation.inverse(), inplace=True)
    ...         return circuit
    ...
    ...     def diagonal(self, circuit, terms):
-   ...         """Synthesize the diagonal group: a phase, single-qubit Z and paired Rzz.
-   ...
-   ...         These all commute, so `reps` repetitions collapse into one set of rotations.
-   ...         """
+   ...         """Synthesize the diagonal group: a phase, single-qubit Z and paired Rzz."""
    ...         rzz = {}
    ...         for label, indices, angle in terms:
    ...             match label, indices:
    ...                 case "", _:  # the identity contributes only a global phase
-   ...                     circuit.global_phase -= self.reps * angle / 2
+   ...                     circuit.global_phase -= angle / 2
    ...                 case "Z", [qubit]:  # a lone vertex operator
-   ...                     circuit.rz(self.reps * angle, qubit)
+   ...                     circuit.rz(angle, qubit)
    ...                 case "ZZ", [j, k]:  # interaction, see rzz_layers above
-   ...                     rzz[min(j, k), max(j, k)] = self.reps * angle
+   ...                     rzz[min(j, k), max(j, k)] = angle
    ...                 case _:
    ...                     raise ValueError(f"unexpected Pauli term: {label} on {indices}")
    ...         rzz_layers(circuit, rzz, self.cols)
@@ -862,8 +856,17 @@ As in 1D, this is deliberately written for this encoding: it recognizes the four
 shapes and raises on anything else rather than falling back silently. It also assumes the
 one-flow-set-per-gate split above, and says so; more than one hopping shape in a single
 gate means the grouping was not applied, which is an error rather than something to work
-around. ``reps`` is here for the same reason as in 1D: the number
-of Trotter steps belongs in a product formula, as in Qiskit's own :class:`~qiskit.synthesis.LieTrotter`.
+around.
+
+.. note::
+   Unlike its 1D counterpart, this synthesis takes no ``reps`` argument. A Trotter step has to
+   cycle *between* the flow sets, but ``transpile_trotter_step`` below decomposes the fermionic
+   circuit into one :class:`.Evolution` gate per set, so this method only ever sees one set at a
+   time and could only repeat *within* it -- which changes nothing, since repeating one operator
+   just splits its own evolution into equal pieces. Multi-step Trotterization here therefore needs
+   a product formula that respects the operator's
+   :attr:`~qiskit_fermions.operators.OperatorTrait.groups` inside a single gate; see
+   `issue #298 <https://github.com/Qiskit/qiskit-fermions/issues/298>`_.
 
 7. The result: constant depth
 -----------------------------
@@ -964,17 +967,17 @@ Random statevectors detect any discrepancy far more cheaply than building the fu
    >>>
    >>> rng = np.random.default_rng(1234)
    >>>
-   >>> def agrees_up_to_one_phase(rows, cols, samples=3, reps=1):
+   >>> def agrees_up_to_one_phase(rows, cols, samples=3):
    ...     """Compare both syntheses on random states.
    ...
    ...     Returns whether they agree up to a phase, and whether it is the *same* phase
    ...     for every input state.
    ...     """
    ...     lie_trotter = transpile_trotter_step(
-   ...         rows, cols, LieTrotter(reps=reps)
+   ...         rows, cols, LieTrotter()
    ...     ).decompose(reps=6)
    ...     flow = transpile_trotter_step(
-   ...         rows, cols, FlowSetSynthesis(rows, cols, reps=reps)
+   ...         rows, cols, FlowSetSynthesis(rows, cols)
    ...     ).decompose(reps=6)
    ...     dimension = 2**lie_trotter.num_qubits
    ...     residuals, phases = [], []
@@ -1012,12 +1015,6 @@ Random statevectors detect any discrepancy far more cheaply than building the fu
    >>> all(agrees_up_to_one_phase(r, c) == (True, True) for r, c in [(2, 3), (3, 2)])
    True
 
-   Also pin ``reps``: several Trotter steps must still reproduce
-   :class:`~qiskit.synthesis.LieTrotter` at the same step count, which is what makes
-   ``FlowSetSynthesis`` a drop-in product formula rather than a one-step special case.
-
-   >>> all(agrees_up_to_one_phase(2, 3, reps=r) == (True, True) for r in (2, 3))
-   True
 
 .. _flowsets_2d_stabilizers:
 
@@ -1042,11 +1039,29 @@ only on the joint :math:`+1` eigenspace of those constraints.
    aside; the plaquette constraints below are a property of the VC encoding [2]_, not a
    result of the flow-set framework.
 
-The generators are constructed here rather than quoted: one per square face, formed by
-composing the encoded transfer operators around the loop with what the same loop maps to
-under Jordan-Wigner. Both loop products are single Paulis (up to normalization), so
-composing them cancels the physical content and leaves the constraint; dividing by the
-leading coefficient then fixes the sign and scale.
+The generators are constructed here rather than quoted: one per square face, and each is
+simply the encoded **edge**-operator loop around that face.
+
+Edge operators are the natural object for this. A closed loop of them is a symmetry of any
+particle-number-conserving Hamiltonian, whereas the corresponding loop of transfer operators
+is not: the two differ by a vertex operator on each bond's source site,
+
+.. math::
+
+   T_{jk} = \tfrac{i}{2} \, V_j E_{jk}
+   \qquad \Longleftrightarrow \qquad
+   E_{jk} = -2i \, V_j T_{jk} \, ,
+
+Around a closed loop every site is the source of exactly one bond, so the loop collects one
+:math:`V_j` per site -- which is exactly the **local parity** of the plaquette's four sites. That
+local parity is what makes the difference: the Hamiltonian hops particles across the plaquette
+boundary, so it conserves only the *global* parity. The bare transfer loop therefore fails to commute with it, while the edge loop (which
+carries the parity factor) commutes.
+
+Since the encoding is defined on transfer operators, mapping an edge operator needs the relation
+above. That is a five-line callback, and it slots into
+:func:`.map_edge_vertex_generators` exactly as ``vc_action`` slots into
+:func:`.map_transfer_vertex_generators`:
 
 .. plot::
    :context:
@@ -1054,7 +1069,30 @@ leading coefficient then fixes the sign and scale.
    :include-source:
 
    >>> from qiskit.quantum_info import SparsePauliOp
-   >>> from qiskit_fermions.mappers.library import transfer_vertex_jordan_wigner
+   >>> from qiskit_fermions.mappers import map_edge_vertex_generators
+   >>> from qiskit_fermions.operators import EdgeVertexOperator
+   >>>
+   >>> def vc_edge_action(generator, width, cols):
+   ...     """Map one generalized *edge* operator to its Verstraete-Cirac Pauli."""
+   ...     j, k = generator
+   ...     if j == k:  # a vertex operator is the same object in both algebras
+   ...         return SparseObservable.from_sparse_list([("Z", [j], 1.0)], num_qubits=width)
+   ...     # The library decomposes T_jk = (i/2) V_j E_jk, so E_jk = -2i V_j T_jk. Reuse the
+   ...     # transfer encoding for T_jk rather than repeating its four cases here. Note that
+   ...     # `compose` left-multiplies its argument, so this composes to V_j T_jk; the other
+   ...     # order carries the opposite sign, since a vertex and a transfer operator sharing a
+   ...     # mode anticommute.
+   ...     vertex = SparseObservable.from_sparse_list([("Z", [j], 1.0)], num_qubits=width)
+   ...     return (-2.0j * vc_action(generator, width, cols).compose(vertex)).simplify()
+   >>>
+   >>> def vc_edge_encoding(operator, width, cols):
+   ...     """Map an EdgeVertexOperator to a qubit observable, Verstraete-Cirac style."""
+   ...     return map_edge_vertex_generators(
+   ...         operator,
+   ...         partial(vc_edge_action, width=width, cols=cols),
+   ...         identity=lambda: SparseObservable.identity(width),
+   ...         compose=SparseObservable.compose,
+   ...     ).simplify()
    >>>
    >>> def plaquette_loops(rows, cols):
    ...     """The directed edge loop around each square face."""
@@ -1068,21 +1106,12 @@ leading coefficient then fixes the sign and scale.
    >>>
    >>> def stabilizers(rows, cols):
    ...     """One plaquette stabilizer per square face of the lattice."""
-   ...     num_sites = rows * cols
-   ...     num_qubits = 2 * num_sites
-   ...     encoding = partial(vc_encoding, cols=cols)
+   ...     num_qubits = 2 * rows * cols
    ...     out = []
    ...     for loop in plaquette_loops(rows, cols):
-   ...         loop_operator = TransferVertexOperator.from_dict({tuple(loop): 1.0})
-   ...         qubit_side = encoding(loop_operator, num_qubits)
-   ...         # the same loop mapped the conventional way, then widened from the N sites
-   ...         # onto the full 2N-qubit register so the two can be multiplied
-   ...         fermionic = transfer_vertex_jordan_wigner(
-   ...             loop_operator, num_sites
-   ...         ).apply_layout(list(range(num_sites)), num_qubits=num_qubits)
-   ...         stabilizer = SparsePauliOp.from_sparse_observable(
-   ...             qubit_side.compose(fermionic).simplify()
-   ...         )
+   ...         loop_operator = EdgeVertexOperator.from_dict({tuple(loop): 1.0})
+   ...         encoded_loop = vc_edge_encoding(loop_operator, num_qubits, cols)
+   ...         stabilizer = SparsePauliOp.from_sparse_observable(encoded_loop)
    ...         out.append(stabilizer / stabilizer.coeffs[0])
    ...     return out
    >>>
@@ -1093,6 +1122,50 @@ leading coefficient then fixes the sign and scale.
    IIIYXIXYIIIIZIIZII
    IYXIXYIIIIZIIZIIII
    YXIXYIIIIZIIZIIIII
+
+.. plot::
+   :context:
+   :nofigs:
+
+   Two claims underpin the construction above, and neither is visible in the printed Paulis.
+
+   First, the edge loop is the right object: the *transfer* loop on its own does **not**
+   commute with the encoded Hamiltonian, and the bonds that spoil it are exactly the ones
+   leaving the plaquette. The two loops differ by the local parity of the plaquette's sites,
+   and the Hamiltonian conserves only the global parity, so the local factor is what repairs
+   the commutation.
+
+   Second, every stabilizer acts *diagonally* on the site qubits (only ``Z`` and ``I`` there,
+   with the ``X``/``Y`` content confined to the ancillas). That is what lets a site occupation
+   be written as a plain basis state and survive the projection below unchanged: a diagonal
+   operator cannot move it. An encoding whose plaquette operators reached the sites with
+   ``X``/``Y`` would silently scramble the physical state instead.
+
+   >>> encoded_hamiltonian = SparsePauliOp.from_sparse_observable(
+   ...     encoding(hamiltonian, num_qubits)
+   ... )
+   >>>
+   >>> def commutes(left, right):
+   ...     return bool(np.allclose((left @ right - right @ left).simplify().coeffs, 0.0))
+   >>>
+   >>> transfer_loops = [
+   ...     SparsePauliOp.from_sparse_observable(
+   ...         encoding(TransferVertexOperator.from_dict({tuple(loop): 1.0}), num_qubits)
+   ...     )
+   ...     for loop in plaquette_loops(rows, cols)
+   ...     ]
+   >>> [commutes(loop, encoded_hamiltonian) for loop in transfer_loops]
+   [False, False, False, False]
+   >>> [commutes(s, encoded_hamiltonian) for s in plaquette_stabilizers]
+   [True, True, True, True]
+
+   >>> def site_restriction(stabilizer, num_sites):
+   ...     """The stabilizer's Pauli letters on the site qubits only."""
+   ...     per_qubit = stabilizer.paulis.to_labels()[0][::-1]
+   ...     return set(per_qubit[:num_sites])
+   >>>
+   >>> all(site_restriction(s, num_sites) <= {"Z", "I"} for s in plaquette_stabilizers)
+   True
 
 Each generator has weight :math:`6`, spread over two of its plaquette's physical qubits and
 four ancillas. They are involutory and commute with the encoded Hamiltonian, so the physical
@@ -1135,6 +1208,7 @@ this section cheap.
    :include-source:
 
    >>> from scipy.sparse.linalg import expm_multiply
+   >>> from qiskit_fermions.mappers.library import transfer_vertex_jordan_wigner
    >>>
    >>> # an exact evolution time, unrelated to the Trotter step above
    >>> evolution_time = 0.6
@@ -1142,20 +1216,37 @@ this section cheap.
    ...     transfer_vertex_jordan_wigner(hamiltonian, num_sites).simplify()
    ... )
    >>>
+   >>> def basis_state(occupation, num_qubits):
+   ...     """The computational basis state with `occupation` on the first qubits.
+   ...
+   ...     Qubit `q` carries bit `2**q`, and the ancillas are the *high* qubits `N..2N-1`,
+   ...     so the same integer indexes the same site occupations on either register and
+   ...     leaves every ancilla in |0>.
+   ...     """
+   ...     index = int("".join(str(bit) for bit in reversed(occupation)), 2)
+   ...     state = np.zeros(2**num_qubits, dtype=complex)
+   ...     state[index] = 1.0
+   ...     return state
+   >>>
+   >>> def project_onto_codespace(state, stabilizers):
+   ...     """Apply the projector one (1 + S) factor at a time, then renormalize.
+   ...
+   ...     The factors commute, so their product is itself a projector and the order does
+   ...     not matter. Multiplying it out would build a dense 2^2N x 2^2N operator; applied
+   ...     factor by factor this stays a handful of sparse matrix-vector products.
+   ...
+   ...     Each factor is really (1 + S)/2, but every one contributes the same scalar, so the
+   ...     halvings only rescale the result and the final normalization absorbs them.
+   ...     """
+   ...     for stabilizer in stabilizers:
+   ...         state += stabilizer.to_matrix(sparse=True) @ state
+   ...     return state / np.linalg.norm(state)
+   >>>
    >>> occupation = [1, 0, 1, 0, 1, 0, 0, 1, 0]  # site occupations of the initial state
-   >>> index = int("".join(str(bit) for bit in reversed(occupation)), 2)
-   >>>
-   >>> initial_reference = np.zeros(2**num_sites, dtype=complex)
-   >>> initial_reference[index] = 1.0
-   >>> initial_encoded = np.zeros(2**num_qubits, dtype=complex)
-   >>> initial_encoded[index] = 1.0  # ancillas in |0> -> same integer index
-   >>>
-   >>> # project onto the joint +1 eigenspace, one (1 + S)/2 factor at a time
-   >>> for stabilizer in plaquette_stabilizers:
-   ...     initial_encoded = (
-   ...         initial_encoded + stabilizer.to_matrix(sparse=True) @ initial_encoded
-   ...     ) / 2
-   >>> initial_encoded /= np.linalg.norm(initial_encoded)
+   >>> initial_reference = basis_state(occupation, num_sites)
+   >>> initial_encoded = project_onto_codespace(
+   ...     basis_state(occupation, num_qubits), plaquette_stabilizers
+   ... )
    >>>
    >>> evolved_encoded = expm_multiply(
    ...     -1j * evolution_time * encoded.to_matrix(sparse=True), initial_encoded
