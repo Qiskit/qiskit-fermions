@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Simulate 2D Fermi-Hubbard dynamics with flow sets - Qiskit Fermions 0.2.0.dev0+6e49231</title>
+        <title>Simulate 2D Fermi-Hubbard dynamics with flow sets - Qiskit Fermions 0.2.0.dev0+bae161c</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+6e49231</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+bae161c</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+6e49231</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+bae161c</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -817,8 +817,8 @@ depth ends up constant.</p>
 <span class="gp">...</span>
 <span class="gp">... </span>    <span class="n">preserve_order</span> <span class="o">=</span> <span class="kc">True</span>
 <span class="gp">...</span>
-<span class="gp">... </span>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rows</span><span class="p">,</span> <span class="n">cols</span><span class="p">,</span> <span class="n">reps</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
-<span class="gp">... </span>        <span class="bp">self</span><span class="o">.</span><span class="n">rows</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cols</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">reps</span> <span class="o">=</span> <span class="n">rows</span><span class="p">,</span> <span class="n">cols</span><span class="p">,</span> <span class="n">reps</span>
+<span class="gp">... </span>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rows</span><span class="p">,</span> <span class="n">cols</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="bp">self</span><span class="o">.</span><span class="n">rows</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cols</span> <span class="o">=</span> <span class="n">rows</span><span class="p">,</span> <span class="n">cols</span>
 <span class="gp">...</span>
 <span class="gp">... </span>    <span class="k">def</span><span class="w"> </span><span class="nf">rows_of_lattice</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="gp">... </span>        <span class="k">return</span> <span class="p">[[</span><span class="n">r</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">cols</span> <span class="o">+</span> <span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cols</span><span class="p">)]</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rows</span><span class="p">)]</span>
@@ -830,10 +830,8 @@ depth ends up constant.</p>
 <span class="gp">... </span>        <span class="n">num_qubits</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">rows</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">cols</span>
 <span class="gp">... </span>        <span class="n">ancilla</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">ancilla_qubit</span><span class="p">,</span> <span class="n">num_sites</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">rows</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">cols</span><span class="p">)</span>
 <span class="gp">... </span>        <span class="n">circuit</span> <span class="o">=</span> <span class="n">QuantumCircuit</span><span class="p">(</span><span class="n">evolution</span><span class="o">.</span><span class="n">operator</span><span class="o">.</span><span class="n">num_qubits</span><span class="p">)</span>
-<span class="gp">... </span>        <span class="c1"># as in Qiskit's own product formulas, `reps` Trotter steps divide the time --</span>
-<span class="gp">... </span>        <span class="c1"># and hence every rotation angle -- by `reps`</span>
 <span class="gp">... </span>        <span class="n">terms</span> <span class="o">=</span> <span class="p">[</span>
-<span class="gp">... </span>            <span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">indices</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">evolution</span><span class="o">.</span><span class="n">time</span> <span class="o">*</span> <span class="n">coeff</span><span class="o">.</span><span class="n">real</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">reps</span><span class="p">)</span>
+<span class="gp">... </span>            <span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">indices</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">evolution</span><span class="o">.</span><span class="n">time</span> <span class="o">*</span> <span class="n">coeff</span><span class="o">.</span><span class="n">real</span><span class="p">)</span>
 <span class="gp">... </span>            <span class="k">for</span> <span class="n">label</span><span class="p">,</span> <span class="n">indices</span><span class="p">,</span> <span class="n">coeff</span> <span class="ow">in</span> <span class="n">evolution</span><span class="o">.</span><span class="n">operator</span><span class="o">.</span><span class="n">to_sparse_list</span><span class="p">()</span>
 <span class="gp">... </span>        <span class="p">]</span>
 <span class="gp">...</span>
@@ -867,42 +865,38 @@ depth ends up constant.</p>
 <span class="gp">... </span>            <span class="n">rotations</span><span class="p">[</span><span class="n">line</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">slot</span><span class="p">,</span> <span class="n">angle</span><span class="p">))</span>
 <span class="gp">...</span>
 <span class="gp">... </span>        <span class="n">active</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">rotations</span><span class="p">)</span>
-<span class="gp">... </span>        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reps</span><span class="p">):</span>
-<span class="gp">... </span>            <span class="c1"># the lines of one flow set are vertex-disjoint, so all of their Cliffords</span>
-<span class="gp">... </span>            <span class="c1"># are emitted together and share the same two two-qubit layers</span>
-<span class="gp">... </span>            <span class="n">conjugation</span> <span class="o">=</span> <span class="n">QuantumCircuit</span><span class="p">(</span><span class="n">num_qubits</span><span class="p">)</span>
-<span class="gp">... </span>            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">active</span><span class="p">:</span>
-<span class="gp">... </span>                <span class="n">clifford_function</span><span class="p">(</span><span class="n">conjugation</span><span class="p">,</span> <span class="n">lines</span><span class="p">[</span><span class="n">line</span><span class="p">],</span> <span class="n">ancilla</span><span class="p">)</span>
-<span class="gp">... </span>            <span class="n">circuit</span><span class="o">.</span><span class="n">compose</span><span class="p">(</span><span class="n">conjugation</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="gp">... </span>            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">active</span><span class="p">:</span>
-<span class="gp">... </span>                <span class="n">supports</span> <span class="o">=</span> <span class="n">clifford_supports</span><span class="p">(</span>
-<span class="gp">... </span>                    <span class="n">Clifford</span><span class="p">(</span><span class="n">conjugation</span><span class="p">),</span> <span class="n">shapes</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">lines</span><span class="p">[</span><span class="n">line</span><span class="p">],</span> <span class="n">ancilla</span><span class="p">,</span> <span class="n">num_qubits</span>
-<span class="gp">... </span>                <span class="p">)</span>
-<span class="gp">... </span>                <span class="k">for</span> <span class="n">slot</span><span class="p">,</span> <span class="n">angle</span> <span class="ow">in</span> <span class="n">rotations</span><span class="p">[</span><span class="n">line</span><span class="p">]:</span>
-<span class="gp">... </span>                    <span class="k">match</span> <span class="n">supports</span><span class="p">[</span><span class="n">slot</span><span class="p">]:</span>
-<span class="gp">... </span>                        <span class="k">case</span> <span class="n">qubit</span><span class="p">,</span> <span class="s2">"X"</span><span class="p">:</span>
-<span class="gp">... </span>                            <span class="n">circuit</span><span class="o">.</span><span class="n">rx</span><span class="p">(</span><span class="n">angle</span><span class="p">,</span> <span class="n">qubit</span><span class="p">)</span>
-<span class="gp">... </span>                        <span class="k">case</span> <span class="n">qubit</span><span class="p">,</span> <span class="s2">"Y"</span><span class="p">:</span>
-<span class="gp">... </span>                            <span class="n">circuit</span><span class="o">.</span><span class="n">ry</span><span class="p">(</span><span class="n">angle</span><span class="p">,</span> <span class="n">qubit</span><span class="p">)</span>
-<span class="gp">... </span>                        <span class="k">case</span> <span class="n">qubit</span><span class="p">,</span> <span class="s2">"Z"</span><span class="p">:</span>
-<span class="gp">... </span>                            <span class="n">circuit</span><span class="o">.</span><span class="n">rz</span><span class="p">(</span><span class="n">angle</span><span class="p">,</span> <span class="n">qubit</span><span class="p">)</span>
-<span class="gp">... </span>            <span class="n">circuit</span><span class="o">.</span><span class="n">compose</span><span class="p">(</span><span class="n">conjugation</span><span class="o">.</span><span class="n">inverse</span><span class="p">(),</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">... </span>        <span class="c1"># the lines of one flow set are vertex-disjoint, so all of their Cliffords</span>
+<span class="gp">... </span>        <span class="c1"># are emitted together and share the same two two-qubit layers</span>
+<span class="gp">... </span>        <span class="n">conjugation</span> <span class="o">=</span> <span class="n">QuantumCircuit</span><span class="p">(</span><span class="n">num_qubits</span><span class="p">)</span>
+<span class="gp">... </span>        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">active</span><span class="p">:</span>
+<span class="gp">... </span>            <span class="n">clifford_function</span><span class="p">(</span><span class="n">conjugation</span><span class="p">,</span> <span class="n">lines</span><span class="p">[</span><span class="n">line</span><span class="p">],</span> <span class="n">ancilla</span><span class="p">)</span>
+<span class="gp">... </span>        <span class="n">circuit</span><span class="o">.</span><span class="n">compose</span><span class="p">(</span><span class="n">conjugation</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">... </span>        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">active</span><span class="p">:</span>
+<span class="gp">... </span>            <span class="n">supports</span> <span class="o">=</span> <span class="n">clifford_supports</span><span class="p">(</span>
+<span class="gp">... </span>                <span class="n">Clifford</span><span class="p">(</span><span class="n">conjugation</span><span class="p">),</span> <span class="n">shapes</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">lines</span><span class="p">[</span><span class="n">line</span><span class="p">],</span> <span class="n">ancilla</span><span class="p">,</span> <span class="n">num_qubits</span>
+<span class="gp">... </span>            <span class="p">)</span>
+<span class="gp">... </span>            <span class="k">for</span> <span class="n">slot</span><span class="p">,</span> <span class="n">angle</span> <span class="ow">in</span> <span class="n">rotations</span><span class="p">[</span><span class="n">line</span><span class="p">]:</span>
+<span class="gp">... </span>                <span class="k">match</span> <span class="n">supports</span><span class="p">[</span><span class="n">slot</span><span class="p">]:</span>
+<span class="gp">... </span>                    <span class="k">case</span> <span class="n">qubit</span><span class="p">,</span> <span class="s2">"X"</span><span class="p">:</span>
+<span class="gp">... </span>                        <span class="n">circuit</span><span class="o">.</span><span class="n">rx</span><span class="p">(</span><span class="n">angle</span><span class="p">,</span> <span class="n">qubit</span><span class="p">)</span>
+<span class="gp">... </span>                    <span class="k">case</span> <span class="n">qubit</span><span class="p">,</span> <span class="s2">"Y"</span><span class="p">:</span>
+<span class="gp">... </span>                        <span class="n">circuit</span><span class="o">.</span><span class="n">ry</span><span class="p">(</span><span class="n">angle</span><span class="p">,</span> <span class="n">qubit</span><span class="p">)</span>
+<span class="gp">... </span>                    <span class="k">case</span> <span class="n">qubit</span><span class="p">,</span> <span class="s2">"Z"</span><span class="p">:</span>
+<span class="gp">... </span>                        <span class="n">circuit</span><span class="o">.</span><span class="n">rz</span><span class="p">(</span><span class="n">angle</span><span class="p">,</span> <span class="n">qubit</span><span class="p">)</span>
+<span class="gp">... </span>        <span class="n">circuit</span><span class="o">.</span><span class="n">compose</span><span class="p">(</span><span class="n">conjugation</span><span class="o">.</span><span class="n">inverse</span><span class="p">(),</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="gp">... </span>        <span class="k">return</span> <span class="n">circuit</span>
 <span class="gp">...</span>
 <span class="gp">... </span>    <span class="k">def</span><span class="w"> </span><span class="nf">diagonal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">circuit</span><span class="p">,</span> <span class="n">terms</span><span class="p">):</span>
-<span class="gp">... </span><span class="w">        </span><span class="sd">"""Synthesize the diagonal group: a phase, single-qubit Z and paired Rzz.</span>
-<span class="gp">...</span>
-<span class="gp">... </span><span class="sd">        These all commute, so `reps` repetitions collapse into one set of rotations.</span>
-<span class="gp">... </span><span class="sd">        """</span>
+<span class="gp">... </span><span class="w">        </span><span class="sd">"""Synthesize the diagonal group: a phase, single-qubit Z and paired Rzz."""</span>
 <span class="gp">... </span>        <span class="n">rzz</span> <span class="o">=</span> <span class="p">{}</span>
 <span class="gp">... </span>        <span class="k">for</span> <span class="n">label</span><span class="p">,</span> <span class="n">indices</span><span class="p">,</span> <span class="n">angle</span> <span class="ow">in</span> <span class="n">terms</span><span class="p">:</span>
 <span class="gp">... </span>            <span class="k">match</span> <span class="n">label</span><span class="p">,</span> <span class="n">indices</span><span class="p">:</span>
 <span class="gp">... </span>                <span class="k">case</span><span class="w"> </span><span class="s2">""</span><span class="p">,</span> <span class="k">_</span><span class="p">:</span>  <span class="c1"># the identity contributes only a global phase</span>
-<span class="gp">... </span>                    <span class="n">circuit</span><span class="o">.</span><span class="n">global_phase</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reps</span> <span class="o">*</span> <span class="n">angle</span> <span class="o">/</span> <span class="mi">2</span>
+<span class="gp">... </span>                    <span class="n">circuit</span><span class="o">.</span><span class="n">global_phase</span> <span class="o">-=</span> <span class="n">angle</span> <span class="o">/</span> <span class="mi">2</span>
 <span class="gp">... </span>                <span class="k">case</span> <span class="s2">"Z"</span><span class="p">,</span> <span class="p">[</span><span class="n">qubit</span><span class="p">]:</span>  <span class="c1"># a lone vertex operator</span>
-<span class="gp">... </span>                    <span class="n">circuit</span><span class="o">.</span><span class="n">rz</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reps</span> <span class="o">*</span> <span class="n">angle</span><span class="p">,</span> <span class="n">qubit</span><span class="p">)</span>
+<span class="gp">... </span>                    <span class="n">circuit</span><span class="o">.</span><span class="n">rz</span><span class="p">(</span><span class="n">angle</span><span class="p">,</span> <span class="n">qubit</span><span class="p">)</span>
 <span class="gp">... </span>                <span class="k">case</span> <span class="s2">"ZZ"</span><span class="p">,</span> <span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">]:</span>  <span class="c1"># interaction, see rzz_layers above</span>
-<span class="gp">... </span>                    <span class="n">rzz</span><span class="p">[</span><span class="nb">min</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">)]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reps</span> <span class="o">*</span> <span class="n">angle</span>
+<span class="gp">... </span>                    <span class="n">rzz</span><span class="p">[</span><span class="nb">min</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">)]</span> <span class="o">=</span> <span class="n">angle</span>
 <span class="gp">... </span>                <span class="k">case</span><span class="w"> </span><span class="k">_</span><span class="p">:</span>
 <span class="gp">... </span>                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"unexpected Pauli term: </span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s2"> on </span><span class="si">{</span><span class="n">indices</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 <span class="gp">... </span>        <span class="n">rzz_layers</span><span class="p">(</span><span class="n">circuit</span><span class="p">,</span> <span class="n">rzz</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cols</span><span class="p">)</span>
@@ -912,8 +906,18 @@ depth ends up constant.</p>
 shapes and raises on anything else rather than falling back silently. It also assumes the
 one-flow-set-per-gate split above, and says so; more than one hopping shape in a single
 gate means the grouping was not applied, which is an error rather than something to work
-around. <code class="docutils literal notranslate"><span class="pre">reps</span></code> is here for the same reason as in 1D: the number
-of Trotter steps belongs in a product formula, as in Qiskit’s own <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.synthesis.LieTrotter" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">LieTrotter</span></code></a>.</p>
+around.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Unlike its 1D counterpart, this synthesis takes no <code class="docutils literal notranslate"><span class="pre">reps</span></code> argument. A Trotter step has to
+cycle <em>between</em> the flow sets, but <code class="docutils literal notranslate"><span class="pre">transpile_trotter_step</span></code> below decomposes the fermionic
+circuit into one <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate per set, so this method only ever sees one set at a
+time and could only repeat <em>within</em> it – which changes nothing, since repeating one operator
+just splits its own evolution into equal pieces. Multi-step Trotterization here therefore needs
+a product formula that respects the operator’s
+<a class="reference internal" href="../stubs/qiskit_fermions.operators.OperatorTrait.html#qiskit_fermions.operators.OperatorTrait.groups" title="qiskit_fermions.operators.OperatorTrait.groups"><code class="xref py py-attr docutils literal notranslate"><span class="pre">groups</span></code></a> inside a single gate; see
+<a class="reference external" href="https://github.com/Qiskit/qiskit-fermions/issues/298">issue #298</a>.</p>
+</div>
 </section>
 <section id="the-result-constant-depth">
 <h2>7. The result: constant depth<a class="headerlink" href="#the-result-constant-depth" title="Link to this heading">¶</a></h2>
@@ -997,17 +1001,17 @@ several hundred times faster here.</p>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">1234</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">agrees_up_to_one_phase</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">cols</span><span class="p">,</span> <span class="n">samples</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">reps</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">agrees_up_to_one_phase</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">cols</span><span class="p">,</span> <span class="n">samples</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
 <span class="gp">... </span><span class="w">    </span><span class="sd">"""Compare both syntheses on random states.</span>
 <span class="gp">...</span>
 <span class="gp">... </span><span class="sd">    Returns whether they agree up to a phase, and whether it is the *same* phase</span>
 <span class="gp">... </span><span class="sd">    for every input state.</span>
 <span class="gp">... </span><span class="sd">    """</span>
 <span class="gp">... </span>    <span class="n">lie_trotter</span> <span class="o">=</span> <span class="n">transpile_trotter_step</span><span class="p">(</span>
-<span class="gp">... </span>        <span class="n">rows</span><span class="p">,</span> <span class="n">cols</span><span class="p">,</span> <span class="n">LieTrotter</span><span class="p">(</span><span class="n">reps</span><span class="o">=</span><span class="n">reps</span><span class="p">)</span>
+<span class="gp">... </span>        <span class="n">rows</span><span class="p">,</span> <span class="n">cols</span><span class="p">,</span> <span class="n">LieTrotter</span><span class="p">()</span>
 <span class="gp">... </span>    <span class="p">)</span><span class="o">.</span><span class="n">decompose</span><span class="p">(</span><span class="n">reps</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
 <span class="gp">... </span>    <span class="n">flow</span> <span class="o">=</span> <span class="n">transpile_trotter_step</span><span class="p">(</span>
-<span class="gp">... </span>        <span class="n">rows</span><span class="p">,</span> <span class="n">cols</span><span class="p">,</span> <span class="n">FlowSetSynthesis</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">cols</span><span class="p">,</span> <span class="n">reps</span><span class="o">=</span><span class="n">reps</span><span class="p">)</span>
+<span class="gp">... </span>        <span class="n">rows</span><span class="p">,</span> <span class="n">cols</span><span class="p">,</span> <span class="n">FlowSetSynthesis</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">cols</span><span class="p">)</span>
 <span class="gp">... </span>    <span class="p">)</span><span class="o">.</span><span class="n">decompose</span><span class="p">(</span><span class="n">reps</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
 <span class="gp">... </span>    <span class="n">dimension</span> <span class="o">=</span> <span class="mi">2</span><span class="o">**</span><span class="n">lie_trotter</span><span class="o">.</span><span class="n">num_qubits</span>
 <span class="gp">... </span>    <span class="n">residuals</span><span class="p">,</span> <span class="n">phases</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
@@ -1054,13 +1058,51 @@ physical subspace. Ref. <a class="footnote-reference brackets" href="#id17" id="
 aside; the plaquette constraints below are a property of the VC encoding <a class="footnote-reference brackets" href="#id18" id="id14" role="doc-noteref"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></a>, not a
 result of the flow-set framework.</p>
 </div>
-<p>The generators are constructed here rather than quoted: one per square face, formed by
-composing the encoded transfer operators around the loop with what the same loop maps to
-under Jordan-Wigner. Both loop products are single Paulis (up to normalization), so
-composing them cancels the physical content and leaves the constraint; dividing by the
-leading coefficient then fixes the sign and scale.</p>
+<p>The generators are constructed here rather than quoted: one per square face, and each is
+simply the encoded <strong>edge</strong>-operator loop around that face.</p>
+<p>Edge operators are the natural object for this. A closed loop of them is a symmetry of any
+particle-number-conserving Hamiltonian, whereas the corresponding loop of transfer operators
+is not: the two differ by a vertex operator on each bond’s source site,</p>
+<div class="math-wrapper docutils container">
+<div class="math">
+\[T_{jk} = \tfrac{i}{2} \, V_j E_{jk}
+\qquad \Longleftrightarrow \qquad
+E_{jk} = -2i \, V_j T_{jk} \, ,\]</div>
+</div>
+<p>Around a closed loop every site is the source of exactly one bond, so the loop collects one
+<span class="math">\(V_j\)</span> per site – which is exactly the <strong>local parity</strong> of the plaquette’s four sites. That
+local parity is what makes the difference: the Hamiltonian hops particles across the plaquette
+boundary, so it conserves only the <em>global</em> parity. The bare transfer loop therefore fails to commute with it, while the edge loop (which
+carries the parity factor) commutes.</p>
+<p>Since the encoding is defined on transfer operators, mapping an edge operator needs the relation
+above. That is a five-line callback, and it slots into
+<a class="reference internal" href="../stubs/qiskit_fermions.mappers.map_edge_vertex_generators.html#qiskit_fermions.mappers.map_edge_vertex_generators" title="qiskit_fermions.mappers.map_edge_vertex_generators"><code class="xref py py-func docutils literal notranslate"><span class="pre">map_edge_vertex_generators()</span></code></a> exactly as <code class="docutils literal notranslate"><span class="pre">vc_action</span></code> slots into
+<a class="reference internal" href="../stubs/qiskit_fermions.mappers.map_transfer_vertex_generators.html#qiskit_fermions.mappers.map_transfer_vertex_generators" title="qiskit_fermions.mappers.map_transfer_vertex_generators"><code class="xref py py-func docutils literal notranslate"><span class="pre">map_transfer_vertex_generators()</span></code></a>:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit.quantum_info</span><span class="w"> </span><span class="kn">import</span> <span class="n">SparsePauliOp</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.mappers.library</span><span class="w"> </span><span class="kn">import</span> <span class="n">transfer_vertex_jordan_wigner</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.mappers</span><span class="w"> </span><span class="kn">import</span> <span class="n">map_edge_vertex_generators</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.operators</span><span class="w"> </span><span class="kn">import</span> <span class="n">EdgeVertexOperator</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">vc_edge_action</span><span class="p">(</span><span class="n">generator</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">cols</span><span class="p">):</span>
+<span class="gp">... </span><span class="w">    </span><span class="sd">"""Map one generalized *edge* operator to its Verstraete-Cirac Pauli."""</span>
+<span class="gp">... </span>    <span class="n">j</span><span class="p">,</span> <span class="n">k</span> <span class="o">=</span> <span class="n">generator</span>
+<span class="gp">... </span>    <span class="k">if</span> <span class="n">j</span> <span class="o">==</span> <span class="n">k</span><span class="p">:</span>  <span class="c1"># a vertex operator is the same object in both algebras</span>
+<span class="gp">... </span>        <span class="k">return</span> <span class="n">SparseObservable</span><span class="o">.</span><span class="n">from_sparse_list</span><span class="p">([(</span><span class="s2">"Z"</span><span class="p">,</span> <span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="mf">1.0</span><span class="p">)],</span> <span class="n">num_qubits</span><span class="o">=</span><span class="n">width</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="c1"># The library decomposes T_jk = (i/2) V_j E_jk, so E_jk = -2i V_j T_jk. Reuse the</span>
+<span class="gp">... </span>    <span class="c1"># transfer encoding for T_jk rather than repeating its four cases here. Note that</span>
+<span class="gp">... </span>    <span class="c1"># `compose` left-multiplies its argument, so this composes to V_j T_jk; the other</span>
+<span class="gp">... </span>    <span class="c1"># order carries the opposite sign, since a vertex and a transfer operator sharing a</span>
+<span class="gp">... </span>    <span class="c1"># mode anticommute.</span>
+<span class="gp">... </span>    <span class="n">vertex</span> <span class="o">=</span> <span class="n">SparseObservable</span><span class="o">.</span><span class="n">from_sparse_list</span><span class="p">([(</span><span class="s2">"Z"</span><span class="p">,</span> <span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="mf">1.0</span><span class="p">)],</span> <span class="n">num_qubits</span><span class="o">=</span><span class="n">width</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="k">return</span> <span class="p">(</span><span class="o">-</span><span class="mf">2.0</span><span class="n">j</span> <span class="o">*</span> <span class="n">vc_action</span><span class="p">(</span><span class="n">generator</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">cols</span><span class="p">)</span><span class="o">.</span><span class="n">compose</span><span class="p">(</span><span class="n">vertex</span><span class="p">))</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">vc_edge_encoding</span><span class="p">(</span><span class="n">operator</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">cols</span><span class="p">):</span>
+<span class="gp">... </span><span class="w">    </span><span class="sd">"""Map an EdgeVertexOperator to a qubit observable, Verstraete-Cirac style."""</span>
+<span class="gp">... </span>    <span class="k">return</span> <span class="n">map_edge_vertex_generators</span><span class="p">(</span>
+<span class="gp">... </span>        <span class="n">operator</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="n">partial</span><span class="p">(</span><span class="n">vc_edge_action</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span> <span class="n">cols</span><span class="o">=</span><span class="n">cols</span><span class="p">),</span>
+<span class="gp">... </span>        <span class="n">identity</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="n">SparseObservable</span><span class="o">.</span><span class="n">identity</span><span class="p">(</span><span class="n">width</span><span class="p">),</span>
+<span class="gp">... </span>        <span class="n">compose</span><span class="o">=</span><span class="n">SparseObservable</span><span class="o">.</span><span class="n">compose</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="p">)</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">plaquette_loops</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">cols</span><span class="p">):</span>
 <span class="gp">... </span><span class="w">    </span><span class="sd">"""The directed edge loop around each square face."""</span>
@@ -1074,21 +1116,12 @@ leading coefficient then fixes the sign and scale.</p>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">stabilizers</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">cols</span><span class="p">):</span>
 <span class="gp">... </span><span class="w">    </span><span class="sd">"""One plaquette stabilizer per square face of the lattice."""</span>
-<span class="gp">... </span>    <span class="n">num_sites</span> <span class="o">=</span> <span class="n">rows</span> <span class="o">*</span> <span class="n">cols</span>
-<span class="gp">... </span>    <span class="n">num_qubits</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">num_sites</span>
-<span class="gp">... </span>    <span class="n">encoding</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">vc_encoding</span><span class="p">,</span> <span class="n">cols</span><span class="o">=</span><span class="n">cols</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="n">num_qubits</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">rows</span> <span class="o">*</span> <span class="n">cols</span>
 <span class="gp">... </span>    <span class="n">out</span> <span class="o">=</span> <span class="p">[]</span>
 <span class="gp">... </span>    <span class="k">for</span> <span class="n">loop</span> <span class="ow">in</span> <span class="n">plaquette_loops</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">cols</span><span class="p">):</span>
-<span class="gp">... </span>        <span class="n">loop_operator</span> <span class="o">=</span> <span class="n">TransferVertexOperator</span><span class="o">.</span><span class="n">from_dict</span><span class="p">({</span><span class="nb">tuple</span><span class="p">(</span><span class="n">loop</span><span class="p">):</span> <span class="mf">1.0</span><span class="p">})</span>
-<span class="gp">... </span>        <span class="n">qubit_side</span> <span class="o">=</span> <span class="n">encoding</span><span class="p">(</span><span class="n">loop_operator</span><span class="p">,</span> <span class="n">num_qubits</span><span class="p">)</span>
-<span class="gp">... </span>        <span class="c1"># the same loop mapped the conventional way, then widened from the N sites</span>
-<span class="gp">... </span>        <span class="c1"># onto the full 2N-qubit register so the two can be multiplied</span>
-<span class="gp">... </span>        <span class="n">fermionic</span> <span class="o">=</span> <span class="n">transfer_vertex_jordan_wigner</span><span class="p">(</span>
-<span class="gp">... </span>            <span class="n">loop_operator</span><span class="p">,</span> <span class="n">num_sites</span>
-<span class="gp">... </span>        <span class="p">)</span><span class="o">.</span><span class="n">apply_layout</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">num_sites</span><span class="p">)),</span> <span class="n">num_qubits</span><span class="o">=</span><span class="n">num_qubits</span><span class="p">)</span>
-<span class="gp">... </span>        <span class="n">stabilizer</span> <span class="o">=</span> <span class="n">SparsePauliOp</span><span class="o">.</span><span class="n">from_sparse_observable</span><span class="p">(</span>
-<span class="gp">... </span>            <span class="n">qubit_side</span><span class="o">.</span><span class="n">compose</span><span class="p">(</span><span class="n">fermionic</span><span class="p">)</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span>
-<span class="gp">... </span>        <span class="p">)</span>
+<span class="gp">... </span>        <span class="n">loop_operator</span> <span class="o">=</span> <span class="n">EdgeVertexOperator</span><span class="o">.</span><span class="n">from_dict</span><span class="p">({</span><span class="nb">tuple</span><span class="p">(</span><span class="n">loop</span><span class="p">):</span> <span class="mf">1.0</span><span class="p">})</span>
+<span class="gp">... </span>        <span class="n">encoded_loop</span> <span class="o">=</span> <span class="n">vc_edge_encoding</span><span class="p">(</span><span class="n">loop_operator</span><span class="p">,</span> <span class="n">num_qubits</span><span class="p">,</span> <span class="n">cols</span><span class="p">)</span>
+<span class="gp">... </span>        <span class="n">stabilizer</span> <span class="o">=</span> <span class="n">SparsePauliOp</span><span class="o">.</span><span class="n">from_sparse_observable</span><span class="p">(</span><span class="n">encoded_loop</span><span class="p">)</span>
 <span class="gp">... </span>        <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">stabilizer</span> <span class="o">/</span> <span class="n">stabilizer</span><span class="o">.</span><span class="n">coeffs</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 <span class="gp">... </span>    <span class="k">return</span> <span class="n">out</span>
 <span class="gp">&gt;&gt;&gt;</span>
@@ -1130,6 +1163,7 @@ uses <a class="reference external" href="https://docs.scipy.org/doc/scipy/refere
 Hamiltonian is a sparse <span class="math">\(2^{2N}\)</span>-dimensional operator, that distinction is what keeps
 this section cheap.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">scipy.sparse.linalg</span><span class="w"> </span><span class="kn">import</span> <span class="n">expm_multiply</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.mappers.library</span><span class="w"> </span><span class="kn">import</span> <span class="n">transfer_vertex_jordan_wigner</span>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># an exact evolution time, unrelated to the Trotter step above</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">evolution_time</span> <span class="o">=</span> <span class="mf">0.6</span>
@@ -1137,20 +1171,37 @@ this section cheap.</p>
 <span class="gp">... </span>    <span class="n">transfer_vertex_jordan_wigner</span><span class="p">(</span><span class="n">hamiltonian</span><span class="p">,</span> <span class="n">num_sites</span><span class="p">)</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span>
 <span class="gp">... </span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">basis_state</span><span class="p">(</span><span class="n">occupation</span><span class="p">,</span> <span class="n">num_qubits</span><span class="p">):</span>
+<span class="gp">... </span><span class="w">    </span><span class="sd">"""The computational basis state with `occupation` on the first qubits.</span>
+<span class="gp">...</span>
+<span class="gp">... </span><span class="sd">    Qubit `q` carries bit `2**q`, and the ancillas are the *high* qubits `N..2N-1`,</span>
+<span class="gp">... </span><span class="sd">    so the same integer indexes the same site occupations on either register and</span>
+<span class="gp">... </span><span class="sd">    leaves every ancilla in |0&gt;.</span>
+<span class="gp">... </span><span class="sd">    """</span>
+<span class="gp">... </span>    <span class="n">index</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="s2">""</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">bit</span><span class="p">)</span> <span class="k">for</span> <span class="n">bit</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">occupation</span><span class="p">)),</span> <span class="mi">2</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="n">state</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="n">num_qubits</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">complex</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="n">state</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
+<span class="gp">... </span>    <span class="k">return</span> <span class="n">state</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">project_onto_codespace</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">stabilizers</span><span class="p">):</span>
+<span class="gp">... </span><span class="w">    </span><span class="sd">"""Apply the projector one (1 + S) factor at a time, then renormalize.</span>
+<span class="gp">...</span>
+<span class="gp">... </span><span class="sd">    The factors commute, so their product is itself a projector and the order does</span>
+<span class="gp">... </span><span class="sd">    not matter. Multiplying it out would build a dense 2^2N x 2^2N operator; applied</span>
+<span class="gp">... </span><span class="sd">    factor by factor this stays a handful of sparse matrix-vector products.</span>
+<span class="gp">...</span>
+<span class="gp">... </span><span class="sd">    Each factor is really (1 + S)/2, but every one contributes the same scalar, so the</span>
+<span class="gp">... </span><span class="sd">    halvings only rescale the result and the final normalization absorbs them.</span>
+<span class="gp">... </span><span class="sd">    """</span>
+<span class="gp">... </span>    <span class="k">for</span> <span class="n">stabilizer</span> <span class="ow">in</span> <span class="n">stabilizers</span><span class="p">:</span>
+<span class="gp">... </span>        <span class="n">state</span> <span class="o">+=</span> <span class="n">stabilizer</span><span class="o">.</span><span class="n">to_matrix</span><span class="p">(</span><span class="n">sparse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">@</span> <span class="n">state</span>
+<span class="gp">... </span>    <span class="k">return</span> <span class="n">state</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">occupation</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>  <span class="c1"># site occupations of the initial state</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">index</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="s2">""</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">bit</span><span class="p">)</span> <span class="k">for</span> <span class="n">bit</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">occupation</span><span class="p">)),</span> <span class="mi">2</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">initial_reference</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="n">num_sites</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">complex</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">initial_reference</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">initial_encoded</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="n">num_qubits</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">complex</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">initial_encoded</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>  <span class="c1"># ancillas in |0&gt; -&gt; same integer index</span>
-<span class="gp">&gt;&gt;&gt;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># project onto the joint +1 eigenspace, one (1 + S)/2 factor at a time</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">stabilizer</span> <span class="ow">in</span> <span class="n">plaquette_stabilizers</span><span class="p">:</span>
-<span class="gp">... </span>    <span class="n">initial_encoded</span> <span class="o">=</span> <span class="p">(</span>
-<span class="gp">... </span>        <span class="n">initial_encoded</span> <span class="o">+</span> <span class="n">stabilizer</span><span class="o">.</span><span class="n">to_matrix</span><span class="p">(</span><span class="n">sparse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">@</span> <span class="n">initial_encoded</span>
-<span class="gp">... </span>    <span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">initial_encoded</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">initial_encoded</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">initial_reference</span> <span class="o">=</span> <span class="n">basis_state</span><span class="p">(</span><span class="n">occupation</span><span class="p">,</span> <span class="n">num_sites</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">initial_encoded</span> <span class="o">=</span> <span class="n">project_onto_codespace</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">basis_state</span><span class="p">(</span><span class="n">occupation</span><span class="p">,</span> <span class="n">num_qubits</span><span class="p">),</span> <span class="n">plaquette_stabilizers</span>
+<span class="gp">... </span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">evolved_encoded</span> <span class="o">=</span> <span class="n">expm_multiply</span><span class="p">(</span>
 <span class="gp">... </span>    <span class="o">-</span><span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">evolution_time</span> <span class="o">*</span> <span class="n">encoded</span><span class="o">.</span><span class="n">to_matrix</span><span class="p">(</span><span class="n">sparse</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">initial_encoded</span>
@@ -1321,7 +1372,7 @@ dimensions, <a class="reference external" href="https://doi.org/10.1103/PRXQuant
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on 2026/09/02</div>
+              Last updated on 2026/09/03</div>
           </div>
           <div class="right-details">
             
@@ -1367,7 +1418,7 @@ dimensions, <a class="reference external" href="https://doi.org/10.1103/PRXQuant
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=7f6214c4"></script>
+</div><script src="../_static/documentation_options.js?v=a8e26990"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

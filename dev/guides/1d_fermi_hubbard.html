@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Simulate 1D Fermi-Hubbard dynamics with flow sets - Qiskit Fermions 0.2.0.dev0+6e49231</title>
+        <title>Simulate 1D Fermi-Hubbard dynamics with flow sets - Qiskit Fermions 0.2.0.dev0+bae161c</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+6e49231</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+bae161c</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+6e49231</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+bae161c</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -801,6 +801,10 @@ product formula is also where the number of Trotter steps belongs, as in Qiskitâ
 <span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">cz_brickwork</span><span class="p">(</span><span class="n">circuit</span><span class="p">):</span>
 <span class="gp">... </span>    <span class="c1"># emit even and odd bonds as two layers, so the CZs are scheduled in</span>
 <span class="gp">... </span>    <span class="c1"># parallel: a chain of overlapping CZs has depth 2, not num_qubits - 1</span>
+<span class="gp">... </span>    <span class="c1">#</span>
+<span class="gp">... </span>    <span class="c1"># NOTE: CZ gates are diagonal, so they all commute and each is its own inverse.</span>
+<span class="gp">... </span>    <span class="c1"># This whole layer is therefore self-inverse, which is why the conjugation below</span>
+<span class="gp">... </span>    <span class="c1"># calls it twice rather than calling it and then its inverse.</span>
 <span class="gp">... </span>    <span class="k">for</span> <span class="n">offset</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
 <span class="gp">... </span>        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">offset</span><span class="p">,</span> <span class="n">circuit</span><span class="o">.</span><span class="n">num_qubits</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span>
 <span class="gp">... </span>            <span class="n">circuit</span><span class="o">.</span><span class="n">cz</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
@@ -829,6 +833,8 @@ product formula is also where the number of Trotter steps belongs, as in Qiskitâ
 <span class="gp">... </span>    <span class="n">preserve_order</span> <span class="o">=</span> <span class="kc">True</span>
 <span class="gp">...</span>
 <span class="gp">... </span>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reps</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="c1"># `reps` Trotter steps of the WHOLE Hamiltonian; see the caution below for why</span>
+<span class="gp">... </span>        <span class="c1"># this synthesis must not be handed one flow set at a time when reps &gt; 1</span>
 <span class="gp">... </span>        <span class="bp">self</span><span class="o">.</span><span class="n">reps</span> <span class="o">=</span> <span class="n">reps</span>
 <span class="gp">...</span>
 <span class="gp">... </span>    <span class="k">def</span><span class="w"> </span><span class="nf">synthesize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">evolution</span><span class="p">):</span>
@@ -836,8 +842,8 @@ product formula is also where the number of Trotter steps belongs, as in Qiskitâ
 <span class="gp">... </span>        <span class="n">east</span><span class="p">,</span> <span class="n">west</span><span class="p">,</span> <span class="n">diagonal</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">{}</span>
 <span class="gp">...</span>
 <span class="gp">... </span>        <span class="k">for</span> <span class="n">label</span><span class="p">,</span> <span class="n">indices</span><span class="p">,</span> <span class="n">coeff</span> <span class="ow">in</span> <span class="n">evolution</span><span class="o">.</span><span class="n">operator</span><span class="o">.</span><span class="n">to_sparse_list</span><span class="p">():</span>
-<span class="gp">... </span>            <span class="c1"># as in Qiskit's own product formulas, `reps` Trotter steps divide the</span>
-<span class="gp">... </span>            <span class="c1"># time -- and hence every rotation angle -- by `reps`</span>
+<span class="gp">... </span>            <span class="c1"># as in Qiskit's own product formulas, `reps` steps divide the time</span>
+<span class="gp">... </span>            <span class="c1"># (and hence every rotation angle) by `reps`</span>
 <span class="gp">... </span>            <span class="n">angle</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">evolution</span><span class="o">.</span><span class="n">time</span> <span class="o">*</span> <span class="n">coeff</span><span class="o">.</span><span class="n">real</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">reps</span>
 <span class="gp">... </span>            <span class="k">match</span> <span class="n">label</span><span class="p">,</span> <span class="n">indices</span><span class="p">:</span>
 <span class="gp">... </span>                <span class="k">case</span><span class="w"> </span><span class="s2">""</span><span class="p">,</span> <span class="k">_</span><span class="p">:</span>  <span class="c1"># the identity contributes only a global phase</span>
@@ -851,6 +857,15 @@ product formula is also where the number of Trotter steps belongs, as in Qiskitâ
 <span class="gp">... </span>                <span class="k">case</span><span class="w"> </span><span class="k">_</span><span class="p">:</span>
 <span class="gp">... </span>                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"unexpected Pauli term: </span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s2"> on </span><span class="si">{</span><span class="n">indices</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 <span class="gp">...</span>
+<span class="gp">... </span>        <span class="c1"># A Trotter step must cycle BETWEEN the flow sets, so the repetition has to wrap</span>
+<span class="gp">... </span>        <span class="c1"># the whole sweep. If this gate carried only one set, repeating it would merely</span>
+<span class="gp">... </span>        <span class="c1"># split that set's own evolution into equal pieces -- see the caution below.</span>
+<span class="gp">... </span>        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">reps</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">bool</span><span class="p">,</span> <span class="p">(</span><span class="n">east</span><span class="p">,</span> <span class="n">west</span><span class="p">,</span> <span class="n">diagonal</span><span class="p">)))</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+<span class="gp">... </span>            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+<span class="gp">... </span>                <span class="s2">"reps &gt; 1 needs the whole Hamiltonian in one Evolution gate, but this "</span>
+<span class="gp">... </span>                <span class="s2">"gate holds a single flow set; do not decompose() before transpiling."</span>
+<span class="gp">... </span>            <span class="p">)</span>
+<span class="gp">...</span>
 <span class="gp">... </span>        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reps</span><span class="p">):</span>
 <span class="gp">... </span>            <span class="c1"># east flow set: bare rotations, no entangling gates at all</span>
 <span class="gp">... </span>            <span class="k">for</span> <span class="n">qubit</span><span class="p">,</span> <span class="n">angle</span> <span class="ow">in</span> <span class="n">east</span><span class="p">:</span>
@@ -863,7 +878,8 @@ product formula is also where the number of Trotter steps belongs, as in Qiskitâ
 <span class="gp">... </span>                    <span class="n">circuit</span><span class="o">.</span><span class="n">rx</span><span class="p">(</span><span class="n">angle</span><span class="p">,</span> <span class="n">qubit</span><span class="p">)</span>
 <span class="gp">... </span>                <span class="n">cz_brickwork</span><span class="p">(</span><span class="n">circuit</span><span class="p">)</span>
 <span class="gp">...</span>
-<span class="gp">... </span>            <span class="n">rzz_layers</span><span class="p">(</span><span class="n">circuit</span><span class="p">,</span> <span class="n">diagonal</span><span class="p">)</span>
+<span class="gp">... </span>            <span class="k">if</span> <span class="n">diagonal</span><span class="p">:</span>
+<span class="gp">... </span>                <span class="n">rzz_layers</span><span class="p">(</span><span class="n">circuit</span><span class="p">,</span> <span class="n">diagonal</span><span class="p">)</span>
 <span class="gp">...</span>
 <span class="gp">... </span>        <span class="k">return</span> <span class="n">circuit</span>
 </pre></div>
@@ -879,6 +895,27 @@ order they were added</em>. Since all the gates within one of these sets commute
 A term-by-term synthesis chooses the order badly. Emitting
 the overlapping <code class="docutils literal notranslate"><span class="pre">CZ</span></code> chain sequentially reports a depth that grows with the qubit count
 rather than the constant <code class="docutils literal notranslate"><span class="pre">2</span></code> the hardware could achieve.</p>
+</div>
+<div class="admonition caution">
+<p class="admonition-title">Caution</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">reps</span></code> argument above is only a genuine Trotterization when this synthesis receives
+the <strong>whole</strong> encoded Hamiltonian, as the Trotter-step comparison further below does. If the
+fermionic circuit is decomposed into one <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate per flow set first, then
+<code class="docutils literal notranslate"><span class="pre">synthesize</span></code> is called once per set, and the loop repeats <em>within</em> a set instead of
+cycling between them:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>what a decomposed circuit gives:   A(t/2) A(t/2) B(t/2) B(t/2)
+what a Trotterization needs:       A(t/2) B(t/2) A(t/2) B(t/2)
+</pre></div>
+</div>
+<p>The first form buys nothing at all: consecutive exponentials of the <em>same</em> operator commute,
+so <code class="docutils literal notranslate"><span class="pre">A(t/2)</span> <span class="pre">A(t/2)</span></code> is just <code class="docutils literal notranslate"><span class="pre">A(t)</span></code> and the error stays at its <code class="docutils literal notranslate"><span class="pre">reps=1</span></code> value however
+large <code class="docutils literal notranslate"><span class="pre">reps</span></code> grows. That is why <code class="docutils literal notranslate"><span class="pre">synthesize</span></code> above rejects <code class="docutils literal notranslate"><span class="pre">reps</span> <span class="pre">&gt;</span> <span class="pre">1</span></code> when it is handed
+a gate carrying a single flow set â€“ silently returning a circuit that looks Trotterized but
+is not would be worse than failing.</p>
+<p>A product formula that respects the operatorâ€™s
+<a class="reference internal" href="../stubs/qiskit_fermions.operators.OperatorTrait.html#qiskit_fermions.operators.OperatorTrait.groups" title="qiskit_fermions.operators.OperatorTrait.groups"><code class="xref py py-attr docutils literal notranslate"><span class="pre">groups</span></code></a> directly (rather than relying on a
+prior decomposition) avoids the constraint entirely; see
+<a class="reference external" href="https://github.com/Qiskit/qiskit-fermions/issues/298">issue #298</a>.</p>
 </div>
 <p>To select the order, pass it to
 <a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis.html#qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis.product_formula" title="qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis.product_formula"><code class="xref py py-attr docutils literal notranslate"><span class="pre">MapperFnEvolutionSynthesis.product_formula</span></code></a>, which is the argument
@@ -1198,7 +1235,7 @@ qubit encodings (2026), <a class="reference external" href="https://arxiv.org/ab
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on 2026/09/02</div>
+              Last updated on 2026/09/03</div>
           </div>
           <div class="right-details">
             
@@ -1243,7 +1280,7 @@ qubit encodings (2026), <a class="reference external" href="https://arxiv.org/ab
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=7f6214c4"></script>
+</div><script src="../_static/documentation_options.js?v=a8e26990"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
