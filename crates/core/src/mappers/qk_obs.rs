@@ -24,6 +24,8 @@
 use rayon::prelude::*;
 use std::sync::{Arc, Mutex};
 
+use crate::mappers::ternary_tree::PauliLabel;
+
 cfg_select! {
     feature = "pyext" => {
         pub(crate) use num_complex::Complex64 as QkComplex64;
@@ -32,6 +34,9 @@ cfg_select! {
         pub(crate) use ffi::QkBitTerm::X as QK_BIT_TERM_X;
         pub(crate) use ffi::QkBitTerm::Y as QK_BIT_TERM_Y;
         pub(crate) use ffi::QkBitTerm::Z as QK_BIT_TERM_Z;
+        /// The bit-term discriminants as plain `u8`, for the compile-time assertions below.
+        const BIT_TERM_DISCRIMINANTS: [u8; 3] =
+            [QK_BIT_TERM_X as u8, QK_BIT_TERM_Y as u8, QK_BIT_TERM_Z as u8];
     }
     feature = "cext" => {
         extern crate qiskit_sys as ffi;
@@ -40,12 +45,81 @@ cfg_select! {
         pub(crate) use ffi::QkBitTerm_QkBitTerm_X as QK_BIT_TERM_X;
         pub(crate) use ffi::QkBitTerm_QkBitTerm_Y as QK_BIT_TERM_Y;
         pub(crate) use ffi::QkBitTerm_QkBitTerm_Z as QK_BIT_TERM_Z;
+        /// The bit-term discriminants as plain `u8`, for the compile-time assertions below.
+        const BIT_TERM_DISCRIMINANTS: [u8; 3] =
+            [QK_BIT_TERM_X, QK_BIT_TERM_Y, QK_BIT_TERM_Z];
     }
 }
 
 // The `QkBitTerm` values are re-exported from here so that the backend selection above is the only
 // place in the crate that spells the two FFI backends' differing names for them. Call sites use the
 // re-exported *values*, so they read identically on both backends.
+//
+// `BIT_TERM_DISCRIMINANTS` exists because the assertions below cannot: under `cext` `QkBitTerm` is a
+// `u8` type alias, so `QK_BIT_TERM_X as u8` is a no-op cast that `clippy::unnecessary_cast` rejects,
+// while under `pyext` it is a real enum for which the cast is required. The cast therefore has to sit
+// inside the backend-selected block, where each arm can spell it the one way that compiles clean.
+
+/// [`PauliLabel`] is declared with the `QkBitTerm` discriminants so that a compiled encoding's label
+/// slice can be reinterpreted as bit terms rather than translated element by element. These assert
+/// that correspondence at compile time: the sizes must agree for the reinterpretation to be
+/// well-formed, and each discriminant must agree for it to mean the right Pauli. Checking the size
+/// alone would let a renumbering on either side through, and it would produce wrong Paulis with no
+/// diagnostic.
+///
+/// These live here rather than on [`PauliLabel`] itself because cbindgen exports that type to the C API
+/// as `QfPauliLabel`, doc comment included: naming an `ffi::QkBitTerm` beside it would render a Qiskit
+/// type into the generated C header, where no such type exists.
+const _: () = {
+    assert!(size_of::<PauliLabel>() == size_of::<ffi::QkBitTerm>());
+    assert!(PauliLabel::X as u8 == BIT_TERM_DISCRIMINANTS[0]);
+    assert!(PauliLabel::Y as u8 == BIT_TERM_DISCRIMINANTS[1]);
+    assert!(PauliLabel::Z as u8 == BIT_TERM_DISCRIMINANTS[2]);
+};
+
+/// Reinterprets a compiled encoding's labels as the bit terms Qiskit takes.
+///
+/// [`PauliLabel`] and `QkBitTerm` have the same size and, for the three Paulis a label can hold, the
+/// same discriminants (asserted above), so the slice is reinterpreted rather than translated element
+/// by element.
+pub(crate) fn as_bit_terms(labels: &[PauliLabel]) -> &[ffi::QkBitTerm] {
+    // SAFETY: Sound by the size and discriminant assertions above, which cover every value a
+    // `PauliLabel` can hold.
+    unsafe { std::slice::from_raw_parts(labels.as_ptr().cast::<ffi::QkBitTerm>(), labels.len()) }
+}
+
+/// Builds a sum of Pauli strings as an observable, the one place this module calls `qk_obs_new`.
+///
+/// [`one_pauli_string`] funnels into this, and the ternary-tree mappers call it directly for the
+/// sums they build from a compiled encoding, converting its [`PauliLabel`]s with
+/// [`as_bit_terms`]. The buffers are borrowed rather than owned: `qk_obs_new` copies them into the
+/// observable it builds and never writes through them, so they can be handed over as they are.
+/// Copying them into owned buffers first, merely to obtain the `*mut` pointers the signature asks
+/// for, would cost allocations per string in the mappers' innermost loop.
+pub(crate) fn pauli_sum(
+    num_qubits: u32,
+    coeffs: &[QkComplex64],
+    bit_terms: &[ffi::QkBitTerm],
+    indices: &[u32],
+    boundaries: &[usize],
+) -> *mut ffi::QkObs {
+    debug_assert_eq!(indices.len(), bit_terms.len());
+    debug_assert_eq!(boundaries.len(), coeffs.len() + 1);
+    debug_assert_eq!(boundaries.last().copied(), Some(bit_terms.len()));
+    // SAFETY: `qk_obs_new` only reads its four buffers, copying them into the observable it returns,
+    // so casting away their constness never leads to a write through a shared borrow.
+    unsafe {
+        ffi::qk_obs_new(
+            num_qubits,
+            coeffs.len().try_into().unwrap(),
+            bit_terms.len().try_into().unwrap(),
+            coeffs.as_ptr().cast_mut(),
+            bit_terms.as_ptr().cast_mut(),
+            indices.as_ptr().cast_mut(),
+            boundaries.as_ptr().cast_mut(),
+        )
+    }
+}
 
 /// Tolerance used for every `qk_obs_canonicalize` call in this module.
 ///
@@ -321,27 +395,23 @@ pub(crate) fn qk_coeff(coeff: num_complex::Complex64) -> QkComplex64 {
 /// Builds a single Pauli string as an observable, from its bit terms and their qubit indices.
 ///
 /// Unlike a fermionic action (a *two*-term sum), every generator of the Majorana, edge-vertex and
-/// transfer-vertex algebras has an image consisting of exactly one Pauli string, so all three
-/// mappers below build their images through this.
+/// transfer-vertex algebras has an image consisting of exactly one Pauli string, so the
+/// Jordan-Wigner mappers of all three build their images through this. The ternary-tree mappers,
+/// whose strings already sit in a compiled encoding, pass its [`PauliLabel`]s through
+/// [`as_bit_terms`] first.
 pub(crate) fn one_pauli_string(
     num_qubits: u32,
     coeff: QkComplex64,
-    bit_terms: &mut [ffi::QkBitTerm],
-    indices: &mut [u32],
+    bit_terms: &[ffi::QkBitTerm],
+    indices: &[u32],
 ) -> *mut ffi::QkObs {
-    let mut coeffs = [coeff];
-    let mut boundaries = [0usize, bit_terms.len()];
-    unsafe {
-        ffi::qk_obs_new(
-            num_qubits,
-            1,
-            bit_terms.len().try_into().unwrap(),
-            coeffs.as_mut_ptr(),
-            bit_terms.as_mut_ptr(),
-            indices.as_mut_ptr(),
-            boundaries.as_mut_ptr(),
-        )
-    }
+    pauli_sum(
+        num_qubits,
+        &[coeff],
+        bit_terms,
+        indices,
+        &[0, bit_terms.len()],
+    )
 }
 
 /// Asserts that two observables represent the same operator, consuming both.

@@ -147,8 +147,8 @@ fn map_majorana_action(action: MajoranaAction, num_qubits: u32) -> *mut ffi::QkO
     one_pauli_string(
         num_qubits,
         QkComplex64 { re: 1.0, im: 0.0 },
-        &mut bit_terms,
-        &mut indices,
+        &bit_terms,
+        &indices,
     )
 }
 
@@ -213,8 +213,8 @@ fn map_edge_action(action: EdgeAction, num_qubits: u32) -> *mut ffi::QkObs {
         return one_pauli_string(
             num_qubits,
             QkComplex64 { re: 1.0, im: 0.0 },
-            &mut [QK_BIT_TERM_Z],
-            &mut [left],
+            &[QK_BIT_TERM_Z],
+            &[left],
         );
     }
 
@@ -233,8 +233,8 @@ fn map_edge_action(action: EdgeAction, num_qubits: u32) -> *mut ffi::QkObs {
     one_pauli_string(
         num_qubits,
         QkComplex64 { re, im: 0.0 },
-        &mut bit_terms,
-        &mut indices,
+        &bit_terms,
+        &indices,
     )
 }
 
@@ -286,8 +286,8 @@ fn map_transfer_action(action: TransferAction, num_qubits: u32) -> *mut ffi::QkO
         return one_pauli_string(
             num_qubits,
             QkComplex64 { re: 1.0, im: 0.0 },
-            &mut [QK_BIT_TERM_Z],
-            &mut [left],
+            &[QK_BIT_TERM_Z],
+            &[left],
         );
     }
 
@@ -310,8 +310,8 @@ fn map_transfer_action(action: TransferAction, num_qubits: u32) -> *mut ffi::QkO
     one_pauli_string(
         num_qubits,
         QkComplex64 { re: -0.5, im: 0.0 },
-        &mut bit_terms,
-        &mut indices,
+        &bit_terms,
+        &indices,
     )
 }
 
@@ -361,12 +361,7 @@ mod tests {
         bit_terms: &[ffi::QkBitTerm],
         indices: &[u32],
     ) -> *mut ffi::QkObs {
-        one_pauli_string(
-            num_qubits,
-            QkComplex64 { re, im },
-            &mut bit_terms.to_vec(),
-            &mut indices.to_vec(),
-        )
+        one_pauli_string(num_qubits, QkComplex64 { re, im }, bit_terms, indices)
     }
 
     fn majorana_op(
