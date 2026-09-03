@@ -4,11 +4,13 @@
 from . import edge_vertex
 from . import jordan_wigner
 from . import majorana_fermion
+from . import ternary_tree
 from . import transfer_vertex
 __all__ = [
     "edge_vertex",
     "jordan_wigner",
     "majorana_fermion",
+    "ternary_tree",
     "transfer_vertex",
 ]
 

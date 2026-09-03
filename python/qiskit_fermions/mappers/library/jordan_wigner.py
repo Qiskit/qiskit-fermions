@@ -14,6 +14,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
+
 from qiskit.quantum_info import SparseObservable
 
 from qiskit_fermions._lib.mappers.mappers_library.jordan_wigner import (
@@ -30,15 +32,23 @@ from qiskit_fermions.operators import (
     TransferVertexOperator,
 )
 
+from ._dispatch import dispatch_mapper
+
+_IMPLEMENTATIONS: dict[type, Callable[..., SparseObservable]] = {
+    FermionOperator: fermion_jordan_wigner,
+    MajoranaOperator: majorana_jordan_wigner,
+    EdgeVertexOperator: edge_vertex_jordan_wigner,
+    TransferVertexOperator: transfer_vertex_jordan_wigner,
+}
+
 
 def jordan_wigner(operator: OperatorTrait, num_qubits: int) -> SparseObservable:
     """Map an operator to a ``SparseObservable`` under the Jordan-Wigner transformation.
 
     This is the type-agnostic entry point to the Jordan-Wigner transformation. It dispatches on the
-    concrete type of ``operator`` to the appropriate direct implementation:
-    :func:`.fermion_jordan_wigner`, :func:`.majorana_jordan_wigner`,
-    :func:`.edge_vertex_jordan_wigner` or :func:`.transfer_vertex_jordan_wigner`. Anything that is
-    not one of the four operator types raises a :class:`TypeError`.
+    concrete type of ``operator`` to the matching direct implementation, listed under
+    :ref:`jordan_wigner_mappers` in the :mod:`~qiskit_fermions.mappers.library` documentation. An
+    operator type without one raises a :class:`TypeError`.
 
     Args:
         operator: the operator to map.
@@ -53,6 +63,7 @@ def jordan_wigner(operator: OperatorTrait, num_qubits: int) -> SparseObservable:
     Raises:
         TypeError: if ``operator`` is of a type for which no Jordan-Wigner implementation exists.
         ValueError: if ``num_qubits`` is too small to hold the operator's support.
+        OverflowError: if ``num_qubits`` is negative or does not fit in 32 bits.
 
     .. doctest::
 
@@ -73,19 +84,4 @@ def jordan_wigner(operator: OperatorTrait, num_qubits: int) -> SparseObservable:
         ...
         TypeError: jordan_wigner does not support operator type 'SparseObservable'.
     """
-    match operator:
-        case FermionOperator():
-            return fermion_jordan_wigner(operator, num_qubits)
-        case MajoranaOperator():
-            return majorana_jordan_wigner(operator, num_qubits)
-        case EdgeVertexOperator():
-            return edge_vertex_jordan_wigner(operator, num_qubits)
-        case TransferVertexOperator():
-            return transfer_vertex_jordan_wigner(operator, num_qubits)
-        case _:
-            # Kept as a guard even though the four arms above cover every operator type: it is what
-            # turns a non-operator argument into a clear error instead of an obscure failure deeper
-            # in, and it is what a future operator type will land on until it gains an implementation.
-            raise TypeError(
-                f"jordan_wigner does not support operator type {type(operator).__name__!r}."
-            )
+    return dispatch_mapper("jordan_wigner", _IMPLEMENTATIONS, operator, num_qubits)

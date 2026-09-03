@@ -1,0 +1,17 @@
+---
+features:
+  - |
+    Added ternary-tree fermion-to-qubit encodings. A
+    :class:`~qiskit_fermions.mappers.TernaryTree` describes the encoding and is compiled once into a
+    :class:`~qiskit_fermions.mappers.TernaryTreeEncoding`, which the mappers
+    :func:`~qiskit_fermions.mappers.library.fermion_ternary_tree`,
+    :func:`~qiskit_fermions.mappers.library.majorana_ternary_tree`,
+    :func:`~qiskit_fermions.mappers.library.edge_vertex_ternary_tree` and
+    :func:`~qiskit_fermions.mappers.library.transfer_vertex_ternary_tree` map through. In the Python
+    API, :func:`~qiskit_fermions.mappers.library.ternary_tree` dispatches to whichever of the four
+    matches the operator it is given, mirroring
+    :func:`~qiskit_fermions.mappers.library.jordan_wigner`.
+
+    This simplifies the use of every mapping that can be expressed as a ternary tree, including but
+    not limited to the Jordan-Wigner, parity, Bravyi-Kitaev and Jiang-Kalev-Mruczkiewicz-Neven (JKMN)
+    encodings.
