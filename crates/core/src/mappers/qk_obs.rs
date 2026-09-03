@@ -252,9 +252,11 @@ impl Wrapper {
 
 /// Maps every term of an operator onto a `QkObs` in parallel, merging duplicates as it goes.
 ///
-/// This is the single copy of the mapping driver shared by all four public mappers in this module:
-/// the thread pool, the per-worker accumulators and the compaction schedule live here and nowhere
-/// else, so a fix to any of them lands once.
+/// This is the single copy of the mapping driver shared by every mapper that emits a `QkObs`, in
+/// [`library::jordan_wigner`](crate::mappers::library::jordan_wigner) and
+/// [`library::ternary_tree`](crate::mappers::library::ternary_tree) alike: the thread pool, the
+/// per-worker accumulators and the compaction schedule live here and nowhere else, so a fix to any
+/// of them lands once.
 ///
 /// It is generic over the term iterator and a per-term closure rather than over
 /// [`OperatorTrait`](crate::operators::OperatorTrait): each operator's `*TermView` exposes `iter()`
@@ -268,7 +270,10 @@ impl Wrapper {
 /// # Panics
 ///
 /// `map_term` must not unwind: it runs inside `for_each`, and a panic there would leak every
-/// accumulator. The four implementations in this module are `qk_obs_*` calls plus arithmetic.
+/// accumulator. Every caller passes `qk_obs_*` calls plus arithmetic. The ternary-tree closures also
+/// index the encoding's tables by mode, which cannot go out of range only because each of those
+/// mappers checks its operator's support against the encoding *before* calling this; that check is
+/// what keeps them from unwinding, so it must not be skipped.
 pub(crate) fn map_operator<T, I, F>(terms: I, num_qubits: u32, map_term: F) -> *mut ffi::QkObs
 where
     I: Iterator<Item = T> + Send,
@@ -412,6 +417,16 @@ pub(crate) fn one_pauli_string(
         indices,
         &[0, bit_terms.len()],
     )
+}
+
+/// Returns the largest fermionic mode index the two index buffers of a vertex-type operator act on.
+///
+/// Shared by every mapper of the edge-vertex and transfer-vertex operators, which must bound-check
+/// a term's modes before any of them reaches a `qk_obs_*` call.
+pub(crate) fn max_paired_index(left_indices: &[u32], right_indices: &[u32]) -> Option<u32> {
+    // Both endpoints must be checked: an operator whose largest index only ever appears on the right
+    // would otherwise pass a left-only check and abort inside the `qk_obs_*` calls.
+    left_indices.iter().chain(right_indices).max().copied()
 }
 
 /// Asserts that two observables represent the same operator, consuming both.

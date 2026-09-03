@@ -105,6 +105,8 @@ pub enum TernaryTreeEncodingError {
     /// A ternary-tree encoding spends one qubit per mode, and a mode's image can act on any of the
     /// encoding's qubits, so the register must cover all of them even when the operator being
     /// mapped touches only low modes.
+    ///
+    /// Distinct from [`Self::ModeOutsideEncoding`], which no register size can fix.
     #[error(
         "num_qubits ({num_qubits}) is too small for an encoding of {num_modes} modes, which needs \
          one qubit per mode"
@@ -115,13 +117,26 @@ pub enum TernaryTreeEncodingError {
         /// The number of modes, and hence qubits, the encoding needs.
         num_modes: u32,
     },
+    /// The operator acts on a mode that the encoding has no Pauli image for.
+    ///
+    /// Distinct from [`Self::NumQubitsTooSmall`] because no value of `num_qubits` fixes it: the
+    /// encoding's extent is fixed when it is built, so it is the encoding that has to grow.
+    #[error(
+        "the operator acts on mode index {max_mode}, but the encoding covers only {num_modes} modes"
+    )]
+    ModeOutsideEncoding {
+        /// The number of modes the encoding covers.
+        num_modes: u32,
+        /// The largest mode the operator acts on.
+        max_mode: u32,
+    },
 }
 
 /// A ternary tree compiled into the Pauli strings of its Majorana operators.
 ///
-/// Holds the `2N` Majorana strings in a flat, sorted form, together with the string of the total
-/// parity. This is the artifact the mappers consume: after it is built, mapping a generator is a
-/// slice lookup, or the product of two of them.
+/// Holds the `2N` Majorana strings in a flat, sorted form, together with the string of each mode's
+/// vertex operator and of the total parity. This is the artifact the mappers consume: after it is
+/// built, mapping a generator is a slice lookup, or the product of two of them.
 ///
 /// # The pairing
 ///
@@ -177,6 +192,13 @@ pub struct TernaryTreeEncoding {
     /// each other: a fermionic action's image is their two-term sum, which can then be handed to
     /// `qk_obs_new` as one contiguous span with no gathering.
     majoranas: PauliTable,
+    /// The Pauli string of each mode's vertex operator `-i gamma_2j gamma_2j+1`, indexed by mode.
+    ///
+    /// Every one is a `Z` string with coefficient `+1` (see the type-level documentation), so only
+    /// the string is stored. Precomputed because vertex operators dominate the edge-vertex and
+    /// transfer-vertex Hamiltonians these encodings map, and their images depend on the encoding
+    /// alone.
+    vertices: PauliTable,
     /// The qubits the total parity acts on, ascending: `Z` on every node of the root's
     /// `Z`-descent, with coefficient `+1`.
     parity: Vec<u32>,
@@ -269,11 +291,11 @@ impl TernaryTreeEncoding {
         let num_nodes = tree.num_nodes();
         mode_map.validate(num_nodes)?;
 
-        // The total parity comes first, in the closed form derived in the type-level
-        // documentation: the `Z` string on the nodes a walk along `Z` edges from the root passes
-        // through, with coefficient `+1`, so no product needs taking. Its size fixes how large
-        // the Majorana table is. `z_descent` collects the nodes such a walk passes through,
-        // starting from a link.
+        // The total parity and the vertex operators come first, in the closed forms derived in
+        // the type-level documentation: each is the `Z` string on a node set read straight off
+        // the tree, with coefficient `+1`, so neither needs a product taken. Their sizes fix how
+        // large the Majorana table is. `z_descent` collects the nodes a walk along `Z` edges
+        // passes through, starting from a link.
         let z_descent = |mut slot: Slot, string: &mut Vec<(u32, PauliLabel)>| {
             while let Slot::Edge(node) = slot {
                 string.push((node, PauliLabel::Z));
@@ -289,6 +311,26 @@ impl TernaryTreeEncoding {
         // only when they are stored identically, so an unsorted string would silently defeat the
         // memory bound in `qk_obs`.
         parity.sort_unstable();
+
+        // Vertices are stored by mode, so the node serving each mode is needed.
+        let mut node_of_mode = vec![0; num_nodes as usize];
+        for node in 0..num_nodes {
+            node_of_mode[mode_map.mode_of(node) as usize] = node;
+        }
+        // Every node off the root's `Z`-descent lies in exactly two vertex strings and every
+        // node on it in exactly one (see the type-level documentation), so they hold
+        // `2N - |parity|` entries between them and the buffers are sized once.
+        let mut vertices =
+            PauliTable::with_capacity(num_nodes as usize, 2 * num_nodes as usize - parity.len());
+        for &node in &node_of_mode {
+            string.clear();
+            string.push((node, PauliLabel::Z));
+            z_descent(tree.child_of(node, PauliLabel::X), &mut string);
+            z_descent(tree.child_of(node, PauliLabel::Y), &mut string);
+            // Sorted for the same reason as the parity above.
+            string.sort_unstable_by_key(|&(qubit, _)| qubit);
+            vertices.push(string.iter().copied());
+        }
 
         // Bonsai Algorithm 1. `descend` walks from a link along `Z` edges to the leg it ends in.
         let descend = |mut slot: Slot| -> LegId {
@@ -342,6 +384,7 @@ impl TernaryTreeEncoding {
         Ok(Self {
             num_modes: num_nodes,
             majoranas,
+            vertices,
             parity,
         })
     }
@@ -361,10 +404,33 @@ impl TernaryTreeEncoding {
     ///
     /// With [`Self::num_modes`], this is the whole public surface a fermion-to-qubit mapping needs:
     /// every generator of all four operator algebras is a product of Majorana operators, so mapping
-    /// one is a lookup here per factor.
+    /// one is a lookup here per factor. The other accessors are crate-internal shortcuts the
+    /// mappers take for the common cases.
     #[inline]
     pub fn majorana_image(&self, majorana: u32) -> (&[PauliLabel], &[u32]) {
         self.majoranas.get(majorana as usize)
+    }
+
+    /// Returns the images of `gamma_2j` and `gamma_2j+1` of `mode`, back to back, and the length of
+    /// the first.
+    ///
+    /// The two strings are adjacent in storage, so a fermionic action's two-term image is built
+    /// from this span directly.
+    #[inline]
+    pub(crate) fn mode_images(&self, mode: u32) -> (&[PauliLabel], &[u32], usize) {
+        let even = 2 * mode as usize;
+        let (labels, indices) = self.majoranas.span(even, even + 2);
+        (labels, indices, self.majoranas.weight(even))
+    }
+
+    /// Returns the image of the vertex operator `-i gamma_2j gamma_2j+1` of `mode` as parallel
+    /// label and ascending-index slices.
+    ///
+    /// The image is a `Z` string whose coefficient is always exactly `+1` (see the type-level
+    /// documentation), so no coefficient is returned.
+    #[inline]
+    pub(crate) fn vertex_image(&self, mode: u32) -> (&[PauliLabel], &[u32]) {
+        self.vertices.get(mode as usize)
     }
 
     /// Builds the total fermionic parity observable of this encoding.
@@ -527,6 +593,12 @@ mod tests {
                     tree.total_leg_depth() - enc.parity.len(),
                     "Majorana support at n={n}"
                 );
+                // ... and the vertex strings hold `2N - |parity|` entries between them.
+                assert_eq!(
+                    enc.vertices.labels.len(),
+                    2 * n as usize - enc.parity.len(),
+                    "vertex support at n={n}"
+                );
             }
         }
     }
@@ -664,6 +736,13 @@ mod tests {
                         "gamma_{m} at n={n} is not strictly ascending: {indices:?}"
                     );
                 }
+                for mode in 0..n {
+                    let (_, indices) = enc.vertex_image(mode);
+                    assert!(
+                        indices.windows(2).all(|w| w[0] < w[1]),
+                        "vertex {mode} at n={n} is not strictly ascending: {indices:?}"
+                    );
+                }
             }
         }
     }
@@ -775,9 +854,13 @@ mod tests {
             let TernaryTreeEncoding {
                 num_modes,
                 majoranas,
+                vertices,
                 parity,
             } = a;
-            *num_modes == b.num_modes && *majoranas == b.majoranas && *parity == b.parity
+            *num_modes == b.num_modes
+                && *majoranas == b.majoranas
+                && *vertices == b.vertices
+                && *parity == b.parity
         };
         let hash = |enc: &TernaryTreeEncoding| {
             let mut hasher = std::hash::DefaultHasher::new();
@@ -870,5 +953,55 @@ mod tests {
         }
         assert_eq!(compile(&balanced(13)).max_weight(), 3);
         assert_eq!(compile(&jw(5)).max_weight(), 5);
+    }
+
+    /// Each precomputed vertex image is the product `-i gamma_2j gamma_2j+1` of the stored strings,
+    /// with coefficient exactly `+1`.
+    ///
+    /// The closed form the encoding builds the vertices from is derived rather than computed, so
+    /// this checks it against `qk_obs_compose` over every uniform family, label order and a
+    /// non-trivial mode map. A tree on which the derivation failed would show up as a vertex off by
+    /// a sign.
+    #[test]
+    fn test_vertex_images_are_the_majorana_products() {
+        use PauliLabel::{X, Y, Z};
+        let orders = [
+            [X, Y, Z],
+            [X, Z, Y],
+            [Y, X, Z],
+            [Y, Z, X],
+            [Z, X, Y],
+            [Z, Y, X],
+        ];
+        let trees = [1u32, 4, 5, 13].into_iter().flat_map(|n| {
+            (1..=3).flat_map(move |branching| {
+                orders
+                    .into_iter()
+                    .map(move |order| TernaryTree::breadth_first(n, branching, order).unwrap())
+            })
+        });
+        for tree in trees {
+            let reversed: Vec<u32> = (0..tree.num_nodes()).rev().collect();
+            let enc = TernaryTreeEncoding::new(&tree, &ModeMap::Permutation(reversed)).unwrap();
+            let n = enc.num_modes();
+            let one = QkComplex64 { re: 1.0, im: 0.0 };
+            for mode in 0..n {
+                let (labels, indices) = enc.majorana_image(2 * mode);
+                let even = one_pauli_string(n, one, as_bit_terms(labels), indices);
+                let (labels, indices) = enc.majorana_image(2 * mode + 1);
+                let odd = one_pauli_string(n, one, as_bit_terms(labels), indices);
+                let product = unsafe { ffi::qk_obs_compose(odd, even) };
+                unsafe { ffi::qk_obs_free(even) };
+                unsafe { ffi::qk_obs_free(odd) };
+                unsafe {
+                    ffi::qk_obs_multiply_inplace(product, &QkComplex64 { re: 0.0, im: -1.0 })
+                };
+
+                let (labels, indices) = enc.vertex_image(mode);
+                assert!(labels.iter().all(|&label| label == Z));
+                let vertex = one_pauli_string(n, one, as_bit_terms(labels), indices);
+                assert_obs_equal(vertex, product, n);
+            }
+        }
     }
 }

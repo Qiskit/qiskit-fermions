@@ -12,7 +12,7 @@
 
 use crate::mappers::qk_obs::{
     QK_BIT_TERM_X, QK_BIT_TERM_Y, QK_BIT_TERM_Z, QkComplex64, compose_actions, ffi_backend as ffi,
-    map_operator, one_pauli_string, qk_coeff,
+    map_operator, max_paired_index, one_pauli_string, qk_coeff,
 };
 use crate::operators::edge_vertex_operator::{EdgeAction, EdgeVertexOperator};
 use crate::operators::fermion_operator::{FermionAction, FermionOperator};
@@ -103,19 +103,6 @@ fn push_z_string(bit_terms: &mut Vec<ffi::QkBitTerm>, indices: &mut Vec<u32>, qu
         bit_terms.push(QK_BIT_TERM_Z);
         indices.push(qb_idx);
     }
-}
-
-/// Returns the largest fermionic mode index the two index buffers of a vertex-type operator act on.
-fn max_paired_index(left_indices: &[u32], right_indices: &[u32]) -> Option<u32> {
-    // Both endpoints must be checked: an operator whose largest index only ever appears on the right
-    // would otherwise pass a left-only check and abort inside the `qk_obs_*` calls.
-    left_indices
-        .iter()
-        .max()
-        .into_iter()
-        .chain(right_indices.iter().max())
-        .max()
-        .copied()
 }
 
 /// Maps a single Majorana operator onto its Pauli image.
