@@ -24,6 +24,8 @@
 use rayon::prelude::*;
 use std::sync::{Arc, Mutex};
 
+use crate::mappers::ternary_tree::PauliLabel;
+
 cfg_select! {
     feature = "pyext" => {
         pub(crate) use num_complex::Complex64 as QkComplex64;
@@ -32,6 +34,9 @@ cfg_select! {
         pub(crate) use ffi::QkBitTerm::X as QK_BIT_TERM_X;
         pub(crate) use ffi::QkBitTerm::Y as QK_BIT_TERM_Y;
         pub(crate) use ffi::QkBitTerm::Z as QK_BIT_TERM_Z;
+        /// The bit-term discriminants as plain `u8`, for the compile-time assertions below.
+        const BIT_TERM_DISCRIMINANTS: [u8; 3] =
+            [QK_BIT_TERM_X as u8, QK_BIT_TERM_Y as u8, QK_BIT_TERM_Z as u8];
     }
     feature = "cext" => {
         extern crate qiskit_sys as ffi;
@@ -40,12 +45,55 @@ cfg_select! {
         pub(crate) use ffi::QkBitTerm_QkBitTerm_X as QK_BIT_TERM_X;
         pub(crate) use ffi::QkBitTerm_QkBitTerm_Y as QK_BIT_TERM_Y;
         pub(crate) use ffi::QkBitTerm_QkBitTerm_Z as QK_BIT_TERM_Z;
+        /// The bit-term discriminants as plain `u8`, for the compile-time assertions below.
+        const BIT_TERM_DISCRIMINANTS: [u8; 3] =
+            [QK_BIT_TERM_X, QK_BIT_TERM_Y, QK_BIT_TERM_Z];
     }
 }
 
 // The `QkBitTerm` values are re-exported from here so that the backend selection above is the only
 // place in the crate that spells the two FFI backends' differing names for them. Call sites use the
 // re-exported *values*, so they read identically on both backends.
+//
+// `BIT_TERM_DISCRIMINANTS` exists because the assertions below cannot: under `cext` `QkBitTerm` is a
+// `u8` type alias, so `QK_BIT_TERM_X as u8` is a no-op cast that `clippy::unnecessary_cast` rejects,
+// while under `pyext` it is a real enum for which the cast is required. The cast therefore has to sit
+// inside the backend-selected block, where each arm can spell it the one way that compiles clean.
+
+/// [`PauliLabel`] is declared with the `QkBitTerm` discriminants so that a compiled encoding's label
+/// slice can be reinterpreted as bit terms rather than translated element by element. These assert
+/// that correspondence at compile time: the sizes must agree for the reinterpretation to be
+/// well-formed, and each discriminant must agree for it to mean the right Pauli. Checking the size
+/// alone would let a renumbering on either side through, and it would produce wrong Paulis with no
+/// diagnostic.
+///
+/// These live here rather than on [`PauliLabel`] itself because cbindgen exports that type to the C API
+/// as `QfPauliLabel`, doc comment included: naming an `ffi::QkBitTerm` beside it would render a Qiskit
+/// type into the generated C header, where no such type exists.
+const _: () = {
+    assert!(size_of::<PauliLabel>() == size_of::<ffi::QkBitTerm>());
+    assert!(PauliLabel::X as u8 == BIT_TERM_DISCRIMINANTS[0]);
+    assert!(PauliLabel::Y as u8 == BIT_TERM_DISCRIMINANTS[1]);
+    assert!(PauliLabel::Z as u8 == BIT_TERM_DISCRIMINANTS[2]);
+};
+
+/// Reinterprets a slice of [`PauliLabel`] as Qiskit bit terms.
+///
+/// The two enumerations share their discriminants by construction (see the assertion above), so this
+/// is a relabelling rather than a conversion. A copy is made regardless because `qk_obs_new` takes its
+/// buffers by mutable pointer.
+#[inline]
+pub(crate) fn bit_terms(labels: &[PauliLabel]) -> Vec<ffi::QkBitTerm> {
+    labels
+        .iter()
+        .map(|&label| {
+            // SAFETY: `PauliLabel` is `#[repr(u8)]` with the `QkBitTerm` discriminants (`Z = 1`,
+            // `X = 2`, `Y = 3`), and the assertions above pin both the size and every discriminant.
+            // Every `PauliLabel` value is therefore a valid `QkBitTerm`.
+            unsafe { std::mem::transmute_copy::<PauliLabel, ffi::QkBitTerm>(&label) }
+        })
+        .collect()
+}
 
 /// Tolerance used for every `qk_obs_canonicalize` call in this module.
 ///

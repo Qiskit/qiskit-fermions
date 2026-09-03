@@ -12,3 +12,4 @@
 
 pub mod library;
 pub mod qk_obs;
+pub mod ternary_tree;
