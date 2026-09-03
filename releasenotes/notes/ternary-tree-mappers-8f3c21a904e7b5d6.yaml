@@ -46,3 +46,24 @@ features:
     fermionic parity observable of a ternary-tree encoding, :math:`\prod_j (1 - 2 n_j)`. A tree's
     :math:`2N+1` legs pair into :math:`2N` Majorana operators, leaving exactly one over, and that
     leftover is this operator.
+features_c:
+  - |
+    Added the ternary-tree framework to the C API. Trees are built with
+    :c:func:`qf_ternary_tree_new` (from a parent-and-label specification, the general interface),
+    :c:func:`qf_ternary_tree_chain` or :c:func:`qf_ternary_tree_breadth_first`, inspected with
+    :c:func:`qf_ternary_tree_num_nodes`, :c:func:`qf_ternary_tree_num_legs` and
+    :c:func:`qf_ternary_tree_max_weight`, and freed with :c:func:`qf_ternary_tree_free`. A tree is
+    compiled into a :c:struct:`QfTernaryTreeEncoding` with
+    :c:func:`qf_ternary_tree_encoding_new`, inspected with
+    :c:func:`qf_ternary_tree_encoding_num_modes` and
+    :c:func:`qf_ternary_tree_encoding_max_weight`, and then passed to
+    :c:func:`qf_ferm_op_ternary_tree`, :c:func:`qf_maj_op_ternary_tree`,
+    :c:func:`qf_edge_op_ternary_tree`, :c:func:`qf_transfer_op_ternary_tree` or
+    :c:func:`qf_ternary_tree_encoding_total_parity`.
+
+    Like the Jordan-Wigner mappers, the four operator mappers write the mapped
+    :external+cqiskit:doc:`QkObs <cdoc/qk-obs>` through an out-parameter and return a
+    ``QfExitCode``, which is ``QfExitCode_ValueError`` when the specification does not describe a
+    single connected tree, or when the operator acts on a mode that the encoding or the requested
+    qubit count does not cover. :c:func:`qf_ternary_tree_encoding_total_parity` instead returns the
+    observable directly, or ``NULL`` if the requested qubit count is below the encoding's mode count.

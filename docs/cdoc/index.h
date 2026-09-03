@@ -69,3 +69,7 @@
 /**
  * @defgroup qf_mapper_library qf_mapper_library
  */
+
+/**
+ * @defgroup qf_ternary_tree qf_ternary_tree
+ */

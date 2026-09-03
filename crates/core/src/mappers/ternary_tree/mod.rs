@@ -54,7 +54,7 @@ pub type LegId = u32;
 /// `x` in the next: `Z = 0b01`, `X = 0b10`, `Y = 0b11`. That makes them the discriminants of
 /// Qiskit's `QkBitTerm`, so a compiled encoding can be handed to the FFI without translating each
 /// label. Both the size and each individual discriminant are asserted at compile time where that is
-/// relied upon, in [`library::ternary_tree`](crate::mappers::library::ternary_tree).
+/// relied upon, in the ternary-tree mapper module.
 ///
 /// `0b00` would be the natural encoding of the identity, which is why no `I` variant is named: a
 /// link always carries a non-trivial Pauli, and identity on a qubit is that qubit's absence from a
@@ -256,10 +256,9 @@ pub const MAX_NODES: u32 = (u32::MAX - 1) / 2;
 ///
 /// # Constructing one
 ///
-/// [`try_new`](Self::try_new) and [`try_from_children`](Self::try_from_children) build an arbitrary
-/// tree; they are the general interface, and the shapes the literature names are all reachable
-/// through them. [`chain`](Self::chain) and [`breadth_first`](Self::breadth_first) are conveniences
-/// for the two uniform families:
+/// [`Self::try_new`] and [`Self::try_from_children`] build an arbitrary tree; they are the general
+/// interface, and the shapes the literature names are all reachable through them. [`Self::chain`] and
+/// [`Self::breadth_first`] are conveniences for the two uniform families:
 ///
 /// ```text
 /// Encoding            Constructor                        Pauli weight

@@ -86,3 +86,6 @@ prefix_with_name = true
 "EdgeVertexOperator" = "QfEdgeVertexOperator"
 "TransferVertexOperator" = "QfTransferVertexOperator"
 "FCIDump" = "QfFCIDump"
+"PauliLabel" = "QfPauliLabel"
+"TernaryTree" = "QfTernaryTree"
+"TernaryTreeEncoding" = "QfTernaryTreeEncoding"
