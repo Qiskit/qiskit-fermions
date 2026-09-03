@@ -11,3 +11,4 @@
 // that they have been altered from the originals.
 
 pub mod library;
+pub mod qk_obs;
