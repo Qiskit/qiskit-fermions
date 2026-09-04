@@ -19,10 +19,7 @@ import numbers
 import numpy as np
 import scipy.linalg
 
-from qiskit_fermions.utils.optionals import HAS_FFSIM
-
 from .. import FermionicGate
-from ._expm_multiply import _expm_multiply_fci
 
 
 class OrbitalRotation(FermionicGate):
@@ -110,18 +107,10 @@ class OrbitalRotation(FermionicGate):
         ``(n_alpha, n_beta)`` sector -- an operation the fixed-sector state vector cannot represent.
         Such a rotation is rejected with a :class:`ValueError`.
 
-        The embedded matrix is then applied in one of two ways:
-
-        - **Fast path** (only when ``ffsim`` is installed): the embedded matrix is applied via
-          :func:`ffsim.apply_orbital_rotation`'s Givens-rotation kernel. Under the spinful block-spin
-          convention (modes ``0..norb`` are alpha orbitals, modes ``norb..2*norb`` are beta orbitals)
-          the two diagonal blocks are the per-spin rotations passed to ffsim as ``(mat_a, mat_b)``.
-        - **General path**: otherwise (i.e. when ``ffsim`` is unavailable) the rotation is applied as
-          the evolution :math:`\exp(G)` under its generator
-          :math:`G = \sum_{ij} \log(U)_{ij} a^\dagger_i a_j`, where :math:`U` is the embedded matrix.
-          :math:`G` is turned into a ``scipy`` ``LinearOperator`` backed by the native FCI
-          matrix-vector kernel and applied via :func:`scipy.sparse.linalg.expm_multiply`. This
-          mirrors :meth:`.Evolution._apply_unitary_placed_`.
+        The embedded matrix is then applied via :func:`ffsim.apply_orbital_rotation`'s Givens-rotation
+        kernel. Under the spinful block-spin convention (modes ``0..norb`` are alpha orbitals, modes
+        ``norb..2*norb`` are beta orbitals) the two diagonal blocks are the per-spin rotations passed
+        to ffsim as ``(mat_a, mat_b)``.
 
         Args:
             vec: the state vector to act on.
@@ -138,6 +127,7 @@ class OrbitalRotation(FermionicGate):
             The transformed vector.
 
         Raises:
+            MissingOptionalLibraryError: if ffsim is not installed.
             ValueError: if ``nelec`` is a spinful pair and the (placed) rotation mixes the alpha and
                 beta spin sectors.
         """
@@ -151,12 +141,9 @@ class OrbitalRotation(FermionicGate):
         # resolve the argument ffsim's kernel (and, when it mixes spins, the whole gate) accepts
         mat = self._resolve_orbital_rotation(full, norb, nelec)
 
-        if HAS_FFSIM:
-            import ffsim
+        import ffsim
 
-            return ffsim.apply_orbital_rotation(vec, mat, norb=norb, nelec=nelec, copy=copy)
-
-        return self._apply_via_generator(full, vec, norb, nelec, copy)
+        return ffsim.apply_orbital_rotation(vec, mat, norb=norb, nelec=nelec, copy=copy)
 
     @staticmethod
     def _resolve_orbital_rotation(
@@ -184,41 +171,3 @@ class OrbitalRotation(FermionicGate):
             )
 
         return full[:norb, :norb], full[norb:, norb:]
-
-    @staticmethod
-    def _apply_via_generator(
-        full: np.ndarray,
-        vec: np.ndarray,
-        norb: int,
-        nelec: int | tuple[int, int],
-        copy: bool,
-    ) -> np.ndarray:
-        r"""Applies ``exp(G)`` for ``G = sum_ij log(full)_ij a^\dagger_i a_j`` via the native kernel.
-
-        This is the ``ffsim``-free fallback, requiring only ``scipy`` plus the native FCI
-        matrix-vector kernel. ``full`` has already been validated by :meth:`_resolve_orbital_rotation`
-        to be sector-preserving (spinless, or block-diagonal across the alpha/beta split), and
-        ``logm`` preserves that block-diagonal structure, so the generator ``G`` conserves the
-        ``(norb, nelec)`` sector and no amplitude is dropped.
-        """
-        from qiskit_fermions.operators import FermionOperator
-
-        if copy:
-            vec = vec.copy()
-
-        log_mat = scipy.linalg.logm(full)
-        # ``logm`` of a block-diagonal / sparse rotation leaves ~1e-16 round-off in nominally-zero
-        # entries; drop them with a tolerance rather than an exact ``!= 0.0`` so the generator carries
-        # only the genuine terms (an exactly-zero threshold keeps the junk, bloating the operator).
-        tol = 1e-12
-        # the generator's modes are already global (``full`` was embedded onto them), so no relabel
-        # is needed -- unlike Evolution, which relabels a local operator onto its global modes
-        terms = {
-            ((True, i), (False, j)): complex(log_mat[i, j])
-            for i in range(full.shape[0])
-            for j in range(full.shape[1])
-            if abs(log_mat[i, j]) > tol
-        }
-        generator = FermionOperator.from_dict(terms)  # type: ignore[arg-type]
-
-        return _expm_multiply_fci(generator, vec, norb, nelec)

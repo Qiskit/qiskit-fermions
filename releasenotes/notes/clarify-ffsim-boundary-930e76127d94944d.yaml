@@ -22,13 +22,9 @@ upgrade:
        vec = gate._apply_unitary_(vec, norb, nelec, copy=True)
        linop = operator._linear_operator_(norb, nelec)
 
-    The protocols themselves are unchanged, and the native FCI kernel backing
-    ``_linear_operator_`` still depends only on ``scipy``, so simulating an operator without ffsim
-    installed works exactly as before.
+    The protocols themselves are unchanged.
   - |
     The ``simulation`` optional dependency has been renamed to ``ffsim``, so
     ``pip install "qiskit-fermions[simulation]"`` becomes
     ``pip install "qiskit-fermions[ffsim]"``. The extra names the dependency it installs rather than
-    a capability, because simulation does not require it: the native FCI kernel behind
-    :class:`.SupportsLinearOperator` depends only on ``scipy``. Installing
-    ``qiskit-fermions[all]`` is unaffected.
+    a capability. Installing ``qiskit-fermions[all]`` is unaffected.

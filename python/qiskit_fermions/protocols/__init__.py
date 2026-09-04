@@ -33,10 +33,10 @@ dispatch function built on top of a protocol (for example :func:`.fermion_operat
 the interface itself; the distinction should be clear from context.
 
 Some protocols below are paired with a small, type-agnostic **helper function** that dispatches to
-the protocol method on whatever object it is given. The two simulation protocols
-(:class:`.SupportsApplyUnitary` and :class:`.SupportsLinearOperator`) have none: they are the same
-contracts :mod:`ffsim` defines, so :func:`ffsim.apply_unitary` and :func:`ffsim.linear_operator`
-dispatch to them already, and without ffsim installed you call the method on the object directly.
+the protocol method on whatever object it is given. The simulation protocols
+(:class:`.SupportsApplyUnitary`, :class:`.SupportsLinearOperator` and :class:`.SupportsTrace`) have
+none: they are the same contracts :mod:`ffsim` defines, so :func:`ffsim.apply_unitary`,
+:func:`ffsim.linear_operator` and :func:`ffsim.trace` dispatch to them already.
 
 .. list-table::
    :header-rows: 1
@@ -52,6 +52,9 @@ dispatch to them already, and without ffsim installed you call the method on the
      - :func:`.majorana_operator`
    * - :class:`.SupportsLinearOperator`
      - ``_linear_operator_(self, norb, nelec)``
+     - --
+   * - :class:`.SupportsTrace`
+     - ``_trace_(self, norb, nelec)``
      - --
    * - :class:`.SupportsApplyUnitary`
      - ``_apply_unitary_(self, vec, norb, nelec, copy)``
@@ -73,6 +76,7 @@ dispatch to them already, and without ffsim installed you call the method on the
    SupportsFermionOperator
    SupportsLinearOperator
    SupportsMajoranaOperator
+   SupportsTrace
 
 """
 
@@ -81,7 +85,7 @@ from __future__ import annotations
 from .apply_unitary import SupportsApplyUnitary, SupportsApplyUnitaryPlaced
 from .commutators import SupportsCommutators
 from .fermion_operator import SupportsFermionOperator
-from .linear_operator import SupportsLinearOperator
+from .linear_operator import SupportsLinearOperator, SupportsTrace
 from .majorana_operator import SupportsMajoranaOperator
 
 __all__ = [
@@ -91,4 +95,5 @@ __all__ = [
     "SupportsFermionOperator",
     "SupportsLinearOperator",
     "SupportsMajoranaOperator",
+    "SupportsTrace",
 ]
