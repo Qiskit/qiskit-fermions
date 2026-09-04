@@ -28,6 +28,7 @@ from qiskit_fermions.transpiler.passes import (
     CustomF2QLayout,
     F2QSynthesis,
     MapperFnEvolutionSynthesis,
+    simplify,
 )
 
 
@@ -325,7 +326,12 @@ def test_custom_layout():
         (14, 10): 19,
         (14, 13): 19,
     }
-    mapper_fn = partial(derby_klassen, initial_state=initial_state, edge_face_map=edge_face_map)
+    # `simplify` pins a canonical Pauli term order. Without it the mapped term order -- and hence
+    # the synthesized depth -- varies between runs, because the operators of the Rust core do not
+    # preserve the order their terms were added in.
+    mapper_fn = simplify(
+        partial(derby_klassen, initial_state=initial_state, edge_face_map=edge_face_map)
+    )
 
     circ = FermionicCircuit(num_modes)
     circ.append(Evolution(num_modes, hamil), circ.modes)

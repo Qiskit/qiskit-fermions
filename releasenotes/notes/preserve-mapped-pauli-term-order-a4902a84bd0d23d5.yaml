@@ -1,0 +1,32 @@
+---
+upgrade:
+  - |
+    :class:`.MapperFnEvolutionSynthesis` no longer simplifies the operator returned by its
+    :attr:`~.MapperFnEvolutionSynthesis.mapper_fn`. Simplifying sorts the Pauli terms into a canonical
+    order, and a product formula synthesizes them in the order it receives them, so the previous
+    behavior discarded whatever order the mapper had chosen.
+
+    This changes the synthesized circuit for existing pipelines: the gate count is unaffected, but the
+    order the rotations are emitted in (and hence the two-qubit depth) may differ. The evolution being
+    approximated is unchanged.
+
+    Note also that the term order a mapper produces is not guaranteed to be stable between runs,
+    because the operators of the Rust core do not preserve the order their terms were added in. Wrap
+    the mapper in the new :func:`.simplify` to restore the previous behavior and pin a canonical
+    order::
+
+        MapperFnEvolutionSynthesis(simplify(jordan_wigner))
+features:
+  - |
+    Added two adapters that wrap a mapper function to control the Pauli term order it produces, which
+    :class:`.MapperFnEvolutionSynthesis` now preserves through synthesis.
+
+    :func:`.simplify` simplifies the mapped operator, merging duplicate Pauli terms and pinning a
+    canonical term order.
+
+    :func:`.group_wise` maps an operator one :attr:`~qiskit_fermions.operators.OperatorTrait.groups`
+    entry at a time and sums the results. The operator is unchanged, but the terms of each group come
+    out adjacent rather than interleaved, which lets those acting on disjoint qubits share a circuit
+    layer::
+
+        MapperFnEvolutionSynthesis(group_wise(jordan_wigner))

@@ -33,6 +33,77 @@ MapperFunction = Callable[[OperatorTrait, int], SparseObservable]
 """The function signature for :attr:`mapper_fn`."""
 
 
+def simplify(mapper_fn: MapperFunction) -> MapperFunction:
+    """Wraps a mapper function so that it simplifies the operator it returns.
+
+    Simplifying merges duplicate Pauli terms and, as a side effect, sorts the terms into a canonical
+    order. That order is worth asking for explicitly in two situations:
+
+    1. The term order an unsimplified mapper produces is **not** guaranteed to be stable between runs,
+       because the operators of the Rust core do not preserve the order their terms were added in. A
+       product formula synthesizes the terms in the order it receives them, so an unsimplified mapper
+       can yield a different (though equally valid) circuit each time. Simplifying pins it.
+    2. It merges terms that map to the same Pauli string, which shortens the synthesized circuit when a
+       mapper produces such duplicates.
+
+    Use it to wrap any :type:`MapperFunction`::
+
+        MapperFnEvolutionSynthesis(simplify(jordan_wigner))
+
+    Args:
+        mapper_fn: the mapper function to wrap.
+
+    Returns:
+        A mapper function that simplifies whatever ``mapper_fn`` returns.
+    """
+
+    def simplified(operator: OperatorTrait, num_qubits: int) -> SparseObservable:
+        return mapper_fn(operator, num_qubits).simplify()
+
+    return simplified
+
+
+def group_wise(mapper_fn: MapperFunction) -> MapperFunction:
+    """Wraps a mapper function so that it maps an operator one group at a time.
+
+    Rather than mapping the operator in one go, the wrapped function maps each of its
+    :attr:`~qiskit_fermions.operators.OperatorTrait.groups` separately and sums the results (see
+    :ref:`grouping_explanation`). The sum is the same operator either way, but its Pauli terms come out
+    grouped: the terms of one group are adjacent instead of interleaved with everybody else's.
+
+    That matters because a product formula synthesizes the terms in the order it receives them. Where
+    the terms of a group act on disjoint qubits, having them adjacent lets them be scheduled in
+    parallel, which can reduce the two-qubit depth substantially at an unchanged gate count.
+
+    Use it to wrap any :type:`MapperFunction`::
+
+        MapperFnEvolutionSynthesis(group_wise(jordan_wigner))
+
+    An operator without groups is mapped in one go, exactly as ``mapper_fn`` would on its own.
+
+    .. note::
+       Composing this with :func:`simplify` defeats the purpose, since simplifying re-sorts the terms
+       into a canonical order and so discards the grouping this produces.
+
+    Args:
+        mapper_fn: the mapper function to wrap.
+
+    Returns:
+        A mapper function that maps ``mapper_fn`` over the operator's groups and sums the results.
+    """
+
+    def grouped(operator: OperatorTrait, num_qubits: int) -> SparseObservable:
+        if not operator.has_groups():
+            return mapper_fn(operator, num_qubits)
+
+        accumulated = SparseObservable.zero(num_qubits)
+        for group in operator.split_out_groups():
+            accumulated += mapper_fn(group, num_qubits)
+        return accumulated
+
+    return grouped
+
+
 class MapperFnEvolutionSynthesis:
     r"""A :class:`.F2QSynthesisPlugin` for transpiling :class:`.Evolution` under a custom mapping.
 
@@ -47,9 +118,29 @@ class MapperFnEvolutionSynthesis:
     its default (``None``) defers to the :class:`~qiskit.circuit.library.PauliEvolutionGate`'s own
     default synthesis (a first-order :class:`~qiskit.synthesis.LieTrotter` decomposition with a
     single repetition). Supplying an explicit
-    :class:`~qiskit.synthesis.EvolutionSynthesis` -- for example a higher-order
-    :class:`~qiskit.synthesis.SuzukiTrotter` or one with several repetitions -- selects a different
+    :class:`~qiskit.synthesis.EvolutionSynthesis` (for example a higher-order
+    :class:`~qiskit.synthesis.SuzukiTrotter` or one with several repetitions) selects a different
     Trotter-Suzuki product formula, trading circuit depth for a smaller Trotter error.
+
+    .. note::
+       The operator returned by :attr:`mapper_fn` is passed on as-is, in particular **without** being
+       simplified. A product formula synthesizes the Pauli terms in the order it receives them, so the
+       term order that :attr:`mapper_fn` produces is part of its output and is preserved here. A
+       :attr:`mapper_fn` that maps an operator group by group, for instance, emits the terms of each
+       group together, which lets the terms of one group be scheduled in parallel where their supports
+       are disjoint. See :func:`group_wise`, which wraps any mapper to do exactly that.
+
+    .. caution::
+       A consequence of preserving that order is that the synthesized circuit is only as reproducible
+       as :attr:`mapper_fn` is. The operators of the Rust core do **not** preserve the order in which
+       their terms were added, so a mapper that walks an operator's terms can emit them in a different
+       order from one run to the next. The circuits that result are all equally valid (they
+       approximate the same evolution of the same operator) but they need not be identical, and
+       metrics such as depth or gate count can vary between them.
+
+       Wrap the mapper in :func:`simplify` to pin a canonical order where that matters::
+
+           MapperFnEvolutionSynthesis(simplify(jordan_wigner))
     """
 
     def __init__(
@@ -88,7 +179,7 @@ class MapperFnEvolutionSynthesis:
         r"""Runs this transpilation plugin.
 
         The fermionic Hamiltonian of the incoming :class:`.Evolution` gate is mapped to a qubit
-        operator via :attr:`mapper_fn`, simplified, and appended to ``out_dag`` as a
+        operator via :attr:`mapper_fn` and appended to ``out_dag`` as a
         :class:`~qiskit.circuit.library.PauliEvolutionGate` implementing :math:`e^{-i t H}` with the
         original evolution time :math:`t` and the :attr:`product_formula` synthesis.
 
@@ -110,7 +201,10 @@ class MapperFnEvolutionSynthesis:
         freg_indices, qreg = map_node_single_register(in_node, f2q_layout)
         local_op = in_node.op.operator
         global_op = local_op.relabel_modes(freg_indices)
-        pauli_op = self.mapper_fn(global_op, len(qreg)).simplify()
+        # NOTE: the mapped operator is deliberately *not* simplified here. `simplify` reorders the
+        # Pauli terms into a canonical order, and a product formula synthesizes them in the order it
+        # receives them -- so canonicalizing discards whatever ordering `mapper_fn` chose.
+        pauli_op = self.mapper_fn(global_op, len(qreg))
         out_dag.apply_operation_back(
             PauliEvolutionGate(pauli_op, time=in_node.op.params[0], synthesis=self.product_formula),
             qreg,
