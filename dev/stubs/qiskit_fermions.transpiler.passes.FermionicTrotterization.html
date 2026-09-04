@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>TrivialF2QLayout - Qiskit Fermions 0.2.0.dev0+063c2b7</title>
+        <title>FermionicTrotterization - Qiskit Fermions 0.2.0.dev0+063c2b7</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -244,7 +244,7 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="../_sources/stubs/qiskit_fermions.transpiler.passes.TrivialF2QLayout.rst.txt" title="View this page">
+  <a class="muted-link" href="../_sources/stubs/qiskit_fermions.transpiler.passes.FermionicTrotterization.rst.txt" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
@@ -262,29 +262,86 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="trivialf2qlayout">
-<h1>TrivialF2QLayout<a class="headerlink" href="#trivialf2qlayout" title="Link to this heading">¶</a></h1>
+          <section id="fermionictrotterization">
+<h1>FermionicTrotterization<a class="headerlink" href="#fermionictrotterization" title="Link to this heading">¶</a></h1>
 <dl class="py class">
-<dt class="sig sig-object py" id="qiskit_fermions.transpiler.passes.TrivialF2QLayout">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">TrivialF2QLayout</span></span><a class="headerlink" href="#qiskit_fermions.transpiler.passes.TrivialF2QLayout" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="qiskit_fermions.transpiler.passes.FermionicTrotterization">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">FermionicTrotterization</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">synthesis</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qiskit_fermions.transpiler.passes.FermionicTrotterization" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.GenericPass" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">GenericPass</span></code></a>[<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.dagcircuit.DAGCircuit" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DAGCircuit</span></code></a>, <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.dagcircuit.DAGCircuit" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DAGCircuit</span></code></a>]</p>
-<p>Trivially maps <span class="math">\(n\)</span> fermionic modes to <span class="math">\(n\)</span> qubits.</p>
-<p>This pass simply populates the <code class="docutils literal notranslate"><span class="pre">f2q_layout</span></code> field of the
-<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.PassManagerState#property_set" title="(in Qiskit v2.5)"><code class="xref py py-attr docutils literal notranslate"><span class="pre">property_set</span></code></a>, with a dictionary associating each
-<a class="reference internal" href="qiskit_fermions.circuit.FermionicRegister.html#qiskit_fermions.circuit.FermionicRegister" title="qiskit_fermions.circuit.FermionicRegister"><code class="xref py py-type docutils literal notranslate"><span class="pre">FermionicRegister</span></code></a> with an equally sized
-<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.QuantumRegister" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumRegister</span></code></a>.</p>
-<p class="rubric">Methods</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="qiskit_fermions.transpiler.passes.TrivialF2QLayout.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dag</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qiskit_fermions.transpiler.passes.TrivialF2QLayout.run" title="Link to this definition">¶</a></dt>
-<dd><p>Runs this analysis pass.</p>
+<p>A transpilation pass selecting the fermion-to-fermion synthesis of <a class="reference internal" href="qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gates.</p>
+<p>An <a class="reference internal" href="qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate carries the synthesis method with which it gets decomposed in fermionic
+space (see <a class="reference internal" href="qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution.synthesis" title="qiskit_fermions.circuit.library.Evolution.synthesis"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Evolution.synthesis</span></code></a>). Setting it per gate means threading the choice through
+everything that constructs one – including <a class="reference internal" href="qiskit_fermions.circuit.library.UCC.html#qiskit_fermions.circuit.library.UCC" title="qiskit_fermions.circuit.library.UCC"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCC</span></code></a> and <a class="reference internal" href="qiskit_fermions.circuit.library.UCJ.html#qiskit_fermions.circuit.library.UCJ" title="qiskit_fermions.circuit.library.UCJ"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCJ</span></code></a>, which build their own
+internally. This pass applies one method to every <a class="reference internal" href="qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> in a circuit instead, so the
+choice can be made once for a whole transpilation pipeline:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pm</span><span class="o">.</span><span class="n">optimization</span> <span class="o">=</span> <span class="n">FermionicPassManager</span><span class="p">(</span>
+    <span class="p">[</span><span class="n">FermionicTrotterization</span><span class="p">(</span><span class="n">FermionicSuzukiTrotter</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">reps</span><span class="o">=</span><span class="mi">4</span><span class="p">))]</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>Nodes that are not <a class="reference internal" href="qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gates are left untouched, as are those rejected by an
+optional <a class="reference internal" href="#qiskit_fermions.transpiler.passes.FermionicTrotterization.filter" title="qiskit_fermions.transpiler.passes.FermionicTrotterization.filter"><code class="xref py py-attr docutils literal notranslate"><span class="pre">filter</span></code></a>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The pass <em>selects</em> a synthesis method rather than expanding the evolution there and then. The
+expansion happens later, when the gate’s definition is built, which keeps each
+<a class="reference internal" href="qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> intact as a single node for the passes that follow – notably
+<a class="reference internal" href="qiskit_fermions.transpiler.passes.RelabelModes.html#qiskit_fermions.transpiler.passes.RelabelModes" title="qiskit_fermions.transpiler.passes.RelabelModes"><code class="xref py py-class docutils literal notranslate"><span class="pre">RelabelModes</span></code></a>, which reads the operator of every <a class="reference internal" href="qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> to build its
+mode-relabeling model and would otherwise see a fragment per factor.</p>
+<p>This is the opposite choice from <a class="reference internal" href="qiskit_fermions.transpiler.passes.QDriftTrotterization.html#qiskit_fermions.transpiler.passes.QDriftTrotterization" title="qiskit_fermions.transpiler.passes.QDriftTrotterization"><code class="xref py py-class docutils literal notranslate"><span class="pre">QDriftTrotterization</span></code></a>, which replaces each gate with
+its sampled factors immediately. That pass has no alternative: its sampling is random and
+one-shot, so deferring it would draw a different sample every time the definition were rebuilt.
+A deterministic product formula is a pure function of the gate and can safely be deferred.</p>
+</div>
+<div class="admonition caution">
+<p class="admonition-title">Caution</p>
+<p>Not every synthesis method suits every operator. An <a class="reference internal" href="qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> whose operator groups
+all mutually commute (the diagonal-Coulomb operators of a <a class="reference internal" href="qiskit_fermions.circuit.library.UCJ.html#qiskit_fermions.circuit.library.UCJ" title="qiskit_fermions.circuit.library.UCJ"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCJ</span></code></a>, for example) is
+synthesized exactly at any order, so a higher order only adds depth. Use <a class="reference internal" href="#qiskit_fermions.transpiler.passes.FermionicTrotterization.filter" title="qiskit_fermions.transpiler.passes.FermionicTrotterization.filter"><code class="xref py py-attr docutils literal notranslate"><span class="pre">filter</span></code></a> to
+restrict the pass to the gates that benefit.</p>
+</div>
+<p>Initializing this transpiler pass can be done with the arguments listed below.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>dag</strong> (<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.dagcircuit.DAGCircuit" title="(in Qiskit v2.5)"><em>DAGCircuit</em></a>) – the DAG circuit representation of a <a class="reference internal" href="qiskit_fermions.circuit.FermionicCircuit.html#qiskit_fermions.circuit.FermionicCircuit" title="qiskit_fermions.circuit.FermionicCircuit"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicCircuit</span></code></a>.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>synthesis</strong> (<a class="reference internal" href="qiskit_fermions.circuit.library.synthesis.FermionicEvolutionSynthesis.html#qiskit_fermions.circuit.library.synthesis.FermionicEvolutionSynthesis" title="qiskit_fermions.circuit.library.synthesis.FermionicEvolutionSynthesis"><em>FermionicEvolutionSynthesis</em></a>) – the fermion-to-fermion synthesis method to apply to the <a class="reference internal" href="qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a>
+gates of the circuit.</p></li>
+<li><p><strong>filter</strong> (<em>Callable</em><em>[</em><em>[</em><em>DAGOpNode</em><em>]</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>] </em><em>| </em><em>None</em>) – an optional predicate deciding which <a class="reference internal" href="qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> nodes to apply
+<code class="docutils literal notranslate"><span class="pre">synthesis</span></code> to. It is called with the <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.dagcircuit.DAGOpNode" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DAGOpNode</span></code></a> and the
+node is left untouched unless it returns <code class="docutils literal notranslate"><span class="pre">True</span></code>. If <code class="docutils literal notranslate"><span class="pre">None</span></code> (the default), every
+<a class="reference internal" href="qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> node is selected.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Attributes</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qiskit_fermions.transpiler.passes.FermionicTrotterization.synthesis">
+<span class="sig-name descname"><span class="pre">synthesis</span></span><a class="headerlink" href="#qiskit_fermions.transpiler.passes.FermionicTrotterization.synthesis" title="Link to this definition">¶</a></dt>
+<dd><p>The fermion-to-fermion synthesis method applied to the selected gates.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qiskit_fermions.transpiler.passes.FermionicTrotterization.filter">
+<span class="sig-name descname"><span class="pre">filter</span></span><a class="headerlink" href="#qiskit_fermions.transpiler.passes.FermionicTrotterization.filter" title="Link to this definition">¶</a></dt>
+<dd><p>The predicate selecting which <a class="reference internal" href="qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> nodes to apply <a class="reference internal" href="#qiskit_fermions.transpiler.passes.FermionicTrotterization.synthesis" title="qiskit_fermions.transpiler.passes.FermionicTrotterization.synthesis"><code class="xref py py-attr docutils literal notranslate"><span class="pre">synthesis</span></code></a> to.</p>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qiskit_fermions.transpiler.passes.FermionicTrotterization.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dag</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qiskit_fermions.transpiler.passes.FermionicTrotterization.run" title="Link to this definition">¶</a></dt>
+<dd><p>Runs this transpilation pass.</p>
+<p>Every <a class="reference internal" href="qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> node accepted by <a class="reference internal" href="#qiskit_fermions.transpiler.passes.FermionicTrotterization.filter" title="qiskit_fermions.transpiler.passes.FermionicTrotterization.filter"><code class="xref py py-attr docutils literal notranslate"><span class="pre">filter</span></code></a> is replaced by an equivalent gate
+carrying <a class="reference internal" href="#qiskit_fermions.transpiler.passes.FermionicTrotterization.synthesis" title="qiskit_fermions.transpiler.passes.FermionicTrotterization.synthesis"><code class="xref py py-attr docutils literal notranslate"><span class="pre">synthesis</span></code></a>. All other nodes are left untouched. The input DAG is modified in
+place.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>dag</strong> (<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.dagcircuit.DAGCircuit" title="(in Qiskit v2.5)"><em>DAGCircuit</em></a>) – the input circuit with fermion-based instructions. Only
+<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.dagcircuit.DAGOpNode" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DAGOpNode</span></code></a> with <a class="reference internal" href="qiskit_fermions.circuit.FermionicGate.html#qiskit_fermions.circuit.FermionicGate" title="qiskit_fermions.circuit.FermionicGate"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicGate</span></code></a> instances as their
+<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.dagcircuit.DAGOpNode#op" title="(in Qiskit v2.5)"><code class="xref py py-attr docutils literal notranslate"><span class="pre">op</span></code></a> are supported.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>The unchanged input. But the <code class="xref py py-attr docutils literal notranslate"><span class="pre">property_set</span></code> of this transpilation pipeline will
-be updated.</p>
+<dd class="field-even"><p>The output circuit which is still acting on a fermionic register.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.dagcircuit.DAGCircuit" title="(in Qiskit v2.5)"><em>DAGCircuit</em></a></p>
@@ -294,8 +351,8 @@ be updated.</p>
 
 <p class="rubric">Inherited Methods</p>
 <dl class="py method">
-<dt class="sig sig-object py" id="qiskit_fermions.transpiler.passes.TrivialF2QLayout.execute">
-<span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">passmanager_ir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callback</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qiskit_fermions.transpiler.passes.TrivialF2QLayout.execute" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="qiskit_fermions.transpiler.passes.FermionicTrotterization.execute">
+<span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">passmanager_ir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callback</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qiskit_fermions.transpiler.passes.FermionicTrotterization.execute" title="Link to this definition">¶</a></dt>
 <dd><p>Execute optimization task for input Qiskit IR.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -315,8 +372,8 @@ be updated.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="qiskit_fermions.transpiler.passes.TrivialF2QLayout.name">
-<span class="sig-name descname"><span class="pre">name</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qiskit_fermions.transpiler.passes.TrivialF2QLayout.name" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="qiskit_fermions.transpiler.passes.FermionicTrotterization.name">
+<span class="sig-name descname"><span class="pre">name</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qiskit_fermions.transpiler.passes.FermionicTrotterization.name" title="Link to this definition">¶</a></dt>
 <dd><p>Name of the pass.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
@@ -326,8 +383,8 @@ be updated.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="qiskit_fermions.transpiler.passes.TrivialF2QLayout.update_status">
-<span class="sig-name descname"><span class="pre">update_status</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_state</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qiskit_fermions.transpiler.passes.TrivialF2QLayout.update_status" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="qiskit_fermions.transpiler.passes.FermionicTrotterization.update_status">
+<span class="sig-name descname"><span class="pre">update_status</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_state</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qiskit_fermions.transpiler.passes.FermionicTrotterization.update_status" title="Link to this definition">¶</a></dt>
 <dd><p>Update workflow status.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -387,12 +444,14 @@ be updated.</p>
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">TrivialF2QLayout</a><ul>
-<li><a class="reference internal" href="#qiskit_fermions.transpiler.passes.TrivialF2QLayout"><code class="docutils literal notranslate"><span class="pre">TrivialF2QLayout</span></code></a><ul>
-<li><a class="reference internal" href="#qiskit_fermions.transpiler.passes.TrivialF2QLayout.run"><code class="docutils literal notranslate"><span class="pre">TrivialF2QLayout.run()</span></code></a></li>
-<li><a class="reference internal" href="#qiskit_fermions.transpiler.passes.TrivialF2QLayout.execute"><code class="docutils literal notranslate"><span class="pre">TrivialF2QLayout.execute()</span></code></a></li>
-<li><a class="reference internal" href="#qiskit_fermions.transpiler.passes.TrivialF2QLayout.name"><code class="docutils literal notranslate"><span class="pre">TrivialF2QLayout.name()</span></code></a></li>
-<li><a class="reference internal" href="#qiskit_fermions.transpiler.passes.TrivialF2QLayout.update_status"><code class="docutils literal notranslate"><span class="pre">TrivialF2QLayout.update_status()</span></code></a></li>
+<li><a class="reference internal" href="#">FermionicTrotterization</a><ul>
+<li><a class="reference internal" href="#qiskit_fermions.transpiler.passes.FermionicTrotterization"><code class="docutils literal notranslate"><span class="pre">FermionicTrotterization</span></code></a><ul>
+<li><a class="reference internal" href="#qiskit_fermions.transpiler.passes.FermionicTrotterization.synthesis"><code class="docutils literal notranslate"><span class="pre">FermionicTrotterization.synthesis</span></code></a></li>
+<li><a class="reference internal" href="#qiskit_fermions.transpiler.passes.FermionicTrotterization.filter"><code class="docutils literal notranslate"><span class="pre">FermionicTrotterization.filter</span></code></a></li>
+<li><a class="reference internal" href="#qiskit_fermions.transpiler.passes.FermionicTrotterization.run"><code class="docutils literal notranslate"><span class="pre">FermionicTrotterization.run()</span></code></a></li>
+<li><a class="reference internal" href="#qiskit_fermions.transpiler.passes.FermionicTrotterization.execute"><code class="docutils literal notranslate"><span class="pre">FermionicTrotterization.execute()</span></code></a></li>
+<li><a class="reference internal" href="#qiskit_fermions.transpiler.passes.FermionicTrotterization.name"><code class="docutils literal notranslate"><span class="pre">FermionicTrotterization.name()</span></code></a></li>
+<li><a class="reference internal" href="#qiskit_fermions.transpiler.passes.FermionicTrotterization.update_status"><code class="docutils literal notranslate"><span class="pre">FermionicTrotterization.update_status()</span></code></a></li>
 </ul>
 </li>
 </ul>

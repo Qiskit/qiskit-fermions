@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Transpiler Passes - Qiskit Fermions 0.2.0.dev0+b68b77b</title>
+        <title>Transpiler Passes - Qiskit Fermions 0.2.0.dev0+063c2b7</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+b68b77b</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+063c2b7</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+b68b77b</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+063c2b7</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -272,16 +272,19 @@
 <div class="table-wrapper autosummary longtable docutils container">
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.MergeOrbitalRotations.html#qiskit_fermions.transpiler.passes.MergeOrbitalRotations" title="qiskit_fermions.transpiler.passes.MergeOrbitalRotations"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MergeOrbitalRotations</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.FermionicTrotterization.html#qiskit_fermions.transpiler.passes.FermionicTrotterization" title="qiskit_fermions.transpiler.passes.FermionicTrotterization"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FermionicTrotterization</span></code></a>(synthesis, *[, filter])</p></td>
+<td><p>A transpilation pass selecting the fermion-to-fermion synthesis of <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gates.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.MergeOrbitalRotations.html#qiskit_fermions.transpiler.passes.MergeOrbitalRotations" title="qiskit_fermions.transpiler.passes.MergeOrbitalRotations"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MergeOrbitalRotations</span></code></a>()</p></td>
 <td><p>A transpilation pass merging runs of consecutive orbital rotations into a single one.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.MergeSlaterDeterminantPreparation.html#qiskit_fermions.transpiler.passes.MergeSlaterDeterminantPreparation" title="qiskit_fermions.transpiler.passes.MergeSlaterDeterminantPreparation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MergeSlaterDeterminantPreparation</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.MergeSlaterDeterminantPreparation.html#qiskit_fermions.transpiler.passes.MergeSlaterDeterminantPreparation" title="qiskit_fermions.transpiler.passes.MergeSlaterDeterminantPreparation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MergeSlaterDeterminantPreparation</span></code></a>()</p></td>
 <td><p>A transpilation pass fusing an initialization and rotation into a Slater determinant prep.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.QDriftTrotterization.html#qiskit_fermions.transpiler.passes.QDriftTrotterization" title="qiskit_fermions.transpiler.passes.QDriftTrotterization"><code class="xref py py-obj docutils literal notranslate"><span class="pre">QDriftTrotterization</span></code></a>(num_terms, *[, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.QDriftTrotterization.html#qiskit_fermions.transpiler.passes.QDriftTrotterization" title="qiskit_fermions.transpiler.passes.QDriftTrotterization"><code class="xref py py-obj docutils literal notranslate"><span class="pre">QDriftTrotterization</span></code></a>(num_terms, *[, ...])</p></td>
 <td><p>A transpilation pass to Trotterize <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gates via the qDRIFT protocol.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.RelabelModes.html#qiskit_fermions.transpiler.passes.RelabelModes" title="qiskit_fermions.transpiler.passes.RelabelModes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RelabelModes</span></code></a>([permutation, solver])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.RelabelModes.html#qiskit_fermions.transpiler.passes.RelabelModes" title="qiskit_fermions.transpiler.passes.RelabelModes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RelabelModes</span></code></a>([permutation, solver])</p></td>
 <td><p>A transpilation pass to relabel the fermionic modes.</p></td>
 </tr>
 </tbody>
@@ -385,7 +388,7 @@ needs to be placed in the <code class="docutils literal notranslate"><span class
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=aa253c3e"></script>
+</div><script src="../_static/documentation_options.js?v=ebba96c3"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
