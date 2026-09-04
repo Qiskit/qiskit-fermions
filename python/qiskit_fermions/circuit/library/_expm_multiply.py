@@ -35,13 +35,12 @@ def _expm_multiply_fci(
     r"""Applies ``exp(scale * operator)`` to ``vec`` on the ``(norb, nelec)`` FCI sector.
 
     This goes through the internal ``_fci_linear_operator_`` carrier rather than the public
-    :func:`~qiskit_fermions.linalg.linear_operator` helper, because the native kernel it returns
-    exposes the operator's exact fixed-sector ``trace`` alongside its matrix-vector action. SciPy
-    uses that trace to precondition the exponential -- it factors out ``exp(traceA / n)`` -- which is
-    not a correctness input but is a large win in both speed and accuracy for an operator with a
+    :meth:`.SupportsLinearOperator._linear_operator_` protocol method, because the native kernel it
+    returns exposes the operator's exact fixed-sector ``trace`` alongside its matrix-vector action.
+    SciPy uses that trace to precondition the exponential (it factors out ``exp(traceA / n)``), which
+    is not a correctness input but is a large win in both speed and accuracy for an operator with a
     sizeable trace. A SciPy ``LinearOperator`` has nowhere to carry the value (and drops attributes
-    when scaled), so the trace is read off the kernel here instead of being transported through the
-    public wrapper.
+    when scaled), so the trace is read off the kernel here instead.
 
     ``scale`` multiplies the operator, so it must multiply the trace too: ``trace(c * A)`` is
     ``c * trace(A)``. It is applied to the trace *before* SciPy sees it, since ``scale * linop``

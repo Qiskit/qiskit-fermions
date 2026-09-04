@@ -21,10 +21,12 @@ if TYPE_CHECKING:
 
 
 class SupportsApplyUnitary(Protocol):
-    """A mirror of the :class:`ffsim.SupportsApplyUnitary` protocol.
+    """The state-vector simulation contract this package implements.
 
-    See :func:`.apply_unitary` for the type-agnostic helper function dispatching to the method
-    below.
+    This is the same protocol that :class:`ffsim.SupportsApplyUnitary` describes, so
+    :func:`ffsim.apply_unitary` dispatches to the method below on any object of this package. It is
+    stated here because the contract holds whether or not ffsim is installed: without it, call the
+    method directly, as the doctest below does.
 
     .. doctest::
 
@@ -63,12 +65,11 @@ class SupportsApplyUnitary(Protocol):
 class SupportsApplyUnitaryPlaced(Protocol):
     """A package-specific extension of :class:`.SupportsApplyUnitary` carrying a mode placement.
 
-    Unlike :class:`.SupportsApplyUnitary` (mirroring :class:`ffsim.SupportsApplyUnitary`), this
-    protocol has no ffsim equivalent and no helper function: :meth:`~.FermionicCircuit._apply_unitary_placed_`
-    is the only caller, and it dispatches to it directly via ``getattr`` duck-typing rather than
-    through a free function. It exists here purely for typing and documentation purposes, since every
-    concrete :class:`.FermionicGate` (as well as :class:`.FermionicCircuit` itself) implements this
-    method.
+    Unlike :class:`.SupportsApplyUnitary`, this protocol has no ffsim equivalent:
+    :meth:`~.FermionicCircuit._apply_unitary_placed_` is the only caller, and it dispatches to it
+    directly via ``getattr`` duck-typing. It exists here purely for typing and documentation
+    purposes, since every concrete :class:`.FermionicGate` (as well as :class:`.FermionicCircuit`
+    itself) implements this method.
 
     See :meth:`.FermionicCircuit._apply_unitary_placed_` for the full semantics, including how a
     plain :class:`.SupportsApplyUnitary` implementation (with no mode-placement argument) is honored

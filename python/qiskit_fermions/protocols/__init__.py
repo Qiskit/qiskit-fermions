@@ -28,12 +28,15 @@ The protocols in this module follow the same idea, but each one centers on a sin
 unremarkable dunder-style method (for example ``_linear_operator_``). A class implementing that
 one method thereby satisfies the corresponding protocol -- :class:`.SupportsLinearOperator` in
 this example -- and becomes usable wherever that protocol is expected, without any explicit
-registration. Note that "protocol" is sometimes also used loosely to refer to the type-agnostic
-dispatch function built on top of a protocol (for example :func:`.linear_operator`) rather than
+registration. Note that "protocol" is sometimes also used loosely to refer to a type-agnostic
+dispatch function built on top of a protocol (for example :func:`.fermion_operator`) rather than
 the interface itself; the distinction should be clear from context.
 
-Most protocols below follow this pattern paired with a small, type-agnostic **helper function**
-that dispatches to the protocol method on whatever object it is given:
+Some protocols below are paired with a small, type-agnostic **helper function** that dispatches to
+the protocol method on whatever object it is given. The two simulation protocols
+(:class:`.SupportsApplyUnitary` and :class:`.SupportsLinearOperator`) have none: they are the same
+contracts :mod:`ffsim` defines, so :func:`ffsim.apply_unitary` and :func:`ffsim.linear_operator`
+dispatch to them already, and without ffsim installed you call the method on the object directly.
 
 .. list-table::
    :header-rows: 1
@@ -49,10 +52,10 @@ that dispatches to the protocol method on whatever object it is given:
      - :func:`.majorana_operator`
    * - :class:`.SupportsLinearOperator`
      - ``_linear_operator_(self, norb, nelec)``
-     - :func:`.linear_operator`
+     - --
    * - :class:`.SupportsApplyUnitary`
      - ``_apply_unitary_(self, vec, norb, nelec, copy)``
-     - :func:`.apply_unitary`
+     - --
    * - :class:`.SupportsApplyUnitaryPlaced`
      - ``_apply_unitary_placed_(self, vec, norb, nelec, copy, freg_indices)``
      - --

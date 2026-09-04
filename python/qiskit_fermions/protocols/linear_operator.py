@@ -24,10 +24,13 @@ if TYPE_CHECKING:
 
 
 class SupportsLinearOperator(Protocol):
-    """A mirror of the :class:`ffsim.SupportsLinearOperator` protocol.
+    """The linear-operator conversion contract this package implements.
 
-    See :func:`.linear_operator` for the type-agnostic helper function dispatching to the method
-    below.
+    This is the same protocol that :class:`ffsim.SupportsLinearOperator` describes, so
+    :func:`ffsim.linear_operator` dispatches to the method below on any object of this package. It is
+    stated here because the contract holds whether or not ffsim is installed: the native FCI kernel
+    backing it depends only on ``scipy``, so without ffsim you call the method directly, as the
+    doctest below does.
 
     .. doctest::
 
