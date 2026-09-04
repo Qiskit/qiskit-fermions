@@ -120,7 +120,21 @@ modindex_common_prefix = ["qiskit_fermions."]
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),
     "numpy": ("https://numpy.org/doc/stable/", None),
-    "scipy": ("https://docs.scipy.org/doc/scipy/", None),
+    # scipy is the one entry whose target and inventory differ, deliberately.  `docs.scipy.org` is
+    # self-hosted (every other entry here sits behind a CDN) and has repeatedly black-holed the docs
+    # build: measured 20.8s for `objects.inv` on a good day, then no response at all.  With `-W`
+    # the resulting "failed to reach any of the inventories" warning is a hard error, and with `-E`
+    # the environment pickle is discarded every run so the inventory is never cached.
+    # `static.scipy.org` mirrors `objects.inv` behind a CDN (0.36s, refreshed hourly by a cron job
+    # on `docs.scipy.org`) but serves *only* that file -- its HTML 404s -- so it cannot be the
+    # target: intersphinx builds link hrefs from the target, not the inventory.  Hence fetch the
+    # inventory from the mirror while still pointing readers at the real docs.  The `None` fallback
+    # must stay *second*, since locations are tried in order and the first success wins.
+    # See https://github.com/scipy/docs.scipy.org/issues/102 for the upstream suggestion.
+    "scipy": (
+        "https://docs.scipy.org/doc/scipy/",
+        ("https://static.scipy.org/doc/scipy/objects.inv", None),
+    ),
     "qiskit": ("https://quantum.cloud.ibm.com/docs/api/qiskit/", None),
     "cqiskit": ("https://quantum.cloud.ibm.com/docs/api/qiskit-c/", None),
     "qiskit_addon_sqd": ("https://quantum.cloud.ibm.com/docs/api/qiskit-addon-sqd/", None),
@@ -128,6 +142,13 @@ intersphinx_mapping = {
     "ffsim": ("https://qiskit-community.github.io/ffsim/", None),
     "pyscf": ("https://pyscf.org/", None),
 }
+
+# Bound each inventory fetch.  Nothing in the mapping above takes more than half a second in
+# practice, so this only ever fires for a host that is genuinely unreachable -- where a fast red
+# build beats burning the CI job's 30-minute budget on one hung socket.  It also caps the cost of
+# the scipy fallback above: without a timeout, falling back to `docs.scipy.org` could hang
+# indefinitely.
+intersphinx_timeout = 30
 
 plot_working_directory = "."
 plot_html_show_source_link = False
