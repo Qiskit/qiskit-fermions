@@ -323,10 +323,12 @@ def test_merge_ucj_workflow():
     :class:`.PrepareSlaterDeterminant` gates. The later rotations follow an :class:`.Evolution`, not
     the init, and are correctly left untouched.
     """
+    ffsim = pytest.importorskip("ffsim")
+
     norb, nelec, n_reps = 2, (1, 1), 1
     diag_coulomb_mats = np.zeros((n_reps, 2, norb, norb))
     orbital_rotations = np.stack([random_unitary(norb, seed=5) for _ in range(n_reps)])
-    ucj = UCJ("balanced", diag_coulomb_mats, orbital_rotations)
+    ucj = UCJ(ffsim.UCJOpSpinBalanced(diag_coulomb_mats, orbital_rotations))
 
     circ = FermionicCircuit(2 * norb)
     circ.append(InitializeModes.from_hartree_fock(norb, nelec), circ.modes)

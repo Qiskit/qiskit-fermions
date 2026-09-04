@@ -107,12 +107,11 @@ in packed (lower-triangular) `chemist` ordering, which is what PySCF produces.
 3. Build the LUCJ circuit
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The :class:`.UCJ` gate assembles the ansatz directly from the coupled-cluster amplitudes. Its
-:meth:`~qiskit_fermions.circuit.library.UCJ.from_t_amplitudes` constructor performs a *double
-factorization* of the :math:`t_2` amplitudes (by using
-:func:`~qiskit_fermions.linalg.double_factorized_t2`) to obtain the per-layer diagonal Coulomb
-matrices and orbital rotations, and derives an optional final orbital rotation from the
-:math:`t_1` amplitudes.
+The ansatz operator is built by `ffsim`_. Its
+:external:meth:`~ffsim.UCJOpSpinBalanced.from_t_amplitudes` constructor performs a *double
+factorization* of the :math:`t_2` amplitudes to obtain the per-layer diagonal Coulomb matrices and
+orbital rotations, and derives an optional final orbital rotation from the :math:`t_1` amplitudes.
+The :class:`.UCJ` gate then turns that operator into a fermionic circuit.
 
 The number of ansatz repetitions, :math:`L`, equals the number of terms in the double
 factorization. Truncating it with the ``n_reps`` argument trades some accuracy for a shallower
@@ -124,10 +123,12 @@ halving the number of layers.
    :nofigs:
    :include-source:
 
+   >>> import ffsim
    >>> from qiskit_fermions.circuit import FermionicCircuit
    >>> from qiskit_fermions.circuit.library import InitializeModes, UCJ
    >>>
-   >>> ansatz = UCJ.from_t_amplitudes(nelec, t2, t1=t1, n_reps=2)
+   >>> ucj_op = ffsim.UCJOpSpinBalanced.from_t_amplitudes(t2, t1=t1, n_reps=2)
+   >>> ansatz = UCJ(ucj_op)
    >>>
    >>> circuit = FermionicCircuit(2 * norb)
    >>> circuit.append(InitializeModes.from_hartree_fock(norb, nelec), circuit.modes)
@@ -212,10 +213,8 @@ additionally offers an optimized ("compressed") double factorization, its
 typically smaller, number of repetitions. This trades a classical optimization up front for a
 shallower ansatz at a target accuracy, and has no equivalent in this package.
 
-There is no need to re-implement it: an ``ffsim`` UCJ operator exposes the same tensors that
-:class:`.UCJ` is built from, so you can construct the operator with ``optimize=True`` and hand its
-``diag_coulomb_mats`` / ``orbital_rotations`` / ``final_orbital_rotation`` straight to the
-:class:`.UCJ` constructor.
+Since :class:`.UCJ` takes the ffsim operator itself, this needs no extra work: pass
+``optimize=True`` when building the operator and hand the result to the same constructor.
 
 .. skip: start if(not HAS_FFSIM)
 
@@ -228,12 +227,7 @@ There is no need to re-implement it: an ``ffsim`` UCJ operator exposes the same 
    ...     t2, t1=t1, n_reps=2, optimize=True
    ... )
    >>>
-   >>> compressed_ansatz = UCJ(
-   ...     "balanced",
-   ...     compressed.diag_coulomb_mats,
-   ...     compressed.orbital_rotations,
-   ...     final_orbital_rotation=compressed.final_orbital_rotation,
-   ... )
+   >>> compressed_ansatz = UCJ(compressed)
    >>>
    >>> compressed_circuit = FermionicCircuit(2 * norb)
    >>> compressed_circuit.append(
@@ -256,10 +250,8 @@ way recovers the same correlation energy at this (small) system size:
    compressed LUCJ energy: -1.14618323 Hartree
 
 .. note::
-   ``diag_coulomb_mats`` from ``optimize=True`` might carry tiny imaginary round-off; :class:`.UCJ`
-   takes their real part and raises only if the imaginary part is not negligible. For a better fit at
-   a given ``n_reps`` (at increased classical cost) see ffsim's ``multi_stage_start`` /
-   ``multi_stage_step`` options.
+   For a better fit at a given ``n_reps`` (at increased classical cost) see ffsim's
+   ``multi_stage_start`` / ``multi_stage_step`` options.
 
 .. skip: end
 
@@ -286,7 +278,7 @@ pipeline's optimization stage can act on them, so pass ``circuit.decompose()``.
    >>> pm = generate_preset_jw_pass_manager()
    >>> transpiled = pm.run(circuit.decompose())
    >>> print(dict(sorted(transpiled.count_ops().items())))
-   {'p': 16, 'rzz': 12, 'x': 2, 'xx_plus_yy': 28}
+   {'p': 14, 'rzz': 12, 'x': 2, 'xx_plus_yy': 28}
 
 Without a target device, this maps onto ``2 * norb`` qubits with all-to-all connectivity assumed; the
 orbital rotations synthesize into :class:`~qiskit.circuit.library.XXPlusYYGate`\ objects and the diagonal
@@ -358,17 +350,19 @@ directly, the router must insert many ``SWAP`` gates to bridge them:
 .. rubric:: Restrict the ansatz to the hardware-implementable interactions
 
 The fix is to feed ``allowed_pairs_ab`` back into the ansatz construction, through the
-``interaction_pairs`` argument of :meth:`~qiskit_fermions.circuit.library.UCJ.from_t_amplitudes`,
-so the diagonal Coulomb operator only contains alpha-beta terms the coupling map can implement
-directly. The ansatz then matches the device topology and the router barely has to touch it:
+``interaction_pairs`` argument of
+:external:meth:`~ffsim.UCJOpSpinBalanced.from_t_amplitudes`, so the diagonal Coulomb operator only
+contains alpha-beta terms the coupling map can implement directly. The ansatz then matches the device topology and the router barely has to touch it:
 
 .. plot::
    :context:
    :nofigs:
    :include-source:
 
-   >>> restricted = UCJ.from_t_amplitudes(
-   ...     nelec, t2, t1=t1, n_reps=2, interaction_pairs=(pairs_aa, allowed_pairs_ab)
+   >>> restricted = UCJ(
+   ...     ffsim.UCJOpSpinBalanced.from_t_amplitudes(
+   ...         t2, t1=t1, n_reps=2, interaction_pairs=(pairs_aa, allowed_pairs_ab)
+   ...     )
    ... )
    >>>
    >>> circuit = FermionicCircuit(2 * norb)
