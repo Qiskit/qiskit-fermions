@@ -190,7 +190,8 @@ class Evolution(FermionicGate):
             NotImplementedError: if the gate's ``operator`` is not a
                 :class:`~qiskit_fermions.operators.FermionOperator`. The simulation path is currently
                 backed by the native FCI kernel, which only ``FermionOperator`` exposes (via
-                :class:`.SupportsLinearOperator`); evolving other operator types is not yet supported.
+                :class:`ffsim.SupportsLinearOperator`); evolving other operator types is not yet
+                supported.
             ValueError: if the operator does not conserve the ``(norb, nelec)`` sector. Evolving
                 under ``exp(-i * time * operator)`` only yields a unitary when ``operator`` maps the
                 sector to itself; a term that leaves the sector would be silently projected to zero by

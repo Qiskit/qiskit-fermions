@@ -25,15 +25,15 @@ explicitly inheriting from it. For example, any class that implements a ``__len_
 satisfies :class:`~typing.Sized`, whether or not it says so anywhere in its class hierarchy.
 
 The protocols in this module follow the same idea, but each one centers on a single, otherwise
-unremarkable dunder-style method (for example ``_linear_operator_``). A class implementing that
-one method thereby satisfies the corresponding protocol -- :class:`.SupportsLinearOperator` in
-this example -- and becomes usable wherever that protocol is expected, without any explicit
-registration. Note that "protocol" is sometimes also used loosely to refer to the type-agnostic
-dispatch function built on top of a protocol (for example :func:`.linear_operator`) rather than
-the interface itself; the distinction should be clear from context.
+unremarkable dunder-style method (for example ``_majorana_operator_``). A class implementing that
+one method thereby satisfies the corresponding protocol (:class:`.SupportsMajoranaOperator` in this
+example) and becomes usable wherever that protocol is expected, without any explicit registration.
+Note that "protocol" is sometimes also used loosely to refer to a type-agnostic dispatch function
+built on top of a protocol (for example :func:`.fermion_operator`) rather than the interface itself;
+the distinction should be clear from context.
 
-Most protocols below follow this pattern paired with a small, type-agnostic **helper function**
-that dispatches to the protocol method on whatever object it is given:
+Some protocols below are paired with a small, type-agnostic **helper function** that dispatches to
+the protocol method on whatever object it is given.
 
 .. list-table::
    :header-rows: 1
@@ -47,12 +47,6 @@ that dispatches to the protocol method on whatever object it is given:
    * - :class:`.SupportsMajoranaOperator`
      - ``_majorana_operator_(self)``
      - :func:`.majorana_operator`
-   * - :class:`.SupportsLinearOperator`
-     - ``_linear_operator_(self, norb, nelec)``
-     - :func:`.linear_operator`
-   * - :class:`.SupportsApplyUnitary`
-     - ``_apply_unitary_(self, vec, norb, nelec, copy)``
-     - :func:`.apply_unitary`
    * - :class:`.SupportsApplyUnitaryPlaced`
      - ``_apply_unitary_placed_(self, vec, norb, nelec, copy, freg_indices)``
      - --
@@ -64,28 +58,50 @@ that dispatches to the protocol method on whatever object it is given:
    :toctree: ../stubs/
    :class: sd-d-none
 
-   SupportsApplyUnitary
    SupportsApplyUnitaryPlaced
    SupportsCommutators
    SupportsFermionOperator
-   SupportsLinearOperator
    SupportsMajoranaOperator
+
+Protocols implemented from ffsim
+================================
+
+Simulation is `ffsim <https://qiskit-community.github.io/ffsim/>`_'s concern, and its protocols are
+defined there rather than restated here. The gates and operators of this package implement the
+following, so ffsim's dispatchers accept them directly:
+
+.. list-table::
+   :header-rows: 1
+
+   * - ffsim protocol
+     - Method
+     - Implemented by
+   * - :class:`ffsim.SupportsApplyUnitary`
+     - ``_apply_unitary_(self, vec, norb, nelec, copy)``
+     - :class:`.FermionicCircuit` and every :class:`.FermionicGate`
+   * - :class:`ffsim.SupportsLinearOperator`
+     - ``_linear_operator_(self, norb, nelec)``
+     - :class:`.FermionOperator`
+
+.. caution::
+   :class:`ffsim.SupportsFermionOperator` shares the ``_fermion_operator_`` method name with
+   this package's :class:`.SupportsFermionOperator`, but the two are *not* the same contract: ours
+   returns this package's :class:`.FermionOperator` rather than ffsim's unrelated type. Since
+   :func:`ffsim.fermion_operator` dispatches purely on the method name, calling it on an object of
+   this package returns our type.
 
 """
 
 from __future__ import annotations
 
-from .apply_unitary import SupportsApplyUnitary, SupportsApplyUnitaryPlaced
+from .apply_unitary import SupportsApplyUnitaryPlaced
 from .commutators import SupportsCommutators
 from .fermion_operator import SupportsFermionOperator
-from .linear_operator import SupportsLinearOperator
 from .majorana_operator import SupportsMajoranaOperator
 
 __all__ = [
-    "SupportsApplyUnitary",
     "SupportsApplyUnitaryPlaced",
     "SupportsCommutators",
     "SupportsFermionOperator",
-    "SupportsLinearOperator",
     "SupportsMajoranaOperator",
 ]

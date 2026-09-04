@@ -20,59 +20,19 @@ if TYPE_CHECKING:
     import numpy as np
 
 
-class SupportsApplyUnitary(Protocol):
-    """A mirror of the :class:`ffsim.SupportsApplyUnitary` protocol.
-
-    See :func:`.apply_unitary` for the type-agnostic helper function dispatching to the method
-    below.
-
-    .. doctest::
-
-        >>> import numpy as np
-        >>> from qiskit_fermions.circuit.library import OrbitalRotation
-        >>> gate = OrbitalRotation(np.eye(2))
-        >>> vec = np.array([1.0, 0.0], dtype=complex)
-        >>> gate._apply_unitary_(vec, norb=2, nelec=1, copy=True)
-        array([1.+0.j, 0.+0.j])
-    """
-
-    def _apply_unitary_(
-        self, vec: np.ndarray, norb: int, nelec: int | tuple[int, int], copy: bool
-    ) -> np.ndarray:
-        """Applies a unitary transformation to a state vector.
-
-        Args:
-            vec: the state vector to apply the unitary transformation to.
-            norb: the number of spatial orbitals.
-            nelec: either a single integer representing the number of fermions for a spinless
-                system, or a pair of integers storing the numbers of spin alpha and spin beta
-                fermions.
-            copy: whether to copy the vector before operating on it.
-
-                - If ``copy=True`` then this method always returns a newly allocated vector and the
-                  original vector is left untouched.
-                - If ``copy=False`` then this method may still return a newly allocated vector, but
-                  the original vector may have its data overwritten. It is also possible that the
-                  original vector is returned, modified in-place.
-
-        Returns:
-            The transformed vector.
-        """
-
-
 class SupportsApplyUnitaryPlaced(Protocol):
-    """A package-specific extension of :class:`.SupportsApplyUnitary` carrying a mode placement.
+    """A package-specific extension of :class:`ffsim.SupportsApplyUnitary`.
 
-    Unlike :class:`.SupportsApplyUnitary` (mirroring :class:`ffsim.SupportsApplyUnitary`), this
-    protocol has no ffsim equivalent and no helper function: :meth:`~.FermionicCircuit._apply_unitary_placed_`
-    is the only caller, and it dispatches to it directly via ``getattr`` duck-typing rather than
-    through a free function. It exists here purely for typing and documentation purposes, since every
-    concrete :class:`.FermionicGate` (as well as :class:`.FermionicCircuit` itself) implements this
-    method.
+    Where ffsim's protocol applies an object to a whole state vector, this one adds the placement of
+    the object's local modes onto the global ones it acts on. It has no ffsim equivalent:
+    :meth:`~.FermionicCircuit._apply_unitary_placed_` is the only caller, and it dispatches to it
+    directly via ``getattr`` duck-typing. It exists here purely for typing and documentation
+    purposes, since every concrete :class:`.FermionicGate` (as well as :class:`.FermionicCircuit`
+    itself) implements this method.
 
     See :meth:`.FermionicCircuit._apply_unitary_placed_` for the full semantics, including how a
-    plain :class:`.SupportsApplyUnitary` implementation (with no mode-placement argument) is honored
-    only on the identity placement.
+    plain ``_apply_unitary_`` implementation (with no mode-placement argument) is honored only on the
+    identity placement.
     """
 
     def _apply_unitary_placed_(

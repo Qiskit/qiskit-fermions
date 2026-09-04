@@ -1,0 +1,49 @@
+---
+upgrade:
+  - |
+    The ``qiskit_fermions.linalg.apply_unitary`` and
+    ``qiskit_fermions.linalg.linear_operator`` functions have been removed. They were thin wrappers
+    around the ``_apply_unitary_`` and ``_linear_operator_`` protocol methods,
+    duplicating :func:`ffsim.apply_unitary` and :func:`ffsim.linear_operator`. Call ffsim's
+    functions instead, or, when ffsim is not installed, the protocol method on the object directly:
+
+    .. code-block:: python
+
+       # before
+       from qiskit_fermions.linalg import apply_unitary, linear_operator
+       vec = apply_unitary(vec, gate, norb, nelec)
+       linop = linear_operator(operator, norb, nelec)
+
+       # after (with ffsim)
+       vec = ffsim.apply_unitary(vec, gate, norb=norb, nelec=nelec)
+       linop = ffsim.linear_operator(operator, norb=norb, nelec=nelec)
+
+       # after (without ffsim)
+       vec = gate._apply_unitary_(vec, norb, nelec, copy=True)
+       linop = operator._linear_operator_(norb, nelec)
+
+    The methods themselves are unchanged, and the native FCI kernel backing ``_linear_operator_``
+    still depends only on ``scipy``, so simulating an operator without ffsim installed works exactly
+    as before.
+  - |
+    The ``qiskit_fermions.protocols.SupportsApplyUnitary`` and
+    ``qiskit_fermions.protocols.SupportsLinearOperator`` protocols have been removed for the same
+    reason: they restated contracts that ffsim defines. Use ffsim's own protocols, which they
+    mirrored one-to-one:
+
+    * ``qiskit_fermions.protocols.SupportsApplyUnitary`` becomes
+      :class:`ffsim.SupportsApplyUnitary`
+    * ``qiskit_fermions.protocols.SupportsLinearOperator`` becomes
+      :class:`ffsim.SupportsLinearOperator`
+
+    The protocol *methods* (``_apply_unitary_`` and ``_linear_operator_``) are unchanged, so the
+    objects of this package that implemented them still do; only the local restatement of the
+    interface is gone. :class:`.SupportsApplyUnitaryPlaced` stays, since it extends
+    :class:`ffsim.SupportsApplyUnitary` with a mode placement and has no ffsim counterpart.
+  - |
+    The ``simulation`` optional dependency has been renamed to ``ffsim``, so
+    ``pip install "qiskit-fermions[simulation]"`` becomes
+    ``pip install "qiskit-fermions[ffsim]"``. The extra names the dependency it installs rather than
+    a capability, because simulation does not require it: the native FCI kernel behind
+    ``_linear_operator_`` depends only on ``scipy``. Installing
+    ``qiskit-fermions[all]`` is unaffected.

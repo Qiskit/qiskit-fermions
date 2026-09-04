@@ -10,7 +10,7 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
-"""A protocol to indicate linear operator conversion support."""
+"""Support for converting an operator into a SciPy ``LinearOperator``."""
 
 from __future__ import annotations
 
@@ -21,30 +21,6 @@ import scipy.sparse.linalg
 
 if TYPE_CHECKING:
     from qiskit_fermions._lib.linalg.fci import FciLinearOperator
-
-
-class SupportsLinearOperator(Protocol):
-    """A mirror of the :class:`ffsim.SupportsLinearOperator` protocol.
-
-    See :func:`.linear_operator` for the type-agnostic helper function dispatching to the method
-    below.
-
-    .. doctest::
-
-        >>> import numpy as np
-        >>> from qiskit_fermions.operators import FermionOperator
-        >>> num_op = FermionOperator.from_dict({((True, 0), (False, 0)): 1.0})
-        >>> linop = num_op._linear_operator_(norb=2, nelec=1)
-        >>> linop.shape
-        (2, 2)
-        >>> linop.matvec(np.array([1.0, 0.0], dtype=complex))
-        array([1.+0.j, 0.+0.j])
-    """
-
-    def _linear_operator_(
-        self, norb: int, nelec: int | tuple[int, int]
-    ) -> scipy.sparse.linalg.LinearOperator:
-        """Returns a :class:`scipy.sparse.linalg.LinearOperator` for this operator on the ``(norb, nelec)`` FCI sector."""
 
 
 class _SupportsFciLinearOperator(Protocol):
