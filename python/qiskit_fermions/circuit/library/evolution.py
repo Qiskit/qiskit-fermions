@@ -24,6 +24,8 @@ from ._expm_multiply import _expm_multiply_fci
 if TYPE_CHECKING:
     import numpy as np
 
+    from .synthesis import FermionicEvolutionSynthesis
+
 
 class Evolution(FermionicGate):
     r"""Implements the time evolution of an operator.
@@ -39,15 +41,35 @@ class Evolution(FermionicGate):
     and is not verified.
 
     .. note::
-       How this evolution is decomposed into a circuit is not fixed by this gate alone. The default
-       :meth:`_define` implementation splits the evolution group-by-group when the ``operator`` has
-       :attr:`~qiskit_fermions.operators.FermionOperator.groups` assigned, and term-by-term
-       otherwise, yielding a first-order product formula (which is exact only when the individual
-       factors mutually commute). The transpilation process may further alter this decomposition
-       (for example, :class:`.QDriftTrotterization` replaces it with a randomized product formula).
+       Breaking this gate down in fermionic space (into a circuit of smaller :class:`.Evolution`
+       gates) is **optional**, and it is what the :attr:`synthesis` attribute governs. The gate can
+       equally be handed straight to the fermion-to-qubit stage, which maps and synthesizes it whole,
+       however many terms its ``operator`` holds. See
+       :mod:`~qiskit_fermions.circuit.library.synthesis`.
+
+       When it `is` decomposed (by :meth:`~.FermionicCircuit.decompose`, for instance)
+       :attr:`synthesis` decides how. It defaults to :class:`.FermionicLieTrotter`, which splits the
+       evolution group-by-group when the ``operator`` has
+       :attr:`~qiskit_fermions.operators.OperatorTrait.groups` assigned (see
+       :ref:`grouping_explanation`), and term-by-term otherwise (exact only when the individual factors
+       mutually commute). The transpilation process may further alter the decomposition;
+       :class:`.QDriftTrotterization`, for example, replaces the evolution with a randomized sample of
+       its terms.
+
+    .. note::
+       The state-vector simulation path does `not` go through :attr:`synthesis`: it exponentiates the
+       whole ``operator`` exactly. Simulating this gate therefore incurs no Trotter error, whereas a
+       decomposed circuit generally does.
     """
 
-    def __init__(self, num_modes: int, operator: OperatorTrait, time: float = 1.0) -> None:
+    def __init__(
+        self,
+        num_modes: int,
+        operator: OperatorTrait,
+        time: float = 1.0,
+        *,
+        synthesis: FermionicEvolutionSynthesis | None = None,
+    ) -> None:
         r"""Initializing an instance of this gate can be done with the arguments listed below.
 
         Args:
@@ -56,49 +78,34 @@ class Evolution(FermionicGate):
                 fermionic modes.
             time: the evolution time :math:`t` entering the exponent of :math:`e^{-i t H}`. A
                 negative value evolves backwards in time.
+            synthesis: the fermion-to-fermion synthesis method with which to decompose this gate, when
+                it gets decomposed at all. If ``None`` (the default), a
+                :class:`.FermionicLieTrotter` instance is used.
         """
+        from .synthesis import FermionicLieTrotter
+
         self.operator = operator
         """The operator under which to time evolve the acted-upon fermionic modes."""
+
+        # read-only (see the `synthesis` property): the definition is cached the first time it is
+        # built, so a later re-assignment would be silently ignored
+        self._synthesis: FermionicEvolutionSynthesis = synthesis or FermionicLieTrotter()
 
         super().__init__(
             "Evolution", num_modes, [time], label=f"evolve({' '.join(str(operator).split())})"
         )
 
+    @property
+    def synthesis(self) -> FermionicEvolutionSynthesis:
+        """The fermion-to-fermion synthesis method with which this gate is decomposed.
+
+        This is read-only: the gate's definition is built once and then cached, so a synthesis method
+        assigned after the fact could not take effect. Pass it to the constructor instead.
+        """
+        return self._synthesis
+
     def _define(self) -> None:
-        from qiskit_fermions.circuit import FermionicCircuit
-
-        definition = FermionicCircuit(self.num_modes)
-
-        # when the operator being evolved has groups use those for the decomposition, otherwise
-        # decompose into all individual terms
-        iterator = (
-            self.operator.split_out_groups
-            if self.operator.has_groups()
-            else self.operator.iter_terms
-        )
-
-        for item in iterator():
-            if isinstance(item, tuple):
-                # iterating over terms rather than operator groups
-                item = self.operator.__class__.from_terms([item])
-
-            # reduce each operator to act only on the non-idle part of the register
-            active = item.get_support()
-            num_active = len(active)
-            active_idx = iter(range(num_active))
-            idle_idx = iter(range(num_active, self.num_modes))
-            permutation = [
-                next(active_idx) if idx in active else next(idle_idx)
-                for idx in range(self.num_modes)
-            ]
-            relabeled = item.relabel_modes(permutation)
-
-            definition.append(
-                Evolution(num_active, relabeled, time=self.params[0]),
-                [definition.modes[idx] for idx in sorted(active)],
-            )
-
-        self._definition = definition._inner
+        self._definition = self.synthesis.synthesize(self)._inner
 
     def _apply_unitary_placed_(
         self,

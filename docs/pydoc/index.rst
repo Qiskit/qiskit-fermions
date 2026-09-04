@@ -45,6 +45,7 @@ Circuits
 
    qiskit_fermions.circuit
    qiskit_fermions.circuit.library
+   qiskit_fermions.circuit.library.synthesis
 
 
 **********
