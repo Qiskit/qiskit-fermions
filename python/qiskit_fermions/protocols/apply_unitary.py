@@ -28,6 +28,12 @@ class SupportsApplyUnitary(Protocol):
     stated here because the contract holds whether or not ffsim is installed: without it, call the
     method directly, as the doctest below does.
 
+    .. invisible-code-block: python
+
+        >>> from qiskit_fermions.utils.optionals import HAS_FFSIM
+
+    .. skip: start if(not HAS_FFSIM)
+
     .. doctest::
 
         >>> import numpy as np
@@ -36,6 +42,8 @@ class SupportsApplyUnitary(Protocol):
         >>> vec = np.array([1.0, 0.0], dtype=complex)
         >>> gate._apply_unitary_(vec, norb=2, nelec=1, copy=True)
         array([1.+0.j, 0.+0.j])
+
+    .. skip: end
     """
 
     def _apply_unitary_(

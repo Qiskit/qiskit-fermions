@@ -19,13 +19,8 @@ use pyo3::{class::basic::CompareOp, exceptions::PyNotImplementedError};
 use pyo3_stub_gen::derive::*;
 use std::collections::HashMap;
 
-use std::sync::Arc;
-
-use qiskit_fermions_core::linalg::fci::{MAX_ORBITALS, SpinfulSector, SpinlessSector};
 use qiskit_fermions_core::operators::fermion_operator::FermionOperator;
 use qiskit_fermions_core::operators::{OperatorMacro, OperatorTrait};
-
-use crate::linalg::fci::FciLinearOperator;
 
 pub type PyFermionAction = (bool, u32);
 
@@ -1200,37 +1195,6 @@ impl PyFermionOperator {
             .map_err(crate::value_err)
     }
 
-    /// Returns a native FCI matrix-vector view of this operator on a fixed sector.
-    ///
-    /// This is the native kernel carrier behind the public ``_linear_operator_`` protocol method:
-    /// it applies this operator to a state vector via a native matrix-vector kernel, avoiding any
-    /// conversion to an intermediate representation. The returned object duck-types the subset of
-    /// the SciPy ``LinearOperator`` interface that :func:`scipy.sparse.linalg.expm_multiply` needs,
-    /// but it is **not** itself a SciPy ``LinearOperator``. The public ``_linear_operator_`` method
-    /// (added in Python, see :mod:`qiskit_fermions.operators`) wraps this into a genuine
-    /// :class:`scipy.sparse.linalg.LinearOperator` -- which is what ffsim's ``_linear_operator_``
-    /// protocol (and :external:func:`ffsim.linear_operator`) require.
-    ///
-    /// The FCI sector is selected by ``nelec``:
-    ///
-    /// * an ``int`` treats the operator's ``norb`` modes as spinless orbitals; the state vector has
-    ///   length :math:`\binom{norb}{nelec}`.
-    /// * a ``(n_alpha, n_beta)`` tuple treats the operator's ``2 * norb`` modes as spin-orbitals
-    ///   under the block-spin convention; the state vector has length
-    ///   :math:`\binom{norb}{n_\alpha} \binom{norb}{n_\beta}`.
-    ///
-    /// Args:
-    ///     norb: the number of (spatial) orbitals.
-    ///     nelec: the electron count -- an ``int`` for a spinless sector, or a ``(n_alpha, n_beta)``
-    ///         tuple for a spinful one.
-    ///
-    /// Returns:
-    ///     A native ``LinearOperator``-compatible object for the requested sector.
-    ///
-    /// Raises:
-    ///     TypeError: if ``nelec`` is neither an ``int`` nor a ``(int, int)`` tuple.
-    ///     ValueError: if ``norb`` exceeds the maximum number of orbitals the bitmask
-    ///         representation supports (64).
     /// Returns the constructor arguments needed to pickle this operator.
     ///
     /// Together with :meth:`__getstate__`/:meth:`__setstate__` (which round-trip
@@ -1252,51 +1216,6 @@ impl PyFermionOperator {
     /// Restores this operator's :attr:`groups` from its pickled state.
     fn __setstate__(&mut self, state: Option<Vec<u32>>) {
         self.inner.groups = state;
-    }
-
-    fn _fci_linear_operator_(
-        &self,
-        norb: u32,
-        nelec: &Bound<'_, PyAny>,
-    ) -> PyResult<FciLinearOperator> {
-        if norb > MAX_ORBITALS {
-            return Err(crate::value_err(format!(
-                "norb={norb} exceeds the maximum of {MAX_ORBITALS} orbitals"
-            )));
-        }
-        if let Ok(nocc) = nelec.extract::<u32>() {
-            // Compile the operator once into a flat scatter map for this sector: `expm_multiply` calls
-            // `matvec`/`rmatvec` many times, and the map (the ladder walk, the conservation check, and
-            // the destination ranks) depends only on the operator and the sector -- not on the probe
-            // vector. The same map backs `rmatvec` via its conjugate transpose (`apply_conj`), so no
-            // separate adjoint operator is built or copied into the closures.
-            let sector = SpinlessSector::new(norb, nocc);
-            let dim = sector.dim();
-            let compiled = Arc::new(
-                self.inner
-                    .compile_fci_spinless(&sector)
-                    .map_err(crate::value_err)?,
-            );
-            let trace = compiled.trace();
-            let (compiled_mv, compiled_rmv) = (Arc::clone(&compiled), compiled);
-            let matvec = Box::new(move |vec: &[Complex64]| compiled_mv.apply(vec));
-            let rmatvec = Box::new(move |vec: &[Complex64]| compiled_rmv.apply_conj(vec));
-            Ok(FciLinearOperator::new(dim, trace, matvec, rmatvec))
-        } else {
-            let (n_alpha, n_beta) = nelec.extract::<(u32, u32)>()?;
-            let sector = SpinfulSector::new(norb, n_alpha, n_beta).map_err(crate::value_err)?;
-            let dim = sector.dim();
-            let compiled = Arc::new(
-                self.inner
-                    .compile_fci_spinful(&sector)
-                    .map_err(crate::value_err)?,
-            );
-            let trace = compiled.trace();
-            let (compiled_mv, compiled_rmv) = (Arc::clone(&compiled), compiled);
-            let matvec = Box::new(move |vec: &[Complex64]| compiled_mv.apply(vec));
-            let rmatvec = Box::new(move |vec: &[Complex64]| compiled_rmv.apply_conj(vec));
-            Ok(FciLinearOperator::new(dim, trace, matvec, rmatvec))
-        }
     }
 }
 

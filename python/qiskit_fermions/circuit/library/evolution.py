@@ -14,15 +14,16 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from qiskit_fermions.operators import OperatorTrait
 
 from .. import FermionicGate
-from ._expm_multiply import _expm_multiply_fci
 
 if TYPE_CHECKING:
     import numpy as np
+
+    from qiskit_fermions.protocols import SupportsFermionOperator
 
     from .synthesis import FermionicEvolutionSynthesis
 
@@ -166,10 +167,12 @@ class Evolution(FermionicGate):
     ) -> np.ndarray:
         """Applies ``exp(-i * time * operator)`` after relabeling the operator to global modes.
 
-        The operator is relabeled onto its global modes and turned into a ``scipy`` ``LinearOperator``
-        backed by a native FCI matrix-vector kernel, then applied to the vector via
-        ``scipy.sparse.linalg.expm_multiply``. This mirrors ffsim's own ``_apply_unitary_``
-        implementations (e.g. for its UCCSD operators).
+        The operator is relabeled onto its global modes, converted to an
+        :class:`ffsim.FermionOperator` and handed to :func:`ffsim.linear_operator`, then applied to
+        the vector via :func:`scipy.sparse.linalg.expm_multiply`. An operator that is not already a
+        :class:`.FermionOperator` is first converted through the
+        :class:`.SupportsFermionOperator` protocol, so any operator type of this package can be
+        evolved.
 
         Args:
             vec: the state vector to act on.
@@ -187,49 +190,44 @@ class Evolution(FermionicGate):
             The transformed vector.
 
         Raises:
-            NotImplementedError: if the gate's ``operator`` is not a
-                :class:`~qiskit_fermions.operators.FermionOperator`. The simulation path is currently
-                backed by the native FCI kernel, which only ``FermionOperator`` exposes (via
-                :class:`.SupportsLinearOperator`); evolving other operator types is not yet supported.
+            MissingOptionalLibraryError: if ffsim is not installed.
             ValueError: if the operator does not conserve the ``(norb, nelec)`` sector. Evolving
                 under ``exp(-i * time * operator)`` only yields a unitary when ``operator`` maps the
-                sector to itself; a term that leaves the sector would be silently projected to zero by
-                the native kernel, producing a non-unitary, physically meaningless result. Such an
-                operator is therefore rejected rather than applied. For a pair ``nelec`` the alpha and
-                beta electron counts must *each* be conserved (particle number and the z-component of
-                spin), matching the fixed sector the kernel represents.
+                sector to itself, so ffsim rejects an operator that conserves neither particle number
+                nor the z-component of spin.
         """
-        from qiskit_fermions.operators import FermionOperator
+        import ffsim
+        import scipy.sparse.linalg
 
-        # The simulation path relies on the operator exposing ``SupportsLinearOperator`` (the native FCI
-        # kernel) and ``conserves_sector``, which today only ``FermionOperator`` provides. Until
-        # ``SupportsLinearOperator`` is folded into ``OperatorTrait`` so any operator can be evolved,
-        # reject a non-``FermionOperator`` operator with a clear error rather than failing obscurely
-        # deeper in.
-        if not isinstance(self.operator, FermionOperator):
-            raise NotImplementedError(
-                "Evolution can only be applied to a state vector when its operator is a "
-                f"'FermionOperator'; got '{type(self.operator).__name__}'. Simulating the evolution "
-                "of other operator types is not yet supported."
-            )
+        from qiskit_fermions.mappers.library.fermion_operator import fermion_operator
+        from qiskit_fermions.operators import FermionOperator
 
         if copy:
             vec = vec.copy()
 
-        # `self.operator` is narrowed to `FermionOperator` by the guard above, and `relabel_modes`
-        # preserves the type, so the relabeled operator exposes `conserves_sector` and satisfies
-        # `SupportsLinearOperator`.
-        operator = self.operator.relabel_modes(freg_indices)
-        # A term that leaves the fixed (norb, nelec) sector is projected to zero by the native kernel,
-        # which would turn `exp(-i t H)` into a non-unitary map. Reject rather than silently produce a
-        # wrong state. Spinless: one block of `norb`; spinful: alpha [0, norb) and beta [norb, 2*norb)
-        # blocks, each of which must be conserved.
-        block_sizes = [norb] if isinstance(nelec, int) else [norb, norb]
-        if not operator.conserves_sector(block_sizes):
-            raise ValueError(
-                "Evolution requires an operator that conserves the (norb, nelec) sector: every term "
-                "must preserve the particle number"
-                + (" of each spin species" if not isinstance(nelec, int) else "")
-                + f" (norb={norb}, nelec={nelec})."
-            )
-        return _expm_multiply_fci(operator, vec, norb, nelec, scale=-1j * self.params[0])
+        # Any operator type of this package reaches the ffsim simulation path through its fermionic
+        # image: `_fermion_operator_` is this package's own protocol (it returns *this* package's
+        # `FermionOperator`), which is then converted to ffsim's unrelated type below.
+        if isinstance(self.operator, FermionOperator):
+            operator = self.operator
+        else:
+            # The raw image of a Majorana-like operator carries terms that repeat a mode (such as
+            # `a_0 a_0`), which vanish identically but which ffsim's structural conservation check
+            # reads as particle-number violations. Normal-ordering contracts them away first, so a
+            # sector-conserving operator is not rejected for the shape of its unreduced image.
+            image = fermion_operator(cast("SupportsFermionOperator", self.operator))
+            operator = image.normal_ordered().simplify()
+
+        operator = operator.relabel_modes(freg_indices)
+
+        scale = -1j * self.params[0]
+        linop = ffsim.linear_operator(operator, norb=norb, nelec=nelec)
+        # SciPy factors `exp(traceA / n)` out of the exponential. That is not a correctness input,
+        # but it is a sizeable win in speed and accuracy for an operator with a large trace, and
+        # `scale * linop` is a composed operator that no longer carries the trace, so scale it here:
+        # `trace(c * A) == c * trace(A)`.
+        trace_a = scale * ffsim.trace(operator, norb=norb, nelec=nelec)
+        return cast(
+            "np.ndarray",
+            scipy.sparse.linalg.expm_multiply(scale * linop, vec, traceA=trace_a),
+        )

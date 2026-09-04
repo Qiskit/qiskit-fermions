@@ -40,20 +40,23 @@ diagonalize a :class:`.FermionOperator`, and sampling utilities like
 :func:`ffsim.sample_state_vector` (used in the :ref:`SKQD guide <skqd_getting_started>` to turn a
 simulated statevector into measurement counts) work without modification.
 
+.. invisible-code-block: python
+
+    >>> from qiskit_fermions.utils.optionals import HAS_FFSIM
+
+.. skip: start if(not HAS_FFSIM)
+
 .. plot::
    :context:
    :nofigs:
    :include-source:
 
+   >>> import ffsim
    >>> import numpy as np
    >>>
    >>> from qiskit_fermions.circuit import FermionicCircuit
    >>> from qiskit_fermions.circuit.library import Evolution
    >>> from qiskit_fermions.operators import FermionOperator, ann, cre
-   >>> from qiskit_fermions.utils.optionals import HAS_FFSIM
-   >>>
-   >>> if HAS_FFSIM:
-   ...     import ffsim
    >>>
    >>> norb, nelec = 2, (1, 1)
    >>> hamiltonian = FermionOperator.from_terms([
@@ -64,9 +67,8 @@ simulated statevector into measurement counts) work without modification.
    >>> circuit = FermionicCircuit(2 * norb)
    >>> circuit.append(Evolution(2 * norb, hamiltonian, time=1.0), circuit.modes)
    >>>
-   >>> if HAS_FFSIM:
-   ...     reference = ffsim.hartree_fock_state(norb, nelec)
-   ...     state = ffsim.apply_unitary(reference, circuit, norb=norb, nelec=nelec)  # native ffsim call
+   >>> reference = ffsim.hartree_fock_state(norb, nelec)
+   >>> state = ffsim.apply_unitary(reference, circuit, norb=norb, nelec=nelec)  # native ffsim call
 
 This is the reason for coupling with ffsim's protocols rather than only offering a
 bespoke ``simulate()`` method. It lets ffsim's existing, actively developed ecosystem of simulation
@@ -84,16 +86,15 @@ guarded at runtime by :data:`~qiskit_fermions.utils.optionals.HAS_FFSIM` (as was
 On Windows, that extra resolves to nothing (a silent no-op through a ``sys_platform`` marker),
 rather than an install failure.
 
-Simulation must still work without ffsim, so :class:`.SupportsLinearOperator` is backed
-by an independent native Rust FCI (full configuration interaction) kernel, not a wrapper
-around ffsim's linear algebra routines. It compiles an operator's terms into a scatter map
-over the fixed-particle-number determinant basis, then reuses that compiled form across repeated
-matrix-vector products. This is the protocol method ffsim expects
-(:class:`ffsim.SupportsLinearOperator`); it is implemented without ffsim, and it is
-cross-checked against ffsim's matrix elements in this package's test suite, but it does not call
-into ffsim. Handing a :class:`.FermionOperator` to :func:`scipy.sparse.linalg.eigsh` or
-:func:`scipy.sparse.linalg.expm_multiply` (as :meth:`.Evolution._apply_unitary_placed_` does
-internally) therefore works identically whether or not ffsim is installed:
+Simulation itself, however, *is* ffsim's concern. :class:`.SupportsLinearOperator` and
+:class:`.SupportsTrace` are implemented by converting this package's :class:`.FermionOperator` into
+an :class:`ffsim.FermionOperator` and handing that to :func:`ffsim.linear_operator` and
+:func:`ffsim.trace`. This package owns the mapper-agnostic circuit and its transpilation; it does
+not carry a second simulation backend alongside ffsim's. Both protocol methods therefore require
+ffsim, and raise
+:class:`~qiskit.exceptions.MissingOptionalLibraryError` without it. Everything that does not
+simulate -- building operators, mapping them, and transpiling the resulting circuits -- keeps working
+on any platform, Windows included.
 
 .. plot::
    :context:
@@ -102,27 +103,20 @@ internally) therefore works identically whether or not ffsim is installed:
 
    >>> import scipy.sparse.linalg
    >>>
-   >>> # no ffsim: call the protocol method directly (pure scipy + native Rust kernel)
    >>> linop = hamiltonian._linear_operator_(norb, nelec)
    >>> energy, _ = scipy.sparse.linalg.eigsh(linop, k=1, which="SA")
    >>> print(f"ground-state energy: {energy[0]:.6f}")
    ground-state energy: -0.500000
 
-Some gates go further and branch on :data:`~qiskit_fermions.utils.optionals.HAS_FFSIM` at simulation
-time for performance. :class:`.OrbitalRotation` is one example, whose ``_apply_unitary_``
-implementation delegates to ffsim's dedicated Givens-rotation kernel
-(:func:`ffsim.apply_orbital_rotation`) when ffsim is installed, and otherwise falls back to
-expressing the rotation as :math:`\exp(G)` for a one-body generator :math:`G` and applying that
-through the same native-kernel-plus-:func:`~scipy.sparse.linalg.expm_multiply` path used throughout
-this section. Both paths implement the same protocol method and produce the same result; ffsim is
-a performance choice, not a correctness dependency. Gates without such a fast path
-(:class:`.Evolution`, and everything built out of it, such as :class:`.UCJ`) use the
-ffsim-independent path unconditionally.
+:class:`.OrbitalRotation` reaches ffsim by a shorter route: its ``_apply_unitary_`` delegates to
+ffsim's dedicated Givens-rotation kernel (:func:`ffsim.apply_orbital_rotation`) rather than going
+through a generator and an exponential. :class:`.Evolution`, and everything built out of it such as
+:class:`.UCJ`, goes through the linear-operator path above.
 
-In short: ffsim's protocols are the interface; ffsim is an accelerator you can uninstall.
-This is also why the two getting started guides that use ffsim directly (:ref:`LUCJ
-<lucj_getting_started>` and :ref:`SKQD <skqd_getting_started>`) internally guard their ffsim-specific
-code with :data:`~qiskit_fermions.utils.optionals.HAS_FFSIM` the same way this guide does.
+In short: ffsim's protocols are the interface, and ffsim is the simulator behind them. This is also
+why the two getting started guides that use ffsim directly (:ref:`LUCJ <lucj_getting_started>` and
+:ref:`SKQD <skqd_getting_started>`) internally guard their ffsim-specific code with
+:data:`~qiskit_fermions.utils.optionals.HAS_FFSIM` the same way this guide does.
 
 Fermionic simulation lives in a fixed particle-number sector
 ------------------------------------------------------------
@@ -137,16 +131,12 @@ the spinful case, each spin species' particle number individually) can be repres
 operator whose action would move amplitude to a different particle number has nowhere to go
 in this fixed-sector situation.
 
-The native kernel resolves this by silently dropping any term that would leave the sector, projecting
-its contribution to zero rather than raising an error, since the kernel's contract is "matrix-vector
-product on this sector," not "validate this operator." For most callers this dropping would be the
-wrong action. Applying :math:`\exp(-i t H)` for a Hamiltonian :math:`H` with a
-non-particle-conserving term would silently turn a would-be unitary into a non-unitary,
-physically-meaningless map. So the higher-level entry points that build a unitary out of the kernel
-add an explicit guard before calling it:
+ffsim resolves this by rejecting such an operator outright: converting one to a linear operator
+raises a :class:`ValueError` naming which conservation law fails. That is the right default, because
+applying :math:`\exp(-i t H)` for a Hamiltonian :math:`H` with a non-particle-conserving term would
+otherwise turn a would-be unitary into a non-unitary, physically-meaningless map.
 
-- :class:`.Evolution` checks :meth:`.FermionOperator.conserves_sector` and raises a
-  :class:`ValueError` if the operator does not conserve the ``(norb, nelec)`` sector.
+- :class:`.Evolution` surfaces that rejection from the operator it evolves.
 - :class:`.OrbitalRotation` checks that its (embedded) rotation matrix is block-diagonal across the
   alpha/beta split in the spinful case, and raises a :class:`ValueError` if it mixes spin sectors.
 
@@ -160,19 +150,11 @@ add an explicit guard before calling it:
    >>> non_conserving = FermionOperator.from_terms([([cre(0), cre(1)], 1.0)])  # creates 2 particles
    >>> gate = Evolution(2 * norb, non_conserving, time=1.0)
    >>>
-   >>> if not HAS_FFSIM:
-   ...     # on Windows we manually define our reference state vector
-   ...     reference = np.asarray([1, 0, 0, 0], dtype=complex)
-   >>>
    >>> try:
    ...     gate._apply_unitary_(reference, norb, nelec, copy=True)
    ... except ValueError as exc:
    ...     print("rejected:", exc)
-   rejected: Evolution requires an operator that conserves the (norb, nelec) sector: every term must preserve the particle number of each spin species (norb=2, nelec=(1, 1)).
-
-Calling :meth:`.SupportsLinearOperator._linear_operator_` *directly* on a non-conserving operator bypasses
-this guard (it is a lower-level building block, not a validated simulation entry point) and returns
-a matrix-vector product that silently zeroes the non-conserving amplitude rather than raising.
+   rejected: The given FermionOperator could not be converted to a LinearOperator because it does not conserve particle number and the z component of spin. Conserves particle number: False Conserves spin z: False
 
 The practical consequence is that non-particle-preserving simulation is not possible in fermionic
 space, by construction of the fixed-sector representation. This is not a missing feature, but
@@ -222,12 +204,14 @@ is supplied to a simulation call, not baked into the operator or circuit represe
    >>> print([bool(occ) for occ in init.occupation])  # alpha modes 0,1; beta mode 3 (= norb + 0)
    [True, True, False, True, False, False]
 
+.. skip: end
+
 Next steps
 ^^^^^^^^^^
 
 - Walk through the :ref:`LUCJ <lucj_getting_started>` guide to see this backend used end to end,
-  including the pure-scipy path (through the :func:`ffsim.linear_operator`, itself backed by the same
-  ``_linear_operator_`` protocol method described here) for evaluating an ansatz's energy.
+  including :func:`ffsim.linear_operator` (which dispatches to the ``_linear_operator_`` protocol
+  method described here) for evaluating an ansatz's energy.
 - Walk through the :ref:`SKQD <skqd_getting_started>` guide to see :func:`ffsim.apply_unitary` and
   :func:`ffsim.sample_state_vector` used together to sample circuits built from this package's gates.
 - Read the :ref:`fermionic circuit guide <fermionic_circuit_explanation>` for the generic,

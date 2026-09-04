@@ -1,0 +1,45 @@
+---
+upgrade:
+  - |
+    Simulation now requires `ffsim <https://github.com/qiskit-community/ffsim>`__. The native Rust
+    FCI (full configuration interaction) kernel that used to back
+    :class:`.SupportsLinearOperator` has been removed, and
+    :meth:`.SupportsLinearOperator._linear_operator_` is now implemented by converting a
+    :class:`.FermionOperator` into an :class:`ffsim.FermionOperator` and delegating to
+    :func:`ffsim.linear_operator`.
+
+    Simulation is ffsim's concern: this package focuses on fermionic mappers and the
+    mapper-agnostic circuit and its transpilation. Because ffsim depends on PySCF, which does not
+    support Windows, simulation is consequently unavailable on Windows; the rest of the package
+    (building operators, mapping them and transpiling the resulting circuits) is unaffected on
+    every platform. Windows users who need to simulate can do so through the `Windows Subsystem
+    for Linux <https://learn.microsoft.com/en-us/windows/wsl/>`__.
+
+    Calling a simulation entry point without ffsim installed now raises
+    :class:`~qiskit.exceptions.MissingOptionalLibraryError`.
+  - |
+    The ``qiskit_fermions.linalg.fci`` module has been removed along with the kernel, including its
+    ``FciLinearOperator`` class and the ``slater_determinant_statevector`` and
+    ``occupation_axis_mask`` functions. ffsim provides equivalents:
+    :func:`ffsim.slater_determinant` and :func:`ffsim.addresses_to_strings` respectively.
+  - |
+    :class:`.OrbitalRotation` no longer falls back to a generator-plus-exponential path when ffsim
+    is absent; it always delegates to :func:`ffsim.apply_orbital_rotation`. The results are
+    unchanged when ffsim is installed.
+  - |
+    An operator that does not conserve particle number, or the z-component of spin in the spinful
+    case, is now rejected by ffsim rather than by this package's own check, so the
+    :class:`ValueError` that :class:`.Evolution` surfaces when simulating one carries a different
+    message.
+features:
+  - |
+    :class:`.Evolution` can now be simulated for **any** operator type of this package, not only
+    :class:`.FermionOperator`. An operator of another type is converted through its fermionic image
+    (the :class:`.SupportsFermionOperator` protocol) before being simulated, so evolving a
+    :class:`.MajoranaOperator`, :class:`.EdgeVertexOperator` or :class:`.TransferVertexOperator` no
+    longer raises :class:`NotImplementedError`.
+  - |
+    :class:`.FermionOperator` now implements :class:`ffsim.SupportsTrace` through a new
+    :class:`.SupportsTrace` protocol, so :func:`ffsim.trace` can compute the trace of an operator on
+    a fixed ``(norb, nelec)`` sector. This is what preconditions
+    :func:`scipy.sparse.linalg.expm_multiply` along the evolution path.

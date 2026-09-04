@@ -10,27 +10,32 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
-"""A protocol to indicate linear operator conversion support."""
+"""Protocols to indicate linear operator and trace conversion support."""
 
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Protocol
 
-import numpy as np
-import scipy.sparse.linalg
+from qiskit_fermions.utils.optionals import HAS_FFSIM
 
 if TYPE_CHECKING:
-    from qiskit_fermions._lib.linalg.fci import FciLinearOperator
+    import ffsim
+    import scipy.sparse.linalg
+
+    from qiskit_fermions.operators import FermionOperator
 
 
 class SupportsLinearOperator(Protocol):
     """The linear-operator conversion contract this package implements.
 
     This is the same protocol that :class:`ffsim.SupportsLinearOperator` describes, so
-    :func:`ffsim.linear_operator` dispatches to the method below on any object of this package. It is
-    stated here because the contract holds whether or not ffsim is installed: the native FCI kernel
-    backing it depends only on ``scipy``, so without ffsim you call the method directly, as the
-    doctest below does.
+    :func:`ffsim.linear_operator` dispatches to the method below on any object of this package.
+
+    .. invisible-code-block: python
+
+        >>> from qiskit_fermions.utils.optionals import HAS_FFSIM
+
+    .. skip: start if(not HAS_FFSIM)
 
     .. doctest::
 
@@ -42,6 +47,8 @@ class SupportsLinearOperator(Protocol):
         (2, 2)
         >>> linop.matvec(np.array([1.0, 0.0], dtype=complex))
         array([1.+0.j, 0.+0.j])
+
+    .. skip: end
     """
 
     def _linear_operator_(
@@ -50,45 +57,104 @@ class SupportsLinearOperator(Protocol):
         """Returns a :class:`scipy.sparse.linalg.LinearOperator` for this operator on the ``(norb, nelec)`` FCI sector."""
 
 
-class _SupportsFciLinearOperator(Protocol):
-    """A protocol for operators carrying a native FCI matrix-vector kernel.
+class SupportsTrace(Protocol):
+    """The trace contract this package implements.
 
-    This is the internal contract through which the :class:`.OperatorTrait` implementations of this
-    package support the :class:`ffsim.SupportsLinearOperator` protocol. This is achieved by
-    attaching ``_linear_operator_`` methods to the operator classes via a Python wrapper around the
-    Rust-backed :func:`_fci_linear_operator_` carrier, rendering the internal wrapper function
-    independent of any concrete operator type.
+    This is the same protocol that :class:`ffsim.SupportsTrace` describes, so :func:`ffsim.trace`
+    dispatches to the method below on any object of this package. The trace of an operator on a fixed
+    sector preconditions :func:`~scipy.sparse.linalg.expm_multiply`, which factors out
+    ``exp(traceA / n)`` -- not a correctness input, but a sizeable win in speed and accuracy for an
+    operator with a large trace, as a molecular Hamiltonian has.
+
+    .. invisible-code-block: python
+
+        >>> from qiskit_fermions.utils.optionals import HAS_FFSIM
+
+    .. skip: start if(not HAS_FFSIM)
+
+    .. doctest::
+
+        >>> from qiskit_fermions.operators import FermionOperator
+        >>> num_op = FermionOperator.from_dict({((True, 0), (False, 0)): 1.0})
+        >>> num_op._trace_(norb=2, nelec=1)
+        (1+0j)
+
+    .. skip: end
     """
 
-    def _fci_linear_operator_(self, norb: int, nelec: int | tuple[int, int]) -> FciLinearOperator:
-        """Returns a native FCI matrix-vector view of this operator on the ``(norb, nelec)`` sector."""
+    def _trace_(self, norb: int, nelec: int | tuple[int, int]) -> complex:
+        """Returns the trace of this operator on the ``(norb, nelec)`` FCI sector."""
 
 
-def scipy_linear_operator_from_fci(  # noqa: D417
-    self: _SupportsFciLinearOperator, norb: int, nelec: int | tuple[int, int]
+def _ffsim_fermion_operator(
+    operator: FermionOperator, norb: int, spinless: bool
+) -> ffsim.FermionOperator:
+    """Converts a :class:`.FermionOperator` of this package into an :class:`ffsim.FermionOperator`.
+
+    This deliberately does **not** go through the :class:`.SupportsFermionOperator` protocol. Despite
+    the shared method name, ``_fermion_operator_`` returns *this* package's ``FermionOperator``,
+    whereas ffsim's simulation entry points need ffsim's own unrelated type; see the caution in
+    :mod:`qiskit_fermions.protocols`.
+
+    The two types differ in how they index a spin orbital. This package uses a flat, convention-free
+    mode index and encodes spin in that index under the block-spin convention (mode ``m < norb`` is
+    alpha orbital ``m``; mode ``m >= norb`` is beta orbital ``m - norb``), while ffsim carries a
+    separate ``spin`` boolean alongside a *spatial* orbital index. A spinless sector maps every mode
+    onto an alpha orbital directly, since ffsim represents that sector as an empty beta space.
+
+    The conversion reads this package's flat term buffers rather than iterating term objects, which
+    keeps a Hamiltonian's worth of terms out of intermediate Python lists. The order of the ladder
+    operators *within* a term is preserved: reordering them flips the sign of a cross-spin term.
+
+    Args:
+        operator: the operator to convert.
+        norb: the number of spatial orbitals, which fixes the alpha/beta split of the mode index.
+        spinless: whether to read the modes as a single spinless (alpha-only) sector.
+
+    Returns:
+        The equivalent :class:`ffsim.FermionOperator`.
+    """
+    import ffsim
+
+    coeffs = operator.get_coeffs()
+    actions = operator.get_actions()
+    modes = operator.get_modes()
+    boundaries = operator.get_boundaries()
+
+    # Bind the action constructors once, rather than re-resolving them per ladder operator.
+    cre, des = ffsim.cre, ffsim.des
+
+    coeff_map: dict[tuple[tuple[bool, bool, int], ...], complex] = {}
+    for index, coeff in enumerate(coeffs):
+        start, stop = boundaries[index], boundaries[index + 1]
+        if spinless:
+            term = tuple((cre if actions[i] else des)(False, modes[i]) for i in range(start, stop))
+        else:
+            term = tuple(
+                (cre if actions[i] else des)(modes[i] >= norb, modes[i] % norb)
+                for i in range(start, stop)
+            )
+        # Distinct terms of this package's operator can share a key, since it does not canonicalize
+        # on construction. Accumulate rather than overwrite, or a repeated term would be dropped.
+        coeff_map[term] = coeff_map.get(term, 0.0) + coeff
+
+    return ffsim.FermionOperator(coeff_map)
+
+
+@HAS_FFSIM.require_in_call("FermionOperator._linear_operator_")
+def _linear_operator(  # noqa: D417
+    self: FermionOperator, norb: int, nelec: int | tuple[int, int]
 ) -> scipy.sparse.linalg.LinearOperator:
     """Returns a SciPy ``LinearOperator`` for this operator on the ``(norb, nelec)`` FCI sector.
 
-    This implements the :class:`SupportsLinearOperator` protocol, so an operator carrying a native
-    FCI kernel can be passed directly to :func:`scipy.sparse.linalg.expm_multiply` or to
-    :func:`ffsim.linear_operator`. It depends only on the internal
-    :class:`~qiskit_fermions.protocols._SupportsFciLinearOperator` contract -- the
-    ``_fci_linear_operator_`` carrier -- rather than on any concrete operator type, and wraps that
-    native matrix-vector kernel in a genuine :class:`scipy.sparse.linalg.LinearOperator`;
-    :func:`~scipy.sparse.linalg.expm_multiply` requires the adjoint action, so both ``matvec`` and
-    ``rmatvec`` are supplied.
+    This implements the :class:`SupportsLinearOperator` protocol by converting to an
+    :class:`ffsim.FermionOperator` and handing that to :func:`ffsim.linear_operator`: simulation is
+    ffsim's concern, and this package owns the mapper-agnostic circuit rather than a second
+    simulation backend.
 
-    The native kernel requires a contiguous one-dimensional ``complex128`` vector, whereas SciPy's
-    machinery may feed a :class:`~scipy.sparse.linalg.LinearOperator` real probe vectors (from its
-    one-norm estimator) or non-contiguous ``(dim, 1)`` column slices. The ``matvec``/``rmatvec``
-    wrappers coerce the input with ``numpy.ascontiguousarray(v, complex128).reshape(-1)``; the numpy
-    handles are bound once here (per operator) rather than re-resolved on every matvec inside the
-    :func:`~scipy.sparse.linalg.expm_multiply` loop.
-
-    This is attached to the operator classes as ``_linear_operator_`` at import time (see
-    :mod:`qiskit_fermions.operators`): the native operator classes are compiled types whose
-    instances cannot themselves subclass SciPy's :class:`~scipy.sparse.linalg.LinearOperator`, so
-    the protocol method is provided in Python.
+    ffsim rejects an operator that does not conserve both particle number and the z-component of
+    spin, since such an operator has no action on a fixed sector, and silently ignores a term acting
+    on an orbital outside ``[0, norb)``.
 
     Args:
         norb: the number of spatial orbitals.
@@ -98,45 +164,35 @@ def scipy_linear_operator_from_fci(  # noqa: D417
     Returns:
         A :class:`scipy.sparse.linalg.LinearOperator` applying this operator on the requested sector.
     """
-    return scipy_linear_operator_from_kernel(self._fci_linear_operator_(norb, nelec))
+    import ffsim
+
+    operator = _ffsim_fermion_operator(self, norb, isinstance(nelec, int))
+    return ffsim.linear_operator(operator, norb=norb, nelec=nelec)
 
 
-def scipy_linear_operator_from_kernel(
-    kernel: FciLinearOperator,
-) -> scipy.sparse.linalg.LinearOperator:
-    """Wraps a native FCI kernel in a SciPy :class:`~scipy.sparse.linalg.LinearOperator`.
+@HAS_FFSIM.require_in_call("FermionOperator._trace_")
+def _trace(  # noqa: D417
+    self: FermionOperator, norb: int, nelec: int | tuple[int, int]
+) -> complex:
+    """Returns the trace of this operator on the ``(norb, nelec)`` FCI sector.
 
-    The native kernel requires a contiguous one-dimensional ``complex128`` vector, whereas SciPy's
-    machinery may feed a :class:`~scipy.sparse.linalg.LinearOperator` real probe vectors (from its
-    one-norm estimator) or non-contiguous ``(dim, 1)`` column slices, so the ``matvec``/``rmatvec``
-    wrappers coerce their input.
-
-    This deliberately returns only the SciPy operator and not the kernel's ``trace``: a SciPy
-    ``LinearOperator`` has nowhere to carry that metadata, and composing one (scaling, adding) drops
-    any attribute attached to it. Callers that need the exact trace should hold on to the ``kernel``
-    they passed in and read its ``trace`` directly.
+    This implements the :class:`SupportsTrace` protocol via :func:`ffsim.trace`, mirroring
+    :meth:`SupportsLinearOperator._linear_operator_`.
 
     Args:
-        kernel: the native FCI matrix-vector kernel to wrap.
+        norb: the number of spatial orbitals.
+        nelec: the electron count -- an integer for a spinless sector, or an ``(n_alpha, n_beta)``
+            pair for a spinful one.
 
     Returns:
-        A :class:`scipy.sparse.linalg.LinearOperator` applying ``kernel`` on its sector.
+        The trace of this operator on the requested sector.
     """
-    # Bind the coercion handles once per operator (not once per matvec): SciPy hands a
-    # LinearOperator real probe vectors or non-contiguous (dim, 1) columns, which the native kernel
-    # cannot slice directly.
-    ascontiguousarray = np.ascontiguousarray
-    complex128 = np.complex128
+    import ffsim
 
-    def matvec(vec):
-        return kernel.matvec(ascontiguousarray(vec, complex128).reshape(-1))
-
-    def rmatvec(vec):
-        return kernel.rmatvec(ascontiguousarray(vec, complex128).reshape(-1))
-
-    return scipy.sparse.linalg.LinearOperator(
-        shape=kernel.shape,
-        matvec=matvec,
-        rmatvec=rmatvec,
-        dtype=kernel.dtype,
-    )
+    spinless = isinstance(nelec, int)
+    operator = _ffsim_fermion_operator(self, norb, spinless)
+    # ffsim's own trace protocol requires a pair, even though its `linear_operator` accepts a bare
+    # integer and reads it as an empty beta sector. Spell that pair out to keep both spellings of a
+    # spinless sector working here.
+    sector = (nelec, 0) if spinless else nelec
+    return complex(ffsim.trace(operator, norb=norb, nelec=sector))

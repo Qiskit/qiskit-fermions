@@ -20,6 +20,8 @@ from math import comb
 
 import numpy as np
 
+from qiskit_fermions.utils.optionals import HAS_FFSIM
+
 from .. import FermionicGate
 
 if sys.version_info >= (3, 11):
@@ -31,6 +33,37 @@ else:
 # constant; this is the de-facto convention (numpy's ``allclose`` default, matching the Rust
 # operator-method default) applied consistently across the apply-unitary stack.
 _ATOL = 1e-8
+
+
+@HAS_FFSIM.require_in_call("InitializeModes._apply_unitary_")
+def _occupation_axis_mask(norb: int, nocc: int, occupied: int, empty: int) -> np.ndarray:
+    """Returns the determinants of one FCI axis that match a partial occupation.
+
+    Marks every determinant of the ``(norb, nocc)`` single-spin axis whose orbital occupation agrees
+    with the constraint: every orbital whose bit is set in ``occupied`` is filled, and every orbital
+    whose bit is set in ``empty`` is not. Orbitals named in neither are left free.
+
+    The determinants are enumerated in the FCI address order that
+    :func:`ffsim.addresses_to_strings` defines, which is the order the state vector this mask indexes
+    is laid out in.
+
+    Args:
+        norb: the number of spatial orbitals of the axis.
+        nocc: the number of occupied orbitals of the axis.
+        occupied: a bitmask of the orbitals constrained to be occupied.
+        empty: a bitmask of the orbitals constrained to be empty.
+
+    Returns:
+        A boolean mask over the axis, ``True`` where the determinant matches the constraint.
+    """
+    import ffsim
+
+    strings = ffsim.addresses_to_strings(range(ffsim.dim(norb, nocc)), norb=norb, nelec=nocc)
+    return np.fromiter(
+        ((s & occupied) == occupied and not (s & empty) for s in strings),
+        dtype=bool,
+        count=len(strings),
+    )
 
 
 class InitializeModes(FermionicGate):
@@ -172,8 +205,6 @@ class InitializeModes(FermionicGate):
                 ``vec``'s length does not match the ``(norb, nelec)`` sector dimension; or if ``vec``
                 has amplitude outside the subspace the occupation defines.
         """
-        from qiskit_fermions._lib.linalg.fci import occupation_axis_mask
-
         num_modes = norb if isinstance(nelec, int) else 2 * norb
 
         # place the local occupation onto its global modes, keeping the occupied/empty split
@@ -191,7 +222,7 @@ class InitializeModes(FermionicGate):
         if isinstance(nelec, int):
             occupied_bits = sum(1 << g for g, occ in placed if occ)
             empty_bits = sum(1 << g for g, occ in placed if not occ)
-            mask = occupation_axis_mask(norb, nelec, occupied_bits, empty_bits)
+            mask = _occupation_axis_mask(norb, nelec, occupied_bits, empty_bits)
             # the sole axis: amplitude on any determinant outside the mask must vanish
             if len(vec) != len(mask):
                 raise ValueError(
@@ -235,7 +266,7 @@ class InitializeModes(FermionicGate):
         # Constrain each touched axis. A sector the gate does not touch is left free (its mask is the
         # whole axis), so a single-sector gate constrains only its own axis and the other stays open.
         if alpha:
-            mask_a = occupation_axis_mask(
+            mask_a = _occupation_axis_mask(
                 norb,
                 n_alpha,
                 sum(1 << g for g, occ in alpha if occ),
@@ -247,7 +278,7 @@ class InitializeModes(FermionicGate):
                     f"subspace defined by its occupation for the (norb={norb}, nelec={nelec!r}) sector."
                 )
         if beta:
-            mask_b = occupation_axis_mask(
+            mask_b = _occupation_axis_mask(
                 norb,
                 n_beta,
                 sum(1 << g for g, occ in beta if occ),
