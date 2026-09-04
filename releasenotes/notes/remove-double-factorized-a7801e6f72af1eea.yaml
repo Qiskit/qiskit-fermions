@@ -1,0 +1,17 @@
+---
+upgrade:
+  - |
+    The double factorization utilities have been removed from
+    :mod:`qiskit_fermions.linalg`: ``double_factorized_t2``,
+    ``double_factorized_t2_alpha_beta``, ``reconstruct_t2``, ``reconstruct_t2_alpha_beta`` and
+    ``double_factorized_2body``. The ``t2`` variants existed to serve ``UCJ.from_t_amplitudes``,
+    which now lives in ffsim, and ``double_factorized_2body`` had no caller. Use
+    :external:func:`ffsim.linalg.double_factorized_t2`,
+    :external:func:`ffsim.linalg.double_factorized_t2_alpha_beta` and
+    :external:func:`ffsim.linalg.double_factorized` instead; the last is a superset of the removed
+    two-body routine, additionally offering an optimized (``optimize=True``) decomposition.
+
+    :func:`~qiskit_fermions.linalg.givens_decomposition` and
+    :func:`~qiskit_fermions.linalg.givens_decomposition_slater` are unaffected: they back
+    :class:`.OrbitalRotation` and :class:`.PrepareSlaterDeterminant` synthesis and remain
+    ffsim-independent, as does the native FCI kernel behind :class:`.SupportsLinearOperator`.
