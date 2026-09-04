@@ -8,7 +8,7 @@
         <link rel="prefetch" href="_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Release Notes - Qiskit Fermions 0.2.0.dev0+ebfbc22</title>
+        <title>Release Notes - Qiskit Fermions 0.2.0.dev0+d82edf3</title>
       <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+ebfbc22</div></a>
+      <a href="index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+d82edf3</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+ebfbc22</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+d82edf3</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="search.html" role="search">
@@ -290,6 +290,26 @@ commutator, anti-commutator and double-commutator functions for both new operato
 <a class="reference internal" href="cdoc/qf-mappers-library.html#c.qf_transfer_vertex_to_fermion" title="qf_transfer_vertex_to_fermion"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_transfer_vertex_to_fermion()</span></code></a>, <a class="reference internal" href="cdoc/qf-mappers-library.html#c.qf_transfer_vertex_to_majorana" title="qf_transfer_vertex_to_majorana"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_transfer_vertex_to_majorana()</span></code></a>, and
 <a class="reference internal" href="cdoc/qf-mappers-library.html#c.qf_transfer_vertex_to_edge_vertex" title="qf_transfer_vertex_to_edge_vertex"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_transfer_vertex_to_edge_vertex()</span></code></a>.</p></li>
 </ul>
+<ul>
+<li><p>How an <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate gets decomposed in fermionic space is now configurable through its
+new keyword-only <code class="docutils literal notranslate"><span class="pre">synthesis</span></code> argument, mirroring the <code class="docutils literal notranslate"><span class="pre">synthesis</span></code> argument of Qiskit’s
+<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.library.PauliEvolutionGate" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">PauliEvolutionGate</span></code></a>. The available methods live in the new
+<a class="reference internal" href="pydoc/qiskit_fermions.circuit.library.synthesis.html#module-qiskit_fermions.circuit.library.synthesis" title="qiskit_fermions.circuit.library.synthesis"><code class="xref py py-mod docutils literal notranslate"><span class="pre">qiskit_fermions.circuit.library.synthesis</span></code></a> module, which provides the
+<a class="reference internal" href="stubs/qiskit_fermions.circuit.library.synthesis.FermionicEvolutionSynthesis.html#qiskit_fermions.circuit.library.synthesis.FermionicEvolutionSynthesis" title="qiskit_fermions.circuit.library.synthesis.FermionicEvolutionSynthesis"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicEvolutionSynthesis</span></code></a> interface and its
+first-order <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter.html#qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter" title="qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicLieTrotter</span></code></a>
+implementation.</p>
+<p>This fermion-to-fermion step is optional: an <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate can be handed straight to the
+fermion-to-qubit stage regardless of how many terms its operator holds. Decomposing it beforehand
+is a choice, taken to obtain cheaper factors or to expose structure (such as mutually commuting
+<a class="reference internal" href="stubs/qiskit_fermions.operators.OperatorTrait.html#qiskit_fermions.operators.OperatorTrait.groups" title="qiskit_fermions.operators.OperatorTrait.groups"><code class="xref py py-attr docutils literal notranslate"><span class="pre">groups</span></code></a>) that the later stage can exploit.
+Because both sides of the rewrite stay in fermionic space, that structure survives it, which is
+what these methods can exploit and Qiskit’s <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.synthesis.EvolutionSynthesis" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">EvolutionSynthesis</span></code></a> cannot.</p>
+<p>The default is unchanged: leaving <code class="docutils literal notranslate"><span class="pre">synthesis</span></code> at <code class="docutils literal notranslate"><span class="pre">None</span></code> uses
+<a class="reference internal" href="stubs/qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter.html#qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter" title="qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicLieTrotter</span></code></a>, which reproduces exactly
+the decomposition that <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> performed before, so existing circuits synthesize
+identically.</p>
+</li>
+</ul>
 <ul class="simple">
 <li><p>Improved the numerical conditioning of state-vector simulation for
 <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> and <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.OrbitalRotation.html#qiskit_fermions.circuit.library.OrbitalRotation" title="qiskit_fermions.circuit.library.OrbitalRotation"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrbitalRotation</span></code></a> gates by supplying the
@@ -321,6 +341,40 @@ on a concrete operator class.</p>
 its weakest guarantee: a <code class="docutils literal notranslate"><span class="pre">True</span></code> result is always reliable, while a <code class="docutils literal notranslate"><span class="pre">False</span></code> result is
 conservative for operator types whose normal form is not a genuine canonical form. See
 <a class="reference internal" href="stubs/qiskit_fermions.operators.TransferVertexOperator.html#qiskit_fermions.operators.TransferVertexOperator.is_hermitian" title="qiskit_fermions.operators.TransferVertexOperator.is_hermitian"><code class="xref py py-meth docutils literal notranslate"><span class="pre">is_hermitian()</span></code></a> for the one such case.</p>
+</li>
+</ul>
+<ul>
+<li><p>Added two adapters that wrap a mapper function to control the Pauli term order it produces, which
+<a class="reference internal" href="stubs/qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis.html#qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis" title="qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis"><code class="xref py py-class docutils literal notranslate"><span class="pre">MapperFnEvolutionSynthesis</span></code></a> now preserves through synthesis.</p>
+<p><a class="reference internal" href="stubs/qiskit_fermions.transpiler.passes.synthesis.simplify.html#qiskit_fermions.transpiler.passes.synthesis.simplify" title="qiskit_fermions.transpiler.passes.synthesis.simplify"><code class="xref py py-func docutils literal notranslate"><span class="pre">simplify()</span></code></a> simplifies the mapped operator, merging duplicate Pauli terms and pinning a
+canonical term order.</p>
+<p><a class="reference internal" href="stubs/qiskit_fermions.transpiler.passes.synthesis.group_wise.html#qiskit_fermions.transpiler.passes.synthesis.group_wise" title="qiskit_fermions.transpiler.passes.synthesis.group_wise"><code class="xref py py-func docutils literal notranslate"><span class="pre">group_wise()</span></code></a> maps an operator one <a class="reference internal" href="stubs/qiskit_fermions.operators.OperatorTrait.html#qiskit_fermions.operators.OperatorTrait.groups" title="qiskit_fermions.operators.OperatorTrait.groups"><code class="xref py py-attr docutils literal notranslate"><span class="pre">groups</span></code></a>
+entry at a time and sums the results. The operator is unchanged, but the terms of each group come
+out adjacent rather than interleaved, which lets those acting on disjoint qubits share a circuit
+layer:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">MapperFnEvolutionSynthesis</span><span class="p">(</span><span class="n">group_wise</span><span class="p">(</span><span class="n">jordan_wigner</span><span class="p">))</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="upgrade-notes">
+<span id="release-notes-upcoming-release-main-upgrade-notes"></span><h3>Upgrade Notes<a class="headerlink" href="#upgrade-notes" title="Link to this heading">¶</a></h3>
+<ul>
+<li><p><a class="reference internal" href="stubs/qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis.html#qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis" title="qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis"><code class="xref py py-class docutils literal notranslate"><span class="pre">MapperFnEvolutionSynthesis</span></code></a> no longer simplifies the operator returned by its
+<a class="reference internal" href="stubs/qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis.html#qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis.mapper_fn" title="qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis.mapper_fn"><code class="xref py py-attr docutils literal notranslate"><span class="pre">mapper_fn</span></code></a>. Simplifying sorts the Pauli terms into a canonical
+order, and a product formula synthesizes them in the order it receives them, so the previous
+behavior discarded whatever order the mapper had chosen.</p>
+<p>This changes the synthesized circuit for existing pipelines: the gate count is unaffected, but the
+order the rotations are emitted in (and hence the two-qubit depth) may differ. The evolution being
+approximated is unchanged.</p>
+<p>Note also that the term order a mapper produces is not guaranteed to be stable between runs,
+because the operators of the Rust core do not preserve the order their terms were added in. Wrap
+the mapper in the new <a class="reference internal" href="stubs/qiskit_fermions.transpiler.passes.synthesis.simplify.html#qiskit_fermions.transpiler.passes.synthesis.simplify" title="qiskit_fermions.transpiler.passes.synthesis.simplify"><code class="xref py py-func docutils literal notranslate"><span class="pre">simplify()</span></code></a> to restore the previous behavior and pin a canonical
+order:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">MapperFnEvolutionSynthesis</span><span class="p">(</span><span class="n">simplify</span><span class="p">(</span><span class="n">jordan_wigner</span><span class="p">))</span>
+</pre></div>
+</div>
 </li>
 </ul>
 </section>
@@ -416,6 +470,7 @@ Following Qiskit’s design philosophy, the core of this package is written in R
 <li><a class="reference internal" href="#">Release Notes</a><ul>
 <li><a class="reference internal" href="#upcoming-release-main">Upcoming release (<code class="docutils literal notranslate"><span class="pre">main</span></code>)</a><ul>
 <li><a class="reference internal" href="#new-features">New Features</a></li>
+<li><a class="reference internal" href="#upgrade-notes">Upgrade Notes</a></li>
 <li><a class="reference internal" href="#bug-fixes">Bug Fixes</a></li>
 </ul>
 </li>
@@ -434,7 +489,7 @@ Following Qiskit’s design philosophy, the core of this package is written in R
       
     </aside>
   </div>
-</div><script src="_static/documentation_options.js?v=582b8e5c"></script>
+</div><script src="_static/documentation_options.js?v=da4d062a"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/scripts/furo.js?v=46bd48cc"></script>

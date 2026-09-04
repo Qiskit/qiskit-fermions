@@ -1,0 +1,96 @@
+﻿FermionicEvolutionSynthesis
+===========================
+
+.. currentmodule:: qiskit_fermions.circuit.library.synthesis
+
+.. autoclass:: FermionicEvolutionSynthesis
+   :show-inheritance:
+   :no-members:
+   :no-inherited-members:
+   :special-members:
+
+
+  
+  
+  
+  
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+  
+  
+   .. rubric:: Methods
+    
+   .. automethod:: synthesize
+  
+  
+  
+  
+  
+  
+  
