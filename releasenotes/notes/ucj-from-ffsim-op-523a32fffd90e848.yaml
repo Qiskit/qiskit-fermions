@@ -1,0 +1,34 @@
+---
+upgrade:
+  - |
+    The :class:`.UCJ` gate is now constructed from one of ffsim's UCJ operators, which is its only
+    constructor argument. The spin variant, the number of spatial orbitals and the number of modes
+    are read off that operator, so the ``variant`` argument and the ``UCJ.Variant`` enum are gone:
+
+    .. code-block:: python
+
+       # before
+       ansatz = UCJ.from_t_amplitudes(nelec, t2, t1=t1, n_reps=2)
+       ansatz = UCJ("balanced", diag_coulomb_mats, orbital_rotations)
+
+       # after
+       ansatz = UCJ(ffsim.UCJOpSpinBalanced.from_t_amplitudes(t2, t1=t1, n_reps=2))
+       ansatz = UCJ(ffsim.UCJOpSpinBalanced(diag_coulomb_mats, orbital_rotations))
+
+    Accordingly, ``UCJ.from_t_amplitudes``, ``UCJ.num_parameters``, ``UCJ.from_parameters`` and
+    ``UCJ.to_parameters`` have been removed: ffsim's operators provide
+    :external:meth:`~ffsim.UCJOpSpinBalanced.from_t_amplitudes`,
+    :external:meth:`~ffsim.UCJOpSpinBalanced.n_params`,
+    :external:meth:`~ffsim.UCJOpSpinBalanced.from_parameters` and
+    :external:meth:`~ffsim.UCJOpSpinBalanced.to_parameters` with identical conventions, and
+    additionally offer the compressed (``optimize=True``) double factorization and
+    :external:meth:`~ffsim.UCJOpSpinBalanced.from_cisd_vec`, which this package never implemented.
+    The wrapped operator is available as ``UCJ.ucj_op``, so its tensors are reachable as
+    ``gate.ucj_op.diag_coulomb_mats`` and so on; the gate no longer mirrors them as attributes of its
+    own.
+
+    Since ffsim is now the gate's input type rather than an optional accelerator, constructing a
+    :class:`.UCJ` requires the ``ffsim`` extra
+    (``pip install "qiskit-fermions[ffsim]"``) and raises
+    :class:`~qiskit.exceptions.MissingOptionalLibraryError` without it. ffsim does not support
+    Windows, so the gate is unavailable there; use WSL.
