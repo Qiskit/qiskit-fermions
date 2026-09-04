@@ -59,6 +59,8 @@ def test_apply_unitary_rejects_out_of_range_mode():
 
 def test_apply_unitary_rejects_wrong_length_vec_spinless():
     """A spinless vector whose length disagrees with ``C(norb, nelec)`` is rejected."""
+    pytest.importorskip("ffsim")  # the subspace check enumerates determinants via ffsim
+
     norb = 4
     nelec = 2  # sector dimension is C(4, 2) == 6
     occupation = [True, True, False, False]  # a satisfiable 2-electron occupation
@@ -73,6 +75,8 @@ def test_apply_unitary_rejects_amplitude_outside_alpha_subspace():
     An all-ones vector necessarily carries weight on alpha determinants that leave orbital 0 empty,
     so an alpha-only gate fixing orbital 0 occupied must reject it (the alpha-axis branch).
     """
+    pytest.importorskip("ffsim")  # the subspace check enumerates determinants via ffsim
+
     norb = 3
     nelec = (2, 1)
     dim = comb(norb, nelec[0]) * comb(norb, nelec[1])

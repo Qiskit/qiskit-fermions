@@ -12,13 +12,10 @@
 
 use pyo3::prelude::*;
 
-pub mod fci;
 pub mod givens;
 
 #[pymodule]
 pub mod linalg {
-    #[pymodule_export]
-    use super::fci::fci;
     #[pymodule_export]
     use super::givens::givens;
 }

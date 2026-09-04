@@ -95,7 +95,7 @@ from qiskit_fermions._lib.operators.edge_vertex_operator import EdgeVertexOperat
 from qiskit_fermions._lib.operators.fermion_operator import FermionOperator
 from qiskit_fermions._lib.operators.majorana_operator import MajoranaOperator
 from qiskit_fermions._lib.operators.transfer_vertex_operator import TransferVertexOperator
-from qiskit_fermions.protocols.linear_operator import scipy_linear_operator_from_fci
+from qiskit_fermions.protocols.linear_operator import _linear_operator, _trace
 
 from .edge_action import EdgeAction
 from .fermion_action import FermionAction, ann, cre
@@ -103,12 +103,13 @@ from .majorana_action import MajoranaAction, gamma
 from .operator_trait import OperatorTrait
 from .transfer_action import TransferAction
 
-# Attach the ffsim ``_linear_operator_`` protocol method to the compiled ``FermionOperator`` type.
-# The wrapper itself is type-agnostic (it depends only on ``SupportsFciLinearOperator``), but the
-# attach is done manually per type rather than generically: ``FermionOperator`` is the only operator
-# with a native FCI kernel today, and the ``(norb, nelec)`` sector semantics are not yet known to
-# generalize to the other operator types.
-FermionOperator._linear_operator_ = scipy_linear_operator_from_fci  # type: ignore[attr-defined]
+# Attach the ffsim ``_linear_operator_`` and ``_trace_`` protocol methods to the compiled
+# ``FermionOperator`` type. They are written in Python because they convert to an
+# ``ffsim.FermionOperator``, which the Rust core cannot reach; the compiled type has a writable
+# ``__dict__``, so they can be attached here. Only ``FermionOperator`` carries them: the other
+# operator types reach the same path by converting through ``_fermion_operator_`` first.
+FermionOperator._linear_operator_ = _linear_operator  # type: ignore[attr-defined]
+FermionOperator._trace_ = _trace  # type: ignore[attr-defined]
 
 __all__ = [
     "EdgeAction",

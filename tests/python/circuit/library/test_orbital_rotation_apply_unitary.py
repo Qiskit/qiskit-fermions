@@ -236,36 +236,13 @@ def test_orbital_rotation_apply_unitary_through_circuit_with_placement():
     np.testing.assert_allclose(result_beta, expected_beta, atol=1e-10)
 
 
-def test_orbital_rotation_apply_unitary_general_path_matches_fast_path(monkeypatch):
-    """With ffsim disabled the native generator path matches the ffsim fast path."""
-    import qiskit_fermions.circuit.library.orbital_rotation as orbital_rotation_module
-
-    norb = 3
-    nelec = (2, 1)
-    full = _block_diag(random_unitary(norb, seed=1), random_unitary(norb, seed=2))
-    vec0 = ffsim.slater_determinant(norb, ([0, 1], [0]))
-
-    fast = OrbitalRotation(full)._apply_unitary_(vec0, norb, nelec, copy=True)
-
-    monkeypatch.setattr(orbital_rotation_module, "HAS_FFSIM", False)
-    general = OrbitalRotation(full)._apply_unitary_(vec0, norb, nelec, copy=True)
-
-    np.testing.assert_allclose(general, fast, atol=1e-10)
-
-
-def test_orbital_rotation_apply_unitary_rejects_spin_mixing(monkeypatch):
-    """A spinful rotation mixing the alpha/beta sectors is rejected, with or without ffsim."""
-    import qiskit_fermions.circuit.library.orbital_rotation as orbital_rotation_module
-
+def test_orbital_rotation_apply_unitary_rejects_spin_mixing():
+    """A spinful rotation mixing the alpha/beta sectors is rejected."""
     norb = 3
     nelec = (2, 1)
     full = random_unitary(2 * norb, seed=7)  # dense: nonzero alpha/beta off-diagonal blocks
     vec0 = ffsim.slater_determinant(norb, ([0, 1], [0]))
 
-    with pytest.raises(ValueError, match="mixes the alpha and beta spin sectors"):
-        OrbitalRotation(full)._apply_unitary_(vec0, norb, nelec, copy=True)
-
-    monkeypatch.setattr(orbital_rotation_module, "HAS_FFSIM", False)
     with pytest.raises(ValueError, match="mixes the alpha and beta spin sectors"):
         OrbitalRotation(full)._apply_unitary_(vec0, norb, nelec, copy=True)
 
