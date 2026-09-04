@@ -69,6 +69,7 @@ class Evolution(FermionicGate):
         time: float = 1.0,
         *,
         synthesis: FermionicEvolutionSynthesis | None = None,
+        atomic: bool = False,
     ) -> None:
         r"""Initializing an instance of this gate can be done with the arguments listed below.
 
@@ -81,15 +82,18 @@ class Evolution(FermionicGate):
             synthesis: the fermion-to-fermion synthesis method with which to decompose this gate, when
                 it gets decomposed at all. If ``None`` (the default), a
                 :class:`.FermionicLieTrotter` instance is used.
+            atomic: whether this gate is a fully decomposed factor which must not be broken down any
+                further in fermionic space. See :attr:`atomic`.
         """
         from .synthesis import FermionicLieTrotter
 
         self.operator = operator
         """The operator under which to time evolve the acted-upon fermionic modes."""
 
-        # read-only (see the `synthesis` property): the definition is cached the first time it is
-        # built, so a later re-assignment would be silently ignored
+        # both read-only (see their properties): the definition is cached the first time it is built,
+        # so a later re-assignment of either would be silently ignored
         self._synthesis: FermionicEvolutionSynthesis = synthesis or FermionicLieTrotter()
+        self._atomic = atomic
 
         super().__init__(
             "Evolution", num_modes, [time], label=f"evolve({' '.join(str(operator).split())})"
@@ -104,8 +108,53 @@ class Evolution(FermionicGate):
         """
         return self._synthesis
 
+    @property
+    def atomic(self) -> bool:
+        r"""Whether this gate is a factor that must not be decomposed any further.
+
+        A :class:`.FermionicEvolutionSynthesis` marks the factors it emits as atomic, because they
+        are the result of the split it chose to perform: breaking them down again would discard that
+        choice. The evolution of a single operator term is atomic for the stronger reason that there
+        is nothing left to split.
+
+        An atomic gate has no definition at all, so :meth:`~.FermionicCircuit.decompose` leaves it in
+        place rather than expanding it. It still maps and synthesizes normally at the
+        fermion-to-qubit level, which is where a factor is turned into actual operations.
+
+        This is read-only, for the same reason as :attr:`synthesis`.
+        """
+        return self._atomic
+
     def _define(self) -> None:
+        if self.atomic:
+            # A fully decomposed factor has no fermionic definition: it is left untouched by
+            # `decompose()` and lowered directly by the fermion-to-qubit stage. Note that this must
+            # leave `_definition` as `None` rather than assigning an empty circuit -- an empty
+            # definition would make `decompose()` *drop* the evolution instead of keeping it.
+            return
+
         self._definition = self.synthesis.synthesize(self)._inner
+
+    def inverse(self, annotated: bool = False) -> Evolution:
+        r"""Returns the inverse of this gate, :math:`e^{+i t H}`.
+
+        Args:
+            annotated: ignored. The inverse of this gate is another :class:`.Evolution`, so it never
+                needs to be an :class:`~qiskit.circuit.AnnotatedOperation`.
+
+        Returns:
+            An :class:`.Evolution` gate evolving the same operator for the negated time.
+        """
+        # `Instruction.inverse` would recurse through the definition and return a plain `Gate`,
+        # losing the operator and this gate's synthesis method; negating the time is both cheaper and
+        # exact.
+        return Evolution(
+            self.num_modes,
+            self.operator,
+            time=-self.params[0],
+            synthesis=self.synthesis,
+            atomic=self.atomic,
+        )
 
     def _apply_unitary_placed_(
         self,

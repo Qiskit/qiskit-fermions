@@ -336,14 +336,36 @@ def test_ucc_definition_is_a_single_evolution():
     assert dict(circuit.decompose().count_ops()) == {"Evolution": 1}
 
 
-def test_ucc_definition_decomposes_into_term_evolutions():
-    """Decomposing the definition's ``Evolution`` splits it into per-term evolutions."""
+def test_ucc_definition_decomposes_into_group_evolutions():
+    """Decomposing the definition's ``Evolution`` splits it into one evolution per group."""
     t1, t2 = _restricted_amplitudes(1, 2, seed=17)
     gate = UCC("restricted", t1, t2)
     circuit = FermionicCircuit(gate.num_modes)
     circuit.append(gate, circuit.modes)
     counts = dict(circuit.decompose().decompose().count_ops())
     assert counts["Evolution"] > 1
+
+
+def test_ucc_stays_hermitian_at_any_decomposition_depth():
+    """Every emitted factor must stay Hermitian, so that its exponential stays unitary.
+
+    The cluster generator carries conjugate-paired groups precisely so that each factor is Hermitian.
+    Decomposing past those groups used to split them term-by-term, and an individual excitation is
+    *not* Hermitian on its own -- which produced complex Pauli coefficients that the transpiler
+    rejected, and a non-normalized state vector in simulation.
+    """
+    t1, t2 = _restricted_amplitudes(1, 2, seed=18)
+    gate = UCC("restricted", t1, t2)
+    circuit = FermionicCircuit(gate.num_modes)
+    circuit.append(gate, circuit.modes)
+
+    at_two_levels = dict(circuit.decompose(reps=2).count_ops())
+    for reps in (3, 4, 6):
+        decomposed = circuit.decompose(reps=reps)
+        assert dict(decomposed.count_ops()) == at_two_levels, f"still expanding at reps={reps}"
+        for instruction in decomposed._inner.data:
+            operator = instruction.operation.operator
+            assert operator.is_hermitian(), f"non-Hermitian factor at reps={reps}"
 
 
 def _antisymmetrize(t2):

@@ -84,3 +84,61 @@ def test_evolution_gate_decompose_with_groups():
 
     ops = decomposed.count_ops()
     assert ops == {"Evolution": 2}
+
+
+def test_atomic_evolution_is_not_decomposed_further():
+    """An atomic factor is left in place rather than expanded -- or, worse, dropped.
+
+    Guarding both failure modes: a definition that re-emits the gate recurses forever, while an
+    *empty* definition makes ``decompose()`` discard the evolution entirely.
+    """
+    hamil = FermionOperator.from_dict({((True, 0), (False, 1)): 1.0})
+    circ = FermionicCircuit(2)
+    circ.append(Evolution(2, hamil, time=0.5, atomic=True), circ.modes)
+
+    assert circ.decompose(reps=5).count_ops() == {"Evolution": 1}
+
+
+def test_repeated_decomposition_reaches_a_fixed_point():
+    """Regression test for a recursion that had no base case.
+
+    A single-term factor used to decompose into an identical single-term ``Evolution``, so the
+    expansion never terminated -- which is what made ``inverse()`` raise ``RecursionError``.
+    """
+    hamil = FermionOperator.from_dict(
+        {
+            ((True, 0), (False, 1)): 2.0,
+            ((True, 1), (False, 0)): 2.0,
+            ((True, 2), (False, 3)): -2.0,
+            ((True, 3), (False, 2)): -2.0,
+        }
+    )
+    circ = FermionicCircuit(4)
+    circ.append(Evolution(4, hamil, time=1.5), circ.modes)
+
+    once = circ.decompose().count_ops()
+    assert once == {"Evolution": 4}
+    for reps in (2, 3, 6):
+        assert circ.decompose(reps=reps).count_ops() == once
+
+
+def test_inverse_negates_the_time():
+    hamil = FermionOperator.from_dict({((True, 0), (False, 1)): 1.0, ((True, 1), (False, 0)): 1.0})
+    evo = Evolution(2, hamil, time=0.5)
+
+    inverse = evo.inverse()
+
+    assert isinstance(inverse, Evolution)
+    assert inverse.params[0] == -0.5
+    assert inverse.operator.equiv(hamil, 1e-12)
+    assert inverse.inverse().params[0] == 0.5
+
+
+def test_inverse_preserves_the_synthesis_and_atomicity():
+    hamil = FermionOperator.from_dict({((True, 0), (False, 1)): 1.0})
+    evo = Evolution(2, hamil, time=0.5, atomic=True)
+
+    inverse = evo.inverse()
+
+    assert inverse.atomic
+    assert inverse.synthesis is evo.synthesis
