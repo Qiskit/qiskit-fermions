@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Evolution - Qiskit Fermions 0.2.0.dev0+d82edf3</title>
+        <title>Evolution - Qiskit Fermions 0.2.0.dev0+a2dc9d5</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+d82edf3</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+a2dc9d5</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+d82edf3</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+a2dc9d5</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -266,7 +266,7 @@
 <h1>Evolution<a class="headerlink" href="#evolution" title="Link to this heading">¶</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="qiskit_fermions.circuit.library.Evolution">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">Evolution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_modes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">operator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">synthesis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qiskit_fermions.circuit.library.Evolution" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">Evolution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_modes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">operator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">synthesis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atomic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qiskit_fermions.circuit.library.Evolution" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="qiskit_fermions.circuit.FermionicGate.html#qiskit_fermions.circuit.FermionicGate" title="qiskit_fermions.circuit.fermionic_gate.FermionicGate"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicGate</span></code></a></p>
 <p>Implements the time evolution of an operator.</p>
 <p>Given a fermionic <code class="docutils literal notranslate"><span class="pre">operator</span></code> <span class="math">\(H\)</span> and an evolution <code class="docutils literal notranslate"><span class="pre">time</span></code> <span class="math">\(t\)</span>, this gate
@@ -311,10 +311,26 @@ negative value evolves backwards in time.</p></li>
 <li><p><strong>synthesis</strong> (<a class="reference internal" href="qiskit_fermions.circuit.library.synthesis.FermionicEvolutionSynthesis.html#qiskit_fermions.circuit.library.synthesis.FermionicEvolutionSynthesis" title="qiskit_fermions.circuit.library.synthesis.FermionicEvolutionSynthesis"><em>FermionicEvolutionSynthesis</em></a><em> | </em><em>None</em>) – the fermion-to-fermion synthesis method with which to decompose this gate, when
 it gets decomposed at all. If <code class="docutils literal notranslate"><span class="pre">None</span></code> (the default), a
 <a class="reference internal" href="qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter.html#qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter" title="qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicLieTrotter</span></code></a> instance is used.</p></li>
+<li><p><strong>atomic</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – whether this gate is a fully decomposed factor which must not be broken down any
+further in fermionic space. See <a class="reference internal" href="#qiskit_fermions.circuit.library.Evolution.atomic" title="qiskit_fermions.circuit.library.Evolution.atomic"><code class="xref py py-attr docutils literal notranslate"><span class="pre">atomic</span></code></a>.</p></li>
 </ul>
 </dd>
 </dl>
 <p class="rubric">Attributes</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qiskit_fermions.circuit.library.Evolution.atomic">
+<span class="sig-name descname"><span class="pre">atomic</span></span><a class="headerlink" href="#qiskit_fermions.circuit.library.Evolution.atomic" title="Link to this definition">¶</a></dt>
+<dd><p>Whether this gate is a factor that must not be decomposed any further.</p>
+<p>A <a class="reference internal" href="qiskit_fermions.circuit.library.synthesis.FermionicEvolutionSynthesis.html#qiskit_fermions.circuit.library.synthesis.FermionicEvolutionSynthesis" title="qiskit_fermions.circuit.library.synthesis.FermionicEvolutionSynthesis"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicEvolutionSynthesis</span></code></a> marks the factors it emits as atomic, because they
+are the result of the split it chose to perform: breaking them down again would discard that
+choice. The evolution of a single operator term is atomic for the stronger reason that there
+is nothing left to split.</p>
+<p>An atomic gate has no definition at all, so <a class="reference internal" href="qiskit_fermions.circuit.FermionicCircuit.html#qiskit_fermions.circuit.FermionicCircuit.decompose" title="qiskit_fermions.circuit.FermionicCircuit.decompose"><code class="xref py py-meth docutils literal notranslate"><span class="pre">decompose()</span></code></a> leaves it in
+place rather than expanding it. It still maps and synthesizes normally at the
+fermion-to-qubit level, which is where a factor is turned into actual operations.</p>
+<p>This is read-only, for the same reason as <a class="reference internal" href="../pydoc/qiskit_fermions.circuit.library.synthesis.html#module-qiskit_fermions.circuit.library.synthesis" title="qiskit_fermions.circuit.library.synthesis"><code class="xref py py-attr docutils literal notranslate"><span class="pre">synthesis</span></code></a>.</p>
+</dd></dl>
+
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qiskit_fermions.circuit.library.Evolution.synthesis">
 <span class="sig-name descname"><span class="pre">synthesis</span></span><a class="headerlink" href="#qiskit_fermions.circuit.library.Evolution.synthesis" title="Link to this definition">¶</a></dt>
@@ -327,6 +343,25 @@ assigned after the fact could not take effect. Pass it to the constructor instea
 <dt class="sig sig-object py" id="qiskit_fermions.circuit.library.Evolution.operator">
 <span class="sig-name descname"><span class="pre">operator</span></span><a class="headerlink" href="#qiskit_fermions.circuit.library.Evolution.operator" title="Link to this definition">¶</a></dt>
 <dd><p>The operator under which to time evolve the acted-upon fermionic modes.</p>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qiskit_fermions.circuit.library.Evolution.inverse">
+<span class="sig-name descname"><span class="pre">inverse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">annotated</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qiskit_fermions.circuit.library.Evolution.inverse" title="Link to this definition">¶</a></dt>
+<dd><p>Returns the inverse of this gate, <span class="math">\(e^{+i t H}\)</span>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>annotated</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – ignored. The inverse of this gate is another <a class="reference internal" href="#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a>, so it never
+needs to be an <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.AnnotatedOperation" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">AnnotatedOperation</span></code></a>.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>An <a class="reference internal" href="#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate evolving the same operator for the negated time.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.evolution.Evolution"><em>Evolution</em></a></p>
+</dd>
+</dl>
 </dd></dl>
 
 <p class="rubric">Protocol Methods</p>
@@ -421,8 +456,10 @@ applied, mirroring the transpiler’s synthesis pass.</p></li>
             <ul>
 <li><a class="reference internal" href="#">Evolution</a><ul>
 <li><a class="reference internal" href="#qiskit_fermions.circuit.library.Evolution"><code class="docutils literal notranslate"><span class="pre">Evolution</span></code></a><ul>
+<li><a class="reference internal" href="#qiskit_fermions.circuit.library.Evolution.atomic"><code class="docutils literal notranslate"><span class="pre">Evolution.atomic</span></code></a></li>
 <li><a class="reference internal" href="#qiskit_fermions.circuit.library.Evolution.synthesis"><code class="docutils literal notranslate"><span class="pre">Evolution.synthesis</span></code></a></li>
 <li><a class="reference internal" href="#qiskit_fermions.circuit.library.Evolution.operator"><code class="docutils literal notranslate"><span class="pre">Evolution.operator</span></code></a></li>
+<li><a class="reference internal" href="#qiskit_fermions.circuit.library.Evolution.inverse"><code class="docutils literal notranslate"><span class="pre">Evolution.inverse()</span></code></a></li>
 <li><a class="reference internal" href="#qiskit_fermions.circuit.library.Evolution._apply_unitary_placed_"><code class="docutils literal notranslate"><span class="pre">Evolution._apply_unitary_placed_()</span></code></a></li>
 </ul>
 </li>
@@ -437,7 +474,7 @@ applied, mirroring the transpiler’s synthesis pass.</p></li>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=da4d062a"></script>
+</div><script src="../_static/documentation_options.js?v=e77a4914"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

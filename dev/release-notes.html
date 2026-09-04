@@ -8,7 +8,7 @@
         <link rel="prefetch" href="_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Release Notes - Qiskit Fermions 0.2.0.dev0+d82edf3</title>
+        <title>Release Notes - Qiskit Fermions 0.2.0.dev0+a2dc9d5</title>
       <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+d82edf3</div></a>
+      <a href="index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+a2dc9d5</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+d82edf3</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+a2dc9d5</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="search.html" role="search">
@@ -407,6 +407,35 @@ represents exactly the same observable as before.</p>
 is given. The Python binding took its argument by value, which duplicated every term buffer of
 the input <a class="reference internal" href="stubs/qiskit_fermions.operators.FermionOperator.html#qiskit_fermions.operators.FermionOperator" title="qiskit_fermions.operators.FermionOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionOperator</span></code></a> purely in order to read it.</p></li>
 </ul>
+<ul>
+<li><p>Fixed a decomposition of the <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate that never terminated. The evolution of a
+single operator term used to decompose into an identical single-term <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a>, so
+repeated expansion made no progress. Most visibly this made <code class="docutils literal notranslate"><span class="pre">inverse()</span></code> raise a
+<code class="docutils literal notranslate"><span class="pre">RecursionError</span></code>, since it recurses through the gate’s definition.</p>
+<p>A factor emitted by a
+<a class="reference internal" href="stubs/qiskit_fermions.circuit.library.synthesis.FermionicEvolutionSynthesis.html#qiskit_fermions.circuit.library.synthesis.FermionicEvolutionSynthesis" title="qiskit_fermions.circuit.library.synthesis.FermionicEvolutionSynthesis"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicEvolutionSynthesis</span></code></a> is
+now marked <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution.atomic" title="qiskit_fermions.circuit.library.Evolution.atomic"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Evolution.atomic</span></code></a> and is left in place by
+<a class="reference internal" href="stubs/qiskit_fermions.circuit.FermionicCircuit.html#qiskit_fermions.circuit.FermionicCircuit.decompose" title="qiskit_fermions.circuit.FermionicCircuit.decompose"><code class="xref py py-meth docutils literal notranslate"><span class="pre">decompose()</span></code></a> instead of being expanded again. Decomposing an
+<a class="reference internal" href="stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> repeatedly therefore reaches a fixed point.</p>
+</li>
+</ul>
+<ul>
+<li><p>Fixed <a class="reference internal" href="stubs/qiskit_fermions.circuit.FermionicCircuit.html#qiskit_fermions.circuit.FermionicCircuit.decompose" title="qiskit_fermions.circuit.FermionicCircuit.decompose"><code class="xref py py-meth docutils literal notranslate"><span class="pre">decompose()</span></code></a> producing non-unitary factors when applied more than
+twice to an operator carrying groups. Each group was split further, term by term, but an
+individual term is generally not Hermitian even when the group containing it is – the conjugate
+pairs of a <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.UCC.html#qiskit_fermions.circuit.library.UCC" title="qiskit_fermions.circuit.library.UCC"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCC</span></code></a> cluster generator being the motivating example. The exponential of such a
+factor is not unitary.</p>
+<p>The fermion-to-qubit stage rejected those factors with a <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> about complex
+coefficients, but state-vector simulation applied them without complaint and returned a
+non-normalized state. Since a group is now atomic, the split that produced them no longer happens.</p>
+</li>
+</ul>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Evolution.inverse()</span></code> is now implemented directly, returning an <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> that evolves
+the same operator for the negated time and preserves the gate’s <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution.synthesis" title="qiskit_fermions.circuit.library.Evolution.synthesis"><code class="xref py py-attr docutils literal notranslate"><span class="pre">synthesis</span></code></a>
+method. Previously the inherited implementation recursed through the gate’s definition and returned
+a plain <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.Gate" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Gate</span></code></a>, discarding both the operator and the synthesis method.</p></li>
+</ul>
 </section>
 </section>
 <section id="release-notes-0-1-0">
@@ -489,7 +518,7 @@ Following Qiskit’s design philosophy, the core of this package is written in R
       
     </aside>
   </div>
-</div><script src="_static/documentation_options.js?v=da4d062a"></script>
+</div><script src="_static/documentation_options.js?v=e77a4914"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/scripts/furo.js?v=46bd48cc"></script>
