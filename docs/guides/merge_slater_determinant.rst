@@ -124,7 +124,7 @@ occupation at the sector boundary and emits **two** :class:`.PrepareSlaterDeterm
 two rotations might appear in either order.
 
 This is the shape produced by the local unitary cluster Jastrow (LUCJ) workflow (see the
-:ref:`LUCJ guide <lucj_getting_started>`);
+:ref:`LUCJ guide <lucj_transpilation>`);
 A user places an :class:`.InitializeModes` (typically the Hartree-Fock reference by using
 :meth:`~qiskit_fermions.circuit.library.InitializeModes.from_hartree_fock`) at the front of the
 circuit and appends a :class:`.UCJ` ansatz, whose first two per-spin orbital rotations directly
@@ -294,5 +294,5 @@ preparation), which is what the phase gates would have fixed.
    :class:`.PrepareSlaterDeterminant`, :class:`.InitializeModes`, :class:`.OrbitalRotation`,
    :class:`.MergeOrbitalRotations`,
    :class:`.GivensDecompositionSlaterDeterminantSynthesis`, and the
-   :ref:`LUCJ guide <lucj_getting_started>` for the workflow that produces the global-initialization
+   :ref:`LUCJ guide <lucj_transpilation>` for the workflow that produces the global-initialization
    pattern.

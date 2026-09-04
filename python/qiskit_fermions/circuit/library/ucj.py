@@ -57,7 +57,7 @@ class UCJ(FermionicGate):
     parameter-vector packing that a variational optimizer drives), while this gate expresses the
     result as fermionic modes so that the transpiler can lower it through *any* fermion-to-qubit
     encoding. Passing an ffsim operator through unchanged is what keeps the two consistent; see the
-    :ref:`ffsim guide <ffsim_backend_explanation>`.
+    :ref:`ffsim relationship guide <ffsim_relationship_explanation>`.
 
     Accepts any of ffsim's three UCJ operators, whose type fixes the spin variant and the number of
     modes this gate acts on:
