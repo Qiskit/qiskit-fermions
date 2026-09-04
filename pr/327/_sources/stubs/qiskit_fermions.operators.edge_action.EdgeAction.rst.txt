@@ -1,0 +1,6 @@
+﻿EdgeAction
+==========
+
+.. currentmodule:: qiskit_fermions.operators.edge_action
+
+.. autodata:: EdgeAction

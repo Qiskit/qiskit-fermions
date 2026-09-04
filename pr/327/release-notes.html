@@ -1,0 +1,731 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="./">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="prev" title="How this package relates to ffsim" href="guides/ffsim.html">
+        <link rel="prefetch" href="_static/images/qiskit-light-logo.svg" as="image">
+        <link rel="prefetch" href="_static/images/qiskit-dark-logo.svg" as="image">
+
+    <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
+        <title>Release Notes - Qiskit Fermions 0.2.0.dev0+9120772</title>
+      <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
+    <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css" />
+    <link rel="stylesheet" type="text/css" href="_static/katex-math.css?v=05624691" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style><link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:ital,wght@0,400;0,600;1,400;1,600&display=swap" rel="stylesheet"></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M14 2H2C1.73478 2 1.48043 2.10536 1.29289 2.29289C1.10536 2.48043 1 2.73478 1 3V13C1 13.2652 1.10536 13.5196 1.29289 13.7071C1.48043 13.8946 1.73478 14 2 14H14C14.2652 14 14.5196 13.8946 14.7071 13.7071C14.8946 13.5196 15 13.2652 15 13V3C15 2.73478 14.8946 2.48043 14.7071 2.29289C14.5196 2.10536 14.2652 2 14 2V2ZM2 3H10V13H2V3ZM14 13H11V3H14V13Z" fill="currentColor"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M14 3H2V4H14V3Z" fill="currentColor"/>
+      <path d="M14 12H2V13H14V12Z" fill="currentColor"/>
+      <path d="M14 6H2V7H14V6Z" fill="currentColor"/>
+      <path d="M14 9H2V10H14V9Z" fill="currentColor"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M11 8L6.00005 13L5.30005 12.3L9.60005 8L5.30005 3.7L6.00005 3L11 8Z" fill="currentColor"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M15 13H1V14H15V13Z" fill="currentColor"/>
+      <path d="M12.7 4.5C13.1 4.1 13.1 3.5 12.7 3.1L10.9 1.3C10.5 0.9 9.9 0.9 9.5 1.3L2 8.8V12H5.2L12.7 4.5ZM10.2 2L12 3.8L10.5 5.3L8.7 3.5L10.2 2ZM3 11V9.2L8 4.2L9.8 6L4.8 11H3Z" fill="currentColor"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M11 13.0002C11.5523 13.0002 12 12.5525 12 12.0002C12 11.4479 11.5523 11.0002 11 11.0002C10.4477 11.0002 10 11.4479 10 12.0002C10 12.5525 10.4477 13.0002 11 13.0002Z" fill="currentColor"/>
+      <path d="M14.8884 11.7394C14.5795 10.9524 14.0464 10.2734 13.3552 9.78646C12.664 9.29954 11.8451 9.02615 11 9.00017C10.1549 9.02615 9.33604 9.29954 8.64484 9.78646C7.95365 10.2734 7.42052 10.9524 7.11155 11.7394L7 12.0002L7.11155 12.2609C7.42052 13.0479 7.95365 13.727 8.64484 14.2139C9.33604 14.7008 10.1549 14.9742 11 15.0002C11.8451 14.9742 12.664 14.7008 13.3552 14.2139C14.0464 13.727 14.5795 13.0479 14.8884 12.2609L15 12.0002L14.8884 11.7394ZM11 14.0002C10.6044 14.0002 10.2178 13.8829 9.88886 13.6631C9.55996 13.4433 9.30362 13.131 9.15224 12.7655C9.00087 12.4001 8.96126 11.998 9.03843 11.61C9.1156 11.222 9.30608 10.8657 9.58579 10.586C9.86549 10.3063 10.2219 10.1158 10.6098 10.0386C10.9978 9.96143 11.3999 10.001 11.7654 10.1524C12.1308 10.3038 12.4432 10.5601 12.6629 10.889C12.8827 11.2179 13 11.6046 13 12.0002C12.9994 12.5304 12.7885 13.0388 12.4136 13.4137C12.0386 13.7887 11.5303 13.9996 11 14.0002Z" fill="currentColor"/>
+      <path d="M6 14.0002H4V2.00017H8V5.00017C8.00077 5.26515 8.10637 5.51906 8.29374 5.70643C8.48111 5.8938 8.73502 5.99941 9 6.00017H12V8.00017H13V5.00017C13.0018 4.93446 12.9893 4.86913 12.9634 4.80871C12.9375 4.74828 12.8988 4.6942 12.85 4.65017L9.35 1.15017C9.30599 1.10134 9.2519 1.06263 9.19147 1.03674C9.13104 1.01084 9.06572 0.998364 9 1.00017H4C3.73502 1.00094 3.48111 1.10654 3.29374 1.29391C3.10637 1.48128 3.00077 1.73519 3 2.00017V14.0002C3.00077 14.2652 3.10637 14.5191 3.29374 14.7064C3.48111 14.8938 3.73502 14.9994 4 15.0002H6V14.0002ZM9 2.20017L11.8 5.00017H9V2.20017Z" fill="currentColor"/>
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+9120772</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
+  
+  <div class="sidebar-logo-container">
+    <img class="sidebar-logo only-light" src="_static/images/qiskit-light-logo.svg" alt="Light Logo"/>
+    <img class="sidebar-logo only-dark" src="_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
+  </div>
+  
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+9120772</span>
+  
+</a>
+<form class="sidebar-search-container" method="get" action="search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <ul>
+<li class="toctree-l1"><a class="reference internal" href="index.html"> Documentation Home</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="install.html"> Installation Instructions</a><input aria-label="Toggle navigation of  Installation Instructions" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="install-c.html"> C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install-py.html"> Python</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="guides/index.html"> Guides</a><input aria-label="Toggle navigation of  Guides" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="guides/operators.html">Design principles of operator representations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guides/grouping.html">Group operator terms: use the operator structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guides/mappers.html">Map operator representations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guides/circuit.html">Work with fermionic circuits</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guides/sqdrift.html">Generate SqDRIFT circuits</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guides/skqd.html">Generate Krylov time-evolution circuits (SKQD)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guides/transpilation.html">Transpile fermionic circuits</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guides/merge_slater_determinant.html">Optimize Slater determinant preparation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guides/lucj.html">Transpile an LUCJ ansatz</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guides/1d_fermi_hubbard.html">Simulate 1D Fermi-Hubbard dynamics with flow sets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guides/2d_fermi_hubbard.html">Simulate 2D Fermi-Hubbard dynamics with flow sets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guides/ffsim.html">How this package relates to ffsim</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/Qiskit/qiskit-fermions"> GitHub</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API reference</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference external" href="pydoc/index.html">Python API reference</a></li>
+<li class="toctree-l1"><a class="reference external" href="cdoc/index.html">C API reference</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Release notes</a></li>
+</ul>
+
+</div></div>
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="_sources/release-notes.rst.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="release-notes">
+<span id="id1"></span><h1>Release Notes<a class="headerlink" href="#release-notes" title="Link to this heading">¶</a></h1>
+<section id="upcoming-release-327-merge">
+<span id="release-notes-upcoming-release-327-merge"></span><h2>Upcoming release (<code class="docutils literal notranslate"><span class="pre">327/merge</span></code>)<a class="headerlink" href="#upcoming-release-327-merge" title="Link to this heading">¶</a></h2>
+<section id="new-features">
+<span id="release-notes-upcoming-release-327-merge-new-features"></span><h3>New Features<a class="headerlink" href="#new-features" title="Link to this heading">¶</a></h3>
+<ul>
+<li><p>Added a C API for the edge-vertex and transfer-vertex operator representations, which were
+previously available only from Python. This includes two new opaque structs,
+<a class="reference internal" href="cdoc/qf-edge-op.html#c.QfEdgeVertexOperator" title="QfEdgeVertexOperator"><code class="xref c c-struct docutils literal notranslate"><span class="pre">QfEdgeVertexOperator</span></code></a> and <a class="reference internal" href="cdoc/qf-transfer-op.html#c.QfTransferVertexOperator" title="QfTransferVertexOperator"><code class="xref c c-struct docutils literal notranslate"><span class="pre">QfTransferVertexOperator</span></code></a>, each one with an
+equivalent set of functions to the existing operator structs.</p>
+<p>Both operators store two parallel index arrays, <code class="docutils literal notranslate"><span class="pre">left_indices</span></code> and <code class="docutils literal notranslate"><span class="pre">right_indices</span></code>, in
+place of the single <code class="docutils literal notranslate"><span class="pre">modes</span></code> array the Majorana operator uses. Because a generator is always
+identified by exactly one <code class="docutils literal notranslate"><span class="pre">(left,</span> <span class="pre">right)</span></code> pair, the two arrays necessarily have the same
+length and the constructors therefore take a single <code class="docutils literal notranslate"><span class="pre">num_indices</span></code> argument covering both.</p>
+</li>
+</ul>
+<ul class="simple">
+<li><p>Added <code class="docutils literal notranslate"><span class="pre">qf_edge_op_canonical_order</span></code> and <code class="docutils literal notranslate"><span class="pre">qf_transfer_op_canonical_order</span></code>, along with the
+commutator, anti-commutator and double-commutator functions for both new operator types
+(<code class="docutils literal notranslate"><span class="pre">qf_edge_op_commutator</span></code> and friends).</p></li>
+</ul>
+<ul class="simple">
+<li><p>Added C API functions for the edge-vertex and transfer-vertex mappers:
+<a class="reference internal" href="cdoc/qf-mappers-library.html#c.qf_edge_vertex_to_fermion" title="qf_edge_vertex_to_fermion"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_edge_vertex_to_fermion()</span></code></a>, <a class="reference internal" href="cdoc/qf-mappers-library.html#c.qf_edge_vertex_to_majorana" title="qf_edge_vertex_to_majorana"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_edge_vertex_to_majorana()</span></code></a>,
+<a class="reference internal" href="cdoc/qf-mappers-library.html#c.qf_transfer_vertex_to_fermion" title="qf_transfer_vertex_to_fermion"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_transfer_vertex_to_fermion()</span></code></a>, <a class="reference internal" href="cdoc/qf-mappers-library.html#c.qf_transfer_vertex_to_majorana" title="qf_transfer_vertex_to_majorana"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_transfer_vertex_to_majorana()</span></code></a>, and
+<a class="reference internal" href="cdoc/qf-mappers-library.html#c.qf_transfer_vertex_to_edge_vertex" title="qf_transfer_vertex_to_edge_vertex"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_transfer_vertex_to_edge_vertex()</span></code></a>.</p></li>
+</ul>
+<ul>
+<li><p>How an <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate gets decomposed in fermionic space is now configurable through its
+new keyword-only <code class="docutils literal notranslate"><span class="pre">synthesis</span></code> argument, mirroring the <code class="docutils literal notranslate"><span class="pre">synthesis</span></code> argument of Qiskit’s
+<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.library.PauliEvolutionGate" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">PauliEvolutionGate</span></code></a>. The available methods live in the new
+<a class="reference internal" href="pydoc/qiskit_fermions.circuit.library.synthesis.html#module-qiskit_fermions.circuit.library.synthesis" title="qiskit_fermions.circuit.library.synthesis"><code class="xref py py-mod docutils literal notranslate"><span class="pre">qiskit_fermions.circuit.library.synthesis</span></code></a> module, which provides the
+<a class="reference internal" href="stubs/qiskit_fermions.circuit.library.synthesis.FermionicEvolutionSynthesis.html#qiskit_fermions.circuit.library.synthesis.FermionicEvolutionSynthesis" title="qiskit_fermions.circuit.library.synthesis.FermionicEvolutionSynthesis"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicEvolutionSynthesis</span></code></a> interface and its
+first-order <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter.html#qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter" title="qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicLieTrotter</span></code></a>
+implementation.</p>
+<p>This fermion-to-fermion step is optional: an <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate can be handed straight to the
+fermion-to-qubit stage regardless of how many terms its operator holds. Decomposing it beforehand
+is a choice, taken to obtain cheaper factors or to expose structure (such as mutually commuting
+<a class="reference internal" href="stubs/qiskit_fermions.operators.OperatorTrait.html#qiskit_fermions.operators.OperatorTrait.groups" title="qiskit_fermions.operators.OperatorTrait.groups"><code class="xref py py-attr docutils literal notranslate"><span class="pre">groups</span></code></a>) that the later stage can exploit.
+Because both sides of the rewrite stay in fermionic space, that structure survives it, which is
+what these methods can exploit and Qiskit’s <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.synthesis.EvolutionSynthesis" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">EvolutionSynthesis</span></code></a> cannot.</p>
+<p>The default is unchanged: leaving <code class="docutils literal notranslate"><span class="pre">synthesis</span></code> at <code class="docutils literal notranslate"><span class="pre">None</span></code> uses
+<a class="reference internal" href="stubs/qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter.html#qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter" title="qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicLieTrotter</span></code></a>, which reproduces exactly
+the decomposition that <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> performed before, so existing circuits synthesize
+identically.</p>
+</li>
+</ul>
+<ul class="simple">
+<li><p>Improved the numerical conditioning of state-vector simulation for
+<a class="reference internal" href="stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> and <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.OrbitalRotation.html#qiskit_fermions.circuit.library.OrbitalRotation" title="qiskit_fermions.circuit.library.OrbitalRotation"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrbitalRotation</span></code></a> gates by supplying the
+exact fixed-sector operator trace to SciPy’s matrix exponential routine.</p></li>
+</ul>
+<ul>
+<li><p>Added <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter.html#qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter" title="qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicSuzukiTrotter</span></code></a>, a higher-order
+product formula for decomposing an <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate in fermionic space. Where
+<a class="reference internal" href="stubs/qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter.html#qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter" title="qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicLieTrotter</span></code></a> applies each factor once,
+this composes them symmetrically to cancel lower-order error terms, and its <code class="docutils literal notranslate"><span class="pre">reps</span></code> argument
+divides the evolution into several shorter steps:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Evolution</span><span class="p">(</span><span class="n">num_modes</span><span class="p">,</span> <span class="n">operator</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">synthesis</span><span class="o">=</span><span class="n">FermionicSuzukiTrotter</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">reps</span><span class="o">=</span><span class="mi">4</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Because it operates on the fermionic operator, it splits it along its
+<a class="reference internal" href="stubs/qiskit_fermions.operators.OperatorTrait.html#qiskit_fermions.operators.OperatorTrait.groups" title="qiskit_fermions.operators.OperatorTrait.groups"><code class="xref py py-attr docutils literal notranslate"><span class="pre">groups</span></code></a> where they are assigned – a partition that
+is no longer available to a product formula applied after the fermion-to-qubit mapping. On a
+six-mode Fermi-Hubbard chain grouped into three flow sets, <code class="docutils literal notranslate"><span class="pre">order=2</span></code> with <code class="docutils literal notranslate"><span class="pre">reps=4</span></code> reached a
+Trotter error roughly two times lower than a second-order qubit-side formula, at slightly fewer
+two-qubit gates.</p>
+<p><a class="reference internal" href="stubs/qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter.html#qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter" title="qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicLieTrotter</span></code></a> is the first-order member
+of this family and is now implemented as such, which also gives it the <code class="docutils literal notranslate"><span class="pre">reps</span></code> argument it
+previously lacked. The two are interchangeable at equal <code class="docutils literal notranslate"><span class="pre">reps</span></code>.</p>
+<p>Note that a higher order buys accuracy with depth: an order-<code class="docutils literal notranslate"><span class="pre">k</span></code> formula emits roughly
+<code class="docutils literal notranslate"><span class="pre">5**((k-2)/2)</span></code> times as many factors as an order-2 one. Note also that the accuracy of a
+decomposed circuit is governed by the weaker of the fermionic and the fermion-to-qubit formula, so
+raising the order here while the latter stays first-order buys little.</p>
+</li>
+</ul>
+<ul>
+<li><p>Added <a class="reference internal" href="stubs/qiskit_fermions.transpiler.passes.FermionicTrotterization.html#qiskit_fermions.transpiler.passes.FermionicTrotterization" title="qiskit_fermions.transpiler.passes.FermionicTrotterization"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicTrotterization</span></code></a>, a transpiler pass that selects the fermion-to-fermion
+synthesis method of every <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate in a circuit:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pm</span><span class="o">.</span><span class="n">optimization</span> <span class="o">=</span> <span class="n">FermionicPassManager</span><span class="p">(</span>
+    <span class="p">[</span><span class="n">FermionicTrotterization</span><span class="p">(</span><span class="n">FermionicSuzukiTrotter</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">reps</span><span class="o">=</span><span class="mi">4</span><span class="p">))]</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>Choosing a synthesis method per gate means threading it through everything that constructs an
+<a class="reference internal" href="stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> – including <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.UCC.html#qiskit_fermions.circuit.library.UCC" title="qiskit_fermions.circuit.library.UCC"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCC</span></code></a> and <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.UCJ.html#qiskit_fermions.circuit.library.UCJ" title="qiskit_fermions.circuit.library.UCJ"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCJ</span></code></a>, which build their own internally.
+This pass makes the choice once for a whole pipeline instead. An optional <code class="docutils literal notranslate"><span class="pre">filter</span></code> predicate
+restricts it to a subset of the gates, which is worth using when a circuit mixes evolutions that
+benefit from a higher order with ones that do not, such as the all-commuting diagonal-Coulomb
+operators of a <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.UCJ.html#qiskit_fermions.circuit.library.UCJ" title="qiskit_fermions.circuit.library.UCJ"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCJ</span></code></a>.</p>
+<p>The pass <em>selects</em> a method rather than expanding the evolution immediately, so each
+<a class="reference internal" href="stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> stays a single node for the passes that follow – notably
+<a class="reference internal" href="stubs/qiskit_fermions.transpiler.passes.RelabelModes.html#qiskit_fermions.transpiler.passes.RelabelModes" title="qiskit_fermions.transpiler.passes.RelabelModes"><code class="xref py py-class docutils literal notranslate"><span class="pre">RelabelModes</span></code></a>, which needs whole operators to build its mode-relabeling model. This is the
+opposite choice from <a class="reference internal" href="stubs/qiskit_fermions.transpiler.passes.QDriftTrotterization.html#qiskit_fermions.transpiler.passes.QDriftTrotterization" title="qiskit_fermions.transpiler.passes.QDriftTrotterization"><code class="xref py py-class docutils literal notranslate"><span class="pre">QDriftTrotterization</span></code></a>, whose random one-shot sampling cannot be
+deferred.</p>
+</li>
+</ul>
+<ul class="simple">
+<li><p>Added direct Jordan-Wigner mappers for the three remaining operator data structures:
+<a class="reference internal" href="stubs/qiskit_fermions.mappers.library.majorana_jordan_wigner.html#qiskit_fermions.mappers.library.majorana_jordan_wigner" title="qiskit_fermions.mappers.library.majorana_jordan_wigner"><code class="xref py py-func docutils literal notranslate"><span class="pre">majorana_jordan_wigner()</span></code></a>,
+<a class="reference internal" href="stubs/qiskit_fermions.mappers.library.edge_vertex_jordan_wigner.html#qiskit_fermions.mappers.library.edge_vertex_jordan_wigner" title="qiskit_fermions.mappers.library.edge_vertex_jordan_wigner"><code class="xref py py-func docutils literal notranslate"><span class="pre">edge_vertex_jordan_wigner()</span></code></a> and
+<a class="reference internal" href="stubs/qiskit_fermions.mappers.library.transfer_vertex_jordan_wigner.html#qiskit_fermions.mappers.library.transfer_vertex_jordan_wigner" title="qiskit_fermions.mappers.library.transfer_vertex_jordan_wigner"><code class="xref py py-func docutils literal notranslate"><span class="pre">transfer_vertex_jordan_wigner()</span></code></a>.</p></li>
+</ul>
+<ul class="simple">
+<li><p><a class="reference internal" href="stubs/qiskit_fermions.mappers.library.jordan_wigner.html#qiskit_fermions.mappers.library.jordan_wigner" title="qiskit_fermions.mappers.library.jordan_wigner"><code class="xref py py-func docutils literal notranslate"><span class="pre">jordan_wigner()</span></code></a> now dispatches on all four operator types
+rather than only <a class="reference internal" href="stubs/qiskit_fermions.operators.FermionOperator.html#qiskit_fermions.operators.FermionOperator" title="qiskit_fermions.operators.FermionOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionOperator</span></code></a>, delegating to whichever
+direct implementation matches the operator it is given. Passing one of the other three operator
+types previously raised a <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#TypeError" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeError</span></code></a>.</p></li>
+</ul>
+<ul class="simple">
+<li><p>Added the same three mappers to the C API, alongside the existing
+<a class="reference internal" href="cdoc/qf-mappers-library.html#c.qf_ferm_op_jordan_wigner" title="qf_ferm_op_jordan_wigner"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_ferm_op_jordan_wigner()</span></code></a>: <a class="reference internal" href="cdoc/qf-mappers-library.html#c.qf_maj_op_jordan_wigner" title="qf_maj_op_jordan_wigner"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_maj_op_jordan_wigner()</span></code></a>,
+<a class="reference internal" href="cdoc/qf-mappers-library.html#c.qf_edge_op_jordan_wigner" title="qf_edge_op_jordan_wigner"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_edge_op_jordan_wigner()</span></code></a> and <a class="reference internal" href="cdoc/qf-mappers-library.html#c.qf_transfer_op_jordan_wigner" title="qf_transfer_op_jordan_wigner"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_transfer_op_jordan_wigner()</span></code></a>.</p></li>
+</ul>
+<ul>
+<li><p>The <a class="reference internal" href="stubs/qiskit_fermions.operators.OperatorTrait.html#qiskit_fermions.operators.OperatorTrait.is_hermitian" title="qiskit_fermions.operators.OperatorTrait.is_hermitian"><code class="xref py py-meth docutils literal notranslate"><span class="pre">is_hermitian()</span></code></a> method is now part of the
+<a class="reference internal" href="stubs/qiskit_fermions.operators.OperatorTrait.html#qiskit_fermions.operators.OperatorTrait" title="qiskit_fermions.operators.OperatorTrait"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperatorTrait</span></code></a> protocol. Every operator class already
+provided it, so it can now be called on any value typed as an <code class="docutils literal notranslate"><span class="pre">OperatorTrait</span></code> rather than only
+on a concrete operator class.</p>
+<p>Note that the strength of this check varies by operator type, which the protocol documents as
+its weakest guarantee: a <code class="docutils literal notranslate"><span class="pre">True</span></code> result is always reliable, while a <code class="docutils literal notranslate"><span class="pre">False</span></code> result is
+conservative for operator types whose normal form is not a genuine canonical form. See
+<a class="reference internal" href="stubs/qiskit_fermions.operators.TransferVertexOperator.html#qiskit_fermions.operators.TransferVertexOperator.is_hermitian" title="qiskit_fermions.operators.TransferVertexOperator.is_hermitian"><code class="xref py py-meth docutils literal notranslate"><span class="pre">is_hermitian()</span></code></a> for the one such case.</p>
+</li>
+</ul>
+<ul>
+<li><p>Added two adapters that wrap a mapper function to control the Pauli term order it produces, which
+<a class="reference internal" href="stubs/qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis.html#qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis" title="qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis"><code class="xref py py-class docutils literal notranslate"><span class="pre">MapperFnEvolutionSynthesis</span></code></a> now preserves through synthesis.</p>
+<p><a class="reference internal" href="stubs/qiskit_fermions.transpiler.passes.synthesis.simplify.html#qiskit_fermions.transpiler.passes.synthesis.simplify" title="qiskit_fermions.transpiler.passes.synthesis.simplify"><code class="xref py py-func docutils literal notranslate"><span class="pre">simplify()</span></code></a> simplifies the mapped operator, merging duplicate Pauli terms and pinning a
+canonical term order.</p>
+<p><a class="reference internal" href="stubs/qiskit_fermions.transpiler.passes.synthesis.group_wise.html#qiskit_fermions.transpiler.passes.synthesis.group_wise" title="qiskit_fermions.transpiler.passes.synthesis.group_wise"><code class="xref py py-func docutils literal notranslate"><span class="pre">group_wise()</span></code></a> maps an operator one <a class="reference internal" href="stubs/qiskit_fermions.operators.OperatorTrait.html#qiskit_fermions.operators.OperatorTrait.groups" title="qiskit_fermions.operators.OperatorTrait.groups"><code class="xref py py-attr docutils literal notranslate"><span class="pre">groups</span></code></a>
+entry at a time and sums the results. The operator is unchanged, but the terms of each group come
+out adjacent rather than interleaved, which lets those acting on disjoint qubits share a circuit
+layer:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">MapperFnEvolutionSynthesis</span><span class="p">(</span><span class="n">group_wise</span><span class="p">(</span><span class="n">jordan_wigner</span><span class="p">))</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<ul class="simple">
+<li><p><a class="reference internal" href="stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> can now be simulated for <strong>any</strong> operator type of this package, not only
+<a class="reference internal" href="stubs/qiskit_fermions.operators.FermionOperator.html#qiskit_fermions.operators.FermionOperator" title="qiskit_fermions.operators.FermionOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionOperator</span></code></a>. An operator of another type is converted through its fermionic image
+(the <a class="reference internal" href="stubs/qiskit_fermions.protocols.SupportsFermionOperator.html#qiskit_fermions.protocols.SupportsFermionOperator" title="qiskit_fermions.protocols.SupportsFermionOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">SupportsFermionOperator</span></code></a> protocol) before being simulated, so evolving a
+<a class="reference internal" href="stubs/qiskit_fermions.operators.MajoranaOperator.html#qiskit_fermions.operators.MajoranaOperator" title="qiskit_fermions.operators.MajoranaOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">MajoranaOperator</span></code></a>, <a class="reference internal" href="stubs/qiskit_fermions.operators.EdgeVertexOperator.html#qiskit_fermions.operators.EdgeVertexOperator" title="qiskit_fermions.operators.EdgeVertexOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">EdgeVertexOperator</span></code></a> or <a class="reference internal" href="stubs/qiskit_fermions.operators.TransferVertexOperator.html#qiskit_fermions.operators.TransferVertexOperator" title="qiskit_fermions.operators.TransferVertexOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransferVertexOperator</span></code></a> no
+longer raises <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#NotImplementedError" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">NotImplementedError</span></code></a>.</p></li>
+</ul>
+<ul class="simple">
+<li><p><a class="reference internal" href="stubs/qiskit_fermions.operators.FermionOperator.html#qiskit_fermions.operators.FermionOperator" title="qiskit_fermions.operators.FermionOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionOperator</span></code></a> now implements <a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.SupportsTrace.html#ffsim.SupportsTrace" title="(in ffsim)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ffsim.SupportsTrace</span></code></a> through a new
+<a class="reference internal" href="stubs/qiskit_fermions.protocols.SupportsTrace.html#qiskit_fermions.protocols.SupportsTrace" title="qiskit_fermions.protocols.SupportsTrace"><code class="xref py py-class docutils literal notranslate"><span class="pre">SupportsTrace</span></code></a> protocol, so <a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.trace.html#ffsim.trace" title="(in ffsim)"><code class="xref py py-func docutils literal notranslate"><span class="pre">ffsim.trace()</span></code></a> can compute the trace of an operator on
+a fixed <code class="docutils literal notranslate"><span class="pre">(norb,</span> <span class="pre">nelec)</span></code> sector. This is what preconditions
+<a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.linalg.expm_multiply.html#scipy.sparse.linalg.expm_multiply" title="(in SciPy v1.18.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.sparse.linalg.expm_multiply()</span></code></a> along the evolution path.</p></li>
+</ul>
+</section>
+<section id="upgrade-notes">
+<span id="release-notes-upcoming-release-327-merge-upgrade-notes"></span><h3>Upgrade Notes<a class="headerlink" href="#upgrade-notes" title="Link to this heading">¶</a></h3>
+<ul>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">qiskit_fermions.linalg.apply_unitary</span></code> and
+<code class="docutils literal notranslate"><span class="pre">qiskit_fermions.linalg.linear_operator</span></code> functions have been removed. They were thin wrappers
+around the <a class="reference internal" href="stubs/qiskit_fermions.protocols.SupportsApplyUnitary.html#qiskit_fermions.protocols.SupportsApplyUnitary" title="qiskit_fermions.protocols.SupportsApplyUnitary"><code class="xref py py-class docutils literal notranslate"><span class="pre">SupportsApplyUnitary</span></code></a> and <a class="reference internal" href="stubs/qiskit_fermions.protocols.SupportsLinearOperator.html#qiskit_fermions.protocols.SupportsLinearOperator" title="qiskit_fermions.protocols.SupportsLinearOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">SupportsLinearOperator</span></code></a> protocol methods,
+duplicating <a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.apply_unitary.html#ffsim.apply_unitary" title="(in ffsim)"><code class="xref py py-func docutils literal notranslate"><span class="pre">ffsim.apply_unitary()</span></code></a> and <a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.linear_operator.html#ffsim.linear_operator" title="(in ffsim)"><code class="xref py py-func docutils literal notranslate"><span class="pre">ffsim.linear_operator()</span></code></a>. Call ffsim’s
+functions instead, or, when ffsim is not installed, the protocol method on the object directly:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># before</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.linalg</span><span class="w"> </span><span class="kn">import</span> <span class="n">apply_unitary</span><span class="p">,</span> <span class="n">linear_operator</span>
+<span class="n">vec</span> <span class="o">=</span> <span class="n">apply_unitary</span><span class="p">(</span><span class="n">vec</span><span class="p">,</span> <span class="n">gate</span><span class="p">,</span> <span class="n">norb</span><span class="p">,</span> <span class="n">nelec</span><span class="p">)</span>
+<span class="n">linop</span> <span class="o">=</span> <span class="n">linear_operator</span><span class="p">(</span><span class="n">operator</span><span class="p">,</span> <span class="n">norb</span><span class="p">,</span> <span class="n">nelec</span><span class="p">)</span>
+
+<span class="c1"># after (with ffsim)</span>
+<span class="n">vec</span> <span class="o">=</span> <span class="n">ffsim</span><span class="o">.</span><span class="n">apply_unitary</span><span class="p">(</span><span class="n">vec</span><span class="p">,</span> <span class="n">gate</span><span class="p">,</span> <span class="n">norb</span><span class="o">=</span><span class="n">norb</span><span class="p">,</span> <span class="n">nelec</span><span class="o">=</span><span class="n">nelec</span><span class="p">)</span>
+<span class="n">linop</span> <span class="o">=</span> <span class="n">ffsim</span><span class="o">.</span><span class="n">linear_operator</span><span class="p">(</span><span class="n">operator</span><span class="p">,</span> <span class="n">norb</span><span class="o">=</span><span class="n">norb</span><span class="p">,</span> <span class="n">nelec</span><span class="o">=</span><span class="n">nelec</span><span class="p">)</span>
+
+<span class="c1"># after (without ffsim)</span>
+<span class="n">vec</span> <span class="o">=</span> <span class="n">gate</span><span class="o">.</span><span class="n">_apply_unitary_</span><span class="p">(</span><span class="n">vec</span><span class="p">,</span> <span class="n">norb</span><span class="p">,</span> <span class="n">nelec</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">linop</span> <span class="o">=</span> <span class="n">operator</span><span class="o">.</span><span class="n">_linear_operator_</span><span class="p">(</span><span class="n">norb</span><span class="p">,</span> <span class="n">nelec</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The protocols themselves are unchanged.</p>
+</li>
+</ul>
+<ul class="simple">
+<li><p>The <code class="docutils literal notranslate"><span class="pre">simulation</span></code> optional dependency has been renamed to <code class="docutils literal notranslate"><span class="pre">ffsim</span></code>, so
+<code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">&quot;qiskit-fermions[simulation]&quot;</span></code> becomes
+<code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">&quot;qiskit-fermions[ffsim]&quot;</span></code>. The extra names the dependency it installs rather than
+a capability. Installing <code class="docutils literal notranslate"><span class="pre">qiskit-fermions[all]</span></code> is unaffected.</p></li>
+</ul>
+<ul>
+<li><p><a class="reference internal" href="stubs/qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis.html#qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis" title="qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis"><code class="xref py py-class docutils literal notranslate"><span class="pre">MapperFnEvolutionSynthesis</span></code></a> no longer simplifies the operator returned by its
+<a class="reference internal" href="stubs/qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis.html#qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis.mapper_fn" title="qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis.mapper_fn"><code class="xref py py-attr docutils literal notranslate"><span class="pre">mapper_fn</span></code></a>. Simplifying sorts the Pauli terms into a canonical
+order, and a product formula synthesizes them in the order it receives them, so the previous
+behavior discarded whatever order the mapper had chosen.</p>
+<p>This changes the synthesized circuit for existing pipelines: the gate count is unaffected, but the
+order the rotations are emitted in (and hence the two-qubit depth) may differ. The evolution being
+approximated is unchanged.</p>
+<p>Note also that the term order a mapper produces is not guaranteed to be stable between runs,
+because the operators of the Rust core do not preserve the order their terms were added in. Wrap
+the mapper in the new <a class="reference internal" href="stubs/qiskit_fermions.transpiler.passes.synthesis.simplify.html#qiskit_fermions.transpiler.passes.synthesis.simplify" title="qiskit_fermions.transpiler.passes.synthesis.simplify"><code class="xref py py-func docutils literal notranslate"><span class="pre">simplify()</span></code></a> to restore the previous behavior and pin a canonical
+order:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">MapperFnEvolutionSynthesis</span><span class="p">(</span><span class="n">simplify</span><span class="p">(</span><span class="n">jordan_wigner</span><span class="p">))</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<ul>
+<li><p>The double factorization utilities have been removed from
+<a class="reference internal" href="pydoc/qiskit_fermions.linalg.html#module-qiskit_fermions.linalg" title="qiskit_fermions.linalg"><code class="xref py py-mod docutils literal notranslate"><span class="pre">qiskit_fermions.linalg</span></code></a>: <code class="docutils literal notranslate"><span class="pre">double_factorized_t2</span></code>,
+<code class="docutils literal notranslate"><span class="pre">double_factorized_t2_alpha_beta</span></code>, <code class="docutils literal notranslate"><span class="pre">reconstruct_t2</span></code>, <code class="docutils literal notranslate"><span class="pre">reconstruct_t2_alpha_beta</span></code> and
+<code class="docutils literal notranslate"><span class="pre">double_factorized_2body</span></code>. The <code class="docutils literal notranslate"><span class="pre">t2</span></code> variants existed to serve <code class="docutils literal notranslate"><span class="pre">UCJ.from_t_amplitudes</span></code>,
+which now lives in ffsim, and <code class="docutils literal notranslate"><span class="pre">double_factorized_2body</span></code> had no caller. Use
+<a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.linalg.double_factorized_t2.html#ffsim.linalg.double_factorized_t2" title="(in ffsim)"><code class="xref py py-func docutils literal notranslate"><span class="pre">ffsim.linalg.double_factorized_t2()</span></code></a>,
+<a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.linalg.double_factorized_t2_alpha_beta.html#ffsim.linalg.double_factorized_t2_alpha_beta" title="(in ffsim)"><code class="xref py py-func docutils literal notranslate"><span class="pre">ffsim.linalg.double_factorized_t2_alpha_beta()</span></code></a> and
+<a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.linalg.double_factorized.html#ffsim.linalg.double_factorized" title="(in ffsim)"><code class="xref py py-func docutils literal notranslate"><span class="pre">ffsim.linalg.double_factorized()</span></code></a> instead; the last is a superset of the removed
+two-body routine, additionally offering an optimized (<code class="docutils literal notranslate"><span class="pre">optimize=True</span></code>) decomposition.</p>
+<p><a class="reference internal" href="stubs/qiskit_fermions.linalg.givens_decomposition.html#qiskit_fermions.linalg.givens_decomposition" title="qiskit_fermions.linalg.givens_decomposition"><code class="xref py py-func docutils literal notranslate"><span class="pre">givens_decomposition()</span></code></a> and
+<a class="reference internal" href="stubs/qiskit_fermions.linalg.givens_decomposition_slater.html#qiskit_fermions.linalg.givens_decomposition_slater" title="qiskit_fermions.linalg.givens_decomposition_slater"><code class="xref py py-func docutils literal notranslate"><span class="pre">givens_decomposition_slater()</span></code></a> are unaffected: they back
+<a class="reference internal" href="stubs/qiskit_fermions.circuit.library.OrbitalRotation.html#qiskit_fermions.circuit.library.OrbitalRotation" title="qiskit_fermions.circuit.library.OrbitalRotation"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrbitalRotation</span></code></a> and <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.PrepareSlaterDeterminant.html#qiskit_fermions.circuit.library.PrepareSlaterDeterminant" title="qiskit_fermions.circuit.library.PrepareSlaterDeterminant"><code class="xref py py-class docutils literal notranslate"><span class="pre">PrepareSlaterDeterminant</span></code></a> synthesis and remain
+ffsim-independent, as does the native FCI kernel behind <a class="reference internal" href="stubs/qiskit_fermions.protocols.SupportsLinearOperator.html#qiskit_fermions.protocols.SupportsLinearOperator" title="qiskit_fermions.protocols.SupportsLinearOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">SupportsLinearOperator</span></code></a>.</p>
+</li>
+</ul>
+<ul>
+<li><p>Simulation now requires <a class="reference external" href="https://github.com/qiskit-community/ffsim">ffsim</a>. The native Rust
+FCI (full configuration interaction) kernel that used to back
+<a class="reference internal" href="stubs/qiskit_fermions.protocols.SupportsLinearOperator.html#qiskit_fermions.protocols.SupportsLinearOperator" title="qiskit_fermions.protocols.SupportsLinearOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">SupportsLinearOperator</span></code></a> has been removed, and
+<a class="reference internal" href="stubs/qiskit_fermions.protocols.SupportsLinearOperator.html#qiskit_fermions.protocols.SupportsLinearOperator._linear_operator_" title="qiskit_fermions.protocols.SupportsLinearOperator._linear_operator_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">SupportsLinearOperator._linear_operator_()</span></code></a> is now implemented by converting a
+<a class="reference internal" href="stubs/qiskit_fermions.operators.FermionOperator.html#qiskit_fermions.operators.FermionOperator" title="qiskit_fermions.operators.FermionOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionOperator</span></code></a> into an <a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.FermionOperator.html#ffsim.FermionOperator" title="(in ffsim)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ffsim.FermionOperator</span></code></a> and delegating to
+<a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.linear_operator.html#ffsim.linear_operator" title="(in ffsim)"><code class="xref py py-func docutils literal notranslate"><span class="pre">ffsim.linear_operator()</span></code></a>.</p>
+<p>Simulation is ffsim’s concern: this package focuses on fermionic mappers and the
+mapper-agnostic circuit and its transpilation. Because ffsim depends on PySCF, which does not
+support Windows, simulation is consequently unavailable on Windows; the rest of the package
+(building operators, mapping them and transpiling the resulting circuits) is unaffected on
+every platform. Windows users who need to simulate can do so through the <a class="reference external" href="https://learn.microsoft.com/en-us/windows/wsl/">Windows Subsystem
+for Linux</a>.</p>
+<p>Calling a simulation entry point without ffsim installed now raises
+<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/exceptions#qiskit.exceptions.MissingOptionalLibraryError" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">MissingOptionalLibraryError</span></code></a>.</p>
+</li>
+</ul>
+<ul class="simple">
+<li><p>The <code class="docutils literal notranslate"><span class="pre">qiskit_fermions.linalg.fci</span></code> module has been removed along with the kernel, including its
+<code class="docutils literal notranslate"><span class="pre">FciLinearOperator</span></code> class and the <code class="docutils literal notranslate"><span class="pre">slater_determinant_statevector</span></code> and
+<code class="docutils literal notranslate"><span class="pre">occupation_axis_mask</span></code> functions. ffsim provides equivalents:
+<a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.slater_determinant.html#ffsim.slater_determinant" title="(in ffsim)"><code class="xref py py-func docutils literal notranslate"><span class="pre">ffsim.slater_determinant()</span></code></a> and <a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.addresses_to_strings.html#ffsim.addresses_to_strings" title="(in ffsim)"><code class="xref py py-func docutils literal notranslate"><span class="pre">ffsim.addresses_to_strings()</span></code></a> respectively.</p></li>
+</ul>
+<ul class="simple">
+<li><p><a class="reference internal" href="stubs/qiskit_fermions.circuit.library.OrbitalRotation.html#qiskit_fermions.circuit.library.OrbitalRotation" title="qiskit_fermions.circuit.library.OrbitalRotation"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrbitalRotation</span></code></a> no longer falls back to a generator-plus-exponential path when ffsim
+is absent; it always delegates to <a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.apply_orbital_rotation.html#ffsim.apply_orbital_rotation" title="(in ffsim)"><code class="xref py py-func docutils literal notranslate"><span class="pre">ffsim.apply_orbital_rotation()</span></code></a>. The results are
+unchanged when ffsim is installed.</p></li>
+</ul>
+<ul class="simple">
+<li><p>An operator that does not conserve particle number, or the z-component of spin in the spinful
+case, is now rejected by ffsim rather than by this package’s own check, so the
+<a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ValueError</span></code></a> that <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> surfaces when simulating one carries a different
+message.</p></li>
+</ul>
+<ul>
+<li><p>The <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.UCC.html#qiskit_fermions.circuit.library.UCC" title="qiskit_fermions.circuit.library.UCC"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCC</span></code></a> gate is now constructed from one of ffsim’s UCCSD operators, which is its only
+constructor argument. The spin variant and the number of modes are read off that operator, so the
+<code class="docutils literal notranslate"><span class="pre">variant</span></code> argument and the <code class="docutils literal notranslate"><span class="pre">UCC.Variant</span></code> enum are gone:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># before</span>
+<span class="n">ansatz</span> <span class="o">=</span> <span class="n">UCC</span><span class="p">(</span><span class="s2">"restricted"</span><span class="p">,</span> <span class="n">t1</span><span class="p">,</span> <span class="n">t2</span><span class="p">)</span>
+
+<span class="c1"># after</span>
+<span class="n">ansatz</span> <span class="o">=</span> <span class="n">UCC</span><span class="p">(</span><span class="n">ffsim</span><span class="o">.</span><span class="n">UCCSDOpRestrictedReal</span><span class="p">(</span><span class="n">t1</span><span class="o">=</span><span class="n">t1</span><span class="p">,</span> <span class="n">t2</span><span class="o">=</span><span class="n">t2</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Accordingly, <code class="docutils literal notranslate"><span class="pre">UCC.from_t_amplitudes</span></code>, <code class="docutils literal notranslate"><span class="pre">UCC.num_parameters</span></code>, <code class="docutils literal notranslate"><span class="pre">UCC.from_parameters</span></code> and
+<code class="docutils literal notranslate"><span class="pre">UCC.to_parameters</span></code> have been removed, as have the <code class="docutils literal notranslate"><span class="pre">spinless</span></code> variant and the opt-in
+<code class="docutils literal notranslate"><span class="pre">antisymmetric</span></code> parameterization, which have no ffsim equivalent. ffsim’s operators provide
+<a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.UCCSDOpRestrictedReal.html#ffsim.UCCSDOpRestrictedReal.n_params" title="(in ffsim)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">n_params()</span></code></a>,
+<a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.UCCSDOpRestrictedReal.html#ffsim.UCCSDOpRestrictedReal.from_parameters" title="(in ffsim)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_parameters()</span></code></a> and
+<a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.UCCSDOpRestrictedReal.html#ffsim.UCCSDOpRestrictedReal.to_parameters" title="(in ffsim)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">to_parameters()</span></code></a> with identical conventions. To build
+an ansatz outside that family (a spinless one, or an antisymmetrized <span class="math">\(t_2\)</span>), construct an
+<a class="reference internal" href="stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> over your own cluster operator directly, which also gives you control over
+the Trotter ordering of its terms.</p>
+<p>The wrapped operator is available as <code class="docutils literal notranslate"><span class="pre">UCC.uccsd_op</span></code>, so its amplitudes are reachable as
+<code class="docutils literal notranslate"><span class="pre">gate.uccsd_op.t1</span></code> and <code class="docutils literal notranslate"><span class="pre">gate.uccsd_op.t2</span></code>; the gate no longer mirrors them as attributes of
+its own. <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.UCC.html#qiskit_fermions.circuit.library.UCC.cluster_operator" title="qiskit_fermions.circuit.library.UCC.cluster_operator"><code class="xref py py-meth docutils literal notranslate"><span class="pre">UCC.cluster_operator()</span></code></a> is unchanged. A
+<code class="docutils literal notranslate"><span class="pre">final_orbital_rotation</span></code> carried by the ffsim operator is now appended as a closing
+<a class="reference internal" href="stubs/qiskit_fermions.circuit.library.OrbitalRotation.html#qiskit_fermions.circuit.library.OrbitalRotation" title="qiskit_fermions.circuit.library.OrbitalRotation"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrbitalRotation</span></code></a>.</p>
+<p>Since ffsim is now the gate’s input type rather than an optional accelerator, constructing a
+<a class="reference internal" href="stubs/qiskit_fermions.circuit.library.UCC.html#qiskit_fermions.circuit.library.UCC" title="qiskit_fermions.circuit.library.UCC"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCC</span></code></a> requires the <code class="docutils literal notranslate"><span class="pre">ffsim</span></code> extra (<code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">&quot;qiskit-fermions[ffsim]&quot;</span></code>) and raises
+<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/exceptions#qiskit.exceptions.MissingOptionalLibraryError" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">MissingOptionalLibraryError</span></code></a> without it. ffsim does not support
+Windows, so the gate is unavailable there; use WSL.</p>
+</li>
+</ul>
+<ul>
+<li><p>The <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.UCJ.html#qiskit_fermions.circuit.library.UCJ" title="qiskit_fermions.circuit.library.UCJ"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCJ</span></code></a> gate is now constructed from one of ffsim’s UCJ operators, which is its only
+constructor argument. The spin variant, the number of spatial orbitals and the number of modes
+are read off that operator, so the <code class="docutils literal notranslate"><span class="pre">variant</span></code> argument and the <code class="docutils literal notranslate"><span class="pre">UCJ.Variant</span></code> enum are gone:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># before</span>
+<span class="n">ansatz</span> <span class="o">=</span> <span class="n">UCJ</span><span class="o">.</span><span class="n">from_t_amplitudes</span><span class="p">(</span><span class="n">nelec</span><span class="p">,</span> <span class="n">t2</span><span class="p">,</span> <span class="n">t1</span><span class="o">=</span><span class="n">t1</span><span class="p">,</span> <span class="n">n_reps</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">ansatz</span> <span class="o">=</span> <span class="n">UCJ</span><span class="p">(</span><span class="s2">"balanced"</span><span class="p">,</span> <span class="n">diag_coulomb_mats</span><span class="p">,</span> <span class="n">orbital_rotations</span><span class="p">)</span>
+
+<span class="c1"># after</span>
+<span class="n">ansatz</span> <span class="o">=</span> <span class="n">UCJ</span><span class="p">(</span><span class="n">ffsim</span><span class="o">.</span><span class="n">UCJOpSpinBalanced</span><span class="o">.</span><span class="n">from_t_amplitudes</span><span class="p">(</span><span class="n">t2</span><span class="p">,</span> <span class="n">t1</span><span class="o">=</span><span class="n">t1</span><span class="p">,</span> <span class="n">n_reps</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+<span class="n">ansatz</span> <span class="o">=</span> <span class="n">UCJ</span><span class="p">(</span><span class="n">ffsim</span><span class="o">.</span><span class="n">UCJOpSpinBalanced</span><span class="p">(</span><span class="n">diag_coulomb_mats</span><span class="p">,</span> <span class="n">orbital_rotations</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Accordingly, <code class="docutils literal notranslate"><span class="pre">UCJ.from_t_amplitudes</span></code>, <code class="docutils literal notranslate"><span class="pre">UCJ.num_parameters</span></code>, <code class="docutils literal notranslate"><span class="pre">UCJ.from_parameters</span></code> and
+<code class="docutils literal notranslate"><span class="pre">UCJ.to_parameters</span></code> have been removed: ffsim’s operators provide
+<a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.UCJOpSpinBalanced.html#ffsim.UCJOpSpinBalanced.from_t_amplitudes" title="(in ffsim)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_t_amplitudes()</span></code></a>,
+<a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.UCJOpSpinBalanced.html#ffsim.UCJOpSpinBalanced.n_params" title="(in ffsim)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">n_params()</span></code></a>,
+<a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.UCJOpSpinBalanced.html#ffsim.UCJOpSpinBalanced.from_parameters" title="(in ffsim)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_parameters()</span></code></a> and
+<a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.UCJOpSpinBalanced.html#ffsim.UCJOpSpinBalanced.to_parameters" title="(in ffsim)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">to_parameters()</span></code></a> with identical conventions, and
+additionally offer the compressed (<code class="docutils literal notranslate"><span class="pre">optimize=True</span></code>) double factorization and
+<a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.UCJOpSpinBalanced.html#ffsim.UCJOpSpinBalanced.from_cisd_vec" title="(in ffsim)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_cisd_vec()</span></code></a>, which this package never implemented.
+The wrapped operator is available as <code class="docutils literal notranslate"><span class="pre">UCJ.ucj_op</span></code>, so its tensors are reachable as
+<code class="docutils literal notranslate"><span class="pre">gate.ucj_op.diag_coulomb_mats</span></code> and so on; the gate no longer mirrors them as attributes of its
+own.</p>
+<p>Since ffsim is now the gate’s input type rather than an optional accelerator, constructing a
+<a class="reference internal" href="stubs/qiskit_fermions.circuit.library.UCJ.html#qiskit_fermions.circuit.library.UCJ" title="qiskit_fermions.circuit.library.UCJ"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCJ</span></code></a> requires the <code class="docutils literal notranslate"><span class="pre">ffsim</span></code> extra
+(<code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">&quot;qiskit-fermions[ffsim]&quot;</span></code>) and raises
+<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/exceptions#qiskit.exceptions.MissingOptionalLibraryError" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">MissingOptionalLibraryError</span></code></a> without it. ffsim does not support
+Windows, so the gate is unavailable there; use WSL.</p>
+</li>
+</ul>
+</section>
+<section id="bug-fixes">
+<span id="release-notes-upcoming-release-327-merge-bug-fixes"></span><h3>Bug Fixes<a class="headerlink" href="#bug-fixes" title="Link to this heading">¶</a></h3>
+<ul>
+<li><p>Fixed the excessive memory consumption of
+<a class="reference internal" href="stubs/qiskit_fermions.mappers.library.fermion_jordan_wigner.html#qiskit_fermions.mappers.library.fermion_jordan_wigner" title="qiskit_fermions.mappers.library.fermion_jordan_wigner"><code class="xref py py-func docutils literal notranslate"><span class="pre">fermion_jordan_wigner()</span></code></a> (and therefore of
+<a class="reference internal" href="stubs/qiskit_fermions.mappers.library.jordan_wigner.html#qiskit_fermions.mappers.library.jordan_wigner" title="qiskit_fermions.mappers.library.jordan_wigner"><code class="xref py py-func docutils literal notranslate"><span class="pre">jordan_wigner()</span></code></a> when applied to a
+<a class="reference internal" href="stubs/qiskit_fermions.operators.FermionOperator.html#qiskit_fermions.operators.FermionOperator" title="qiskit_fermions.operators.FermionOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionOperator</span></code></a>). The mapper accumulated the mapped terms
+using an addition that concatenates rather than merges duplicate Pauli terms, so the
+intermediate observable grew with the number of Pauli terms <em>emitted</em> instead of the number of
+<em>distinct</em> ones. Mapping a large Hamiltonian could therefore exhaust the available memory even
+though the simplified result was orders of magnitude smaller. The accumulators are now
+canonicalized once they have grown by a factor over their previously merged size, which bounds
+the memory they hold in terms of the operator they actually represent.</p>
+<p>Peak memory still grows with the number of worker threads: the terms are handed to whichever
+thread is free rather than partitioned by the Pauli strings they produce, so each accumulator
+ends up holding roughly a full copy of the mapped operator. What changed is the factor each one
+carries – previously proportional to the number of Pauli terms emitted, now to the number of
+distinct ones. Reducing the thread count through rayon’s <code class="docutils literal notranslate"><span class="pre">RAYON_NUM_THREADS</span></code> environment
+variable therefore lowers the peak, roughly in proportion, and is the control to reach for when
+memory is tight.</p>
+<p>The mapped operator is unchanged: canonicalization only merges duplicate terms, so the result
+represents exactly the same observable as before.</p>
+</li>
+</ul>
+<ul class="simple">
+<li><p><a class="reference internal" href="stubs/qiskit_fermions.mappers.library.fermion_jordan_wigner.html#qiskit_fermions.mappers.library.fermion_jordan_wigner" title="qiskit_fermions.mappers.library.fermion_jordan_wigner"><code class="xref py py-func docutils literal notranslate"><span class="pre">fermion_jordan_wigner()</span></code></a> no longer copies the operator it
+is given. The Python binding took its argument by value, which duplicated every term buffer of
+the input <a class="reference internal" href="stubs/qiskit_fermions.operators.FermionOperator.html#qiskit_fermions.operators.FermionOperator" title="qiskit_fermions.operators.FermionOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionOperator</span></code></a> purely in order to read it.</p></li>
+</ul>
+<ul>
+<li><p>Fixed a decomposition of the <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate that never terminated. The evolution of a
+single operator term used to decompose into an identical single-term <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a>, so
+repeated expansion made no progress. Most visibly this made <code class="docutils literal notranslate"><span class="pre">inverse()</span></code> raise a
+<code class="docutils literal notranslate"><span class="pre">RecursionError</span></code>, since it recurses through the gate’s definition.</p>
+<p>A factor emitted by a
+<a class="reference internal" href="stubs/qiskit_fermions.circuit.library.synthesis.FermionicEvolutionSynthesis.html#qiskit_fermions.circuit.library.synthesis.FermionicEvolutionSynthesis" title="qiskit_fermions.circuit.library.synthesis.FermionicEvolutionSynthesis"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicEvolutionSynthesis</span></code></a> is
+now marked <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution.atomic" title="qiskit_fermions.circuit.library.Evolution.atomic"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Evolution.atomic</span></code></a> and is left in place by
+<a class="reference internal" href="stubs/qiskit_fermions.circuit.FermionicCircuit.html#qiskit_fermions.circuit.FermionicCircuit.decompose" title="qiskit_fermions.circuit.FermionicCircuit.decompose"><code class="xref py py-meth docutils literal notranslate"><span class="pre">decompose()</span></code></a> instead of being expanded again. Decomposing an
+<a class="reference internal" href="stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> repeatedly therefore reaches a fixed point.</p>
+</li>
+</ul>
+<ul>
+<li><p>Fixed <a class="reference internal" href="stubs/qiskit_fermions.circuit.FermionicCircuit.html#qiskit_fermions.circuit.FermionicCircuit.decompose" title="qiskit_fermions.circuit.FermionicCircuit.decompose"><code class="xref py py-meth docutils literal notranslate"><span class="pre">decompose()</span></code></a> producing non-unitary factors when applied more than
+twice to an operator carrying groups. Each group was split further, term by term, but an
+individual term is generally not Hermitian even when the group containing it is – the conjugate
+pairs of a <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.UCC.html#qiskit_fermions.circuit.library.UCC" title="qiskit_fermions.circuit.library.UCC"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCC</span></code></a> cluster generator being the motivating example. The exponential of such a
+factor is not unitary.</p>
+<p>The fermion-to-qubit stage rejected those factors with a <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> about complex
+coefficients, but state-vector simulation applied them without complaint and returned a
+non-normalized state. Since a group is now atomic, the split that produced them no longer happens.</p>
+</li>
+</ul>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Evolution.inverse()</span></code> is now implemented directly, returning an <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> that evolves
+the same operator for the negated time and preserves the gate’s <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution.synthesis" title="qiskit_fermions.circuit.library.Evolution.synthesis"><code class="xref py py-attr docutils literal notranslate"><span class="pre">synthesis</span></code></a>
+method. Previously the inherited implementation recursed through the gate’s definition and returned
+a plain <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.Gate" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Gate</span></code></a>, discarding both the operator and the synthesis method.</p></li>
+</ul>
+</section>
+</section>
+<section id="release-notes-0-1-0">
+<span id="id2"></span><h2>0.1.0<a class="headerlink" href="#release-notes-0-1-0" title="Link to this heading">¶</a></h2>
+<section id="prelude">
+<span id="release-notes-0-1-0-prelude"></span><h3>Prelude<a class="headerlink" href="#prelude" title="Link to this heading">¶</a></h3>
+<p>This is the first release of Qiskit Fermions, an extension of Qiskit with tools for fermionic systems.  It provides operator data structures, a framework and library for converting those operators to qubit form (mappers), and a framework and library for synthesizing the corresponding quantum circuits.
+Following Qiskit’s design philosophy, the core of this package is written in Rust and exposed through first-party bindings for both Python and C.</p>
+</section>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
+          <a class="prev-page" href="guides/ffsim.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">How this package relates to ffsim</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2026, Qiskit addons team
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            <div class="last-updated">
+              Last updated on 2026/09/04</div>
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Release Notes</a><ul>
+<li><a class="reference internal" href="#upcoming-release-327-merge">Upcoming release (<code class="docutils literal notranslate"><span class="pre">327/merge</span></code>)</a><ul>
+<li><a class="reference internal" href="#new-features">New Features</a></li>
+<li><a class="reference internal" href="#upgrade-notes">Upgrade Notes</a></li>
+<li><a class="reference internal" href="#bug-fixes">Bug Fixes</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#release-notes-0-1-0">0.1.0</a><ul>
+<li><a class="reference internal" href="#prelude">Prelude</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="_static/documentation_options.js?v=f88b33f2"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/scripts/furo.js?v=46bd48cc"></script>
+    <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="_static/copybutton.js?v=6dbb43f8"></script>
+    <script src="_static/design-tabs.js?v=f930bc37"></script>
+    <script src="_static/katex.min.js?v=5cc8ed51"></script>
+    <script src="_static/auto-render.min.js?v=af98beb9"></script>
+    <script src="_static/katex_autorenderer.js?v=bebc588a"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    </body>
+</html>

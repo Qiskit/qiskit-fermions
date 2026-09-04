@@ -1,0 +1,6 @@
+﻿simplify
+========
+
+.. currentmodule:: qiskit_fermions.transpiler.passes.synthesis
+
+.. autofunction:: simplify
