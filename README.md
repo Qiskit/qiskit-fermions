@@ -27,7 +27,8 @@ scope it provides the following:
 
 Additionally, `qiskit-fermions` integrates with other tools of the ecosystem, such as:
 
-- [ffsim](https://qiskit-community.github.io/ffsim/) for efficient simulation of fermionic circuits
+- [ffsim](https://qiskit-community.github.io/ffsim/) for the high-level ansatz operators and
+  efficient simulation of fermionic circuits (see [Relationship to ffsim](#relationship-to-ffsim))
 
 ----------------------------------------------------------------------------------------------------
 
@@ -90,6 +91,30 @@ Furthermore, the fermionic circuit representation cannot make any assumptions
 about its fermion-to-qubit encoding applied later on. Consequently, while
 Jordan-Wigner retains a dominant position and role, it is not assumed to be the
 _default_ fermion-to-qubit encoding.
+
+#### Relationship to ffsim
+
+[ffsim](https://qiskit-community.github.io/ffsim/) and `qiskit-fermions` divide the work rather than
+overlap. ffsim owns the high-level ansatz operators and their fast simulation: it constructs a UCJ or
+UCCSD operator from coupled-cluster amplitudes or a parameter vector, and simulates fermionic states
+in a compact fixed-particle-number space. `qiskit-fermions` owns the circuit side: it expresses that
+operator as a fermionic circuit on fermionic modes and transpiles it into a qubit circuit through
+*any* fermion-to-qubit encoding.
+
+That last point is the reason to bring an ffsim operator here. ffsim's own Qiskit gates are specific
+to the Jordan-Wigner transformation, so lowering an ansatz through a different encoding (a local
+encoding trading qubits for shallower circuits, for instance) is what this package adds. Conversely,
+this package does not reimplement the ansatz math, so its `UCJ` and `UCC` gates take an ffsim
+operator directly as their input.
+
+On the simulation side, ffsim is the backend. This package's gates and operators implement the
+protocol methods ffsim's simulation functions consume (`_apply_unitary_`, `_linear_operator_` and
+`_trace_`), so ffsim's tools work on them natively, with no conversion step. Because ffsim depends
+on PySCF, which does not support Windows, simulating on Windows means going through
+[WSL](https://learn.microsoft.com/en-us/windows/wsl/) for now. Building operators, mapping them and
+transpiling the resulting circuits need none of this and work everywhere.
+
+For the full picture, refer to the [ffsim relationship guide](docs/guides/ffsim.rst).
 
 #### Known issues
 

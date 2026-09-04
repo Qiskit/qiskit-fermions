@@ -52,7 +52,7 @@ class UCC(FermionicGate):
     optimizer drives), while this gate expresses the result as fermionic modes so that the transpiler
     can lower it through *any* fermion-to-qubit encoding. ffsim ships no Qiskit gate for UCCSD at all,
     so this is the only route from one of its UCCSD operators to a circuit; see the
-    :ref:`ffsim guide <ffsim_backend_explanation>`.
+    :ref:`ffsim relationship guide <ffsim_relationship_explanation>`.
 
     Accepts any of ffsim's four UCCSD operators, whose type fixes the spin variant and the number of
     modes this gate acts on. All four act on ``2 * norb`` block-spin modes (mode ``p`` is alpha
