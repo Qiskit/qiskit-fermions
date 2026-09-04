@@ -53,14 +53,15 @@ Issues = "https://github.com/Qiskit/qiskit-fermions/issues"
 
 [project.optional-dependencies]
 all = [
-    "qiskit-fermions[optimization,simulation]",
+    "qiskit-fermions[optimization,ffsim]",
 ]
 optimization = [
     "pyomo",
 ]
-simulation = [
+ffsim = [
     # ffsim (and its unconditional PySCF dependency) does not support Windows, so restrict it to
-    # non-Windows platforms; this is one reason the simulation backend is an optional dependency.
+    # non-Windows platforms. The ansatz gates of the circuit library take an ffsim operator as their
+    # input, so they require this extra; everything else in the package works without it.
     "ffsim; sys_platform != 'win32'",
 ]
 
@@ -89,10 +90,10 @@ doctest = [
     "rustworkx[mpl]",
     "pylatexenc",
     "sybil>=9.3.0",
-    # the LUCJ guide (docs/guides/lucj.rst) renders and evaluates a UCJ ansatz, which requires the
-    # simulation backend (ffsim, which pulls in PySCF for the underlying quantum chemistry). Neither
-    # supports Windows, so both are gated to non-Windows platforms and the guide's doctest is
-    # skipped there (see docs/guides/lucj.rst).
+    # the LUCJ guide (docs/guides/lucj.rst) renders and evaluates a UCJ ansatz, which requires ffsim
+    # (which pulls in PySCF for the underlying quantum chemistry). Neither supports Windows, so both
+    # are gated to non-Windows platforms and the guide's doctest is skipped there (see
+    # docs/guides/lucj.rst).
     "ffsim; sys_platform != 'win32'",
     # the SKQD guide (docs/guides/skqd.rst) closes its final section by diagonalizing the sampled
     # subspace with qiskit-addon-sqd (configuration recovery). It pulls in PySCF and, like ffsim,

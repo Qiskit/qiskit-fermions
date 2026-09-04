@@ -1,0 +1,34 @@
+---
+upgrade:
+  - |
+    The ``qiskit_fermions.linalg.apply_unitary`` and
+    ``qiskit_fermions.linalg.linear_operator`` functions have been removed. They were thin wrappers
+    around the :class:`.SupportsApplyUnitary` and :class:`.SupportsLinearOperator` protocol methods,
+    duplicating :func:`ffsim.apply_unitary` and :func:`ffsim.linear_operator`. Call ffsim's
+    functions instead, or, when ffsim is not installed, the protocol method on the object directly:
+
+    .. code-block:: python
+
+       # before
+       from qiskit_fermions.linalg import apply_unitary, linear_operator
+       vec = apply_unitary(vec, gate, norb, nelec)
+       linop = linear_operator(operator, norb, nelec)
+
+       # after (with ffsim)
+       vec = ffsim.apply_unitary(vec, gate, norb=norb, nelec=nelec)
+       linop = ffsim.linear_operator(operator, norb=norb, nelec=nelec)
+
+       # after (without ffsim)
+       vec = gate._apply_unitary_(vec, norb, nelec, copy=True)
+       linop = operator._linear_operator_(norb, nelec)
+
+    The protocols themselves are unchanged, and the native FCI kernel backing
+    ``_linear_operator_`` still depends only on ``scipy``, so simulating an operator without ffsim
+    installed works exactly as before.
+  - |
+    The ``simulation`` optional dependency has been renamed to ``ffsim``, so
+    ``pip install "qiskit-fermions[simulation]"`` becomes
+    ``pip install "qiskit-fermions[ffsim]"``. The extra names the dependency it installs rather than
+    a capability, because simulation does not require it: the native FCI kernel behind
+    :class:`.SupportsLinearOperator` depends only on ``scipy``. Installing
+    ``qiskit-fermions[all]`` is unaffected.

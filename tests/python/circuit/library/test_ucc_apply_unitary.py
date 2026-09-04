@@ -27,7 +27,6 @@ import pytest
 import scipy.sparse.linalg
 from qiskit_fermions.circuit import FermionicCircuit
 from qiskit_fermions.circuit.library import UCC
-from qiskit_fermions.linalg import linear_operator
 
 ffsim = pytest.importorskip("ffsim")
 
@@ -206,7 +205,7 @@ def test_ucc_spinless_matches_directly_exponentiated_generator():
     gate = UCC("spinless", t1, t2)
     reference = ffsim.slater_determinant(norb, list(range(nelec)))
 
-    linop = linear_operator(gate.cluster_operator(), norb, nelec)
+    linop = ffsim.linear_operator(gate.cluster_operator(), norb, nelec)
     expected = scipy.sparse.linalg.expm_multiply(linop, reference, traceA=0.0)
 
     result = ffsim.apply_unitary(reference, gate, norb=norb, nelec=nelec)
@@ -228,7 +227,7 @@ def test_ucc_restricted_matches_directly_exponentiated_generator():
     gate = UCC("restricted", t1, t2)
     reference = ffsim.hartree_fock_state(norb, nelec)
 
-    linop = linear_operator(gate.cluster_operator(), norb, nelec)
+    linop = ffsim.linear_operator(gate.cluster_operator(), norb, nelec)
     expected = scipy.sparse.linalg.expm_multiply(linop, reference, traceA=0.0)
 
     result = ffsim.apply_unitary(reference, gate, norb=norb, nelec=nelec)
@@ -255,7 +254,7 @@ def test_ucc_gate_subset_placement_matches_global_embedding():
 
     # oracle: the same generator, relabeled from local modes onto the placed global modes
     relabeled = gate.cluster_operator().relabel_modes(placement)
-    linop = linear_operator(relabeled, norb_global, nelec)
+    linop = ffsim.linear_operator(relabeled, norb_global, nelec)
     expected = scipy.sparse.linalg.expm_multiply(linop, reference, traceA=0.0)
 
     circ = FermionicCircuit(norb_global)

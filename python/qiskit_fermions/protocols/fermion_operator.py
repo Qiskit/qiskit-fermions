@@ -21,10 +21,19 @@ if TYPE_CHECKING:
 
 
 class SupportsFermionOperator(Protocol):
-    """An equivalent of the :class:`ffsim.SupportsFermionOperator` protocol.
+    """This package's operator-conversion contract, converting an operator to a :class:`.FermionOperator`.
 
     See :func:`.fermion_operator` for the type-agnostic helper function dispatching to the method
     below.
+
+    .. caution::
+       Despite the shared method name, this is *not* the same contract as
+       :class:`ffsim.SupportsFermionOperator`: this one returns a
+       :class:`~qiskit_fermions.operators.FermionOperator`, whereas ffsim's returns an
+       :class:`ffsim.FermionOperator`. The two types are unrelated. Since
+       :func:`ffsim.fermion_operator` dispatches purely on the method name, calling it on an operator
+       of this package returns *this* package's type rather than ffsim's; use
+       :func:`.fermion_operator` when that is what you mean.
 
     .. doctest::
 

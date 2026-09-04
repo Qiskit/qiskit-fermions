@@ -79,7 +79,7 @@ A native path when ffsim is unavailable
 
 Coupling with ffsim's protocols does not make ffsim a hard dependency. `ffsim`_ transitively
 depends on `PySCF <https://pyscf.org/>`_, which does not support Windows, so ffsim is declared as
-an optional extra (``pip install "qiskit-fermions[simulation]"``, or transitively by ``[all]``),
+an optional extra (``pip install "qiskit-fermions[ffsim]"``, or transitively by ``[all]``),
 guarded at runtime by :data:`~qiskit_fermions.utils.optionals.HAS_FFSIM` (as was shown above).
 On Windows, that extra resolves to nothing (a silent no-op through a ``sys_platform`` marker),
 rather than an install failure.
@@ -101,9 +101,9 @@ internally) therefore works identically whether or not ffsim is installed:
    :include-source:
 
    >>> import scipy.sparse.linalg
-   >>> from qiskit_fermions.linalg import linear_operator
    >>>
-   >>> linop = linear_operator(hamiltonian, norb, nelec)  # pure scipy + native Rust kernel, no ffsim
+   >>> # no ffsim: call the protocol method directly (pure scipy + native Rust kernel)
+   >>> linop = hamiltonian._linear_operator_(norb, nelec)
    >>> energy, _ = scipy.sparse.linalg.eigsh(linop, k=1, which="SA")
    >>> print(f"ground-state energy: {energy[0]:.6f}")
    ground-state energy: -0.500000
@@ -156,7 +156,6 @@ add an explicit guard before calling it:
    :include-source:
 
    >>> from qiskit_fermions.circuit.library import Evolution
-   >>> from qiskit_fermions.linalg import apply_unitary
    >>>
    >>> non_conserving = FermionOperator.from_terms([([cre(0), cre(1)], 1.0)])  # creates 2 particles
    >>> gate = Evolution(2 * norb, non_conserving, time=1.0)
@@ -166,7 +165,7 @@ add an explicit guard before calling it:
    ...     reference = np.asarray([1, 0, 0, 0], dtype=complex)
    >>>
    >>> try:
-   ...     apply_unitary(reference, gate, norb, nelec, copy=True)
+   ...     gate._apply_unitary_(reference, norb, nelec, copy=True)
    ... except ValueError as exc:
    ...     print("rejected:", exc)
    rejected: Evolution requires an operator that conserves the (norb, nelec) sector: every term must preserve the particle number of each spin species (norb=2, nelec=(1, 1)).

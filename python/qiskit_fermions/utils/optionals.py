@@ -34,9 +34,7 @@ Available Testers
 
 from qiskit.utils import LazyImportTester
 
-HAS_FFSIM = LazyImportTester(
-    "ffsim", name="ffsim", install='pip install "qiskit-fermions[simulation]"'
-)
+HAS_FFSIM = LazyImportTester("ffsim", name="ffsim", install='pip install "qiskit-fermions[ffsim]"')
 """`ffsim <https://github.com/qiskit-community/ffsim>`__ is a high-performance simulator for
 fermionic quantum circuits that exploits particle-number and spin-Z conservation.
 
