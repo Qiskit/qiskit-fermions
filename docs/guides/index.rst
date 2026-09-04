@@ -35,7 +35,6 @@ You can express circuits directly on the fermionic level rather than mapping to 
    :glob:
 
    circuit
-   vqe_outer_loop
 
 Circuit examples
 ----------------
