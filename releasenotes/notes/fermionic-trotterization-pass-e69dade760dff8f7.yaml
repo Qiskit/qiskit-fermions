@@ -1,0 +1,22 @@
+---
+features:
+  - |
+    Added :class:`.FermionicTrotterization`, a transpiler pass that selects the fermion-to-fermion
+    synthesis method of every :class:`.Evolution` gate in a circuit::
+
+        pm.optimization = FermionicPassManager(
+            [FermionicTrotterization(FermionicSuzukiTrotter(order=2, reps=4))]
+        )
+
+    Choosing a synthesis method per gate means threading it through everything that constructs an
+    :class:`.Evolution` -- including :class:`.UCC` and :class:`.UCJ`, which build their own internally.
+    This pass makes the choice once for a whole pipeline instead. An optional ``filter`` predicate
+    restricts it to a subset of the gates, which is worth using when a circuit mixes evolutions that
+    benefit from a higher order with ones that do not, such as the all-commuting diagonal-Coulomb
+    operators of a :class:`.UCJ`.
+
+    The pass *selects* a method rather than expanding the evolution immediately, so each
+    :class:`.Evolution` stays a single node for the passes that follow -- notably
+    :class:`.RelabelModes`, which needs whole operators to build its mode-relabeling model. This is the
+    opposite choice from :class:`.QDriftTrotterization`, whose random one-shot sampling cannot be
+    deferred.
