@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>OrbitalRotation - Qiskit Fermions 0.2.0.dev0+b68b77b</title>
+        <title>FermionicSuzukiTrotter - Qiskit Fermions 0.2.0.dev0+b68b77b</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -244,7 +244,7 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="../_sources/stubs/qiskit_fermions.circuit.library.OrbitalRotation.rst.txt" title="View this page">
+  <a class="muted-link" href="../_sources/stubs/qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter.rst.txt" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
@@ -262,121 +262,95 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="orbitalrotation">
-<h1>OrbitalRotation<a class="headerlink" href="#orbitalrotation" title="Link to this heading">¶</a></h1>
+          <section id="fermionicsuzukitrotter">
+<h1>FermionicSuzukiTrotter<a class="headerlink" href="#fermionicsuzukitrotter" title="Link to this heading">¶</a></h1>
 <dl class="py class">
-<dt class="sig sig-object py" id="qiskit_fermions.circuit.library.OrbitalRotation">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">OrbitalRotation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rotation_unitary</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qiskit_fermions.circuit.library.OrbitalRotation" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="qiskit_fermions.circuit.FermionicGate.html#qiskit_fermions.circuit.FermionicGate" title="qiskit_fermions.circuit.fermionic_gate.FermionicGate"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicGate</span></code></a></p>
-<p>Implements an orbital rotation.</p>
-<p>Given an <span class="math">\(n \times n\)</span> unitary matrix <span class="math">\(U\)</span> (<code class="docutils literal notranslate"><span class="pre">rotation_unitary</span></code>), this gate
-implements the single-particle basis change that maps the creation operators as</p>
+<dt class="sig sig-object py" id="qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">FermionicSuzukiTrotter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="qiskit_fermions.circuit.library.synthesis.FermionicEvolutionSynthesis.html#qiskit_fermions.circuit.library.synthesis.FermionicEvolutionSynthesis" title="qiskit_fermions.circuit.library.synthesis.evolution_synthesis.FermionicEvolutionSynthesis"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicEvolutionSynthesis</span></code></a></p>
+<p>The higher-order Suzuki-Trotter product formula, applied in fermionic space.</p>
+<p>A product formula composes the factors of an operator symmetrically, so that the leading error
+terms cancel. For <span class="math">\(\texttt{order} = 2\)</span> and factors <span class="math">\(H_j\)</span>, the approximation is the
+palindrome</p>
 <div class="math-wrapper docutils container">
 <div class="math">
-\[a^\dagger_i \mapsto \sum_j U_{ji} a^\dagger_j,\]</div>
+\[e^{-i t \sum_j H_j} \approx
+\left( \prod_{j<n} e^{-i \frac{t}{2} H_j} \right) e^{-i t H_n}
+\left( \prod_{j<n} e^{-i \frac{t}{2} H_j} \right)^{\mathrm{R}},\]</div>
 </div>
-<p>which is equivalent to applying the many-body unitary</p>
-<div class="math-wrapper docutils container">
-<div class="math">
-\[\exp\left(\sum_{ij} \log(U)_{ij} \, a^\dagger_i a_j\right).\]</div>
+<p>where <span class="math">\(\mathrm{R}\)</span> denotes the reversed order. Higher even orders are built from this by
+Suzuki’s recursion, each level composing five sweeps of the level below.</p>
+<p>The evolved operator is split by its <a class="reference internal" href="qiskit_fermions.operators.OperatorTrait.html#qiskit_fermions.operators.OperatorTrait.groups" title="qiskit_fermions.operators.OperatorTrait.groups"><code class="xref py py-attr docutils literal notranslate"><span class="pre">groups</span></code></a> when
+it has them (see <a class="reference internal" href="../guides/grouping.html#grouping-explanation"><span class="std std-ref">Group operator terms: use the operator structure</span></a>), and term-by-term otherwise. Every order splits it
+the same way: what a higher order changes is the ordering of the factors and their time scales, not
+the partition.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>A higher order buys accuracy with depth: an order-<span class="math">\(k\)</span> formula emits roughly
+<span class="math">\(5^{(k-2)/2}\)</span> times as many factors as an order-2 one. Increasing <a class="reference internal" href="#qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter.reps" title="qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter.reps"><code class="xref py py-attr docutils literal notranslate"><span class="pre">reps</span></code></a> instead
+divides the evolution time into more, shorter steps, which reduces the error at a different
+rate for the same kind of cost. Which is the better trade depends on the operator.</p>
 </div>
-<p>The number of fermionic modes the gate acts on is the dimension <span class="math">\(n\)</span> of
-<code class="docutils literal notranslate"><span class="pre">rotation_unitary</span></code>.</p>
-<p>Initializing an instance of this gate can be done with the arguments listed below.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Applying this in fermionic space at all is optional, and it composes with the product formula
+chosen for the fermion-to-qubit stage. Where both approximate, the accuracy of the result is
+governed by the weaker of the two – so raising the order here while the qubit-side formula
+stays first-order buys little. See <a class="reference internal" href="../pydoc/qiskit_fermions.circuit.library.synthesis.html#module-qiskit_fermions.circuit.library.synthesis" title="qiskit_fermions.circuit.library.synthesis"><code class="xref py py-mod docutils literal notranslate"><span class="pre">synthesis</span></code></a>.</p>
+</div>
+<div class="admonition caution">
+<p class="admonition-title">Caution</p>
+<p>Each factor must be Hermitian for its exponential to be unitary, which does not follow from
+their sum being Hermitian: splitting a Hermitian operator can produce non-Hermitian groups (for
+example, separating <span class="math">\(a^\dagger_0 a_1\)</span> from its conjugate partner <span class="math">\(a^\dagger_1 a_0\)</span>).
+It is the caller’s responsibility to group accordingly; this is not verified.</p>
+<p>Note that the symmetrization partially cancels the error of a non-Hermitian factor, so an
+incorrectly grouped operator can look markedly better at an even order than at first order while
+still being wrong.</p>
+</div>
+<p>Initializing an instance of this synthesis method can be done with the arguments below.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>rotation_unitary</strong> (<em>np.ndarray</em>) – the <span class="math">\(n \times n\)</span> unitary matrix <span class="math">\(U\)</span> defining the orbital
-rotation via <span class="math">\(a^\dagger_i \mapsto \sum_j U_{ji} a^\dagger_j\)</span>. It must be
-square and unitary; this is the caller’s responsibility and is not verified.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>order</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – the order of the product formula. Must be <code class="docutils literal notranslate"><span class="pre">1</span></code> (which reduces to
+<a class="reference internal" href="qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter.html#qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter" title="qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicLieTrotter</span></code></a>) or even, since the Suzuki formulas are symmetric.</p></li>
+<li><p><strong>reps</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – the number of times to repeat the formula, each repetition evolving for
+<code class="docutils literal notranslate"><span class="pre">time</span> <span class="pre">/</span> <span class="pre">reps</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – if <code class="docutils literal notranslate"><span class="pre">order</span></code> is neither <code class="docutils literal notranslate"><span class="pre">1</span></code> nor even, or if <code class="docutils literal notranslate"><span class="pre">reps</span></code> is not positive.</p>
 </dd>
 </dl>
 <p class="rubric">Attributes</p>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="qiskit_fermions.circuit.library.OrbitalRotation.rotation_unitary">
-<span class="sig-name descname"><span class="pre">rotation_unitary</span></span><a class="headerlink" href="#qiskit_fermions.circuit.library.OrbitalRotation.rotation_unitary" title="Link to this definition">¶</a></dt>
-<dd><p>The unitary matrix representing the orbital rotation coefficients.</p>
+<dt class="sig sig-object py" id="qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter.order">
+<span class="sig-name descname"><span class="pre">order</span></span><a class="headerlink" href="#qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter.order" title="Link to this definition">¶</a></dt>
+<dd><p>The order of the product formula.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter.reps">
+<span class="sig-name descname"><span class="pre">reps</span></span><a class="headerlink" href="#qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter.reps" title="Link to this definition">¶</a></dt>
+<dd><p>The number of times the product formula is repeated.</p>
 </dd></dl>
 
 <p class="rubric">Methods</p>
 <dl class="py method">
-<dt class="sig sig-object py" id="qiskit_fermions.circuit.library.OrbitalRotation.from_t1_amplitudes">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">from_t1_amplitudes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qiskit_fermions.circuit.library.OrbitalRotation.from_t1_amplitudes" title="Link to this definition">¶</a></dt>
-<dd><p>Constructs an orbital rotation from <span class="math">\(t_1\)</span> (singles) amplitudes.</p>
-<p>The rotation is the unitary <span class="math">\(\exp(t_1 - t_1^\dagger)\)</span>, where the
-<span class="math">\(n_\text{occ} \times n_\text{virt}\)</span> amplitude matrix <span class="math">\(t_1\)</span> is embedded into the
-anti-Hermitian generator over all <span class="math">\(n = n_\text{occ} + n_\text{virt}\)</span> orbitals</p>
-<div class="math-wrapper docutils container">
-<div class="math">
-\[G = \begin{pmatrix} 0 & -t_1^* \\ t_1^\top & 0 \end{pmatrix},\]</div>
-</div>
-<p>with the occupied orbitals ordered before the virtual ones. This is the single-excitation
-orbital rotation entering the (L)UCJ ansatz when it is initialized from coupled-cluster
-amplitudes; see <a class="reference internal" href="qiskit_fermions.circuit.library.UCJ.html#qiskit_fermions.circuit.library.UCJ" title="qiskit_fermions.circuit.library.UCJ"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCJ</span></code></a>.</p>
+<dt class="sig sig-object py" id="qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter.synthesize">
+<span class="sig-name descname"><span class="pre">synthesize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gate</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter.synthesize" title="Link to this definition">¶</a></dt>
+<dd><p>Synthesizes the gate into the ordered factors of the product formula.</p>
+<p>See the class documentation for the formula this implements.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>t1</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.5)"><em>ndarray</em></a>) – the <span class="math">\(t_1\)</span> amplitudes of shape <code class="docutils literal notranslate"><span class="pre">(nocc,</span> <span class="pre">nvrt)</span></code>, where <code class="docutils literal notranslate"><span class="pre">nocc</span></code> is the number
-of occupied orbitals and <code class="docutils literal notranslate"><span class="pre">nvrt</span></code> is the number of virtual orbitals.</p>
+<dd class="field-odd"><p><strong>gate</strong> (<a class="reference internal" href="qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><em>Evolution</em></a>) – the gate to synthesize.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>An <a class="reference internal" href="#qiskit_fermions.circuit.library.OrbitalRotation" title="qiskit_fermions.circuit.library.OrbitalRotation"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrbitalRotation</span></code></a> acting on <span class="math">\(n = n_\text{occ} + n_\text{virt}\)</span> modes,
-whose <code class="docutils literal notranslate"><span class="pre">rotation_unitary</span></code> is <span class="math">\(\exp(t_1 - t_1^\dagger)\)</span>.</p>
+<dd class="field-even"><p>A <a class="reference internal" href="qiskit_fermions.circuit.FermionicCircuit.html#qiskit_fermions.circuit.FermionicCircuit" title="qiskit_fermions.circuit.FermionicCircuit"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicCircuit</span></code></a> holding one narrowed <a class="reference internal" href="qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate per factor of
+the formula. A factor may appear more than once, at different evolution times.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="#qiskit_fermions.circuit.library.OrbitalRotation" title="qiskit_fermions.circuit.library.orbital_rotation.OrbitalRotation"><em>OrbitalRotation</em></a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<p class="rubric">Protocol Methods</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="qiskit_fermions.circuit.library.OrbitalRotation._apply_unitary_placed_">
-<span class="sig-name descname"><span class="pre">_apply_unitary_placed_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norb</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nelec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">copy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freg_indices</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qiskit_fermions.circuit.library.OrbitalRotation._apply_unitary_placed_" title="Link to this definition">¶</a></dt>
-<dd><p>Applies the orbital rotation after placing it onto the vector’s global modes.</p>
-<p>The gate’s local <a class="reference internal" href="#qiskit_fermions.circuit.library.OrbitalRotation.rotation_unitary" title="qiskit_fermions.circuit.library.OrbitalRotation.rotation_unitary"><code class="xref py py-attr docutils literal notranslate"><span class="pre">rotation_unitary</span></code></a> (an <span class="math">\(n \times n\)</span> matrix acting on the gate’s
-<code class="docutils literal notranslate"><span class="pre">num_modes</span></code> modes) is first embedded into the full register: an identity matrix of the
-state vector’s mode count with <code class="docutils literal notranslate"><span class="pre">rotation_unitary</span></code> written into the rows/columns picked out
-by <code class="docutils literal notranslate"><span class="pre">freg_indices</span></code>.</p>
-<p>In the spinful case the embedded matrix must be block-diagonal across the alpha/beta split.
-A rotation with nonzero alpha/beta off-diagonal blocks mixes the spin sectors, which does not
-conserve the individual alpha/beta electron counts and hence maps amplitude out of the fixed
-<code class="docutils literal notranslate"><span class="pre">(n_alpha,</span> <span class="pre">n_beta)</span></code> sector – an operation the fixed-sector state vector cannot represent.
-Such a rotation is rejected with a <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ValueError</span></code></a>.</p>
-<p>The embedded matrix is then applied in one of two ways:</p>
-<ul class="simple">
-<li><p><strong>Fast path</strong> (only when <code class="docutils literal notranslate"><span class="pre">ffsim</span></code> is installed): the embedded matrix is applied via
-<a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.apply_orbital_rotation.html#ffsim.apply_orbital_rotation" title="(in ffsim)"><code class="xref py py-func docutils literal notranslate"><span class="pre">ffsim.apply_orbital_rotation()</span></code></a>’s Givens-rotation kernel. Under the spinful block-spin
-convention (modes <code class="docutils literal notranslate"><span class="pre">0..norb</span></code> are alpha orbitals, modes <code class="docutils literal notranslate"><span class="pre">norb..2*norb</span></code> are beta orbitals)
-the two diagonal blocks are the per-spin rotations passed to ffsim as <code class="docutils literal notranslate"><span class="pre">(mat_a,</span> <span class="pre">mat_b)</span></code>.</p></li>
-<li><p><strong>General path</strong>: otherwise (i.e. when <code class="docutils literal notranslate"><span class="pre">ffsim</span></code> is unavailable) the rotation is applied as
-the evolution <span class="math">\(\exp(G)\)</span> under its generator
-<span class="math">\(G = \sum_{ij} \log(U)_{ij} a^\dagger_i a_j\)</span>, where <span class="math">\(U\)</span> is the embedded matrix.
-<span class="math">\(G\)</span> is turned into a <code class="docutils literal notranslate"><span class="pre">scipy</span></code> <code class="docutils literal notranslate"><span class="pre">LinearOperator</span></code> backed by the native FCI
-matrix-vector kernel and applied via <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.linalg.expm_multiply.html#scipy.sparse.linalg.expm_multiply" title="(in SciPy v1.18.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.sparse.linalg.expm_multiply()</span></code></a>. This
-mirrors <a class="reference internal" href="qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution._apply_unitary_placed_" title="qiskit_fermions.circuit.library.Evolution._apply_unitary_placed_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Evolution._apply_unitary_placed_()</span></code></a>.</p></li>
-</ul>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>vec</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.5)"><em>ndarray</em></a>) – the state vector to act on.</p></li>
-<li><p><strong>norb</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – the number of spatial orbitals of the <em>global</em> state vector.</p></li>
-<li><p><strong>nelec</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>]</em>) – either a single integer for a spinless system, or a pair of integers storing the
-numbers of spin alpha and spin beta fermions. An integer selects the spinless mode
-interpretation (the <code class="docutils literal notranslate"><span class="pre">norb</span></code> modes are orbitals); a pair selects the spinful
-<code class="docutils literal notranslate"><span class="pre">(orb,</span> <span class="pre">spin)</span></code> block-spin interpretation of the <code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">*</span> <span class="pre">norb</span></code> modes.</p></li>
-<li><p><strong>copy</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – whether to copy the vector before operating on it.</p></li>
-<li><p><strong>freg_indices</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>]</em>) – the absolute (global) mode indices that this gate’s local modes map onto.
-The rotation is embedded onto these global modes before being applied.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>The transformed vector.</p>
-</dd>
-<dt class="field-odd">Raises<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – if <code class="docutils literal notranslate"><span class="pre">nelec</span></code> is a spinful pair and the (placed) rotation mixes the alpha and
-    beta spin sectors.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.5)"><em>ndarray</em></a></p>
+<dd class="field-odd"><p><a class="reference internal" href="qiskit_fermions.circuit.FermionicCircuit.html#qiskit_fermions.circuit.FermionicCircuit" title="qiskit_fermions.circuit.FermionicCircuit">FermionicCircuit</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -423,11 +397,11 @@ The rotation is embedded onto these global modes before being applied.</p></li>
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">OrbitalRotation</a><ul>
-<li><a class="reference internal" href="#qiskit_fermions.circuit.library.OrbitalRotation"><code class="docutils literal notranslate"><span class="pre">OrbitalRotation</span></code></a><ul>
-<li><a class="reference internal" href="#qiskit_fermions.circuit.library.OrbitalRotation.rotation_unitary"><code class="docutils literal notranslate"><span class="pre">OrbitalRotation.rotation_unitary</span></code></a></li>
-<li><a class="reference internal" href="#qiskit_fermions.circuit.library.OrbitalRotation.from_t1_amplitudes"><code class="docutils literal notranslate"><span class="pre">OrbitalRotation.from_t1_amplitudes()</span></code></a></li>
-<li><a class="reference internal" href="#qiskit_fermions.circuit.library.OrbitalRotation._apply_unitary_placed_"><code class="docutils literal notranslate"><span class="pre">OrbitalRotation._apply_unitary_placed_()</span></code></a></li>
+<li><a class="reference internal" href="#">FermionicSuzukiTrotter</a><ul>
+<li><a class="reference internal" href="#qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter"><code class="docutils literal notranslate"><span class="pre">FermionicSuzukiTrotter</span></code></a><ul>
+<li><a class="reference internal" href="#qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter.order"><code class="docutils literal notranslate"><span class="pre">FermionicSuzukiTrotter.order</span></code></a></li>
+<li><a class="reference internal" href="#qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter.reps"><code class="docutils literal notranslate"><span class="pre">FermionicSuzukiTrotter.reps</span></code></a></li>
+<li><a class="reference internal" href="#qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter.synthesize"><code class="docutils literal notranslate"><span class="pre">FermionicSuzukiTrotter.synthesize()</span></code></a></li>
 </ul>
 </li>
 </ul>

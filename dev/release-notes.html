@@ -8,7 +8,7 @@
         <link rel="prefetch" href="_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Release Notes - Qiskit Fermions 0.2.0.dev0+a2dc9d5</title>
+        <title>Release Notes - Qiskit Fermions 0.2.0.dev0+b68b77b</title>
       <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+a2dc9d5</div></a>
+      <a href="index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+b68b77b</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+a2dc9d5</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+b68b77b</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="search.html" role="search">
@@ -314,6 +314,30 @@ identically.</p>
 <li><p>Improved the numerical conditioning of state-vector simulation for
 <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> and <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.OrbitalRotation.html#qiskit_fermions.circuit.library.OrbitalRotation" title="qiskit_fermions.circuit.library.OrbitalRotation"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrbitalRotation</span></code></a> gates by supplying the
 exact fixed-sector operator trace to SciPy’s matrix exponential routine.</p></li>
+</ul>
+<ul>
+<li><p>Added <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter.html#qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter" title="qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicSuzukiTrotter</span></code></a>, a higher-order
+product formula for decomposing an <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate in fermionic space. Where
+<a class="reference internal" href="stubs/qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter.html#qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter" title="qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicLieTrotter</span></code></a> applies each factor once,
+this composes them symmetrically to cancel lower-order error terms, and its <code class="docutils literal notranslate"><span class="pre">reps</span></code> argument
+divides the evolution into several shorter steps:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Evolution</span><span class="p">(</span><span class="n">num_modes</span><span class="p">,</span> <span class="n">operator</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">synthesis</span><span class="o">=</span><span class="n">FermionicSuzukiTrotter</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">reps</span><span class="o">=</span><span class="mi">4</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Because it operates on the fermionic operator, it splits it along its
+<a class="reference internal" href="stubs/qiskit_fermions.operators.OperatorTrait.html#qiskit_fermions.operators.OperatorTrait.groups" title="qiskit_fermions.operators.OperatorTrait.groups"><code class="xref py py-attr docutils literal notranslate"><span class="pre">groups</span></code></a> where they are assigned – a partition that
+is no longer available to a product formula applied after the fermion-to-qubit mapping. On a
+six-mode Fermi-Hubbard chain grouped into three flow sets, <code class="docutils literal notranslate"><span class="pre">order=2</span></code> with <code class="docutils literal notranslate"><span class="pre">reps=4</span></code> reached a
+Trotter error roughly two times lower than a second-order qubit-side formula, at slightly fewer
+two-qubit gates.</p>
+<p><a class="reference internal" href="stubs/qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter.html#qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter" title="qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicLieTrotter</span></code></a> is the first-order member
+of this family and is now implemented as such, which also gives it the <code class="docutils literal notranslate"><span class="pre">reps</span></code> argument it
+previously lacked. The two are interchangeable at equal <code class="docutils literal notranslate"><span class="pre">reps</span></code>.</p>
+<p>Note that a higher order buys accuracy with depth: an order-<code class="docutils literal notranslate"><span class="pre">k</span></code> formula emits roughly
+<code class="docutils literal notranslate"><span class="pre">5**((k-2)/2)</span></code> times as many factors as an order-2 one. Note also that the accuracy of a
+decomposed circuit is governed by the weaker of the fermionic and the fermion-to-qubit formula, so
+raising the order here while the latter stays first-order buys little.</p>
+</li>
 </ul>
 <ul class="simple">
 <li><p>Added direct Jordan-Wigner mappers for the three remaining operator data structures:
@@ -518,7 +542,7 @@ Following Qiskit’s design philosophy, the core of this package is written in R
       
     </aside>
   </div>
-</div><script src="_static/documentation_options.js?v=e77a4914"></script>
+</div><script src="_static/documentation_options.js?v=aa253c3e"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/scripts/furo.js?v=46bd48cc"></script>

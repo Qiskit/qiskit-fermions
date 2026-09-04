@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>FermionicLieTrotter - Qiskit Fermions 0.2.0.dev0+a2dc9d5</title>
+        <title>FermionicLieTrotter - Qiskit Fermions 0.2.0.dev0+b68b77b</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+a2dc9d5</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+b68b77b</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+a2dc9d5</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+b68b77b</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -266,8 +266,8 @@
 <h1>FermionicLieTrotter<a class="headerlink" href="#fermioniclietrotter" title="Link to this heading">¶</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">FermionicLieTrotter</span></span><a class="headerlink" href="#qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="qiskit_fermions.circuit.library.synthesis.FermionicEvolutionSynthesis.html#qiskit_fermions.circuit.library.synthesis.FermionicEvolutionSynthesis" title="qiskit_fermions.circuit.library.synthesis.evolution_synthesis.FermionicEvolutionSynthesis"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicEvolutionSynthesis</span></code></a></p>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">FermionicLieTrotter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter.html#qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter" title="qiskit_fermions.circuit.library.synthesis.suzuki_trotter.FermionicSuzukiTrotter"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicSuzukiTrotter</span></code></a></p>
 <p>The first-order Lie-Trotter product formula, applied in fermionic space.</p>
 <p>Given an <a class="reference internal" href="qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate with the evolution time <span class="math">\(t\)</span>, this synthesizes the
 approximation</p>
@@ -275,42 +275,64 @@ approximation</p>
 <div class="math">
 \[e^{-i t \sum_j H_j} \approx \prod_j e^{-i t H_j},\]</div>
 </div>
-<p>emitting one <a class="reference internal" href="qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate per factor <span class="math">\(H_j\)</span>, each evolving for the <cite>full</cite> time
-<span class="math">\(t\)</span>.</p>
-<p>How the evolved operator is split into the <span class="math">\(H_j\)</span> depends on the operator itself: when it has
-<a class="reference internal" href="qiskit_fermions.operators.OperatorTrait.html#qiskit_fermions.operators.OperatorTrait.groups" title="qiskit_fermions.operators.OperatorTrait.groups"><code class="xref py py-attr docutils literal notranslate"><span class="pre">groups</span></code></a> assigned (see
-<a class="reference internal" href="../guides/grouping.html#grouping-explanation"><span class="std std-ref">Group operator terms: use the operator structure</span></a>), each group becomes one factor; otherwise every individual term does.
-Each factor is reduced to act only on the modes it actually touches, so the emitted gate spans as
-few modes as possible.</p>
+<p>emitting one <a class="reference internal" href="qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate per factor <span class="math">\(H_j\)</span>, each evolving for the whole time
+<span class="math">\(t\)</span> – or, with <a class="reference internal" href="#qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter.reps" title="qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter.reps"><code class="xref py py-attr docutils literal notranslate"><span class="pre">reps</span></code></a> repetitions, for <span class="math">\(t/\texttt{reps}\)</span>
+apiece across that many sweeps.</p>
+<p>The operator is split into the <span class="math">\(H_j\)</span>, and each factor narrowed to the modes it actually
+touches, exactly as described for <a class="reference internal" href="qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter.html#qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter" title="qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicSuzukiTrotter</span></code></a>.</p>
+<p>First order is the degenerate case of the Suzuki recursion, so this is implemented as a
+<a class="reference internal" href="qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter.html#qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter" title="qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicSuzukiTrotter</span></code></a> with the order fixed to <code class="docutils literal notranslate"><span class="pre">1</span></code>; the two are interchangeable at
+equal <a class="reference internal" href="#qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter.reps" title="qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter.reps"><code class="xref py py-attr docutils literal notranslate"><span class="pre">reps</span></code></a>. It keeps a name of its own because it is the default
+synthesis of an <a class="reference internal" href="qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate, and because a plain first-order product formula is more
+recognizable under that name than as an argument to a higher-order one.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>This product formula is <cite>exact</cite> only when the factors mutually commute. Grouping an operator so
 that each group collects mutually commuting terms therefore both shortens the circuit and
-reduces the Trotter error.</p>
+reduces the Trotter error. Where the factors do not commute, an even
+<a class="reference internal" href="qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter.html#qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter.order" title="qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter.order"><code class="xref py py-attr docutils literal notranslate"><span class="pre">order</span></code></a> reduces the error further at the same grouping.</p>
 <p>Note also that applying it at all is optional: leaving the gate undecomposed and letting the
 fermion-to-qubit stage handle the whole operator incurs no Trotter error at this level. See
 <a class="reference internal" href="../pydoc/qiskit_fermions.circuit.library.synthesis.html#module-qiskit_fermions.circuit.library.synthesis" title="qiskit_fermions.circuit.library.synthesis"><code class="xref py py-mod docutils literal notranslate"><span class="pre">synthesis</span></code></a>.</p>
 </div>
-<div class="admonition caution">
-<p class="admonition-title">Caution</p>
-<p>Each factor <span class="math">\(H_j\)</span> must itself be Hermitian for <span class="math">\(e^{-i t H_j}\)</span> to be unitary. This
-does <cite>not</cite> follow from their sum being Hermitian: splitting a Hermitian operator can produce
-non-Hermitian groups (for example, separating <span class="math">\(a^\dagger_0 a_1\)</span> from its conjugate
-partner <span class="math">\(a^\dagger_1 a_0\)</span>). It is the caller’s responsibility to group accordingly; this
-is not verified.</p>
-</div>
-<p class="rubric">Methods</p>
+<p>The Hermiticity requirement on the individual factors, described in the
+<a class="reference internal" href="qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter.html#qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter" title="qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicSuzukiTrotter</span></code></a> documentation, applies here too.</p>
+<p>Initializing an instance of this synthesis method can be done with the argument below.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>reps</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – the number of times to repeat the formula, each repetition evolving for
+<code class="docutils literal notranslate"><span class="pre">time</span> <span class="pre">/</span> <span class="pre">reps</span></code>.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – if <code class="docutils literal notranslate"><span class="pre">reps</span></code> is not positive.</p>
+</dd>
+</dl>
+<p class="rubric">Attributes</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter.order">
+<span class="sig-name descname"><span class="pre">order</span></span><a class="headerlink" href="#qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter.order" title="Link to this definition">¶</a></dt>
+<dd><p>The order of the product formula.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter.reps">
+<span class="sig-name descname"><span class="pre">reps</span></span><a class="headerlink" href="#qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter.reps" title="Link to this definition">¶</a></dt>
+<dd><p>The number of times the product formula is repeated.</p>
+</dd></dl>
+
+<p class="rubric">Inherited Methods</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter.synthesize">
 <span class="sig-name descname"><span class="pre">synthesize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gate</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter.synthesize" title="Link to this definition">¶</a></dt>
-<dd><p>Synthesizes the gate into one <a class="reference internal" href="qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> factor per group (or per term).</p>
-<p>See the class documentation for the product formula this implements.</p>
+<dd><p>Synthesizes the gate into the ordered factors of the product formula.</p>
+<p>See the class documentation for the formula this implements.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>gate</strong> (<a class="reference internal" href="qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><em>Evolution</em></a>) – the gate to synthesize.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A <a class="reference internal" href="qiskit_fermions.circuit.FermionicCircuit.html#qiskit_fermions.circuit.FermionicCircuit" title="qiskit_fermions.circuit.FermionicCircuit"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicCircuit</span></code></a> holding one narrowed <a class="reference internal" href="qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate per factor.</p>
+<dd class="field-even"><p>A <a class="reference internal" href="qiskit_fermions.circuit.FermionicCircuit.html#qiskit_fermions.circuit.FermionicCircuit" title="qiskit_fermions.circuit.FermionicCircuit"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicCircuit</span></code></a> holding one narrowed <a class="reference internal" href="qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate per factor of
+the formula. A factor may appear more than once, at different evolution times.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="qiskit_fermions.circuit.FermionicCircuit.html#qiskit_fermions.circuit.FermionicCircuit" title="qiskit_fermions.circuit.FermionicCircuit">FermionicCircuit</a></p>
@@ -362,6 +384,8 @@ is not verified.</p>
             <ul>
 <li><a class="reference internal" href="#">FermionicLieTrotter</a><ul>
 <li><a class="reference internal" href="#qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter"><code class="docutils literal notranslate"><span class="pre">FermionicLieTrotter</span></code></a><ul>
+<li><a class="reference internal" href="#qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter.order"><code class="docutils literal notranslate"><span class="pre">FermionicLieTrotter.order</span></code></a></li>
+<li><a class="reference internal" href="#qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter.reps"><code class="docutils literal notranslate"><span class="pre">FermionicLieTrotter.reps</span></code></a></li>
 <li><a class="reference internal" href="#qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter.synthesize"><code class="docutils literal notranslate"><span class="pre">FermionicLieTrotter.synthesize()</span></code></a></li>
 </ul>
 </li>
@@ -376,7 +400,7 @@ is not verified.</p>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=e77a4914"></script>
+</div><script src="../_static/documentation_options.js?v=aa253c3e"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

@@ -1,9 +1,9 @@
-﻿FermionicLieTrotter
-===================
+﻿FermionicSuzukiTrotter
+======================
 
 .. currentmodule:: qiskit_fermions.circuit.library.synthesis
 
-.. autoclass:: FermionicLieTrotter
+.. autoclass:: FermionicSuzukiTrotter
    :show-inheritance:
    :no-members:
    :no-inherited-members:
@@ -89,13 +89,13 @@
 
   
   
-  
-  
-  
-  
-   .. rubric:: Inherited Methods
+   .. rubric:: Methods
     
    .. automethod:: synthesize
+  
+  
+  
+  
   
   
   
