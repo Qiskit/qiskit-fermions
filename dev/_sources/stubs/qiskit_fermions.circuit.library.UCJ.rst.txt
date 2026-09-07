@@ -14,14 +14,11 @@
   
    .. rubric:: Attributes
     
-   .. autoattribute:: diag_coulomb_mats
-   .. autoattribute:: orbital_rotations
-   .. autoattribute:: final_orbital_rotation
+   .. autoattribute:: n_reps
    .. autoattribute:: norb
+   .. autoattribute:: ucj_op
   
 
-
-  
 
   
 
@@ -177,48 +174,9 @@
 
   
 
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
 
 
   
-  
-   .. rubric:: Methods
-    
-   .. automethod:: from_parameters
-   .. automethod:: from_t_amplitudes
-   .. automethod:: num_parameters
-   .. automethod:: to_parameters
   
   
    .. rubric:: Protocol Methods

@@ -3,12 +3,12 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="Generate SqDRIFT circuits" href="sqdrift.html"><link rel="prev" title="VQE optimization at the fermionic level" href="vqe_outer_loop.html">
+<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="Generate SqDRIFT circuits" href="sqdrift.html"><link rel="prev" title="Work with fermionic circuits" href="circuit.html">
         <link rel="prefetch" href="../_static/images/qiskit-light-logo.svg" as="image">
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Build an LUCJ ansatz - Qiskit Fermions 0.2.0.dev0+b9e1dce</title>
+        <title>Build an LUCJ ansatz - Qiskit Fermions 0.2.0.dev0+0ae8883</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+b9e1dce</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+0ae8883</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+b9e1dce</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+0ae8883</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -208,7 +208,6 @@
 <li class="toctree-l2"><a class="reference internal" href="grouping.html">Group operator terms: use the operator structure</a></li>
 <li class="toctree-l2"><a class="reference internal" href="mappers.html">Map operator representations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="circuit.html">Work with fermionic circuits</a></li>
-<li class="toctree-l2"><a class="reference internal" href="vqe_outer_loop.html">VQE optimization at the fermionic level</a></li>
 <li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Build an LUCJ ansatz</a></li>
 <li class="toctree-l2"><a class="reference internal" href="sqdrift.html">Generate SqDRIFT circuits</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skqd.html">Generate Krylov time-evolution circuits (SKQD)</a></li>
@@ -348,20 +347,21 @@ in packed (lower-triangular) <cite>chemist</cite> ordering, which is what PySCF 
 </section>
 <section id="build-the-lucj-circuit">
 <h2>3. Build the LUCJ circuit<a class="headerlink" href="#build-the-lucj-circuit" title="Link to this heading">¶</a></h2>
-<p>The <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.UCJ.html#qiskit_fermions.circuit.library.UCJ" title="qiskit_fermions.circuit.library.UCJ"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCJ</span></code></a> gate assembles the ansatz directly from the coupled-cluster amplitudes. Its
-<a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.UCJ.html#qiskit_fermions.circuit.library.UCJ.from_t_amplitudes" title="qiskit_fermions.circuit.library.UCJ.from_t_amplitudes"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_t_amplitudes()</span></code></a> constructor performs a <em>double
-factorization</em> of the <span class="math">\(t_2\)</span> amplitudes (by using
-<a class="reference internal" href="../stubs/qiskit_fermions.linalg.double_factorized_t2.html#qiskit_fermions.linalg.double_factorized_t2" title="qiskit_fermions.linalg.double_factorized_t2"><code class="xref py py-func docutils literal notranslate"><span class="pre">double_factorized_t2()</span></code></a>) to obtain the per-layer diagonal Coulomb
-matrices and orbital rotations, and derives an optional final orbital rotation from the
-<span class="math">\(t_1\)</span> amplitudes.</p>
+<p>The ansatz operator is built by <a class="reference external" href="https://qiskit-community.github.io/ffsim/">ffsim</a>. Its
+<a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.UCJOpSpinBalanced.html#ffsim.UCJOpSpinBalanced.from_t_amplitudes" title="(in ffsim)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_t_amplitudes()</span></code></a> constructor performs a <em>double
+factorization</em> of the <span class="math">\(t_2\)</span> amplitudes to obtain the per-layer diagonal Coulomb matrices and
+orbital rotations, and derives an optional final orbital rotation from the <span class="math">\(t_1\)</span> amplitudes.
+The <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.UCJ.html#qiskit_fermions.circuit.library.UCJ" title="qiskit_fermions.circuit.library.UCJ"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCJ</span></code></a> gate then turns that operator into a fermionic circuit.</p>
 <p>The number of ansatz repetitions, <span class="math">\(L\)</span>, equals the number of terms in the double
 factorization. Truncating it with the <code class="docutils literal notranslate"><span class="pre">n_reps</span></code> argument trades some accuracy for a shallower
 circuit; here the two largest terms are kept, which recovers most of the correlation energy while
 halving the number of layers.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.circuit</span><span class="w"> </span><span class="kn">import</span> <span class="n">FermionicCircuit</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">ffsim</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.circuit</span><span class="w"> </span><span class="kn">import</span> <span class="n">FermionicCircuit</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.circuit.library</span><span class="w"> </span><span class="kn">import</span> <span class="n">InitializeModes</span><span class="p">,</span> <span class="n">UCJ</span>
 <span class="gp">&gt;&gt;&gt;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ansatz</span> <span class="o">=</span> <span class="n">UCJ</span><span class="o">.</span><span class="n">from_t_amplitudes</span><span class="p">(</span><span class="n">nelec</span><span class="p">,</span> <span class="n">t2</span><span class="p">,</span> <span class="n">t1</span><span class="o">=</span><span class="n">t1</span><span class="p">,</span> <span class="n">n_reps</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ucj_op</span> <span class="o">=</span> <span class="n">ffsim</span><span class="o">.</span><span class="n">UCJOpSpinBalanced</span><span class="o">.</span><span class="n">from_t_amplitudes</span><span class="p">(</span><span class="n">t2</span><span class="p">,</span> <span class="n">t1</span><span class="o">=</span><span class="n">t1</span><span class="p">,</span> <span class="n">n_reps</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ansatz</span> <span class="o">=</span> <span class="n">UCJ</span><span class="p">(</span><span class="n">ucj_op</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">circuit</span> <span class="o">=</span> <span class="n">FermionicCircuit</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">norb</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">circuit</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">InitializeModes</span><span class="o">.</span><span class="n">from_hartree_fock</span><span class="p">(</span><span class="n">norb</span><span class="p">,</span> <span class="n">nelec</span><span class="p">),</span> <span class="n">circuit</span><span class="o">.</span><span class="n">modes</span><span class="p">)</span>
@@ -434,20 +434,13 @@ additionally offers an optimized (“compressed”) double factorization, its
 <code class="docutils literal notranslate"><span class="pre">from_t_amplitudes(...,</span> <span class="pre">optimize=True)</span></code>, which variationally fits the amplitudes with a chosen,
 typically smaller, number of repetitions. This trades a classical optimization up front for a
 shallower ansatz at a target accuracy, and has no equivalent in this package.</p>
-<p>There is no need to re-implement it: an <code class="docutils literal notranslate"><span class="pre">ffsim</span></code> UCJ operator exposes the same tensors that
-<a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.UCJ.html#qiskit_fermions.circuit.library.UCJ" title="qiskit_fermions.circuit.library.UCJ"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCJ</span></code></a> is built from, so you can construct the operator with <code class="docutils literal notranslate"><span class="pre">optimize=True</span></code> and hand its
-<code class="docutils literal notranslate"><span class="pre">diag_coulomb_mats</span></code> / <code class="docutils literal notranslate"><span class="pre">orbital_rotations</span></code> / <code class="docutils literal notranslate"><span class="pre">final_orbital_rotation</span></code> straight to the
-<a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.UCJ.html#qiskit_fermions.circuit.library.UCJ" title="qiskit_fermions.circuit.library.UCJ"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCJ</span></code></a> constructor.</p>
+<p>Since <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.UCJ.html#qiskit_fermions.circuit.library.UCJ" title="qiskit_fermions.circuit.library.UCJ"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCJ</span></code></a> takes the ffsim operator itself, this needs no extra work: pass
+<code class="docutils literal notranslate"><span class="pre">optimize=True</span></code> when building the operator and hand the result to the same constructor.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">compressed</span> <span class="o">=</span> <span class="n">ffsim</span><span class="o">.</span><span class="n">UCJOpSpinBalanced</span><span class="o">.</span><span class="n">from_t_amplitudes</span><span class="p">(</span>
 <span class="gp">... </span>    <span class="n">t2</span><span class="p">,</span> <span class="n">t1</span><span class="o">=</span><span class="n">t1</span><span class="p">,</span> <span class="n">n_reps</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">optimize</span><span class="o">=</span><span class="kc">True</span>
 <span class="gp">... </span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">compressed_ansatz</span> <span class="o">=</span> <span class="n">UCJ</span><span class="p">(</span>
-<span class="gp">... </span>    <span class="s2">"balanced"</span><span class="p">,</span>
-<span class="gp">... </span>    <span class="n">compressed</span><span class="o">.</span><span class="n">diag_coulomb_mats</span><span class="p">,</span>
-<span class="gp">... </span>    <span class="n">compressed</span><span class="o">.</span><span class="n">orbital_rotations</span><span class="p">,</span>
-<span class="gp">... </span>    <span class="n">final_orbital_rotation</span><span class="o">=</span><span class="n">compressed</span><span class="o">.</span><span class="n">final_orbital_rotation</span><span class="p">,</span>
-<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">compressed_ansatz</span> <span class="o">=</span> <span class="n">UCJ</span><span class="p">(</span><span class="n">compressed</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">compressed_circuit</span> <span class="o">=</span> <span class="n">FermionicCircuit</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">norb</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">compressed_circuit</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
@@ -467,10 +460,8 @@ way recovers the same correlation energy at this (small) system size:</p>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p><code class="docutils literal notranslate"><span class="pre">diag_coulomb_mats</span></code> from <code class="docutils literal notranslate"><span class="pre">optimize=True</span></code> might carry tiny imaginary round-off; <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.UCJ.html#qiskit_fermions.circuit.library.UCJ" title="qiskit_fermions.circuit.library.UCJ"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCJ</span></code></a>
-takes their real part and raises only if the imaginary part is not negligible. For a better fit at
-a given <code class="docutils literal notranslate"><span class="pre">n_reps</span></code> (at increased classical cost) see ffsim’s <code class="docutils literal notranslate"><span class="pre">multi_stage_start</span></code> /
-<code class="docutils literal notranslate"><span class="pre">multi_stage_step</span></code> options.</p>
+<p>For a better fit at a given <code class="docutils literal notranslate"><span class="pre">n_reps</span></code> (at increased classical cost) see ffsim’s
+<code class="docutils literal notranslate"><span class="pre">multi_stage_start</span></code> / <code class="docutils literal notranslate"><span class="pre">multi_stage_step</span></code> options.</p>
 </div>
 </section>
 <section id="transpile-the-ansatz-to-a-qubit-circuit">
@@ -487,7 +478,7 @@ pipeline’s optimization stage can act on them, so pass <code class="docutils l
 <span class="gp">&gt;&gt;&gt; </span><span class="n">pm</span> <span class="o">=</span> <span class="n">generate_preset_jw_pass_manager</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">transpiled</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">circuit</span><span class="o">.</span><span class="n">decompose</span><span class="p">())</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">transpiled</span><span class="o">.</span><span class="n">count_ops</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">())))</span>
-<span class="go">{'p': 16, 'rzz': 12, 'x': 2, 'xx_plus_yy': 28}</span>
+<span class="go">{'p': 14, 'rzz': 12, 'x': 2, 'xx_plus_yy': 28}</span>
 </pre></div>
 </div>
 <p>Without a target device, this maps onto <code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">*</span> <span class="pre">norb</span></code> qubits with all-to-all connectivity assumed; the
@@ -547,11 +538,13 @@ directly, the router must insert many <code class="docutils literal notranslate"
 </div>
 <p class="rubric">Restrict the ansatz to the hardware-implementable interactions</p>
 <p>The fix is to feed <code class="docutils literal notranslate"><span class="pre">allowed_pairs_ab</span></code> back into the ansatz construction, through the
-<code class="docutils literal notranslate"><span class="pre">interaction_pairs</span></code> argument of <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.UCJ.html#qiskit_fermions.circuit.library.UCJ.from_t_amplitudes" title="qiskit_fermions.circuit.library.UCJ.from_t_amplitudes"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_t_amplitudes()</span></code></a>,
-so the diagonal Coulomb operator only contains alpha-beta terms the coupling map can implement
-directly. The ansatz then matches the device topology and the router barely has to touch it:</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">restricted</span> <span class="o">=</span> <span class="n">UCJ</span><span class="o">.</span><span class="n">from_t_amplitudes</span><span class="p">(</span>
-<span class="gp">... </span>    <span class="n">nelec</span><span class="p">,</span> <span class="n">t2</span><span class="p">,</span> <span class="n">t1</span><span class="o">=</span><span class="n">t1</span><span class="p">,</span> <span class="n">n_reps</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">interaction_pairs</span><span class="o">=</span><span class="p">(</span><span class="n">pairs_aa</span><span class="p">,</span> <span class="n">allowed_pairs_ab</span><span class="p">)</span>
+<code class="docutils literal notranslate"><span class="pre">interaction_pairs</span></code> argument of
+<a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.UCJOpSpinBalanced.html#ffsim.UCJOpSpinBalanced.from_t_amplitudes" title="(in ffsim)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_t_amplitudes()</span></code></a>, so the diagonal Coulomb operator only
+contains alpha-beta terms the coupling map can implement directly. The ansatz then matches the device topology and the router barely has to touch it:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">restricted</span> <span class="o">=</span> <span class="n">UCJ</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">ffsim</span><span class="o">.</span><span class="n">UCJOpSpinBalanced</span><span class="o">.</span><span class="n">from_t_amplitudes</span><span class="p">(</span>
+<span class="gp">... </span>        <span class="n">t2</span><span class="p">,</span> <span class="n">t1</span><span class="o">=</span><span class="n">t1</span><span class="p">,</span> <span class="n">n_reps</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">interaction_pairs</span><span class="o">=</span><span class="p">(</span><span class="n">pairs_aa</span><span class="p">,</span> <span class="n">allowed_pairs_ab</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="p">)</span>
 <span class="gp">... </span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">circuit</span> <span class="o">=</span> <span class="n">FermionicCircuit</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">norb</span><span class="p">)</span>
@@ -619,14 +612,14 @@ to evaluate its energy without ffsim installed.</p></li>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="vqe_outer_loop.html">
+          <a class="prev-page" href="circuit.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">VQE optimization at the fermionic level</div>
+                <div class="title">Work with fermionic circuits</div>
                 
               </div>
             </a>
@@ -680,7 +673,7 @@ to evaluate its energy without ffsim installed.</p></li>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=90bc2563"></script>
+</div><script src="../_static/documentation_options.js?v=aa8e2b7d"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

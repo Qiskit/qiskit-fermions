@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>UCJ - Qiskit Fermions 0.2.0.dev0+b9e1dce</title>
+        <title>UCJ - Qiskit Fermions 0.2.0.dev0+0ae8883</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+b9e1dce</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+0ae8883</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+b9e1dce</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+0ae8883</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -208,7 +208,6 @@
 <li class="toctree-l2"><a class="reference internal" href="../guides/grouping.html">Group operator terms: use the operator structure</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../guides/mappers.html">Map operator representations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../guides/circuit.html">Work with fermionic circuits</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../guides/vqe_outer_loop.html">VQE optimization at the fermionic level</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../guides/lucj.html">Build an LUCJ ansatz</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../guides/sqdrift.html">Generate SqDRIFT circuits</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../guides/skqd.html">Generate Krylov time-evolution circuits (SKQD)</a></li>
@@ -266,7 +265,7 @@
 <h1>UCJ<a class="headerlink" href="#ucj" title="Link to this heading">¶</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="qiskit_fermions.circuit.library.UCJ">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">UCJ</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">variant</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">diag_coulomb_mats</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">orbital_rotations</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">final_orbital_rotation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qiskit_fermions.circuit.library.UCJ" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">UCJ</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ucj_op</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qiskit_fermions.circuit.library.UCJ" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="qiskit_fermions.circuit.FermionicGate.html#qiskit_fermions.circuit.FermionicGate" title="qiskit_fermions.circuit.fermionic_gate.FermionicGate"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicGate</span></code></a></p>
 <p>Implements the (local) unitary cluster Jastrow ((L)UCJ) ansatz.</p>
 <p>A unitary cluster Jastrow operator has the form</p>
@@ -284,239 +283,83 @@ n_{i\sigma}\, n_{j\tau},\]</div>
 </div>
 <p>and <span class="math">\(\mathcal{U}_\text{final}\)</span> is an optional final orbital rotation. The number of terms
 <span class="math">\(L\)</span> is the number of ansatz repetitions.</p>
-<p>This gate supports three spin variants (see <code class="xref py py-class docutils literal notranslate"><span class="pre">UCJ.Variant</span></code>), selected explicitly by the
-<code class="docutils literal notranslate"><span class="pre">variant</span></code> argument and validated against the shapes of the supplied tensors (mirroring ffsim’s
-<a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.UCJOpSpinBalanced.html#ffsim.UCJOpSpinBalanced" title="(in ffsim)"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCJOpSpinBalanced</span></code></a>, <a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.UCJOpSpinUnbalanced.html#ffsim.UCJOpSpinUnbalanced" title="(in ffsim)"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCJOpSpinUnbalanced</span></code></a> and
-<a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.UCJOpSpinless.html#ffsim.UCJOpSpinless" title="(in ffsim)"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCJOpSpinless</span></code></a>). The number of spatial orbitals is <em>not</em> a constructor
-argument – it is inferred from those same tensor shapes (see <a class="reference internal" href="#qiskit_fermions.circuit.library.UCJ.norb" title="qiskit_fermions.circuit.library.UCJ.norb"><code class="xref py py-attr docutils literal notranslate"><span class="pre">norb</span></code></a>):</p>
+<p>The operator itself is built by <a class="reference external" href="https://qiskit-community.github.io/ffsim/">ffsim</a>, and this
+gate turns it into a <a class="reference internal" href="qiskit_fermions.circuit.FermionicCircuit.html#qiskit_fermions.circuit.FermionicCircuit" title="qiskit_fermions.circuit.FermionicCircuit"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicCircuit</span></code></a>. That division of labor is deliberate: ffsim owns
+the ansatz math (double factorization of <span class="math">\(t_2\)</span> amplitudes, the compressed variant, the
+parameter-vector packing that a variational optimizer drives), while this gate expresses the
+result as fermionic modes so that the transpiler can lower it through <em>any</em> fermion-to-qubit
+encoding. Passing an ffsim operator through unchanged is what keeps the two consistent; see the
+<a class="reference internal" href="../guides/ffsim.html#ffsim-backend-explanation"><span class="std std-ref">ffsim guide</span></a>.</p>
+<p>Accepts any of ffsim’s three UCJ operators, whose type fixes the spin variant and the number of
+modes this gate acts on:</p>
 <ul class="simple">
-<li><p><strong>spin-balanced</strong> – <code class="docutils literal notranslate"><span class="pre">diag_coulomb_mats</span></code> has shape <code class="docutils literal notranslate"><span class="pre">(L,</span> <span class="pre">2,</span> <span class="pre">norb,</span> <span class="pre">norb)</span></code> (the
-<code class="docutils literal notranslate"><span class="pre">[alpha-alpha,</span> <span class="pre">alpha-beta]</span></code> matrices, with beta-beta reusing alpha-alpha and beta-alpha
-reusing alpha-beta) and <code class="docutils literal notranslate"><span class="pre">orbital_rotations</span></code> has shape <code class="docutils literal notranslate"><span class="pre">(L,</span> <span class="pre">norb,</span> <span class="pre">norb)</span></code> (one rotation
-applied to both spin sectors). Acts on <code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">*</span> <span class="pre">norb</span></code> block-spin modes.</p></li>
-<li><p><strong>spin-unbalanced</strong> – <code class="docutils literal notranslate"><span class="pre">diag_coulomb_mats</span></code> has shape <code class="docutils literal notranslate"><span class="pre">(L,</span> <span class="pre">3,</span> <span class="pre">norb,</span> <span class="pre">norb)</span></code> (the
-<code class="docutils literal notranslate"><span class="pre">[alpha-alpha,</span> <span class="pre">alpha-beta,</span> <span class="pre">beta-beta]</span></code> matrices) and <code class="docutils literal notranslate"><span class="pre">orbital_rotations</span></code> has shape
-<code class="docutils literal notranslate"><span class="pre">(L,</span> <span class="pre">2,</span> <span class="pre">norb,</span> <span class="pre">norb)</span></code> (independent <code class="docutils literal notranslate"><span class="pre">[alpha,</span> <span class="pre">beta]</span></code> rotations). Acts on <code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">*</span> <span class="pre">norb</span></code>
-block-spin modes.</p></li>
-<li><p><strong>spinless</strong> – <code class="docutils literal notranslate"><span class="pre">diag_coulomb_mats</span></code> and <code class="docutils literal notranslate"><span class="pre">orbital_rotations</span></code> both have shape
-<code class="docutils literal notranslate"><span class="pre">(L,</span> <span class="pre">norb,</span> <span class="pre">norb)</span></code>. Acts on <code class="docutils literal notranslate"><span class="pre">norb</span></code> spinless modes. The equivalent two-register operator
-with a shared same-spin diagonal Coulomb matrix and no cross-spin interaction is expressible
-via the <code class="docutils literal notranslate"><span class="pre">&quot;balanced&quot;</span></code> variant with its alpha-beta block set to zero.</p></li>
+<li><p><a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.UCJOpSpinBalanced.html#ffsim.UCJOpSpinBalanced" title="(in ffsim)"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCJOpSpinBalanced</span></code></a> acts on <code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">*</span> <span class="pre">norb</span></code> block-spin modes, with one
+orbital rotation shared by both spin sectors and <code class="docutils literal notranslate"><span class="pre">[alpha-alpha,</span> <span class="pre">alpha-beta]</span></code> diagonal Coulomb
+matrices (beta-beta reuses alpha-alpha, beta-alpha reuses alpha-beta).</p></li>
+<li><p><a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.UCJOpSpinUnbalanced.html#ffsim.UCJOpSpinUnbalanced" title="(in ffsim)"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCJOpSpinUnbalanced</span></code></a> acts on <code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">*</span> <span class="pre">norb</span></code> block-spin modes, with
+independent <code class="docutils literal notranslate"><span class="pre">[alpha,</span> <span class="pre">beta]</span></code> rotations and <code class="docutils literal notranslate"><span class="pre">[alpha-alpha,</span> <span class="pre">alpha-beta,</span> <span class="pre">beta-beta]</span></code> matrices.</p></li>
+<li><p><a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.UCJOpSpinless.html#ffsim.UCJOpSpinless" title="(in ffsim)"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCJOpSpinless</span></code></a> acts on <code class="docutils literal notranslate"><span class="pre">norb</span></code> spinless modes.</p></li>
 </ul>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>This gate builds the ansatz from <em>exact</em> tensors. To use ffsim’s optimized (“compressed”)
-double factorization, construct an <code class="docutils literal notranslate"><span class="pre">ffsim</span></code> UCJ operator with <code class="docutils literal notranslate"><span class="pre">optimize=True</span></code> and pass its
-<code class="docutils literal notranslate"><span class="pre">diag_coulomb_mats</span></code> / <code class="docutils literal notranslate"><span class="pre">orbital_rotations</span></code> / <code class="docutils literal notranslate"><span class="pre">final_orbital_rotation</span></code> into this
-constructor directly.</p>
+<p>ffsim’s <a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.UCJOpSpinless.html#ffsim.UCJOpSpinless" title="(in ffsim)"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCJOpSpinless</span></code></a> is also valid on a spinful sector, where its
+tensors act on both spin sectors with no cross-spin term. A gate has to fix its width when it
+is constructed, so this gate always reads that type as a single <code class="docutils literal notranslate"><span class="pre">norb</span></code>-mode register. Build
+the two-register reading as an <a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.UCJOpSpinBalanced.html#ffsim.UCJOpSpinBalanced" title="(in ffsim)"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCJOpSpinBalanced</span></code></a> whose alpha-beta
+block is zero, which is the same operator.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>ffsim does not support Windows (through its unconditional PySCF dependency), so this gate
+requires the <code class="docutils literal notranslate"><span class="pre">ffsim</span></code> extra (<code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">&quot;qiskit-fermions[ffsim]&quot;</span></code>) and is unavailable
+there. Use <a class="reference external" href="https://learn.microsoft.com/windows/wsl/">WSL</a> on Windows.</p>
 </div>
 <div class="admonition caution">
 <p class="admonition-title">Caution</p>
 <p>This is an early development prototype. Beware of changes to its interface without warning
 during the pre-release development of this package.</p>
 </div>
-<p>Initializing an instance of this gate can be done with the arguments listed below.</p>
-<p>The number of spatial orbitals is inferred from the supplied tensor shapes (see
-<a class="reference internal" href="#qiskit_fermions.circuit.library.UCJ.norb" title="qiskit_fermions.circuit.library.UCJ.norb"><code class="xref py py-attr docutils literal notranslate"><span class="pre">norb</span></code></a>).</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">ffsim</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.circuit.library</span><span class="w"> </span><span class="kn">import</span> <span class="n">UCJ</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ucj_op</span> <span class="o">=</span> <span class="n">ffsim</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random_ucj_op_spin_balanced</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">n_reps</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">1234</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">gate</span> <span class="o">=</span> <span class="n">UCJ</span><span class="p">(</span><span class="n">ucj_op</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">gate</span><span class="o">.</span><span class="n">norb</span><span class="p">,</span> <span class="n">gate</span><span class="o">.</span><span class="n">num_modes</span><span class="p">,</span> <span class="n">gate</span><span class="o">.</span><span class="n">n_reps</span>
+<span class="go">(3, 6, 1)</span>
+</pre></div>
+</div>
+<p>Initializing an instance of this gate can be done with the argument listed below.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>variant</strong> (<em>UCJ.Variant</em><em> | </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – the spin variant, a <code class="xref py py-class docutils literal notranslate"><span class="pre">UCJ.Variant</span></code> (or its string value <code class="docutils literal notranslate"><span class="pre">&quot;balanced&quot;</span></code>,
-<code class="docutils literal notranslate"><span class="pre">&quot;unbalanced&quot;</span></code>, or <code class="docutils literal notranslate"><span class="pre">&quot;spinless&quot;</span></code>). Determines the number of modes this gate acts
-on (see the class docstring) and the expected tensor shapes.</p></li>
-<li><p><strong>diag_coulomb_mats</strong> (<em>np.ndarray</em>) – the diagonal Coulomb matrices, of shape <code class="docutils literal notranslate"><span class="pre">(L,</span> <span class="pre">2,</span> <span class="pre">norb,</span> <span class="pre">norb)</span></code>
-(spin-balanced), <code class="docutils literal notranslate"><span class="pre">(L,</span> <span class="pre">3,</span> <span class="pre">norb,</span> <span class="pre">norb)</span></code> (spin-unbalanced), or <code class="docutils literal notranslate"><span class="pre">(L,</span> <span class="pre">norb,</span> <span class="pre">norb)</span></code>
-(spinless), where <code class="docutils literal notranslate"><span class="pre">L</span></code> is the number of ansatz repetitions.</p></li>
-<li><p><strong>orbital_rotations</strong> (<em>np.ndarray</em>) – the orbital rotations, of shape <code class="docutils literal notranslate"><span class="pre">(L,</span> <span class="pre">norb,</span> <span class="pre">norb)</span></code> (spin-balanced or
-spinless) or <code class="docutils literal notranslate"><span class="pre">(L,</span> <span class="pre">2,</span> <span class="pre">norb,</span> <span class="pre">norb)</span></code> (spin-unbalanced).</p></li>
-<li><p><strong>final_orbital_rotation</strong> (<em>np.ndarray</em><em> | </em><em>None</em>) – an optional final orbital rotation, of shape <code class="docutils literal notranslate"><span class="pre">(norb,</span> <span class="pre">norb)</span></code>
-(spin-balanced or spinless) or <code class="docutils literal notranslate"><span class="pre">(2,</span> <span class="pre">norb,</span> <span class="pre">norb)</span></code> (spin-unbalanced).</p></li>
-</ul>
+<dd class="field-odd"><p><strong>ucj_op</strong> (<em>Any</em>) – the ffsim UCJ operator to build the circuit from, one of
+<a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.UCJOpSpinBalanced.html#ffsim.UCJOpSpinBalanced" title="(in ffsim)"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCJOpSpinBalanced</span></code></a>,
+<a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.UCJOpSpinUnbalanced.html#ffsim.UCJOpSpinUnbalanced" title="(in ffsim)"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCJOpSpinUnbalanced</span></code></a> or
+<a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.UCJOpSpinless.html#ffsim.UCJOpSpinless" title="(in ffsim)"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCJOpSpinless</span></code></a>. Its type determines the spin variant and the
+number of modes this gate acts on (see the class docstring).</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – if <code class="docutils literal notranslate"><span class="pre">variant</span></code> is not recognized, or if the tensor shapes are inconsistent
-    with each other or with <code class="docutils literal notranslate"><span class="pre">variant</span></code>.</p>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>MissingOptionalLibraryError</strong> – if <code class="docutils literal notranslate"><span class="pre">ffsim</span></code> is not installed.</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#TypeError" title="(in Python v3.14)"><strong>TypeError</strong></a> – if <code class="docutils literal notranslate"><span class="pre">ucj_op</span></code> is not one of ffsim’s three UCJ operator types.</p></li>
+</ul>
 </dd>
 </dl>
 <p class="rubric">Attributes</p>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="qiskit_fermions.circuit.library.UCJ.diag_coulomb_mats">
-<span class="sig-name descname"><span class="pre">diag_coulomb_mats</span></span><a class="headerlink" href="#qiskit_fermions.circuit.library.UCJ.diag_coulomb_mats" title="Link to this definition">¶</a></dt>
-<dd><p>The diagonal Coulomb matrices defining each ansatz repetition.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qiskit_fermions.circuit.library.UCJ.orbital_rotations">
-<span class="sig-name descname"><span class="pre">orbital_rotations</span></span><a class="headerlink" href="#qiskit_fermions.circuit.library.UCJ.orbital_rotations" title="Link to this definition">¶</a></dt>
-<dd><p>The orbital rotations defining each ansatz repetition.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qiskit_fermions.circuit.library.UCJ.final_orbital_rotation">
-<span class="sig-name descname"><span class="pre">final_orbital_rotation</span></span><a class="headerlink" href="#qiskit_fermions.circuit.library.UCJ.final_orbital_rotation" title="Link to this definition">¶</a></dt>
-<dd><p>The optional final orbital rotation.</p>
+<dt class="sig sig-object py" id="qiskit_fermions.circuit.library.UCJ.n_reps">
+<span class="sig-name descname"><span class="pre">n_reps</span></span><a class="headerlink" href="#qiskit_fermions.circuit.library.UCJ.n_reps" title="Link to this definition">¶</a></dt>
+<dd><p>The number of ansatz repetitions.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qiskit_fermions.circuit.library.UCJ.norb">
 <span class="sig-name descname"><span class="pre">norb</span></span><a class="headerlink" href="#qiskit_fermions.circuit.library.UCJ.norb" title="Link to this definition">¶</a></dt>
-<dd><p>The number of spatial orbitals, inferred from the tensor shapes.</p>
+<dd><p>The number of spatial orbitals.</p>
 </dd></dl>
 
-<p class="rubric">Methods</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="qiskit_fermions.circuit.library.UCJ.from_parameters">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">from_parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norb</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variant</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_reps</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">interaction_pairs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">with_final_orbital_rotation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qiskit_fermions.circuit.library.UCJ.from_parameters" title="Link to this definition">¶</a></dt>
-<dd><p>Constructs a UCJ ansatz from a real-valued parameter vector.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>params</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.5)"><em>ndarray</em></a>) – the real-valued parameter vector.</p></li>
-<li><p><strong>norb</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – the number of spatial orbitals.</p></li>
-<li><p><strong>variant</strong> (<em>Variant</em><em> | </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – the spin variant, a <code class="xref py py-class docutils literal notranslate"><span class="pre">UCJ.Variant</span></code> (or its string value <code class="docutils literal notranslate"><span class="pre">&quot;balanced&quot;</span></code>,
-<code class="docutils literal notranslate"><span class="pre">&quot;unbalanced&quot;</span></code>, or <code class="docutils literal notranslate"><span class="pre">&quot;spinless&quot;</span></code>).</p></li>
-<li><p><strong>n_reps</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – the number of ansatz repetitions.</p></li>
-<li><p><strong>interaction_pairs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>]</em><em>] </em><em>| </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>]</em><em>] </em><em>| </em><em>None</em><em>, </em><em>...</em><em>] </em><em>| </em><em>None</em>) – the allowed diagonal Coulomb interactions (see
-<a class="reference internal" href="#qiskit_fermions.circuit.library.UCJ.from_t_amplitudes" title="qiskit_fermions.circuit.library.UCJ.from_t_amplitudes"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_t_amplitudes()</span></code></a> for the exact per-variant shape convention). <code class="docutils literal notranslate"><span class="pre">None</span></code>
-(the default) imposes no restriction, so every block uses its full parameter count.</p></li>
-<li><p><strong>with_final_orbital_rotation</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – whether <code class="docutils literal notranslate"><span class="pre">params</span></code> includes a trailing final orbital
-rotation.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>The constructed <a class="reference internal" href="#qiskit_fermions.circuit.library.UCJ" title="qiskit_fermions.circuit.library.UCJ"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCJ</span></code></a> gate.</p>
-</dd>
-<dt class="field-odd">Raises<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – if <code class="docutils literal notranslate"><span class="pre">variant</span></code> is not recognized, or if <code class="docutils literal notranslate"><span class="pre">len(params)</span></code> does not match
-    <a class="reference internal" href="#qiskit_fermions.circuit.library.UCJ.num_parameters" title="qiskit_fermions.circuit.library.UCJ.num_parameters"><code class="xref py py-meth docutils literal notranslate"><span class="pre">num_parameters()</span></code></a> for the given settings.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Self" title="(in Python v3.14)"><em>Self</em></a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qiskit_fermions.circuit.library.UCJ.from_t_amplitudes">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">from_t_amplitudes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nelec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t2</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">t1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variant</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'balanced'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_reps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interaction_pairs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-08</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qiskit_fermions.circuit.library.UCJ.from_t_amplitudes" title="Link to this definition">¶</a></dt>
-<dd><p>Constructs a UCJ ansatz from coupled-cluster <span class="math">\(t_2\)</span> (and optional <span class="math">\(t_1\)</span>) amplitudes.</p>
-<p>The ansatz layers are obtained from an <em>exact</em> double factorization of the <span class="math">\(t_2\)</span>
-amplitudes (via <a class="reference internal" href="qiskit_fermions.linalg.double_factorized_t2.html#qiskit_fermions.linalg.double_factorized_t2" title="qiskit_fermions.linalg.double_factorized_t2"><code class="xref py py-func docutils literal notranslate"><span class="pre">double_factorized_t2()</span></code></a> /
-<a class="reference internal" href="qiskit_fermions.linalg.double_factorized_t2_alpha_beta.html#qiskit_fermions.linalg.double_factorized_t2_alpha_beta" title="qiskit_fermions.linalg.double_factorized_t2_alpha_beta"><code class="xref py py-func docutils literal notranslate"><span class="pre">double_factorized_t2_alpha_beta()</span></code></a>) and, when <span class="math">\(t_1\)</span> is
-supplied, a final orbital rotation from <a class="reference internal" href="qiskit_fermions.circuit.library.OrbitalRotation.html#qiskit_fermions.circuit.library.OrbitalRotation.from_t1_amplitudes" title="qiskit_fermions.circuit.library.OrbitalRotation.from_t1_amplitudes"><code class="xref py py-meth docutils literal notranslate"><span class="pre">OrbitalRotation.from_t1_amplitudes()</span></code></a>.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Only the exact factorization is supported here. To use ffsim’s optimized (“compressed”)
-double factorization, build an <code class="docutils literal notranslate"><span class="pre">ffsim</span></code> UCJ operator with <code class="docutils literal notranslate"><span class="pre">optimize=True</span></code> and pass its
-tensors into <a class="reference internal" href="#qiskit_fermions.circuit.library.UCJ" title="qiskit_fermions.circuit.library.UCJ"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCJ</span></code></a> directly.</p>
-</div>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>nelec</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>]</em>) – either a single integer for a spinless system, or a pair of integers storing the
-numbers of spin alpha and spin beta fermions.</p></li>
-<li><p><strong>t2</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.5)"><em>ndarray</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a><em>[</em><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.5)"><em>ndarray</em></a><em>, </em><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.5)"><em>ndarray</em></a><em>, </em><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.5)"><em>ndarray</em></a><em>]</em>) – the <span class="math">\(t_2\)</span> amplitudes. For the <code class="docutils literal notranslate"><span class="pre">&quot;balanced&quot;</span></code> and <code class="docutils literal notranslate"><span class="pre">&quot;spinless&quot;</span></code> variants, a
-single array of shape <code class="docutils literal notranslate"><span class="pre">(nocc,</span> <span class="pre">nocc,</span> <span class="pre">nvrt,</span> <span class="pre">nvrt)</span></code>. For the <code class="docutils literal notranslate"><span class="pre">&quot;unbalanced&quot;</span></code> variant,
-a tuple <code class="docutils literal notranslate"><span class="pre">(t2aa,</span> <span class="pre">t2ab,</span> <span class="pre">t2bb)</span></code>.</p></li>
-<li><p><strong>t1</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.5)"><em>ndarray</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a><em>[</em><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.5)"><em>ndarray</em></a><em>, </em><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.5)"><em>ndarray</em></a><em>] </em><em>| </em><em>None</em>) – the optional <span class="math">\(t_1\)</span> amplitudes producing the final orbital rotation. For
-<code class="docutils literal notranslate"><span class="pre">&quot;unbalanced&quot;</span></code>, a pair <code class="docutils literal notranslate"><span class="pre">(t1a,</span> <span class="pre">t1b)</span></code>; otherwise a single array of shape
-<code class="docutils literal notranslate"><span class="pre">(nocc,</span> <span class="pre">nvrt)</span></code>.</p></li>
-<li><p><strong>variant</strong> (<em>Variant</em><em> | </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – the spin variant to build, a <code class="xref py py-class docutils literal notranslate"><span class="pre">UCJ.Variant</span></code> (or its string value
-<code class="docutils literal notranslate"><span class="pre">&quot;balanced&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;unbalanced&quot;</span></code>, or <code class="docutils literal notranslate"><span class="pre">&quot;spinless&quot;</span></code>).</p></li>
-<li><p><strong>n_reps</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>] </em><em>| </em><em>None</em>) – the number of ansatz repetitions. If <code class="docutils literal notranslate"><span class="pre">None</span></code>, uses all terms of the double
-factorization; if larger, the ansatz is padded with identity rotations and zero
-diagonal Coulomb matrices. For the <code class="docutils literal notranslate"><span class="pre">&quot;unbalanced&quot;</span></code> variant a pair
-<code class="docutils literal notranslate"><span class="pre">(n_reps_ab,</span> <span class="pre">n_reps_same_spin)</span></code> independently sets the number of alpha-beta and
-same-spin terms; a tuple is only valid for that variant.</p></li>
-<li><p><strong>interaction_pairs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>]</em><em>] </em><em>| </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>]</em><em>] </em><em>| </em><em>None</em><em>, </em><em>...</em><em>] </em><em>| </em><em>None</em>) – the allowed diagonal Coulomb interactions (the “local” in LUCJ). For
-<code class="docutils literal notranslate"><span class="pre">&quot;spinless&quot;</span></code> a single list of upper-triangular <code class="docutils literal notranslate"><span class="pre">(i,</span> <span class="pre">j)</span></code> pairs; for <code class="docutils literal notranslate"><span class="pre">&quot;balanced&quot;</span></code>
-a pair <code class="docutils literal notranslate"><span class="pre">(pairs_aa,</span> <span class="pre">pairs_ab)</span></code>; for <code class="docutils literal notranslate"><span class="pre">&quot;unbalanced&quot;</span></code> a triple
-<code class="docutils literal notranslate"><span class="pre">(pairs_aa,</span> <span class="pre">pairs_ab,</span> <span class="pre">pairs_bb)</span></code>. A list of pairs restricts that block to exactly
-those entries; the same-spin (aa/bb) masks are symmetrized while the alpha-beta (ab)
-mask is not. Use <code class="docutils literal notranslate"><span class="pre">None</span></code> – not an empty list <code class="docutils literal notranslate"><span class="pre">[]</span></code> – to impose <em>no</em> restriction:
-a <code class="docutils literal notranslate"><span class="pre">None</span></code> element (or the whole argument being <code class="docutils literal notranslate"><span class="pre">None</span></code>) leaves the block untouched,
-whereas an empty list allows no interactions and so zeros the entire block.</p></li>
-<li><p><strong>tol</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a>) – the double-factorization truncation tolerance.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>The constructed <a class="reference internal" href="#qiskit_fermions.circuit.library.UCJ" title="qiskit_fermions.circuit.library.UCJ"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCJ</span></code></a> gate.</p>
-</dd>
-<dt class="field-odd">Raises<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – if <code class="docutils literal notranslate"><span class="pre">variant</span></code> is not recognized, or if a tuple <code class="docutils literal notranslate"><span class="pre">n_reps</span></code> is passed for a
-    variant other than <code class="xref py py-attr docutils literal notranslate"><span class="pre">UCJ.Variant.UNBALANCED</span></code>.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Self" title="(in Python v3.14)"><em>Self</em></a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qiskit_fermions.circuit.library.UCJ.num_parameters">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">num_parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">norb</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variant</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_reps</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">interaction_pairs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">with_final_orbital_rotation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qiskit_fermions.circuit.library.UCJ.num_parameters" title="Link to this definition">¶</a></dt>
-<dd><p>Returns the number of parameters of a UCJ ansatz with the given settings.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>norb</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – the number of spatial orbitals.</p></li>
-<li><p><strong>variant</strong> (<em>Variant</em><em> | </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – the spin variant, a <code class="xref py py-class docutils literal notranslate"><span class="pre">UCJ.Variant</span></code> (or its string value <code class="docutils literal notranslate"><span class="pre">&quot;balanced&quot;</span></code>,
-<code class="docutils literal notranslate"><span class="pre">&quot;unbalanced&quot;</span></code>, or <code class="docutils literal notranslate"><span class="pre">&quot;spinless&quot;</span></code>).</p></li>
-<li><p><strong>n_reps</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – the number of ansatz repetitions.</p></li>
-<li><p><strong>interaction_pairs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>]</em><em>] </em><em>| </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>]</em><em>] </em><em>| </em><em>None</em><em>, </em><em>...</em><em>] </em><em>| </em><em>None</em>) – the allowed diagonal Coulomb interactions (see
-<a class="reference internal" href="#qiskit_fermions.circuit.library.UCJ.from_t_amplitudes" title="qiskit_fermions.circuit.library.UCJ.from_t_amplitudes"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_t_amplitudes()</span></code></a> for the exact per-variant shape convention). <code class="docutils literal notranslate"><span class="pre">None</span></code>
-(the default) imposes no restriction, so every block uses its full parameter count.</p></li>
-<li><p><strong>with_final_orbital_rotation</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – whether the ansatz includes a final orbital rotation.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>The number of parameters.</p>
-</dd>
-<dt class="field-odd">Raises<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – if <code class="docutils literal notranslate"><span class="pre">variant</span></code> is not recognized.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)">int</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qiskit_fermions.circuit.library.UCJ.to_parameters">
-<span class="sig-name descname"><span class="pre">to_parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">interaction_pairs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qiskit_fermions.circuit.library.UCJ.to_parameters" title="Link to this definition">¶</a></dt>
-<dd><p>Converts this UCJ ansatz to a real-valued parameter vector.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>If <code class="docutils literal notranslate"><span class="pre">interaction_pairs</span></code> restricts a block, the returned parameter vector incorporates
-only the diagonal Coulomb matrix entries corresponding to the allowed interactions, so
-the original operator is not recoverable from the parameter vector alone.</p>
-</div>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>The returned vector is the <em>principal-branch</em> representative of this ansatz’s orbital
-rotations: each rotation is parameterized by <code class="docutils literal notranslate"><span class="pre">logm(U)</span></code>, which is unique only up to
-<span class="math">\(2\pi i\)</span> shifts of its eigenvalue phases. Consequently <a class="reference internal" href="#qiskit_fermions.circuit.library.UCJ.from_parameters" title="qiskit_fermions.circuit.library.UCJ.from_parameters"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_parameters()</span></code></a>
-applied to the returned vector reproduces this operator exactly, but the reverse
-composition does <em>not</em> generally return its input – <code class="docutils literal notranslate"><span class="pre">to_parameters(from_parameters(p))</span></code>
-equals <code class="docutils literal notranslate"><span class="pre">p</span></code> only when <code class="docutils literal notranslate"><span class="pre">p</span></code>’s generators already lie in the principal branch (all
-eigenvalue phases within <span class="math">\((-\pi, \pi]\)</span>). Both a wrapped <code class="docutils literal notranslate"><span class="pre">p</span></code> and the returned
-vector describe the same unitary, so the operator is unaffected. Amplitudes from
-<a class="reference internal" href="#qiskit_fermions.circuit.library.UCJ.from_t_amplitudes" title="qiskit_fermions.circuit.library.UCJ.from_t_amplitudes"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_t_amplitudes()</span></code></a> are well inside the principal branch; large hand-built
-parameter vectors need not be.</p>
-</div>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>interaction_pairs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>]</em><em>] </em><em>| </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>]</em><em>] </em><em>| </em><em>None</em><em>, </em><em>...</em><em>] </em><em>| </em><em>None</em>) – the allowed diagonal Coulomb interactions (see
-<a class="reference internal" href="#qiskit_fermions.circuit.library.UCJ.from_t_amplitudes" title="qiskit_fermions.circuit.library.UCJ.from_t_amplitudes"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_t_amplitudes()</span></code></a> for the exact per-variant shape convention). <code class="docutils literal notranslate"><span class="pre">None</span></code>
-(the default) imposes no restriction, so every block’s full contents are included.</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>The real-valued parameter vector.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.5)"><em>ndarray</em></a></p>
-</dd>
-</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qiskit_fermions.circuit.library.UCJ.ucj_op">
+<span class="sig-name descname"><span class="pre">ucj_op</span></span><a class="headerlink" href="#qiskit_fermions.circuit.library.UCJ.ucj_op" title="Link to this definition">¶</a></dt>
+<dd><p>The ffsim UCJ operator this gate builds its circuit from.</p>
 </dd></dl>
 
 <p class="rubric">Protocol Methods</p>
@@ -592,14 +435,9 @@ numbers of spin alpha and spin beta fermions.</p></li>
             <ul>
 <li><a class="reference internal" href="#">UCJ</a><ul>
 <li><a class="reference internal" href="#qiskit_fermions.circuit.library.UCJ"><code class="docutils literal notranslate"><span class="pre">UCJ</span></code></a><ul>
-<li><a class="reference internal" href="#qiskit_fermions.circuit.library.UCJ.diag_coulomb_mats"><code class="docutils literal notranslate"><span class="pre">UCJ.diag_coulomb_mats</span></code></a></li>
-<li><a class="reference internal" href="#qiskit_fermions.circuit.library.UCJ.orbital_rotations"><code class="docutils literal notranslate"><span class="pre">UCJ.orbital_rotations</span></code></a></li>
-<li><a class="reference internal" href="#qiskit_fermions.circuit.library.UCJ.final_orbital_rotation"><code class="docutils literal notranslate"><span class="pre">UCJ.final_orbital_rotation</span></code></a></li>
+<li><a class="reference internal" href="#qiskit_fermions.circuit.library.UCJ.n_reps"><code class="docutils literal notranslate"><span class="pre">UCJ.n_reps</span></code></a></li>
 <li><a class="reference internal" href="#qiskit_fermions.circuit.library.UCJ.norb"><code class="docutils literal notranslate"><span class="pre">UCJ.norb</span></code></a></li>
-<li><a class="reference internal" href="#qiskit_fermions.circuit.library.UCJ.from_parameters"><code class="docutils literal notranslate"><span class="pre">UCJ.from_parameters()</span></code></a></li>
-<li><a class="reference internal" href="#qiskit_fermions.circuit.library.UCJ.from_t_amplitudes"><code class="docutils literal notranslate"><span class="pre">UCJ.from_t_amplitudes()</span></code></a></li>
-<li><a class="reference internal" href="#qiskit_fermions.circuit.library.UCJ.num_parameters"><code class="docutils literal notranslate"><span class="pre">UCJ.num_parameters()</span></code></a></li>
-<li><a class="reference internal" href="#qiskit_fermions.circuit.library.UCJ.to_parameters"><code class="docutils literal notranslate"><span class="pre">UCJ.to_parameters()</span></code></a></li>
+<li><a class="reference internal" href="#qiskit_fermions.circuit.library.UCJ.ucj_op"><code class="docutils literal notranslate"><span class="pre">UCJ.ucj_op</span></code></a></li>
 <li><a class="reference internal" href="#qiskit_fermions.circuit.library.UCJ._apply_unitary_placed_"><code class="docutils literal notranslate"><span class="pre">UCJ._apply_unitary_placed_()</span></code></a></li>
 </ul>
 </li>
@@ -614,7 +452,7 @@ numbers of spin alpha and spin beta fermions.</p></li>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=90bc2563"></script>
+</div><script src="../_static/documentation_options.js?v=aa8e2b7d"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

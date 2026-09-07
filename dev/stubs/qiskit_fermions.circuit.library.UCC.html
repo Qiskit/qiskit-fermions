@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>UCC - Qiskit Fermions 0.2.0.dev0+b9e1dce</title>
+        <title>UCC - Qiskit Fermions 0.2.0.dev0+0ae8883</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+b9e1dce</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+0ae8883</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+b9e1dce</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+0ae8883</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -208,7 +208,6 @@
 <li class="toctree-l2"><a class="reference internal" href="../guides/grouping.html">Group operator terms: use the operator structure</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../guides/mappers.html">Map operator representations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../guides/circuit.html">Work with fermionic circuits</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../guides/vqe_outer_loop.html">VQE optimization at the fermionic level</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../guides/lucj.html">Build an LUCJ ansatz</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../guides/sqdrift.html">Generate SqDRIFT circuits</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../guides/skqd.html">Generate Krylov time-evolution circuits (SKQD)</a></li>
@@ -496,7 +495,7 @@ antisymmetry by construction. Not supported for the <code class="docutils litera
 <dt class="sig sig-object py" id="qiskit_fermions.circuit.library.UCC.from_t_amplitudes">
 <span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">from_t_amplitudes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t2</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">t1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variant</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'restricted'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">antisymmetric</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-08</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qiskit_fermions.circuit.library.UCC.from_t_amplitudes" title="Link to this definition">¶</a></dt>
 <dd><p>Constructs a UCC ansatz from coupled-cluster <span class="math">\(t_2\)</span> (and optional <span class="math">\(t_1\)</span>) amplitudes.</p>
-<p>This is a convenience constructor mirroring <a class="reference internal" href="qiskit_fermions.circuit.library.UCJ.html#qiskit_fermions.circuit.library.UCJ.from_t_amplitudes" title="qiskit_fermions.circuit.library.UCJ.from_t_amplitudes"><code class="xref py py-meth docutils literal notranslate"><span class="pre">UCJ.from_t_amplitudes()</span></code></a>. Unlike the (L)UCJ
+<p>This is a convenience constructor mirroring <code class="xref py py-meth docutils literal notranslate"><span class="pre">UCJ.from_t_amplitudes()</span></code>. Unlike the (L)UCJ
 ansatz – which <em>factorizes</em> the amplitudes into diagonal Coulomb layers – the UCC ansatz
 uses the amplitudes directly as its parameters, so this simply defaults an omitted <code class="docutils literal notranslate"><span class="pre">t1</span></code> to
 zeros of the shape implied by <code class="docutils literal notranslate"><span class="pre">t2</span></code>, giving a doubles-only (UCCD) ansatz.</p>
@@ -691,7 +690,7 @@ numbers of spin alpha and spin beta fermions.</p></li>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=90bc2563"></script>
+</div><script src="../_static/documentation_options.js?v=aa8e2b7d"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
