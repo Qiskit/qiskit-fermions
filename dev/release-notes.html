@@ -8,7 +8,7 @@
         <link rel="prefetch" href="_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Release Notes - Qiskit Fermions 0.2.0.dev0+0ae8883</title>
+        <title>Release Notes - Qiskit Fermions 0.2.0.dev0+f2de761</title>
       <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+0ae8883</div></a>
+      <a href="index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+f2de761</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+0ae8883</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+f2de761</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="search.html" role="search">
@@ -471,6 +471,48 @@ order:</p>
 </div>
 </li>
 </ul>
+<ul class="simple">
+<li><p>The double factorization utilities have been removed from
+<a class="reference internal" href="pydoc/qiskit_fermions.linalg.html#module-qiskit_fermions.linalg" title="qiskit_fermions.linalg"><code class="xref py py-mod docutils literal notranslate"><span class="pre">qiskit_fermions.linalg</span></code></a>: <code class="docutils literal notranslate"><span class="pre">double_factorized_t2</span></code>,
+<code class="docutils literal notranslate"><span class="pre">double_factorized_t2_alpha_beta</span></code>, <code class="docutils literal notranslate"><span class="pre">reconstruct_t2</span></code>, <code class="docutils literal notranslate"><span class="pre">reconstruct_t2_alpha_beta</span></code> and
+<code class="docutils literal notranslate"><span class="pre">double_factorized_2body</span></code>. The <code class="docutils literal notranslate"><span class="pre">t2</span></code> variants existed to serve <code class="docutils literal notranslate"><span class="pre">UCJ.from_t_amplitudes</span></code>,
+which now lives in ffsim, and <code class="docutils literal notranslate"><span class="pre">double_factorized_2body</span></code> had no caller. Use
+<a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.linalg.double_factorized_t2.html#ffsim.linalg.double_factorized_t2" title="(in ffsim)"><code class="xref py py-func docutils literal notranslate"><span class="pre">ffsim.linalg.double_factorized_t2()</span></code></a>,
+<a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.linalg.double_factorized_t2_alpha_beta.html#ffsim.linalg.double_factorized_t2_alpha_beta" title="(in ffsim)"><code class="xref py py-func docutils literal notranslate"><span class="pre">ffsim.linalg.double_factorized_t2_alpha_beta()</span></code></a> and
+<a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.linalg.double_factorized.html#ffsim.linalg.double_factorized" title="(in ffsim)"><code class="xref py py-func docutils literal notranslate"><span class="pre">ffsim.linalg.double_factorized()</span></code></a> instead; the last is a superset of the removed
+two-body routine, additionally offering an optimized (<code class="docutils literal notranslate"><span class="pre">optimize=True</span></code>) decomposition.</p></li>
+</ul>
+<ul>
+<li><p>The <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.UCC.html#qiskit_fermions.circuit.library.UCC" title="qiskit_fermions.circuit.library.UCC"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCC</span></code></a> gate is now constructed from one of ffsim’s UCCSD operators, which is its only
+constructor argument. The spin variant and the number of modes are read off that operator, so the
+<code class="docutils literal notranslate"><span class="pre">variant</span></code> argument and the <code class="docutils literal notranslate"><span class="pre">UCC.Variant</span></code> enum are gone:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># before</span>
+<span class="n">ansatz</span> <span class="o">=</span> <span class="n">UCC</span><span class="p">(</span><span class="s2">"restricted"</span><span class="p">,</span> <span class="n">t1</span><span class="p">,</span> <span class="n">t2</span><span class="p">)</span>
+
+<span class="c1"># after</span>
+<span class="n">ansatz</span> <span class="o">=</span> <span class="n">UCC</span><span class="p">(</span><span class="n">ffsim</span><span class="o">.</span><span class="n">UCCSDOpRestrictedReal</span><span class="p">(</span><span class="n">t1</span><span class="o">=</span><span class="n">t1</span><span class="p">,</span> <span class="n">t2</span><span class="o">=</span><span class="n">t2</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Accordingly, <code class="docutils literal notranslate"><span class="pre">UCC.from_t_amplitudes</span></code>, <code class="docutils literal notranslate"><span class="pre">UCC.num_parameters</span></code>, <code class="docutils literal notranslate"><span class="pre">UCC.from_parameters</span></code> and
+<code class="docutils literal notranslate"><span class="pre">UCC.to_parameters</span></code> have been removed, as have the <code class="docutils literal notranslate"><span class="pre">spinless</span></code> variant and the opt-in
+<code class="docutils literal notranslate"><span class="pre">antisymmetric</span></code> parameterization, which have no ffsim equivalent. ffsim’s operators provide
+<a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.UCCSDOpRestrictedReal.html#ffsim.UCCSDOpRestrictedReal.n_params" title="(in ffsim)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">n_params()</span></code></a>,
+<a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.UCCSDOpRestrictedReal.html#ffsim.UCCSDOpRestrictedReal.from_parameters" title="(in ffsim)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_parameters()</span></code></a> and
+<a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.UCCSDOpRestrictedReal.html#ffsim.UCCSDOpRestrictedReal.to_parameters" title="(in ffsim)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">to_parameters()</span></code></a> with identical conventions. To build
+an ansatz outside that family (a spinless one, or an antisymmetrized <span class="math">\(t_2\)</span>), construct an
+<a class="reference internal" href="stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> over your own cluster operator directly, which also gives you control over
+the Trotter ordering of its terms.</p>
+<p>The wrapped operator is available as <code class="docutils literal notranslate"><span class="pre">UCC.uccsd_op</span></code>, so its amplitudes are reachable as
+<code class="docutils literal notranslate"><span class="pre">gate.uccsd_op.t1</span></code> and <code class="docutils literal notranslate"><span class="pre">gate.uccsd_op.t2</span></code>; the gate no longer mirrors them as attributes of
+its own. <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.UCC.html#qiskit_fermions.circuit.library.UCC.cluster_operator" title="qiskit_fermions.circuit.library.UCC.cluster_operator"><code class="xref py py-meth docutils literal notranslate"><span class="pre">UCC.cluster_operator()</span></code></a> is unchanged. A
+<code class="docutils literal notranslate"><span class="pre">final_orbital_rotation</span></code> carried by the ffsim operator is now appended as a closing
+<a class="reference internal" href="stubs/qiskit_fermions.circuit.library.OrbitalRotation.html#qiskit_fermions.circuit.library.OrbitalRotation" title="qiskit_fermions.circuit.library.OrbitalRotation"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrbitalRotation</span></code></a>.</p>
+<p>Since ffsim is now the gate’s input type rather than an optional accelerator, constructing a
+<a class="reference internal" href="stubs/qiskit_fermions.circuit.library.UCC.html#qiskit_fermions.circuit.library.UCC" title="qiskit_fermions.circuit.library.UCC"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCC</span></code></a> requires the <code class="docutils literal notranslate"><span class="pre">ffsim</span></code> extra (<code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">&quot;qiskit-fermions[ffsim]&quot;</span></code>) and raises
+<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/exceptions#qiskit.exceptions.MissingOptionalLibraryError" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">MissingOptionalLibraryError</span></code></a> without it. ffsim does not support
+Windows, so the gate is unavailable there; use WSL.</p>
+</li>
+</ul>
 <ul>
 <li><p>The <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.UCJ.html#qiskit_fermions.circuit.library.UCJ" title="qiskit_fermions.circuit.library.UCJ"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCJ</span></code></a> gate is now constructed from one of ffsim’s UCJ operators, which is its only
 constructor argument. The spin variant, the number of spatial orbitals and the number of modes
@@ -643,7 +685,7 @@ Following Qiskit’s design philosophy, the core of this package is written in R
       
     </aside>
   </div>
-</div><script src="_static/documentation_options.js?v=aa8e2b7d"></script>
+</div><script src="_static/documentation_options.js?v=af974f43"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/scripts/furo.js?v=46bd48cc"></script>

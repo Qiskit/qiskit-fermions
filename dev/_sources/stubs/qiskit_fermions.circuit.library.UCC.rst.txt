@@ -14,22 +14,10 @@
   
    .. rubric:: Attributes
     
-   .. autoattribute:: antisymmetric
-   .. autoattribute:: t1
-   .. autoattribute:: t2
    .. autoattribute:: norb
+   .. autoattribute:: uccsd_op
   
 
-
-  
-
-  
-
-  
-
-  
-
-  
 
   
 
@@ -107,42 +95,6 @@
 
   
     
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
   
 
   
@@ -226,10 +178,6 @@
    .. rubric:: Methods
     
    .. automethod:: cluster_operator
-   .. automethod:: from_parameters
-   .. automethod:: from_t_amplitudes
-   .. automethod:: num_parameters
-   .. automethod:: to_parameters
   
   
    .. rubric:: Protocol Methods

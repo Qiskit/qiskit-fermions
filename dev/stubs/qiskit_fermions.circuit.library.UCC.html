@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>UCC - Qiskit Fermions 0.2.0.dev0+0ae8883</title>
+        <title>UCC - Qiskit Fermions 0.2.0.dev0+f2de761</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+0ae8883</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+f2de761</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+0ae8883</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+f2de761</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -265,161 +265,115 @@
 <h1>UCC<a class="headerlink" href="#ucc" title="Link to this heading">¶</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="qiskit_fermions.circuit.library.UCC">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">UCC</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">variant</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t2</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">antisymmetric</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-08</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qiskit_fermions.circuit.library.UCC" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">UCC</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">uccsd_op</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qiskit_fermions.circuit.library.UCC" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="qiskit_fermions.circuit.FermionicGate.html#qiskit_fermions.circuit.FermionicGate" title="qiskit_fermions.circuit.fermionic_gate.FermionicGate"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicGate</span></code></a></p>
-<p>Implements the unitary coupled cluster (UCC) ansatz.</p>
-<p>A unitary coupled cluster operator has the form</p>
+<p>Implements the unitary coupled-cluster singles and doubles (UCCSD) ansatz.</p>
+<p>A unitary coupled-cluster operator has the form</p>
 <div class="math-wrapper docutils container">
 <div class="math">
-\[e^{T - T^\dagger}\]</div>
+\[e^{T - T^\dagger}, \qquad
+T = \sum_{ia} t^a_i\, a^\dagger_a a_i
+  + \sum_{ijab} t^{ab}_{ij}\, a^\dagger_a a^\dagger_b a_j a_i,\]</div>
 </div>
-<p>where <span class="math">\(T = T_1 + T_2\)</span> is the cluster operator built from the single and double fermionic
-excitations, parameterized by the <span class="math">\(t_1\)</span> and <span class="math">\(t_2\)</span> amplitudes. Since
-<span class="math">\(T - T^\dagger\)</span> is anti-Hermitian, its exponential is unitary.</p>
-<p>This gate supports three spin variants (see <code class="xref py py-class docutils literal notranslate"><span class="pre">UCC.Variant</span></code>), selected explicitly by the
-<code class="docutils literal notranslate"><span class="pre">variant</span></code> argument and validated against the shapes of the supplied amplitudes (mirroring
-ffsim’s <a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.UCCSDOpRestrictedReal.html#ffsim.UCCSDOpRestrictedReal" title="(in ffsim)"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCCSDOpRestrictedReal</span></code></a> and
-<a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.UCCSDOpUnrestrictedReal.html#ffsim.UCCSDOpUnrestrictedReal" title="(in ffsim)"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCCSDOpUnrestrictedReal</span></code></a>):</p>
-<ul>
-<li><p><strong>restricted</strong> – a single spin-summed amplitude pair. The cluster operator is</p>
-<div class="math-wrapper docutils container">
-<div class="math">
-\[\begin{align}
-T_1 &= \sum_{ia} t_{ia}\left(
-a^\dagger_{a\alpha} a_{i\alpha} + a^\dagger_{a\beta} a_{i\beta}\right), \\
-T_2 &= \sum_{ijab} t_{ijab}\left[
-\frac12\left(
-a^\dagger_{a\alpha} a^\dagger_{b\alpha} a_{j\alpha} a_{i\alpha}
-+ a^\dagger_{a\beta} a^\dagger_{b\beta} a_{j\beta} a_{i\beta}\right)
-+ a^\dagger_{a\alpha} a^\dagger_{b\beta} a_{j\beta} a_{i\alpha}\right],
-\end{align}\]</div>
-</div>
-<p>with <code class="docutils literal notranslate"><span class="pre">t1</span></code> of shape <code class="docutils literal notranslate"><span class="pre">(nocc,</span> <span class="pre">nvrt)</span></code> and <code class="docutils literal notranslate"><span class="pre">t2</span></code> of shape <code class="docutils literal notranslate"><span class="pre">(nocc,</span> <span class="pre">nocc,</span> <span class="pre">nvrt,</span> <span class="pre">nvrt)</span></code>. Acts
-on <code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">*</span> <span class="pre">norb</span></code> block-spin modes.</p>
-</li>
-<li><p><strong>unrestricted</strong> – independent per-spin amplitudes. The cluster operator is</p>
-<div class="math-wrapper docutils container">
-<div class="math">
-\[\begin{align}
-T_1 &= \sum_{ia} t^{(\alpha)}_{ia} a^\dagger_{a\alpha} a_{i\alpha}
-+ \sum_{IA} t^{(\beta)}_{IA} a^\dagger_{A\beta} a_{I\beta}, \\
-T_2 &= \frac14 \sum_{ijab} t^{(\alpha\alpha)}_{ijab}
-a^\dagger_{a\alpha} a^\dagger_{b\alpha} a_{j\alpha} a_{i\alpha}
-+ \frac14 \sum_{IJAB} t^{(\beta\beta)}_{IJAB}
-a^\dagger_{A\beta} a^\dagger_{B\beta} a_{J\beta} a_{I\beta}
-+ \sum_{iJaB} t^{(\alpha\beta)}_{iJaB}
-a^\dagger_{a\alpha} a^\dagger_{B\beta} a_{J\beta} a_{i\alpha},
-\end{align}\]</div>
-</div>
-<p>with <code class="docutils literal notranslate"><span class="pre">t1</span></code> a pair <code class="docutils literal notranslate"><span class="pre">(t1a,</span> <span class="pre">t1b)</span></code> and <code class="docutils literal notranslate"><span class="pre">t2</span></code> a triple <code class="docutils literal notranslate"><span class="pre">(t2aa,</span> <span class="pre">t2ab,</span> <span class="pre">t2bb)</span></code>. Acts on
-<code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">*</span> <span class="pre">norb</span></code> block-spin modes. Note that the occupied/virtual split is resolved <strong>per spin
-sector</strong>, so the two sectors may have different numbers of occupied orbitals.</p>
-</li>
-<li><p><strong>spinless</strong> – a single register of <code class="docutils literal notranslate"><span class="pre">norb</span></code> spinless modes,</p>
-<div class="math-wrapper docutils container">
-<div class="math">
-\[T_1 = \sum_{ia} t_{ia}\, a^\dagger_a a_i, \qquad
-T_2 = \frac14 \sum_{ijab} t_{ijab}\,
-a^\dagger_a a^\dagger_b a_j a_i,\]</div>
-</div>
-<p>with the same amplitude shapes as the <code class="docutils literal notranslate"><span class="pre">&quot;restricted&quot;</span></code> variant. Acts on <code class="docutils literal notranslate"><span class="pre">norb</span></code> modes.</p>
-</li>
+<p>with <span class="math">\(i, j\)</span> occupied and <span class="math">\(a, b\)</span> virtual orbitals, and the amplitudes
+<span class="math">\(t_1 = t^a_i\)</span> and <span class="math">\(t_2 = t^{ab}_{ij}\)</span> supplied by the operator this gate wraps.</p>
+<p>The operator itself is built by <a class="reference external" href="https://qiskit-community.github.io/ffsim/">ffsim</a>, and this
+gate turns it into a <a class="reference internal" href="qiskit_fermions.circuit.FermionicCircuit.html#qiskit_fermions.circuit.FermionicCircuit" title="qiskit_fermions.circuit.FermionicCircuit"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicCircuit</span></code></a>. That division of labor is deliberate: ffsim owns
+the ansatz math (the amplitude conventions and the parameter-vector packing that a variational
+optimizer drives), while this gate expresses the result as fermionic modes so that the transpiler
+can lower it through <em>any</em> fermion-to-qubit encoding. ffsim ships no Qiskit gate for UCCSD at all,
+so this is the only route from one of its UCCSD operators to a circuit; see the
+<a class="reference internal" href="../guides/ffsim.html#ffsim-backend-explanation"><span class="std std-ref">ffsim guide</span></a>.</p>
+<p>Accepts any of ffsim’s four UCCSD operators, whose type fixes the spin variant and the number of
+modes this gate acts on. All four act on <code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">*</span> <span class="pre">norb</span></code> block-spin modes (mode <code class="docutils literal notranslate"><span class="pre">p</span></code> is alpha
+orbital <code class="docutils literal notranslate"><span class="pre">p</span></code>, mode <code class="docutils literal notranslate"><span class="pre">norb</span> <span class="pre">+</span> <span class="pre">p</span></code> is beta orbital <code class="docutils literal notranslate"><span class="pre">p</span></code>), with the occupied orbitals ordered before
+the virtual ones:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.UCCSDOpRestrictedReal.html#ffsim.UCCSDOpRestrictedReal" title="(in ffsim)"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCCSDOpRestrictedReal</span></code></a> and
+<a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.UCCSDOpRestricted.html#ffsim.UCCSDOpRestricted" title="(in ffsim)"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCCSDOpRestricted</span></code></a> share one spatial parametrization between both spin
+sectors: <code class="docutils literal notranslate"><span class="pre">t1</span></code> has shape <code class="docutils literal notranslate"><span class="pre">(nocc,</span> <span class="pre">nvrt)</span></code> and <code class="docutils literal notranslate"><span class="pre">t2</span></code> has shape <code class="docutils literal notranslate"><span class="pre">(nocc,</span> <span class="pre">nocc,</span> <span class="pre">nvrt,</span> <span class="pre">nvrt)</span></code>.</p></li>
+<li><p><a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.UCCSDOpUnrestrictedReal.html#ffsim.UCCSDOpUnrestrictedReal" title="(in ffsim)"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCCSDOpUnrestrictedReal</span></code></a> and
+<a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.UCCSDOpUnrestricted.html#ffsim.UCCSDOpUnrestricted" title="(in ffsim)"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCCSDOpUnrestricted</span></code></a> parameterize the spin sectors independently:
+<code class="docutils literal notranslate"><span class="pre">t1</span></code> is a pair <code class="docutils literal notranslate"><span class="pre">(t1a,</span> <span class="pre">t1b)</span></code> and <code class="docutils literal notranslate"><span class="pre">t2</span></code> a triple <code class="docutils literal notranslate"><span class="pre">(t2aa,</span> <span class="pre">t2ab,</span> <span class="pre">t2bb)</span></code>.</p></li>
 </ul>
-<p>In every variant the occupied orbitals are ordered before the virtual ones, so orbital
-<span class="math">\(i &lt; n_\text{occ}\)</span> is occupied and orbital <span class="math">\(n_\text{occ} + a\)</span> is virtual.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Unlike <a class="reference internal" href="qiskit_fermions.circuit.library.UCJ.html#qiskit_fermions.circuit.library.UCJ" title="qiskit_fermions.circuit.library.UCJ"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCJ</span></code></a>, this ansatz carries no final orbital rotation: its <span class="math">\(t_1\)</span>
-amplitudes already provide the single excitations, so a trailing rotation would be redundant
-freedom. Append an <a class="reference internal" href="qiskit_fermions.circuit.library.OrbitalRotation.html#qiskit_fermions.circuit.library.OrbitalRotation" title="qiskit_fermions.circuit.library.OrbitalRotation"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrbitalRotation</span></code></a> explicitly if you want one.</p>
+<p>The cluster operator only ever sees the part of a same-spin <span class="math">\(t_2\)</span> block that is
+symmetric under the <em>simultaneous</em> exchange <span class="math">\(t_2[i,j,a,b] = t_2[j,i,b,a]\)</span>, because the
+underlying excitation <span class="math">\(a^\dagger_a a^\dagger_b a_j a_i\)</span> is invariant under relabeling
+the pairs <span class="math">\((i,a) \leftrightarrow (j,b)\)</span>. Coupled-cluster amplitudes (from PySCF, or
+ffsim’s own <a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.uccsd_generator_restricted.html#ffsim.uccsd_generator_restricted" title="(in ffsim)"><code class="xref py py-func docutils literal notranslate"><span class="pre">uccsd_generator_restricted()</span></code></a>) always carry that symmetry, so
+this gate and ffsim agree exactly on them. A hand-built <code class="docutils literal notranslate"><span class="pre">t2</span></code> without it describes the same
+ansatz here as its symmetrized counterpart, whereas ffsim reads the raw tensor.</p>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>By default only the symmetry the cluster operator actually enforces is imposed on the
-same-spin <span class="math">\(t_2\)</span> blocks. The stricter antisymmetry of the standard coupled-cluster
-convention is available opt-in via the <code class="docutils literal notranslate"><span class="pre">antisymmetric</span></code> flag (see <a class="reference internal" href="#qiskit_fermions.circuit.library.UCC.antisymmetric" title="qiskit_fermions.circuit.library.UCC.antisymmetric"><code class="xref py py-attr docutils literal notranslate"><span class="pre">antisymmetric</span></code></a>),
-which both validates supplied amplitudes and shrinks the parameter vector accordingly. It is
-not supported for the <code class="docutils literal notranslate"><span class="pre">&quot;restricted&quot;</span></code> variant, whose single <span class="math">\(t_2\)</span> also carries the
-cross-spin amplitudes.</p>
+<p>Unlike <a class="reference internal" href="qiskit_fermions.circuit.library.UCJ.html#qiskit_fermions.circuit.library.UCJ" title="qiskit_fermions.circuit.library.UCJ"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCJ</span></code></a>, this ansatz carries no final orbital rotation of its own: its
+<span class="math">\(t_1\)</span> amplitudes already provide the single excitations, so a trailing rotation would be
+redundant freedom. ffsim’s operators do expose a <code class="docutils literal notranslate"><span class="pre">final_orbital_rotation</span></code>; when one is set,
+this gate appends it as a closing <a class="reference internal" href="qiskit_fermions.circuit.library.OrbitalRotation.html#qiskit_fermions.circuit.library.OrbitalRotation" title="qiskit_fermions.circuit.library.OrbitalRotation"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrbitalRotation</span></code></a>.</p>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Because the individual excitation terms of <span class="math">\(T - T^\dagger\)</span> do <strong>not</strong> commute, the
 circuit <code class="xref py py-meth docutils literal notranslate"><span class="pre">definition()</span></code> this gate produces is a <em>first-order product
-formula</em> (Trotter) approximation of the exponential, not an exact decomposition – the usual
-situation for UCC ansatz circuits. The state-vector simulation path
+formula</em> (Trotter) approximation of the exponential, not an exact decomposition (the usual
+situation for UCC ansatz circuits). The state-vector simulation path
 (<a class="reference internal" href="#qiskit_fermions.circuit.library.UCC._apply_unitary_placed_" title="qiskit_fermions.circuit.library.UCC._apply_unitary_placed_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_apply_unitary_placed_()</span></code></a>), by contrast, applies the exponential <em>exactly</em> via
 <code class="docutils literal notranslate"><span class="pre">scipy</span></code>’s <code class="docutils literal notranslate"><span class="pre">expm_multiply</span></code>. Consequently the simulated gate and its synthesized circuit
 agree only up to the Trotter error; use a higher-order product formula during transpilation to
 tighten it.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>ffsim does not support Windows (through its unconditional PySCF dependency), so this gate
+requires the <code class="docutils literal notranslate"><span class="pre">ffsim</span></code> extra (<code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">&quot;qiskit-fermions[ffsim]&quot;</span></code>) and is unavailable
+there. Use <a class="reference external" href="https://learn.microsoft.com/windows/wsl/">WSL</a> on Windows.</p>
 </div>
 <div class="admonition caution">
 <p class="admonition-title">Caution</p>
 <p>This is an early development prototype. Beware of changes to its interface without warning
 during the pre-release development of this package.</p>
 </div>
-<p>Initializing an instance of this gate can be done with the arguments listed below.</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">ffsim</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.circuit.library</span><span class="w"> </span><span class="kn">import</span> <span class="n">UCC</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">uccsd_op</span> <span class="o">=</span> <span class="n">ffsim</span><span class="o">.</span><span class="n">UCCSDOpRestrictedReal</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">t1</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)),</span> <span class="n">t2</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">gate</span> <span class="o">=</span> <span class="n">UCC</span><span class="p">(</span><span class="n">uccsd_op</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">gate</span><span class="o">.</span><span class="n">norb</span><span class="p">,</span> <span class="n">gate</span><span class="o">.</span><span class="n">num_modes</span>
+<span class="go">(2, 4)</span>
+</pre></div>
+</div>
+<p>Initializing an instance of this gate can be done with the argument listed below.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>variant</strong> (<em>UCC.Variant</em><em> | </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – the spin variant, a <code class="xref py py-class docutils literal notranslate"><span class="pre">UCC.Variant</span></code> (or its string value
-<code class="docutils literal notranslate"><span class="pre">&quot;restricted&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;unrestricted&quot;</span></code>, or <code class="docutils literal notranslate"><span class="pre">&quot;spinless&quot;</span></code>). Determines the number of
-modes this gate acts on (see the class docstring) and the expected amplitude shapes.</p></li>
-<li><p><strong>t1</strong> (<em>np.ndarray</em><em> | </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a><em>[</em><em>np.ndarray</em><em>, </em><em>np.ndarray</em><em>]</em>) – the <span class="math">\(t_1\)</span> (singles) amplitudes. For the <code class="docutils literal notranslate"><span class="pre">&quot;restricted&quot;</span></code> and <code class="docutils literal notranslate"><span class="pre">&quot;spinless&quot;</span></code>
-variants, a single array of shape <code class="docutils literal notranslate"><span class="pre">(nocc,</span> <span class="pre">nvrt)</span></code>. For the <code class="docutils literal notranslate"><span class="pre">&quot;unrestricted&quot;</span></code>
-variant, a pair <code class="docutils literal notranslate"><span class="pre">(t1a,</span> <span class="pre">t1b)</span></code>.</p></li>
-<li><p><strong>t2</strong> (<em>np.ndarray</em><em> | </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a><em>[</em><em>np.ndarray</em><em>, </em><em>np.ndarray</em><em>, </em><em>np.ndarray</em><em>]</em>) – the <span class="math">\(t_2\)</span> (doubles) amplitudes. For the <code class="docutils literal notranslate"><span class="pre">&quot;restricted&quot;</span></code> and <code class="docutils literal notranslate"><span class="pre">&quot;spinless&quot;</span></code>
-variants, a single array of shape <code class="docutils literal notranslate"><span class="pre">(nocc,</span> <span class="pre">nocc,</span> <span class="pre">nvrt,</span> <span class="pre">nvrt)</span></code>. For the
-<code class="docutils literal notranslate"><span class="pre">&quot;unrestricted&quot;</span></code> variant, a triple <code class="docutils literal notranslate"><span class="pre">(t2aa,</span> <span class="pre">t2ab,</span> <span class="pre">t2bb)</span></code>.</p></li>
-<li><p><strong>antisymmetric</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – whether the same-spin <span class="math">\(t_2\)</span> blocks obey the <em>separate</em> occupied and
-virtual antisymmetry (the standard coupled-cluster convention, see
-<a class="reference internal" href="#qiskit_fermions.circuit.library.UCC.antisymmetric" title="qiskit_fermions.circuit.library.UCC.antisymmetric"><code class="xref py py-attr docutils literal notranslate"><span class="pre">antisymmetric</span></code></a>). When <code class="docutils literal notranslate"><span class="pre">True</span></code> the supplied blocks are validated against it
-and the parameter vector is restricted to the corresponding subspace. Not supported
-for the <code class="docutils literal notranslate"><span class="pre">&quot;restricted&quot;</span></code> variant.</p></li>
-<li><p><strong>atol</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a>) – the absolute tolerance for the <code class="docutils literal notranslate"><span class="pre">antisymmetric</span></code> validation.</p></li>
-</ul>
+<dd class="field-odd"><p><strong>uccsd_op</strong> (<em>Any</em>) – the ffsim UCCSD operator to build the circuit from, one of
+<a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.UCCSDOpRestrictedReal.html#ffsim.UCCSDOpRestrictedReal" title="(in ffsim)"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCCSDOpRestrictedReal</span></code></a>,
+<a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.UCCSDOpRestricted.html#ffsim.UCCSDOpRestricted" title="(in ffsim)"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCCSDOpRestricted</span></code></a>,
+<a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.UCCSDOpUnrestrictedReal.html#ffsim.UCCSDOpUnrestrictedReal" title="(in ffsim)"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCCSDOpUnrestrictedReal</span></code></a> or
+<a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.UCCSDOpUnrestricted.html#ffsim.UCCSDOpUnrestricted" title="(in ffsim)"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCCSDOpUnrestricted</span></code></a>. Its type determines the spin variant
+(see the class docstring).</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – if <code class="docutils literal notranslate"><span class="pre">variant</span></code> is not recognized, if the amplitude shapes are inconsistent
-    with each other or with <code class="docutils literal notranslate"><span class="pre">variant</span></code>, if <code class="docutils literal notranslate"><span class="pre">antisymmetric</span></code> is requested for the
-    <code class="docutils literal notranslate"><span class="pre">&quot;restricted&quot;</span></code> variant, or if <code class="docutils literal notranslate"><span class="pre">antisymmetric</span></code> is requested but a same-spin
-    <span class="math">\(t_2\)</span> block violates that antisymmetry.</p>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>MissingOptionalLibraryError</strong> – if <code class="docutils literal notranslate"><span class="pre">ffsim</span></code> is not installed.</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#TypeError" title="(in Python v3.14)"><strong>TypeError</strong></a> – if <code class="docutils literal notranslate"><span class="pre">uccsd_op</span></code> is not one of ffsim’s four UCCSD operator types.</p></li>
+</ul>
 </dd>
 </dl>
 <p class="rubric">Attributes</p>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="qiskit_fermions.circuit.library.UCC.antisymmetric">
-<span class="sig-name descname"><span class="pre">antisymmetric</span></span><a class="headerlink" href="#qiskit_fermions.circuit.library.UCC.antisymmetric" title="Link to this definition">¶</a></dt>
-<dd><p>Whether the same-spin <span class="math">\(t_2\)</span> blocks obey the separate occupied/virtual antisymmetry.</p>
-<p>The cluster operator only ever sees the part of a same-spin <span class="math">\(t_2\)</span> block that is
-symmetric under the <em>simultaneous</em> exchange
-<span class="math">\(t_2[i,j,a,b] = t_2[j,i,b,a]\)</span>, because the underlying excitation
-<span class="math">\(a^\dagger_a a^\dagger_b a_j a_i\)</span> is invariant under relabeling the pairs
-<span class="math">\((i,a) \leftrightarrow (j,b)\)</span>. That weaker symmetry is therefore always imposed.</p>
-<p>The standard coupled-cluster convention additionally makes the block antisymmetric in each
-index pair <em>separately</em>, <span class="math">\(t_2[i,j,a,b] = -t_2[j,i,a,b] = -t_2[i,j,b,a]\)</span>, which is a
-strict subspace of the above. Setting this flag opts into that convention: the supplied
-amplitudes are validated against it, and <a class="reference internal" href="#qiskit_fermions.circuit.library.UCC.num_parameters" title="qiskit_fermions.circuit.library.UCC.num_parameters"><code class="xref py py-meth docutils literal notranslate"><span class="pre">num_parameters()</span></code></a> /
-<a class="reference internal" href="#qiskit_fermions.circuit.library.UCC.from_parameters" title="qiskit_fermions.circuit.library.UCC.from_parameters"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_parameters()</span></code></a> / <a class="reference internal" href="#qiskit_fermions.circuit.library.UCC.to_parameters" title="qiskit_fermions.circuit.library.UCC.to_parameters"><code class="xref py py-meth docutils literal notranslate"><span class="pre">to_parameters()</span></code></a> switch to the smaller parameter basis that
-spans exactly this subspace.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qiskit_fermions.circuit.library.UCC.t1">
-<span class="sig-name descname"><span class="pre">t1</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.5)"><span class="pre">ndarray</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.5)"><span class="pre">ndarray</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#qiskit_fermions.circuit.library.UCC.t1" title="Link to this definition">¶</a></dt>
-<dd><p>The <span class="math">\(t_1\)</span> (singles) amplitudes.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qiskit_fermions.circuit.library.UCC.t2">
-<span class="sig-name descname"><span class="pre">t2</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.5)"><span class="pre">ndarray</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.5)"><span class="pre">ndarray</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#qiskit_fermions.circuit.library.UCC.t2" title="Link to this definition">¶</a></dt>
-<dd><p>The <span class="math">\(t_2\)</span> (doubles) amplitudes.</p>
-</dd></dl>
-
-<dl class="py attribute">
 <dt class="sig sig-object py" id="qiskit_fermions.circuit.library.UCC.norb">
 <span class="sig-name descname"><span class="pre">norb</span></span><a class="headerlink" href="#qiskit_fermions.circuit.library.UCC.norb" title="Link to this definition">¶</a></dt>
-<dd><p>The number of spatial orbitals (or spinless modes, for the spinless variant).</p>
+<dd><p>The number of spatial orbitals.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qiskit_fermions.circuit.library.UCC.uccsd_op">
+<span class="sig-name descname"><span class="pre">uccsd_op</span></span><a class="headerlink" href="#qiskit_fermions.circuit.library.UCC.uccsd_op" title="Link to this definition">¶</a></dt>
+<dd><p>The ffsim UCCSD operator this gate builds its circuit from.</p>
 </dd></dl>
 
 <p class="rubric">Methods</p>
@@ -428,8 +382,8 @@ spans exactly this subspace.</p>
 <span class="sig-name descname"><span class="pre">cluster_operator</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qiskit_fermions.circuit.library.UCC.cluster_operator" title="Link to this definition">¶</a></dt>
 <dd><p>Returns the anti-Hermitian cluster generator <span class="math">\(T - T^\dagger\)</span>.</p>
 <p>The generator is expressed in the block-spin mode convention (mode <code class="docutils literal notranslate"><span class="pre">p</span></code> is alpha orbital
-<code class="docutils literal notranslate"><span class="pre">p</span></code>, mode <code class="docutils literal notranslate"><span class="pre">norb</span> <span class="pre">+</span> <span class="pre">p</span></code> is beta orbital <code class="docutils literal notranslate"><span class="pre">p</span></code>) for the spinful variants, and directly on the
-<code class="docutils literal notranslate"><span class="pre">norb</span></code> modes for the spinless variant. Occupied orbitals are ordered before virtual ones.</p>
+<code class="docutils literal notranslate"><span class="pre">p</span></code>, mode <code class="docutils literal notranslate"><span class="pre">norb</span> <span class="pre">+</span> <span class="pre">p</span></code> is beta orbital <code class="docutils literal notranslate"><span class="pre">p</span></code>). Occupied orbitals are ordered before virtual
+ones.</p>
 <p>Being anti-Hermitian, this generator relates to the ansatz unitary by
 <span class="math">\(e^{T - T^\dagger} = e^{-i H}\)</span> with the Hermitian <span class="math">\(H = i (T - T^\dagger)\)</span>. That
 <span class="math">\(H\)</span> is what <a class="reference internal" href="qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> consumes, since it requires a Hermitian operator to
@@ -447,147 +401,6 @@ instead would not be (see the comment below).</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference internal" href="qiskit_fermions.operators.FermionOperator.html#qiskit_fermions.operators.FermionOperator" title="qiskit_fermions.operators.fermion_operator.FermionOperator"><em>FermionOperator</em></a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qiskit_fermions.circuit.library.UCC.from_parameters">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">from_parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norb</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nocc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variant</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">antisymmetric</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qiskit_fermions.circuit.library.UCC.from_parameters" title="Link to this definition">¶</a></dt>
-<dd><p>Constructs a UCC ansatz from a real-valued parameter vector.</p>
-<p>With <code class="docutils literal notranslate"><span class="pre">antisymmetric=False</span></code> (the default) the parameter ordering matches ffsim’s
-<a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.UCCSDOpRestrictedReal.html#ffsim.UCCSDOpRestrictedReal" title="(in ffsim)"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCCSDOpRestrictedReal</span></code></a> /
-<a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.UCCSDOpUnrestrictedReal.html#ffsim.UCCSDOpUnrestrictedReal" title="(in ffsim)"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCCSDOpUnrestrictedReal</span></code></a> convention, so a vector produced by ffsim’s
-own <code class="docutils literal notranslate"><span class="pre">to_parameters</span></code> round-trips through this method.</p>
-<p>With <code class="docutils literal notranslate"><span class="pre">antisymmetric=True</span></code> the same-spin <span class="math">\(t_2\)</span> blocks are instead built from the
-smaller basis spanning the standard coupled-cluster antisymmetric subspace (see
-<a class="reference internal" href="#qiskit_fermions.circuit.library.UCC.antisymmetric" title="qiskit_fermions.circuit.library.UCC.antisymmetric"><code class="xref py py-attr docutils literal notranslate"><span class="pre">antisymmetric</span></code></a>), so the expected vector length differs and ffsim’s vectors no longer
-apply.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>params</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.5)"><em>ndarray</em></a>) – the real-valued parameter vector.</p></li>
-<li><p><strong>norb</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – the number of spatial orbitals (or spinless modes, for the spinless variant).</p></li>
-<li><p><strong>nocc</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>]</em>) – the number of occupied orbitals. For the <code class="docutils literal notranslate"><span class="pre">&quot;unrestricted&quot;</span></code> variant a pair
-<code class="docutils literal notranslate"><span class="pre">(nocc_a,</span> <span class="pre">nocc_b)</span></code>; otherwise a single integer.</p></li>
-<li><p><strong>variant</strong> (<em>Variant</em><em> | </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – the spin variant, a <code class="xref py py-class docutils literal notranslate"><span class="pre">UCC.Variant</span></code> (or its string value
-<code class="docutils literal notranslate"><span class="pre">&quot;restricted&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;unrestricted&quot;</span></code>, or <code class="docutils literal notranslate"><span class="pre">&quot;spinless&quot;</span></code>).</p></li>
-<li><p><strong>antisymmetric</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – whether to build the same-spin <span class="math">\(t_2\)</span> blocks in the antisymmetric
-subspace (see <a class="reference internal" href="#qiskit_fermions.circuit.library.UCC.antisymmetric" title="qiskit_fermions.circuit.library.UCC.antisymmetric"><code class="xref py py-attr docutils literal notranslate"><span class="pre">antisymmetric</span></code></a>). The resulting amplitudes then satisfy that
-antisymmetry by construction. Not supported for the <code class="docutils literal notranslate"><span class="pre">&quot;restricted&quot;</span></code> variant.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>The constructed <a class="reference internal" href="#qiskit_fermions.circuit.library.UCC" title="qiskit_fermions.circuit.library.UCC"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCC</span></code></a> gate.</p>
-</dd>
-<dt class="field-odd">Raises<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – if <code class="docutils literal notranslate"><span class="pre">variant</span></code> is not recognized, if <code class="docutils literal notranslate"><span class="pre">antisymmetric</span></code> is requested for the
-    <code class="docutils literal notranslate"><span class="pre">&quot;restricted&quot;</span></code> variant, or if <code class="docutils literal notranslate"><span class="pre">len(params)</span></code> does not match
-    <a class="reference internal" href="#qiskit_fermions.circuit.library.UCC.num_parameters" title="qiskit_fermions.circuit.library.UCC.num_parameters"><code class="xref py py-meth docutils literal notranslate"><span class="pre">num_parameters()</span></code></a> for the given settings.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Self" title="(in Python v3.14)"><em>Self</em></a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qiskit_fermions.circuit.library.UCC.from_t_amplitudes">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">from_t_amplitudes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t2</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">t1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variant</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'restricted'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">antisymmetric</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-08</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qiskit_fermions.circuit.library.UCC.from_t_amplitudes" title="Link to this definition">¶</a></dt>
-<dd><p>Constructs a UCC ansatz from coupled-cluster <span class="math">\(t_2\)</span> (and optional <span class="math">\(t_1\)</span>) amplitudes.</p>
-<p>This is a convenience constructor mirroring <code class="xref py py-meth docutils literal notranslate"><span class="pre">UCJ.from_t_amplitudes()</span></code>. Unlike the (L)UCJ
-ansatz – which <em>factorizes</em> the amplitudes into diagonal Coulomb layers – the UCC ansatz
-uses the amplitudes directly as its parameters, so this simply defaults an omitted <code class="docutils literal notranslate"><span class="pre">t1</span></code> to
-zeros of the shape implied by <code class="docutils literal notranslate"><span class="pre">t2</span></code>, giving a doubles-only (UCCD) ansatz.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>t2</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.5)"><em>ndarray</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a><em>[</em><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.5)"><em>ndarray</em></a><em>, </em><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.5)"><em>ndarray</em></a><em>, </em><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.5)"><em>ndarray</em></a><em>]</em>) – the <span class="math">\(t_2\)</span> amplitudes. For the <code class="docutils literal notranslate"><span class="pre">&quot;restricted&quot;</span></code> and <code class="docutils literal notranslate"><span class="pre">&quot;spinless&quot;</span></code> variants, a
-single array of shape <code class="docutils literal notranslate"><span class="pre">(nocc,</span> <span class="pre">nocc,</span> <span class="pre">nvrt,</span> <span class="pre">nvrt)</span></code>. For the <code class="docutils literal notranslate"><span class="pre">&quot;unrestricted&quot;</span></code>
-variant, a triple <code class="docutils literal notranslate"><span class="pre">(t2aa,</span> <span class="pre">t2ab,</span> <span class="pre">t2bb)</span></code>.</p></li>
-<li><p><strong>t1</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.5)"><em>ndarray</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a><em>[</em><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.5)"><em>ndarray</em></a><em>, </em><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.5)"><em>ndarray</em></a><em>] </em><em>| </em><em>None</em>) – the optional <span class="math">\(t_1\)</span> amplitudes. For <code class="docutils literal notranslate"><span class="pre">&quot;unrestricted&quot;</span></code>, a pair <code class="docutils literal notranslate"><span class="pre">(t1a,</span> <span class="pre">t1b)</span></code>;
-otherwise a single array of shape <code class="docutils literal notranslate"><span class="pre">(nocc,</span> <span class="pre">nvrt)</span></code>. Defaults to zeros.</p></li>
-<li><p><strong>variant</strong> (<em>Variant</em><em> | </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – the spin variant to build, a <code class="xref py py-class docutils literal notranslate"><span class="pre">UCC.Variant</span></code> (or its string value
-<code class="docutils literal notranslate"><span class="pre">&quot;restricted&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;unrestricted&quot;</span></code>, or <code class="docutils literal notranslate"><span class="pre">&quot;spinless&quot;</span></code>).</p></li>
-<li><p><strong>antisymmetric</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – whether to assert the standard coupled-cluster antisymmetry of the
-same-spin <span class="math">\(t_2\)</span> blocks (see <a class="reference internal" href="#qiskit_fermions.circuit.library.UCC.antisymmetric" title="qiskit_fermions.circuit.library.UCC.antisymmetric"><code class="xref py py-attr docutils literal notranslate"><span class="pre">antisymmetric</span></code></a>). Amplitudes from a genuine
-coupled-cluster calculation satisfy it, so this is a cheap way to confirm they
-survived whatever preprocessing produced them. Not supported for the <code class="docutils literal notranslate"><span class="pre">&quot;restricted&quot;</span></code>
-variant.</p></li>
-<li><p><strong>atol</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a>) – the absolute tolerance for the <code class="docutils literal notranslate"><span class="pre">antisymmetric</span></code> validation.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>The constructed <a class="reference internal" href="#qiskit_fermions.circuit.library.UCC" title="qiskit_fermions.circuit.library.UCC"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCC</span></code></a> gate.</p>
-</dd>
-<dt class="field-odd">Raises<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – if <code class="docutils literal notranslate"><span class="pre">variant</span></code> is not recognized, if the amplitude shapes are inconsistent
-    with each other or with <code class="docutils literal notranslate"><span class="pre">variant</span></code>, if <code class="docutils literal notranslate"><span class="pre">antisymmetric</span></code> is requested for the
-    <code class="docutils literal notranslate"><span class="pre">&quot;restricted&quot;</span></code> variant, or if <code class="docutils literal notranslate"><span class="pre">antisymmetric</span></code> is requested but a same-spin
-    <span class="math">\(t_2\)</span> block violates that antisymmetry.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Self" title="(in Python v3.14)"><em>Self</em></a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qiskit_fermions.circuit.library.UCC.num_parameters">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">num_parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">norb</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nocc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variant</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">antisymmetric</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qiskit_fermions.circuit.library.UCC.num_parameters" title="Link to this definition">¶</a></dt>
-<dd><p>Returns the number of parameters of a UCC ansatz with the given settings.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>norb</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – the number of spatial orbitals (or spinless modes, for the spinless variant).</p></li>
-<li><p><strong>nocc</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>]</em>) – the number of occupied orbitals. For the <code class="docutils literal notranslate"><span class="pre">&quot;unrestricted&quot;</span></code> variant a pair
-<code class="docutils literal notranslate"><span class="pre">(nocc_a,</span> <span class="pre">nocc_b)</span></code> giving the per-spin occupations; otherwise a single integer.</p></li>
-<li><p><strong>variant</strong> (<em>Variant</em><em> | </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – the spin variant, a <code class="xref py py-class docutils literal notranslate"><span class="pre">UCC.Variant</span></code> (or its string value
-<code class="docutils literal notranslate"><span class="pre">&quot;restricted&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;unrestricted&quot;</span></code>, or <code class="docutils literal notranslate"><span class="pre">&quot;spinless&quot;</span></code>).</p></li>
-<li><p><strong>antisymmetric</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – whether the same-spin <span class="math">\(t_2\)</span> blocks are restricted to the standard
-coupled-cluster antisymmetric subspace (see <a class="reference internal" href="#qiskit_fermions.circuit.library.UCC.antisymmetric" title="qiskit_fermions.circuit.library.UCC.antisymmetric"><code class="xref py py-attr docutils literal notranslate"><span class="pre">antisymmetric</span></code></a>), which needs
-strictly fewer parameters. Not supported for the <code class="docutils literal notranslate"><span class="pre">&quot;restricted&quot;</span></code> variant.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>The number of parameters.</p>
-</dd>
-<dt class="field-odd">Raises<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – if <code class="docutils literal notranslate"><span class="pre">variant</span></code> is not recognized, if <code class="docutils literal notranslate"><span class="pre">nocc</span></code> is a pair for a variant other
-    than <code class="xref py py-attr docutils literal notranslate"><span class="pre">UCC.Variant.UNRESTRICTED</span></code> (or an integer for that variant), or if
-    <code class="docutils literal notranslate"><span class="pre">antisymmetric</span></code> is requested for the <code class="docutils literal notranslate"><span class="pre">&quot;restricted&quot;</span></code> variant.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)">int</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qiskit_fermions.circuit.library.UCC.to_parameters">
-<span class="sig-name descname"><span class="pre">to_parameters</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qiskit_fermions.circuit.library.UCC.to_parameters" title="Link to this definition">¶</a></dt>
-<dd><p>Converts this UCC ansatz to a real-valued parameter vector.</p>
-<p>The inverse of <a class="reference internal" href="#qiskit_fermions.circuit.library.UCC.from_parameters" title="qiskit_fermions.circuit.library.UCC.from_parameters"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_parameters()</span></code></a>, using the same ordering and the same basis this
-gate’s <a class="reference internal" href="#qiskit_fermions.circuit.library.UCC.antisymmetric" title="qiskit_fermions.circuit.library.UCC.antisymmetric"><code class="xref py py-attr docutils literal notranslate"><span class="pre">antisymmetric</span></code></a> flag selects – so <code class="docutils literal notranslate"><span class="pre">from_parameters(gate.to_parameters(),</span> <span class="pre">...)</span></code>
-round-trips as long as the flag is passed consistently.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Only the independent amplitude entries implied by the variant’s symmetries (and by
-<a class="reference internal" href="#qiskit_fermions.circuit.library.UCC.antisymmetric" title="qiskit_fermions.circuit.library.UCC.antisymmetric"><code class="xref py py-attr docutils literal notranslate"><span class="pre">antisymmetric</span></code></a>) are written out; see <a class="reference internal" href="#qiskit_fermions.circuit.library.UCC.num_parameters" title="qiskit_fermions.circuit.library.UCC.num_parameters"><code class="xref py py-meth docutils literal notranslate"><span class="pre">num_parameters()</span></code></a>. Amplitudes violating
-those symmetries – or carrying a non-negligible imaginary part – are therefore not
-recoverable from the parameter vector.</p>
-</div>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>The round-trip is two-sided and holds at <em>any</em> parameter scale: the amplitudes are this
-ansatz’s parameters directly, so both directions are a plain re-indexing.</p>
-</div>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The real-valued parameter vector.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.5)"><em>ndarray</em></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -667,15 +480,9 @@ numbers of spin alpha and spin beta fermions.</p></li>
             <ul>
 <li><a class="reference internal" href="#">UCC</a><ul>
 <li><a class="reference internal" href="#qiskit_fermions.circuit.library.UCC"><code class="docutils literal notranslate"><span class="pre">UCC</span></code></a><ul>
-<li><a class="reference internal" href="#qiskit_fermions.circuit.library.UCC.antisymmetric"><code class="docutils literal notranslate"><span class="pre">UCC.antisymmetric</span></code></a></li>
-<li><a class="reference internal" href="#qiskit_fermions.circuit.library.UCC.t1"><code class="docutils literal notranslate"><span class="pre">UCC.t1</span></code></a></li>
-<li><a class="reference internal" href="#qiskit_fermions.circuit.library.UCC.t2"><code class="docutils literal notranslate"><span class="pre">UCC.t2</span></code></a></li>
 <li><a class="reference internal" href="#qiskit_fermions.circuit.library.UCC.norb"><code class="docutils literal notranslate"><span class="pre">UCC.norb</span></code></a></li>
+<li><a class="reference internal" href="#qiskit_fermions.circuit.library.UCC.uccsd_op"><code class="docutils literal notranslate"><span class="pre">UCC.uccsd_op</span></code></a></li>
 <li><a class="reference internal" href="#qiskit_fermions.circuit.library.UCC.cluster_operator"><code class="docutils literal notranslate"><span class="pre">UCC.cluster_operator()</span></code></a></li>
-<li><a class="reference internal" href="#qiskit_fermions.circuit.library.UCC.from_parameters"><code class="docutils literal notranslate"><span class="pre">UCC.from_parameters()</span></code></a></li>
-<li><a class="reference internal" href="#qiskit_fermions.circuit.library.UCC.from_t_amplitudes"><code class="docutils literal notranslate"><span class="pre">UCC.from_t_amplitudes()</span></code></a></li>
-<li><a class="reference internal" href="#qiskit_fermions.circuit.library.UCC.num_parameters"><code class="docutils literal notranslate"><span class="pre">UCC.num_parameters()</span></code></a></li>
-<li><a class="reference internal" href="#qiskit_fermions.circuit.library.UCC.to_parameters"><code class="docutils literal notranslate"><span class="pre">UCC.to_parameters()</span></code></a></li>
 <li><a class="reference internal" href="#qiskit_fermions.circuit.library.UCC._apply_unitary_placed_"><code class="docutils literal notranslate"><span class="pre">UCC._apply_unitary_placed_()</span></code></a></li>
 </ul>
 </li>
@@ -690,7 +497,7 @@ numbers of spin alpha and spin beta fermions.</p></li>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=aa8e2b7d"></script>
+</div><script src="../_static/documentation_options.js?v=af974f43"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
