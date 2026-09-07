@@ -48,7 +48,6 @@ Chemistry
    :maxdepth: 1
    :glob:
 
-   lucj
    sqdrift
 
 Lattice models
@@ -72,6 +71,7 @@ Guides explaining how a :class:`.FermionicCircuit` becomes a :class:`~qiskit.cir
 
    transpilation
    merge_slater_determinant
+   lucj
 
 
 Workflow examples
@@ -85,8 +85,10 @@ Workflow examples
    2d_fermi_hubbard
 
 
-Workflow validation
-===================
+Relationship to other packages
+==============================
+
+How ``qiskit-fermions`` divides the work with the other tools of the ecosystem.
 
 .. toctree::
    :maxdepth: 1
