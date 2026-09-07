@@ -253,9 +253,9 @@
    .. automethod:: _anti_commutator_
    .. automethod:: _commutator_
    .. automethod:: _double_commutator_
-   .. automethod:: _fci_linear_operator_
    .. automethod:: _linear_operator_
    .. automethod:: _majorana_operator_
+   .. automethod:: _trace_
   
   
   
