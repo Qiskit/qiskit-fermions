@@ -116,10 +116,9 @@ class FermionicCircuit:
         """Applies this circuit to an ffsim state vector, implementing ffsim's protocol.
 
         This walks the circuit in topological order and applies each instruction's unitary effect to
-        the state vector via ffsim's :external:class:`ffsim.SupportsApplyUnitary` protocol (mirrored
-        locally as :class:`.SupportsApplyUnitary`). Each instruction acting on a subset of the
-        register has its fermionic modes relabeled to their absolute (global) indices before being
-        applied.
+        the state vector via ffsim's :class:`ffsim.SupportsApplyUnitary` protocol. Each instruction
+        acting on a subset of the register has its fermionic modes relabeled to their absolute
+        (global) indices before being applied.
 
         See :meth:`_apply_unitary_placed_` for the details; this method assumes the circuit's modes
         are the vector's modes ``0..num_modes`` (i.e. an identity mode placement).
@@ -136,7 +135,7 @@ class FermionicCircuit:
 
         Raises:
             TypeError: if a circuit instruction does not implement ffsim's
-                :external:class:`ffsim.SupportsApplyUnitary` protocol.
+                :class:`ffsim.SupportsApplyUnitary` protocol.
             ValueError: if a circuit instruction declines to apply its unitary for the given
                 ``norb`` and ``nelec``; or if an instruction implementing only the plain
                 ``_apply_unitary_`` protocol is placed on a non-identity mode subset.
@@ -154,7 +153,7 @@ class FermionicCircuit:
         """Applies this circuit after placing its modes onto the vector's global modes.
 
         This walks the circuit in topological order and applies each instruction's unitary effect to
-        the state vector via ffsim's :external:class:`ffsim.SupportsApplyUnitary` protocol. Each
+        the state vector via ffsim's :class:`ffsim.SupportsApplyUnitary` protocol. Each
         instruction's own modes are first mapped through this circuit's placement: a circuit-local
         mode ``m`` maps to the
         global mode ``freg_indices[m]``, so a sub-instruction acting on circuit-local modes
@@ -167,7 +166,7 @@ class FermionicCircuit:
 
         An instruction is placed onto its absolute modes only if it implements the placement-aware
         ``_apply_unitary_placed_`` extension (:class:`.SupportsApplyUnitaryPlaced`). An instruction
-        implementing only ffsim's plain ``_apply_unitary_`` (:class:`.SupportsApplyUnitary`) -- which
+        implementing only ffsim's plain ``_apply_unitary_`` -- which
         has no mode argument and therefore acts on modes ``0..k`` of the vector -- can only be honored
         when its placement is the identity ``[0, 1, ..., k-1]``; on any other subset the placement
         cannot be expressed and the instruction is rejected rather than silently applied on the wrong
@@ -186,7 +185,7 @@ class FermionicCircuit:
 
         Raises:
             TypeError: if a circuit instruction does not implement ffsim's
-                :external:class:`ffsim.SupportsApplyUnitary` protocol.
+                :class:`ffsim.SupportsApplyUnitary` protocol.
             ValueError: if a circuit instruction declines to apply its unitary for the given
                 ``norb`` and ``nelec``; or if an instruction implementing only the plain
                 ``_apply_unitary_`` protocol is placed on a non-identity mode subset.
