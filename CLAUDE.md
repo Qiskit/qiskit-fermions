@@ -91,7 +91,7 @@ Editable install for iterating on Python: `SETUPTOOLS_RUST_CARGO_PROFILE=release
 - **Rust unit tests** live inline in the crate source; run via `make testrust` (only exercises `core`).
 - **Python tests** in `tests/python/` (mirrors the API tree: `operators/`, `mappers/`, `circuit/`, `transpiler/`, `linalg/`).
 - **C tests** in `tests/c/`, built with CMake and run via `ctest`.
-- Tests marked `skipif` (optional deps like `pyomo`/`highspy`) run via `make testoptional`. These deps must actually be installed for the tests to run rather than skip — install the extras, e.g. `pip install -e ".[all]"` (`[all]` pulls in `[optimization]`, i.e. `pyomo`); the extras are declared under `[project.optional-dependencies]` in `pyproject.toml`.
+- Tests marked `skipif` (optional deps like `pyomo`/`highspy`) run via `make testoptional`. These deps must actually be installed for the tests to run rather than skip — install the extras, e.g. `pip install -e ".[all]"` (`[all]` pulls in `[pyomo]` and `[ffsim]`); the extras are declared under `[project.optional-dependencies]` in `pyproject.toml`.
 
 ## Transpiler / synthesis plugins
 

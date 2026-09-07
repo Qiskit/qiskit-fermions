@@ -1,0 +1,12 @@
+---
+upgrade:
+  - |
+    The ``optimization`` optional dependency has been renamed to ``pyomo``, so
+    ``pip install "qiskit-fermions[optimization]"`` becomes
+    ``pip install "qiskit-fermions[pyomo]"``. The extra names the dependency it installs rather than
+    a capability, which the old name over-promised: Pyomo is a modeling language, so it builds the
+    mixed-integer program behind :class:`.RelabelModes` and
+    :func:`.build_excitation_span_minimization_model` but cannot solve it. Choosing a solver is a
+    separate, deliberate step (:class:`.RelabelModes` takes one through its ``solver`` argument and
+    this package does not prescribe which), and naming the extra after Pyomo makes that boundary
+    visible at install time. Installing ``qiskit-fermions[all]`` is unaffected.

@@ -53,16 +53,19 @@ Issues = "https://github.com/Qiskit/qiskit-fermions/issues"
 
 [project.optional-dependencies]
 all = [
-    "qiskit-fermions[optimization,ffsim]",
-]
-optimization = [
-    "pyomo",
+    "qiskit-fermions[ffsim,pyomo]",
 ]
 ffsim = [
     # ffsim (and its unconditional PySCF dependency) does not support Windows, so restrict it to
     # non-Windows platforms. The ansatz gates of the circuit library take an ffsim operator as their
     # input, so they require this extra; everything else in the package works without it.
     "ffsim; sys_platform != 'win32'",
+]
+pyomo = [
+    # Pyomo is a modeling layer, not a solver: choosing one is deliberately left to the user (see
+    # `RelabelModes.solver`), so this extra intentionally does not pull one in. The `highspy` entry
+    # in the `test` dependency group is only our dev-suite choice and must not be prescribed here.
+    "pyomo",
 ]
 
 [dependency-groups]

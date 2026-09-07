@@ -49,9 +49,7 @@ fermionic quantum circuits that exploits particle-number and spin-Z conservation
    methods of this object.
 """
 
-HAS_PYOMO = LazyImportTester(
-    "pyomo", name="Pyomo", install='pip install "qiskit_fermions[optimization]"'
-)
+HAS_PYOMO = LazyImportTester("pyomo", name="Pyomo", install='pip install "qiskit-fermions[pyomo]"')
 """`Pyomo <https://www.pyomo.org/>`__ is a Python-based optimization modeling language used to build
 linear and mixed-integer programs (LP/MILP) for classical solvers.
 
