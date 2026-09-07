@@ -103,8 +103,8 @@ ffsim is an optional dependency
 
 ffsim is declared as an optional extra (``pip install "qiskit-fermions[ffsim]"``, or transitively by
 ``[all]``), guarded at runtime by :data:`~qiskit_fermions.utils.optionals.HAS_FFSIM` (as was shown
-above). Installing it unlocks simulation: :class:`.SupportsLinearOperator` and
-:class:`.SupportsTrace` are implemented by converting this package's :class:`.FermionOperator` into
+above). Installing it unlocks simulation: :class:`ffsim.SupportsLinearOperator` and
+:class:`ffsim.SupportsTrace` are implemented by converting this package's :class:`.FermionOperator` into
 an :class:`ffsim.FermionOperator`, so without ffsim they raise
 :class:`~qiskit.exceptions.MissingOptionalLibraryError`. Everything that does not simulate (building
 operators, mapping them, and transpiling the resulting circuits) needs none of it.

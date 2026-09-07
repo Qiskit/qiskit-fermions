@@ -8,7 +8,7 @@
         <link rel="prefetch" href="_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Release Notes - Qiskit Fermions 0.2.0.dev0+9120772</title>
+        <title>Release Notes - Qiskit Fermions 0.2.0.dev0+c485633</title>
       <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+9120772</div></a>
+      <a href="index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+c485633</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+9120772</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+c485633</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="search.html" role="search">
@@ -409,9 +409,9 @@ layer:</p>
 longer raises <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#NotImplementedError" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">NotImplementedError</span></code></a>.</p></li>
 </ul>
 <ul class="simple">
-<li><p><a class="reference internal" href="stubs/qiskit_fermions.operators.FermionOperator.html#qiskit_fermions.operators.FermionOperator" title="qiskit_fermions.operators.FermionOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionOperator</span></code></a> now implements <a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.SupportsTrace.html#ffsim.SupportsTrace" title="(in ffsim)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ffsim.SupportsTrace</span></code></a> through a new
-<a class="reference internal" href="stubs/qiskit_fermions.protocols.SupportsTrace.html#qiskit_fermions.protocols.SupportsTrace" title="qiskit_fermions.protocols.SupportsTrace"><code class="xref py py-class docutils literal notranslate"><span class="pre">SupportsTrace</span></code></a> protocol, so <a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.trace.html#ffsim.trace" title="(in ffsim)"><code class="xref py py-func docutils literal notranslate"><span class="pre">ffsim.trace()</span></code></a> can compute the trace of an operator on
-a fixed <code class="docutils literal notranslate"><span class="pre">(norb,</span> <span class="pre">nelec)</span></code> sector. This is what preconditions
+<li><p><a class="reference internal" href="stubs/qiskit_fermions.operators.FermionOperator.html#qiskit_fermions.operators.FermionOperator" title="qiskit_fermions.operators.FermionOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionOperator</span></code></a> now implements <a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.SupportsTrace.html#ffsim.SupportsTrace" title="(in ffsim)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ffsim.SupportsTrace</span></code></a> through a new <code class="docutils literal notranslate"><span class="pre">_trace_</span></code>
+method, so <a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.trace.html#ffsim.trace" title="(in ffsim)"><code class="xref py py-func docutils literal notranslate"><span class="pre">ffsim.trace()</span></code></a> can compute the trace of an operator on a fixed
+<code class="docutils literal notranslate"><span class="pre">(norb,</span> <span class="pre">nelec)</span></code> sector. This is what preconditions
 <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.linalg.expm_multiply.html#scipy.sparse.linalg.expm_multiply" title="(in SciPy v1.18.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.sparse.linalg.expm_multiply()</span></code></a> along the evolution path.</p></li>
 </ul>
 </section>
@@ -420,7 +420,7 @@ a fixed <code class="docutils literal notranslate"><span class="pre">(norb,</spa
 <ul>
 <li><p>The <code class="docutils literal notranslate"><span class="pre">qiskit_fermions.linalg.apply_unitary</span></code> and
 <code class="docutils literal notranslate"><span class="pre">qiskit_fermions.linalg.linear_operator</span></code> functions have been removed. They were thin wrappers
-around the <a class="reference internal" href="stubs/qiskit_fermions.protocols.SupportsApplyUnitary.html#qiskit_fermions.protocols.SupportsApplyUnitary" title="qiskit_fermions.protocols.SupportsApplyUnitary"><code class="xref py py-class docutils literal notranslate"><span class="pre">SupportsApplyUnitary</span></code></a> and <a class="reference internal" href="stubs/qiskit_fermions.protocols.SupportsLinearOperator.html#qiskit_fermions.protocols.SupportsLinearOperator" title="qiskit_fermions.protocols.SupportsLinearOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">SupportsLinearOperator</span></code></a> protocol methods,
+around the <code class="docutils literal notranslate"><span class="pre">_apply_unitary_</span></code> and <code class="docutils literal notranslate"><span class="pre">_linear_operator_</span></code> protocol methods,
 duplicating <a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.apply_unitary.html#ffsim.apply_unitary" title="(in ffsim)"><code class="xref py py-func docutils literal notranslate"><span class="pre">ffsim.apply_unitary()</span></code></a> and <a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.linear_operator.html#ffsim.linear_operator" title="(in ffsim)"><code class="xref py py-func docutils literal notranslate"><span class="pre">ffsim.linear_operator()</span></code></a>. Call ffsim’s
 functions instead, or, when ffsim is not installed, the protocol method on the object directly:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># before</span>
@@ -437,7 +437,24 @@ functions instead, or, when ffsim is not installed, the protocol method on the o
 <span class="n">linop</span> <span class="o">=</span> <span class="n">operator</span><span class="o">.</span><span class="n">_linear_operator_</span><span class="p">(</span><span class="n">norb</span><span class="p">,</span> <span class="n">nelec</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>The protocols themselves are unchanged.</p>
+<p>The methods themselves are unchanged.</p>
+</li>
+</ul>
+<ul>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">qiskit_fermions.protocols.SupportsApplyUnitary</span></code> and
+<code class="docutils literal notranslate"><span class="pre">qiskit_fermions.protocols.SupportsLinearOperator</span></code> protocols have been removed for the same
+reason: they restated contracts that ffsim defines. Use ffsim’s own protocols, which they
+mirrored one-to-one:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">qiskit_fermions.protocols.SupportsApplyUnitary</span></code> becomes
+<a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.SupportsApplyUnitary.html#ffsim.SupportsApplyUnitary" title="(in ffsim)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ffsim.SupportsApplyUnitary</span></code></a></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">qiskit_fermions.protocols.SupportsLinearOperator</span></code> becomes
+<a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.SupportsLinearOperator.html#ffsim.SupportsLinearOperator" title="(in ffsim)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ffsim.SupportsLinearOperator</span></code></a></p></li>
+</ul>
+<p>The protocol <em>methods</em> (<code class="docutils literal notranslate"><span class="pre">_apply_unitary_</span></code> and <code class="docutils literal notranslate"><span class="pre">_linear_operator_</span></code>) are unchanged, so the
+objects of this package that implemented them still do; only the local restatement of the
+interface is gone. <a class="reference internal" href="stubs/qiskit_fermions.protocols.SupportsApplyUnitaryPlaced.html#qiskit_fermions.protocols.SupportsApplyUnitaryPlaced" title="qiskit_fermions.protocols.SupportsApplyUnitaryPlaced"><code class="xref py py-class docutils literal notranslate"><span class="pre">SupportsApplyUnitaryPlaced</span></code></a> stays, since it extends
+<a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.SupportsApplyUnitary.html#ffsim.SupportsApplyUnitary" title="(in ffsim)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ffsim.SupportsApplyUnitary</span></code></a> with a mode placement and has no ffsim counterpart.</p>
 </li>
 </ul>
 <ul class="simple">
@@ -476,16 +493,14 @@ two-body routine, additionally offering an optimized (<code class="docutils lite
 <p><a class="reference internal" href="stubs/qiskit_fermions.linalg.givens_decomposition.html#qiskit_fermions.linalg.givens_decomposition" title="qiskit_fermions.linalg.givens_decomposition"><code class="xref py py-func docutils literal notranslate"><span class="pre">givens_decomposition()</span></code></a> and
 <a class="reference internal" href="stubs/qiskit_fermions.linalg.givens_decomposition_slater.html#qiskit_fermions.linalg.givens_decomposition_slater" title="qiskit_fermions.linalg.givens_decomposition_slater"><code class="xref py py-func docutils literal notranslate"><span class="pre">givens_decomposition_slater()</span></code></a> are unaffected: they back
 <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.OrbitalRotation.html#qiskit_fermions.circuit.library.OrbitalRotation" title="qiskit_fermions.circuit.library.OrbitalRotation"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrbitalRotation</span></code></a> and <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.PrepareSlaterDeterminant.html#qiskit_fermions.circuit.library.PrepareSlaterDeterminant" title="qiskit_fermions.circuit.library.PrepareSlaterDeterminant"><code class="xref py py-class docutils literal notranslate"><span class="pre">PrepareSlaterDeterminant</span></code></a> synthesis and remain
-ffsim-independent, as does the native FCI kernel behind <a class="reference internal" href="stubs/qiskit_fermions.protocols.SupportsLinearOperator.html#qiskit_fermions.protocols.SupportsLinearOperator" title="qiskit_fermions.protocols.SupportsLinearOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">SupportsLinearOperator</span></code></a>.</p>
+ffsim-independent.</p>
 </li>
 </ul>
 <ul>
 <li><p>Simulation now requires <a class="reference external" href="https://github.com/qiskit-community/ffsim">ffsim</a>. The native Rust
-FCI (full configuration interaction) kernel that used to back
-<a class="reference internal" href="stubs/qiskit_fermions.protocols.SupportsLinearOperator.html#qiskit_fermions.protocols.SupportsLinearOperator" title="qiskit_fermions.protocols.SupportsLinearOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">SupportsLinearOperator</span></code></a> has been removed, and
-<a class="reference internal" href="stubs/qiskit_fermions.protocols.SupportsLinearOperator.html#qiskit_fermions.protocols.SupportsLinearOperator._linear_operator_" title="qiskit_fermions.protocols.SupportsLinearOperator._linear_operator_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">SupportsLinearOperator._linear_operator_()</span></code></a> is now implemented by converting a
-<a class="reference internal" href="stubs/qiskit_fermions.operators.FermionOperator.html#qiskit_fermions.operators.FermionOperator" title="qiskit_fermions.operators.FermionOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionOperator</span></code></a> into an <a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.FermionOperator.html#ffsim.FermionOperator" title="(in ffsim)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ffsim.FermionOperator</span></code></a> and delegating to
-<a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.linear_operator.html#ffsim.linear_operator" title="(in ffsim)"><code class="xref py py-func docutils literal notranslate"><span class="pre">ffsim.linear_operator()</span></code></a>.</p>
+FCI (full configuration interaction) kernel that used to back <code class="docutils literal notranslate"><span class="pre">_linear_operator_</span></code> has been
+removed; the method is now implemented by converting a <a class="reference internal" href="stubs/qiskit_fermions.operators.FermionOperator.html#qiskit_fermions.operators.FermionOperator" title="qiskit_fermions.operators.FermionOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionOperator</span></code></a> into an
+<a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.FermionOperator.html#ffsim.FermionOperator" title="(in ffsim)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ffsim.FermionOperator</span></code></a> and delegating to <a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.linear_operator.html#ffsim.linear_operator" title="(in ffsim)"><code class="xref py py-func docutils literal notranslate"><span class="pre">ffsim.linear_operator()</span></code></a>.</p>
 <p>Simulation is ffsim’s concern: this package focuses on fermionic mappers and the
 mapper-agnostic circuit and its transpilation. Because ffsim depends on PySCF, which does not
 support Windows, simulation is consequently unavailable on Windows; the rest of the package
@@ -673,7 +688,7 @@ Following Qiskit’s design philosophy, the core of this package is written in R
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on 2026/09/04</div>
+              Last updated on 2026/09/07</div>
           </div>
           <div class="right-details">
             
@@ -716,7 +731,7 @@ Following Qiskit’s design philosophy, the core of this package is written in R
       
     </aside>
   </div>
-</div><script src="_static/documentation_options.js?v=f88b33f2"></script>
+</div><script src="_static/documentation_options.js?v=a3503a12"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/scripts/furo.js?v=46bd48cc"></script>

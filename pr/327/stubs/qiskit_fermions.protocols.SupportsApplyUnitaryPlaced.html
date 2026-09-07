@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>SupportsApplyUnitaryPlaced - Qiskit Fermions 0.2.0.dev0+9120772</title>
+        <title>SupportsApplyUnitaryPlaced - Qiskit Fermions 0.2.0.dev0+c485633</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+9120772</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+c485633</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+9120772</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+c485633</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -267,15 +267,16 @@
 <dt class="sig sig-object py" id="qiskit_fermions.protocols.SupportsApplyUnitaryPlaced">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">SupportsApplyUnitaryPlaced</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qiskit_fermions.protocols.SupportsApplyUnitaryPlaced" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Protocol" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a></p>
-<p>A package-specific extension of <a class="reference internal" href="qiskit_fermions.protocols.SupportsApplyUnitary.html#qiskit_fermions.protocols.SupportsApplyUnitary" title="qiskit_fermions.protocols.SupportsApplyUnitary"><code class="xref py py-class docutils literal notranslate"><span class="pre">SupportsApplyUnitary</span></code></a> carrying a mode placement.</p>
-<p>Unlike <a class="reference internal" href="qiskit_fermions.protocols.SupportsApplyUnitary.html#qiskit_fermions.protocols.SupportsApplyUnitary" title="qiskit_fermions.protocols.SupportsApplyUnitary"><code class="xref py py-class docutils literal notranslate"><span class="pre">SupportsApplyUnitary</span></code></a>, this protocol has no ffsim equivalent:
+<p>A package-specific extension of <a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.SupportsApplyUnitary.html#ffsim.SupportsApplyUnitary" title="(in ffsim)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ffsim.SupportsApplyUnitary</span></code></a>.</p>
+<p>Where ffsim’s protocol applies an object to a whole state vector, this one adds the placement of
+the object’s local modes onto the global ones it acts on. It has no ffsim equivalent:
 <a class="reference internal" href="qiskit_fermions.circuit.FermionicCircuit.html#qiskit_fermions.circuit.FermionicCircuit._apply_unitary_placed_" title="qiskit_fermions.circuit.FermionicCircuit._apply_unitary_placed_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_apply_unitary_placed_()</span></code></a> is the only caller, and it dispatches to it
 directly via <code class="docutils literal notranslate"><span class="pre">getattr</span></code> duck-typing. It exists here purely for typing and documentation
 purposes, since every concrete <a class="reference internal" href="qiskit_fermions.circuit.FermionicGate.html#qiskit_fermions.circuit.FermionicGate" title="qiskit_fermions.circuit.FermionicGate"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicGate</span></code></a> (as well as <a class="reference internal" href="qiskit_fermions.circuit.FermionicCircuit.html#qiskit_fermions.circuit.FermionicCircuit" title="qiskit_fermions.circuit.FermionicCircuit"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicCircuit</span></code></a>
 itself) implements this method.</p>
 <p>See <a class="reference internal" href="qiskit_fermions.circuit.FermionicCircuit.html#qiskit_fermions.circuit.FermionicCircuit._apply_unitary_placed_" title="qiskit_fermions.circuit.FermionicCircuit._apply_unitary_placed_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">FermionicCircuit._apply_unitary_placed_()</span></code></a> for the full semantics, including how a
-plain <a class="reference internal" href="qiskit_fermions.protocols.SupportsApplyUnitary.html#qiskit_fermions.protocols.SupportsApplyUnitary" title="qiskit_fermions.protocols.SupportsApplyUnitary"><code class="xref py py-class docutils literal notranslate"><span class="pre">SupportsApplyUnitary</span></code></a> implementation (with no mode-placement argument) is honored
-only on the identity placement.</p>
+plain <code class="docutils literal notranslate"><span class="pre">_apply_unitary_</span></code> implementation (with no mode-placement argument) is honored only on the
+identity placement.</p>
 <p class="rubric">Protocol Methods</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qiskit_fermions.protocols.SupportsApplyUnitaryPlaced._apply_unitary_placed_">
@@ -323,7 +324,7 @@ fermions.</p></li>
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on 2026/09/04</div>
+              Last updated on 2026/09/07</div>
           </div>
           <div class="right-details">
             
@@ -360,7 +361,7 @@ fermions.</p></li>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=f88b33f2"></script>
+</div><script src="../_static/documentation_options.js?v=a3503a12"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
