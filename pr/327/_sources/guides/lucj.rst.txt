@@ -163,40 +163,119 @@ qubit circuit on their own. The reason to route the ansatz through a fermionic c
 weight of each term, which the :ref:`1D <1d_fermi_hubbard>` and :ref:`2D <2d_fermi_hubbard>`
 flow-set guides use to make a Trotter step's two-qubit depth independent of the system size.
 
-For a UCJ ansatz specifically, two pieces are needed to take that other path, and only the first
-exists today:
+For a UCJ ansatz specifically, the synthesis stage has to cover two kinds of gate:
 
 - **The diagonal Coulomb evolution.** :class:`.Evolution` is already encoding-agnostic:
   :class:`.MapperFnEvolutionSynthesis` takes a mapper function, so the
   :math:`e^{i \mathcal{J}_k}` layers lower through any encoding you can express as one. The
   :ref:`flow-set guides <1d_fermi_hubbard>` show how to write one.
-- **The orbital rotations.** :class:`.GivensDecompositionOrbitalRotationSynthesis` emits
-  :class:`~qiskit.circuit.library.XXPlusYYGate` objects directly on qubit pairs, which is a
-  Jordan-Wigner-specific lowering. A different encoding needs its own
-  :class:`.OrbitalRotation` synthesis plugin, and none ships yet.
+- **Everything else.** The plugins for :class:`.OrbitalRotation`, :class:`.InitializeModes` and
+  :class:`.PrepareSlaterDeterminant` are not parametrized by an encoding; each documents its
+  assumption of an occupation-basis encoding with a 1-to-1 mode-to-qubit mapping, and emits gates
+  directly on that basis. A different encoding needs its own plugin for each of these three, and
+  none ships yet.
 
-So UCJ under a non-Jordan-Wigner encoding is an open direction rather than a worked recipe, and one
-this workflow is meant to enable. Expect this to firm up as further encodings land in the mapper
-library.
+How to transpile UCJ circuits under a non-Jordan-Wigner encoding is an open research question and
+this package provides the framework within which to develop such a pipeline.
+The remainder of this guide constructs the transpiler pipeline for the Jordan-Wigner encoding,
+equivalent to the one produced by :func:`~.generate_preset_jw_pass_manager`, as an example.
 
 4. Lower it through Jordan-Wigner
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The rest of this guide takes the encoding that ships as a preset, which is also the simplest one to
-follow. :func:`~qiskit_fermions.transpiler.presets.generate_preset_jw_pass_manager` builds a staged
-pipeline that maps the fermionic circuit through the Jordan-Wigner transformation and synthesizes
-each gate into a qubit-level circuit. The composite :class:`.UCJ` gate must first be
-decomposed into its primitive gates (:class:`.OrbitalRotation`, :class:`.Evolution`, ...) so the
-pipeline's optimization stage can act on them, so pass ``circuit.decompose()``.
+Lowering happens in :class:`.F2QSynthesis`, which works like Qiskit's
+:external:class:`~qiskit.transpiler.passes.HighLevelSynthesis`: it walks the fermionic instructions
+and hands each to a plugin registered for that gate name. Its :attr:`.F2QSynthesis.methods`
+attribute holds one :class:`.F2QSynthesisPlugin` per gate name, so building the stage means choosing
+a plugin for every fermionic gate the circuit contains:
 
 .. plot::
    :context:
    :nofigs:
    :include-source:
 
-   >>> from qiskit_fermions.transpiler.presets import generate_preset_jw_pass_manager
+   >>> from qiskit_fermions.mappers.library import jordan_wigner
+   >>> from qiskit_fermions.transpiler.passes import F2QSynthesis
+   >>> from qiskit_fermions.transpiler.passes.synthesis import (
+   ...     GivensDecompositionOrbitalRotationSynthesis,
+   ...     GivensDecompositionSlaterDeterminantSynthesis,
+   ...     MapperFnEvolutionSynthesis,
+   ...     TrivialOccupationInitializeModesSynthesis,
+   ... )
    >>>
-   >>> pm = generate_preset_jw_pass_manager()
+   >>> synthesis = F2QSynthesis()
+   >>> synthesis.methods["Evolution"] = MapperFnEvolutionSynthesis(jordan_wigner)
+   >>> synthesis.methods["InitializeModes"] = TrivialOccupationInitializeModesSynthesis()
+   >>> synthesis.methods["OrbitalRotation"] = GivensDecompositionOrbitalRotationSynthesis()
+   >>> synthesis.methods["PrepareSlaterDeterminant"] = (
+   ...     GivensDecompositionSlaterDeterminantSynthesis()
+   ... )
+
+Assigning instances like this is also how a plugin you wrote yourself enters the pipeline, without
+having to register it anywhere first.
+
+This is where the encoding is settled, in the two ways section 3 described: explicitly, by handing
+:func:`.jordan_wigner` to :class:`.MapperFnEvolutionSynthesis`, and implicitly, by the other three
+plugins already assuming it.
+
+That stage then slots into a :external:class:`~qiskit.passmanager.MultiStagePassManager` whose
+stages run in a fixed order:
+
+.. plot::
+   :context:
+   :nofigs:
+   :include-source:
+
+   >>> from qiskit.passmanager import MultiStagePassManager
+   >>> from qiskit.transpiler import generate_preset_pass_manager
+   >>>
+   >>> from qiskit_fermions.transpiler import (
+   ...     FermionicCircuitToDAG,
+   ...     FermionicPassManager,
+   ...     QuantumDAGToCircuit,
+   ... )
+   >>> from qiskit_fermions.transpiler.passes import (
+   ...     MergeOrbitalRotations,
+   ...     MergeSlaterDeterminantPreparation,
+   ...     TrivialF2QLayout,
+   ... )
+   >>>
+   >>> pm = MultiStagePassManager(
+   ...     input=FermionicCircuitToDAG(),
+   ...     optimization=FermionicPassManager(
+   ...         [MergeOrbitalRotations(), MergeSlaterDeterminantPreparation()]
+   ...     ),
+   ...     layout=FermionicPassManager(TrivialF2QLayout()),
+   ...     synthesis=synthesis,
+   ...     qubit=generate_preset_pass_manager(),
+   ...     output=QuantumDAGToCircuit(),
+   ... )
+
+The **optimization** stage runs *before* synthesis, on the fermionic circuit, which is what makes it
+worth having: it rewrites gates while they are still fermionic and encoding-agnostic, so the savings
+carry to whatever encoding follows. :class:`.MergeOrbitalRotations` collapses each run of
+consecutive :class:`.OrbitalRotation` gates into one, which matters for a UCJ ansatz because every
+layer ends with :math:`\mathcal{U}_k` and the next begins with :math:`\mathcal{U}_{k+1}^\dagger`.
+:class:`.MergeSlaterDeterminantPreparation` then fuses the leading :class:`.InitializeModes` and the
+rotation that follows it into a single :class:`.PrepareSlaterDeterminant`, which synthesis lowers
+through the cheaper reduced Slater decomposition instead of a full square rotation. The order
+matters: merging the rotations first exposes the single rotation immediately after the
+initialization, which the Slater fusion then contracts into it.
+
+The remaining stages are plumbing. ``input`` and ``output`` convert between circuits and DAGs,
+``layout`` assigns fermionic modes to qubits (:class:`.TrivialF2QLayout` maps mode ``i`` to qubit
+``i``), and ``qubit`` is an ordinary Qiskit pass manager that takes over once nothing fermionic is
+left.
+
+Running it requires one preparatory step: the composite :class:`.UCJ` gate has to be decomposed
+into its primitive gates first, so the optimization stage can see the individual rotations and
+evolutions.
+
+.. plot::
+   :context:
+   :nofigs:
+   :include-source:
+
    >>> transpiled = pm.run(circuit.decompose())
    >>> print(dict(sorted(transpiled.count_ops().items())))
    {'p': 14, 'rzz': 12, 'x': 2, 'xx_plus_yy': 28}
@@ -212,6 +291,21 @@ Coulomb evolutions into :class:`~qiskit.circuit.library.RZZGate`\ objects:
 
    >>> transpiled.draw("mpl", fold=-1)
    <Figure size ... with 1 Axes>
+
+This pipeline is exactly what
+:func:`~qiskit_fermions.transpiler.presets.generate_preset_jw_pass_manager` assembles, so reach for
+the preset in practice and build the stages by hand when you need to change one of them:
+
+.. plot::
+   :context:
+   :nofigs:
+   :include-source:
+
+   >>> from qiskit_fermions.transpiler.presets import generate_preset_jw_pass_manager
+   >>>
+   >>> preset = generate_preset_jw_pass_manager()
+   >>> preset.run(circuit.decompose()).count_ops() == transpiled.count_ops()
+   True
 
 5. Match the device topology
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -335,6 +429,9 @@ Next steps
   construct fermionic operators and Hamiltonians directly.
 - See how a fermionic circuit is mapped to qubits in the
   :ref:`transpilation guide <transpilation_explanation>`.
+- Read the :class:`.F2QSynthesis` documentation for the other way to configure the synthesis stage:
+  a ``config`` dictionary that selects plugins by the short names they register under their
+  ``qiskit_fermions.transpiler.synthesis`` entry points, rather than by instance.
 - Read the :ref:`ffsim relationship guide <ffsim_relationship_explanation>` to understand how the
   two packages divide the work, and which protocols let ffsim simulate this package's circuits.
 
