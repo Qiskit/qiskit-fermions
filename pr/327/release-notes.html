@@ -8,7 +8,7 @@
         <link rel="prefetch" href="_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Release Notes - Qiskit Fermions 0.2.0.dev0+c485633</title>
+        <title>Release Notes - Qiskit Fermions 0.2.0.dev0+5228346</title>
       <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+c485633</div></a>
+      <a href="index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+5228346</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+c485633</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+5228346</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="search.html" role="search">
@@ -480,7 +480,7 @@ order:</p>
 </div>
 </li>
 </ul>
-<ul>
+<ul class="simple">
 <li><p>The double factorization utilities have been removed from
 <a class="reference internal" href="pydoc/qiskit_fermions.linalg.html#module-qiskit_fermions.linalg" title="qiskit_fermions.linalg"><code class="xref py py-mod docutils literal notranslate"><span class="pre">qiskit_fermions.linalg</span></code></a>: <code class="docutils literal notranslate"><span class="pre">double_factorized_t2</span></code>,
 <code class="docutils literal notranslate"><span class="pre">double_factorized_t2_alpha_beta</span></code>, <code class="docutils literal notranslate"><span class="pre">reconstruct_t2</span></code>, <code class="docutils literal notranslate"><span class="pre">reconstruct_t2_alpha_beta</span></code> and
@@ -489,12 +489,7 @@ which now lives in ffsim, and <code class="docutils literal notranslate"><span c
 <a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.linalg.double_factorized_t2.html#ffsim.linalg.double_factorized_t2" title="(in ffsim)"><code class="xref py py-func docutils literal notranslate"><span class="pre">ffsim.linalg.double_factorized_t2()</span></code></a>,
 <a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.linalg.double_factorized_t2_alpha_beta.html#ffsim.linalg.double_factorized_t2_alpha_beta" title="(in ffsim)"><code class="xref py py-func docutils literal notranslate"><span class="pre">ffsim.linalg.double_factorized_t2_alpha_beta()</span></code></a> and
 <a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.linalg.double_factorized.html#ffsim.linalg.double_factorized" title="(in ffsim)"><code class="xref py py-func docutils literal notranslate"><span class="pre">ffsim.linalg.double_factorized()</span></code></a> instead; the last is a superset of the removed
-two-body routine, additionally offering an optimized (<code class="docutils literal notranslate"><span class="pre">optimize=True</span></code>) decomposition.</p>
-<p><a class="reference internal" href="stubs/qiskit_fermions.linalg.givens_decomposition.html#qiskit_fermions.linalg.givens_decomposition" title="qiskit_fermions.linalg.givens_decomposition"><code class="xref py py-func docutils literal notranslate"><span class="pre">givens_decomposition()</span></code></a> and
-<a class="reference internal" href="stubs/qiskit_fermions.linalg.givens_decomposition_slater.html#qiskit_fermions.linalg.givens_decomposition_slater" title="qiskit_fermions.linalg.givens_decomposition_slater"><code class="xref py py-func docutils literal notranslate"><span class="pre">givens_decomposition_slater()</span></code></a> are unaffected: they back
-<a class="reference internal" href="stubs/qiskit_fermions.circuit.library.OrbitalRotation.html#qiskit_fermions.circuit.library.OrbitalRotation" title="qiskit_fermions.circuit.library.OrbitalRotation"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrbitalRotation</span></code></a> and <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.PrepareSlaterDeterminant.html#qiskit_fermions.circuit.library.PrepareSlaterDeterminant" title="qiskit_fermions.circuit.library.PrepareSlaterDeterminant"><code class="xref py py-class docutils literal notranslate"><span class="pre">PrepareSlaterDeterminant</span></code></a> synthesis and remain
-ffsim-independent.</p>
-</li>
+two-body routine, additionally offering an optimized (<code class="docutils literal notranslate"><span class="pre">optimize=True</span></code>) decomposition.</p></li>
 </ul>
 <ul>
 <li><p>Simulation now requires <a class="reference external" href="https://github.com/qiskit-community/ffsim">ffsim</a>. The native Rust
@@ -521,12 +516,6 @@ for Linux</a>.</p>
 <li><p><a class="reference internal" href="stubs/qiskit_fermions.circuit.library.OrbitalRotation.html#qiskit_fermions.circuit.library.OrbitalRotation" title="qiskit_fermions.circuit.library.OrbitalRotation"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrbitalRotation</span></code></a> no longer falls back to a generator-plus-exponential path when ffsim
 is absent; it always delegates to <a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.apply_orbital_rotation.html#ffsim.apply_orbital_rotation" title="(in ffsim)"><code class="xref py py-func docutils literal notranslate"><span class="pre">ffsim.apply_orbital_rotation()</span></code></a>. The results are
 unchanged when ffsim is installed.</p></li>
-</ul>
-<ul class="simple">
-<li><p>An operator that does not conserve particle number, or the z-component of spin in the spinful
-case, is now rejected by ffsim rather than by this package’s own check, so the
-<a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ValueError</span></code></a> that <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> surfaces when simulating one carries a different
-message.</p></li>
 </ul>
 <ul>
 <li><p>The <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.UCC.html#qiskit_fermions.circuit.library.UCC" title="qiskit_fermions.circuit.library.UCC"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCC</span></code></a> gate is now constructed from one of ffsim’s UCCSD operators, which is its only
@@ -731,7 +720,7 @@ Following Qiskit’s design philosophy, the core of this package is written in R
       
     </aside>
   </div>
-</div><script src="_static/documentation_options.js?v=a3503a12"></script>
+</div><script src="_static/documentation_options.js?v=9a3408cb"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/scripts/furo.js?v=46bd48cc"></script>
