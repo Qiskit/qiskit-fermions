@@ -212,31 +212,45 @@ def test_evolution_apply_unitary_accepts_numpy_int_nelec():
 
 
 def test_evolution_apply_unitary_rejects_non_conserving_operator():
-    """A term that leaves the (norb, nelec) sector is rejected rather than silently projected."""
+    """A term that leaves the (norb, nelec) sector is rejected rather than silently projected.
+
+    The rejection comes from ffsim, which backs the simulation path: an operator that does not
+    conserve particle number has no action on a fixed sector.
+    """
     norb = 2
     vec = np.ones(4, dtype=complex)
 
     # A bare creation does not conserve particle number.
     raising = FermionOperator.from_dict({((True, 0),): 1.0})
-    with pytest.raises(ValueError, match="must preserve the particle number"):
+    with pytest.raises(ValueError, match="does not conserve particle number"):
         Evolution(norb, raising, time=0.1)._apply_unitary_(vec, norb, (1, 1), copy=True)
 
 
-def test_evolution_apply_unitary_rejects_non_fermion_operator():
-    """Evolving a non-FermionOperator on a state vector raises a clear NotImplementedError.
+def test_evolution_apply_unitary_majorana_operator_matches_fermionic_image():
+    """Evolving a non-FermionOperator goes through its fermionic image.
 
-    The simulation path is backed by the native FCI kernel, which only ``FermionOperator`` exposes
-    (via ``_linear_operator_``/``conserves_sector``). Any other operator type must be rejected up
-    front with a clear error rather than failing obscurely deeper in the apply path.
+    Any operator type of this package reaches the simulation path via the
+    ``SupportsFermionOperator`` protocol, so evolving one must agree with evolving the
+    ``FermionOperator`` it converts to.
     """
+    from qiskit_fermions.mappers.library import fermion_operator
     from qiskit_fermions.operators import MajoranaOperator
 
-    norb = 2
-    vec = np.ones(4, dtype=complex)
+    norb, nelec, time = 2, (1, 1), 0.3
+    rng = np.random.default_rng(1234)
+    vec = rng.standard_normal(4) + 1j * rng.standard_normal(4)
 
-    operator = MajoranaOperator.from_dict({(0, 1): 1.0})
-    with pytest.raises(NotImplementedError, match=r"only be applied .* when its operator is a"):
-        Evolution(2 * norb, operator, time=0.1)._apply_unitary_(vec, norb, (1, 1), copy=True)
+    # i * gamma_0 gamma_1 is Hermitian and number-conserving in its fermionic image.
+    operator = MajoranaOperator.from_dict({(0, 1): 1.0j})
+    image = fermion_operator(operator).normal_ordered().simplify()
+    expected = Evolution(2 * norb, image, time=time)._apply_unitary_(
+        vec.copy(), norb, nelec, copy=True
+    )
+    result = Evolution(2 * norb, operator, time=time)._apply_unitary_(
+        vec.copy(), norb, nelec, copy=True
+    )
+
+    np.testing.assert_allclose(result, expected)
 
 
 def test_evolution_apply_unitary_rejects_spin_non_conserving_operator():
@@ -252,7 +266,7 @@ def test_evolution_apply_unitary_rejects_spin_non_conserving_operator():
     # a†_{0 alpha} a_{0 beta}: modes 0 and norb+0=2. Conserves total number but moves a particle
     # from the beta sector to the alpha sector, leaving the fixed (n_alpha, n_beta) = (1, 1) sector.
     spin_flip = FermionOperator.from_dict({((True, 0), (False, 2)): 1.0})
-    with pytest.raises(ValueError, match="spin species"):
+    with pytest.raises(ValueError, match="z component of spin"):
         Evolution(2 * norb, spin_flip, time=0.1)._apply_unitary_(vec, norb, (1, 1), copy=True)
 
 

@@ -82,6 +82,9 @@ following, so ffsim's dispatchers accept them directly:
    * - :class:`ffsim.SupportsLinearOperator`
      - ``_linear_operator_(self, norb, nelec)``
      - :class:`.FermionOperator`
+   * - :class:`ffsim.SupportsTrace`
+     - ``_trace_(self, norb, nelec)``
+     - :class:`.FermionOperator`
 
 .. caution::
    :class:`ffsim.SupportsFermionOperator` shares the ``_fermion_operator_`` method name with

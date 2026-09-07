@@ -4,7 +4,6 @@
 import builtins
 import numpy
 import numpy.typing
-from qiskit_fermions._lib.linalg import fci
 from qiskit_fermions._lib.operators import majorana_operator
 from qiskit_fermions._lib.operators.operators_library import fcidump
 import typing
@@ -1007,37 +1006,6 @@ class FermionOperator:
         """
     def __getnewargs__(self) -> tuple[builtins.list[builtins.complex], builtins.list[builtins.bool], builtins.list[builtins.int], builtins.list[builtins.int]]:
         r"""
-        Returns a native FCI matrix-vector view of this operator on a fixed sector.
-        
-        This is the native kernel carrier behind the public ``_linear_operator_`` protocol method:
-        it applies this operator to a state vector via a native matrix-vector kernel, avoiding any
-        conversion to an intermediate representation. The returned object duck-types the subset of
-        the SciPy ``LinearOperator`` interface that :func:`scipy.sparse.linalg.expm_multiply` needs,
-        but it is **not** itself a SciPy ``LinearOperator``. The public ``_linear_operator_`` method
-        (added in Python, see :mod:`qiskit_fermions.operators`) wraps this into a genuine
-        :class:`scipy.sparse.linalg.LinearOperator` -- which is what ffsim's ``_linear_operator_``
-        protocol (and :external:func:`ffsim.linear_operator`) require.
-        
-        The FCI sector is selected by ``nelec``:
-        
-        * an ``int`` treats the operator's ``norb`` modes as spinless orbitals; the state vector has
-          length :math:`\binom{norb}{nelec}`.
-        * a ``(n_alpha, n_beta)`` tuple treats the operator's ``2 * norb`` modes as spin-orbitals
-          under the block-spin convention; the state vector has length
-          :math:`\binom{norb}{n_\alpha} \binom{norb}{n_\beta}`.
-        
-        Args:
-            norb: the number of (spatial) orbitals.
-            nelec: the electron count -- an ``int`` for a spinless sector, or a ``(n_alpha, n_beta)``
-                tuple for a spinful one.
-        
-        Returns:
-            A native ``LinearOperator``-compatible object for the requested sector.
-        
-        Raises:
-            TypeError: if ``nelec`` is neither an ``int`` nor a ``(int, int)`` tuple.
-            ValueError: if ``norb`` exceeds the maximum number of orbitals the bitmask
-                representation supports (64).
         Returns the constructor arguments needed to pickle this operator.
         
         Together with :meth:`__getstate__`/:meth:`__setstate__` (which round-trip
@@ -1051,7 +1019,6 @@ class FermionOperator:
         r"""
         Restores this operator's :attr:`groups` from its pickled state.
         """
-    def _fci_linear_operator_(self, norb: builtins.int, nelec: typing.Any) -> fci.FciLinearOperator: ...
     @staticmethod
     def _commutator_(op_a: FermionOperator, op_b: FermionOperator) -> FermionOperator: ...
     @staticmethod
