@@ -1,0 +1,35 @@
+---
+upgrade:
+  - |
+    The :class:`.UCC` gate is now constructed from one of ffsim's UCCSD operators, which is its only
+    constructor argument. The spin variant and the number of modes are read off that operator, so the
+    ``variant`` argument and the ``UCC.Variant`` enum are gone:
+
+    .. code-block:: python
+
+       # before
+       ansatz = UCC("restricted", t1, t2)
+
+       # after
+       ansatz = UCC(ffsim.UCCSDOpRestrictedReal(t1=t1, t2=t2))
+
+    Accordingly, ``UCC.from_t_amplitudes``, ``UCC.num_parameters``, ``UCC.from_parameters`` and
+    ``UCC.to_parameters`` have been removed, as have the ``spinless`` variant and the opt-in
+    ``antisymmetric`` parameterization, which have no ffsim equivalent. ffsim's operators provide
+    :external:meth:`~ffsim.UCCSDOpRestrictedReal.n_params`,
+    :external:meth:`~ffsim.UCCSDOpRestrictedReal.from_parameters` and
+    :external:meth:`~ffsim.UCCSDOpRestrictedReal.to_parameters` with identical conventions. To build
+    an ansatz outside that family (a spinless one, or an antisymmetrized :math:`t_2`), construct an
+    :class:`.Evolution` over your own cluster operator directly, which also gives you control over
+    the Trotter ordering of its terms.
+
+    The wrapped operator is available as ``UCC.uccsd_op``, so its amplitudes are reachable as
+    ``gate.uccsd_op.t1`` and ``gate.uccsd_op.t2``; the gate no longer mirrors them as attributes of
+    its own. :meth:`.UCC.cluster_operator` is unchanged. A
+    ``final_orbital_rotation`` carried by the ffsim operator is now appended as a closing
+    :class:`.OrbitalRotation`.
+
+    Since ffsim is now the gate's input type rather than an optional accelerator, constructing a
+    :class:`.UCC` requires the ``ffsim`` extra (``pip install "qiskit-fermions[ffsim]"``) and raises
+    :class:`~qiskit.exceptions.MissingOptionalLibraryError` without it. ffsim does not support
+    Windows, so the gate is unavailable there; use WSL.
