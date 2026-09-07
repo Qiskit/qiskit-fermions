@@ -226,10 +226,10 @@ native full configuration interaction (FCI) matrix-vector kernel), so it can be 
    :nofigs:
    :include-source:
 
+   >>> import ffsim
    >>> import scipy.sparse.linalg
-   >>> from qiskit_fermions.linalg import linear_operator
    >>>
-   >>> linop = linear_operator(hamiltonian_momentum, norb, nelec)
+   >>> linop = ffsim.linear_operator(hamiltonian_momentum, norb, nelec)
    >>> reference_energy, ground_state = scipy.sparse.linalg.eigsh(linop, k=1, which="SA")
    >>> reference_energy = reference_energy[0]
    >>> ground_state = ground_state[:, 0]
@@ -251,7 +251,7 @@ determinants is not:
    ...     return int(np.searchsorted(np.cumsum(weights), fraction) + 1)
    ...
    >>> # the same Hamiltonian in the position basis has an identical spectrum, but a dense ground state
-   >>> position_linop = linear_operator(hamiltonian_position, norb, nelec)
+   >>> position_linop = ffsim.linear_operator(hamiltonian_position, norb, nelec)
    >>> position_energy, position_ground = scipy.sparse.linalg.eigsh(position_linop, k=1, which="SA")
    >>>
    >>> print(f"position-basis energy: {position_energy[0]:.6f}")
@@ -496,7 +496,6 @@ rotation. The gate applies ``reference_rotation`` itself.
    :nofigs:
    :include-source:
 
-   >>> import ffsim
    >>> from collections import Counter
    >>>
    >>> reference = ffsim.slater_determinant(

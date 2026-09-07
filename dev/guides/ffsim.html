@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>The ffsim simulation backend - Qiskit Fermions 0.2.0.dev0+063c2b7</title>
+        <title>The ffsim simulation backend - Qiskit Fermions 0.2.0.dev0+b9e1dce</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+063c2b7</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+b9e1dce</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+063c2b7</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+b9e1dce</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -332,11 +332,11 @@ simulation API.</p>
 <h2>A native path when ffsim is unavailable<a class="headerlink" href="#a-native-path-when-ffsim-is-unavailable" title="Link to this heading">¶</a></h2>
 <p>Coupling with ffsim’s protocols does not make ffsim a hard dependency. <a class="reference external" href="https://qiskit-community.github.io/ffsim/">ffsim</a> transitively
 depends on <a class="reference external" href="https://pyscf.org/">PySCF</a>, which does not support Windows, so ffsim is declared as
-an optional extra (<code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">&quot;qiskit-fermions[simulation]&quot;</span></code>, or transitively by <code class="docutils literal notranslate"><span class="pre">[all]</span></code>),
+an optional extra (<code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">&quot;qiskit-fermions[ffsim]&quot;</span></code>, or transitively by <code class="docutils literal notranslate"><span class="pre">[all]</span></code>),
 guarded at runtime by <a class="reference internal" href="../pydoc/qiskit_fermions.utils.optionals.html#qiskit_fermions.utils.optionals.HAS_FFSIM" title="qiskit_fermions.utils.optionals.HAS_FFSIM"><code class="xref py py-data docutils literal notranslate"><span class="pre">HAS_FFSIM</span></code></a> (as was shown above).
 On Windows, that extra resolves to nothing (a silent no-op through a <code class="docutils literal notranslate"><span class="pre">sys_platform</span></code> marker),
 rather than an install failure.</p>
-<p>Simulation must still work without ffsim, so <a class="reference internal" href="../stubs/qiskit_fermions.protocols.SupportsLinearOperator.html#qiskit_fermions.protocols.SupportsLinearOperator" title="qiskit_fermions.protocols.SupportsLinearOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">SupportsLinearOperator</span></code></a> is backed
+<p>Simulation must still work without ffsim, so <a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.SupportsLinearOperator.html#ffsim.SupportsLinearOperator" title="(in ffsim)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ffsim.SupportsLinearOperator</span></code></a> is backed
 by an independent native Rust FCI (full configuration interaction) kernel, not a wrapper
 around ffsim’s linear algebra routines. It compiles an operator’s terms into a scatter map
 over the fixed-particle-number determinant basis, then reuses that compiled form across repeated
@@ -347,9 +347,9 @@ into ffsim. Handing a <a class="reference internal" href="../stubs/qiskit_fermio
 <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.linalg.expm_multiply.html#scipy.sparse.linalg.expm_multiply" title="(in SciPy v1.18.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.sparse.linalg.expm_multiply()</span></code></a> (as <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution._apply_unitary_placed_" title="qiskit_fermions.circuit.library.Evolution._apply_unitary_placed_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Evolution._apply_unitary_placed_()</span></code></a> does
 internally) therefore works identically whether or not ffsim is installed:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">scipy.sparse.linalg</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.linalg</span><span class="w"> </span><span class="kn">import</span> <span class="n">linear_operator</span>
 <span class="gp">&gt;&gt;&gt;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">linop</span> <span class="o">=</span> <span class="n">linear_operator</span><span class="p">(</span><span class="n">hamiltonian</span><span class="p">,</span> <span class="n">norb</span><span class="p">,</span> <span class="n">nelec</span><span class="p">)</span>  <span class="c1"># pure scipy + native Rust kernel, no ffsim</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># no ffsim: call the protocol method directly (pure scipy + native Rust kernel)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">linop</span> <span class="o">=</span> <span class="n">hamiltonian</span><span class="o">.</span><span class="n">_linear_operator_</span><span class="p">(</span><span class="n">norb</span><span class="p">,</span> <span class="n">nelec</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">energy</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">sparse</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">eigsh</span><span class="p">(</span><span class="n">linop</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s2">"SA"</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"ground-state energy: </span><span class="si">{</span><span class="n">energy</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">.6f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 <span class="go">ground-state energy: -0.500000</span>
@@ -394,7 +394,6 @@ add an explicit guard before calling it:</p>
 alpha/beta split in the spinful case, and raises a <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ValueError</span></code></a> if it mixes spin sectors.</p></li>
 </ul>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.circuit.library</span><span class="w"> </span><span class="kn">import</span> <span class="n">Evolution</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.linalg</span><span class="w"> </span><span class="kn">import</span> <span class="n">apply_unitary</span>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">non_conserving</span> <span class="o">=</span> <span class="n">FermionOperator</span><span class="o">.</span><span class="n">from_terms</span><span class="p">([([</span><span class="n">cre</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">cre</span><span class="p">(</span><span class="mi">1</span><span class="p">)],</span> <span class="mf">1.0</span><span class="p">)])</span>  <span class="c1"># creates 2 particles</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">gate</span> <span class="o">=</span> <span class="n">Evolution</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">norb</span><span class="p">,</span> <span class="n">non_conserving</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
@@ -404,13 +403,13 @@ alpha/beta split in the spinful case, and raises a <a class="reference external"
 <span class="gp">... </span>    <span class="n">reference</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">complex</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">try</span><span class="p">:</span>
-<span class="gp">... </span>    <span class="n">apply_unitary</span><span class="p">(</span><span class="n">reference</span><span class="p">,</span> <span class="n">gate</span><span class="p">,</span> <span class="n">norb</span><span class="p">,</span> <span class="n">nelec</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="n">gate</span><span class="o">.</span><span class="n">_apply_unitary_</span><span class="p">(</span><span class="n">reference</span><span class="p">,</span> <span class="n">norb</span><span class="p">,</span> <span class="n">nelec</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="gp">... </span><span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
 <span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="s2">"rejected:"</span><span class="p">,</span> <span class="n">exc</span><span class="p">)</span>
 <span class="go">rejected: Evolution requires an operator that conserves the (norb, nelec) sector: every term must preserve the particle number of each spin species (norb=2, nelec=(1, 1)).</span>
 </pre></div>
 </div>
-<p>Calling <a class="reference internal" href="../stubs/qiskit_fermions.protocols.SupportsLinearOperator.html#qiskit_fermions.protocols.SupportsLinearOperator._linear_operator_" title="qiskit_fermions.protocols.SupportsLinearOperator._linear_operator_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">SupportsLinearOperator._linear_operator_()</span></code></a> <em>directly</em> on a non-conserving operator bypasses
+<p>Calling <code class="xref py py-meth docutils literal notranslate"><span class="pre">SupportsLinearOperator._linear_operator_()</span></code> <em>directly</em> on a non-conserving operator bypasses
 this guard (it is a lower-level building block, not a validated simulation entry point) and returns
 a matrix-vector product that silently zeroes the non-conserving amplitude rather than raising.</p>
 <p>The practical consequence is that non-particle-preserving simulation is not possible in fermionic
@@ -511,7 +510,7 @@ including the conversion protocols (<a class="reference internal" href="../stubs
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on 2026/09/04</div>
+              Last updated on 2026/09/07</div>
           </div>
           <div class="right-details">
             
@@ -551,7 +550,7 @@ including the conversion protocols (<a class="reference internal" href="../stubs
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=ebba96c3"></script>
+</div><script src="../_static/documentation_options.js?v=90bc2563"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

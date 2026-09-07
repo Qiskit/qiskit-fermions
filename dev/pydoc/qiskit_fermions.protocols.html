@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Protocols - Qiskit Fermions 0.2.0.dev0+063c2b7</title>
+        <title>Protocols - Qiskit Fermions 0.2.0.dev0+b9e1dce</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+063c2b7</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+b9e1dce</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -172,7 +172,7 @@
           <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
         </button>
       </div>
-      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
         <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
       </label>
     </div>
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+063c2b7</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+b9e1dce</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -257,7 +257,7 @@
               <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
             </button>
           </div>
-          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
             <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
           </label>
         </div>
@@ -269,14 +269,14 @@
 explicitly inheriting from it. For example, any class that implements a <code class="docutils literal notranslate"><span class="pre">__len__</span></code> method
 satisfies <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Sized" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sized</span></code></a>, whether or not it says so anywhere in its class hierarchy.</p>
 <p>The protocols in this module follow the same idea, but each one centers on a single, otherwise
-unremarkable dunder-style method (for example <code class="docutils literal notranslate"><span class="pre">_linear_operator_</span></code>). A class implementing that
-one method thereby satisfies the corresponding protocol – <a class="reference internal" href="../stubs/qiskit_fermions.protocols.SupportsLinearOperator.html#qiskit_fermions.protocols.SupportsLinearOperator" title="qiskit_fermions.protocols.SupportsLinearOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">SupportsLinearOperator</span></code></a> in
-this example – and becomes usable wherever that protocol is expected, without any explicit
-registration. Note that “protocol” is sometimes also used loosely to refer to the type-agnostic
-dispatch function built on top of a protocol (for example <a class="reference internal" href="../stubs/qiskit_fermions.linalg.linear_operator.html#qiskit_fermions.linalg.linear_operator" title="qiskit_fermions.linalg.linear_operator"><code class="xref py py-func docutils literal notranslate"><span class="pre">linear_operator()</span></code></a>) rather than
-the interface itself; the distinction should be clear from context.</p>
-<p>Most protocols below follow this pattern paired with a small, type-agnostic <strong>helper function</strong>
-that dispatches to the protocol method on whatever object it is given:</p>
+unremarkable dunder-style method (for example <code class="docutils literal notranslate"><span class="pre">_majorana_operator_</span></code>). A class implementing that
+one method thereby satisfies the corresponding protocol (<a class="reference internal" href="../stubs/qiskit_fermions.protocols.SupportsMajoranaOperator.html#qiskit_fermions.protocols.SupportsMajoranaOperator" title="qiskit_fermions.protocols.SupportsMajoranaOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">SupportsMajoranaOperator</span></code></a> in this
+example) and becomes usable wherever that protocol is expected, without any explicit registration.
+Note that “protocol” is sometimes also used loosely to refer to a type-agnostic dispatch function
+built on top of a protocol (for example <a class="reference internal" href="../stubs/qiskit_fermions.mappers.library.fermion_operator.html#qiskit_fermions.mappers.library.fermion_operator" title="qiskit_fermions.mappers.library.fermion_operator"><code class="xref py py-func docutils literal notranslate"><span class="pre">fermion_operator()</span></code></a>) rather than the interface itself;
+the distinction should be clear from context.</p>
+<p>Some protocols below are paired with a small, type-agnostic <strong>helper function</strong> that dispatches to
+the protocol method on whatever object it is given.</p>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
 <thead>
@@ -294,14 +294,6 @@ that dispatches to the protocol method on whatever object it is given:</p>
 <td><p><code class="docutils literal notranslate"><span class="pre">_majorana_operator_(self)</span></code></p></td>
 <td><p><a class="reference internal" href="../stubs/qiskit_fermions.mappers.library.majorana_operator.html#qiskit_fermions.mappers.library.majorana_operator" title="qiskit_fermions.mappers.library.majorana_operator"><code class="xref py py-func docutils literal notranslate"><span class="pre">majorana_operator()</span></code></a></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../stubs/qiskit_fermions.protocols.SupportsLinearOperator.html#qiskit_fermions.protocols.SupportsLinearOperator" title="qiskit_fermions.protocols.SupportsLinearOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">SupportsLinearOperator</span></code></a></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">_linear_operator_(self,</span> <span class="pre">norb,</span> <span class="pre">nelec)</span></code></p></td>
-<td><p><a class="reference internal" href="../stubs/qiskit_fermions.linalg.linear_operator.html#qiskit_fermions.linalg.linear_operator" title="qiskit_fermions.linalg.linear_operator"><code class="xref py py-func docutils literal notranslate"><span class="pre">linear_operator()</span></code></a></p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../stubs/qiskit_fermions.protocols.SupportsApplyUnitary.html#qiskit_fermions.protocols.SupportsApplyUnitary" title="qiskit_fermions.protocols.SupportsApplyUnitary"><code class="xref py py-class docutils literal notranslate"><span class="pre">SupportsApplyUnitary</span></code></a></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">_apply_unitary_(self,</span> <span class="pre">vec,</span> <span class="pre">norb,</span> <span class="pre">nelec,</span> <span class="pre">copy)</span></code></p></td>
-<td><p><a class="reference internal" href="../stubs/qiskit_fermions.linalg.apply_unitary.html#qiskit_fermions.linalg.apply_unitary" title="qiskit_fermions.linalg.apply_unitary"><code class="xref py py-func docutils literal notranslate"><span class="pre">apply_unitary()</span></code></a></p></td>
-</tr>
 <tr class="row-even"><td><p><a class="reference internal" href="../stubs/qiskit_fermions.protocols.SupportsApplyUnitaryPlaced.html#qiskit_fermions.protocols.SupportsApplyUnitaryPlaced" title="qiskit_fermions.protocols.SupportsApplyUnitaryPlaced"><code class="xref py py-class docutils literal notranslate"><span class="pre">SupportsApplyUnitaryPlaced</span></code></a></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">_apply_unitary_placed_(self,</span> <span class="pre">vec,</span> <span class="pre">norb,</span> <span class="pre">nelec,</span> <span class="pre">copy,</span> <span class="pre">freg_indices)</span></code></p></td>
 <td><p>–</p></td>
@@ -316,20 +308,14 @@ that dispatches to the protocol method on whatever object it is given:</p>
 <div class="table-wrapper autosummary longtable sd-d-none docutils container">
 <table class="autosummary longtable sd-d-none docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="../stubs/qiskit_fermions.protocols.SupportsApplyUnitary.html#qiskit_fermions.protocols.SupportsApplyUnitary" title="qiskit_fermions.protocols.SupportsApplyUnitary"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SupportsApplyUnitary</span></code></a>(*args, **kwargs)</p></td>
-<td><p>A mirror of the <a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.SupportsApplyUnitary.html#ffsim.SupportsApplyUnitary" title="(in ffsim)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ffsim.SupportsApplyUnitary</span></code></a> protocol.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../stubs/qiskit_fermions.protocols.SupportsApplyUnitaryPlaced.html#qiskit_fermions.protocols.SupportsApplyUnitaryPlaced" title="qiskit_fermions.protocols.SupportsApplyUnitaryPlaced"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SupportsApplyUnitaryPlaced</span></code></a>(*args, **kwargs)</p></td>
+<td><p>A package-specific extension of <a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.SupportsApplyUnitary.html#ffsim.SupportsApplyUnitary" title="(in ffsim)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ffsim.SupportsApplyUnitary</span></code></a>.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../stubs/qiskit_fermions.protocols.SupportsApplyUnitaryPlaced.html#qiskit_fermions.protocols.SupportsApplyUnitaryPlaced" title="qiskit_fermions.protocols.SupportsApplyUnitaryPlaced"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SupportsApplyUnitaryPlaced</span></code></a>(*args, **kwargs)</p></td>
-<td><p>A package-specific extension of <a class="reference internal" href="../stubs/qiskit_fermions.protocols.SupportsApplyUnitary.html#qiskit_fermions.protocols.SupportsApplyUnitary" title="qiskit_fermions.protocols.SupportsApplyUnitary"><code class="xref py py-class docutils literal notranslate"><span class="pre">SupportsApplyUnitary</span></code></a> carrying a mode placement.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../stubs/qiskit_fermions.protocols.SupportsCommutators.html#qiskit_fermions.protocols.SupportsCommutators" title="qiskit_fermions.protocols.SupportsCommutators"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SupportsCommutators</span></code></a>(*args, **kwargs)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../stubs/qiskit_fermions.protocols.SupportsCommutators.html#qiskit_fermions.protocols.SupportsCommutators" title="qiskit_fermions.protocols.SupportsCommutators"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SupportsCommutators</span></code></a>(*args, **kwargs)</p></td>
 <td><p>A Protocol indicating support for efficient commutator generation.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../stubs/qiskit_fermions.protocols.SupportsFermionOperator.html#qiskit_fermions.protocols.SupportsFermionOperator" title="qiskit_fermions.protocols.SupportsFermionOperator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SupportsFermionOperator</span></code></a>(*args, **kwargs)</p></td>
-<td><p>An equivalent of the <a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.SupportsFermionOperator.html#ffsim.SupportsFermionOperator" title="(in ffsim)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ffsim.SupportsFermionOperator</span></code></a> protocol.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../stubs/qiskit_fermions.protocols.SupportsLinearOperator.html#qiskit_fermions.protocols.SupportsLinearOperator" title="qiskit_fermions.protocols.SupportsLinearOperator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SupportsLinearOperator</span></code></a>(*args, **kwargs)</p></td>
-<td><p>A mirror of the <a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.SupportsLinearOperator.html#ffsim.SupportsLinearOperator" title="(in ffsim)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ffsim.SupportsLinearOperator</span></code></a> protocol.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../stubs/qiskit_fermions.protocols.SupportsFermionOperator.html#qiskit_fermions.protocols.SupportsFermionOperator" title="qiskit_fermions.protocols.SupportsFermionOperator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SupportsFermionOperator</span></code></a>(*args, **kwargs)</p></td>
+<td><p>This package's operator-conversion contract, converting an operator to a <a class="reference internal" href="../stubs/qiskit_fermions.operators.FermionOperator.html#qiskit_fermions.operators.FermionOperator" title="qiskit_fermions.operators.FermionOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionOperator</span></code></a>.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="../stubs/qiskit_fermions.protocols.SupportsMajoranaOperator.html#qiskit_fermions.protocols.SupportsMajoranaOperator" title="qiskit_fermions.protocols.SupportsMajoranaOperator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SupportsMajoranaOperator</span></code></a>(*args, **kwargs)</p></td>
 <td><p>An equivalent of the <a class="reference internal" href="../stubs/qiskit_fermions.protocols.SupportsFermionOperator.html#qiskit_fermions.protocols.SupportsFermionOperator" title="qiskit_fermions.protocols.SupportsFermionOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">SupportsFermionOperator</span></code></a> protocol, targeting Majorana operators.</p></td>
@@ -337,6 +323,40 @@ that dispatches to the protocol method on whatever object it is given:</p>
 </tbody>
 </table>
 </div>
+<section id="protocols-implemented-from-ffsim">
+<h2>Protocols implemented from ffsim<a class="headerlink" href="#protocols-implemented-from-ffsim" title="Link to this heading">¶</a></h2>
+<p>Simulation is <a class="reference external" href="https://qiskit-community.github.io/ffsim/">ffsim</a>’s concern, and its protocols are
+defined there rather than restated here. The gates and operators of this package implement the
+following, so ffsim’s dispatchers accept them directly:</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>ffsim protocol</p></th>
+<th class="head"><p>Method</p></th>
+<th class="head"><p>Implemented by</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.SupportsApplyUnitary.html#ffsim.SupportsApplyUnitary" title="(in ffsim)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ffsim.SupportsApplyUnitary</span></code></a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">_apply_unitary_(self,</span> <span class="pre">vec,</span> <span class="pre">norb,</span> <span class="pre">nelec,</span> <span class="pre">copy)</span></code></p></td>
+<td><p><a class="reference internal" href="../stubs/qiskit_fermions.circuit.FermionicCircuit.html#qiskit_fermions.circuit.FermionicCircuit" title="qiskit_fermions.circuit.FermionicCircuit"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicCircuit</span></code></a> and every <a class="reference internal" href="../stubs/qiskit_fermions.circuit.FermionicGate.html#qiskit_fermions.circuit.FermionicGate" title="qiskit_fermions.circuit.FermionicGate"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicGate</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.SupportsLinearOperator.html#ffsim.SupportsLinearOperator" title="(in ffsim)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ffsim.SupportsLinearOperator</span></code></a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">_linear_operator_(self,</span> <span class="pre">norb,</span> <span class="pre">nelec)</span></code></p></td>
+<td><p><a class="reference internal" href="../stubs/qiskit_fermions.operators.FermionOperator.html#qiskit_fermions.operators.FermionOperator" title="qiskit_fermions.operators.FermionOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionOperator</span></code></a></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="admonition caution">
+<p class="admonition-title">Caution</p>
+<p><a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.SupportsFermionOperator.html#ffsim.SupportsFermionOperator" title="(in ffsim)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ffsim.SupportsFermionOperator</span></code></a> shares the <code class="docutils literal notranslate"><span class="pre">_fermion_operator_</span></code> method name with
+this package’s <a class="reference internal" href="../stubs/qiskit_fermions.protocols.SupportsFermionOperator.html#qiskit_fermions.protocols.SupportsFermionOperator" title="qiskit_fermions.protocols.SupportsFermionOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">SupportsFermionOperator</span></code></a>, but the two are <em>not</em> the same contract: ours
+returns this package’s <a class="reference internal" href="../stubs/qiskit_fermions.operators.FermionOperator.html#qiskit_fermions.operators.FermionOperator" title="qiskit_fermions.operators.FermionOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionOperator</span></code></a> rather than ffsim’s unrelated type. Since
+<a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.fermion_operator.html#ffsim.fermion_operator" title="(in ffsim)"><code class="xref py py-func docutils literal notranslate"><span class="pre">ffsim.fermion_operator()</span></code></a> dispatches purely on the method name, calling it on an object of
+this package returns our type.</p>
+</div>
+</section>
 </section>
 
         </article>
@@ -356,7 +376,7 @@ that dispatches to the protocol method on whatever object it is given:</p>
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on 2026/09/04</div>
+              Last updated on 2026/09/07</div>
           </div>
           <div class="right-details">
             
@@ -365,13 +385,32 @@ that dispatches to the protocol method on whatever object it is given:</p>
         
       </footer>
     </div>
-    <aside class="toc-drawer no-toc">
+    <aside class="toc-drawer">
       
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Protocols</a><ul>
+<li><a class="reference internal" href="#protocols-implemented-from-ffsim">Protocols implemented from ffsim</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
       
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=ebba96c3"></script>
+</div><script src="../_static/documentation_options.js?v=90bc2563"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

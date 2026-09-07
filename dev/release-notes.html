@@ -8,7 +8,7 @@
         <link rel="prefetch" href="_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Release Notes - Qiskit Fermions 0.2.0.dev0+063c2b7</title>
+        <title>Release Notes - Qiskit Fermions 0.2.0.dev0+b9e1dce</title>
       <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+063c2b7</div></a>
+      <a href="index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+b9e1dce</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+063c2b7</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+b9e1dce</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="search.html" role="search">
@@ -406,6 +406,56 @@ layer:</p>
 <section id="upgrade-notes">
 <span id="release-notes-upcoming-release-main-upgrade-notes"></span><h3>Upgrade Notes<a class="headerlink" href="#upgrade-notes" title="Link to this heading">¶</a></h3>
 <ul>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">qiskit_fermions.linalg.apply_unitary</span></code> and
+<code class="docutils literal notranslate"><span class="pre">qiskit_fermions.linalg.linear_operator</span></code> functions have been removed. They were thin wrappers
+around the <code class="docutils literal notranslate"><span class="pre">_apply_unitary_</span></code> and <code class="docutils literal notranslate"><span class="pre">_linear_operator_</span></code> protocol methods,
+duplicating <a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.apply_unitary.html#ffsim.apply_unitary" title="(in ffsim)"><code class="xref py py-func docutils literal notranslate"><span class="pre">ffsim.apply_unitary()</span></code></a> and <a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.linear_operator.html#ffsim.linear_operator" title="(in ffsim)"><code class="xref py py-func docutils literal notranslate"><span class="pre">ffsim.linear_operator()</span></code></a>. Call ffsim’s
+functions instead, or, when ffsim is not installed, the protocol method on the object directly:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># before</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.linalg</span><span class="w"> </span><span class="kn">import</span> <span class="n">apply_unitary</span><span class="p">,</span> <span class="n">linear_operator</span>
+<span class="n">vec</span> <span class="o">=</span> <span class="n">apply_unitary</span><span class="p">(</span><span class="n">vec</span><span class="p">,</span> <span class="n">gate</span><span class="p">,</span> <span class="n">norb</span><span class="p">,</span> <span class="n">nelec</span><span class="p">)</span>
+<span class="n">linop</span> <span class="o">=</span> <span class="n">linear_operator</span><span class="p">(</span><span class="n">operator</span><span class="p">,</span> <span class="n">norb</span><span class="p">,</span> <span class="n">nelec</span><span class="p">)</span>
+
+<span class="c1"># after (with ffsim)</span>
+<span class="n">vec</span> <span class="o">=</span> <span class="n">ffsim</span><span class="o">.</span><span class="n">apply_unitary</span><span class="p">(</span><span class="n">vec</span><span class="p">,</span> <span class="n">gate</span><span class="p">,</span> <span class="n">norb</span><span class="o">=</span><span class="n">norb</span><span class="p">,</span> <span class="n">nelec</span><span class="o">=</span><span class="n">nelec</span><span class="p">)</span>
+<span class="n">linop</span> <span class="o">=</span> <span class="n">ffsim</span><span class="o">.</span><span class="n">linear_operator</span><span class="p">(</span><span class="n">operator</span><span class="p">,</span> <span class="n">norb</span><span class="o">=</span><span class="n">norb</span><span class="p">,</span> <span class="n">nelec</span><span class="o">=</span><span class="n">nelec</span><span class="p">)</span>
+
+<span class="c1"># after (without ffsim)</span>
+<span class="n">vec</span> <span class="o">=</span> <span class="n">gate</span><span class="o">.</span><span class="n">_apply_unitary_</span><span class="p">(</span><span class="n">vec</span><span class="p">,</span> <span class="n">norb</span><span class="p">,</span> <span class="n">nelec</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">linop</span> <span class="o">=</span> <span class="n">operator</span><span class="o">.</span><span class="n">_linear_operator_</span><span class="p">(</span><span class="n">norb</span><span class="p">,</span> <span class="n">nelec</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The methods themselves are unchanged, and the native FCI kernel backing <code class="docutils literal notranslate"><span class="pre">_linear_operator_</span></code>
+still depends only on <code class="docutils literal notranslate"><span class="pre">scipy</span></code>, so simulating an operator without ffsim installed works exactly
+as before.</p>
+</li>
+</ul>
+<ul>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">qiskit_fermions.protocols.SupportsApplyUnitary</span></code> and
+<code class="docutils literal notranslate"><span class="pre">qiskit_fermions.protocols.SupportsLinearOperator</span></code> protocols have been removed for the same
+reason: they restated contracts that ffsim defines. Use ffsim’s own protocols, which they
+mirrored one-to-one:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">qiskit_fermions.protocols.SupportsApplyUnitary</span></code> becomes
+<a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.SupportsApplyUnitary.html#ffsim.SupportsApplyUnitary" title="(in ffsim)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ffsim.SupportsApplyUnitary</span></code></a></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">qiskit_fermions.protocols.SupportsLinearOperator</span></code> becomes
+<a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.SupportsLinearOperator.html#ffsim.SupportsLinearOperator" title="(in ffsim)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ffsim.SupportsLinearOperator</span></code></a></p></li>
+</ul>
+<p>The protocol <em>methods</em> (<code class="docutils literal notranslate"><span class="pre">_apply_unitary_</span></code> and <code class="docutils literal notranslate"><span class="pre">_linear_operator_</span></code>) are unchanged, so the
+objects of this package that implemented them still do; only the local restatement of the
+interface is gone. <a class="reference internal" href="stubs/qiskit_fermions.protocols.SupportsApplyUnitaryPlaced.html#qiskit_fermions.protocols.SupportsApplyUnitaryPlaced" title="qiskit_fermions.protocols.SupportsApplyUnitaryPlaced"><code class="xref py py-class docutils literal notranslate"><span class="pre">SupportsApplyUnitaryPlaced</span></code></a> stays, since it extends
+<a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.SupportsApplyUnitary.html#ffsim.SupportsApplyUnitary" title="(in ffsim)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ffsim.SupportsApplyUnitary</span></code></a> with a mode placement and has no ffsim counterpart.</p>
+</li>
+</ul>
+<ul class="simple">
+<li><p>The <code class="docutils literal notranslate"><span class="pre">simulation</span></code> optional dependency has been renamed to <code class="docutils literal notranslate"><span class="pre">ffsim</span></code>, so
+<code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">&quot;qiskit-fermions[simulation]&quot;</span></code> becomes
+<code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">&quot;qiskit-fermions[ffsim]&quot;</span></code>. The extra names the dependency it installs rather than
+a capability, because simulation does not require it: the native FCI kernel behind
+<code class="docutils literal notranslate"><span class="pre">_linear_operator_</span></code> depends only on <code class="docutils literal notranslate"><span class="pre">scipy</span></code>. Installing
+<code class="docutils literal notranslate"><span class="pre">qiskit-fermions[all]</span></code> is unaffected.</p></li>
+</ul>
+<ul>
 <li><p><a class="reference internal" href="stubs/qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis.html#qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis" title="qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis"><code class="xref py py-class docutils literal notranslate"><span class="pre">MapperFnEvolutionSynthesis</span></code></a> no longer simplifies the operator returned by its
 <a class="reference internal" href="stubs/qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis.html#qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis.mapper_fn" title="qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis.mapper_fn"><code class="xref py py-attr docutils literal notranslate"><span class="pre">mapper_fn</span></code></a>. Simplifying sorts the Pauli terms into a canonical
 order, and a product formula synthesizes them in the order it receives them, so the previous
@@ -520,7 +570,7 @@ Following Qiskit’s design philosophy, the core of this package is written in R
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on 2026/09/04</div>
+              Last updated on 2026/09/07</div>
           </div>
           <div class="right-details">
             
@@ -563,7 +613,7 @@ Following Qiskit’s design philosophy, the core of this package is written in R
       
     </aside>
   </div>
-</div><script src="_static/documentation_options.js?v=ebba96c3"></script>
+</div><script src="_static/documentation_options.js?v=90bc2563"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/scripts/furo.js?v=46bd48cc"></script>

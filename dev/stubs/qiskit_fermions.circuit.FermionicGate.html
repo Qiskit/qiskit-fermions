@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>FermionicGate - Qiskit Fermions 0.2.0.dev0+063c2b7</title>
+        <title>FermionicGate - Qiskit Fermions 0.2.0.dev0+b9e1dce</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+063c2b7</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+b9e1dce</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+063c2b7</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+b9e1dce</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -383,12 +383,11 @@ and is not mutable.</p>
 <dt class="sig sig-object py" id="qiskit_fermions.circuit.FermionicGate._apply_unitary_">
 <span class="sig-name descname"><span class="pre">_apply_unitary_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norb</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nelec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">copy</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qiskit_fermions.circuit.FermionicGate._apply_unitary_" title="Link to this definition">¶</a></dt>
 <dd><p>Applies this gate to an ffsim state vector, implementing ffsim’s protocol.</p>
-<p>This is the identity-placement entry point of ffsim’s
-<a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.SupportsApplyUnitary.html#ffsim.SupportsApplyUnitary" title="(in ffsim)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ffsim.SupportsApplyUnitary</span></code></a> protocol (mirrored locally as
-<a class="reference internal" href="qiskit_fermions.protocols.SupportsApplyUnitary.html#qiskit_fermions.protocols.SupportsApplyUnitary" title="qiskit_fermions.protocols.SupportsApplyUnitary"><code class="xref py py-class docutils literal notranslate"><span class="pre">SupportsApplyUnitary</span></code></a>): it assumes the gate acts on the modes <code class="docutils literal notranslate"><span class="pre">0..num_modes</span></code> of the
-state vector and delegates to the placement-aware <code class="xref py py-meth docutils literal notranslate"><span class="pre">_apply_unitary_placed_()</span></code> (see
-<a class="reference internal" href="qiskit_fermions.protocols.SupportsApplyUnitaryPlaced.html#qiskit_fermions.protocols.SupportsApplyUnitaryPlaced" title="qiskit_fermions.protocols.SupportsApplyUnitaryPlaced"><code class="xref py py-class docutils literal notranslate"><span class="pre">SupportsApplyUnitaryPlaced</span></code></a>), which every concrete fermionic gate implements.
-See that method for the semantics of <code class="docutils literal notranslate"><span class="pre">vec</span></code> (including whether a <code class="docutils literal notranslate"><span class="pre">None</span></code> vector is accepted),
+<p>This is the identity-placement entry point of ffsim’s <a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.SupportsApplyUnitary.html#ffsim.SupportsApplyUnitary" title="(in ffsim)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ffsim.SupportsApplyUnitary</span></code></a>
+protocol: it assumes the gate acts on the modes <code class="docutils literal notranslate"><span class="pre">0..num_modes</span></code> of the state vector and
+delegates to the placement-aware <code class="xref py py-meth docutils literal notranslate"><span class="pre">_apply_unitary_placed_()</span></code> (see
+<a class="reference internal" href="qiskit_fermions.protocols.SupportsApplyUnitaryPlaced.html#qiskit_fermions.protocols.SupportsApplyUnitaryPlaced" title="qiskit_fermions.protocols.SupportsApplyUnitaryPlaced"><code class="xref py py-class docutils literal notranslate"><span class="pre">SupportsApplyUnitaryPlaced</span></code></a>), which every concrete fermionic gate implements. See
+that method for the semantics of <code class="docutils literal notranslate"><span class="pre">vec</span></code> (including whether a <code class="docutils literal notranslate"><span class="pre">None</span></code> vector is accepted),
 <code class="docutils literal notranslate"><span class="pre">norb</span></code>, <code class="docutils literal notranslate"><span class="pre">nelec</span></code>, and <code class="docutils literal notranslate"><span class="pre">copy</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
@@ -696,7 +695,7 @@ will be a deepcopy of that instance.</p>
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on 2026/09/04</div>
+              Last updated on 2026/09/07</div>
           </div>
           <div class="right-details">
             
@@ -756,7 +755,7 @@ will be a deepcopy of that instance.</p>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=ebba96c3"></script>
+</div><script src="../_static/documentation_options.js?v=90bc2563"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

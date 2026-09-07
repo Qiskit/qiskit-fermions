@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Generate Krylov time-evolution circuits (SKQD) - Qiskit Fermions 0.2.0.dev0+063c2b7</title>
+        <title>Generate Krylov time-evolution circuits (SKQD) - Qiskit Fermions 0.2.0.dev0+b9e1dce</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+063c2b7</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+b9e1dce</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+063c2b7</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+b9e1dce</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -442,10 +442,10 @@ operator is correct by comparing its lowest eigenvalue in the
 <a class="reference internal" href="../stubs/qiskit_fermions.operators.FermionOperator.html#qiskit_fermions.operators.FermionOperator" title="qiskit_fermions.operators.FermionOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionOperator</span></code></a> exposes a SciPy <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.linalg.LinearOperator.html#scipy.sparse.linalg.LinearOperator" title="(in SciPy v1.18.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinearOperator</span></code></a> (backed by a
 native full configuration interaction (FCI) matrix-vector kernel), so it can be handed straight to
 <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.linalg.eigsh.html#scipy.sparse.linalg.eigsh" title="(in SciPy v1.18.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.sparse.linalg.eigsh()</span></code></a>.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">scipy.sparse.linalg</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.linalg</span><span class="w"> </span><span class="kn">import</span> <span class="n">linear_operator</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">ffsim</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">scipy.sparse.linalg</span>
 <span class="gp">&gt;&gt;&gt;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">linop</span> <span class="o">=</span> <span class="n">linear_operator</span><span class="p">(</span><span class="n">hamiltonian_momentum</span><span class="p">,</span> <span class="n">norb</span><span class="p">,</span> <span class="n">nelec</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">linop</span> <span class="o">=</span> <span class="n">ffsim</span><span class="o">.</span><span class="n">linear_operator</span><span class="p">(</span><span class="n">hamiltonian_momentum</span><span class="p">,</span> <span class="n">norb</span><span class="p">,</span> <span class="n">nelec</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">reference_energy</span><span class="p">,</span> <span class="n">ground_state</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">sparse</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">eigsh</span><span class="p">(</span><span class="n">linop</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s2">"SA"</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">reference_energy</span> <span class="o">=</span> <span class="n">reference_energy</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ground_state</span> <span class="o">=</span> <span class="n">ground_state</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
@@ -462,7 +462,7 @@ determinants is not:</p>
 <span class="gp">... </span>    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">weights</span><span class="p">),</span> <span class="n">fraction</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
 <span class="gp">...</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># the same Hamiltonian in the position basis has an identical spectrum, but a dense ground state</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">position_linop</span> <span class="o">=</span> <span class="n">linear_operator</span><span class="p">(</span><span class="n">hamiltonian_position</span><span class="p">,</span> <span class="n">norb</span><span class="p">,</span> <span class="n">nelec</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">position_linop</span> <span class="o">=</span> <span class="n">ffsim</span><span class="o">.</span><span class="n">linear_operator</span><span class="p">(</span><span class="n">hamiltonian_position</span><span class="p">,</span> <span class="n">norb</span><span class="p">,</span> <span class="n">nelec</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">position_energy</span><span class="p">,</span> <span class="n">position_ground</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">sparse</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">eigsh</span><span class="p">(</span><span class="n">position_linop</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s2">"SA"</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"position-basis energy: </span><span class="si">{</span><span class="n">position_energy</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">.6f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
@@ -672,8 +672,7 @@ version of that step, showing the bitstrings SKQD would collect. Simulate each u
 checks that the incoming state occupies its reference determinant, then applies the rotation). Therefore, the
 input is the plain occupation determinant: the lowest <code class="docutils literal notranslate"><span class="pre">nocc</span></code> modes filled per spin, with no
 rotation. The gate applies <code class="docutils literal notranslate"><span class="pre">reference_rotation</span></code> itself.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">ffsim</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">Counter</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">Counter</span>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">reference</span> <span class="o">=</span> <span class="n">ffsim</span><span class="o">.</span><span class="n">slater_determinant</span><span class="p">(</span>
 <span class="gp">... </span>    <span class="n">norb</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">nelec</span><span class="p">[</span><span class="mi">0</span><span class="p">])),</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">nelec</span><span class="p">[</span><span class="mi">1</span><span class="p">])))</span>
@@ -835,7 +834,7 @@ momentum-basis sparsity established in step 2 sample-efficient.</p>
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on 2026/09/04</div>
+              Last updated on 2026/09/07</div>
           </div>
           <div class="right-details">
             
@@ -876,7 +875,7 @@ momentum-basis sparsity established in step 2 sample-efficient.</p>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=ebba96c3"></script>
+</div><script src="../_static/documentation_options.js?v=90bc2563"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>SupportsFermionOperator - Qiskit Fermions 0.2.0.dev0+063c2b7</title>
+        <title>SupportsFermionOperator - Qiskit Fermions 0.2.0.dev0+b9e1dce</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+063c2b7</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+b9e1dce</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+063c2b7</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+b9e1dce</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -268,9 +268,19 @@
 <dt class="sig sig-object py" id="qiskit_fermions.protocols.SupportsFermionOperator">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">SupportsFermionOperator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qiskit_fermions.protocols.SupportsFermionOperator" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Protocol" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a></p>
-<p>An equivalent of the <a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.SupportsFermionOperator.html#ffsim.SupportsFermionOperator" title="(in ffsim)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ffsim.SupportsFermionOperator</span></code></a> protocol.</p>
+<p>This package’s operator-conversion contract, converting an operator to a <a class="reference internal" href="qiskit_fermions.operators.FermionOperator.html#qiskit_fermions.operators.FermionOperator" title="qiskit_fermions.operators.FermionOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionOperator</span></code></a>.</p>
 <p>See <a class="reference internal" href="qiskit_fermions.mappers.library.fermion_operator.html#qiskit_fermions.mappers.library.fermion_operator" title="qiskit_fermions.mappers.library.fermion_operator"><code class="xref py py-func docutils literal notranslate"><span class="pre">fermion_operator()</span></code></a> for the type-agnostic helper function dispatching to the method
 below.</p>
+<div class="admonition caution">
+<p class="admonition-title">Caution</p>
+<p>Despite the shared method name, this is <em>not</em> the same contract as
+<a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.SupportsFermionOperator.html#ffsim.SupportsFermionOperator" title="(in ffsim)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ffsim.SupportsFermionOperator</span></code></a>: this one returns a
+<a class="reference internal" href="qiskit_fermions.operators.FermionOperator.html#qiskit_fermions.operators.FermionOperator" title="qiskit_fermions.operators.FermionOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionOperator</span></code></a>, whereas ffsim’s returns an
+<a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.FermionOperator.html#ffsim.FermionOperator" title="(in ffsim)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ffsim.FermionOperator</span></code></a>. The two types are unrelated. Since
+<a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.fermion_operator.html#ffsim.fermion_operator" title="(in ffsim)"><code class="xref py py-func docutils literal notranslate"><span class="pre">ffsim.fermion_operator()</span></code></a> dispatches purely on the method name, calling it on an operator
+of this package returns <em>this</em> package’s type rather than ffsim’s; use
+<a class="reference internal" href="qiskit_fermions.mappers.library.fermion_operator.html#qiskit_fermions.mappers.library.fermion_operator" title="qiskit_fermions.mappers.library.fermion_operator"><code class="xref py py-func docutils literal notranslate"><span class="pre">fermion_operator()</span></code></a> when that is what you mean.</p>
+</div>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.operators</span><span class="w"> </span><span class="kn">import</span> <span class="n">MajoranaOperator</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">maj_op</span> <span class="o">=</span> <span class="n">MajoranaOperator</span><span class="o">.</span><span class="n">from_dict</span><span class="p">({(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span> <span class="mi">1</span><span class="p">})</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">fer_op</span> <span class="o">=</span> <span class="n">maj_op</span><span class="o">.</span><span class="n">_fermion_operator_</span><span class="p">()</span>
@@ -312,7 +322,7 @@ below.</p>
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on 2026/09/04</div>
+              Last updated on 2026/09/07</div>
           </div>
           <div class="right-details">
             
@@ -349,7 +359,7 @@ below.</p>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=ebba96c3"></script>
+</div><script src="../_static/documentation_options.js?v=90bc2563"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
