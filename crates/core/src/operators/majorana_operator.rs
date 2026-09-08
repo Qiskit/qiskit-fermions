@@ -10,7 +10,9 @@
 // copyright notice, and modified files need to carry a notice indicating
 // that they have been altered from the originals.
 
-use crate::operators::{CoherenceError, OperatorMacro, OperatorTrait, ScaledTerm, TermSortKey};
+use crate::operators::{
+    CoherenceError, GroupedTerm, OperatorMacro, OperatorTrait, ScaledTerm, TermSortKey,
+};
 use num_complex::{Complex64, ComplexFloat};
 use std::collections::{HashMap, HashSet};
 use std::ops::{
@@ -88,6 +90,12 @@ impl ScaledTerm for MajoranaOperatorGroupTermView<'_> {
     fn scaled(mut self, factor: Complex64) -> Self {
         self.coeff *= factor;
         self
+    }
+}
+
+impl GroupedTerm for MajoranaOperatorGroupTermView<'_> {
+    fn group(&self) -> u32 {
+        self.group
     }
 }
 
@@ -479,6 +487,19 @@ impl OperatorTrait for MajoranaOperator {
 
     fn groups(&self) -> Option<&[u32]> {
         self.groups.as_deref()
+    }
+
+    fn set_groups(&mut self, groups: Option<Vec<u32>>) -> Result<(), CoherenceError> {
+        if let Some(groups) = &groups
+            && groups.len() != self.coeffs.len()
+        {
+            return Err(CoherenceError::GroupLengthMismatch {
+                num_groups: groups.len(),
+                num_terms: self.coeffs.len(),
+            });
+        }
+        self.groups = groups;
+        Ok(())
     }
 
     fn iter_with_groups(&self) -> impl ExactSizeIterator<Item = Self::GroupTermView<'_>> {

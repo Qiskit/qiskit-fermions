@@ -27,6 +27,7 @@ from qiskit_fermions.circuit.library import (
     OrbitalRotation,
     PrepareSlaterDeterminant,
 )
+from qiskit_fermions.operators.terms.grouping import group_coeff_means
 
 from ... import FermionicDAGCircuitPass
 
@@ -234,8 +235,10 @@ class QDriftTrotterization(FermionicDAGCircuitPass):
                 # `hamil.groups` here. Those two accessors each copy one value per *ungrouped*
                 # term out of the operator, only for both arrays to be aggregated straight back
                 # down to one weight per group -- which dominates the cost of the reduction itself
-                # for a Hamiltonian holding far more terms than groups.
-                weights = np.array(hamil.group_weights())
+                # for a Hamiltonian holding far more terms than groups. The mean is the magnitude
+                # of one atomic group, which is the scale the protocol needs: grouping is what makes
+                # each sampled piece Hermitian, and hence its evolution unitary, to begin with.
+                weights = np.array(group_coeff_means(hamil))
                 # NOTE: we do not materialize the group operators here. Since only a small
                 # fraction of the (potentially much larger) set of groups ends up being sampled,
                 # we look up each sampled group's operator lazily via `split_out_groups`, once we

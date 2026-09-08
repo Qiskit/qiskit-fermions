@@ -12,10 +12,18 @@
 
 """Operator terms grouping."""
 
+from qiskit_fermions._lib.operators.operators_terms.grouping.analysis import (
+    group_coeff_means,
+    groups_are_hermitian,
+    groups_have_uniform_coeffs,
+)
 from qiskit_fermions._lib.operators.operators_terms.grouping.electronic_structure import (
     group_terms_by_electronic_structure,
 )
 
 __all__ = [
+    "group_coeff_means",
     "group_terms_by_electronic_structure",
+    "groups_are_hermitian",
+    "groups_have_uniform_coeffs",
 ]

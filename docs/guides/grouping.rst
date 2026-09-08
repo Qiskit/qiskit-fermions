@@ -116,6 +116,155 @@ the same group. The following code shows how that can be done:
        qf_maj_op_split_out_groups(op, NULL, 0, group_ops);
 
 
+Analyze a grouping
+------------------
+
+Groups prescribe no meaning of their own: the groups array records which terms belong together,
+never why. No routine in this library reports whether a grouping is "correct", because there is no
+single notion of correctness to report against. Downstream consumers do, however, assume properties
+of a grouping, and the functions in this section let you check such an assumption up front rather
+than paying for it on every call.
+
+The most common convention is that each group is separately Hermitian. That is what makes fermionic
+randomized product formulas possible at all: a lone :math:`a^\dagger_p a_q` with :math:`p \neq q`
+is not Hermitian, so its time evolution is not unitary and it cannot be sampled on its own. Pairing
+it with :math:`a^\dagger_q a_p` yields a group that can be.
+
+.. tab-set-code::
+
+    .. code-block:: python
+
+       >>> from qiskit_fermions.operators import FermionOperator
+       >>> from qiskit_fermions.operators.terms.grouping import (
+       ...     group_coeff_means,
+       ...     groups_are_hermitian,
+       ...     groups_have_uniform_coeffs,
+       ... )
+       >>>
+       >>> # a conjugate pair, plus one unpaired term. The operator is built from the sparse
+       >>> # arrays rather than from a dictionary, because only the former fixes the term order
+       >>> # that the group indices below are paired with.
+       >>> pair_and_single = FermionOperator(
+       ...     [1.0, 1.0, 1.0],
+       ...     [True, False, True, False, True, False],
+       ...     [0, 1, 1, 0, 2, 3],
+       ...     [0, 2, 4, 6],
+       ... )
+       >>> pair_and_single.groups = [0, 0, 1]
+       >>>
+       >>> groups_are_hermitian(pair_and_single)  # group 1 is unpaired
+       [True, False]
+       >>> group_coeff_means(pair_and_single)
+       [1.0, 1.0]
+
+    .. code-block:: c
+
+       #include <qiskit_fermions.h>
+
+       uint64_t num_terms = 3;
+       uint64_t num_actions = 6;
+       bool actions[6] = {true, false, true, false, true, false};
+       uint32_t modes[6] = {0, 1, 1, 0, 2, 3};
+       QkComplex64 coeffs[3] = {{1.0, 0.0}, {1.0, 0.0}, {1.0, 0.0}};
+       uint32_t boundaries[4] = {0, 2, 4, 6};
+       QfFermionOperator *op =
+           qf_ferm_op_new(num_terms, num_actions, coeffs, actions, modes, boundaries);
+
+       uint32_t groups[3] = {0, 0, 1};
+       qf_ferm_op_set_groups(op, groups, num_terms);
+
+       bool hermitian[2];
+       qf_ferm_op_groups_are_hermitian(op, 1e-8, hermitian);
+
+       double means[2];
+       qf_ferm_op_group_coeff_means(op, means);
+
+
+One group index per term is enforced
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The groups array holds one index per term, and assigning one of a different length raises. Nothing
+downstream re-checks the invariant, so it is enforced where the indices enter the operator: an array
+that is too short would silently drop trailing terms, and one that is too long would invent groups
+that no term carries.
+
+.. code-block:: python
+
+   >>> pair_and_single.groups = [0, 0]  # one index short, on a three-term operator
+   Traceback (most recent call last):
+   ValueError: expected one group index per term, but got 2 for 3 terms
+
+Clearing the group indices by assigning ``None`` is always allowed.
+
+The two checks are independent
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+:func:`~qiskit_fermions.operators.terms.grouping.groups_have_uniform_coeffs` reports whether a
+group's coefficients agree, which is the assumption
+:func:`~qiskit_fermions.operators.terms.grouping.group_coeff_means` makes when it averages
+magnitudes. It is not a weaker form of the Hermiticity check: neither check implies the other, in
+either direction.
+
+.. plot::
+   :context:
+   :nofigs:
+   :include-source:
+
+   >>> from qiskit_fermions.operators.terms.grouping import (
+   ...     groups_are_hermitian,
+   ...     groups_have_uniform_coeffs,
+   ... )
+   >>> # uniform coefficients, but not Hermitian: the terms are not each other's adjoint
+   >>> uniform = FermionOperator(
+   ...     [1.0, 1.0],
+   ...     [True, False, True, False],
+   ...     [0, 1, 2, 3],
+   ...     [0, 2, 4],
+   ... )
+   >>> uniform.groups = [0, 0]
+   >>> groups_have_uniform_coeffs(uniform), groups_are_hermitian(uniform)
+   ([True], [False])
+
+   >>> # Hermitian, but with mixed magnitudes: two conjugate pairs at different scales
+   >>> mixed = FermionOperator(
+   ...     [1.0, 1.0, 5.0, 5.0],
+   ...     [True, False, True, False, True, False, True, False],
+   ...     [0, 1, 1, 0, 2, 3, 3, 2],
+   ...     [0, 2, 4, 6, 8],
+   ... )
+   >>> mixed.groups = [0, 0, 0, 0]
+   >>> groups_are_hermitian(mixed), groups_have_uniform_coeffs(mixed)
+   ([True], [False])
+
+By default the magnitudes are compared, because that is what
+:func:`~qiskit_fermions.operators.terms.grouping.group_coeff_means` averages. A Hermitian conjugate
+pair with complex coefficients has equal magnitudes but unequal coefficients, so it satisfies only
+the default form.
+
+.. plot::
+   :context:
+   :nofigs:
+   :include-source:
+
+   >>> conjugate = FermionOperator(
+   ...     [1.0j, -1.0j],
+   ...     [True, False, True, False],
+   ...     [0, 1, 1, 0],
+   ...     [0, 2, 4],
+   ... )
+   >>> conjugate.groups = [0, 0]
+   >>> groups_have_uniform_coeffs(conjugate)
+   [True]
+   >>> groups_have_uniform_coeffs(conjugate, abs=False)
+   [False]
+
+.. note::
+   :func:`~qiskit_fermions.operators.terms.grouping.groups_are_hermitian` inherits the one-sided
+   guarantee of :meth:`~qiskit_fermions.operators.OperatorTrait.is_hermitian`: a ``True`` entry is
+   always reliable, while a ``False`` entry is reliable only for operator types whose normal form is
+   a genuine canonical form. Consult the specific operator type to find out which applies.
+
+
 .. [1] A. Gandon et al., Stabilizer-based quantum simulation of fermion dynamics
        with local qubit encodings, `arXiv:2512.11418v2
        <https://arxiv.org/abs/2512.11418v2>`_.

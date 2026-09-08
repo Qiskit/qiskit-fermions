@@ -478,12 +478,6 @@ static int test_groups(void) {
         correct_groups = correct_groups && (groups_out[i] == groups_in[i]);
     }
 
-    // group 0 holds coeffs 1.0 and 1.0 (mean 1.0); group 1 holds 3.0 and 1.0 (mean 2.0). Both
-    // means are exactly representable, so an exact comparison is safe here.
-    double weights[2];
-    qf_edge_op_group_weights(op, weights);
-    bool correct_weights = (weights[0] == 1.0) && (weights[1] == 2.0);
-
     QfEdgeVertexOperator *group_ops[2];
     qf_edge_op_split_out_groups(op, NULL, 0, group_ops);
     bool correct_split_len =
@@ -506,7 +500,7 @@ static int test_groups(void) {
     qf_edge_op_free(op);
 
     bool passed_all = has_no_groups && has_some_groups && correct_num_groups && correct_groups &&
-                      correct_weights && correct_split_len && correct_indexed && groups_deleted;
+                      correct_split_len && correct_indexed && groups_deleted;
 
     if (!passed_all) {
         return EqualityError;

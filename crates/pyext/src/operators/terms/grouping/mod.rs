@@ -12,10 +12,13 @@
 
 use pyo3::prelude::*;
 
+pub mod analysis;
 pub mod electronic_structure;
 
 #[pymodule]
 pub mod grouping {
+    #[pymodule_export]
+    use super::analysis::analysis;
     #[pymodule_export]
     use super::electronic_structure::electronic_structure;
 }
