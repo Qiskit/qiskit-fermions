@@ -156,8 +156,6 @@
 
   
 
-  
-
 
 
   
@@ -170,7 +168,6 @@
    .. automethod:: from_terms_with_groups
    .. automethod:: get_coeffs
    .. automethod:: get_support
-   .. automethod:: group_weights
    .. automethod:: has_groups
    .. automethod:: ichop
    .. automethod:: is_hermitian

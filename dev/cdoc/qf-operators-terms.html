@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Operator Terms - Qiskit Fermions 0.2.0.dev0+4e36a9c</title>
+        <title>Operator Terms - Qiskit Fermions 0.2.0.dev0+c044e51</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+4e36a9c</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+c044e51</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+4e36a9c</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+c044e51</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -271,8 +271,8 @@ partitioning them based on their structure.</p>
 <h2>Grouping<a class="headerlink" href="#grouping" title="Link to this heading">¶</a></h2>
 <p>Refer to <a class="reference internal" href="../guides/grouping.html#grouping-explanation"><span class="std std-ref">Group operator terms: use the operator structure</span></a> for a detailed explanation of this module’s
 functionality.</p>
-<section id="members">
-<h3>Members<a class="headerlink" href="#members" title="Link to this heading">¶</a></h3>
+<section id="assignment">
+<h3>Assignment<a class="headerlink" href="#assignment" title="Link to this heading">¶</a></h3>
 <p>Rather than always relying on the user to provide the group indices themselves,
 the C API provides a collection of functions which determine the grouping
 information automatically.</p>
@@ -286,13 +286,23 @@ information automatically.</p>
 </table>
 </div>
 </section>
+<section id="analysis">
+<h3>Analysis<a class="headerlink" href="#analysis" title="Link to this heading">¶</a></h3>
+<p>Group indices carry no intrinsic meaning: they only say which terms belong
+together, never why. Accordingly, no function reports whether a grouping is
+“correct”. The C API instead provides a collection of functions that each answer
+one narrow, stated question about an existing grouping, so that an assumption a
+downstream consumer makes can be checked up front rather than being paid for on
+every call. Since these work with generic operator representations, they are
+documented on the <a class="reference internal" href="qf-operators-terms-grouping.html"><span class="doc">grouping functions</span></a> page.</p>
+</section>
 </section>
 <section id="filtering">
 <h2>Filtering<a class="headerlink" href="#filtering" title="Link to this heading">¶</a></h2>
 <p>The C API provides a collection of functions for removing terms from an operator
 that do not contribute meaningfully to a downstream computation.</p>
-<section id="id1">
-<h3>Members<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h3>
+<section id="members">
+<h3>Members<a class="headerlink" href="#members" title="Link to this heading">¶</a></h3>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
 <tbody>
@@ -308,8 +318,8 @@ that do not contribute meaningfully to a downstream computation.</p>
 <h2>Ordering<a class="headerlink" href="#ordering" title="Link to this heading">¶</a></h2>
 <p>The C API provides functions to reorder the terms of an operator into a canonical,
 coefficient-independent order.</p>
-<section id="id2">
-<h3>Members<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h3>
+<section id="id1">
+<h3>Members<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h3>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
 <tbody>
@@ -366,15 +376,16 @@ coefficient-independent order.</p>
             <ul>
 <li><a class="reference internal" href="#">Operator Terms</a><ul>
 <li><a class="reference internal" href="#grouping">Grouping</a><ul>
-<li><a class="reference internal" href="#members">Members</a></li>
+<li><a class="reference internal" href="#assignment">Assignment</a></li>
+<li><a class="reference internal" href="#analysis">Analysis</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#filtering">Filtering</a><ul>
-<li><a class="reference internal" href="#id1">Members</a></li>
+<li><a class="reference internal" href="#members">Members</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#ordering">Ordering</a><ul>
-<li><a class="reference internal" href="#id2">Members</a></li>
+<li><a class="reference internal" href="#id1">Members</a></li>
 </ul>
 </li>
 </ul>
@@ -388,7 +399,7 @@ coefficient-independent order.</p>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=9bd9c9cf"></script>
+</div><script src="../_static/documentation_options.js?v=8de533c9"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

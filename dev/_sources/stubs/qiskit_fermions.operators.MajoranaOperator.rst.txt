@@ -184,8 +184,6 @@
 
   
 
-  
-
 
 
   
@@ -201,7 +199,6 @@
    .. automethod:: get_coeffs
    .. automethod:: get_modes
    .. automethod:: get_support
-   .. automethod:: group_weights
    .. automethod:: has_groups
    .. automethod:: ichop
    .. automethod:: is_even

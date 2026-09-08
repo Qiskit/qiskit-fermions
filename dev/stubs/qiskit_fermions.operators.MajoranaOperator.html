@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>MajoranaOperator - Qiskit Fermions 0.2.0.dev0+4e36a9c</title>
+        <title>MajoranaOperator - Qiskit Fermions 0.2.0.dev0+c044e51</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+4e36a9c</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+c044e51</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+4e36a9c</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+c044e51</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -809,43 +809,6 @@ the assignment of even and odd indices to <span class="math">\(\gamma\)</span> a
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="qiskit_fermions.operators.MajoranaOperator.group_weights">
-<span class="sig-name descname"><span class="pre">group_weights</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qiskit_fermions.operators.MajoranaOperator.group_weights" title="Link to this definition">¶</a></dt>
-<dd><p>Returns the mean absolute coefficient magnitude of each group.</p>
-<p>The <code class="docutils literal notranslate"><span class="pre">i</span></code>-th entry is the sum of <code class="docutils literal notranslate"><span class="pre">abs(coeff)</span></code> over the terms in group <code class="docutils literal notranslate"><span class="pre">i</span></code>, divided by
-the number of terms in that group. If <a class="reference internal" href="#qiskit_fermions.operators.MajoranaOperator.groups" title="qiskit_fermions.operators.MajoranaOperator.groups"><code class="xref py py-attr docutils literal notranslate"><span class="pre">groups</span></code></a> is <code class="docutils literal notranslate"><span class="pre">None</span></code>, this function also returns
-<code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
-<p>This is the sampling weight of a randomized product formula (e.g. qDRIFT) that draws whole
-groups rather than individual terms. Computing it natively is considerably cheaper than
-reducing <a class="reference internal" href="#qiskit_fermions.operators.MajoranaOperator.get_coeffs" title="qiskit_fermions.operators.MajoranaOperator.get_coeffs"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_coeffs()</span></code></a> and <a class="reference internal" href="#qiskit_fermions.operators.MajoranaOperator.groups" title="qiskit_fermions.operators.MajoranaOperator.groups"><code class="xref py py-attr docutils literal notranslate"><span class="pre">groups</span></code></a> in NumPy, because those two accessors each
-copy one value per <em>ungrouped</em> term out of the operator only for it to be aggregated back
-down to one value per group, whereas this returns just the <a class="reference internal" href="#qiskit_fermions.operators.MajoranaOperator.num_groups" title="qiskit_fermions.operators.MajoranaOperator.num_groups"><code class="xref py py-meth docutils literal notranslate"><span class="pre">num_groups()</span></code></a> reduced
-values.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>A group index that no term carries weighs <code class="docutils literal notranslate"><span class="pre">0.0</span></code>, which keeps it out of the sample.</p>
-</div>
-<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.operators</span><span class="w"> </span><span class="kn">import</span> <span class="n">MajoranaOperator</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">op</span> <span class="o">=</span> <span class="n">MajoranaOperator</span><span class="p">(</span>
-<span class="gp">... </span>    <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.0</span><span class="p">],</span>
-<span class="gp">... </span>    <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
-<span class="gp">... </span>    <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">8</span><span class="p">],</span>
-<span class="gp">... </span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">op</span><span class="o">.</span><span class="n">group_weights</span><span class="p">())</span>
-<span class="go">None</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">op</span><span class="o">.</span><span class="n">groups</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">op</span><span class="o">.</span><span class="n">group_weights</span><span class="p">()</span>
-<span class="go">[1.0, 2.0]</span>
-</pre></div>
-</div>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The mean absolute coefficient magnitude of each group index.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="qiskit_fermions.operators.MajoranaOperator.has_groups">
 <span class="sig-name descname"><span class="pre">has_groups</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qiskit_fermions.operators.MajoranaOperator.has_groups" title="Link to this definition">¶</a></dt>
 <dd><p>Returns whether this operator tracks group indices.</p>
@@ -1293,7 +1256,6 @@ order. When omitted, every group is built, in index order.</p>
 <li><a class="reference internal" href="#qiskit_fermions.operators.MajoranaOperator.get_coeffs"><code class="docutils literal notranslate"><span class="pre">MajoranaOperator.get_coeffs()</span></code></a></li>
 <li><a class="reference internal" href="#qiskit_fermions.operators.MajoranaOperator.get_modes"><code class="docutils literal notranslate"><span class="pre">MajoranaOperator.get_modes()</span></code></a></li>
 <li><a class="reference internal" href="#qiskit_fermions.operators.MajoranaOperator.get_support"><code class="docutils literal notranslate"><span class="pre">MajoranaOperator.get_support()</span></code></a></li>
-<li><a class="reference internal" href="#qiskit_fermions.operators.MajoranaOperator.group_weights"><code class="docutils literal notranslate"><span class="pre">MajoranaOperator.group_weights()</span></code></a></li>
 <li><a class="reference internal" href="#qiskit_fermions.operators.MajoranaOperator.has_groups"><code class="docutils literal notranslate"><span class="pre">MajoranaOperator.has_groups()</span></code></a></li>
 <li><a class="reference internal" href="#qiskit_fermions.operators.MajoranaOperator.ichop"><code class="docutils literal notranslate"><span class="pre">MajoranaOperator.ichop()</span></code></a></li>
 <li><a class="reference internal" href="#qiskit_fermions.operators.MajoranaOperator.is_even"><code class="docutils literal notranslate"><span class="pre">MajoranaOperator.is_even()</span></code></a></li>
@@ -1325,7 +1287,7 @@ order. When omitted, every group is built, in index order.</p>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=9bd9c9cf"></script>
+</div><script src="../_static/documentation_options.js?v=8de533c9"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

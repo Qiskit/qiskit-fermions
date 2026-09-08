@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Group operator terms: use the operator structure - Qiskit Fermions 0.2.0.dev0+4e36a9c</title>
+        <title>Group operator terms: use the operator structure - Qiskit Fermions 0.2.0.dev0+c044e51</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+4e36a9c</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+c044e51</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+4e36a9c</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+c044e51</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -372,6 +372,145 @@ C</label><div class="sd-tab-content docutils">
 </div>
 </div>
 </div>
+</section>
+<section id="analyze-a-grouping">
+<h2>Analyze a grouping<a class="headerlink" href="#analyze-a-grouping" title="Link to this heading">¶</a></h2>
+<p>Groups prescribe no meaning of their own: the groups array records which terms belong together,
+never why. No routine in this library reports whether a grouping is “correct”, because there is no
+single notion of correctness to report against. Downstream consumers do, however, assume properties
+of a grouping, and the functions in this section let you check such an assumption up front rather
+than paying for it on every call.</p>
+<p>The most common convention is that each group is separately Hermitian. That is what makes fermionic
+randomized product formulas possible at all: a lone <span class="math">\(a^\dagger_p a_q\)</span> with <span class="math">\(p \neq q\)</span>
+is not Hermitian, so its time evolution is not unitary and it cannot be sampled on its own. Pairing
+it with <span class="math">\(a^\dagger_q a_p\)</span> yields a group that can be.</p>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-2" name="sd-tab-set-1" type="radio">
+<label class="sd-tab-label" data-sync-group="code" data-sync-id="python" for="sd-tab-item-2">
+PYTHON</label><div class="sd-tab-content docutils">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.operators</span><span class="w"> </span><span class="kn">import</span> <span class="n">FermionOperator</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.operators.terms.grouping</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+<span class="gp">... </span>    <span class="n">group_coeff_means</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">groups_are_hermitian</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">groups_have_uniform_coeffs</span><span class="p">,</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># a conjugate pair, plus one unpaired term. The operator is built from the sparse</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># arrays rather than from a dictionary, because only the former fixes the term order</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># that the group indices below are paired with.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pair_and_single</span> <span class="o">=</span> <span class="n">FermionOperator</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">],</span>
+<span class="gp">... </span>    <span class="p">[</span><span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">],</span>
+<span class="gp">... </span>    <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span>
+<span class="gp">... </span>    <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pair_and_single</span><span class="o">.</span><span class="n">groups</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">groups_are_hermitian</span><span class="p">(</span><span class="n">pair_and_single</span><span class="p">)</span>  <span class="c1"># group 1 is unpaired</span>
+<span class="go">[True, False]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">group_coeff_means</span><span class="p">(</span><span class="n">pair_and_single</span><span class="p">)</span>
+<span class="go">[1.0, 1.0]</span>
+</pre></div>
+</div>
+</div>
+<input id="sd-tab-item-3" name="sd-tab-set-1" type="radio">
+<label class="sd-tab-label" data-sync-group="code" data-sync-id="c" for="sd-tab-item-3">
+C</label><div class="sd-tab-content docutils">
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;qiskit_fermions.h&gt;</span>
+
+<span class="kt">uint64_t</span><span class="w"> </span><span class="n">num_terms</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">3</span><span class="p">;</span>
+<span class="kt">uint64_t</span><span class="w"> </span><span class="n">num_actions</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">6</span><span class="p">;</span>
+<span class="kt">bool</span><span class="w"> </span><span class="n">actions</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="nb">true</span><span class="p">,</span><span class="w"> </span><span class="nb">false</span><span class="p">,</span><span class="w"> </span><span class="nb">true</span><span class="p">,</span><span class="w"> </span><span class="nb">false</span><span class="p">,</span><span class="w"> </span><span class="nb">true</span><span class="p">,</span><span class="w"> </span><span class="nb">false</span><span class="p">};</span>
+<span class="kt">uint32_t</span><span class="w"> </span><span class="n">modes</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">};</span>
+<span class="n">QkComplex64</span><span class="w"> </span><span class="n">coeffs</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{{</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">}};</span>
+<span class="kt">uint32_t</span><span class="w"> </span><span class="n">boundaries</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">6</span><span class="p">};</span>
+<span class="n">QfFermionOperator</span><span class="w"> </span><span class="o">*</span><span class="n">op</span><span class="w"> </span><span class="o">=</span>
+<span class="w">    </span><span class="n">qf_ferm_op_new</span><span class="p">(</span><span class="n">num_terms</span><span class="p">,</span><span class="w"> </span><span class="n">num_actions</span><span class="p">,</span><span class="w"> </span><span class="n">coeffs</span><span class="p">,</span><span class="w"> </span><span class="n">actions</span><span class="p">,</span><span class="w"> </span><span class="n">modes</span><span class="p">,</span><span class="w"> </span><span class="n">boundaries</span><span class="p">);</span>
+
+<span class="kt">uint32_t</span><span class="w"> </span><span class="n">groups</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">};</span>
+<span class="n">qf_ferm_op_set_groups</span><span class="p">(</span><span class="n">op</span><span class="p">,</span><span class="w"> </span><span class="n">groups</span><span class="p">,</span><span class="w"> </span><span class="n">num_terms</span><span class="p">);</span>
+
+<span class="kt">bool</span><span class="w"> </span><span class="n">hermitian</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span>
+<span class="n">qf_ferm_op_groups_are_hermitian</span><span class="p">(</span><span class="n">op</span><span class="p">,</span><span class="w"> </span><span class="mf">1e-8</span><span class="p">,</span><span class="w"> </span><span class="n">hermitian</span><span class="p">);</span>
+
+<span class="kt">double</span><span class="w"> </span><span class="n">means</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span>
+<span class="n">qf_ferm_op_group_coeff_means</span><span class="p">(</span><span class="n">op</span><span class="p">,</span><span class="w"> </span><span class="n">means</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+</div>
+<section id="one-group-index-per-term-is-enforced">
+<h3>One group index per term is enforced<a class="headerlink" href="#one-group-index-per-term-is-enforced" title="Link to this heading">¶</a></h3>
+<p>The groups array holds one index per term, and assigning one of a different length raises. Nothing
+downstream re-checks the invariant, so it is enforced where the indices enter the operator: an array
+that is too short would silently drop trailing terms, and one that is too long would invent groups
+that no term carries.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">pair_and_single</span><span class="o">.</span><span class="n">groups</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>  <span class="c1"># one index short, on a three-term operator</span>
+<span class="gt">Traceback (most recent call last):</span>
+<span class="gr">ValueError</span>: <span class="n">expected one group index per term, but got 2 for 3 terms</span>
+</pre></div>
+</div>
+<p>Clearing the group indices by assigning <code class="docutils literal notranslate"><span class="pre">None</span></code> is always allowed.</p>
+</section>
+<section id="the-two-checks-are-independent">
+<h3>The two checks are independent<a class="headerlink" href="#the-two-checks-are-independent" title="Link to this heading">¶</a></h3>
+<p><code class="xref py py-func docutils literal notranslate"><span class="pre">groups_have_uniform_coeffs()</span></code> reports whether a
+group’s coefficients agree, which is the assumption
+<code class="xref py py-func docutils literal notranslate"><span class="pre">group_coeff_means()</span></code> makes when it averages
+magnitudes. It is not a weaker form of the Hermiticity check: neither check implies the other, in
+either direction.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.operators.terms.grouping</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+<span class="gp">... </span>    <span class="n">groups_are_hermitian</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">groups_have_uniform_coeffs</span><span class="p">,</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># uniform coefficients, but not Hermitian: the terms are not each other's adjoint</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">uniform</span> <span class="o">=</span> <span class="n">FermionOperator</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">],</span>
+<span class="gp">... </span>    <span class="p">[</span><span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">],</span>
+<span class="gp">... </span>    <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span>
+<span class="gp">... </span>    <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">uniform</span><span class="o">.</span><span class="n">groups</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">groups_have_uniform_coeffs</span><span class="p">(</span><span class="n">uniform</span><span class="p">),</span> <span class="n">groups_are_hermitian</span><span class="p">(</span><span class="n">uniform</span><span class="p">)</span>
+<span class="go">([True], [False])</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Hermitian, but with mixed magnitudes: two conjugate pairs at different scales</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mixed</span> <span class="o">=</span> <span class="n">FermionOperator</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">],</span>
+<span class="gp">... </span>    <span class="p">[</span><span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">],</span>
+<span class="gp">... </span>    <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
+<span class="gp">... </span>    <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">8</span><span class="p">],</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mixed</span><span class="o">.</span><span class="n">groups</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">groups_are_hermitian</span><span class="p">(</span><span class="n">mixed</span><span class="p">),</span> <span class="n">groups_have_uniform_coeffs</span><span class="p">(</span><span class="n">mixed</span><span class="p">)</span>
+<span class="go">([True], [False])</span>
+</pre></div>
+</div>
+<p>By default the magnitudes are compared, because that is what
+<code class="xref py py-func docutils literal notranslate"><span class="pre">group_coeff_means()</span></code> averages. A Hermitian conjugate
+pair with complex coefficients has equal magnitudes but unequal coefficients, so it satisfies only
+the default form.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">conjugate</span> <span class="o">=</span> <span class="n">FermionOperator</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="p">[</span><span class="mf">1.0</span><span class="n">j</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="n">j</span><span class="p">],</span>
+<span class="gp">... </span>    <span class="p">[</span><span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">],</span>
+<span class="gp">... </span>    <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+<span class="gp">... </span>    <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">conjugate</span><span class="o">.</span><span class="n">groups</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">groups_have_uniform_coeffs</span><span class="p">(</span><span class="n">conjugate</span><span class="p">)</span>
+<span class="go">[True]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">groups_have_uniform_coeffs</span><span class="p">(</span><span class="n">conjugate</span><span class="p">,</span> <span class="nb">abs</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="go">[False]</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code class="xref py py-func docutils literal notranslate"><span class="pre">groups_are_hermitian()</span></code> inherits the one-sided
+guarantee of <a class="reference internal" href="../stubs/qiskit_fermions.operators.OperatorTrait.html#qiskit_fermions.operators.OperatorTrait.is_hermitian" title="qiskit_fermions.operators.OperatorTrait.is_hermitian"><code class="xref py py-meth docutils literal notranslate"><span class="pre">is_hermitian()</span></code></a>: a <code class="docutils literal notranslate"><span class="pre">True</span></code> entry is
+always reliable, while a <code class="docutils literal notranslate"><span class="pre">False</span></code> entry is reliable only for operator types whose normal form is
+a genuine canonical form. Consult the specific operator type to find out which applies.</p>
+</div>
 <aside class="footnote-list brackets">
 <aside class="footnote brackets" id="id3" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></span>
@@ -380,6 +519,7 @@ C</label><div class="sd-tab-content docutils">
 with local qubit encodings, <a class="reference external" href="https://arxiv.org/abs/2512.11418v2">arXiv:2512.11418v2</a>.</p>
 </aside>
 </aside>
+</section>
 </section>
 </section>
 
@@ -441,6 +581,11 @@ with local qubit encodings, <a class="reference external" href="https://arxiv.or
             <ul>
 <li><a class="reference internal" href="#">Group operator terms: use the operator structure</a><ul>
 <li><a class="reference internal" href="#usage">Usage</a></li>
+<li><a class="reference internal" href="#analyze-a-grouping">Analyze a grouping</a><ul>
+<li><a class="reference internal" href="#one-group-index-per-term-is-enforced">One group index per term is enforced</a></li>
+<li><a class="reference internal" href="#the-two-checks-are-independent">The two checks are independent</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -452,7 +597,7 @@ with local qubit encodings, <a class="reference external" href="https://arxiv.or
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=9bd9c9cf"></script>
+</div><script src="../_static/documentation_options.js?v=8de533c9"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

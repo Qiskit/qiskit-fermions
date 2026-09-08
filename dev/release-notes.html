@@ -8,7 +8,7 @@
         <link rel="prefetch" href="_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Release Notes - Qiskit Fermions 0.2.0.dev0+4e36a9c</title>
+        <title>Release Notes - Qiskit Fermions 0.2.0.dev0+c044e51</title>
       <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+4e36a9c</div></a>
+      <a href="index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+c044e51</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+4e36a9c</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+c044e51</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="search.html" role="search">
@@ -359,6 +359,28 @@ opposite choice from <a class="reference internal" href="stubs/qiskit_fermions.t
 deferred.</p>
 </li>
 </ul>
+<ul>
+<li><p>The <code class="xref py py-mod docutils literal notranslate"><span class="pre">qiskit_fermions.operators.terms.grouping</span></code> module now covers the <em>analysis</em> of an
+existing grouping alongside the assignment of group indices. Group indices carry no intrinsic
+meaning, so none of the new functions reports whether a grouping is “correct”; each answers one
+narrow question about a grouping, so that an assumption a downstream consumer makes can be
+checked up front rather than being paid for on every call:</p>
+<ul class="simple">
+<li><p><code class="xref py py-func docutils literal notranslate"><span class="pre">groups_are_hermitian()</span></code> reports, for each
+group, whether the operator formed by its terms is Hermitian. This is the property a
+randomized product formula relies on when it samples whole groups, since only a Hermitian
+group has a unitary time evolution.</p></li>
+<li><p><code class="xref py py-func docutils literal notranslate"><span class="pre">groups_have_uniform_coeffs()</span></code> reports, for each
+group, whether its coefficients are numerically equal (by magnitude, by default).</p></li>
+</ul>
+<p>Each function is available from the C API once per operator type, for example
+<code class="docutils literal notranslate"><span class="pre">qf_ferm_op_groups_are_hermitian</span></code>. See <a class="reference internal" href="guides/grouping.html#grouping-explanation"><span class="std std-ref">Group operator terms: use the operator structure</span></a> for a worked example.</p>
+</li>
+</ul>
+<ul class="simple">
+<li><p>Added <code class="docutils literal notranslate"><span class="pre">qf_ferm_op_groups_are_hermitian</span></code> and <code class="docutils literal notranslate"><span class="pre">qf_ferm_op_groups_have_uniform_coeffs</span></code>, along
+with the equivalent functions for the Majorana, edge-vertex and transfer-vertex operator types.</p></li>
+</ul>
 <ul class="simple">
 <li><p>Added direct Jordan-Wigner mappers for the three remaining operator data structures:
 <a class="reference internal" href="stubs/qiskit_fermions.mappers.library.majorana_jordan_wigner.html#qiskit_fermions.mappers.library.majorana_jordan_wigner" title="qiskit_fermions.mappers.library.majorana_jordan_wigner"><code class="xref py py-func docutils literal notranslate"><span class="pre">majorana_jordan_wigner()</span></code></a>,
@@ -462,6 +484,32 @@ interface is gone. <a class="reference internal" href="stubs/qiskit_fermions.pro
 <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">&quot;qiskit-fermions[simulation]&quot;</span></code> becomes
 <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">&quot;qiskit-fermions[ffsim]&quot;</span></code>. The extra names the dependency it installs rather than
 a capability. Installing <code class="docutils literal notranslate"><span class="pre">qiskit-fermions[all]</span></code> is unaffected.</p></li>
+</ul>
+<ul>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">group_weights</span></code> method has been removed from every operator class and from the
+<a class="reference internal" href="stubs/qiskit_fermions.operators.OperatorTrait.html#qiskit_fermions.operators.OperatorTrait" title="qiskit_fermions.operators.OperatorTrait"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperatorTrait</span></code></a> protocol. It is replaced by
+<code class="xref py py-func docutils literal notranslate"><span class="pre">group_coeff_means()</span></code>, a free function in the
+<code class="xref py py-mod docutils literal notranslate"><span class="pre">qiskit_fermions.operators.terms.grouping</span></code> module, whose behavior is unchanged:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># before</span>
+<span class="n">weights</span> <span class="o">=</span> <span class="n">op</span><span class="o">.</span><span class="n">group_weights</span><span class="p">()</span>
+
+<span class="c1"># after</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.operators.terms.grouping</span><span class="w"> </span><span class="kn">import</span> <span class="n">group_coeff_means</span>
+
+<span class="n">weights</span> <span class="o">=</span> <span class="n">group_coeff_means</span><span class="p">(</span><span class="n">op</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>In the C API, <code class="docutils literal notranslate"><span class="pre">qf_ferm_op_group_weights</span></code> and its per-type counterparts have likewise been
+renamed to <code class="docutils literal notranslate"><span class="pre">qf_ferm_op_group_coeff_means</span></code> and friends.</p>
+</li>
+</ul>
+<ul>
+<li><p>Assigning a <a class="reference internal" href="stubs/qiskit_fermions.operators.FermionOperator.html#qiskit_fermions.operators.FermionOperator.groups" title="qiskit_fermions.operators.FermionOperator.groups"><code class="xref py py-attr docutils literal notranslate"><span class="pre">groups</span></code></a> array whose length differs
+from the operator’s number of terms now raises a <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> instead of being accepted
+silently. Assigning <code class="docutils literal notranslate"><span class="pre">None</span></code> to clear the group indices is unaffected.</p>
+<p>In the C API, <code class="docutils literal notranslate"><span class="pre">qf_ferm_op_set_groups</span></code> and its per-type counterparts now return a
+<a class="reference internal" href="cdoc/qf-exit-code.html#c.QfExitCode" title="QfExitCode"><code class="xref c c-enum docutils literal notranslate"><span class="pre">QfExitCode</span></code></a> (<code class="docutils literal notranslate"><span class="pre">QfExitCode_ValueError</span></code> on a length mismatch) rather than <code class="docutils literal notranslate"><span class="pre">void</span></code>.</p>
+</li>
 </ul>
 <ul>
 <li><p><a class="reference internal" href="stubs/qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis.html#qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis" title="qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis"><code class="xref py py-class docutils literal notranslate"><span class="pre">MapperFnEvolutionSynthesis</span></code></a> no longer simplifies the operator returned by its
@@ -737,7 +785,7 @@ Following Qiskit’s design philosophy, the core of this package is written in R
       
     </aside>
   </div>
-</div><script src="_static/documentation_options.js?v=9bd9c9cf"></script>
+</div><script src="_static/documentation_options.js?v=8de533c9"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/scripts/furo.js?v=46bd48cc"></script>

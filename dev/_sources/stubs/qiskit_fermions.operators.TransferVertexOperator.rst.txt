@@ -186,8 +186,6 @@
 
   
 
-  
-
 
 
   
@@ -204,7 +202,6 @@
    .. automethod:: get_left_indices
    .. automethod:: get_right_indices
    .. automethod:: get_support
-   .. automethod:: group_weights
    .. automethod:: has_groups
    .. automethod:: ichop
    .. automethod:: is_hermitian

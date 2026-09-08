@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Operator Terms - Qiskit Fermions 0.2.0.dev0+4e36a9c</title>
+        <title>Operator Terms - Qiskit Fermions 0.2.0.dev0+c044e51</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+4e36a9c</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+c044e51</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+4e36a9c</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+c044e51</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -269,8 +269,8 @@ them based on their structure. The submodules below group related functionality.
 <h2>Grouping<a class="headerlink" href="#grouping" title="Link to this heading">¶</a></h2>
 <p>Please refer to <a class="reference internal" href="../guides/grouping.html#grouping-explanation"><span class="std std-ref">Group operator terms: use the operator structure</span></a> for a detailed explanation of this module’s
 functionality.</p>
-<section id="members">
-<h3>Members<a class="headerlink" href="#members" title="Link to this heading">¶</a></h3>
+<section id="assignment">
+<h3>Assignment<a class="headerlink" href="#assignment" title="Link to this heading">¶</a></h3>
 <p>Rather than always relying on the user to provide the group indices themselves, this module provides
 a collection of functions which determine the grouping information automatically.</p>
 <div class="table-wrapper autosummary longtable docutils container">
@@ -283,13 +283,36 @@ a collection of functions which determine the grouping information automatically
 </table>
 </div>
 </section>
+<section id="analysis">
+<h3>Analysis<a class="headerlink" href="#analysis" title="Link to this heading">¶</a></h3>
+<p>Group indices carry no intrinsic meaning: the array only says which terms belong together, never
+why. Accordingly, none of the functions below reports whether a grouping is “correct”: each
+answers one narrow, stated question about an existing grouping, leaving the interpretation to you.
+They are provided so that an assumption a downstream consumer makes about a grouping can be checked
+up front, rather than being paid for on every call.</p>
+<div class="table-wrapper autosummary longtable docutils container">
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="../stubs/qiskit_fermions.operators.terms.group_coeff_means.html#qiskit_fermions.operators.terms.group_coeff_means" title="qiskit_fermions.operators.terms.group_coeff_means"><code class="xref py py-obj docutils literal notranslate"><span class="pre">group_coeff_means</span></code></a>(op)</p></td>
+<td><p>Returns the mean absolute coefficient magnitude of each group.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../stubs/qiskit_fermions.operators.terms.groups_are_hermitian.html#qiskit_fermions.operators.terms.groups_are_hermitian" title="qiskit_fermions.operators.terms.groups_are_hermitian"><code class="xref py py-obj docutils literal notranslate"><span class="pre">groups_are_hermitian</span></code></a>(op, *[, atol])</p></td>
+<td><p>Returns, for each group, whether the operator formed by that group's terms is Hermitian.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../stubs/qiskit_fermions.operators.terms.groups_have_uniform_coeffs.html#qiskit_fermions.operators.terms.groups_have_uniform_coeffs" title="qiskit_fermions.operators.terms.groups_have_uniform_coeffs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">groups_have_uniform_coeffs</span></code></a>(op, *[, atol, abs])</p></td>
+<td><p>Returns, for each group, whether all of its coefficients are numerically equal.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
 </section>
 <section id="filtering">
 <h2>Filtering<a class="headerlink" href="#filtering" title="Link to this heading">¶</a></h2>
 <p>This module provides convenience functions for removing terms from an operator that do not
 contribute meaningfully to a downstream computation.</p>
-<section id="id1">
-<h3>Members<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h3>
+<section id="members">
+<h3>Members<a class="headerlink" href="#members" title="Link to this heading">¶</a></h3>
 <div class="table-wrapper autosummary longtable docutils container">
 <table class="autosummary longtable docutils align-default">
 <tbody>
@@ -311,8 +334,8 @@ iteration order.</p>
 <p class="admonition-title">Note</p>
 <p>Unlike <a class="reference internal" href="../stubs/qiskit_fermions.operators.terms.canonical_order.html#qiskit_fermions.operators.terms.canonical_order" title="qiskit_fermions.operators.terms.canonical_order"><code class="xref py py-func docutils literal notranslate"><span class="pre">canonical_order()</span></code></a>, <a class="reference internal" href="../stubs/qiskit_fermions.operators.terms.order_terms.html#qiskit_fermions.operators.terms.order_terms" title="qiskit_fermions.operators.terms.order_terms"><code class="xref py py-func docutils literal notranslate"><span class="pre">order_terms()</span></code></a> has no counterpart in the C API.</p>
 </div>
-<section id="id2">
-<h3>Members<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h3>
+<section id="id1">
+<h3>Members<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h3>
 <div class="table-wrapper autosummary longtable docutils container">
 <table class="autosummary longtable docutils align-default">
 <tbody>
@@ -369,15 +392,16 @@ iteration order.</p>
             <ul>
 <li><a class="reference internal" href="#">Operator Terms</a><ul>
 <li><a class="reference internal" href="#grouping">Grouping</a><ul>
-<li><a class="reference internal" href="#members">Members</a></li>
+<li><a class="reference internal" href="#assignment">Assignment</a></li>
+<li><a class="reference internal" href="#analysis">Analysis</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#filtering">Filtering</a><ul>
-<li><a class="reference internal" href="#id1">Members</a></li>
+<li><a class="reference internal" href="#members">Members</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#ordering">Ordering</a><ul>
-<li><a class="reference internal" href="#id2">Members</a></li>
+<li><a class="reference internal" href="#id1">Members</a></li>
 </ul>
 </li>
 </ul>
@@ -391,7 +415,7 @@ iteration order.</p>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=9bd9c9cf"></script>
+</div><script src="../_static/documentation_options.js?v=8de533c9"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
