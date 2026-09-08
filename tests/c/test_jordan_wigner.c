@@ -76,7 +76,10 @@ static int test_mapping(void) {
     QkObs *expected = qk_obs_new(4, 15, 32, coeffs, bits, indices, boundaries);
 
     QkComplex64 factor = {-1.0, 0.0};
-    QkObs *diff = qk_obs_add(result, qk_obs_multiply(expected, &factor));
+    // Bound to a variable rather than passed inline, so that it can be freed: the observable
+    // returned by `qk_obs_multiply` is owned by the caller.
+    QkObs *negated = qk_obs_multiply(expected, &factor);
+    QkObs *diff = qk_obs_add(result, negated);
     QkObs *canon = qk_obs_canonicalize(diff, 1e-6);
 
     QkObs *zero = qk_obs_zero(4);
@@ -86,6 +89,10 @@ static int test_mapping(void) {
     qf_ferm_op_free(hamil);
     qk_obs_free(result);
     qk_obs_free(expected);
+    qk_obs_free(negated);
+    qk_obs_free(diff);
+    qk_obs_free(canon);
+    qk_obs_free(zero);
 
     if (!is_equal) {
         return EqualityError;
@@ -135,6 +142,10 @@ static int check_one_string(QkObs *result, uint32_t num_qubits, QkComplex64 coef
 
     qk_obs_free(result);
     qk_obs_free(expected);
+    qk_obs_free(negated);
+    qk_obs_free(diff);
+    qk_obs_free(canon);
+    qk_obs_free(zero);
 
     return is_equal ? Ok : EqualityError;
 }

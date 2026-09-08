@@ -100,6 +100,8 @@ static int test_add(void) {
     bool is_equal = qf_maj_op_equal(op, one);
 
     qf_maj_op_free(op);
+    qf_maj_op_free(zero);
+    qf_maj_op_free(one);
 
     if (!is_equal) {
         return EqualityError;
@@ -118,6 +120,7 @@ static int test_add_term(void) {
     bool is_equal = qf_maj_op_equal(op, one);
 
     qf_maj_op_free(op);
+    qf_maj_op_free(one);
 
     if (!is_equal) {
         return EqualityError;
@@ -136,6 +139,7 @@ static int test_equiv_pos(void) {
     bool is_equiv = qf_maj_op_equiv(op, zero, 1e-6);
 
     qf_maj_op_free(op);
+    qf_maj_op_free(zero);
 
     if (!is_equiv) {
         return EqualityError;
@@ -154,6 +158,7 @@ static int test_equiv_neg(void) {
     bool is_not_equiv = !qf_maj_op_equiv(op, zero, 1e-8);
 
     qf_maj_op_free(op);
+    qf_maj_op_free(zero);
 
     if (!is_not_equiv) {
         return EqualityError;
@@ -174,6 +179,8 @@ static int test_mul(void) {
     bool is_equal = qf_maj_op_equal(op, expected);
 
     qf_maj_op_free(op);
+    qf_maj_op_free(one);
+    qf_maj_op_free(expected);
 
     if (!is_equal) {
         return EqualityError;
@@ -274,14 +281,20 @@ static int test_simplify(void) {
 static int test_simplify_vs_ichop(void) {
     uint64_t num_terms = 100000;
     uint64_t num_modes = 0;
-    QkComplex64 *coeffs = (QkComplex64 *)malloc(100000 * sizeof(QkComplex64));
-    uint32_t boundaries[100001];
-    for (int i = 0; i < 100000; i++) {
+    // Both arrays are heap-allocated: `boundaries` holds `num_terms + 1` entries, which at this
+    // size is ~400 KB and overflows the default 1 MB stack on some platforms (notably MSVC) if
+    // declared as a local array. The term count itself is load-bearing and cannot simply be
+    // reduced: the test needs 100000 coefficients of 1e-5 so that they sum to exactly 1.0 while
+    // each one stays below the 1e-4 chop tolerance, which is what distinguishes `simplify` from
+    // `ichop` here.
+    QkComplex64 *coeffs = (QkComplex64 *)malloc(num_terms * sizeof(QkComplex64));
+    uint32_t *boundaries = (uint32_t *)malloc((num_terms + 1) * sizeof(uint32_t));
+    for (uint64_t i = 0; i < num_terms; i++) {
         coeffs[i].re = 1e-5;
         coeffs[i].im = 0.0;
         boundaries[i] = 0;
     }
-    boundaries[100000] = 0;
+    boundaries[num_terms] = 0;
     QfMajoranaOperator *op = qf_maj_op_new(num_terms, num_modes, coeffs, NULL, boundaries);
 
     QfMajoranaOperator *canon = qf_maj_op_simplify(op, 1e-4);
@@ -295,6 +308,7 @@ static int test_simplify_vs_ichop(void) {
     bool ichop_is_equal = qf_maj_op_equiv(op, zero, 1e-6);
 
     free(coeffs);
+    free(boundaries);
     qf_maj_op_free(op);
     qf_maj_op_free(canon);
     qf_maj_op_free(one);
@@ -488,6 +502,8 @@ static int test_relabel_modes_duplicate_err(void) {
 
     QfExitCode exit = qf_maj_op_relabel_modes(op, 4, permutation);
 
+    qf_maj_op_free(op);
+
     return exit == QfExitCode_DuplicateIndexError ? Ok : EqualityError;
 }
 
@@ -502,6 +518,8 @@ static int test_relabel_modes_too_small_err(void) {
     uint32_t permutation[4] = {4, 2, 5};
 
     QfExitCode exit = qf_maj_op_relabel_modes(op, 3, permutation);
+
+    qf_maj_op_free(op);
 
     return exit == QfExitCode_IndexError ? Ok : EqualityError;
 }

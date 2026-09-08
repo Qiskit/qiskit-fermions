@@ -40,6 +40,9 @@ static int test_ferm_op_commutator(void) {
 
     qf_ferm_op_free(op1);
     qf_ferm_op_free(op2);
+    qf_ferm_op_free(comm);
+    qf_ferm_op_free(normal);
+    qf_ferm_op_free(canon);
     qf_ferm_op_free(zero);
 
     if (!is_equal) {
@@ -72,6 +75,9 @@ static int test_ferm_op_anti_commutator(void) {
 
     qf_ferm_op_free(op1);
     qf_ferm_op_free(op2);
+    qf_ferm_op_free(anti_comm);
+    qf_ferm_op_free(normal);
+    qf_ferm_op_free(canon);
     qf_ferm_op_free(zero);
 
     if (!is_equal) {
@@ -108,6 +114,10 @@ static int test_ferm_op_double_commutator(void) {
 
     qf_ferm_op_free(op1);
     qf_ferm_op_free(op2);
+    qf_ferm_op_free(double_comm);
+    qf_ferm_op_free(normal);
+    qf_ferm_op_free(canon);
+    qf_ferm_op_free(op3);
     qf_ferm_op_free(zero);
 
     if (!is_equal) {
