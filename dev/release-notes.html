@@ -8,7 +8,7 @@
         <link rel="prefetch" href="_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Release Notes - Qiskit Fermions 0.2.0.dev0+c044e51</title>
+        <title>Release Notes - Qiskit Fermions 0.2.0.dev0+d506d4b</title>
       <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+c044e51</div></a>
+      <a href="index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+d506d4b</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+c044e51</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+d506d4b</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="search.html" role="search">
@@ -484,6 +484,28 @@ interface is gone. <a class="reference internal" href="stubs/qiskit_fermions.pro
 <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">&quot;qiskit-fermions[simulation]&quot;</span></code> becomes
 <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">&quot;qiskit-fermions[ffsim]&quot;</span></code>. The extra names the dependency it installs rather than
 a capability. Installing <code class="docutils literal notranslate"><span class="pre">qiskit-fermions[all]</span></code> is unaffected.</p></li>
+</ul>
+<ul class="simple">
+<li><p><a class="reference internal" href="stubs/qiskit_fermions.operators.library.FCIDump.html#qiskit_fermions.operators.library.FCIDump.from_file" title="qiskit_fermions.operators.library.FCIDump.from_file"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_file()</span></code></a> now raises a catchable Python
+exception when it cannot parse a file, instead of propagating a Rust panic. A path that cannot
+be opened or read raises <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#OSError" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSError</span></code></a>, while a file that does not honour the FCIDump format
+(a missing header namelist, a missing <code class="docutils literal notranslate"><span class="pre">NORB</span></code> or <code class="docutils literal notranslate"><span class="pre">NELEC</span></code> field, or a malformed <code class="docutils literal notranslate"><span class="pre">MS2</span></code> field)
+raises <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ValueError</span></code></a>. An FCIDump carrying an MO energy value, which is still unsupported,
+also raises <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ValueError</span></code></a>.</p></li>
+</ul>
+<ul>
+<li><p>The C function <code class="docutils literal notranslate"><span class="pre">qf_fcidump_from_file</span></code> now returns a <a class="reference internal" href="cdoc/qf-exit-code.html#c.QfExitCode" title="QfExitCode"><code class="xref c c-enum docutils literal notranslate"><span class="pre">QfExitCode</span></code></a> and takes the parsed
+<a class="reference internal" href="cdoc/qf-fcidump.html#c.QfFCIDump" title="QfFCIDump"><code class="xref c c-struct docutils literal notranslate"><span class="pre">QfFCIDump</span></code></a> through a new out-parameter, matching the convention already used by the
+mapper functions:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">QfFCIDump</span> <span class="o">*</span><span class="n">fcidump</span> <span class="o">=</span> <span class="n">NULL</span><span class="p">;</span>
+<span class="n">QfExitCode</span> <span class="n">exit</span> <span class="o">=</span> <span class="n">qf_fcidump_from_file</span><span class="p">(</span><span class="s2">"molecule.fcidump"</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">fcidump</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>It returns <code class="docutils literal notranslate"><span class="pre">QfExitCode_ValueError</span></code> for any of the parse failures listed above, leaving the
+out-parameter untouched. This replaces the previous signature, which returned the pointer
+directly and had no way to report a failure (an unparsable file unwound a Rust panic across the
+FFI boundary, which is undefined behaviour).</p>
+</li>
 </ul>
 <ul>
 <li><p>The <code class="docutils literal notranslate"><span class="pre">group_weights</span></code> method has been removed from every operator class and from the
@@ -785,7 +807,7 @@ Following Qiskit’s design philosophy, the core of this package is written in R
       
     </aside>
   </div>
-</div><script src="_static/documentation_options.js?v=8de533c9"></script>
+</div><script src="_static/documentation_options.js?v=b767346c"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/scripts/furo.js?v=46bd48cc"></script>

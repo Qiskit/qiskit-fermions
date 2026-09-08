@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Electronic Integrals - Qiskit Fermions 0.2.0.dev0+c044e51</title>
+        <title>Electronic Integrals - Qiskit Fermions 0.2.0.dev0+d506d4b</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+c044e51</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+d506d4b</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+c044e51</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+d506d4b</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -295,6 +295,15 @@ the array, and <span class="math">\(n\)</span> is the number of orbitals, <code 
 </div>
 </p>
  </p>
+<section id="group__qf__electronic__integrals_1autotoc_md0">
+<h2>Safety<a class="headerlink" href="#group__qf__electronic__integrals_1autotoc_md0" title="Link to this heading">¶</a></h2>
+<p id="group__qf__electronic__integrals_1autotoc_md0">Behavior is undefined if any of the following conditions are violated:</p>
+<p><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">one_body_a</span></code> is a non-null, aligned pointer to a <code class="docutils literal notranslate"><span class="pre">double</span></code> array of length <code class="docutils literal notranslate"><span class="pre">norb</span> <span class="pre">*</span> <span class="pre">(norb</span> <span class="pre">+</span> <span class="pre">1)</span> <span class="pre">/</span> <span class="pre">2</span></code></p></li>
+</ul>
+</p>
+<p>A null or misaligned pointer is detected and panics; the array <em>length</em> cannot be derived from the pointer, so it remains an unchecked caller contract. </p>
+</section>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -303,7 +312,7 @@ the array, and <span class="math">\(n\)</span> is the number of orbitals, <code 
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>The 1-body component of the electronic structure Hamiltonian as defined above.</p>
+<dd class="field-even"><p>A pointer to the component of the electronic structure Hamiltonian defined below.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -331,6 +340,15 @@ of orbitals, <code class="docutils literal notranslate"><span class="pre">norb</
 </div>
 </p>
  </p>
+<section id="group__qf__electronic__integrals_1autotoc_md1">
+<h2>Safety<a class="headerlink" href="#group__qf__electronic__integrals_1autotoc_md1" title="Link to this heading">¶</a></h2>
+<p id="group__qf__electronic__integrals_1autotoc_md1">Behavior is undefined if any of the following conditions are violated:</p>
+<p><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">one_body_a</span></code> and <code class="docutils literal notranslate"><span class="pre">one_body_b</span></code> are non-null, aligned pointers to <code class="docutils literal notranslate"><span class="pre">double</span></code> arrays, each of length <code class="docutils literal notranslate"><span class="pre">norb</span> <span class="pre">*</span> <span class="pre">(norb</span> <span class="pre">+</span> <span class="pre">1)</span> <span class="pre">/</span> <span class="pre">2</span></code></p></li>
+</ul>
+</p>
+<p>A null or misaligned pointer is detected and panics; the array <em>lengths</em> cannot be derived from the pointers, so they remain an unchecked caller contract. </p>
+</section>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -340,7 +358,7 @@ of orbitals, <code class="docutils literal notranslate"><span class="pre">norb</
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>The 1-body component of the electronic structure Hamiltonian as defined above.</p>
+<dd class="field-even"><p>A pointer to the component of the electronic structure Hamiltonian defined below.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -370,6 +388,15 @@ orbitals, <code class="docutils literal notranslate"><span class="pre">norb</spa
 </div>
 </p>
  </p>
+<section id="group__qf__electronic__integrals_1autotoc_md2">
+<h2>Safety<a class="headerlink" href="#group__qf__electronic__integrals_1autotoc_md2" title="Link to this heading">¶</a></h2>
+<p id="group__qf__electronic__integrals_1autotoc_md2">Behavior is undefined if any of the following conditions are violated:</p>
+<p><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">two_body_aa</span></code> is a non-null, aligned pointer to a <code class="docutils literal notranslate"><span class="pre">double</span></code> array of length <code class="docutils literal notranslate"><span class="pre">npair</span> <span class="pre">*</span> <span class="pre">(npair</span> <span class="pre">+</span> <span class="pre">1)</span> <span class="pre">/</span> <span class="pre">2</span></code>, where <code class="docutils literal notranslate"><span class="pre">npair</span> <span class="pre">=</span> <span class="pre">norb</span> <span class="pre">*</span> <span class="pre">(norb</span> <span class="pre">+</span> <span class="pre">1)</span> <span class="pre">/</span> <span class="pre">2</span></code></p></li>
+</ul>
+</p>
+<p>A null or misaligned pointer is detected and panics; the array <em>length</em> cannot be derived from the pointer, so it remains an unchecked caller contract. </p>
+</section>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p><code class="docutils literal notranslate"><span class="pre">two_body_aa</span></code> is an S8-fold symmetric array. That means, it is the flattened
@@ -387,7 +414,7 @@ index permutations <span class="math">\((i,j,k,l)\)</span> that index this 4-dim
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>The 2-body component of the electronic structure Hamiltonian as defined above.</p>
+<dd class="field-even"><p>A pointer to the component of the electronic structure Hamiltonian defined below.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -424,6 +451,16 @@ generates the unique permutations of the 4-index <span class="math">\((i,j,k,l)\
 </div>
 </p>
  </p>
+<section id="group__qf__electronic__integrals_1autotoc_md3">
+<h2>Safety<a class="headerlink" href="#group__qf__electronic__integrals_1autotoc_md3" title="Link to this heading">¶</a></h2>
+<p id="group__qf__electronic__integrals_1autotoc_md3">Behavior is undefined if any of the following conditions are violated:</p>
+<p><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">two_body_aa</span></code> and <code class="docutils literal notranslate"><span class="pre">two_body_bb</span></code> are non-null, aligned pointers to <code class="docutils literal notranslate"><span class="pre">double</span></code> arrays, each of length <code class="docutils literal notranslate"><span class="pre">npair</span> <span class="pre">*</span> <span class="pre">(npair</span> <span class="pre">+</span> <span class="pre">1)</span> <span class="pre">/</span> <span class="pre">2</span></code>, where <code class="docutils literal notranslate"><span class="pre">npair</span> <span class="pre">=</span> <span class="pre">norb</span> <span class="pre">*</span> <span class="pre">(norb</span> <span class="pre">+</span> <span class="pre">1)</span> <span class="pre">/</span> <span class="pre">2</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">two_body_ab</span></code> is a non-null, aligned pointer to a <code class="docutils literal notranslate"><span class="pre">double</span></code> array of length <code class="docutils literal notranslate"><span class="pre">npair</span> <span class="pre">*</span> <span class="pre">npair</span></code></p></li>
+</ul>
+</p>
+<p>A null or misaligned pointer is detected and panics; the array <em>lengths</em> cannot be derived from the pointers, so they remain an unchecked caller contract. </p>
+</section>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p><code class="docutils literal notranslate"><span class="pre">two_body_aa</span></code> and <code class="docutils literal notranslate"><span class="pre">two_body_bb</span></code> are a S8-fold symmetric arrays. That means, they
@@ -447,7 +484,7 @@ index <span class="math">\(ijkl\)</span> as an abuse of notation.)</p>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>The 2-body component of the electronic structure Hamiltonian as defined above.</p>
+<dd class="field-even"><p>A pointer to the component of the electronic structure Hamiltonian defined below.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -508,7 +545,7 @@ index <span class="math">\(ijkl\)</span> as an abuse of notation.)</p>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=8de533c9"></script>
+</div><script src="../_static/documentation_options.js?v=b767346c"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

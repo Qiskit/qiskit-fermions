@@ -71,10 +71,13 @@ Members
 
 .. table::
 
-  ==================================== =======================================================
-  :c:func:`qf_ferm_op_canonical_order` Reorders the terms of a fermionic operator canonically.
-  :c:func:`qf_maj_op_canonical_order`  Reorders the terms of a Majorana operator canonically.
-  ==================================== =======================================================
+  ======================================== ============================================================
+  :c:func:`qf_ferm_op_canonical_order`     Reorders the terms of a fermionic operator canonically.
+  :c:func:`qf_maj_op_canonical_order`      Reorders the terms of a Majorana operator canonically.
+  :c:func:`qf_edge_op_canonical_order`     Reorders the terms of an edge-vertex operator canonically.
+  :c:func:`qf_transfer_op_canonical_order` Reorders the terms of a transfer-vertex operator
+                                           canonically.
+  ======================================== ============================================================
 
 .. doxygengroup:: qf_operator_terms
    :content-only:
