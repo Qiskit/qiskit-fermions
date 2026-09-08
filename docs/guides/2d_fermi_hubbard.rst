@@ -26,8 +26,8 @@ square lattice**, using the **Verstraete-Cirac (VC) encoding** [2]_.
 There are three differences from the 1D problem, forming the basis of this work:
 
 * **The flow sets multiply.** A chain has two arrow orientations; a square lattice has
-   four (east, west, north, south), and each is a union of vertex-disjoint directed
-   paths (one per lattice row or column) rather than a single path.
+  four (east, west, north, south), and each is a union of vertex-disjoint directed
+  paths (one per lattice row or column) rather than a single path.
 * **The encoding gains an ancilla per site**, not one for the whole system, giving a
    qubit-to-mode ratio of :math:`2`. Transfer operators become weight-3 (horizontal) and
    weight-4 (vertical) Paulis, and each of the four flow sets maps to its own Pauli
@@ -352,7 +352,7 @@ single Pauli shape, uniform across the whole set.
 
 The four hopping shapes are distinct, so each flow set gets its own Clifford in
 :ref:`step 5 <flowsets_2d_synthesis>`. The reverse orientations are different
-Paulis, not the same ones relabeled; this is the why a 2D flow-set synthesis
+Paulis, not the same ones relabeled; this is why a 2D flow-set synthesis
 needs four circuits, where the 1D synthesis needs one.
 
 .. plot::
@@ -436,6 +436,7 @@ single ancilla.
    >>> from qiskit.synthesis import LieTrotter
    >>> from qiskit_fermions.circuit import FermionicCircuit
    >>> from qiskit_fermions.circuit.library import Evolution
+   >>> from qiskit_fermions.circuit.library.synthesis import FermionicLieTrotter
    >>> from qiskit_fermions.transpiler import FermionicCircuitToDAG, QuantumDAGToCircuit
    >>> from qiskit_fermions.transpiler.passes import (
    ...     CustomF2QLayout,
@@ -461,10 +462,15 @@ single ancilla.
    ...     )
    >>>
    >>> circuit = FermionicCircuit(num_sites)
-   >>> circuit.append(Evolution(num_sites, hamiltonian, time=total_time), circuit.modes)
+   >>> circuit.append(
+   ...     Evolution(
+   ...         num_sites, hamiltonian, time=total_time, synthesis=FermionicLieTrotter()
+   ...     ),
+   ...     circuit.modes,
+   ... )
    >>>
-   >>> # as in 1D, one decompose() splits the Evolution group by group -- five gates here,
-   >>> # the four hopping flow sets in group order, then the diagonal interaction
+   >>> # as in 1D, one decompose() splits the Evolution group by group (five gates here,
+   >>> # the four hopping flow sets in group order, then the diagonal interaction)
    >>> flow_set_circuit = circuit.decompose()
    >>> flow_set_circuit.count_ops()["Evolution"]
    5
@@ -859,14 +865,21 @@ gate means the grouping was not applied, which is an error rather than something
 around.
 
 .. note::
-   Unlike its 1D counterpart, this synthesis takes no ``reps`` argument. A Trotter step has to
+   Like its 1D counterpart, this synthesis takes no number of Trotter steps. A Trotter step has to
    cycle *between* the flow sets, but ``transpile_trotter_step`` below decomposes the fermionic
    circuit into one :class:`.Evolution` gate per set, so this method only ever sees one set at a
-   time and could only repeat *within* it -- which changes nothing, since repeating one operator
-   just splits its own evolution into equal pieces. Multi-step Trotterization here therefore needs
-   a product formula that respects the operator's
-   :attr:`~qiskit_fermions.operators.OperatorTrait.groups` inside a single gate; see
-   `issue #298 <https://github.com/Qiskit/qiskit-fermions/issues/298>`_.
+   time and could only repeat *within* it, which changes nothing: repeating one operator just
+   splits its own evolution into equal pieces.
+
+   Multi-step Trotterization therefore needs a product formula that respects the operator's
+   :attr:`~qiskit_fermions.operators.OperatorTrait.groups` inside a single gate, before the
+   decomposition. :class:`.FermionicLieTrotter` does that, and
+   :ref:`step 10 <flowsets_2d_convergence>` uses it to measure the convergence.
+
+   Note the two similarly named classes at play. Qiskit's
+   :class:`~qiskit.synthesis.LieTrotter`, used as the baseline above, acts on the *mapped*
+   Hamiltonian, where the grouping is already gone. :class:`.FermionicLieTrotter` is the fermionic
+   counterpart, and it is the one that can still see the flow sets.
 
 7. The result: constant depth
 -----------------------------
@@ -880,15 +893,23 @@ grouping, encoding, circuit, pass manager) repeated per size, so it is worth wra
    :nofigs:
    :include-source:
 
-   >>> def transpile_trotter_step(rows, cols, product_formula):
-   ...     """Transpile one Trotter step on a `rows` x `cols` lattice."""
+   >>> def transpile_trotter_step(rows, cols, product_formula, steps=1):
+   ...     """Transpile `steps` Trotter steps on a `rows` x `cols` lattice."""
    ...     num_sites = rows * cols
    ...     operator = fermi_hubbard_2d(rows, cols, 1.0, 2.0)
    ...     operator.groups = flow_set_groups(operator, cols)
    ...     encoding = partial(vc_encoding, cols=cols)
    ...
    ...     circuit = FermionicCircuit(num_sites)
-   ...     circuit.append(Evolution(num_sites, operator, time=total_time), circuit.modes)
+   ...     circuit.append(
+   ...         Evolution(
+   ...             num_sites,
+   ...             operator,
+   ...             time=total_time,
+   ...             synthesis=FermionicLieTrotter(reps=steps),
+   ...         ),
+   ...         circuit.modes,
+   ...     )
    ...     circuit = circuit.decompose()  # split into one Evolution per flow set
    ...
    ...     pass_manager = flow_set_pass_manager(circuit.register, encoding, product_formula)
@@ -900,8 +921,8 @@ edge makes the difference plain:
 .. plot::
    :context: close-figs
    :include-source:
-   :alt: Two-qubit depth and CX count against lattice edge; LieTrotter grows linearly while
-         the flow-set synthesis stays flat at 24.
+   :alt: Two-qubit depth and CX count against lattice edge; the qubit-level LieTrotter grows
+         linearly while the flow-set synthesis stays flat at 24.
 
    >>> sizes = [3, 4, 5, 6, 7, 8]
    >>> lie_trotter = [
@@ -913,7 +934,7 @@ edge makes the difference plain:
    >>>
    >>> figure, axes = plt.subplots(1, 2, figsize=(9, 3.5), layout="constrained")
    >>> for panel, index, title in zip(axes, (1, 0), ("two-qubit depth", "CX count")):
-   ...     _ = panel.plot(sizes, [stat[index] for stat in lie_trotter], "o-", label="Lie")
+   ...     _ = panel.plot(sizes, [stat[index] for stat in lie_trotter], "o-", label="qubit-level")
    ...     _ = panel.plot(sizes, [stat[index] for stat in flow], "s-", label="flow set")
    ...     _ = panel.set(xlabel="lattice edge $L$ (an $L \\times L$ lattice)", title=title)
    ...     _ = panel.legend()
@@ -1053,7 +1074,7 @@ is not: the two differ by a vertex operator on each bond's source site,
    E_{jk} = -2i \, V_j T_{jk} \, ,
 
 Around a closed loop every site is the source of exactly one bond, so the loop collects one
-:math:`V_j` per site -- which is exactly the **local parity** of the plaquette's four sites. That
+:math:`V_j` per site, which is the **local parity** of the plaquette's four sites. That
 local parity is what makes the difference: the Hamiltonian hops particles across the plaquette
 boundary, so it conserves only the *global* parity. The bare transfer loop therefore fails to commute with it, while the edge loop (which
 carries the parity factor) commutes.
@@ -1265,8 +1286,8 @@ this section cheap.
    >>> encoded_densities = [density(evolved_encoded, j, num_qubits) for j in range(num_sites)]
    >>> reference_densities = [density(evolved_reference, j, num_sites) for j in range(num_sites)]
    >>>
-   >>> for j, occupation in enumerate(encoded_densities):
-   ...     print(f"site {j}: {occupation:.10f}")
+   >>> for j, density_value in enumerate(encoded_densities):
+   ...     print(f"site {j}: {density_value:.10f}")
    site 0: 0.6750993356
    site 1: 0.3689791258
    site 2: 0.6750993356
@@ -1281,6 +1302,62 @@ this section cheap.
 
 Those are the encoded densities; they match the Jordan-Wigner reference to machine
 precision, on a lattice whose encoding is faithful only after projection.
+
+.. _flowsets_2d_convergence:
+
+10. Measure the Trotter convergence
+-----------------------------------
+
+:ref:`Step 8 <flowsets_2d_verify>` established that the two syntheses agree with each other, which
+is a statement about equivalence rather than accuracy: both describe the same single Trotter step,
+so both carry the same Trotter error. Measuring that error needs an exact reference, and step 9 just
+built one.
+
+The step count comes from :class:`.FermionicLieTrotter`, the fermionic counterpart of the
+qubit-level formula used as the baseline earlier. Applied to the whole grouped operator before the
+decomposition, its repetition cycles between the four flow sets and the diagonal group instead of
+within any one of them:
+
+.. plot::
+   :context:
+   :nofigs:
+   :include-source:
+
+   >>> initial_state = project_onto_codespace(
+   ...     basis_state(occupation, num_qubits), plaquette_stabilizers
+   ... )
+   >>> exact = expm_multiply(
+   ...     -1j * total_time * encoded.to_matrix(sparse=True), initial_state
+   ... )
+   >>>
+   >>> def trotter_fidelity(steps):
+   ...     # `steps` goes to the fermionic formula inside transpile_trotter_step, so the
+   ...     # repetition cycles between the flow sets rather than within any one of them
+   ...     circuit = transpile_trotter_step(
+   ...         rows, cols, FlowSetSynthesis(rows, cols), steps=steps
+   ...     )
+   ...     evolved = Statevector(initial_state).evolve(circuit.decompose(reps=6))
+   ...     return abs(np.vdot(evolved.data, exact)) ** 2
+   >>>
+   >>> for steps in (1, 2, 4, 8):
+   ...     print(f"{steps} step(s): fidelity {trotter_fidelity(steps):.6f}")
+   1 step(s): fidelity 0.053820
+   2 step(s): fidelity 0.704014
+   4 step(s): fidelity 0.932937
+   8 step(s): fidelity 0.982687
+
+The fidelity climbs monotonically toward one as the steps shorten, which is the behavior a product
+formula must show.
+
+A single step of this Hamiltonian at :math:`t = 1` is a poor approximation
+(the four hopping sets and the interaction do not commute) so the first row is far from one, and
+that is the point: the convergence is what confirms the construction, not any single row.
+
+.. note::
+   Each factor of the schedule spans every mode of this lattice, so narrowing a factor to its
+   support is a no-op here and the absolute qubit indices ``FlowSetSynthesis`` matches on are
+   unchanged. A synthesis written for an operator whose groups touch only part of the register
+   would have to account for that relabeling.
 
 What to take away
 -----------------
@@ -1309,6 +1386,9 @@ What to take away
   the synthesis is handed one flow set at a time and never has to re-derive the partition:
   it reads one Pauli shape off the first term and picks the matching Clifford. Assuming that,
   and raising when it does not hold, is what keeps ``synthesize`` short.
+- **The step count sits above the split.** The synthesis here sees one flow set per gate, so it
+  cannot subdivide the evolution across the sets. :class:`.FermionicLieTrotter` does that in
+  fermionic space, before the decomposition, which is what makes a convergence test possible at all.
 - **Verify on the subspace.** A :math:`2N`-qubit encoding of :math:`N` modes is faithful
   only where the stabilizers say it is. Because VC keeps :math:`V_j = Z_j`, the cheapest
   reliable check is to project a product state and compare densities: no intertwiner and
