@@ -1420,6 +1420,10 @@ mod tests {
         (op1, op2)
     }
 
+    // Not redundant with `test_and`/`test_and_assign`, despite looking like it: `__and__` delegates
+    // to `composed`, which is implemented separately from `__iand__` for every operator type (the
+    // trait docs on `composed` explain why it is not a clone followed by `__iand__`). So this pins
+    // that two independent implementations agree, which is exactly what a shared one would not need.
     #[test]
     fn test_and_matches_clone_then_and_assign() {
         let (op1, op2) = operand_pair();

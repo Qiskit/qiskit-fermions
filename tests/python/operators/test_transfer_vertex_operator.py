@@ -455,6 +455,10 @@ class TestTransferVertexOperator:
             for remaining, _ in reduced.iter_terms():
                 assert not reducible(tuple(remaining)), f"{actions} left {remaining} unreduced"
 
+    # The Eq. (7) relations below are asserted a second time, independently, by the
+    # `test_normal_ordered_gandon_rel*` tests in `crates/core/src/operators/transfer_vertex_operator.rs`.
+    # Those build a struct literal and call `normal_ordered` directly; these compose the same
+    # relation through the public `commutator` helper, which the Rust tests never touch. Keep both.
     def test_commutator(self, subtests):
         cls = self.get_class()
 
