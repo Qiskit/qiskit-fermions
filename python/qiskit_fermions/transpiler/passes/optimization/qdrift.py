@@ -44,7 +44,8 @@ class QDriftTrotterization(FermionicDAGCircuitPass):
     :attr:`~qiskit_fermions.operators.FermionOperator.groups`, if assigned), with each term sampled
     with a probability proportional to the magnitude of its coefficient, and emits one
     :class:`.Evolution` gate per sample. Every sampled gate evolves its (unit-magnitude,
-    sign-preserving) term for the same time
+    sign-preserving) term (or, when the Hamiltonian carries groups, its whole sampled group) for
+    the same time
 
     .. math::
 
@@ -55,6 +56,13 @@ class QDriftTrotterization(FermionicDAGCircuitPass):
     over the sampling approximates the exact evolution, with an error that decreases as
     ``num_terms`` grows. Because the output depends on the random draws, it differs from run to run
     unless a fixed ``rng`` is supplied.
+
+    .. note::
+       The sampled gates are marked :attr:`.Evolution.atomic`: the random draw *is* the
+       Trotterization this pass performs, so the emitted gates are terminal factors and
+       :meth:`~.FermionicCircuit.decompose` leaves them in place rather than splitting them further.
+       Each of them carries over the :attr:`.Evolution.synthesis` method of the gate it was sampled
+       from, even though an atomic gate never consults it.
 
     .. hint::
        Terms that are diagonal in the occupation-number basis (i.e. products of number operators)
@@ -124,10 +132,12 @@ class QDriftTrotterization(FermionicDAGCircuitPass):
     def run(self, dag: FermionicDAGCircuit) -> FermionicDAGCircuit:
         """Runs this transpilation pass.
 
-        Each :class:`.Evolution` node is replaced by ``num_terms`` sampled single-term
-        :class:`.Evolution` gates (see the class docstring). Nodes that are not :class:`.Evolution`
-        gates are copied to the output unchanged. Since the sampling is random, the output varies
-        between runs unless the ``rng`` was seeded.
+        Each :class:`.Evolution` node is replaced by ``num_terms`` sampled :class:`.Evolution`
+        gates, one per drawn term (or per drawn group, when the Hamiltonian carries groups; see the
+        class docstring). The emitted gates are marked :attr:`.Evolution.atomic` and carry over the
+        :attr:`.Evolution.synthesis` method of the node they replace. Nodes that are not
+        :class:`.Evolution` gates are copied to the output unchanged. Since the sampling is random,
+        the output varies between runs unless the ``rng`` was seeded.
 
         When :attr:`filter_trivial` is set, this method tracks the sets of modes that are known to
         be occupied or unoccupied, seeded from any :class:`.InitializeModes` gate(s) preceding the
@@ -290,7 +300,13 @@ class QDriftTrotterization(FermionicDAGCircuitPass):
                 for term in draws:
                     unit_terms = _unit_terms(term)
                     op = hamil.__class__.from_terms(unit_terms)
-                    evo = Evolution(num_modes, op, time=delta)
+                    evo = Evolution(
+                        num_modes,
+                        op,
+                        time=delta,
+                        synthesis=node.op.synthesis,
+                        atomic=True,
+                    )
                     out_dag.apply_operation_back(evo, qargs=out_dag.qubits)
                 continue
 
@@ -335,7 +351,13 @@ class QDriftTrotterization(FermionicDAGCircuitPass):
                 occupied |= term_support
                 unoccupied |= term_support
 
-                evo = Evolution(num_modes, op, time=delta)
+                evo = Evolution(
+                    num_modes,
+                    op,
+                    time=delta,
+                    synthesis=node.op.synthesis,
+                    atomic=True,
+                )
                 out_dag.apply_operation_back(evo, qargs=out_dag.qubits)
                 added_terms += 1
 

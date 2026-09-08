@@ -55,7 +55,8 @@ class Evolution(FermionicGate):
        :ref:`grouping_explanation`), and term-by-term otherwise (exact only when the individual factors
        mutually commute). The transpilation process may further alter the decomposition;
        :class:`.QDriftTrotterization`, for example, replaces the evolution with a randomized sample of
-       its terms.
+       its terms. The gates it emits are :attr:`atomic`, so :attr:`synthesis` no longer applies to
+       them.
 
     .. note::
        The state-vector simulation path does `not` go through :attr:`synthesis`: it exponentiates the
