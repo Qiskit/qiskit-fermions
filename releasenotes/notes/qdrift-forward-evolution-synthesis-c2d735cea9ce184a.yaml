@@ -1,0 +1,7 @@
+---
+fixes:
+  - |
+    Fixed :class:`.QDriftTrotterization` discarding the :attr:`.Evolution.synthesis` method of the
+    gates it Trotterizes, and emitting sampled gates that could be decomposed into non-unitary
+    factors. The sampled gates now carry over the synthesis method of the gate they replace and are
+    marked :attr:`.Evolution.atomic`.

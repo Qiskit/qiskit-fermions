@@ -25,6 +25,7 @@ from qiskit_fermions.circuit.library import (
     OrbitalRotation,
     PrepareSlaterDeterminant,
 )
+from qiskit_fermions.circuit.library.synthesis import FermionicSuzukiTrotter
 from qiskit_fermions.operators import FermionOperator
 from qiskit_fermions.operators.library import FCIDump
 from qiskit_fermions.operators.terms.filtering import filter_diagonal_terms
@@ -461,3 +462,147 @@ def test_qdrift_filter_trivial_accumulates_parallel_initialize_modes():
     for instruction in qdrift_circ._inner.data:
         if instruction.operation.name == "Evolution":
             assert instruction.operation.operator.get_support() in ({0, 1}, {2, 3})
+
+
+def _evolutions(circuit: FermionicCircuit) -> list[Evolution]:
+    return [
+        instruction.operation
+        for instruction in circuit._inner.data
+        if isinstance(instruction.operation, Evolution)
+    ]
+
+
+def _coupling_hamiltonian() -> FermionOperator:
+    """A 4-mode Hamiltonian whose terms all couple modes 0/1 with modes 2/3.
+
+    Every term bridges the occupied and unoccupied sets seeded by ``InitializeModes([1, 1, 0, 0])``,
+    so it is usable by the ``filter_trivial=True`` path without any draw being rejected.
+    """
+    hamil = FermionOperator.from_terms(
+        [
+            (((True, 2), (False, 0)), 1.0),  # 0 -> 2
+            (((True, 3), (False, 1)), 1.0),  # 1 -> 3
+            (((True, 0), (False, 2)), 1.0),  # 2 -> 0
+            (((True, 1), (False, 3)), 1.0),  # 3 -> 1
+        ]
+    )
+    hamil.groups = None
+    return hamil
+
+
+def _filter_trivial_circuit(hamil: FermionOperator, **kwargs) -> FermionicCircuit:
+    """Builds a circuit whose Evolution is preceded by the InitializeModes ``filter_trivial`` needs."""
+    circ = FermionicCircuit(4)
+    circ.append(InitializeModes([True, True, False, False]), circ.modes)
+    circ.append(Evolution(4, hamil, time=1.0, **kwargs), circ.modes)
+    return circ
+
+
+def test_qdrift_forwards_the_synthesis_method(subtests):
+    """The synthesis method of the input gate must survive the pass.
+
+    Dropping it silently replaced a caller's choice with the default ``FermionicLieTrotter``. Both
+    emission paths construct their gate independently, so both are covered here.
+    """
+    synthesis = FermionicSuzukiTrotter(order=2, reps=3)
+    num_terms = 4
+
+    with subtests.test("batched sampling"):
+        circ = _filter_trivial_circuit(_coupling_hamiltonian(), synthesis=synthesis)
+
+        qdrift_circ = FermionicPassManager(QDriftTrotterization(num_terms, rng=42)).run(circ)
+
+        evolutions = _evolutions(qdrift_circ)
+        assert len(evolutions) == num_terms
+        for evolution in evolutions:
+            assert evolution.synthesis is synthesis
+
+    with subtests.test("rejection sampling"):
+        circ = _filter_trivial_circuit(_coupling_hamiltonian(), synthesis=synthesis)
+
+        qdrift = QDriftTrotterization(num_terms, filter_trivial=True, rng=42)
+        qdrift_circ = FermionicPassManager(qdrift).run(circ)
+
+        evolutions = _evolutions(qdrift_circ)
+        assert len(evolutions) == num_terms
+        for evolution in evolutions:
+            assert evolution.synthesis is synthesis
+
+
+def test_qdrift_gates_are_atomic(subtests):
+    """The sampled gates are terminal factors: the random draw *is* the Trotterization.
+
+    Decomposing them again would discard the sampling this pass performed.
+    """
+    num_terms = 4
+
+    with subtests.test("batched sampling"):
+        circ = _filter_trivial_circuit(_coupling_hamiltonian())
+
+        qdrift_circ = FermionicPassManager(QDriftTrotterization(num_terms, rng=42)).run(circ)
+
+        evolutions = _evolutions(qdrift_circ)
+        assert len(evolutions) == num_terms
+        assert all(evolution.atomic for evolution in evolutions)
+
+    with subtests.test("rejection sampling"):
+        circ = _filter_trivial_circuit(_coupling_hamiltonian())
+
+        qdrift = QDriftTrotterization(num_terms, filter_trivial=True, rng=42)
+        qdrift_circ = FermionicPassManager(qdrift).run(circ)
+
+        evolutions = _evolutions(qdrift_circ)
+        assert len(evolutions) == num_terms
+        assert all(evolution.atomic for evolution in evolutions)
+
+
+def test_qdrift_does_not_mutate_the_input_gate():
+    """The pass must build new gates rather than mutate the node's operation.
+
+    A gate instance can be shared between circuits (Qiskit copies gates with a shallow ``__dict__``
+    copy), so mutating one would retroactively change every other circuit holding the same object.
+    """
+    gate = Evolution(4, _coupling_hamiltonian(), time=1.0)
+    circ = FermionicCircuit(4)
+    circ.append(InitializeModes([True, True, False, False]), circ.modes)
+    circ.append(gate, circ.modes)
+
+    FermionicPassManager(QDriftTrotterization(4, rng=42)).run(circ)
+
+    assert not gate.atomic
+
+
+def test_qdrift_output_is_a_decomposition_fixed_point():
+    """Decomposing the sampled gates must not split them into non-unitary factors.
+
+    A sampled *group* holds several terms, and ``split_out_groups`` drops the grouping, so before the
+    emitted gates were marked atomic a further decomposition re-split each group term by term. An
+    individual term is generally not Hermitian even when its group is (the conjugate pairs of a UCC
+    cluster generator being the motivating example), so the exponential of such a factor is not
+    unitary, and the fermion-to-qubit stage rejected it with a ``ValueError`` about complex
+    coefficients.
+    """
+    num_modes = 4
+    hamil = FermionOperator.from_terms(
+        [
+            (((True, 0), (False, 1)), 1.0j),  # group 0: Hermitian as a pair,
+            (((True, 1), (False, 0)), -1.0j),  #          but neither term is on its own
+            (((True, 2), (False, 3)), 1.0j),  # group 1: likewise
+            (((True, 3), (False, 2)), -1.0j),
+        ]
+    )
+    hamil.groups = [0, 0, 1, 1]
+
+    circ = FermionicCircuit(num_modes)
+    circ.append(Evolution(num_modes, hamil, time=1.0), circ.modes)
+
+    num_terms = 2
+    qdrift_circ = FermionicPassManager(QDriftTrotterization(num_terms, rng=5)).run(circ)
+
+    assert qdrift_circ.count_ops() == {"Evolution": num_terms}
+    # repeated decomposition makes no further progress ...
+    assert qdrift_circ.decompose(reps=5).count_ops() == {"Evolution": num_terms}
+    # ... so every factor keeps the Hermiticity of the group it was sampled from
+    for evolution in _evolutions(qdrift_circ.decompose(reps=5)):
+        operator = evolution.operator
+        assert operator.adjoint().equiv(operator), f"non-Hermitian factor {operator}"

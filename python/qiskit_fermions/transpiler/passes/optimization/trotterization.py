@@ -54,9 +54,10 @@ class FermionicTrotterization(FermionicDAGCircuitPass):
        mode-relabeling model and would otherwise see a fragment per factor.
 
        This is the opposite choice from :class:`.QDriftTrotterization`, which replaces each gate with
-       its sampled factors immediately. That pass has no alternative: its sampling is random and
-       one-shot, so deferring it would draw a different sample every time the definition were rebuilt.
-       A deterministic product formula is a pure function of the gate and can safely be deferred.
+       its sampled factors immediately -- and marks them :attr:`.Evolution.atomic`, since the sample
+       is the Trotterization. That pass has no alternative: its sampling is random and one-shot, so
+       deferring it would draw a different sample every time the definition were rebuilt. A
+       deterministic product formula is a pure function of the gate and can safely be deferred.
 
     .. caution::
        Not every synthesis method suits every operator. An :class:`.Evolution` whose operator groups
