@@ -65,8 +65,16 @@ class QDriftTrotterization(FermionicDAGCircuitPass):
        Each of them carries over the :attr:`.Evolution.synthesis` method of the gate it was sampled
        from, even though an atomic gate never consults it.
 
+    .. note::
+       A fixed ``rng`` reproduces the *sequence* of randomizations, not an individual member of it.
+       Successive :meth:`run` calls draw from the same generator, so they yield different circuits;
+       replaying from the same seed reproduces all of them in the same order, but the nth circuit
+       cannot be obtained without drawing the preceding ones first. Generating a batch of
+       randomizations and recording the seed therefore works as expected (see
+       :ref:`sqdrift_getting_started`); addressing one member directly is not supported.
+
     .. hint::
-       Terms that are diagonal in the occupation-number basis (i.e. products of number operators)
+       Terms that are diagonal in the occupation-number basis (that is, products of number operators)
        have no effect on the sampled bitstrings, so including them only increases the sampling
        overhead. Filter them out with
        :func:`~qiskit_fermions.operators.terms.filtering.filter_diagonal_terms` on the Hamiltonian
@@ -81,7 +89,7 @@ class QDriftTrotterization(FermionicDAGCircuitPass):
     MAX_SAMPLE_RETRIES = 1_000_000
     """The maximum number of consecutive rejected samples tolerated by ``filter_trivial`` before
     :meth:`run` gives up and raises :class:`RuntimeError`. This guards against an infinite loop when
-    the Hamiltonian's remaining terms cannot bridge the tracked occupied/unoccupied mode sets — for
+    the Hamiltonian's remaining terms cannot bridge the tracked occupied/unoccupied mode sets. For
     example, when both sets remain small and disjoint (few modes have been marked occupied or
     unoccupied, and none have yet become "uncertain") and no remaining term's support touches both."""
 
@@ -144,7 +152,7 @@ class QDriftTrotterization(FermionicDAGCircuitPass):
         be occupied or unoccupied, seeded from any :class:`.InitializeModes` gate(s) preceding the
         :class:`.Evolution` gates in the circuit (several such gates placed in parallel, e.g. one per
         spin sector, are accumulated together). A sampled term is only accepted if its support
-        intersects *both* sets, i.e. it couples a known-occupied mode with a known-unoccupied one;
+        intersects *both* sets, that is, it couples a known-occupied mode with a known-unoccupied one;
         otherwise it is discarded and re-sampled, since it cannot affect the sampled bitstring. Once a
         term is accepted, every mode in its support becomes "uncertain" and is added to *both* sets,
         making it eligible to participate in either role for subsequent samples. Any

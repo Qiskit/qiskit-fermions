@@ -106,11 +106,27 @@ class FermionicSuzukiTrotter(FermionicEvolutionSynthesis):
        governed by the weaker of the two -- so raising the order here while the qubit-side formula
        stays first-order buys little. See :mod:`~qiskit_fermions.circuit.library.synthesis`.
 
+    .. note::
+       Because the factor ordering is part of the formula, a reference value computed with one
+       product formula does not carry over to another. :meth:`.UCC.cluster_operator` pins its group
+       order deliberately, assigning indices in sorted key order rather than by first encounter, so
+       that its Trotter error is reproducible; a Suzuki formula then reorders those groups by design.
+       A :class:`.UCC` reference value obtained at ``order=1`` therefore differs at ``order >= 2``,
+       for the same operator and the same :attr:`reps`. That is inherent to choosing a different
+       product formula rather than a regression, and the default synthesis is unchanged, so nothing
+       moves unless a higher order is requested.
+
     .. caution::
        Each factor must be Hermitian for its exponential to be unitary, which does not follow from
        their sum being Hermitian: splitting a Hermitian operator can produce non-Hermitian groups (for
        example, separating :math:`a^\dagger_0 a_1` from its conjugate partner :math:`a^\dagger_1 a_0`).
        It is the caller's responsibility to group accordingly; this is not verified.
+
+       An operator with no groups is split term by term, which has the same effect, since an
+       individual term is generally not Hermitian. The resulting factors are valid fermionic
+       operators and the gates are built without complaint, but the fermion-to-qubit stage then
+       rejects them: :class:`~qiskit.circuit.library.PauliEvolutionGate` requires real coefficients
+       and raises ``ValueError: Operator contains complex coefficients, which are not supported``.
 
        Note that the symmetrization partially cancels the error of a non-Hermitian factor, so an
        incorrectly grouped operator can look markedly better at an even order than at first order while
