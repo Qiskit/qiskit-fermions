@@ -1219,6 +1219,12 @@ What to take away
   threw away the fact that its terms commute. Only supplying a flow-set-aware
   :class:`~qiskit.synthesis.EvolutionSynthesis` made the depth constant. Custom encodings,
   grouping, and custom synthesis are complementary: all three are needed.
+- **Two product formulas, two jobs.** :class:`.FermionicLieTrotter` fixes the approximation in
+  fermionic space, where the grouping is still visible, so it alone sets the Trotter error and the
+  step count. The qubit-side :class:`~qiskit.synthesis.EvolutionSynthesis` then decides only how
+  cheaply each set is realized: step 9 confirms both choices give the same unitary. Separating the
+  two is what lets the accuracy and the cost be tuned independently. See
+  :ref:`fermionic_synthesis_explanation`.
 - **Verify it.** An encoding that satisfies the commutation relations might still represent
   a different Hamiltonian if a prefactor or sign is off. Checking an intertwining relation
   (or, more cheaply, the spectrum) catches this.

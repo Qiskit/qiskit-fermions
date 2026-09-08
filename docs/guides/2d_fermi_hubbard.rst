@@ -1347,7 +1347,9 @@ within any one of them:
    8 step(s): fidelity 0.982687
 
 The fidelity climbs monotonically toward one as the steps shorten, which is the behavior a product
-formula must show.
+formula must show. Shortening the steps is only one of the two knobs;
+:class:`.FermionicSuzukiTrotter` trades them against each other at a higher order, as
+:ref:`fermionic_synthesis_explanation` measures.
 
 A single step of this Hamiltonian at :math:`t = 1` is a poor approximation
 (the four hopping sets and the interaction do not commute) so the first row is far from one, and

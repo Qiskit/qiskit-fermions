@@ -29,6 +29,10 @@ or problem-specific symmetries), you can unlock several benefits:
   <sqdrift_getting_started>`, some algorithms can benefit from improved
   stability or performance due to the preservation of physical properties.
 
+- **Product-formula factors**: A fermionic product formula splits an operator into its groups, so
+  the grouping determines both the cost and the Trotter error of a time evolution. See
+  :ref:`fermionic_synthesis_explanation`.
+
 
 Usage
 -----
