@@ -10,7 +10,9 @@
 // copyright notice, and modified files need to carry a notice indicating
 // that they have been altered from the originals.
 
-use crate::operators::{CoherenceError, OperatorMacro, OperatorTrait, ScaledTerm, TermSortKey};
+use crate::operators::{
+    CoherenceError, GroupedTerm, OperatorMacro, OperatorTrait, ScaledTerm, TermSortKey,
+};
 use num_complex::{Complex64, ComplexFloat};
 use std::cmp::Ordering;
 use std::collections::{HashMap, HashSet};
@@ -94,6 +96,12 @@ impl ScaledTerm for FermionOperatorGroupTermView<'_> {
     fn scaled(mut self, factor: Complex64) -> Self {
         self.coeff *= factor;
         self
+    }
+}
+
+impl GroupedTerm for FermionOperatorGroupTermView<'_> {
+    fn group(&self) -> u32 {
+        self.group
     }
 }
 
@@ -533,6 +541,19 @@ impl OperatorTrait for FermionOperator {
 
     fn groups(&self) -> Option<&[u32]> {
         self.groups.as_deref()
+    }
+
+    fn set_groups(&mut self, groups: Option<Vec<u32>>) -> Result<(), CoherenceError> {
+        if let Some(groups) = &groups
+            && groups.len() != self.coeffs.len()
+        {
+            return Err(CoherenceError::GroupLengthMismatch {
+                num_groups: groups.len(),
+                num_terms: self.coeffs.len(),
+            });
+        }
+        self.groups = groups;
+        Ok(())
     }
 
     fn iter_with_groups(&self) -> impl ExactSizeIterator<Item = Self::GroupTermView<'_>> {
@@ -1433,6 +1454,41 @@ mod tests {
     }
 
     #[test]
+    fn test_set_groups_rejects_a_length_mismatch() {
+        let mut op = FermionOperator {
+            coeffs: vec![Complex64::new(1.0, 0.0), Complex64::new(2.0, 0.0)],
+            actions: vec![true, false, true, false],
+            modes: vec![0, 1, 1, 0],
+            boundaries: vec![0, 2, 4],
+            groups: None,
+        };
+
+        // one index per term is accepted
+        assert!(op.set_groups(Some(vec![0, 1])).is_ok());
+        assert_eq!(op.groups, Some(vec![0, 1]));
+
+        // clearing the group indices is always allowed
+        assert!(op.set_groups(None).is_ok());
+        assert_eq!(op.groups, None);
+
+        // too few indices would make `iter_with_groups` drop the trailing term
+        let err = op.set_groups(Some(vec![0]));
+        assert!(err.is_err_and(|e| matches!(
+            e,
+            CoherenceError::GroupLengthMismatch {
+                num_groups: 1,
+                num_terms: 2
+            }
+        )));
+
+        // too many would make `num_groups` report groups that no term carries
+        assert!(op.set_groups(Some(vec![0, 1, 2])).is_err());
+
+        // a rejected assignment leaves the operator untouched
+        assert_eq!(op.groups, None);
+    }
+
+    #[test]
     fn test_has_and_num_groups() {
         let mut zero = FermionOperator::zero();
 
@@ -1450,39 +1506,6 @@ mod tests {
 
         assert!(one.has_groups());
         assert_eq!(one.num_groups(), Some(1));
-    }
-
-    #[test]
-    fn test_group_weights() {
-        let mut op = FermionOperator {
-            coeffs: vec![
-                Complex64::new(1.0, 0.0),
-                Complex64::new(-3.0, 4.0),
-                Complex64::new(2.0, 0.0),
-            ],
-            actions: vec![true, false, true, false, true, true, false, false],
-            modes: vec![0, 1, 1, 0, 0, 0, 1, 1],
-            boundaries: vec![0, 2, 4, 8],
-            groups: None,
-        };
-
-        // an ungrouped operator has no per-group weights to report
-        assert!(op.group_weights().is_none());
-
-        op.groups = Some(vec![0, 0, 1]);
-
-        // group 0 averages |1.0| and |-3.0 + 4.0j| = 5.0, i.e. (1.0 + 5.0) / 2; group 1 holds the
-        // single term |2.0|. Note that the magnitude, not the real part, is what is averaged.
-        assert_eq!(op.group_weights(), Some(vec![3.0, 2.0]));
-
-        // a grouped operator holding no terms has no groups to weight either
-        let mut zero = FermionOperator::zero();
-        zero.groups = Some(vec![]);
-        assert_eq!(zero.group_weights(), Some(vec![]));
-
-        // group 1 is carried by no term at all, so it weighs 0.0 rather than NaN-ing the sample
-        op.groups = Some(vec![0, 0, 2]);
-        assert_eq!(op.group_weights(), Some(vec![3.0, 0.0, 2.0]));
     }
 
     #[test]

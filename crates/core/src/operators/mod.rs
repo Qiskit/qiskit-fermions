@@ -27,6 +27,8 @@ pub enum CoherenceError {
         "num_qubits ({num_qubits}) is too small for an operator acting on mode index {max_mode}"
     )]
     NumQubitsTooSmall { num_qubits: u32, max_mode: u32 },
+    #[error("expected one group index per term, but got {num_groups} for {num_terms} terms")]
+    GroupLengthMismatch { num_groups: usize, num_terms: usize },
 }
 
 /// Provides a total, coefficient-independent ordering key for a single term view.
@@ -50,6 +52,21 @@ pub trait TermSortKey {
 pub trait ScaledTerm {
     /// Returns this term with its coefficient multiplied by `factor`.
     fn scaled(self, factor: Complex64) -> Self;
+}
+
+/// Exposes the group index of a single grouped term view.
+///
+/// Implemented by the `*GroupTermView` structs. This is what lets the group-related routines in
+/// [`operators::terms::grouping::analysis`](crate::operators::terms::grouping::analysis) bucket the
+/// terms of an arbitrary operator type by group in a single pass: the group index is otherwise
+/// reachable only on the concrete view structs, not through
+/// [`OperatorTrait::GroupTermView`]'s bounds.
+///
+/// Deliberately kept out of [`TermSortKey::sort_key`], which must keep ignoring the group index so
+/// that ordering a grouped operator agrees with ordering the same terms ungrouped.
+pub trait GroupedTerm {
+    /// Returns the index of the group this term belongs to.
+    fn group(&self) -> u32;
 }
 
 pub trait OperatorTrait {
@@ -105,7 +122,7 @@ pub trait OperatorTrait {
     /// Its [`TermSortKey`] must match that of the corresponding [`Self::TermView`] (i.e. ignore the
     /// group index), so that ordering a grouped operator agrees with ordering the same terms
     /// ungrouped.
-    type GroupTermView<'a>: PartialEq + TermSortKey + ScaledTerm
+    type GroupTermView<'a>: PartialEq + TermSortKey + ScaledTerm + GroupedTerm
     where
         Self: 'a;
 
@@ -118,18 +135,29 @@ pub trait OperatorTrait {
 
     /// Returns the operator's coefficients, one per term.
     ///
-    /// This is the single point of access through which the trait's coefficient-dependent provided
-    /// methods ([`group_weights`](Self::group_weights)) reach the `coeffs` field, so that they need
-    /// not be reimplemented per operator type.
+    /// This is also the single point of access through which the group-analysis routines in
+    /// [`operators::terms::grouping::analysis`](crate::operators::terms::grouping::analysis) read
+    /// the coefficients, so that they need not be reimplemented per operator type.
     fn coeffs(&self) -> &[Complex64];
 
     /// Returns the operator's group indices, one per term, or `None` if it tracks no groups.
     ///
     /// This is the single point of access through which the trait's group-related provided methods
-    /// ([`has_groups`](Self::has_groups), [`num_groups`](Self::num_groups),
-    /// [`group_weights`](Self::group_weights)) reach the `groups` field, so that they need not be
-    /// reimplemented per operator type.
+    /// ([`has_groups`](Self::has_groups), [`num_groups`](Self::num_groups)) and the group-analysis
+    /// routines in
+    /// [`operators::terms::grouping::analysis`](crate::operators::terms::grouping::analysis) reach
+    /// the `groups` field, so that they need not be reimplemented per operator type.
     fn groups(&self) -> Option<&[u32]>;
+
+    /// Assigns the operator's group indices, or clears them when given `None`.
+    ///
+    /// This is the only route through which group indices enter an operator, and it rejects an array
+    /// whose length differs from the number of terms. Nothing downstream re-checks that invariant:
+    /// [`iter_with_groups`](Self::iter_with_groups) zips the two arrays and so would silently drop
+    /// trailing terms, while [`num_groups`](Self::num_groups) reads the group indices alone and so
+    /// would report groups that no term carries. Rejecting the assignment keeps both unreachable
+    /// rather than leaving a corrupt operator for a later routine to detect.
+    fn set_groups(&mut self, groups: Option<Vec<u32>>) -> Result<(), CoherenceError>;
 
     /// Returns whether the operator tracks group indices (i.e. `groups` is `Some`).
     ///
@@ -152,37 +180,6 @@ pub trait OperatorTrait {
             Some(max) => max + 1,
             None => 0,
         })
-    }
-
-    /// Returns the mean absolute coefficient magnitude of each group, or `None` if the operator
-    /// tracks no groups.
-    ///
-    /// The `i`-th entry is the sum of `|coeff|` over the terms in group `i`, divided by the number
-    /// of terms in that group. This is the sampling weight of a randomized product formula (e.g.
-    /// qDRIFT) that draws whole groups rather than individual terms.
-    ///
-    /// Computing this natively reduces the per-term coefficients and group indices down to one
-    /// value per group in a single pass, so a caller across an FFI boundary receives only
-    /// [`num_groups`](Self::num_groups) values instead of two arrays of one value per (ungrouped)
-    /// term that it would have to reduce itself.
-    ///
-    /// A group index that no term carries yields a weight of `0.0`: the index range is dense by
-    /// construction (see [`num_groups`](Self::num_groups)), but nothing enforces that, and a `0.0`
-    /// weight keeps such a group out of the sample rather than poisoning every weight with a `NaN`.
-    fn group_weights(&self) -> Option<Vec<f64>> {
-        let groups = self.groups()?;
-        let mut sums = vec![0.0; self.num_groups()? as usize];
-        let mut counts = vec![0_u32; sums.len()];
-        for (&group, coeff) in groups.iter().zip(self.coeffs()) {
-            sums[group as usize] += coeff.norm();
-            counts[group as usize] += 1;
-        }
-        for (sum, &count) in sums.iter_mut().zip(counts.iter()) {
-            if count > 0 {
-                *sum /= f64::from(count);
-            }
-        }
-        Some(sums)
     }
 
     /// Iterates over the terms of the operator together with their group index.

@@ -671,35 +671,34 @@ class TestEdgeVertexOperator:
             op.groups = None
             assert not op.has_groups()
 
-    def test_group_weights(self, subtests):
+    def test_set_groups_err(self, subtests):
         cls = self.get_class()
 
-        op = cls.from_dict({((0, 1),): 1.0, ((2, 3),): -3.0 + 4.0j, ((1, 0), (2, 3)): 2.0})
+        op = cls.from_dict({((0, 1),): 1.0, ((2, 3),): 1.0})
+        assert len(op.get_coeffs()) == 2
 
-        with subtests.test("unset"):
-            assert op.group_weights() is None
+        # a short array would silently drop the trailing term wherever terms are iterated together
+        # with their groups
+        with (
+            subtests.test("too few indices"),
+            pytest.raises(ValueError, match="expected one group index per term"),
+        ):
+            op.groups = [0]
 
-        # NOTE: `from_dict` does not preserve the insertion order of its keys, so the expected
-        # weights are derived from the operator's actual coefficient order rather than hardcoded.
-        # The magnitude, not the real part, is what gets averaged (hence `abs` below).
-        coeffs = op.get_coeffs()
-        first_two = (abs(coeffs[0]) + abs(coeffs[1])) / 2
-        last = abs(coeffs[2])
+        # a long array would make `num_groups` report groups that no term carries
+        with (
+            subtests.test("too many indices"),
+            pytest.raises(ValueError, match="expected one group index per term"),
+        ):
+            op.groups = [0, 0, 1]
 
-        op.groups = [0, 0, 1]
+        with subtests.test("a rejected assignment changes nothing"):
+            assert not op.has_groups()
 
-        with subtests.test("assigned"):
-            assert op.group_weights() == [first_two, last]
-
-        with subtests.test("sparse group index"):
-            # group 1 is carried by no term at all, so it weighs 0.0 rather than NaN
-            op.groups = [0, 0, 2]
-            assert op.group_weights() == [first_two, 0.0, last]
-
-        with subtests.test("empty list"):
-            empty = cls.zero()
-            empty.groups = []
-            assert empty.group_weights() == []
+        with subtests.test("clearing is always allowed"):
+            op.groups = [0, 1]
+            op.groups = None
+            assert not op.has_groups()
 
     def test_split_out_groups_err(self):
         cls = self.get_class()

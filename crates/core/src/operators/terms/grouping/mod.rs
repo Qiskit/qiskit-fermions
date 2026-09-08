@@ -18,4 +18,5 @@ pub enum GroupingError {
     ElectronicStructureError,
 }
 
+pub mod analysis;
 pub mod electronic_structure;

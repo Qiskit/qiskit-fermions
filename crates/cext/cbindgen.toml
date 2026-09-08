@@ -41,6 +41,34 @@ QfTransferVertexOperator *qf_transfer_op_commutator(const QfTransferVertexOperat
 QfTransferVertexOperator *qf_transfer_op_anti_commutator(const QfTransferVertexOperator *op_a, const QfTransferVertexOperator *op_b);
 /// @ingroup qf_commutators
 QfTransferVertexOperator *qf_transfer_op_double_commutator(const QfTransferVertexOperator *op_a, const QfTransferVertexOperator *op_b, const QfTransferVertexOperator *op_c, bool sign);
+
+/// @ingroup qf_operator_terms_grouping
+void qf_ferm_op_group_coeff_means(const QfFermionOperator *op, double *means_out);
+/// @ingroup qf_operator_terms_grouping
+void qf_ferm_op_groups_are_hermitian(const QfFermionOperator *op, double atol, bool *hermitian_out);
+/// @ingroup qf_operator_terms_grouping
+void qf_ferm_op_groups_have_uniform_coeffs(const QfFermionOperator *op, double atol, bool abs, bool *uniform_out);
+
+/// @ingroup qf_operator_terms_grouping
+void qf_maj_op_group_coeff_means(const QfMajoranaOperator *op, double *means_out);
+/// @ingroup qf_operator_terms_grouping
+void qf_maj_op_groups_are_hermitian(const QfMajoranaOperator *op, double atol, bool *hermitian_out);
+/// @ingroup qf_operator_terms_grouping
+void qf_maj_op_groups_have_uniform_coeffs(const QfMajoranaOperator *op, double atol, bool abs, bool *uniform_out);
+
+/// @ingroup qf_operator_terms_grouping
+void qf_edge_op_group_coeff_means(const QfEdgeVertexOperator *op, double *means_out);
+/// @ingroup qf_operator_terms_grouping
+void qf_edge_op_groups_are_hermitian(const QfEdgeVertexOperator *op, double atol, bool *hermitian_out);
+/// @ingroup qf_operator_terms_grouping
+void qf_edge_op_groups_have_uniform_coeffs(const QfEdgeVertexOperator *op, double atol, bool abs, bool *uniform_out);
+
+/// @ingroup qf_operator_terms_grouping
+void qf_transfer_op_group_coeff_means(const QfTransferVertexOperator *op, double *means_out);
+/// @ingroup qf_operator_terms_grouping
+void qf_transfer_op_groups_are_hermitian(const QfTransferVertexOperator *op, double atol, bool *hermitian_out);
+/// @ingroup qf_operator_terms_grouping
+void qf_transfer_op_groups_have_uniform_coeffs(const QfTransferVertexOperator *op, double atol, bool abs, bool *uniform_out);
 """
 
 [parse]

@@ -452,58 +452,6 @@ pub unsafe extern "C" fn qf_transfer_op_num_groups(op: *const TransferVertexOper
 
 /// @ingroup qf_transfer_op
 ///
-/// @brief Gets the mean absolute coefficient magnitude of each group.
-///
-/// @param op A pointer to the transfer-vertex operator whose group weights to compute.
-/// @param weights_out A pointer to the array of doubles into which to write the weights. Must be
-///     sized to :c:func:`qf_transfer_op_num_groups`.
-///
-/// @rst
-///
-/// The ``i``-th entry is the sum of ``abs(coeff)`` over the terms in group ``i``, divided by the
-/// number of terms in that group. This is the sampling weight of a randomized product formula
-/// (e.g. qDRIFT) that draws whole groups rather than individual terms, and is computed in a single
-/// pass over the operator rather than by reducing :c:func:`qf_transfer_op_get_coeffs` and
-/// :c:func:`qf_transfer_op_get_groups` (one value per *ungrouped* term each) on the caller's side.
-///
-/// .. note::
-///    A group index that no term carries weighs ``0.0``, which keeps it out of the sample.
-///
-/// .. seealso::
-///    The explanation on :ref:`grouping_explanation`.
-///
-/// Example
-/// -------
-///
-/// .. code-block:: c
-///     :linenos:
-///
-///     QfTransferVertexOperator *op = ...;
-///
-///     uint32_t groups_in[4] = {0, 1, 0, 1};
-///     qf_transfer_op_set_groups(op, groups_in, 4);
-///
-///     double weights[2];
-///     qf_transfer_op_group_weights(op, weights);
-///
-/// @endrst
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn qf_transfer_op_group_weights(
-    op: *const TransferVertexOperator,
-    weights_out: *mut f64,
-) {
-    let op = unsafe { const_ptr_as_ref(op) };
-    let weights = op.group_weights().expect(
-        "Expected groups to be present. It is the user's responsibility to check this via \
-        qf_transfer_op_has_groups before calling this function.",
-    );
-    for (i, weight) in weights.iter().enumerate() {
-        unsafe { weights_out.add(i).write(*weight) };
-    }
-}
-
-/// @ingroup qf_transfer_op
-///
 /// @brief Gets the group indices for all operator terms.
 ///
 /// @param op A pointer to the transfer-vertex operator whose group indices to get.
@@ -555,7 +503,15 @@ pub unsafe extern "C" fn qf_transfer_op_get_groups(
 /// @param groups_in A pointer to the ``groups`` integer array to write into the operator.
 /// @param groups_len The number of terms in the ``groups_in`` array.
 ///
+/// @return An exit code.
+/// * ``QfExitCode_Success`` upon success
+/// * ``QfExitCode_ValueError`` if ``groups_len`` differs from the number of terms in the operator
+///
 /// @rst
+///
+/// The length is validated here because nothing downstream re-checks it: too few indices would
+/// silently drop the trailing terms wherever terms are iterated together with their groups, and too
+/// many would make :c:func:`qf_transfer_op_num_groups` report groups that no term carries.
 ///
 /// .. seealso::
 ///    The explanation on :ref:`grouping_explanation`.
@@ -578,12 +534,15 @@ pub unsafe extern "C" fn qf_transfer_op_set_groups(
     op: *mut TransferVertexOperator,
     groups_in: *const u32,
     groups_len: u64,
-) {
+) -> ExitCode {
     let op = unsafe { mut_ptr_as_ref(op) };
     let groups_in = unsafe { const_ptr_as_ref(groups_in) };
     let mut groups = vec![0; groups_len as usize];
     groups.copy_from_slice(unsafe { slice_from_ptr(groups_in, groups_len as usize) });
-    op.groups = Some(groups);
+    match op.set_groups(Some(groups)) {
+        Ok(()) => ExitCode::Success,
+        Err(_) => ExitCode::ValueError,
+    }
 }
 
 /// @ingroup qf_transfer_op

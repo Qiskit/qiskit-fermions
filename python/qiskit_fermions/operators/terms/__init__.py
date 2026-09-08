@@ -27,8 +27,8 @@ Grouping
 Please refer to :ref:`grouping_explanation` for a detailed explanation of this module's
 functionality.
 
-Members
-^^^^^^^
+Assignment
+^^^^^^^^^^
 
 Rather than always relying on the user to provide the group indices themselves, this module provides
 a collection of functions which determine the grouping information automatically.
@@ -37,6 +37,22 @@ a collection of functions which determine the grouping information automatically
    :toctree: ../stubs/
 
    group_terms_by_electronic_structure
+
+Analysis
+^^^^^^^^
+
+Group indices carry no intrinsic meaning: the array only says which terms belong together, never
+why. Accordingly, none of the functions below reports whether a grouping is "correct": each
+answers one narrow, stated question about an existing grouping, leaving the interpretation to you.
+They are provided so that an assumption a downstream consumer makes about a grouping can be checked
+up front, rather than being paid for on every call.
+
+.. autosummary::
+   :toctree: ../stubs/
+
+   group_coeff_means
+   groups_are_hermitian
+   groups_have_uniform_coeffs
 
 Filtering
 ---------
@@ -74,12 +90,20 @@ Members
 """
 
 from .filtering import filter_diagonal_terms
-from .grouping import group_terms_by_electronic_structure
+from .grouping import (
+    group_coeff_means,
+    group_terms_by_electronic_structure,
+    groups_are_hermitian,
+    groups_have_uniform_coeffs,
+)
 from .ordering import canonical_order, order_terms
 
 __all__ = [
     "canonical_order",
     "filter_diagonal_terms",
+    "group_coeff_means",
     "group_terms_by_electronic_structure",
+    "groups_are_hermitian",
+    "groups_have_uniform_coeffs",
     "order_terms",
 ]

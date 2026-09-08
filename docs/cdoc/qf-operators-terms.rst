@@ -21,8 +21,8 @@ Grouping
 Refer to :ref:`grouping_explanation` for a detailed explanation of this module's
 functionality.
 
-Members
-^^^^^^^
+Assignment
+^^^^^^^^^^
 
 Rather than always relying on the user to provide the group indices themselves,
 the C API provides a collection of functions which determine the grouping
@@ -33,6 +33,17 @@ information automatically.
   ======================================================== ==============================================================
   :c:func:`qf_ferm_op_group_terms_by_electronic_structure` Groups the terms of an operator by their electronic structure.
   ======================================================== ==============================================================
+
+Analysis
+^^^^^^^^
+
+Group indices carry no intrinsic meaning: they only say which terms belong
+together, never why. Accordingly, no function reports whether a grouping is
+"correct". The C API instead provides a collection of functions that each answer
+one narrow, stated question about an existing grouping, so that an assumption a
+downstream consumer makes can be checked up front rather than being paid for on
+every call. Since these work with generic operator representations, they are
+documented on the :doc:`grouping functions <qf-operators-terms-grouping>` page.
 
 Filtering
 ---------
