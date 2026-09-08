@@ -15,7 +15,7 @@ use pyo3::prelude::*;
 use pyo3::types::PyType;
 use pyo3_stub_gen::derive::*;
 use qiskit_fermions_core::operators::fermion_operator::FermionOperator;
-use qiskit_fermions_core::operators::library::fcidump::FCIDump;
+use qiskit_fermions_core::operators::library::fcidump::{FCIDump, FCIDumpError};
 
 /// An electronic structure Hamiltonian in FCIDump format.
 ///
@@ -90,11 +90,29 @@ impl PyFCIDump {
     ///
     /// Returns:
     ///     The constructed data structure.
+    ///
+    /// Raises:
+    ///     OSError: if ``file_path`` cannot be opened or read.
+    ///     ValueError: if the file does not honour the FCIDump format (a missing header namelist, a
+    ///         missing ``NORB`` or ``NELEC`` field, or a malformed ``MS2`` field), or if it carries
+    ///         an MO energy value, which is not supported yet.
     #[classmethod]
-    fn from_file(_cls: &Bound<'_, PyType>, file_path: String) -> Self {
-        Self {
-            inner: FCIDump::from_file(file_path),
-        }
+    fn from_file(_cls: &Bound<'_, PyType>, file_path: String) -> PyResult<Self> {
+        // A bad path is by far the likeliest failure here, so it maps onto `OSError` (carrying the
+        // underlying `io::Error`) while the format violations map onto `ValueError`. Returning a
+        // `PyResult` at all is the point: the core reports these as an `FCIDumpError`, and without
+        // this conversion a panic would cross the FFI boundary as `PanicException`, which derives
+        // from `BaseException` and so slips through an ordinary `except Exception`.
+        FCIDump::from_file(file_path)
+            .map(|inner| Self { inner })
+            .map_err(|err| match err {
+                // `Display` for these two variants already interpolates the underlying
+                // `io::Error`, so the message needs no further decoration.
+                FCIDumpError::Open { .. } | FCIDumpError::Read { .. } => {
+                    ::pyo3::exceptions::PyOSError::new_err(err.to_string())
+                }
+                _ => crate::value_err(err),
+            })
     }
 
     /// Returns the number of orbitals.

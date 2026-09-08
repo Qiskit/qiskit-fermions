@@ -12,6 +12,7 @@
 
 from pathlib import Path
 
+import pytest
 from qiskit_fermions.operators import FermionOperator, ann, cre
 from qiskit_fermions.operators.library import FCIDump
 
@@ -152,3 +153,69 @@ class TestFCIDump:
             }
         )
         assert op.equiv(expected)
+
+
+class TestFCIDumpErrors:
+    """Covers the failure modes of :meth:`FCIDump.from_file`.
+
+    The parser reports each of these as a recoverable error, which the binding turns into a catchable
+    Python exception. That conversion is the thing under test: the underlying Rust code used to
+    ``panic!``, and a panic crossing PyO3 surfaces as ``PanicException``, which derives from
+    ``BaseException`` rather than ``Exception`` and so slips straight through an ordinary
+    ``except Exception`` handler. Each test therefore asserts the concrete exception type *and* that
+    it is an ``Exception``, since that is precisely what regressed behaviour would violate.
+    """
+
+    def test_missing_file_raises_oserror(self):
+        with pytest.raises(OSError) as excinfo:
+            FCIDump.from_file("does_not_exist.fcidump")
+        assert isinstance(excinfo.value, Exception)
+        assert "does_not_exist.fcidump" in str(excinfo.value)
+
+    def test_missing_namelist_raises_value_error(self, tmp_path):
+        # No `/` or `&END` terminator, so the header namelist is never found.
+        path = tmp_path / "no_namelist.fcidump"
+        path.write_text(" 0.5   1   1   1   1\n")
+        with pytest.raises(ValueError, match="HEADER namelist"):
+            FCIDump.from_file(str(path))
+
+    def test_missing_norb_raises_value_error(self, tmp_path):
+        path = tmp_path / "no_norb.fcidump"
+        path.write_text("&FCI NELEC=   2,MS2= 0,\n /\n")
+        with pytest.raises(ValueError, match="NORB"):
+            FCIDump.from_file(str(path))
+
+    def test_missing_nelec_raises_value_error(self, tmp_path):
+        path = tmp_path / "no_nelec.fcidump"
+        path.write_text("&FCI NORB=   2,MS2= 0,\n /\n")
+        with pytest.raises(ValueError, match="NELEC"):
+            FCIDump.from_file(str(path))
+
+    def test_mo_energy_integral_raises_value_error(self, tmp_path):
+        # An integral line `(i, a, j, 0)` with `i, a, j` all nonzero is an MO energy value, which the
+        # parser does not support yet. Pinning it as a clean error keeps the gap visible and makes
+        # any future support a deliberate change.
+        path = tmp_path / "mo_energy.fcidump"
+        path.write_text("&FCI NORB=   2,NELEC=   2,MS2= 0,\n /\n 0.5   1   1   2   0\n")
+        with pytest.raises(ValueError, match="MO energy"):
+            FCIDump.from_file(str(path))
+
+    def test_every_failure_is_catchable_as_exception(self, tmp_path):
+        """A single guard against the regression that motivated all of the above.
+
+        ``PanicException`` would satisfy none of the ``pytest.raises`` calls above, but this states
+        the property directly and independently of which exception subclass each case maps onto.
+        """
+        path = tmp_path / "no_norb.fcidump"
+        path.write_text("&FCI NELEC=   2,MS2= 0,\n /\n")
+        for bad in ("does_not_exist.fcidump", str(path)):
+            try:
+                FCIDump.from_file(bad)
+            except Exception:
+                continue
+            except BaseException as exc:  # pragma: no cover - only on a regression
+                raise AssertionError(
+                    f"{bad!r} raised {type(exc).__name__}, which is not an `Exception` subclass and "
+                    "so escapes `except Exception`"
+                ) from exc
+            raise AssertionError(f"{bad!r} did not raise at all")

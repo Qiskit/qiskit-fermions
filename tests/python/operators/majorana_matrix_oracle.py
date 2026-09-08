@@ -10,11 +10,12 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
-"""A dense-matrix oracle for edge- and transfer-vertex operators.
+"""A dense-matrix oracle for Majorana, edge- and transfer-vertex operators.
 
-Both operator families are *defined* as products of Majorana operators, so building explicit
-matrices for the Majoranas and multiplying them out gives a ground truth that is independent of
-the operator implementations under test. This is deliberately naive: it never calls
+The edge- and transfer-vertex families are *defined* as products of Majorana operators, so building
+explicit matrices for the Majoranas and multiplying them out gives a ground truth that is independent
+of the operator implementations under test. The same construction serves ``MajoranaOperator`` itself
+through :func:`majorana_operator_matrix`. This is deliberately naive: it never calls
 :meth:`normal_ordered`, :meth:`simplify` or any of the algebra being verified, so a sign error in
 those cannot hide here.
 
@@ -82,5 +83,25 @@ def operator_matrix(operator, num_modes: int, action_matrix) -> np.ndarray:
         term = np.eye(dim, dtype=complex)
         for left, right in actions:
             term = term @ action_matrix(left, right, num_modes)
+        total += complex(coeff) * term
+    return total
+
+
+def majorana_operator_matrix(operator, num_modes: int) -> np.ndarray:
+    """Returns the dense matrix of a :class:`MajoranaOperator`.
+
+    :func:`operator_matrix` cannot be reused directly: a Majorana term is a flat sequence of single
+    generator indices rather than the ``(left, right)`` pairs the edge- and transfer-vertex operators
+    carry. The indices also differ by one, because ``MajoranaOperator`` counts generators from zero
+    (as :func:`~qiskit_fermions.operators.gamma` returns) while :func:`majorana` above follows the
+    1-based convention of the defining papers. That offset is pinned by
+    ``test_majorana_matrix_oracle_matches_vertex_matrix``.
+    """
+    dim = 2**num_modes
+    total = np.zeros((dim, dim), dtype=complex)
+    for indices, coeff in operator.iter_terms():
+        term = np.eye(dim, dtype=complex)
+        for index in indices:
+            term = term @ majorana(index + 1, num_modes)
         total += complex(coeff) * term
     return total

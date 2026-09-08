@@ -37,7 +37,8 @@ documentation, as well as the :mod:`qiskit_fermions.operators.library`.
 
        #include <qiskit_fermions.h>
 
-       QfFCIDump* fcidump = qf_fcidump_from_file("docs/guides/n2.fcidump");
+       QfFCIDump* fcidump = NULL;
+       qf_fcidump_from_file("docs/guides/n2.fcidump", &fcidump);
        QfFermionOperator* hamil = qf_ferm_op_from_fcidump(fcidump);
        uint32_t num_modes = 2 * qf_fcidump_norb(fcidump);
 

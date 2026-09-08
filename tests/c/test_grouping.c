@@ -36,7 +36,10 @@ static int test_grouping_error(void) {
 }
 
 static int test_group_terms_by_electronic_structure(void) {
-    QfFCIDump *fcidump = qf_fcidump_from_file("../../h2.fcidump");
+    QfFCIDump *fcidump = NULL;
+    if (qf_fcidump_from_file("../../h2.fcidump", &fcidump) != QfExitCode_Success) {
+        return RuntimeError;
+    }
     QfFermionOperator *op = qf_ferm_op_from_fcidump(fcidump);
     qf_fcidump_free(fcidump);
 

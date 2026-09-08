@@ -10,6 +10,7 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
+import itertools
 import pickle
 
 import numpy as np
@@ -17,11 +18,37 @@ import pytest
 from qiskit_fermions.operators import MajoranaOperator, gamma
 from qiskit_fermions.operators.library import anti_commutator, commutator
 
+from .majorana_matrix_oracle import majorana, majorana_operator_matrix, vertex_matrix
+from .operator_contract_tests import OperatorContractTests
 
-class TestMajoranaOperator:
+
+class TestMajoranaOperator(OperatorContractTests):
     @staticmethod
     def get_class() -> type[MajoranaOperator]:
         return MajoranaOperator
+
+    def test_max_rank(self, subtests):
+        cls = self.get_class()
+
+        op = cls.zero()
+
+        with subtests.test("0 for additive identity"):
+            assert op.max_rank() == 0
+
+        op += cls.one()
+
+        with subtests.test("0 for multiplicative identity"):
+            assert op.max_rank() == 0
+
+        op += cls.from_dict({(0, 1): 1})
+
+        with subtests.test("2"):
+            assert op.max_rank() == 2
+
+        op += cls.from_dict({(0, 1, 2, 3): 1})
+
+        with subtests.test("4"):
+            assert op.max_rank() == 4
 
     def test_getters(self, subtests):
         cls = self.get_class()
@@ -43,16 +70,6 @@ class TestMajoranaOperator:
         cls = self.get_class()
         op = cls.from_dict({(0, 4): 1, (1, 3, 4, 7): 1})
         assert op.get_support() == {0, 1, 3, 4, 7}
-
-    def test_zero(self):
-        cls = self.get_class()
-        op = cls.zero()
-        assert op.equiv(cls.from_dict({}))
-
-    def test_one(self):
-        cls = self.get_class()
-        op = cls.one()
-        assert op.equiv(cls.from_dict({(): 1}))
 
     def test_richcmp(self, subtests):
         cls = self.get_class()
@@ -106,11 +123,6 @@ class TestMajoranaOperator:
             op = cls.from_dict({(): 1, (gamma(0, False), gamma(0, True)): 1})
             assert len(op) == 2
 
-    def test_iter(self):
-        cls = self.get_class()
-        op = cls.one()
-        assert list(op.iter_terms()) == [([], 1)]
-
     def test_from_terms(self, subtests):
         cls = self.get_class()
         op = cls.from_dict(
@@ -126,12 +138,6 @@ class TestMajoranaOperator:
             assert op.equiv(cls.from_terms(op.iter_terms()))
         with subtests.test("list"):
             assert op.equiv(cls.from_terms(list(op.iter_terms())))
-
-    def test_iter_with_groups(self):
-        cls = self.get_class()
-        op = cls.one()
-        op.groups = [0]
-        assert list(op.iter_terms_with_groups()) == [([], 1, 0)]
 
     def test_from_terms_with_groups(self, subtests):
         cls = self.get_class()
@@ -203,69 +209,6 @@ class TestMajoranaOperator:
         op.ichop(1e-4)
         assert op.equiv(op.zero(), 1e-6)
 
-    def test_add(self):
-        cls = self.get_class()
-        one = cls.one()
-        two = cls.from_dict({(): 2})
-        three = one + two
-        assert three.equiv(cls.from_dict({(): 3}))
-
-    def test_iadd(self):
-        cls = self.get_class()
-        op = cls.one()
-        two = cls.from_dict({(): 2})
-        op += two
-        assert op.equiv(cls.from_dict({(): 3}))
-
-    def test_sub(self):
-        cls = self.get_class()
-        one = cls.one()
-        two = cls.from_dict({(): 2})
-        new_one = two - one
-        assert new_one.equiv(one)
-
-    def test_isub(self):
-        cls = self.get_class()
-        op = cls.from_dict({(): 2})
-        one = cls.one()
-        op -= one
-        assert op.equiv(one)
-
-    def test_mul(self):
-        cls = self.get_class()
-        one = cls.one()
-        three = one * 3
-        assert three.equiv(cls.from_dict({(): 3}))
-
-    def test_rmul(self):
-        cls = self.get_class()
-        one = cls.one()
-        three = 3 * one
-        assert three.equiv(cls.from_dict({(): 3}))
-
-    def test_imul(self):
-        cls = self.get_class()
-        op = cls.one()
-        op *= 3
-        assert op.equiv(cls.from_dict({(): 3}))
-
-    def test_div(self):
-        cls = self.get_class()
-        three = cls.from_dict({(): 3})
-        one_half = three / 2.0
-        assert one_half.equiv(cls.from_dict({(): 1.5}))
-
-    def test_idiv(self):
-        cls = self.get_class()
-        op = cls.from_dict({(): 3})
-        op /= 2.0
-        assert op.equiv(cls.from_dict({(): 1.5}))
-
-    def test_neg(self):
-        cls = self.get_class()
-        one = cls.one()
-        assert (-one).equiv(cls.from_dict({(): -1}))
-
     def test_and(self):
         cls = self.get_class()
         op1 = cls.from_dict({(): 2, (gamma(0, False), gamma(0, True)): 3})
@@ -326,14 +269,6 @@ class TestMajoranaOperator:
         op = cls.from_dict({(): 2j, (gamma(0, False), gamma(0, True)): 3})
         assert op.adjoint().equiv(cls.from_dict({(): -2j, (gamma(0, True), gamma(0, False)): 3}))
 
-    def test_equiv(self):
-        cls = self.get_class()
-        op = cls.from_dict({(): 1e-7})
-        zero = cls.zero()
-        assert not op.equiv(zero)
-        assert op.equiv(zero, 1e-6)
-        assert not op.equiv(zero, 1e-8)
-
     def test_normal_ordered(self, subtests):
         cls = self.get_class()
 
@@ -358,6 +293,68 @@ class TestMajoranaOperator:
             op = cls.from_dict({(gamma(0, True), gamma(0, False), gamma(0, True)): 1})
             expected = cls.from_dict({(gamma(0, True), gamma(0, True), gamma(0, False)): -1})
             assert op.normal_ordered(reduce=False).equiv(expected)
+
+    def test_majorana_matrix_oracle_matches_vertex_matrix(self):
+        """Pins the index convention that :func:`majorana_operator_matrix` relies on.
+
+        ``MajoranaOperator`` numbers generators from zero, while the oracle's :func:`majorana`
+        follows the 1-based convention of the defining papers. An off-by-one here would make the
+        oracle agree with a shifted operator and quietly validate a wrong implementation, so the
+        offset is checked against :func:`vertex_matrix` (independently exercised by the edge- and
+        transfer-vertex suites) via :math:`V_j = -i \\gamma_{2j-1} \\gamma_{2j}`.
+        """
+        num_modes = 2
+        for mode in range(num_modes):
+            lo, hi = sorted((gamma(mode, False), gamma(mode, True)))
+            from_majoranas = -1j * majorana(lo + 1, num_modes) @ majorana(hi + 1, num_modes)
+            assert np.allclose(from_majoranas, vertex_matrix(mode, num_modes))
+
+    @pytest.mark.parametrize("length", [2, 3])
+    @pytest.mark.parametrize("reduce", [True, False])
+    @pytest.mark.parametrize("ascending", [True, False])
+    def test_normal_ordered_preserves_matrix(self, length, reduce, ascending):
+        """Asserts ``normal_ordered`` never changes the operator it represents.
+
+        Reordering and contracting generators is only sound if every swap and every contraction
+        carries the right sign, and a sign error is invisible to a test that compares against a
+        hand-written expectation derived from the same (possibly wrong) rule. So this compares
+        against dense matrices built straight from the Majorana definitions instead, exhaustively
+        over every term of the given length. The edge- and transfer-vertex suites have carried this
+        check for a while; ``MajoranaOperator`` was the one type whose own oracle it never used.
+        """
+        cls = self.get_class()
+        num_modes = 2
+        generators = list(range(2 * num_modes))
+
+        for indices in itertools.product(generators, repeat=length):
+            op = cls.from_dict({tuple(indices): 1 - 0.5j})
+            reordered = op.normal_ordered(ascending=ascending, reduce=reduce)
+            expected = majorana_operator_matrix(op, num_modes)
+            actual = majorana_operator_matrix(reordered, num_modes)
+            assert np.allclose(actual, expected), f"normal_ordered changed the operator {indices}"
+
+    @pytest.mark.parametrize("ascending", [True, False])
+    @pytest.mark.parametrize("length", [2, 3])
+    def test_normal_ordered_is_fully_reduced(self, length, ascending):
+        """Asserts no reducible pair of adjacent generators survives ``normal_ordered``.
+
+        Two adjacent Majoranas on the same index square to the identity, so a fully reduced term
+        never repeats an index in adjacent positions, and its indices are sorted in the requested
+        direction.
+        """
+        cls = self.get_class()
+        num_modes = 2
+        generators = list(range(2 * num_modes))
+
+        for indices in itertools.product(generators, repeat=length):
+            reduced = cls.from_dict({tuple(indices): 1}).normal_ordered(ascending=ascending)
+            for remaining, _ in reduced.iter_terms():
+                pairs = list(itertools.pairwise(remaining))
+                assert all(a != b for a, b in pairs), f"{indices} left {remaining} unreduced"
+                if ascending:
+                    assert all(a < b for a, b in pairs), f"{indices} left {remaining} unsorted"
+                else:
+                    assert all(a > b for a, b in pairs), f"{indices} left {remaining} unsorted"
 
     def test_is_hermitian(self, subtests):
         cls = self.get_class()
@@ -385,29 +382,6 @@ class TestMajoranaOperator:
 
         with subtests.test("imaginary identity is not Hermitian"):
             assert not (cls.one() * 1j).is_hermitian()
-
-    def test_max_rank(self, subtests):
-        cls = self.get_class()
-
-        op = cls.zero()
-
-        with subtests.test("0 for additive identity"):
-            assert op.max_rank() == 0
-
-        op += cls.one()
-
-        with subtests.test("0 for multiplicative identity"):
-            assert op.max_rank() == 0
-
-        op += cls.from_dict({(0, 1): 1})
-
-        with subtests.test("2"):
-            assert op.max_rank() == 2
-
-        op += cls.from_dict({(0, 1, 2, 3): 1})
-
-        with subtests.test("4"):
-            assert op.max_rank() == 4
 
     def test_is_even(self, subtests):
         cls = self.get_class()

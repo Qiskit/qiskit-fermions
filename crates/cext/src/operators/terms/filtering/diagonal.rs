@@ -51,7 +51,8 @@ use qiskit_fermions_core::operators::terms::filtering::diagonal::filter_diagonal
 /// .. code-block:: c
 ///     :linenos:
 ///
-///     QfFCIDump *fcidump = qf_fcidump_from_file("molecule.fcidump");
+///     QfFCIDump *fcidump = NULL;
+///     qf_fcidump_from_file("molecule.fcidump", &fcidump);
 ///     QfFermionOperator *op = qf_ferm_op_from_fcidump(fcidump);
 ///
 ///     QfFermionOperator *normal = qf_ferm_op_normal_ordered(op, NULL);

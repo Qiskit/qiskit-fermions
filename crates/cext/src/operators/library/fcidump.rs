@@ -10,6 +10,7 @@
 // copyright notice, and modified files need to carry a notice indicating
 // that they have been altered from the originals.
 
+use crate::exit_codes::ExitCode;
 use crate::pointers::const_ptr_as_ref;
 use std::ffi::{CStr, c_char};
 
@@ -21,8 +22,12 @@ use qiskit_fermions_core::operators::library::fcidump::FCIDump;
 /// @brief Parses an FCIDump file.
 ///
 /// @param file_path The path to the FCIDump file.
+/// @param out A pointer to the pointer that will be set to the parsed FCIDump data structure. It is
+///        only written to on success; on failure it is left untouched.
 ///
-/// @return A pointer to the FCIDump data structure.
+/// @return An exit code. This is ``QfExitCode_ValueError`` if the file cannot be opened or read, or
+///         if it does not honour the FCIDump format (a missing header namelist, a missing ``NORB``
+///         or ``NELEC`` field, a malformed ``MS2`` field, or an unsupported MO energy value).
 ///
 /// @rst
 ///
@@ -34,14 +39,30 @@ use qiskit_fermions_core::operators::library::fcidump::FCIDump;
 /// .. code-block:: c
 ///     :linenos:
 ///
-///     QfFCIDump *fcidump = qf_fcidump_from_file("molecule.fcidump");
+///     QfFCIDump *fcidump = NULL;
+///     QfExitCode exit = qf_fcidump_from_file("molecule.fcidump", &fcidump);
+///
+///     assert(exit == QfExitCode_Success);
 ///
 /// @endrst
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn qf_fcidump_from_file(file_path: *mut c_char) -> *mut FCIDump {
+pub unsafe extern "C" fn qf_fcidump_from_file(
+    file_path: *mut c_char,
+    out: *mut *mut FCIDump,
+) -> ExitCode {
     let rust_file_path = unsafe { CStr::from_ptr(file_path).to_string_lossy().into_owned() };
-    let fcidump = FCIDump::from_file(rust_file_path);
-    Box::into_raw(Box::new(fcidump))
+
+    // The core reports every parse failure as an `FCIDumpError`. Surfacing it as an exit code (and
+    // leaving `out` alone) is what keeps a bad path from unwinding across the FFI boundary, which is
+    // undefined behaviour in an `extern "C"` function.
+    match FCIDump::from_file(rust_file_path) {
+        Ok(fcidump) => {
+            // SAFETY: Per documentation, `out` is non-null and aligned.
+            unsafe { out.write(Box::into_raw(Box::new(fcidump))) };
+            ExitCode::Success
+        }
+        Err(_) => ExitCode::ValueError,
+    }
 }
 
 /// @ingroup qf_fcidump

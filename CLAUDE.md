@@ -8,10 +8,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Scope: operator data structures, a framework + library for operator conversion (mappers), and a framework + library for quantum-circuit synthesis.
 
-## Repository layout note
-
-This checkout is a **bare repo + worktrees** setup. The project source lives in the `main/` worktree (and other named worktrees like `apply-unitary/`, `term-ordering/`), *not* in the top-level directory which only holds `.bare/` and the worktree dirs. Run commands and edit files inside a worktree (e.g. `main/`).
-
 ## Three-layer crate architecture
 
 The Rust workspace (`crates/`) has three primary crates whose **module structure all mirrors the public Python API** for easy navigation:
@@ -60,7 +56,7 @@ This full triple is not always worthwhile — decide case-by-case. Features may 
 | Run Python tests | `make testpython` |
 | Run optional-dependency Python tests | `make testoptional` (needs the optional deps installed — `pip install -e ".[all]"`) |
 | Run C tests | `make testc` (links Qiskit's C library; may need `QISKIT_LIB`/`QISKIT_INCLUDE` — see note above) |
-| Run guide doctests | `make doctest` (all `docs/**/*.rst`; today only the `docs/guides/` guides carry any) |
+| Run guide doctests | `make doctest` (every `docs/**/*.rst`; in practice the guides are what carry them) |
 | Lint (rust + python + clang) | `make lint` |
 | Auto-fix formatting | `make style` |
 | Build docs | `make docs` (Python + C via Doxygen/breathe/Sphinx) |
@@ -84,14 +80,14 @@ Editable install for iterating on Python: `SETUPTOOLS_RUST_CARGO_PROFILE=release
 
 - **Python API docs** are pulled from `python/qiskit_fermions/` source and, for `pyext`-implemented components, from **docstrings written in the `pyext` Rust source** and surfaced through the `.pyi` stubs. Layout config is in `docs/pydoc/`. Docstring convention: **Google** (`ruff` pydocstyle).
 - **C API docs**: docstrings written in the `cext` Rust source (mix of Doxygen + Sphinx directives), extracted via Doxygen from the generated header, integrated with breathe. Layout in `docs/cdoc/`.
-- **Doctests** are collected by **Sybil** (`python/conftest.py`, `docs/conftest.py`) from `*.py`/`*.pyi`, with `ELLIPSIS | NORMALIZE_WHITESPACE | NUMBER` flags. They run in two places: the docstring and `.pyi`-stub doctests under `python/qiskit_fermions/` run as part of `make testpython` (a normal `pytest` run), while `make doctest` (via `pytest docs/`) collects all `docs/**/*.rst` — though today only the `docs/guides/*.rst` guides carry any doctests.
+- **Doctests** are collected by **Sybil** (`python/conftest.py`, `docs/conftest.py`) from `*.py`/`*.pyi`, with `ELLIPSIS | NORMALIZE_WHITESPACE | NUMBER` flags. They run in two places: the docstring and `.pyi`-stub doctests under `python/qiskit_fermions/` run as part of `make testpython` (a normal `pytest` run), while `make doctest` (via `pytest docs/`) collects every `docs/**/*.rst`, which in practice means the guides.
 
 ## Testing structure
 
 - **Rust unit tests** live inline in the crate source; run via `make testrust` (only exercises `core`).
 - **Python tests** in `tests/python/` (mirrors the API tree: `operators/`, `mappers/`, `circuit/`, `transpiler/`, `linalg/`).
 - **C tests** in `tests/c/`, built with CMake and run via `ctest`.
-- Tests marked `skipif` (optional deps like `pyomo`/`highspy`) run via `make testoptional`. These deps must actually be installed for the tests to run rather than skip — install the extras, e.g. `pip install -e ".[all]"` (`[all]` pulls in `[pyomo]` and `[ffsim]`); the extras are declared under `[project.optional-dependencies]` in `pyproject.toml`.
+- **Optional-dependency tests are guarded, and the `test` dependency group deliberately omits those deps.** So `make testpython` from `--group test` alone runs with them absent, which is what proves the guards hold: the guarded tests skip, and a *failure* there means a missing guard rather than a missing dependency. `make testoptional` is its exact complement, selecting every guarded test once the extras are installed (`pip install -e ".[all]"`). `make doctest` is deliberately different: the guides under `docs/` are documentation, so it always runs *with* the optional deps. Read [`tests/README.md`](tests/README.md) before changing any of this — the group split and the marker inference are easy to break by accident.
 
 ## Transpiler / synthesis plugins
 

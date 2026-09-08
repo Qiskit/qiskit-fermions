@@ -1288,6 +1288,11 @@ mod tests {
         );
     }
 
+    // The Eq. (7) relations are verified a second time, independently, in `tests/python/operators/test_transfer_vertex_operator.py`
+    // (`test_commutator`/`test_anti_commutator`). That is deliberate rather than duplication: these
+    // tests reach `normal_ordered` directly from a struct literal, while the Python ones build the
+    // same relation through the public `commutator` helper. Neither path exercises the other, so
+    // both are needed.
     #[test]
     fn test_normal_ordered_gandon_rel1() {
         // Tests the 1. relation of Eq. (7) from arXiv:2512.11418v1: {T_{jk}, V_{k}} = 0
@@ -1335,6 +1340,12 @@ mod tests {
     #[test]
     fn test_normal_ordered_gandon_rel3() {
         // Tests the 3. relation of Eq. (7) from arXiv:2512.11418v1: [V_{k}, V_{l}] = 0
+        //
+        // This one relation is shared with the other index-pair representation (it is also the 3.
+        // relation of the other equation), because vertex operators are common to both. The two
+        // tests are not redundant: they call different `normal_ordered` implementations, whose
+        // signatures even differ (edge-vertex takes `ascending` and `reduce`, transfer-vertex only
+        // `reduce`).
         let op = TransferVertexOperator {
             coeffs: vec![Complex64::new(1.0, 0.0)],
             left_indices: vec![1, 0],
@@ -1728,6 +1739,10 @@ mod tests {
         (op1, op2)
     }
 
+    // Not redundant with `test_and`/`test_and_assign`, despite looking like it: `__and__` delegates
+    // to `composed`, which is implemented separately from `__iand__` for every operator type (the
+    // trait docs on `composed` explain why it is not a clone followed by `__iand__`). So this pins
+    // that two independent implementations agree, which is exactly what a shared one would not need.
     #[test]
     fn test_and_matches_clone_then_and_assign() {
         let (op1, op2) = operand_pair();

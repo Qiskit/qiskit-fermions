@@ -107,9 +107,14 @@ pyext-dev: pystubs-dev
 testpython:
 	python -m pytest -s -p no:doctest
 
+# Runs every test that needs an optional dependency: the `skipif`-marked ones (pyomo) plus the
+# `optionaldep`-marked ones (ffsim and friends), which `tests/python/conftest.py` marks automatically
+# because a module-level `pytest.importorskip` leaves nothing for `-m skipif` to match on.  The
+# optional dependencies must actually be installed, or this selects tests that then skip; see the
+# "Optional dependencies" section of tests/README.md.
 .PHONY: testoptional
 testoptional:
-	python -m pytest -s -p no:doctest -m skipif
+	python -m pytest -s -p no:doctest -m "skipif or optionaldep"
 
 .PHONY: pycoverage
 pycoverage:
