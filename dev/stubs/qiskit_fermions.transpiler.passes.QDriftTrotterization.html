@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>QDriftTrotterization - Qiskit Fermions 0.2.0.dev0+d506d4b</title>
+        <title>QDriftTrotterization - Qiskit Fermions 0.2.0.dev0+3e0c8fc</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+d506d4b</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+3e0c8fc</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+d506d4b</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+3e0c8fc</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -211,6 +211,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../guides/sqdrift.html">Generate SqDRIFT circuits</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../guides/skqd.html">Generate Krylov time-evolution circuits (SKQD)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../guides/transpilation.html">Transpile fermionic circuits</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/fermionic_synthesis.html">Synthesize an Evolution gate in fermionic space</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../guides/merge_slater_determinant.html">Optimize Slater determinant preparation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../guides/lucj.html">Transpile an LUCJ ansatz</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../guides/1d_fermi_hubbard.html">Simulate 1D Fermi-Hubbard dynamics with flow sets</a></li>
@@ -292,9 +293,18 @@ Trotterization this pass performs, so the emitted gates are terminal factors and
 Each of them carries over the <a class="reference internal" href="qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution.synthesis" title="qiskit_fermions.circuit.library.Evolution.synthesis"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Evolution.synthesis</span></code></a> method of the gate it was sampled
 from, even though an atomic gate never consults it.</p>
 </div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>A fixed <code class="docutils literal notranslate"><span class="pre">rng</span></code> reproduces the <em>sequence</em> of randomizations, not an individual member of it.
+Successive <a class="reference internal" href="#qiskit_fermions.transpiler.passes.QDriftTrotterization.run" title="qiskit_fermions.transpiler.passes.QDriftTrotterization.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a> calls draw from the same generator, so they yield different circuits;
+replaying from the same seed reproduces all of them in the same order, but the nth circuit
+cannot be obtained without drawing the preceding ones first. Generating a batch of
+randomizations and recording the seed therefore works as expected (see
+<a class="reference internal" href="../guides/sqdrift.html#sqdrift-getting-started"><span class="std std-ref">Generate SqDRIFT circuits</span></a>); addressing one member directly is not supported.</p>
+</div>
 <div class="admonition hint">
 <p class="admonition-title">Hint</p>
-<p>Terms that are diagonal in the occupation-number basis (i.e. products of number operators)
+<p>Terms that are diagonal in the occupation-number basis (that is, products of number operators)
 have no effect on the sampled bitstrings, so including them only increases the sampling
 overhead. Filter them out with
 <code class="xref py py-func docutils literal notranslate"><span class="pre">filter_diagonal_terms()</span></code> on the Hamiltonian
@@ -342,7 +352,7 @@ rng will be initialized with <code class="docutils literal notranslate"><span cl
 <span class="sig-name descname"><span class="pre">MAX_SAMPLE_RETRIES</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1000000</span></span><a class="headerlink" href="#qiskit_fermions.transpiler.passes.QDriftTrotterization.MAX_SAMPLE_RETRIES" title="Link to this definition">¶</a></dt>
 <dd><p>The maximum number of consecutive rejected samples tolerated by <code class="docutils literal notranslate"><span class="pre">filter_trivial</span></code> before
 <a class="reference internal" href="#qiskit_fermions.transpiler.passes.QDriftTrotterization.run" title="qiskit_fermions.transpiler.passes.QDriftTrotterization.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a> gives up and raises <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#RuntimeError" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">RuntimeError</span></code></a>. This guards against an infinite loop when
-the Hamiltonian’s remaining terms cannot bridge the tracked occupied/unoccupied mode sets — for
+the Hamiltonian’s remaining terms cannot bridge the tracked occupied/unoccupied mode sets. For
 example, when both sets remain small and disjoint (few modes have been marked occupied or
 unoccupied, and none have yet become “uncertain”) and no remaining term’s support touches both.</p>
 </dd></dl>
@@ -375,7 +385,7 @@ the output varies between runs unless the <code class="docutils literal notransl
 be occupied or unoccupied, seeded from any <a class="reference internal" href="qiskit_fermions.circuit.library.InitializeModes.html#qiskit_fermions.circuit.library.InitializeModes" title="qiskit_fermions.circuit.library.InitializeModes"><code class="xref py py-class docutils literal notranslate"><span class="pre">InitializeModes</span></code></a> gate(s) preceding the
 <a class="reference internal" href="qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gates in the circuit (several such gates placed in parallel, e.g. one per
 spin sector, are accumulated together). A sampled term is only accepted if its support
-intersects <em>both</em> sets, i.e. it couples a known-occupied mode with a known-unoccupied one;
+intersects <em>both</em> sets, that is, it couples a known-occupied mode with a known-unoccupied one;
 otherwise it is discarded and re-sampled, since it cannot affect the sampled bitstring. Once a
 term is accepted, every mode in its support becomes “uncertain” and is added to <em>both</em> sets,
 making it eligible to participate in either role for subsequent samples. Any
@@ -521,7 +531,7 @@ immediately marked “uncertain”, since it also carries a rotation.</p>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=b767346c"></script>
+</div><script src="../_static/documentation_options.js?v=02b0a281"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>FermionicTrotterization - Qiskit Fermions 0.2.0.dev0+d506d4b</title>
+        <title>FermionicTrotterization - Qiskit Fermions 0.2.0.dev0+3e0c8fc</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+d506d4b</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+3e0c8fc</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+d506d4b</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+3e0c8fc</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -211,6 +211,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../guides/sqdrift.html">Generate SqDRIFT circuits</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../guides/skqd.html">Generate Krylov time-evolution circuits (SKQD)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../guides/transpilation.html">Transpile fermionic circuits</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/fermionic_synthesis.html">Synthesize an Evolution gate in fermionic space</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../guides/merge_slater_determinant.html">Optimize Slater determinant preparation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../guides/lucj.html">Transpile an LUCJ ansatz</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../guides/1d_fermi_hubbard.html">Simulate 1D Fermi-Hubbard dynamics with flow sets</a></li>
@@ -274,12 +275,29 @@ everything that constructs one – including <a class="reference internal" href=
 internally. This pass applies one method to every <a class="reference internal" href="qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> in a circuit instead, so the
 choice can be made once for a whole transpilation pipeline:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pm</span><span class="o">.</span><span class="n">optimization</span> <span class="o">=</span> <span class="n">FermionicPassManager</span><span class="p">(</span>
-    <span class="p">[</span><span class="n">FermionicTrotterization</span><span class="p">(</span><span class="n">FermionicSuzukiTrotter</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">reps</span><span class="o">=</span><span class="mi">4</span><span class="p">))]</span>
+    <span class="p">[</span>
+        <span class="n">FermionicTrotterization</span><span class="p">(</span><span class="n">FermionicSuzukiTrotter</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">reps</span><span class="o">=</span><span class="mi">4</span><span class="p">)),</span>
+        <span class="n">Decompose</span><span class="p">(</span><span class="s2">"Evolution"</span><span class="p">),</span>
+    <span class="p">]</span>
 <span class="p">)</span>
 </pre></div>
 </div>
 <p>Nodes that are not <a class="reference internal" href="qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gates are left untouched, as are those rejected by an
 optional <a class="reference internal" href="#qiskit_fermions.transpiler.passes.FermionicTrotterization.filter" title="qiskit_fermions.transpiler.passes.FermionicTrotterization.filter"><code class="xref py py-attr docutils literal notranslate"><span class="pre">filter</span></code></a>.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>Something must expand the evolution for the selected method to have any effect, and no pass
+in the preset pipelines does. Qiskit’s <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.transpiler.passes.Decompose" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Decompose</span></code></a> is that
+trigger, as in the snippet above; a <a class="reference internal" href="qiskit_fermions.circuit.FermionicCircuit.html#qiskit_fermions.circuit.FermionicCircuit.decompose" title="qiskit_fermions.circuit.FermionicCircuit.decompose"><code class="xref py py-meth docutils literal notranslate"><span class="pre">decompose()</span></code></a> call on the circuit
+before transpiling works equally well.</p>
+<p>Without it the gate reaches the fermion-to-qubit stage whole, where it is mapped without
+<a class="reference internal" href="qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution.synthesis" title="qiskit_fermions.circuit.library.Evolution.synthesis"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Evolution.synthesis</span></code></a> ever being read, and every synthesis method produces identical
+output. Restricting the expansion by name (<code class="docutils literal notranslate"><span class="pre">Decompose(&quot;Evolution&quot;)</span></code>) leaves the other
+fermionic gates for their own synthesis plugins to lower.</p>
+<p>Place it <em>after</em> any pass that needs whole operators, <a class="reference internal" href="qiskit_fermions.transpiler.passes.RelabelModes.html#qiskit_fermions.transpiler.passes.RelabelModes" title="qiskit_fermions.transpiler.passes.RelabelModes"><code class="xref py py-class docutils literal notranslate"><span class="pre">RelabelModes</span></code></a> in particular.
+Expanding is idempotent, since the factors a synthesis method emits are
+<a class="reference internal" href="qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution.atomic" title="qiskit_fermions.circuit.library.Evolution.atomic"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Evolution.atomic</span></code></a> and therefore carry no definition of their own.</p>
+</div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>The pass <em>selects</em> a synthesis method rather than expanding the evolution there and then. The
@@ -465,7 +483,7 @@ place.</p>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=b767346c"></script>
+</div><script src="../_static/documentation_options.js?v=02b0a281"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

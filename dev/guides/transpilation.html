@@ -3,12 +3,12 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="Optimize Slater determinant preparation" href="merge_slater_determinant.html"><link rel="prev" title="Generate Krylov time-evolution circuits (SKQD)" href="skqd.html">
+<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="Synthesize an Evolution gate in fermionic space" href="fermionic_synthesis.html"><link rel="prev" title="Generate Krylov time-evolution circuits (SKQD)" href="skqd.html">
         <link rel="prefetch" href="../_static/images/qiskit-light-logo.svg" as="image">
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Transpile fermionic circuits - Qiskit Fermions 0.2.0.dev0+d506d4b</title>
+        <title>Transpile fermionic circuits - Qiskit Fermions 0.2.0.dev0+3e0c8fc</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+d506d4b</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+3e0c8fc</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+d506d4b</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+3e0c8fc</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -211,6 +211,7 @@
 <li class="toctree-l2"><a class="reference internal" href="sqdrift.html">Generate SqDRIFT circuits</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skqd.html">Generate Krylov time-evolution circuits (SKQD)</a></li>
 <li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Transpile fermionic circuits</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fermionic_synthesis.html">Synthesize an Evolution gate in fermionic space</a></li>
 <li class="toctree-l2"><a class="reference internal" href="merge_slater_determinant.html">Optimize Slater determinant preparation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="lucj.html">Transpile an LUCJ ansatz</a></li>
 <li class="toctree-l2"><a class="reference internal" href="1d_fermi_hubbard.html">Simulate 1D Fermi-Hubbard dynamics with flow sets</a></li>
@@ -280,7 +281,12 @@ this project split the transpilation into the following stages:</p>
 </dd>
 <dt><strong>Optimization</strong></dt><dd><p>Keeps the circuit in fermionic space. These
 passes use fermionic structure and commutation relations while
-problem-aware knowledge remains fully available.</p>
+problem-aware knowledge remains fully available. <a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.FermionicTrotterization.html#qiskit_fermions.transpiler.passes.FermionicTrotterization" title="qiskit_fermions.transpiler.passes.FermionicTrotterization"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicTrotterization</span></code></a> and
+<a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.QDriftTrotterization.html#qiskit_fermions.transpiler.passes.QDriftTrotterization" title="qiskit_fermions.transpiler.passes.QDriftTrotterization"><code class="xref py py-class docutils literal notranslate"><span class="pre">QDriftTrotterization</span></code></a> are the passes that Trotterize an <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate here;
+see <a class="reference internal" href="../pydoc/qiskit_fermions.transpiler.passes.html#qiskit-fermions-transpiler-passes-optimization"><span class="std std-ref">Optimization Passes</span></a> for the full set. The former only
+<em>selects</em> a synthesis method, so pair it with Qiskit’s
+<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.transpiler.passes.Decompose" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Decompose</span></code></a> to expand the evolution (see
+<a class="reference internal" href="fermionic_synthesis.html#fermionic-synthesis-explanation"><span class="std std-ref">Synthesize an Evolution gate in fermionic space</span></a>).</p>
 </dd>
 <dt><strong>Layout</strong></dt><dd><p>Maps fermionic mode registers to quantum registers. For occupation-basis
 mappings like Jordan-Wigner, each fermionic mode maps to a single qubit. This
@@ -383,6 +389,9 @@ into the transpilation process.</p>
 use cases, you can do the following:</p>
 <ul class="simple">
 <li><p>Customize the transpiler passes run during each stage.</p></li>
+<li><p>Choose the product formula that Trotterizes an <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate in fermionic space, either
+per gate or for a whole pipeline with <a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.FermionicTrotterization.html#qiskit_fermions.transpiler.passes.FermionicTrotterization" title="qiskit_fermions.transpiler.passes.FermionicTrotterization"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicTrotterization</span></code></a> (see
+<a class="reference internal" href="fermionic_synthesis.html#fermionic-synthesis-explanation"><span class="std std-ref">Synthesize an Evolution gate in fermionic space</span></a>).</p></li>
 <li><p>Implement custom fermion-to-qubit mappings by creating synthesis plugins (see
 <a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.synthesis.F2QSynthesisPlugin.html#qiskit_fermions.transpiler.passes.synthesis.F2QSynthesisPlugin" title="qiskit_fermions.transpiler.passes.synthesis.F2QSynthesisPlugin"><code class="xref py py-class docutils literal notranslate"><span class="pre">F2QSynthesisPlugin</span></code></a>).</p></li>
 <li><p>Build custom transpiler passes.</p></li>
@@ -395,12 +404,12 @@ use cases, you can do the following:</p>
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="merge_slater_determinant.html">
+          <a class="next-page" href="fermionic_synthesis.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Optimize Slater determinant preparation</div>
+                <div class="title">Synthesize an Evolution gate in fermionic space</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
@@ -464,7 +473,7 @@ use cases, you can do the following:</p>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=b767346c"></script>
+</div><script src="../_static/documentation_options.js?v=02b0a281"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

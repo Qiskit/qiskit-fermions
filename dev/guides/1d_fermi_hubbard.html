@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Simulate 1D Fermi-Hubbard dynamics with flow sets - Qiskit Fermions 0.2.0.dev0+d506d4b</title>
+        <title>Simulate 1D Fermi-Hubbard dynamics with flow sets - Qiskit Fermions 0.2.0.dev0+3e0c8fc</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+d506d4b</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+3e0c8fc</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+d506d4b</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+3e0c8fc</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -211,6 +211,7 @@
 <li class="toctree-l2"><a class="reference internal" href="sqdrift.html">Generate SqDRIFT circuits</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skqd.html">Generate Krylov time-evolution circuits (SKQD)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="transpilation.html">Transpile fermionic circuits</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fermionic_synthesis.html">Synthesize an Evolution gate in fermionic space</a></li>
 <li class="toctree-l2"><a class="reference internal" href="merge_slater_determinant.html">Optimize Slater determinant preparation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="lucj.html">Transpile an LUCJ ansatz</a></li>
 <li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Simulate 1D Fermi-Hubbard dynamics with flow sets</a></li>
@@ -429,6 +430,23 @@ interaction terms commute with everything diagonal and form a third group:</p>
 </div>
 <p>Groups 0 and 1 are the two flow sets. Each set is a directed path along the chain, so by the
 flow property all terms within a group commute.</p>
+<p>Each group also has to be Hermitian on its own, since a product formula exponentiates the groups
+separately and only a Hermitian factor has a unitary evolution.
+<a class="reference internal" href="../stubs/qiskit_fermions.operators.terms.groups_are_hermitian.html#qiskit_fermions.operators.terms.groups_are_hermitian" title="qiskit_fermions.operators.terms.groups_are_hermitian"><code class="xref py py-func docutils literal notranslate"><span class="pre">groups_are_hermitian()</span></code></a> confirms it:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.operators.terms.grouping</span><span class="w"> </span><span class="kn">import</span> <span class="n">groups_are_hermitian</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">groups_are_hermitian</span><span class="p">(</span><span class="n">hamiltonian</span><span class="p">)</span>
+<span class="go">[True, True, True]</span>
+</pre></div>
+</div>
+<p>That is worth pausing on, because the two hopping groups are <em>one-directional</em>: group 0 holds only
+east-oriented terms and group 1 only west-oriented ones. Splitting a Hamiltonian that way would
+normally break Hermiticity, since <span class="math">\(a^\dagger_j a_k\)</span> needs its conjugate partner
+<span class="math">\(a^\dagger_k a_j\)</span> alongside it. A <a class="reference internal" href="../stubs/qiskit_fermions.operators.TransferVertexOperator.html#qiskit_fermions.operators.TransferVertexOperator" title="qiskit_fermions.operators.TransferVertexOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransferVertexOperator</span></code></a> avoids the problem because
+<span class="math">\(T_{jk}\)</span> is <em>already</em> Hermitian on its own. It is a product of two Majorana operators (see its
+definition in step 1), not a bare <span class="math">\(a^\dagger_j a_k\)</span>, so its Jordan-Wigner image carries a
+real coefficient rather than an imaginary one. Choosing this operator representation is therefore
+what makes a one-directional flow set a legitimate Trotter factor at all.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>The east/west labels used throughout this guide are <strong>geometric</strong>, with the chain drawn
@@ -441,7 +459,7 @@ compass words.</p>
 </div>
 </section>
 <section id="write-the-custom-encoding">
-<h2>3. Write the custom encoding<a class="headerlink" href="#write-the-custom-encoding" title="Link to this heading">¶</a></h2>
+<span id="flowsets-encoding"></span><h2>3. Write the custom encoding<a class="headerlink" href="#write-the-custom-encoding" title="Link to this heading">¶</a></h2>
 <p>Section IV B of Ref. <a class="footnote-reference brackets" href="#id10" id="id4" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a> classifies the forms that a
 local fermion-to-qubit encoding can take when restricted to a flow set. Plain
 Jordan-Wigner uses <span class="math">\(N_q = N_f\)</span> qubits and maps every hopping term to a weight-2
@@ -511,7 +529,7 @@ over terms and their composition:</p>
 <p class="admonition-title">Important</p>
 <p>The <a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis.html#qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis.mapper_fn" title="qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis.mapper_fn"><code class="xref py py-attr docutils literal notranslate"><span class="pre">MapperFnEvolutionSynthesis.mapper_fn</span></code></a> expects the signature <code class="docutils literal notranslate"><span class="pre">(operator,</span> <span class="pre">num_qubits)</span></code>,
 and the return type must be a <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.quantum_info.SparseObservable" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">SparseObservable</span></code></a>, which makes
-the function directly usable as a transpiler plugin in. See <a class="reference internal" href="#flowsets-transpile"><span class="std std-ref">step 6</span></a>.</p>
+the function directly usable as a transpiler plugin. See <a class="reference internal" href="#flowsets-transpile"><span class="std std-ref">step 6</span></a>.</p>
 </div>
 <p>Applying it to the Hamiltonian from step 1 gives the encoded operator on
 <span class="math">\(N_f + 1 = 5\)</span> qubits:</p>
@@ -557,8 +575,8 @@ is the space-time trade-off of Ref. <a class="footnote-reference brackets" href=
 half of the hopping Hamiltonian into single-qubit rotations.</p>
 <p>The west-oriented flow set (group 1) pays for it at weight three, and the interaction (group 2)
 sits at weight two, where the weight-zero entry is the identity. None of this is yet a
-<em>circuit</em> claim; what a synthesis makes of these weights is the subject of steps 5
-and 6.</p>
+<em>circuit</em> claim; what a synthesis makes of these weights is the subject of steps 6
+and 7.</p>
 </section>
 <section id="verify-the-encoding">
 <span id="flowsets-verify"></span><h2>4. Verify the encoding<a class="headerlink" href="#verify-the-encoding" title="Link to this heading">¶</a></h2>
@@ -634,18 +652,30 @@ give the same result as evolving it in the fermionic space first and mapping aft
 <span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">isometry</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">isometry</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="n">num_sites</span><span class="p">))</span>
 <span class="go">True</span>
 <span class="gp">&gt;&gt;&gt;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">jw_matrix</span> <span class="o">=</span> <span class="n">to_matrix</span><span class="p">(</span>
-<span class="gp">... </span>    <span class="n">transfer_vertex_jordan_wigner</span><span class="p">(</span><span class="n">hamiltonian</span><span class="p">,</span> <span class="n">num_sites</span><span class="p">)</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span>
-<span class="gp">... </span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">flow_matrix</span> <span class="o">=</span> <span class="n">to_matrix</span><span class="p">(</span><span class="n">flow_set_encoding</span><span class="p">(</span><span class="n">hamiltonian</span><span class="p">,</span> <span class="n">num_qubits</span><span class="p">))</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">flow_matrix</span> <span class="o">@</span> <span class="n">isometry</span><span class="p">,</span> <span class="n">isometry</span> <span class="o">@</span> <span class="n">jw_matrix</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">intertwines</span><span class="p">(</span><span class="n">operator</span><span class="p">):</span>
+<span class="gp">... </span><span class="w">    </span><span class="sd">"""Whether both mappings of `operator` agree through the isometry."""</span>
+<span class="gp">... </span>    <span class="n">flow</span> <span class="o">=</span> <span class="n">to_matrix</span><span class="p">(</span><span class="n">flow_set_encoding</span><span class="p">(</span><span class="n">operator</span><span class="p">,</span> <span class="n">num_qubits</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="n">reference</span> <span class="o">=</span> <span class="n">to_matrix</span><span class="p">(</span><span class="n">transfer_vertex_jordan_wigner</span><span class="p">(</span><span class="n">operator</span><span class="p">,</span> <span class="n">num_sites</span><span class="p">)</span><span class="o">.</span><span class="n">simplify</span><span class="p">())</span>
+<span class="gp">... </span>    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">flow</span> <span class="o">@</span> <span class="n">isometry</span><span class="p">,</span> <span class="n">isometry</span> <span class="o">@</span> <span class="n">reference</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">intertwines</span><span class="p">(</span><span class="n">hamiltonian</span><span class="p">)</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># and, more strongly, once per flow set: a product formula evolves the groups</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># separately, so each one has to be intertwined on its own</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">all</span><span class="p">(</span><span class="n">intertwines</span><span class="p">(</span><span class="n">group</span><span class="p">)</span> <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">hamiltonian</span><span class="o">.</span><span class="n">split_out_groups</span><span class="p">())</span>
 <span class="go">True</span>
 </pre></div>
 </div>
-<p>The intertwining relation holds exactly. As a corollary, the spectra must agree, with
-every Jordan-Wigner eigenvalue appearing twice in the larger space, once for each
-value of the unconstrained global parity:</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">jw_spectrum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">eigvalsh</span><span class="p">(</span><span class="n">jw_matrix</span><span class="p">)</span>
+<p>The intertwining relation holds exactly, and separately for each flow set. That second, stronger
+statement is what later steps rely on: a product formula evolves the groups one at a time, and a
+product of intertwined factors is itself intertwined, so any <em>approximation</em> built from these groups
+agrees between the two encodings even though the encodings differ. As a corollary, the spectra must
+agree, with every Jordan-Wigner eigenvalue appearing twice in the larger space, once for each value
+of the unconstrained global parity:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">jw_matrix</span> <span class="o">=</span> <span class="n">to_matrix</span><span class="p">(</span><span class="n">transfer_vertex_jordan_wigner</span><span class="p">(</span><span class="n">hamiltonian</span><span class="p">,</span> <span class="n">num_sites</span><span class="p">)</span><span class="o">.</span><span class="n">simplify</span><span class="p">())</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">flow_matrix</span> <span class="o">=</span> <span class="n">to_matrix</span><span class="p">(</span><span class="n">flow_set_encoding</span><span class="p">(</span><span class="n">hamiltonian</span><span class="p">,</span> <span class="n">num_qubits</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">jw_spectrum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">eigvalsh</span><span class="p">(</span><span class="n">jw_matrix</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">flow_spectrum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">eigvalsh</span><span class="p">(</span><span class="n">flow_matrix</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span>
 <span class="gp">... </span>    <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">flow_spectrum</span><span class="p">),</span>
@@ -658,42 +688,76 @@ value of the unconstrained global parity:</p>
 </div>
 </section>
 <section id="build-the-fermionic-circuit">
-<h2>5. Build the fermionic circuit<a class="headerlink" href="#build-the-fermionic-circuit" title="Link to this heading">¶</a></h2>
+<span id="flowsets-build"></span><h2>5. Build the fermionic circuit<a class="headerlink" href="#build-the-fermionic-circuit" title="Link to this heading">¶</a></h2>
 <p>Before involving any qubits, the dynamics are expressed on the <em>fermionic</em> level.
 A <a class="reference internal" href="../stubs/qiskit_fermions.circuit.FermionicCircuit.html#qiskit_fermions.circuit.FermionicCircuit" title="qiskit_fermions.circuit.FermionicCircuit"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicCircuit</span></code></a> acts on fermionic modes rather than qubits, and an
 <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate over the Hamiltonian is the whole circuit:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.circuit</span><span class="w"> </span><span class="kn">import</span> <span class="n">FermionicCircuit</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.circuit.library</span><span class="w"> </span><span class="kn">import</span> <span class="n">Evolution</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.circuit.library.synthesis</span><span class="w"> </span><span class="kn">import</span> <span class="n">FermionicLieTrotter</span>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">total_time</span> <span class="o">=</span> <span class="mf">1.0</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">circuit</span> <span class="o">=</span> <span class="n">FermionicCircuit</span><span class="p">(</span><span class="n">num_sites</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">circuit</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Evolution</span><span class="p">(</span><span class="n">num_sites</span><span class="p">,</span> <span class="n">hamiltonian</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="n">total_time</span><span class="p">),</span> <span class="n">circuit</span><span class="o">.</span><span class="n">modes</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">circuit</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">Evolution</span><span class="p">(</span>
+<span class="gp">... </span>        <span class="n">num_sites</span><span class="p">,</span> <span class="n">hamiltonian</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="n">total_time</span><span class="p">,</span> <span class="n">synthesis</span><span class="o">=</span><span class="n">FermionicLieTrotter</span><span class="p">()</span>
+<span class="gp">... </span>    <span class="p">),</span>
+<span class="gp">... </span>    <span class="n">circuit</span><span class="o">.</span><span class="n">modes</span><span class="p">,</span>
+<span class="gp">... </span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">circuit</span><span class="o">.</span><span class="n">draw</span><span class="p">(</span><span class="s2">"mpl"</span><span class="p">)</span>
-<span class="go">&lt;Figure size ... with 1 Axes&gt;</span>
-</pre></div>
-</div>
-<p>(<a class="reference download internal" download="" href="../_downloads/23727e6ef1c09f55b2854710773008c3/1d_fermi_hubbard-10.png"><code class="xref download docutils literal notranslate"><span class="pre">png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/e6e78f6585db8b705f464d492694bfe7/1d_fermi_hubbard-10.hires.png"><code class="xref download docutils literal notranslate"><span class="pre">hires.png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/83161c474a9def39150ff8b7e68f2c0b/1d_fermi_hubbard-10.pdf"><code class="xref download docutils literal notranslate"><span class="pre">pdf</span></code></a>)</p>
-<figure class="align-default">
-<img alt="A single Evolution gate spanning all four fermionic modes." class="plot-directive" src="../_images/1d_fermi_hubbard-10.png" />
-</figure>
-<p>There is one opaque box over all four modes. The interesting part is what it decomposes into:
-<a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> splits itself group-by-group whenever its operator has
-<a class="reference internal" href="../stubs/qiskit_fermions.operators.TransferVertexOperator.html#qiskit_fermions.operators.TransferVertexOperator.groups" title="qiskit_fermions.operators.TransferVertexOperator.groups"><code class="xref py py-attr docutils literal notranslate"><span class="pre">groups</span></code></a> assigned, so a single
-<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit#decompose" title="(in Qiskit v2.5)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">decompose()</span></code></a> turns it into <strong>one</strong> <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a>
-<strong>per flow set</strong>. This is ordered by group index: east, west, then the diagonal interaction,
-carrying 3, 3, and 8 terms respectively. The groups from step 2 are shown in the following plot:</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">flow_set_circuit</span> <span class="o">=</span> <span class="n">circuit</span><span class="o">.</span><span class="n">decompose</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">flow_set_circuit</span><span class="o">.</span><span class="n">draw</span><span class="p">(</span><span class="s2">"mpl"</span><span class="p">)</span>
 <span class="go">&lt;Figure size ... with 1 Axes&gt;</span>
 </pre></div>
 </div>
 <p>(<a class="reference download internal" download="" href="../_downloads/478eca12986719a6a8c35f73c622e7bb/1d_fermi_hubbard-11.png"><code class="xref download docutils literal notranslate"><span class="pre">png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/6cbc00c40b0581e7d73e22ae4d4d80a3/1d_fermi_hubbard-11.hires.png"><code class="xref download docutils literal notranslate"><span class="pre">hires.png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/3b87430267b84bf0bd5257aefeb19566/1d_fermi_hubbard-11.pdf"><code class="xref download docutils literal notranslate"><span class="pre">pdf</span></code></a>)</p>
 <figure class="align-default">
-<img alt="The same circuit decomposed into three Evolution gates, one per flow set." class="plot-directive" src="../_images/1d_fermi_hubbard-11.png" />
+<img alt="A single Evolution gate spanning all four fermionic modes." class="plot-directive" src="../_images/1d_fermi_hubbard-11.png" />
 </figure>
-<p>This is the step that makes the grouping matter. Each of the three gates is mapped and
-synthesized independently, so the transpiler ends up acting on the partitioning decided at
-the fermionic level in step 2. If you skip the decomposition,  the grouping is ignored.</p>
+<p>There is one opaque box over all four modes, and the interesting part is what it decomposes
+into. The <code class="docutils literal notranslate"><span class="pre">synthesis</span></code> argument says how: <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter.html#qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter" title="qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicLieTrotter</span></code></a> is the first-order
+product formula, which splits the operator by its
+<a class="reference internal" href="../stubs/qiskit_fermions.operators.TransferVertexOperator.html#qiskit_fermions.operators.TransferVertexOperator.groups" title="qiskit_fermions.operators.TransferVertexOperator.groups"><code class="xref py py-attr docutils literal notranslate"><span class="pre">groups</span></code></a> and evolves each group in turn.
+So the flow-set partitioning from step 2 <em>is</em> the Trotterization, and a single
+<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit#decompose" title="(in Qiskit v2.5)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">decompose()</span></code></a> performs it, giving <strong>one</strong>
+<a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> <strong>per flow set</strong> in group order: east, west, then the diagonal interaction,
+carrying 3, 3, and 8 terms respectively.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">flow_set_circuit</span> <span class="o">=</span> <span class="n">circuit</span><span class="o">.</span><span class="n">decompose</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">flow_set_circuit</span><span class="o">.</span><span class="n">draw</span><span class="p">(</span><span class="s2">"mpl"</span><span class="p">)</span>
+<span class="go">&lt;Figure size ... with 1 Axes&gt;</span>
+</pre></div>
+</div>
+<p>(<a class="reference download internal" download="" href="../_downloads/ab29efd3c08b26ff4595f19a70e5c324/1d_fermi_hubbard-12.png"><code class="xref download docutils literal notranslate"><span class="pre">png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/34a4f056e349037f5b646de5fabf4150/1d_fermi_hubbard-12.hires.png"><code class="xref download docutils literal notranslate"><span class="pre">hires.png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/f50a6619d43609d37ec8148ace6af243/1d_fermi_hubbard-12.pdf"><code class="xref download docutils literal notranslate"><span class="pre">pdf</span></code></a>)</p>
+<figure class="align-default">
+<img alt="The same circuit decomposed into three Evolution gates, one per flow set." class="plot-directive" src="../_images/1d_fermi_hubbard-12.png" />
+</figure>
+<p>Note that this happens entirely in fermionic space: no qubit has been mentioned yet, and the
+approximation is already made. The number of Trotter steps therefore belongs here too, as
+<a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter.html#qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter.reps" title="qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter.reps"><code class="xref py py-attr docutils literal notranslate"><span class="pre">reps</span></code></a>, which divides the time and repeats the whole sweep:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">trotter_steps</span><span class="p">(</span><span class="n">reps</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="n">step</span> <span class="o">=</span> <span class="n">FermionicCircuit</span><span class="p">(</span><span class="n">num_sites</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="n">step</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+<span class="gp">... </span>        <span class="n">Evolution</span><span class="p">(</span>
+<span class="gp">... </span>            <span class="n">num_sites</span><span class="p">,</span>
+<span class="gp">... </span>            <span class="n">hamiltonian</span><span class="p">,</span>
+<span class="gp">... </span>            <span class="n">time</span><span class="o">=</span><span class="n">total_time</span><span class="p">,</span>
+<span class="gp">... </span>            <span class="n">synthesis</span><span class="o">=</span><span class="n">FermionicLieTrotter</span><span class="p">(</span><span class="n">reps</span><span class="o">=</span><span class="n">reps</span><span class="p">),</span>
+<span class="gp">... </span>        <span class="p">),</span>
+<span class="gp">... </span>        <span class="n">step</span><span class="o">.</span><span class="n">modes</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="p">)</span>
+<span class="gp">... </span>    <span class="k">return</span> <span class="n">step</span><span class="o">.</span><span class="n">decompose</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">trotter_steps</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">count_ops</span><span class="p">()[</span><span class="s2">"Evolution"</span><span class="p">]</span>
+<span class="go">9</span>
+</pre></div>
+</div>
+<p>Nine gates: the three flow sets, cycled through three times at a third of the time each. That
+cycling is what makes it a Trotterization rather than a re-slicing of one group. Repeating a
+<em>single</em> group would achieve nothing, since consecutive exponentials of the same operator
+commute, so <code class="docutils literal notranslate"><span class="pre">A(t/3)</span> <span class="pre">A(t/3)</span> <span class="pre">A(t/3)</span></code> is just <code class="docutils literal notranslate"><span class="pre">A(t)</span></code>. A formula that reads the groups can
+interleave them; one applied after the mapping cannot, because the grouping is gone by then.</p>
+<p>This is the step that makes the grouping matter. Each emitted gate is mapped and synthesized
+independently, so everything downstream acts on the partitioning decided at the fermionic level.
+Skipping the decomposition hands the whole operator to the next stage instead, and the grouping
+is ignored.</p>
 </section>
 <section id="transpile-with-the-custom-encoding">
 <span id="flowsets-transpile"></span><h2>6. Transpile with the custom encoding<a class="headerlink" href="#transpile-with-the-custom-encoding" title="Link to this heading">¶</a></h2>
@@ -706,8 +770,10 @@ enter the pipeline.</p></li>
 <li><p><strong>A synthesis plugin.</strong> <a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis.html#qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis" title="qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis"><code class="xref py py-class docutils literal notranslate"><span class="pre">MapperFnEvolutionSynthesis</span></code></a> takes the mapper function
 directly, maps the <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate’s Hamiltonian with it, and emits a
 <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.library.PauliEvolutionGate" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">PauliEvolutionGate</span></code></a>, preserving the <span class="math">\(e^{-itH}\)</span>
-convention. Its <a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis.html#qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis.product_formula" title="qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis.product_formula"><code class="xref py py-attr docutils literal notranslate"><span class="pre">product_formula</span></code></a> is left at its
-default for now. A custom one is added in step 7.</p></li>
+convention. Its <a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis.html#qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis.product_formula" title="qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis.product_formula"><code class="xref py py-attr docutils literal notranslate"><span class="pre">product_formula</span></code></a> decides how that gate is
+turned into rotations. Note that this is a <em>second</em>, independent product formula, acting on
+qubits after the mapping: Qiskit’s <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.synthesis.LieTrotter" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">LieTrotter</span></code></a> is passed here, and
+step 7 replaces it with one that knows about flow sets.</p></li>
 </ul>
 <p>Since every comparison below reruns this pipeline, it is worth wrapping once:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit.circuit</span><span class="w"> </span><span class="kn">import</span> <span class="n">QuantumRegister</span>
@@ -734,7 +800,9 @@ default for now. A custom one is added in step 7.</p></li>
 <span class="gp">... </span>        <span class="n">output</span><span class="o">=</span><span class="n">QuantumDAGToCircuit</span><span class="p">(),</span>
 <span class="gp">... </span>    <span class="p">)</span>
 <span class="gp">&gt;&gt;&gt;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">pass_manager</span> <span class="o">=</span> <span class="n">flow_set_pass_manager</span><span class="p">(</span><span class="n">flow_set_circuit</span><span class="o">.</span><span class="n">register</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit.synthesis</span><span class="w"> </span><span class="kn">import</span> <span class="n">LieTrotter</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pass_manager</span> <span class="o">=</span> <span class="n">flow_set_pass_manager</span><span class="p">(</span><span class="n">flow_set_circuit</span><span class="o">.</span><span class="n">register</span><span class="p">,</span> <span class="n">LieTrotter</span><span class="p">())</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">qubit_circuit</span> <span class="o">=</span> <span class="n">pass_manager</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">flow_set_circuit</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">qubit_circuit</span><span class="o">.</span><span class="n">num_qubits</span>
 <span class="go">5</span>
@@ -747,7 +815,8 @@ the evolution gates all the way down to <code class="docutils literal notranslat
 two synthesis strategies compared below is measured in the same currency:
 <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit#count_ops" title="(in Qiskit v2.5)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">count_ops()</span></code></a> then reports the <code class="docutils literal notranslate"><span class="pre">CX</span></code> count, and
 <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit#depth" title="(in Qiskit v2.5)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">depth()</span></code></a> takes a filter function to measure the
-two-qubit depth:</p>
+two-qubit depth. Note that this <code class="docutils literal notranslate"><span class="pre">reps</span></code> is a decomposition depth, unrelated to the number of
+Trotter steps a product formula takes, which also goes by <code class="docutils literal notranslate"><span class="pre">reps</span></code> later in this guide:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">decomposed</span> <span class="o">=</span> <span class="n">qubit_circuit</span><span class="o">.</span><span class="n">decompose</span><span class="p">(</span><span class="n">reps</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">decomposed</span><span class="o">.</span><span class="n">count_ops</span><span class="p">()[</span><span class="s2">"cx"</span><span class="p">]</span>
 <span class="go">26</span>
@@ -761,24 +830,27 @@ the circuit shows why:</p>
 <span class="go">&lt;Figure size ... with 1 Axes&gt;</span>
 </pre></div>
 </div>
-<p>(<a class="reference download internal" download="" href="../_downloads/903520b6703ed34f1ea1c1e39d9cf18f/1d_fermi_hubbard-14.png"><code class="xref download docutils literal notranslate"><span class="pre">png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/ffc277772e0a2e9244991fb1909a6105/1d_fermi_hubbard-14.hires.png"><code class="xref download docutils literal notranslate"><span class="pre">hires.png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/1297660603c26e437e85b0d149ca9a38/1d_fermi_hubbard-14.pdf"><code class="xref download docutils literal notranslate"><span class="pre">pdf</span></code></a>)</p>
+<p>(<a class="reference download internal" download="" href="../_downloads/ed70405838675911c39ef50200fdb022/1d_fermi_hubbard-16.png"><code class="xref download docutils literal notranslate"><span class="pre">png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/99f4ad2b254e9b18f6d7bc513c591c69/1d_fermi_hubbard-16.hires.png"><code class="xref download docutils literal notranslate"><span class="pre">hires.png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/9902b6004c97b3a0cc7c85bdb27053b0/1d_fermi_hubbard-16.pdf"><code class="xref download docutils literal notranslate"><span class="pre">pdf</span></code></a>)</p>
 <figure class="align-default">
-<img alt="The transpiled circuit under LieTrotter's term-by-term synthesis, a long serial chain of CX ladders." class="plot-directive" src="../_images/1d_fermi_hubbard-14.png" />
+<img alt="The transpiled circuit under LieTrotter's term-by-term synthesis, a long serial chain of CX ladders." class="plot-directive" src="../_images/1d_fermi_hubbard-16.png" />
 </figure>
 <p>Every term has been compiled in isolation: a basis change, a <code class="docutils literal notranslate"><span class="pre">CX</span></code> ladder down to a single
 rotation, then the ladder is undone. The weight-1 flow set is free; its terms are
 lone rotations with no ladder around them, but each weight-3 term pays for four
 <code class="docutils literal notranslate"><span class="pre">CX</span></code>gates, and because the ladders are emitted sequentially, nothing overlaps.</p>
-<p>The grouping has been honored at the level of the pipeline (three flow sets, three
-mapped <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.library.PauliEvolutionGate" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">PauliEvolutionGate</span></code></a>s) but it buys almost
-nothing, because <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.synthesis.LieTrotter" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">LieTrotter</span></code></a> synthesizes each one term by
-term. It does not know that the terms handed to it mutually commute, so it still compiles
-them sequentially. The structural advantage is present in the operator and preserved by
-the decomposition, then discarded by the <em>synthesis</em>. The next step replaces that synthesis.</p>
+<p>So the grouping survives the whole pipeline (three flow sets, three mapped
+<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.library.PauliEvolutionGate" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">PauliEvolutionGate</span></code></a>s) and still buys almost nothing. The
+fermionic Trotterization of step 5 did its job; what wastes it is the <em>qubit-side</em> formula.
+<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.synthesis.LieTrotter" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">LieTrotter</span></code></a> receives a set of terms it happens to be told nothing
+about, and compiles each in isolation. It cannot know they mutually commute, so it serializes
+what could share a basis change.</p>
+<p>That is the gap this encoding exists to close: two product formulas are at work, and only the
+fermionic one has been given the structure so far. The next step supplies a qubit-side synthesis
+that exploits it too.</p>
 </section>
 <section id="a-flow-set-aware-synthesis">
 <span id="flowsets-synthesis"></span><h2>7. A flow-set-aware synthesis<a class="headerlink" href="#a-flow-set-aware-synthesis" title="Link to this heading">¶</a></h2>
-<p>To recover the advantage, we need to tell the synthesis about the structure. This is
+<p>Recovering the advantage means telling the qubit-side synthesis about the structure. This is
 Section IV C of Ref. <a class="footnote-reference brackets" href="#id10" id="id6" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a>: because all terms of a flow set commute, they can be
 simultaneously diagonalized by a single Clifford circuit, rotated in one shared basis
 and rotated back, instead of once per term.</p>
@@ -791,9 +863,11 @@ gates on nearest neighbors maps</p>
 <p>simultaneously for every <span class="math">\(j\)</span>. One <code class="docutils literal notranslate"><span class="pre">CZ</span></code> chain turns the entire weight-3
 (west) flow set into a layer of independent single-qubit <span class="math">\(X\)</span> rotations. The
 <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.synthesis.EvolutionSynthesis" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">EvolutionSynthesis</span></code></a> interface only requests a
-<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.synthesis.EvolutionSynthesis#synthesize" title="(in Qiskit v2.5)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">synthesize()</span></code></a> method; <code class="docutils literal notranslate"><span class="pre">reps</span></code> is here because a
-product formula is also where the number of Trotter steps belongs, as in Qiskit’s
-<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.synthesis.LieTrotter" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">LieTrotter</span></code></a>:</p>
+<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.synthesis.EvolutionSynthesis#synthesize" title="(in Qiskit v2.5)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">synthesize()</span></code></a> method, which is all this class
+implements. It carries no number of Trotter steps, because it receives one flow set at a time
+and so cannot subdivide the evolution across the sets. That subdivision belongs a level up, in
+fermionic space, where a <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.synthesis.FermionicEvolutionSynthesis.html#qiskit_fermions.circuit.library.synthesis.FermionicEvolutionSynthesis" title="qiskit_fermions.circuit.library.synthesis.FermionicEvolutionSynthesis"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicEvolutionSynthesis</span></code></a> sees all of them at once (see
+<a class="reference internal" href="#flowsets-check-dynamics"><span class="std std-ref">step 9</span></a>):</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit.circuit</span><span class="w"> </span><span class="kn">import</span> <span class="n">QuantumCircuit</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit.synthesis.evolution</span><span class="w"> </span><span class="kn">import</span> <span class="n">EvolutionSynthesis</span>
 <span class="gp">&gt;&gt;&gt;</span>
@@ -831,22 +905,15 @@ product formula is also where the number of Trotter steps belongs, as in Qiskit�
 <span class="gp">...</span>
 <span class="gp">... </span>    <span class="n">preserve_order</span> <span class="o">=</span> <span class="kc">True</span>
 <span class="gp">...</span>
-<span class="gp">... </span>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reps</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
-<span class="gp">... </span>        <span class="c1"># `reps` Trotter steps of the WHOLE Hamiltonian; see the caution below for why</span>
-<span class="gp">... </span>        <span class="c1"># this synthesis must not be handed one flow set at a time when reps &gt; 1</span>
-<span class="gp">... </span>        <span class="bp">self</span><span class="o">.</span><span class="n">reps</span> <span class="o">=</span> <span class="n">reps</span>
-<span class="gp">...</span>
 <span class="gp">... </span>    <span class="k">def</span><span class="w"> </span><span class="nf">synthesize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">evolution</span><span class="p">):</span>
 <span class="gp">... </span>        <span class="n">circuit</span> <span class="o">=</span> <span class="n">QuantumCircuit</span><span class="p">(</span><span class="n">evolution</span><span class="o">.</span><span class="n">operator</span><span class="o">.</span><span class="n">num_qubits</span><span class="p">)</span>
 <span class="gp">... </span>        <span class="n">east</span><span class="p">,</span> <span class="n">west</span><span class="p">,</span> <span class="n">diagonal</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">{}</span>
 <span class="gp">...</span>
 <span class="gp">... </span>        <span class="k">for</span> <span class="n">label</span><span class="p">,</span> <span class="n">indices</span><span class="p">,</span> <span class="n">coeff</span> <span class="ow">in</span> <span class="n">evolution</span><span class="o">.</span><span class="n">operator</span><span class="o">.</span><span class="n">to_sparse_list</span><span class="p">():</span>
-<span class="gp">... </span>            <span class="c1"># as in Qiskit's own product formulas, `reps` steps divide the time</span>
-<span class="gp">... </span>            <span class="c1"># (and hence every rotation angle) by `reps`</span>
-<span class="gp">... </span>            <span class="n">angle</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">evolution</span><span class="o">.</span><span class="n">time</span> <span class="o">*</span> <span class="n">coeff</span><span class="o">.</span><span class="n">real</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">reps</span>
+<span class="gp">... </span>            <span class="n">angle</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">evolution</span><span class="o">.</span><span class="n">time</span> <span class="o">*</span> <span class="n">coeff</span><span class="o">.</span><span class="n">real</span>
 <span class="gp">... </span>            <span class="k">match</span> <span class="n">label</span><span class="p">,</span> <span class="n">indices</span><span class="p">:</span>
 <span class="gp">... </span>                <span class="k">case</span><span class="w"> </span><span class="s2">""</span><span class="p">,</span> <span class="k">_</span><span class="p">:</span>  <span class="c1"># the identity contributes only a global phase</span>
-<span class="gp">... </span>                    <span class="n">circuit</span><span class="o">.</span><span class="n">global_phase</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reps</span> <span class="o">*</span> <span class="n">angle</span> <span class="o">/</span> <span class="mi">2</span>
+<span class="gp">... </span>                    <span class="n">circuit</span><span class="o">.</span><span class="n">global_phase</span> <span class="o">-=</span> <span class="n">angle</span> <span class="o">/</span> <span class="mi">2</span>
 <span class="gp">... </span>                <span class="k">case</span> <span class="s2">"X"</span><span class="p">,</span> <span class="p">[</span><span class="n">qubit</span><span class="p">]:</span>  <span class="c1"># east flow set: already weight-1</span>
 <span class="gp">... </span>                    <span class="n">east</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">qubit</span><span class="p">,</span> <span class="n">angle</span><span class="p">))</span>
 <span class="gp">... </span>                <span class="k">case</span> <span class="s2">"ZXZ"</span><span class="p">,</span> <span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">l</span><span class="p">]</span> <span class="k">if</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">l</span><span class="p">)</span> <span class="o">==</span> <span class="p">(</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">j</span> <span class="o">+</span> <span class="mi">2</span><span class="p">):</span>
@@ -856,29 +923,19 @@ product formula is also where the number of Trotter steps belongs, as in Qiskit�
 <span class="gp">... </span>                <span class="k">case</span><span class="w"> </span><span class="k">_</span><span class="p">:</span>
 <span class="gp">... </span>                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"unexpected Pauli term: </span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s2"> on </span><span class="si">{</span><span class="n">indices</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 <span class="gp">...</span>
-<span class="gp">... </span>        <span class="c1"># A Trotter step must cycle BETWEEN the flow sets, so the repetition has to wrap</span>
-<span class="gp">... </span>        <span class="c1"># the whole sweep. If this gate carried only one set, repeating it would merely</span>
-<span class="gp">... </span>        <span class="c1"># split that set's own evolution into equal pieces -- see the caution below.</span>
-<span class="gp">... </span>        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">reps</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">bool</span><span class="p">,</span> <span class="p">(</span><span class="n">east</span><span class="p">,</span> <span class="n">west</span><span class="p">,</span> <span class="n">diagonal</span><span class="p">)))</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
-<span class="gp">... </span>            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-<span class="gp">... </span>                <span class="s2">"reps &gt; 1 needs the whole Hamiltonian in one Evolution gate, but this "</span>
-<span class="gp">... </span>                <span class="s2">"gate holds a single flow set; do not decompose() before transpiling."</span>
-<span class="gp">... </span>            <span class="p">)</span>
+<span class="gp">... </span>        <span class="c1"># east flow set: bare rotations, no entangling gates at all</span>
+<span class="gp">... </span>        <span class="k">for</span> <span class="n">qubit</span><span class="p">,</span> <span class="n">angle</span> <span class="ow">in</span> <span class="n">east</span><span class="p">:</span>
+<span class="gp">... </span>            <span class="n">circuit</span><span class="o">.</span><span class="n">rx</span><span class="p">(</span><span class="n">angle</span><span class="p">,</span> <span class="n">qubit</span><span class="p">)</span>
 <span class="gp">...</span>
-<span class="gp">... </span>        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reps</span><span class="p">):</span>
-<span class="gp">... </span>            <span class="c1"># east flow set: bare rotations, no entangling gates at all</span>
-<span class="gp">... </span>            <span class="k">for</span> <span class="n">qubit</span><span class="p">,</span> <span class="n">angle</span> <span class="ow">in</span> <span class="n">east</span><span class="p">:</span>
+<span class="gp">... </span>        <span class="c1"># west flow set: one CZ chain diagonalizes the WHOLE set at once</span>
+<span class="gp">... </span>        <span class="k">if</span> <span class="n">west</span><span class="p">:</span>
+<span class="gp">... </span>            <span class="n">cz_brickwork</span><span class="p">(</span><span class="n">circuit</span><span class="p">)</span>
+<span class="gp">... </span>            <span class="k">for</span> <span class="n">qubit</span><span class="p">,</span> <span class="n">angle</span> <span class="ow">in</span> <span class="n">west</span><span class="p">:</span>
 <span class="gp">... </span>                <span class="n">circuit</span><span class="o">.</span><span class="n">rx</span><span class="p">(</span><span class="n">angle</span><span class="p">,</span> <span class="n">qubit</span><span class="p">)</span>
+<span class="gp">... </span>            <span class="n">cz_brickwork</span><span class="p">(</span><span class="n">circuit</span><span class="p">)</span>
 <span class="gp">...</span>
-<span class="gp">... </span>            <span class="c1"># west flow set: one CZ chain diagonalizes the WHOLE set at once</span>
-<span class="gp">... </span>            <span class="k">if</span> <span class="n">west</span><span class="p">:</span>
-<span class="gp">... </span>                <span class="n">cz_brickwork</span><span class="p">(</span><span class="n">circuit</span><span class="p">)</span>
-<span class="gp">... </span>                <span class="k">for</span> <span class="n">qubit</span><span class="p">,</span> <span class="n">angle</span> <span class="ow">in</span> <span class="n">west</span><span class="p">:</span>
-<span class="gp">... </span>                    <span class="n">circuit</span><span class="o">.</span><span class="n">rx</span><span class="p">(</span><span class="n">angle</span><span class="p">,</span> <span class="n">qubit</span><span class="p">)</span>
-<span class="gp">... </span>                <span class="n">cz_brickwork</span><span class="p">(</span><span class="n">circuit</span><span class="p">)</span>
-<span class="gp">...</span>
-<span class="gp">... </span>            <span class="k">if</span> <span class="n">diagonal</span><span class="p">:</span>
-<span class="gp">... </span>                <span class="n">rzz_layers</span><span class="p">(</span><span class="n">circuit</span><span class="p">,</span> <span class="n">diagonal</span><span class="p">)</span>
+<span class="gp">... </span>        <span class="k">if</span> <span class="n">diagonal</span><span class="p">:</span>
+<span class="gp">... </span>            <span class="n">rzz_layers</span><span class="p">(</span><span class="n">circuit</span><span class="p">,</span> <span class="n">diagonal</span><span class="p">)</span>
 <span class="gp">...</span>
 <span class="gp">... </span>        <span class="k">return</span> <span class="n">circuit</span>
 </pre></div>
@@ -890,31 +947,29 @@ product formula is also where the number of Trotter steps belongs, as in Qiskit�
 attribute, which the high-level-synthesis pass reads.</p>
 <p>Both helpers emit their gates in explicit layers rather than in term order, because
 <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit#depth" title="(in Qiskit v2.5)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">depth()</span></code></a> schedules gates <em>as soon as possible, in the
-order they were added</em>. Since all the gates within one of these sets commute, we can choose the order.
+order they were added</em>. Since all the gates within one of these sets commute, the order is free
+to choose.
 A term-by-term synthesis chooses the order badly. Emitting
 the overlapping <code class="docutils literal notranslate"><span class="pre">CZ</span></code> chain sequentially reports a depth that grows with the qubit count
 rather than the constant <code class="docutils literal notranslate"><span class="pre">2</span></code> the hardware could achieve.</p>
 </div>
-<div class="admonition caution">
-<p class="admonition-title">Caution</p>
-<p>The <code class="docutils literal notranslate"><span class="pre">reps</span></code> argument above is only a genuine Trotterization when this synthesis receives
-the <strong>whole</strong> encoded Hamiltonian, as the Trotter-step comparison further below does. If the
-fermionic circuit is decomposed into one <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate per flow set first, then
-<code class="docutils literal notranslate"><span class="pre">synthesize</span></code> is called once per set, and the loop repeats <em>within</em> a set instead of
-cycling between them:</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>what a decomposed circuit gives:   A(t/2) A(t/2) B(t/2) B(t/2)
-what a Trotterization needs:       A(t/2) B(t/2) A(t/2) B(t/2)
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This is why the synthesis above carries no number of Trotter steps. It receives one flow set
+per gate, so a repetition inside it would repeat <em>within</em> a set rather than cycling between
+them:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>repeating within one set:      A(t/2) A(t/2) B(t/2) B(t/2)
+what a Trotterization needs:   A(t/2) B(t/2) A(t/2) B(t/2)
 </pre></div>
 </div>
-<p>The first form buys nothing at all: consecutive exponentials of the <em>same</em> operator commute,
-so <code class="docutils literal notranslate"><span class="pre">A(t/2)</span> <span class="pre">A(t/2)</span></code> is just <code class="docutils literal notranslate"><span class="pre">A(t)</span></code> and the error stays at its <code class="docutils literal notranslate"><span class="pre">reps=1</span></code> value however
-large <code class="docutils literal notranslate"><span class="pre">reps</span></code> grows. That is why <code class="docutils literal notranslate"><span class="pre">synthesize</span></code> above rejects <code class="docutils literal notranslate"><span class="pre">reps</span> <span class="pre">&gt;</span> <span class="pre">1</span></code> when it is handed
-a gate carrying a single flow set – silently returning a circuit that looks Trotterized but
-is not would be worse than failing.</p>
-<p>A product formula that respects the operator’s
-<a class="reference internal" href="../stubs/qiskit_fermions.operators.OperatorTrait.html#qiskit_fermions.operators.OperatorTrait.groups" title="qiskit_fermions.operators.OperatorTrait.groups"><code class="xref py py-attr docutils literal notranslate"><span class="pre">groups</span></code></a> directly (rather than relying on a
-prior decomposition) avoids the constraint entirely; see
-<a class="reference external" href="https://github.com/Qiskit/qiskit-fermions/issues/298">issue #298</a>.</p>
+<p>The first form buys nothing: consecutive exponentials of the same operator commute, so
+<code class="docutils literal notranslate"><span class="pre">A(t/2)</span> <span class="pre">A(t/2)</span></code> is just <code class="docutils literal notranslate"><span class="pre">A(t)</span></code> and the error stays at its one-step value however many
+steps are asked for.</p>
+<p>The step count therefore belongs to the fermionic
+<a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter.html#qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter" title="qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicLieTrotter</span></code></a> of <a class="reference internal" href="#flowsets-build"><span class="std std-ref">step 5</span></a>, which reads the
+<a class="reference internal" href="../stubs/qiskit_fermions.operators.OperatorTrait.html#qiskit_fermions.operators.OperatorTrait.groups" title="qiskit_fermions.operators.OperatorTrait.groups"><code class="xref py py-attr docutils literal notranslate"><span class="pre">groups</span></code></a> and can interleave them. That division
+of labor is the point: the fermionic formula decides <em>how many steps</em> and <em>in what order</em>, and
+this class decides <em>how cheaply</em> each resulting set is realized.</p>
 </div>
 <p>To select the order, pass it to
 <a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis.html#qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis.product_formula" title="qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis.product_formula"><code class="xref py py-attr docutils literal notranslate"><span class="pre">MapperFnEvolutionSynthesis.product_formula</span></code></a>, which is the argument
@@ -933,15 +988,22 @@ it runs on) changes:</p>
 <span class="go">&lt;Figure size ... with 1 Axes&gt;</span>
 </pre></div>
 </div>
-<p>(<a class="reference download internal" download="" href="../_downloads/0823111a7a265116a81bcd2adfcb68db/1d_fermi_hubbard-17.png"><code class="xref download docutils literal notranslate"><span class="pre">png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/0c44b7926b0fffdfaa2047ff1ec7f405/1d_fermi_hubbard-17.hires.png"><code class="xref download docutils literal notranslate"><span class="pre">hires.png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/53e5505ad903eb4b618a8f9c88920065/1d_fermi_hubbard-17.pdf"><code class="xref download docutils literal notranslate"><span class="pre">pdf</span></code></a>)</p>
+<p>(<a class="reference download internal" download="" href="../_downloads/77b4b4a8dc9b406ec3f4a74aafc1eaef/1d_fermi_hubbard-19.png"><code class="xref download docutils literal notranslate"><span class="pre">png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/73c4df7096c7a9d2290757f88fe6def7/1d_fermi_hubbard-19.hires.png"><code class="xref download docutils literal notranslate"><span class="pre">hires.png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/e46dff663c4fc1ab2d7813d0535acfa9/1d_fermi_hubbard-19.pdf"><code class="xref download docutils literal notranslate"><span class="pre">pdf</span></code></a>)</p>
 <figure class="align-default">
-<img alt="The flow-set-aware circuit, markedly shorter than the previous one, with entangling gates stacked into parallel layers." class="plot-directive" src="../_images/1d_fermi_hubbard-17.png" />
+<img alt="The flow-set-aware circuit, markedly shorter than the previous one, with entangling gates stacked into parallel layers." class="plot-directive" src="../_images/1d_fermi_hubbard-19.png" />
 </figure>
 <p>From depth 23 with 26 <code class="docutils literal notranslate"><span class="pre">CX</span></code> gates down to depth 12 with 22 <code class="docutils literal notranslate"><span class="pre">CX</span></code> gates.  Note that this is fewer entangling gates and
 nearly half the depth. Comparing the two pictures, the difference is not that the gates are
 cheaper but that they <em>stack</em>. The serial ladders are gone; entangling gates now sit above
 one another in shared layers because the whole west flow set is rotated in a single shared
 basis and the interaction is emitted in layers of disjoint pairs.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code class="docutils literal notranslate"><span class="pre">FlowSetSynthesis</span></code> pattern-matches <em>absolute</em> qubit indices, which is safe here only because
+every flow set of this Hamiltonian spans the whole register. A fermionic product formula narrows
+each factor to the modes it actually touches, so a grouping whose sets covered only part of the
+chain would arrive relabeled and the patterns above would not match.</p>
+</div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Both drawings show the circuit after <code class="docutils literal notranslate"><span class="pre">decompose(reps=6)</span></code>, which rewrites everything
@@ -953,7 +1015,7 @@ gate labels.</p>
 </div>
 </section>
 <section id="constant-depth-at-scale">
-<h2>8. Constant depth at scale<a class="headerlink" href="#constant-depth-at-scale" title="Link to this heading">¶</a></h2>
+<span id="flowsets-scaling"></span><h2>8. Constant depth at scale<a class="headerlink" href="#constant-depth-at-scale" title="Link to this heading">¶</a></h2>
 <p>The interesting question is not the count at four modes but how it <em>scales</em>. The two
 <code class="docutils literal notranslate"><span class="pre">CZ</span></code> brickwork layers do not grow with the chain length, so the two-qubit depth of one
 Trotter step should be constant. Measuring it directly on the full Fermi-Hubbard
@@ -963,23 +1025,26 @@ Hamiltonian, well past what could be simulated by brute force:</p>
 <span class="gp">... </span>    <span class="n">operator</span><span class="o">.</span><span class="n">groups</span> <span class="o">=</span> <span class="n">flow_set_groups</span><span class="p">(</span><span class="n">operator</span><span class="p">)</span>
 <span class="gp">...</span>
 <span class="gp">... </span>    <span class="n">circuit</span> <span class="o">=</span> <span class="n">FermionicCircuit</span><span class="p">(</span><span class="n">num_sites</span><span class="p">)</span>
-<span class="gp">... </span>    <span class="n">circuit</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Evolution</span><span class="p">(</span><span class="n">num_sites</span><span class="p">,</span> <span class="n">operator</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="n">total_time</span><span class="p">),</span> <span class="n">circuit</span><span class="o">.</span><span class="n">modes</span><span class="p">)</span>
-<span class="gp">... </span>    <span class="n">circuit</span> <span class="o">=</span> <span class="n">circuit</span><span class="o">.</span><span class="n">decompose</span><span class="p">()</span>  <span class="c1"># split into one Evolution per flow set</span>
+<span class="gp">... </span>    <span class="n">circuit</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+<span class="gp">... </span>        <span class="n">Evolution</span><span class="p">(</span>
+<span class="gp">... </span>            <span class="n">num_sites</span><span class="p">,</span> <span class="n">operator</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="n">total_time</span><span class="p">,</span> <span class="n">synthesis</span><span class="o">=</span><span class="n">FermionicLieTrotter</span><span class="p">()</span>
+<span class="gp">... </span>        <span class="p">),</span>
+<span class="gp">... </span>        <span class="n">circuit</span><span class="o">.</span><span class="n">modes</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="p">)</span>
+<span class="gp">... </span>    <span class="n">circuit</span> <span class="o">=</span> <span class="n">circuit</span><span class="o">.</span><span class="n">decompose</span><span class="p">()</span>  <span class="c1"># one Evolution per flow set, as in step 5</span>
 <span class="gp">...</span>
 <span class="gp">... </span>    <span class="n">pass_manager</span> <span class="o">=</span> <span class="n">flow_set_pass_manager</span><span class="p">(</span><span class="n">circuit</span><span class="o">.</span><span class="n">register</span><span class="p">,</span> <span class="n">product_formula</span><span class="p">)</span>
 <span class="gp">... </span>    <span class="n">decomposed</span> <span class="o">=</span> <span class="n">pass_manager</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">circuit</span><span class="p">)</span><span class="o">.</span><span class="n">decompose</span><span class="p">(</span><span class="n">reps</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
 <span class="gp">... </span>    <span class="n">two_qubit</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">instruction</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">instruction</span><span class="o">.</span><span class="n">qubits</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span>
-<span class="gp">... </span>    <span class="k">return</span> <span class="n">decomposed</span><span class="o">.</span><span class="n">depth</span><span class="p">(</span><span class="n">two_qubit</span><span class="p">),</span> <span class="n">decomposed</span><span class="o">.</span><span class="n">count_ops</span><span class="p">()[</span><span class="s2">"cx"</span><span class="p">]</span>
-<span class="gp">&gt;&gt;&gt;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit.synthesis</span><span class="w"> </span><span class="kn">import</span> <span class="n">LieTrotter</span>
+<span class="gp">... </span>    <span class="k">return</span> <span class="n">decomposed</span><span class="o">.</span><span class="n">count_ops</span><span class="p">()[</span><span class="s2">"cx"</span><span class="p">],</span> <span class="n">decomposed</span><span class="o">.</span><span class="n">depth</span><span class="p">(</span><span class="n">two_qubit</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">sites</span> <span class="o">=</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">100</span><span class="p">]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">flow</span> <span class="o">=</span> <span class="p">[</span><span class="n">evolution_stats</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">FlowSetSynthesis</span><span class="p">())</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">sites</span><span class="p">]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">lie_trotter</span> <span class="o">=</span> <span class="p">[</span><span class="n">evolution_stats</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">LieTrotter</span><span class="p">())</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">sites</span><span class="p">]</span>
 <span class="gp">&gt;&gt;&gt;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="p">[</span><span class="n">depth</span> <span class="k">for</span> <span class="n">depth</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">flow</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">[</span><span class="n">depth</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">depth</span> <span class="ow">in</span> <span class="n">flow</span><span class="p">]</span>
 <span class="go">[12, 12, 12, 12, 12]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="p">[</span><span class="n">depth</span> <span class="k">for</span> <span class="n">depth</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">lie_trotter</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">[</span><span class="n">depth</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">depth</span> <span class="ow">in</span> <span class="n">lie_trotter</span><span class="p">]</span>
 <span class="go">[23, 47, 87, 207, 407]</span>
 </pre></div>
 </div>
@@ -989,8 +1054,8 @@ each set is still Trotterized term by term, so the growth is only slowed, not re
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">figure</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">9</span><span class="p">,</span> <span class="mf">3.5</span><span class="p">),</span> <span class="n">layout</span><span class="o">=</span><span class="s2">"constrained"</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">panel</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">title</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">axes</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="s2">"two-qubit depth"</span><span class="p">,</span> <span class="s2">"CX count"</span><span class="p">)):</span>
-<span class="gp">... </span>    <span class="n">_</span> <span class="o">=</span> <span class="n">panel</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">sites</span><span class="p">,</span> <span class="p">[</span><span class="n">stat</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="k">for</span> <span class="n">stat</span> <span class="ow">in</span> <span class="n">lie_trotter</span><span class="p">],</span> <span class="s2">"o-"</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">"Lie"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">panel</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">title</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">axes</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="s2">"two-qubit depth"</span><span class="p">,</span> <span class="s2">"CX count"</span><span class="p">)):</span>
+<span class="gp">... </span>    <span class="n">_</span> <span class="o">=</span> <span class="n">panel</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">sites</span><span class="p">,</span> <span class="p">[</span><span class="n">stat</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="k">for</span> <span class="n">stat</span> <span class="ow">in</span> <span class="n">lie_trotter</span><span class="p">],</span> <span class="s2">"o-"</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">"qubit-level"</span><span class="p">)</span>
 <span class="gp">... </span>    <span class="n">_</span> <span class="o">=</span> <span class="n">panel</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">sites</span><span class="p">,</span> <span class="p">[</span><span class="n">stat</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="k">for</span> <span class="n">stat</span> <span class="ow">in</span> <span class="n">flow</span><span class="p">],</span> <span class="s2">"s-"</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">"flow set"</span><span class="p">)</span>
 <span class="gp">... </span>    <span class="n">_</span> <span class="o">=</span> <span class="n">panel</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">xlabel</span><span class="o">=</span><span class="s2">"modes"</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">)</span>
 <span class="gp">... </span>    <span class="n">_</span> <span class="o">=</span> <span class="n">panel</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
@@ -998,9 +1063,9 @@ each set is still Trotterized term by term, so the growth is only slowed, not re
 <span class="go">&lt;Figure size ... with 2 Axes&gt;</span>
 </pre></div>
 </div>
-<p>(<a class="reference download internal" download="" href="../_downloads/77b4b4a8dc9b406ec3f4a74aafc1eaef/1d_fermi_hubbard-19.png"><code class="xref download docutils literal notranslate"><span class="pre">png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/73c4df7096c7a9d2290757f88fe6def7/1d_fermi_hubbard-19.hires.png"><code class="xref download docutils literal notranslate"><span class="pre">hires.png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/e46dff663c4fc1ab2d7813d0535acfa9/1d_fermi_hubbard-19.pdf"><code class="xref download docutils literal notranslate"><span class="pre">pdf</span></code></a>)</p>
+<p>(<a class="reference download internal" download="" href="../_downloads/6a6143f4a1b61b22e6c83d52a3f842fe/1d_fermi_hubbard-21.png"><code class="xref download docutils literal notranslate"><span class="pre">png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/a73bf169d8be129ccee1af2ef15633c8/1d_fermi_hubbard-21.hires.png"><code class="xref download docutils literal notranslate"><span class="pre">hires.png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/ca515553287aaefeaa3f5b0f82bd6358/1d_fermi_hubbard-21.pdf"><code class="xref download docutils literal notranslate"><span class="pre">pdf</span></code></a>)</p>
 <figure class="align-default">
-<img alt="Two-qubit depth against number of modes; LieTrotter grows linearly while the flow-set synthesis stays flat at 12." class="plot-directive" src="../_images/1d_fermi_hubbard-19.png" />
+<img alt="Two-qubit depth against number of modes; the qubit-level LieTrotter grows linearly while the flow-set synthesis stays flat at 12." class="plot-directive" src="../_images/1d_fermi_hubbard-21.png" />
 </figure>
 <p>The gate count grows linearly under both (there are <span class="math">\(O(N)\)</span> terms to apply, and
 that is unavoidable), but the flow-set synthesis applies them in a constant number of
@@ -1024,7 +1089,7 @@ exploring.</p>
 </div>
 </section>
 <section id="check-the-dynamics">
-<h2>9. Check the dynamics<a class="headerlink" href="#check-the-dynamics" title="Link to this heading">¶</a></h2>
+<span id="flowsets-check-dynamics"></span><h2>9. Check the dynamics<a class="headerlink" href="#check-the-dynamics" title="Link to this heading">¶</a></h2>
 <p>Under the domain-wall map, an occupation pattern becomes a
 cumulative-parity string, so the initial state is prepared differently than under
 Jordan-Wigner.  This is an easily overlooked practical consequence of delocalizing the parity. The
@@ -1035,68 +1100,135 @@ helper from step 4 gives the right label:</p>
 <span class="go">'00110'</span>
 </pre></div>
 </div>
-<p>Now compare <code class="docutils literal notranslate"><span class="pre">FlowSetSynthesis</span></code> against <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.synthesis.LieTrotter" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">LieTrotter</span></code></a> at increasing
-numbers of Trotter steps, measuring the fidelity of the evolved state against exact matrix
-exponentiation. The step count is a property of the product formula, so both columns run
-the same fermionic circuit (<code class="docutils literal notranslate"><span class="pre">circuit</span></code> from step 5, a single <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a>
-gate at the full time) and let the synthesis subdivide it:</p>
+<p>With the state prepared, two questions remain, and they are best asked separately: does the
+flow-set synthesis compute the <em>right</em> thing, and does it compute it more <em>cheaply</em>?</p>
+<p>Take correctness first. <code class="docutils literal notranslate"><span class="pre">FlowSetSynthesis</span></code> and Qiskit’s
+<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.synthesis.LieTrotter" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">LieTrotter</span></code></a> receive the same encoded flow sets from the same fermionic
+Trotterization, so they must realize the same unitary up to a global phase. The custom Cliffords
+reorganize the work; they do not change the result. Random statevectors detect any discrepancy far
+more cheaply than building the full unitary:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit.quantum_info</span><span class="w"> </span><span class="kn">import</span> <span class="n">Statevector</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">scipy.linalg</span><span class="w"> </span><span class="kn">import</span> <span class="n">expm</span>
 <span class="gp">&gt;&gt;&gt;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">reference</span> <span class="o">=</span> <span class="n">expm</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">total_time</span> <span class="o">*</span> <span class="n">flow_matrix</span><span class="p">)</span> <span class="o">@</span> <span class="n">Statevector</span><span class="o">.</span><span class="n">from_label</span><span class="p">(</span><span class="n">initial_label</span><span class="p">)</span><span class="o">.</span><span class="n">data</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">1234</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">trotter_fidelity</span><span class="p">(</span><span class="n">product_formula</span><span class="p">):</span>
-<span class="gp">... </span>    <span class="c1"># `circuit` is the undecomposed one from step 5 -- see the note below</span>
-<span class="gp">... </span>    <span class="n">pass_manager</span> <span class="o">=</span> <span class="n">flow_set_pass_manager</span><span class="p">(</span><span class="n">circuit</span><span class="o">.</span><span class="n">register</span><span class="p">,</span> <span class="n">product_formula</span><span class="p">)</span>
-<span class="gp">... </span>    <span class="c1"># NOTE: decompose() is essential -- see the warning below</span>
-<span class="gp">... </span>    <span class="n">decomposed</span> <span class="o">=</span> <span class="n">pass_manager</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">circuit</span><span class="p">)</span><span class="o">.</span><span class="n">decompose</span><span class="p">(</span><span class="n">reps</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
-<span class="gp">... </span>    <span class="n">evolved</span> <span class="o">=</span> <span class="n">Statevector</span><span class="o">.</span><span class="n">from_label</span><span class="p">(</span><span class="n">initial_label</span><span class="p">)</span><span class="o">.</span><span class="n">evolve</span><span class="p">(</span><span class="n">decomposed</span><span class="p">)</span>
-<span class="gp">... </span>    <span class="n">fidelity</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">vdot</span><span class="p">(</span><span class="n">evolved</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">reference</span><span class="p">))</span> <span class="o">**</span> <span class="mi">2</span>
-<span class="gp">... </span>    <span class="n">two_qubit</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">instruction</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">instruction</span><span class="o">.</span><span class="n">qubits</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span>
-<span class="gp">... </span>    <span class="k">return</span> <span class="n">fidelity</span><span class="p">,</span> <span class="n">decomposed</span><span class="o">.</span><span class="n">count_ops</span><span class="p">()[</span><span class="s2">"cx"</span><span class="p">],</span> <span class="n">decomposed</span><span class="o">.</span><span class="n">depth</span><span class="p">(</span><span class="n">two_qubit</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">agrees_up_to_one_phase</span><span class="p">(</span><span class="n">reps</span><span class="p">,</span> <span class="n">samples</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
+<span class="gp">... </span><span class="w">    </span><span class="sd">"""Compare both qubit-side syntheses of the same fermionic Trotterization."""</span>
+<span class="gp">... </span>    <span class="n">step</span> <span class="o">=</span> <span class="n">trotter_steps</span><span class="p">(</span><span class="n">reps</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="n">trotter</span> <span class="o">=</span> <span class="n">flow_set_pass_manager</span><span class="p">(</span><span class="n">step</span><span class="o">.</span><span class="n">register</span><span class="p">,</span> <span class="n">LieTrotter</span><span class="p">())</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">step</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="n">flow</span> <span class="o">=</span> <span class="n">flow_set_pass_manager</span><span class="p">(</span><span class="n">step</span><span class="o">.</span><span class="n">register</span><span class="p">,</span> <span class="n">FlowSetSynthesis</span><span class="p">())</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">step</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="n">trotter</span><span class="p">,</span> <span class="n">flow</span> <span class="o">=</span> <span class="n">trotter</span><span class="o">.</span><span class="n">decompose</span><span class="p">(</span><span class="n">reps</span><span class="o">=</span><span class="mi">6</span><span class="p">),</span> <span class="n">flow</span><span class="o">.</span><span class="n">decompose</span><span class="p">(</span><span class="n">reps</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="n">dimension</span> <span class="o">=</span> <span class="mi">2</span><span class="o">**</span><span class="n">trotter</span><span class="o">.</span><span class="n">num_qubits</span>
+<span class="gp">... </span>    <span class="n">residuals</span><span class="p">,</span> <span class="n">phases</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+<span class="gp">... </span>    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">samples</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="n">vector</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">dimension</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">dimension</span><span class="p">)</span>
+<span class="gp">... </span>        <span class="n">state</span> <span class="o">=</span> <span class="n">Statevector</span><span class="p">(</span><span class="n">vector</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">vector</span><span class="p">))</span>
+<span class="gp">... </span>        <span class="n">a</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">evolve</span><span class="p">(</span><span class="n">trotter</span><span class="p">)</span><span class="o">.</span><span class="n">data</span>
+<span class="gp">... </span>        <span class="n">b</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">evolve</span><span class="p">(</span><span class="n">flow</span><span class="p">)</span><span class="o">.</span><span class="n">data</span>
+<span class="gp">... </span>        <span class="n">overlap</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vdot</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+<span class="gp">... </span>        <span class="n">phases</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">overlap</span> <span class="o">/</span> <span class="nb">abs</span><span class="p">(</span><span class="n">overlap</span><span class="p">))</span>
+<span class="gp">... </span>        <span class="n">residuals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">b</span> <span class="o">-</span> <span class="n">a</span> <span class="o">*</span> <span class="n">overlap</span> <span class="o">/</span> <span class="nb">abs</span><span class="p">(</span><span class="n">overlap</span><span class="p">)))</span>
+<span class="gp">... </span>    <span class="c1"># the SAME global phase must work for every input state</span>
+<span class="gp">... </span>    <span class="n">spread</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">phase</span> <span class="o">-</span> <span class="n">phases</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="k">for</span> <span class="n">phase</span> <span class="ow">in</span> <span class="n">phases</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">residuals</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">1e-9</span><span class="p">),</span> <span class="nb">bool</span><span class="p">(</span><span class="n">spread</span> <span class="o">&lt;</span> <span class="mf">1e-9</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">steps</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">8</span><span class="p">):</span>
-<span class="gp">... </span>    <span class="n">flow_set</span> <span class="o">=</span> <span class="n">trotter_fidelity</span><span class="p">(</span><span class="n">FlowSetSynthesis</span><span class="p">(</span><span class="n">reps</span><span class="o">=</span><span class="n">steps</span><span class="p">))</span>
-<span class="gp">... </span>    <span class="n">trotter</span> <span class="o">=</span> <span class="n">trotter_fidelity</span><span class="p">(</span><span class="n">LieTrotter</span><span class="p">(</span><span class="n">reps</span><span class="o">=</span><span class="n">steps</span><span class="p">))</span>
-<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span>
-<span class="gp">... </span>        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">steps</span><span class="si">}</span><span class="s2"> step(s):  flow set </span><span class="si">{</span><span class="n">flow_set</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">.6f</span><span class="si">}</span><span class="s2">"</span>
-<span class="gp">... </span>        <span class="sa">f</span><span class="s2">" (</span><span class="si">{</span><span class="n">flow_set</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s2">3d</span><span class="si">}</span><span class="s2"> CX, depth </span><span class="si">{</span><span class="n">flow_set</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="si">:</span><span class="s2">3d</span><span class="si">}</span><span class="s2">)"</span>
-<span class="gp">... </span>        <span class="sa">f</span><span class="s2">"   Lie </span><span class="si">{</span><span class="n">trotter</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">.6f</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">trotter</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s2">3d</span><span class="si">}</span><span class="s2"> CX, depth </span><span class="si">{</span><span class="n">trotter</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="si">:</span><span class="s2">3d</span><span class="si">}</span><span class="s2">)"</span>
-<span class="gp">... </span>    <span class="p">)</span>
-<span class="go">1 step(s):  flow set 0.590661 ( 22 CX, depth  12)   Lie 0.148587 ( 26 CX, depth  26)</span>
-<span class="go">2 step(s):  flow set 0.926656 ( 44 CX, depth  24)   Lie 0.212137 ( 52 CX, depth  48)</span>
-<span class="go">4 step(s):  flow set 0.982053 ( 88 CX, depth  48)   Lie 0.723415 (104 CX, depth  92)</span>
-<span class="go">8 step(s):  flow set 0.995395 (176 CX, depth  96)   Lie 0.925807 (208 CX, depth 180)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">[</span><span class="n">agrees_up_to_one_phase</span><span class="p">(</span><span class="n">reps</span><span class="p">)</span> <span class="k">for</span> <span class="n">reps</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">)]</span>
+<span class="go">[(True, True), (True, True)]</span>
 </pre></div>
 </div>
-<p>The flow-set synthesis wins on <strong>all three</strong> axes: higher fidelity, fewer entangling
-gates, and roughly half the two-qubit depth at every step count. This is not a
-depth-versus-accuracy trade; the Trotter error is genuinely smaller because each flow set
-is evolved <em>exactly</em>, so the only remaining error comes from splitting the three groups against
-each other, rather than from splitting all 14 terms.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>The circuit used matters. The <em>undecomposed</em> one from step 5, holding a single
-<a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate over all 14 terms is used - not the group-wise
-<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit#decompose" title="(in Qiskit v2.5)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">decompose()</span></code></a> from <a class="reference internal" href="#flowsets-transpile"><span class="std std-ref">step 6</span></a>.
-That is what keeps the default column an honest baseline. Passing it the decomposed
-circuit would let it inherit the flow-set partitioning for free, and since Trotterizing a
-set of commuting terms is exact, its fidelities would become identical to the flow-set
-column’s.</p>
-<p>The flip side is that <code class="docutils literal notranslate"><span class="pre">FlowSetSynthesis</span></code> has to recover the flow sets from the
-Pauli labels it is handed. That works here because the encoding gives each set a
-recognizable shape, but it is the less general route; the group-wise
-<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit#decompose" title="(in Qiskit v2.5)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">decompose()</span></code></a> works for <em>any</em> grouping, not just one that a
-synthesis plugin can reverse-engineer.</p>
+<p>Both halves of that check matter. A unit-modulus overlap on a single state is necessary but not
+sufficient: a synthesis that got a state-dependent phase wrong would still show it. Requiring
+the <em>same</em> phase across several random states is what closes the gap. Checking more than one
+<a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter.html#qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter.reps" title="qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter.reps"><code class="xref py py-attr docutils literal notranslate"><span class="pre">reps</span></code></a> matters too, since it confirms the agreement survives the
+interleaving of the flow sets rather than holding only for a single sweep.</p>
 </div>
+<p>So the choice of qubit-side synthesis is free of consequence for accuracy, which is what makes a
+cost comparison meaningful. The remaining question is what the encoding as a whole buys against the
+obvious alternative: plain Jordan-Wigner on <code class="docutils literal notranslate"><span class="pre">num_sites</span></code> qubits, with no ancilla and no custom
+Cliffords. Both the encoding and the qubit-side synthesis differ between the two columns, but the
+check above showed the latter cannot affect the result, so what the fidelities test is the encoding.
+Both pipelines also start from the <em>same</em> fermionic Trotterization, so any difference in fidelity
+would indicate a bug rather than a trade-off. The two columns are the <em>encodings</em>, flow-set against
+Jordan-Wigner:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">jordan_wigner_pass_manager</span><span class="p">(</span><span class="n">mode_register</span><span class="p">,</span> <span class="n">product_formula</span><span class="p">):</span>
+<span class="gp">... </span><span class="w">    </span><span class="sd">"""The same pipeline under plain Jordan-Wigner: one qubit per mode."""</span>
+<span class="gp">... </span>    <span class="n">synthesis</span> <span class="o">=</span> <span class="n">F2QSynthesis</span><span class="p">()</span>
+<span class="gp">... </span>    <span class="n">synthesis</span><span class="o">.</span><span class="n">methods</span><span class="p">[</span><span class="s2">"Evolution"</span><span class="p">]</span> <span class="o">=</span> <span class="n">MapperFnEvolutionSynthesis</span><span class="p">(</span>
+<span class="gp">... </span>        <span class="n">transfer_vertex_jordan_wigner</span><span class="p">,</span> <span class="n">product_formula</span><span class="o">=</span><span class="n">product_formula</span>
+<span class="gp">... </span>    <span class="p">)</span>
+<span class="gp">... </span>    <span class="n">qubit_register</span> <span class="o">=</span> <span class="n">QuantumRegister</span><span class="p">(</span><span class="n">mode_register</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="s2">"q"</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="k">return</span> <span class="n">MultiStagePassManager</span><span class="p">(</span>
+<span class="gp">... </span>        <span class="nb">input</span><span class="o">=</span><span class="n">FermionicCircuitToDAG</span><span class="p">(),</span>
+<span class="gp">... </span>        <span class="n">layout</span><span class="o">=</span><span class="n">CustomF2QLayout</span><span class="p">({</span><span class="n">mode_register</span><span class="p">:</span> <span class="n">qubit_register</span><span class="p">}),</span>
+<span class="gp">... </span>        <span class="n">synthesis</span><span class="o">=</span><span class="n">synthesis</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="n">output</span><span class="o">=</span><span class="n">QuantumDAGToCircuit</span><span class="p">(),</span>
+<span class="gp">... </span>    <span class="p">)</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">scipy.linalg</span><span class="w"> </span><span class="kn">import</span> <span class="n">expm</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">jw_state</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="n">num_sites</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">complex</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">jw_state</span><span class="p">[</span><span class="nb">sum</span><span class="p">(</span><span class="n">o</span> <span class="o">&lt;&lt;</span> <span class="n">j</span> <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">o</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">occupations</span><span class="p">))]</span> <span class="o">=</span> <span class="mf">1.0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reference_jw</span> <span class="o">=</span> <span class="n">expm</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">total_time</span> <span class="o">*</span> <span class="n">jw_matrix</span><span class="p">)</span> <span class="o">@</span> <span class="n">jw_state</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reference_flow</span> <span class="o">=</span> <span class="n">expm</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">total_time</span> <span class="o">*</span> <span class="n">flow_matrix</span><span class="p">)</span> <span class="o">@</span> <span class="p">(</span><span class="n">isometry</span> <span class="o">@</span> <span class="n">jw_state</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">cost_and_fidelity</span><span class="p">(</span><span class="n">reps</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="n">step</span> <span class="o">=</span> <span class="n">trotter_steps</span><span class="p">(</span><span class="n">reps</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="n">flow</span> <span class="o">=</span> <span class="n">flow_set_pass_manager</span><span class="p">(</span><span class="n">step</span><span class="o">.</span><span class="n">register</span><span class="p">,</span> <span class="n">FlowSetSynthesis</span><span class="p">())</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">step</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="n">jw</span> <span class="o">=</span> <span class="n">jordan_wigner_pass_manager</span><span class="p">(</span><span class="n">step</span><span class="o">.</span><span class="n">register</span><span class="p">,</span> <span class="n">LieTrotter</span><span class="p">())</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">step</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="n">flow</span><span class="p">,</span> <span class="n">jw</span> <span class="o">=</span> <span class="n">flow</span><span class="o">.</span><span class="n">decompose</span><span class="p">(</span><span class="n">reps</span><span class="o">=</span><span class="mi">6</span><span class="p">),</span> <span class="n">jw</span><span class="o">.</span><span class="n">decompose</span><span class="p">(</span><span class="n">reps</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="n">two_qubit</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">instruction</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">instruction</span><span class="o">.</span><span class="n">qubits</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span>
+<span class="gp">... </span>    <span class="n">evolved_flow</span> <span class="o">=</span> <span class="n">Statevector</span><span class="o">.</span><span class="n">from_label</span><span class="p">(</span><span class="n">initial_label</span><span class="p">)</span><span class="o">.</span><span class="n">evolve</span><span class="p">(</span><span class="n">flow</span><span class="p">)</span><span class="o">.</span><span class="n">data</span>
+<span class="gp">... </span>    <span class="n">evolved_jw</span> <span class="o">=</span> <span class="n">Statevector</span><span class="p">(</span><span class="n">jw_state</span><span class="p">)</span><span class="o">.</span><span class="n">evolve</span><span class="p">(</span><span class="n">jw</span><span class="p">)</span><span class="o">.</span><span class="n">data</span>
+<span class="gp">... </span>    <span class="k">return</span> <span class="p">(</span>
+<span class="gp">... </span>        <span class="nb">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">vdot</span><span class="p">(</span><span class="n">evolved_flow</span><span class="p">,</span> <span class="n">reference_flow</span><span class="p">))</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="n">flow</span><span class="o">.</span><span class="n">count_ops</span><span class="p">()[</span><span class="s2">"cx"</span><span class="p">],</span>
+<span class="gp">... </span>        <span class="n">flow</span><span class="o">.</span><span class="n">depth</span><span class="p">(</span><span class="n">two_qubit</span><span class="p">),</span>
+<span class="gp">... </span>        <span class="nb">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">vdot</span><span class="p">(</span><span class="n">evolved_jw</span><span class="p">,</span> <span class="n">reference_jw</span><span class="p">))</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="n">jw</span><span class="o">.</span><span class="n">count_ops</span><span class="p">()[</span><span class="s2">"cx"</span><span class="p">],</span>
+<span class="gp">... </span>        <span class="n">jw</span><span class="o">.</span><span class="n">depth</span><span class="p">(</span><span class="n">two_qubit</span><span class="p">),</span>
+<span class="gp">... </span>    <span class="p">)</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">reps</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">8</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="n">flow_f</span><span class="p">,</span> <span class="n">flow_cx</span><span class="p">,</span> <span class="n">flow_d</span><span class="p">,</span> <span class="n">jw_f</span><span class="p">,</span> <span class="n">jw_cx</span><span class="p">,</span> <span class="n">jw_d</span> <span class="o">=</span> <span class="n">cost_and_fidelity</span><span class="p">(</span><span class="n">reps</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span>
+<span class="gp">... </span>        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">reps</span><span class="si">}</span><span class="s2"> step(s):  flow set </span><span class="si">{</span><span class="n">flow_f</span><span class="si">:</span><span class="s2">.6f</span><span class="si">}</span><span class="s2">"</span>
+<span class="gp">... </span>        <span class="sa">f</span><span class="s2">" (</span><span class="si">{</span><span class="n">flow_cx</span><span class="si">:</span><span class="s2">3d</span><span class="si">}</span><span class="s2"> CX, depth </span><span class="si">{</span><span class="n">flow_d</span><span class="si">:</span><span class="s2">3d</span><span class="si">}</span><span class="s2">)"</span>
+<span class="gp">... </span>        <span class="sa">f</span><span class="s2">"   JW </span><span class="si">{</span><span class="n">jw_f</span><span class="si">:</span><span class="s2">.6f</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">jw_cx</span><span class="si">:</span><span class="s2">3d</span><span class="si">}</span><span class="s2"> CX, depth </span><span class="si">{</span><span class="n">jw_d</span><span class="si">:</span><span class="s2">3d</span><span class="si">}</span><span class="s2">)"</span>
+<span class="gp">... </span>    <span class="p">)</span>
+<span class="go">1 step(s):  flow set 0.590661 ( 22 CX, depth  12)   JW 0.590661 ( 18 CX, depth  14)</span>
+<span class="go">2 step(s):  flow set 0.926656 ( 44 CX, depth  24)   JW 0.926656 ( 36 CX, depth  26)</span>
+<span class="go">4 step(s):  flow set 0.982053 ( 88 CX, depth  48)   JW 0.982053 ( 72 CX, depth  50)</span>
+<span class="go">8 step(s):  flow set 0.995395 (176 CX, depth  96)   JW 0.995395 (144 CX, depth  98)</span>
+</pre></div>
+</div>
+<p>Read the fidelity column first: identical, to every printed digit, in two different Hilbert spaces
+under two different encodings. That is the fermionic Trotterization showing through. The
+approximation was fixed in step 5, before either encoding was chosen, so both circuits carry exactly
+the error of a first-order formula over three flow sets, and it falls roughly four-fold per doubling
+of the step count.</p>
+<p>What the encodings do differ in is cost, and the trade is worth stating plainly. The flow set spends
+<strong>more</strong> entangling gates: 22 against 18 at one step. The ancilla is not the reason, since it
+carries no two-qubit gate of its own. The reason is the interaction, exactly as
+<a class="reference internal" href="#flowsets-encoding"><span class="std std-ref">step 3</span></a> warned: delocalizing the parity turns three nearest-neighbor
+<code class="docutils literal notranslate"><span class="pre">ZZ</span></code> terms into seven spanning nearest <em>and</em> next-nearest neighbors, and each costs two <code class="docutils literal notranslate"><span class="pre">CX</span></code>
+gates. That is the price paid for making the hopping cheap.</p>
+<p>It also wins only narrowly on depth at this size (12 against 14), because four modes is too small
+for the asymptotics to show. The point is the <em>scaling</em> measured in
+<a class="reference internal" href="#flowsets-scaling"><span class="std std-ref">step 8</span></a>: that depth of 12 is constant, while the Jordan-Wigner depth grows
+with the chain. At 14 modes it is already 12 against 34.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p>The <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit#decompose" title="(in Qiskit v2.5)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">decompose()</span></code></a> call above is essential.
-<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.quantum_info.Statevector#evolve" title="(in Qiskit v2.5)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">evolve()</span></code></a> and
-<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.quantum_info.Operator" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Operator</span></code></a> use a
-<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.library.PauliEvolutionGate" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">PauliEvolutionGate</span></code></a>’s <em>exact</em> definition and bypass a
-custom synthesis. Verifying against an un-decomposed circuit reports perfect
-fidelity even for a deliberately wrong synthesis.</p>
+<p>The <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit#decompose" title="(in Qiskit v2.5)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">decompose()</span></code></a> calls above are essential, for two
+independent reasons.</p>
+<p><a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.quantum_info.Statevector#evolve" title="(in Qiskit v2.5)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">evolve()</span></code></a> and <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.quantum_info.Operator" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Operator</span></code></a> use a
+<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.library.PauliEvolutionGate" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">PauliEvolutionGate</span></code></a>’s <em>exact</em> definition, bypassing a custom
+qubit-side synthesis. Verifying against an un-decomposed circuit reports perfect fidelity even
+for a deliberately wrong synthesis.</p>
+<p>The same applies one level up, to the fermionic synthesis. An <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate that is
+never decomposed goes to the fermion-to-qubit stage whole, which maps it without consulting
+<a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution.synthesis" title="qiskit_fermions.circuit.library.Evolution.synthesis"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Evolution.synthesis</span></code></a> at all, so <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter.html#qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter.reps" title="qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter.reps"><code class="xref py py-attr docutils literal notranslate"><span class="pre">reps</span></code></a> would silently have no
+effect. <code class="docutils literal notranslate"><span class="pre">trotter_steps</span></code> from step 5 performs that decomposition.</p>
 </div>
 <p>As a final cross-check, the site densities <span class="math">\(\langle n_j(t) \rangle = (1 - \langle
 V_j \rangle)/2\)</span> computed in the encoded space must reproduce the Jordan-Wigner result. This
@@ -1144,7 +1276,13 @@ Pauli string; <a class="reference internal" href="../stubs/qiskit_fermions.mappe
 set only slowed the linear growth in depth; a term-by-term synthesis of each set still
 threw away the fact that its terms commute. Only supplying a flow-set-aware
 <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.synthesis.EvolutionSynthesis" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">EvolutionSynthesis</span></code></a> made the depth constant. Custom encodings,
-grouping and custom synthesis are complementary: all three are needed.</p></li>
+grouping, and custom synthesis are complementary: all three are needed.</p></li>
+<li><p><strong>Two product formulas, two jobs.</strong> <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter.html#qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter" title="qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicLieTrotter</span></code></a> fixes the approximation in
+fermionic space, where the grouping is still visible, so it alone sets the Trotter error and the
+step count. The qubit-side <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.synthesis.EvolutionSynthesis" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">EvolutionSynthesis</span></code></a> then decides only how
+cheaply each set is realized: step 9 confirms both choices give the same unitary. Separating the
+two is what lets the accuracy and the cost be tuned independently. See
+<a class="reference internal" href="fermionic_synthesis.html#fermionic-synthesis-explanation"><span class="std std-ref">Synthesize an Evolution gate in fermionic space</span></a>.</p></li>
 <li><p><strong>Verify it.</strong> An encoding that satisfies the commutation relations might still represent
 a different Hamiltonian if a prefactor or sign is off. Checking an intertwining relation
 (or, more cheaply, the spectrum) catches this.</p></li>
@@ -1154,9 +1292,11 @@ a different Hamiltonian if a prefactor or sign is off. Checking an intertwining 
 <p>The <code class="docutils literal notranslate"><span class="pre">FlowSetSynthesis</span></code> above is deliberately written for <em>this</em> encoding on a 1D
 chain. It pattern-matches the specific Pauli labels the encoding produces and raises on
 anything else, rather than silently falling back to a generic product formula. A general
-implementation would read the flow-set structure from the operator’s
-<a class="reference internal" href="../stubs/qiskit_fermions.operators.TransferVertexOperator.html#qiskit_fermions.operators.TransferVertexOperator.groups" title="qiskit_fermions.operators.TransferVertexOperator.groups"><code class="xref py py-attr docutils literal notranslate"><span class="pre">groups</span></code></a> and derive the diagonalizing Clifford from the
-stabilizer group, as described in Section IV C of Ref. <a class="footnote-reference brackets" href="#id10" id="id9" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a>.</p>
+implementation has two halves. Reading the flow-set structure from the operator’s
+<a class="reference internal" href="../stubs/qiskit_fermions.operators.TransferVertexOperator.html#qiskit_fermions.operators.TransferVertexOperator.groups" title="qiskit_fermions.operators.TransferVertexOperator.groups"><code class="xref py py-attr docutils literal notranslate"><span class="pre">groups</span></code></a> is what a
+<a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.synthesis.FermionicEvolutionSynthesis.html#qiskit_fermions.circuit.library.synthesis.FermionicEvolutionSynthesis" title="qiskit_fermions.circuit.library.synthesis.FermionicEvolutionSynthesis"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicEvolutionSynthesis</span></code></a> already does. Deriving the diagonalizing Clifford from the
+stabilizer group, as described in Section IV C of Ref. <a class="footnote-reference brackets" href="#id10" id="id9" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a>, is the half that remains encoding
+specific.</p>
 <p>Also, delocalizing the parity makes the interaction term <span class="math">\(n_j n_{j+1}\)</span>
 weight-2 rather than diagonal in single qubits, which is the counterpart cost to the
 cheaper hopping terms.</p>
@@ -1279,7 +1419,7 @@ qubit encodings (2026), <a class="reference external" href="https://arxiv.org/ab
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=b767346c"></script>
+</div><script src="../_static/documentation_options.js?v=02b0a281"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

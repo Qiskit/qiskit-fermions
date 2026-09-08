@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>FermionicSuzukiTrotter - Qiskit Fermions 0.2.0.dev0+d506d4b</title>
+        <title>FermionicSuzukiTrotter - Qiskit Fermions 0.2.0.dev0+3e0c8fc</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+d506d4b</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+3e0c8fc</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+d506d4b</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+3e0c8fc</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -211,6 +211,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../guides/sqdrift.html">Generate SqDRIFT circuits</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../guides/skqd.html">Generate Krylov time-evolution circuits (SKQD)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../guides/transpilation.html">Transpile fermionic circuits</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guides/fermionic_synthesis.html">Synthesize an Evolution gate in fermionic space</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../guides/merge_slater_determinant.html">Optimize Slater determinant preparation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../guides/lucj.html">Transpile an LUCJ ansatz</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../guides/1d_fermi_hubbard.html">Simulate 1D Fermi-Hubbard dynamics with flow sets</a></li>
@@ -297,12 +298,28 @@ chosen for the fermion-to-qubit stage. Where both approximate, the accuracy of t
 governed by the weaker of the two – so raising the order here while the qubit-side formula
 stays first-order buys little. See <a class="reference internal" href="../pydoc/qiskit_fermions.circuit.library.synthesis.html#module-qiskit_fermions.circuit.library.synthesis" title="qiskit_fermions.circuit.library.synthesis"><code class="xref py py-mod docutils literal notranslate"><span class="pre">synthesis</span></code></a>.</p>
 </div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Because the factor ordering is part of the formula, a reference value computed with one
+product formula does not carry over to another. <a class="reference internal" href="qiskit_fermions.circuit.library.UCC.html#qiskit_fermions.circuit.library.UCC.cluster_operator" title="qiskit_fermions.circuit.library.UCC.cluster_operator"><code class="xref py py-meth docutils literal notranslate"><span class="pre">UCC.cluster_operator()</span></code></a> pins its group
+order deliberately, assigning indices in sorted key order rather than by first encounter, so
+that its Trotter error is reproducible; a Suzuki formula then reorders those groups by design.
+A <a class="reference internal" href="qiskit_fermions.circuit.library.UCC.html#qiskit_fermions.circuit.library.UCC" title="qiskit_fermions.circuit.library.UCC"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCC</span></code></a> reference value obtained at <code class="docutils literal notranslate"><span class="pre">order=1</span></code> therefore differs at <code class="docutils literal notranslate"><span class="pre">order</span> <span class="pre">&gt;=</span> <span class="pre">2</span></code>,
+for the same operator and the same <a class="reference internal" href="#qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter.reps" title="qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter.reps"><code class="xref py py-attr docutils literal notranslate"><span class="pre">reps</span></code></a>. That is inherent to choosing a different
+product formula rather than a regression, and the default synthesis is unchanged, so nothing
+moves unless a higher order is requested.</p>
+</div>
 <div class="admonition caution">
 <p class="admonition-title">Caution</p>
 <p>Each factor must be Hermitian for its exponential to be unitary, which does not follow from
 their sum being Hermitian: splitting a Hermitian operator can produce non-Hermitian groups (for
 example, separating <span class="math">\(a^\dagger_0 a_1\)</span> from its conjugate partner <span class="math">\(a^\dagger_1 a_0\)</span>).
 It is the caller’s responsibility to group accordingly; this is not verified.</p>
+<p>An operator with no groups is split term by term, which has the same effect, since an
+individual term is generally not Hermitian. The resulting factors are valid fermionic
+operators and the gates are built without complaint, but the fermion-to-qubit stage then
+rejects them: <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.library.PauliEvolutionGate" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">PauliEvolutionGate</span></code></a> requires real coefficients
+and raises <code class="docutils literal notranslate"><span class="pre">ValueError:</span> <span class="pre">Operator</span> <span class="pre">contains</span> <span class="pre">complex</span> <span class="pre">coefficients,</span> <span class="pre">which</span> <span class="pre">are</span> <span class="pre">not</span> <span class="pre">supported</span></code>.</p>
 <p>Note that the symmetrization partially cancels the error of a non-Hermitian factor, so an
 incorrectly grouped operator can look markedly better at an even order than at first order while
 still being wrong.</p>
@@ -414,7 +431,7 @@ the formula. A factor may appear more than once, at different evolution times.</
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=b767346c"></script>
+</div><script src="../_static/documentation_options.js?v=02b0a281"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
