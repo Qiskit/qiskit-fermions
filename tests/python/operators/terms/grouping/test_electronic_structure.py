@@ -48,3 +48,27 @@ def test_group_terms_by_electronic_structure():
     groups = normal.split_out_groups()
     assert len(groups) == 14, "Expected 14 individual operators, one for each group."
     # NOTE: the content of the groups is asserted in the Rust-level unittest
+
+
+def test_group_terms_by_electronic_structure_physicist_order():
+    """The ``two_body_physicist_order`` flag changes how two-body terms are grouped.
+
+    Only the chemist-order path (the default, ``False``) was covered from Python; the Rust unittest
+    exercises ``True``. Physicist order reads the two-body index tuple in a different sequence, so
+    fewer terms coincide and the same Hamiltonian resolves into more groups. Pinning both numbers
+    keeps the flag from silently becoming a no-op.
+    """
+    file_path = Path(__file__).parent / "../../../../h2.fcidump"
+    fcidump = FCIDump.from_file(str(file_path))
+
+    op = FermionOperator.from_fcidump(fcidump)
+    normal = op.normal_ordered().simplify(atol=1e-16)
+
+    res = group_terms_by_electronic_structure(
+        normal, 2 * fcidump.norb, two_body_physicist_order=True
+    )
+    assert res is None, "We should not have a GroupingError here!"
+    assert normal.groups is not None
+    # ... against the 14 that chemist order (the default) yields for the same operator.
+    assert normal.num_groups() == 17
+    assert len(normal.split_out_groups()) == 17

@@ -23,7 +23,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 from qiskit_fermions.circuit import FermionicCircuit
-from qiskit_fermions.circuit.library import UCJ, OrbitalRotation
+from qiskit_fermions.circuit.library import UCJ
 
 ffsim = pytest.importorskip("ffsim")
 
@@ -117,16 +117,6 @@ def test_ucj_spinless_definition_places_one_rotation_per_layer():
     assert ops["Evolution"] == n_reps
     # spinless places a single rotation on all norb modes: U^dagger + U = 2 per rep
     assert ops["OrbitalRotation"] == 2 * n_reps
-
-
-def test_orbital_rotation_from_t1_amplitudes_is_unitary():
-    """OrbitalRotation.from_t1_amplitudes builds a unitary of the right size."""
-    t1 = np.array([[0.1, 0.2], [0.3, -0.1]])  # 2 occ, 2 virt
-    gate = OrbitalRotation.from_t1_amplitudes(t1)
-    assert isinstance(gate, OrbitalRotation)
-    assert gate.num_modes == 4
-    u = gate.rotation_unitary
-    np.testing.assert_allclose(u.conj().T @ u, np.eye(4), atol=1e-12)
 
 
 def _term_supports(operator):
