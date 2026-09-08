@@ -19,11 +19,36 @@ from qiskit_fermions.operators import MajoranaOperator, gamma
 from qiskit_fermions.operators.library import anti_commutator, commutator
 
 from .majorana_matrix_oracle import majorana, majorana_operator_matrix, vertex_matrix
+from .operator_contract_tests import OperatorContractTests
 
-class TestMajoranaOperator:
+
+class TestMajoranaOperator(OperatorContractTests):
     @staticmethod
     def get_class() -> type[MajoranaOperator]:
         return MajoranaOperator
+
+    def test_max_rank(self, subtests):
+        cls = self.get_class()
+
+        op = cls.zero()
+
+        with subtests.test("0 for additive identity"):
+            assert op.max_rank() == 0
+
+        op += cls.one()
+
+        with subtests.test("0 for multiplicative identity"):
+            assert op.max_rank() == 0
+
+        op += cls.from_dict({(0, 1): 1})
+
+        with subtests.test("2"):
+            assert op.max_rank() == 2
+
+        op += cls.from_dict({(0, 1, 2, 3): 1})
+
+        with subtests.test("4"):
+            assert op.max_rank() == 4
 
     def test_getters(self, subtests):
         cls = self.get_class()
@@ -45,16 +70,6 @@ class TestMajoranaOperator:
         cls = self.get_class()
         op = cls.from_dict({(0, 4): 1, (1, 3, 4, 7): 1})
         assert op.get_support() == {0, 1, 3, 4, 7}
-
-    def test_zero(self):
-        cls = self.get_class()
-        op = cls.zero()
-        assert op.equiv(cls.from_dict({}))
-
-    def test_one(self):
-        cls = self.get_class()
-        op = cls.one()
-        assert op.equiv(cls.from_dict({(): 1}))
 
     def test_richcmp(self, subtests):
         cls = self.get_class()
@@ -108,11 +123,6 @@ class TestMajoranaOperator:
             op = cls.from_dict({(): 1, (gamma(0, False), gamma(0, True)): 1})
             assert len(op) == 2
 
-    def test_iter(self):
-        cls = self.get_class()
-        op = cls.one()
-        assert list(op.iter_terms()) == [([], 1)]
-
     def test_from_terms(self, subtests):
         cls = self.get_class()
         op = cls.from_dict(
@@ -128,12 +138,6 @@ class TestMajoranaOperator:
             assert op.equiv(cls.from_terms(op.iter_terms()))
         with subtests.test("list"):
             assert op.equiv(cls.from_terms(list(op.iter_terms())))
-
-    def test_iter_with_groups(self):
-        cls = self.get_class()
-        op = cls.one()
-        op.groups = [0]
-        assert list(op.iter_terms_with_groups()) == [([], 1, 0)]
 
     def test_from_terms_with_groups(self, subtests):
         cls = self.get_class()
@@ -205,69 +209,6 @@ class TestMajoranaOperator:
         op.ichop(1e-4)
         assert op.equiv(op.zero(), 1e-6)
 
-    def test_add(self):
-        cls = self.get_class()
-        one = cls.one()
-        two = cls.from_dict({(): 2})
-        three = one + two
-        assert three.equiv(cls.from_dict({(): 3}))
-
-    def test_iadd(self):
-        cls = self.get_class()
-        op = cls.one()
-        two = cls.from_dict({(): 2})
-        op += two
-        assert op.equiv(cls.from_dict({(): 3}))
-
-    def test_sub(self):
-        cls = self.get_class()
-        one = cls.one()
-        two = cls.from_dict({(): 2})
-        new_one = two - one
-        assert new_one.equiv(one)
-
-    def test_isub(self):
-        cls = self.get_class()
-        op = cls.from_dict({(): 2})
-        one = cls.one()
-        op -= one
-        assert op.equiv(one)
-
-    def test_mul(self):
-        cls = self.get_class()
-        one = cls.one()
-        three = one * 3
-        assert three.equiv(cls.from_dict({(): 3}))
-
-    def test_rmul(self):
-        cls = self.get_class()
-        one = cls.one()
-        three = 3 * one
-        assert three.equiv(cls.from_dict({(): 3}))
-
-    def test_imul(self):
-        cls = self.get_class()
-        op = cls.one()
-        op *= 3
-        assert op.equiv(cls.from_dict({(): 3}))
-
-    def test_div(self):
-        cls = self.get_class()
-        three = cls.from_dict({(): 3})
-        one_half = three / 2.0
-        assert one_half.equiv(cls.from_dict({(): 1.5}))
-
-    def test_idiv(self):
-        cls = self.get_class()
-        op = cls.from_dict({(): 3})
-        op /= 2.0
-        assert op.equiv(cls.from_dict({(): 1.5}))
-
-    def test_neg(self):
-        cls = self.get_class()
-        one = cls.one()
-        assert (-one).equiv(cls.from_dict({(): -1}))
-
     def test_and(self):
         cls = self.get_class()
         op1 = cls.from_dict({(): 2, (gamma(0, False), gamma(0, True)): 3})
@@ -327,14 +268,6 @@ class TestMajoranaOperator:
         cls = self.get_class()
         op = cls.from_dict({(): 2j, (gamma(0, False), gamma(0, True)): 3})
         assert op.adjoint().equiv(cls.from_dict({(): -2j, (gamma(0, True), gamma(0, False)): 3}))
-
-    def test_equiv(self):
-        cls = self.get_class()
-        op = cls.from_dict({(): 1e-7})
-        zero = cls.zero()
-        assert not op.equiv(zero)
-        assert op.equiv(zero, 1e-6)
-        assert not op.equiv(zero, 1e-8)
 
     def test_normal_ordered(self, subtests):
         cls = self.get_class()
@@ -449,29 +382,6 @@ class TestMajoranaOperator:
 
         with subtests.test("imaginary identity is not Hermitian"):
             assert not (cls.one() * 1j).is_hermitian()
-
-    def test_max_rank(self, subtests):
-        cls = self.get_class()
-
-        op = cls.zero()
-
-        with subtests.test("0 for additive identity"):
-            assert op.max_rank() == 0
-
-        op += cls.one()
-
-        with subtests.test("0 for multiplicative identity"):
-            assert op.max_rank() == 0
-
-        op += cls.from_dict({(0, 1): 1})
-
-        with subtests.test("2"):
-            assert op.max_rank() == 2
-
-        op += cls.from_dict({(0, 1, 2, 3): 1})
-
-        with subtests.test("4"):
-            assert op.max_rank() == 4
 
     def test_is_even(self, subtests):
         cls = self.get_class()
