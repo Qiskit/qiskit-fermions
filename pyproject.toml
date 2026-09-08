@@ -84,28 +84,27 @@ lint = [
     "reno>=4.1",
     "toml>=0.10.2",
 ]
+# Three tiers, each adding one layer, so that no requirement is declared twice. Deliberately kept
+# separate: the wheel smoke test installs `basetest` alone, and `test` must *not* inherit the optional
+# dependencies that `guidetest` adds. See the "Optional dependencies" section of tests/README.md for
+# why that boundary matters.
 basetest = [
     "pytest>=8.0",
     "pytest-subtests>=0.15.0",
 ]
 doctest = [
     {include-group = "basetest"},
+    "sybil>=9.3.0",
     "rustworkx[mpl]",
     "pylatexenc",
-    "sybil>=9.3.0",
-    # the LUCJ guide (docs/guides/lucj.rst) renders and evaluates a UCJ ansatz, which requires ffsim
-    # (which pulls in PySCF for the underlying quantum chemistry). Neither supports Windows, so both
-    # are gated to non-Windows platforms and the guide's doctest is skipped there (see
-    # docs/guides/lucj.rst).
+]
+guidetest = [
+    {include-group = "doctest"},
+    # Neither supports Windows, so both are gated and the doctests needing them skip there.
     "ffsim; sys_platform != 'win32'",
-    # the SKQD guide (docs/guides/skqd.rst) closes its final section by diagonalizing the sampled
-    # subspace with qiskit-addon-sqd (configuration recovery). It pulls in PySCF and, like ffsim,
-    # does not support Windows, so it is gated to non-Windows platforms and that step's doctest is
-    # skipped there (see docs/guides/skqd.rst).
     "qiskit-addon-sqd; sys_platform != 'win32'",
 ]
 test = [
-    {include-group = "basetest"},
     {include-group = "doctest"},
     "highspy>=1.7.1",
 ]
@@ -114,7 +113,7 @@ coverage = [
     "pytest-cov>=7.1.0",
 ]
 docs = [
-    {include-group = "doctest"},
+    {include-group = "guidetest"},
     "qiskit-sphinx-theme~=2.1.0",
     "sphinx-design",
     "sphinx-autodoc-typehints",
@@ -177,6 +176,12 @@ ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 testpaths = ["./python/qiskit_fermions/", "./tests/python/"]
+markers = [
+    # Applied automatically by `tests/python/conftest.py` to every test whose module imports an
+    # optional dependency; `make testoptional` selects it together with the hand-written `skipif`
+    # markers. Do not apply it by hand.
+    "optionaldep: test requires an optional dependency (added automatically, do not set manually)",
+]
 
 [tool.ruff]
 line-length = 100

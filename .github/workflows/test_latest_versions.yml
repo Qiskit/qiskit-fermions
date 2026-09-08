@@ -97,12 +97,19 @@ jobs:
         run: |
           make pystubs testpython
 
+      # `make testpython` ran above *without* the optional dependencies, which is what proves each
+      # test's guard holds. `make testoptional` is the complement: it selects exactly the tests and
+      # docstring doctests that those guards skip, so they get exercised here with the dependencies
+      # present. No second full `make testpython` is needed.
       - name: Optional tests
         shell: bash
         run: |
           SETUPTOOLS_RUST_CARGO_PROFILE=release pip install -e ".[all]"
           make testoptional
 
+      # The guides under `docs/` are documentation: their doctests are only meaningful when the
+      # optional dependencies are present, so this deliberately runs after the install above. A
+      # skipped guide doctest means that guide went unverified.
       - name: Documentation tests
         shell: bash
         run: |

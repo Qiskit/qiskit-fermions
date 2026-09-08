@@ -98,6 +98,75 @@ updated via [`cbindgen`](https://github.com/mozilla/cbindgen).
 > reads `QISKIT_LIB` and `QISKIT_INCLUDE` (see the
 > [C installation instructions](../docs/install-c.rst)).
 
+## Optional dependencies
+
+Some tests and doctests need an optional dependency: `ffsim` (which pulls in PySCF) for the ansatz
+gates and the LUCJ guide, `qiskit-addon-sqd` for the SKQD guide, and `pyomo` for the mode-permutation
+optimization. Every one of those is guarded, in one of three ways:
+
+- `pytest.importorskip("ffsim")` at the top of a test module,
+- `@pytest.mark.skipif(not HAS_PYOMO, ...)` on an individual test,
+- `.. skip: start if(not HAS_FFSIM)` / `.. skip: end` around a doctest, in a docstring or a guide.
+
+The dependency groups are split so that each one means what its name says:
+
+| Group | Optional deps? | Holds |
+|---|---|---|
+| `basetest` | no | `pytest` itself, and nothing more |
+| `doctest` | no | + the doctest machinery: Sybil, and what the doctests import |
+| `guidetest` | **yes** | + what the *guides* import (ffsim, qiskit-addon-sqd) |
+| `test` | **no** | `doctest` + `highspy`; what `make testpython` runs from |
+| `docs` | yes, via `guidetest` | + Sphinx and friends; what `make doctest` runs from |
+
+The three `*test` tiers each add one layer, so a version bound is stated once and cannot drift between
+consumers. `basetest` is the floor because the wheel smoke test installs that group alone (see
+`[tool.cibuildwheel].test-command`) and deliberately runs no doctests. `doctest` is shared: both
+`test` and `guidetest` build on it.
+
+**`test` includes `doctest` but deliberately not `guidetest`.** It needs the machinery, since
+`make testpython` does collect the docstring and `.pyi`-stub doctests, but must *not* get ffsim or
+qiskit-addon-sqd along with it. Run from `--group test` alone, `make testpython` exercises everything
+with the optional dependencies absent, so a test that forgot its guard fails as a collection error
+rather than passing unnoticed. Expect the guarded tests to skip there; a *failure* means a missing
+guard.
+
+CI then installs the extras and runs `make testoptional`, which is the exact complement: it selects
+every test and docstring doctest that those guards skip, so they get exercised with the dependencies
+present.
+
+```bash
+pip install -e ".[all]"      # `[all]` pulls in `[ffsim]` and `[pyomo]`
+make testoptional            # the pyomo- and ffsim-gated tests, plus their docstring doctests
+```
+
+`make testoptional` selects `-m "skipif or optionaldep"`. The `skipif` half is the hand-written pyomo
+marker; the `optionaldep` half is added automatically by `tests/python/conftest.py`, which is what
+makes the ffsim-gated tests selectable at all: they guard themselves with a `pytest.importorskip`,
+which leaves no marker behind and (at module scope, when the dependency is missing) raises during
+collection, so there is no item for `-m skipif` to match. Do not apply `optionaldep` by hand.
+
+That conftest infers the marker from the guards themselves, not from any list of dependency names or
+file paths, so guarding a new test is all it takes to have it selected. A call to `importorskip` is
+found in the module's source: at module scope it gates the whole file, inside a single test function
+it gates only that test. A gated docstring doctest is found through Sybil, which exposes a skip
+region's `start`/`end` directives as items of their own, so the marker lands on exactly the doctests
+that region encloses. Those two directive items are selected as well, because Sybil installs the
+region's skip state as its `start` item is evaluated: without them the region would never open and
+the gated doctests would run instead of skipping.
+
+Both properties get asserted, each in the order that makes it meaningful.
+
+**`make doctest` is different, and always runs with the optional dependencies present.** It collects
+the guides under `docs/`, which are *documentation*: a skipped guide doctest means that guide went
+unverified, which is a loss rather than a useful signal. Hence `guidetest` carries ffsim and
+qiskit-addon-sqd, `docs` inherits them from it, and the test workflows run `make doctest` after their
+`.[all]` install. The coverage job runs only `make pycoverage` and installs `.[all]` itself, so
+coverage is unaffected.
+
+Neither `ffsim` nor `qiskit-addon-sqd` supports Windows, so on that platform they are unavailable by
+design and their tests skip to zero. Read a green Windows run with that in mind: it is not evidence
+that the ffsim-gated tests passed.
+
 ## Coverage
 
 - [ ] figure out how to measure coverage in these different settings and document it here
