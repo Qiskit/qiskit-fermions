@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>FermionicTrotterization - Qiskit Fermions 0.2.0.dev0+e5fc53a</title>
+        <title>FermionicTrotterization - Qiskit Fermions 0.2.0.dev0+4e36a9c</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+e5fc53a</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+4e36a9c</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+e5fc53a</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+4e36a9c</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -288,9 +288,10 @@ expansion happens later, when the gate’s definition is built, which keeps each
 <a class="reference internal" href="qiskit_fermions.transpiler.passes.RelabelModes.html#qiskit_fermions.transpiler.passes.RelabelModes" title="qiskit_fermions.transpiler.passes.RelabelModes"><code class="xref py py-class docutils literal notranslate"><span class="pre">RelabelModes</span></code></a>, which reads the operator of every <a class="reference internal" href="qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> to build its
 mode-relabeling model and would otherwise see a fragment per factor.</p>
 <p>This is the opposite choice from <a class="reference internal" href="qiskit_fermions.transpiler.passes.QDriftTrotterization.html#qiskit_fermions.transpiler.passes.QDriftTrotterization" title="qiskit_fermions.transpiler.passes.QDriftTrotterization"><code class="xref py py-class docutils literal notranslate"><span class="pre">QDriftTrotterization</span></code></a>, which replaces each gate with
-its sampled factors immediately. That pass has no alternative: its sampling is random and
-one-shot, so deferring it would draw a different sample every time the definition were rebuilt.
-A deterministic product formula is a pure function of the gate and can safely be deferred.</p>
+its sampled factors immediately – and marks them <a class="reference internal" href="qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution.atomic" title="qiskit_fermions.circuit.library.Evolution.atomic"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Evolution.atomic</span></code></a>, since the sample
+is the Trotterization. That pass has no alternative: its sampling is random and one-shot, so
+deferring it would draw a different sample every time the definition were rebuilt. A
+deterministic product formula is a pure function of the gate and can safely be deferred.</p>
 </div>
 <div class="admonition caution">
 <p class="admonition-title">Caution</p>
@@ -422,7 +423,7 @@ place.</p>
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on 2026/09/07</div>
+              Last updated on 2026/09/08</div>
           </div>
           <div class="right-details">
             
@@ -464,7 +465,7 @@ place.</p>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=f597ee44"></script>
+</div><script src="../_static/documentation_options.js?v=9bd9c9cf"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
