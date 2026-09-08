@@ -70,6 +70,7 @@ Guides explaining how a :class:`.FermionicCircuit` becomes a :class:`~qiskit.cir
    :glob:
 
    transpilation
+   fermionic_synthesis
    merge_slater_determinant
    lucj
 

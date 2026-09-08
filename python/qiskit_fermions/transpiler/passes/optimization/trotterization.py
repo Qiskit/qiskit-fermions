@@ -40,11 +40,29 @@ class FermionicTrotterization(FermionicDAGCircuitPass):
     .. code-block:: python
 
        pm.optimization = FermionicPassManager(
-           [FermionicTrotterization(FermionicSuzukiTrotter(order=2, reps=4))]
+           [
+               FermionicTrotterization(FermionicSuzukiTrotter(order=2, reps=4)),
+               Decompose("Evolution"),
+           ]
        )
 
     Nodes that are not :class:`.Evolution` gates are left untouched, as are those rejected by an
     optional :attr:`filter`.
+
+    .. important::
+       Something must expand the evolution for the selected method to have any effect, and no pass
+       in the preset pipelines does. Qiskit's :class:`~qiskit.transpiler.passes.Decompose` is that
+       trigger, as in the snippet above; a :meth:`~.FermionicCircuit.decompose` call on the circuit
+       before transpiling works equally well.
+
+       Without it the gate reaches the fermion-to-qubit stage whole, where it is mapped without
+       :attr:`.Evolution.synthesis` ever being read, and every synthesis method produces identical
+       output. Restricting the expansion by name (``Decompose("Evolution")``) leaves the other
+       fermionic gates for their own synthesis plugins to lower.
+
+       Place it *after* any pass that needs whole operators, :class:`.RelabelModes` in particular.
+       Expanding is idempotent, since the factors a synthesis method emits are
+       :attr:`.Evolution.atomic` and therefore carry no definition of their own.
 
     .. note::
        The pass *selects* a synthesis method rather than expanding the evolution there and then. The
