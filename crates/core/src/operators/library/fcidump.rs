@@ -18,6 +18,7 @@ use num_complex::Complex64;
 use regex::{Captures, Regex};
 use std::fs::File;
 use std::io::Read;
+use thiserror::Error;
 
 /// Splits one integral line into its coefficient and four (1-based) orbital indices, or returns
 /// `None` if the line is not an integral record and should be skipped.
@@ -49,6 +50,40 @@ fn split_integral_line(line: &str) -> Option<(f64, usize, usize, usize, usize)> 
     Some((coeff, indices[0], indices[1], indices[2], indices[3]))
 }
 
+/// Error cases arising while parsing an FCIDump file.
+///
+/// These are all user-input failures (a bad path, or a file that does not honour the format), so
+/// they are reported as a recoverable error rather than a panic: the Python and C bindings turn
+/// them into a catchable exception and an exit code respectively.
+#[derive(Error, Debug)]
+pub enum FCIDumpError {
+    #[error("could not open {path}: {source}")]
+    Open {
+        path: String,
+        #[source]
+        source: std::io::Error,
+    },
+    #[error("could not read {path}: {source}")]
+    Read {
+        path: String,
+        #[source]
+        source: std::io::Error,
+    },
+    #[error("could not find the HEADER namelist in the FCIDump file")]
+    MissingHeader,
+    #[error("the FCIDump header is missing the required NORB field")]
+    MissingNorb,
+    #[error("the FCIDump header is missing the required NELEC field")]
+    MissingNelec,
+    #[error("the FCIDump header carries a malformed MS2 field")]
+    MalformedMs2,
+    #[error(
+        "the FCIDump file contains an MO energy value (an integral line of the form `i a j 0`), \
+         which is not supported yet"
+    )]
+    MoEnergyUnsupported,
+}
+
 #[derive(Clone, Debug, PartialEq)]
 pub struct FCIDump {
     pub norb: u32,
@@ -63,17 +98,21 @@ pub struct FCIDump {
 }
 
 impl FCIDump {
-    pub fn from_file(file_path: String) -> Self {
-        let mut file = match File::open(&file_path) {
-            Err(why) => panic!("Could not open {}: {}", file_path, why),
-            Ok(file) => file,
-        };
+    pub fn from_file(file_path: String) -> Result<Self, FCIDumpError> {
+        let mut file = File::open(&file_path).map_err(|source| FCIDumpError::Open {
+            path: file_path.clone(),
+            source,
+        })?;
         let mut contents = String::new();
-        file.read_to_string(&mut contents).unwrap();
+        file.read_to_string(&mut contents)
+            .map_err(|source| FCIDumpError::Read {
+                path: file_path.clone(),
+                source,
+            })?;
 
         let namelist_end = Regex::new(r"(/|&END)").unwrap();
         let Some(header) = namelist_end.captures(&contents) else {
-            panic!("Could not find of HEADER in FCIDump file!")
+            return Err(FCIDumpError::MissingHeader);
         };
         let integrals = contents.split_off(header.get_match().end());
 
@@ -82,6 +121,7 @@ impl FCIDump {
         let mut _norb: Option<usize> = None;
         let mut _nelec: Option<usize> = None;
         let mut ms2: u32 = 0;
+        let mut ms2_malformed = false;
         // TODO: handle these remaining fields:
         // let mut isym: usize = 1;
         // let mut orbsym: Vec<usize> = vec![];
@@ -102,13 +142,19 @@ impl FCIDump {
             match field.get(1).unwrap().as_str().to_lowercase().as_str() {
                 "norb" => _norb = unwrap_cap(&field, 2).parse::<usize>().ok(),
                 "nelec" => _nelec = unwrap_cap(&field, 2).parse::<usize>().ok(),
-                "ms2" => ms2 = unwrap_cap(&field, 2).parse::<u32>().expect("Missing ms2!"),
+                "ms2" => match unwrap_cap(&field, 2).parse::<u32>() {
+                    Ok(value) => ms2 = value,
+                    Err(_) => ms2_malformed = true,
+                },
                 _ => continue,
             };
         }
 
-        let norb = _norb.expect("Missing norb!");
-        let nelec = _nelec.expect("Missing nelec!");
+        if ms2_malformed {
+            return Err(FCIDumpError::MalformedMs2);
+        }
+        let norb = _norb.ok_or(FCIDumpError::MissingNorb)?;
+        let nelec = _nelec.ok_or(FCIDumpError::MissingNelec)?;
         let npair = norb * (norb + 1) / 2;
         let num_s4 = npair * npair;
         let num_s8 = npair * (npair + 1) / 2;
@@ -142,7 +188,7 @@ impl FCIDump {
                         one_body_b[_ia] = coeff;
                     }
                 }
-                (_, _, _, 0) => todo!("MO energy value"),
+                (_, _, _, 0) => return Err(FCIDumpError::MoEnergyUnsupported),
                 (_, _, _, _) => {
                     let (mut _i, mut _a, mut _j, mut _b) = (i - 1, a - 1, j - 1, b - 1);
                     if _i < _a {
@@ -180,7 +226,7 @@ impl FCIDump {
             }
         }
 
-        Self {
+        Ok(Self {
             norb: norb as u32,
             nelec: nelec as u32,
             ms2,
@@ -199,7 +245,7 @@ impl FCIDump {
                 true => Some(two_body_bb),
                 false => None,
             },
-        }
+        })
     }
 }
 
@@ -260,7 +306,7 @@ mod tests {
     #[test]
     fn test_from_file() {
         let file_path = String::from("../../tests/h2.fcidump");
-        let fcidump = FCIDump::from_file(file_path);
+        let fcidump = FCIDump::from_file(file_path).expect("the fixture must parse");
 
         let expected = FCIDump {
             norb: 2,
@@ -400,7 +446,7 @@ mod tests {
     #[test]
     fn test_from_file_beta() {
         let file_path = String::from("../../tests/heh.fcidump");
-        let fcidump = FCIDump::from_file(file_path);
+        let fcidump = FCIDump::from_file(file_path).expect("the fixture must parse");
 
         let expected = FCIDump {
             norb: 2,
@@ -645,47 +691,56 @@ mod tests {
         path.to_string_lossy().into_owned()
     }
 
+    // Every parse failure below is returned as an `FCIDumpError` rather than panicking, so that the
+    // Python and C bindings can surface it as a catchable exception / exit code. The tests match on
+    // the variant instead of on a message substring, which keeps them from silently passing on an
+    // unrelated failure that happens to share wording.
+
     #[test]
-    #[should_panic(expected = "Could not open")]
     fn test_from_file_missing_file() {
         // A path that does not exist must surface the open failure rather than silently succeed.
-        FCIDump::from_file(String::from("../../tests/does_not_exist.fcidump"));
+        let err = FCIDump::from_file(String::from("../../tests/does_not_exist.fcidump"))
+            .expect_err("a missing file must not parse");
+        assert!(matches!(err, FCIDumpError::Open { .. }), "got {err:?}");
     }
 
     #[test]
-    #[should_panic(expected = "Could not find of HEADER")]
     fn test_from_file_missing_namelist() {
         // No `/` or `&END` terminator: the header regex finds nothing.
         let path = write_temp_fcidump("no_namelist", " 0.5   1   1   1   1\n");
-        FCIDump::from_file(path);
+        let err = FCIDump::from_file(path).expect_err("a headerless file must not parse");
+        assert!(matches!(err, FCIDumpError::MissingHeader), "got {err:?}");
     }
 
     #[test]
-    #[should_panic(expected = "Missing norb!")]
     fn test_from_file_missing_norb() {
-        // A well-formed namelist that omits NORB must fail the `expect` on the required field.
+        // A well-formed namelist that omits the required NORB field.
         let path = write_temp_fcidump("no_norb", "&FCI NELEC=   2,MS2= 0,\n /\n");
-        FCIDump::from_file(path);
+        let err = FCIDump::from_file(path).expect_err("a missing NORB must not parse");
+        assert!(matches!(err, FCIDumpError::MissingNorb), "got {err:?}");
     }
 
     #[test]
-    #[should_panic(expected = "Missing nelec!")]
     fn test_from_file_missing_nelec() {
         let path = write_temp_fcidump("no_nelec", "&FCI NORB=   2,MS2= 0,\n /\n");
-        FCIDump::from_file(path);
+        let err = FCIDump::from_file(path).expect_err("a missing NELEC must not parse");
+        assert!(matches!(err, FCIDumpError::MissingNelec), "got {err:?}");
     }
 
     #[test]
-    #[should_panic(expected = "MO energy value")]
     fn test_from_file_mo_energy_integral_unsupported() {
         // An integral line of the form `(i, a, j, 0)` with `i, a, j` all nonzero hits the
-        // not-yet-implemented `(_, _, _, 0)` arm. Pin the current behaviour (a panic) so the gap
-        // is visible and any future support is a deliberate change.
+        // not-yet-implemented `(_, _, _, 0)` arm. Pin the current behaviour (a clean error) so the
+        // gap stays visible and any future support is a deliberate change.
         let path = write_temp_fcidump(
             "mo_energy",
             "&FCI NORB=   2,NELEC=   2,MS2= 0,\n /\n 0.5   1   1   2   0\n",
         );
-        FCIDump::from_file(path);
+        let err = FCIDump::from_file(path).expect_err("an MO energy line must not parse");
+        assert!(
+            matches!(err, FCIDumpError::MoEnergyUnsupported),
+            "got {err:?}"
+        );
     }
 
     #[test]

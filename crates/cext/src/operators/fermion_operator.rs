@@ -386,7 +386,8 @@ pub unsafe extern "C" fn qf_ferm_op_one() -> *mut FermionOperator {
 /// .. code-block:: c
 ///     :linenos:
 ///
-///     QfFCIDump *fcidump = qf_fcidump_from_file("molecule.fcidump");
+///     QfFCIDump *fcidump = NULL;
+///     qf_fcidump_from_file("molecule.fcidump", &fcidump);
 ///     QfFermionOperator *op = qf_ferm_op_from_fcidump(fcidump);
 ///
 ///     bool has_groups = qf_ferm_op_has_groups(op);
@@ -422,7 +423,8 @@ pub unsafe extern "C" fn qf_ferm_op_has_groups(op: *const FermionOperator) -> bo
 /// .. code-block:: c
 ///     :linenos:
 ///
-///     QfFCIDump *fcidump = qf_fcidump_from_file("molecule.fcidump");
+///     QfFCIDump *fcidump = NULL;
+///     qf_fcidump_from_file("molecule.fcidump", &fcidump);
 ///     QfFermionOperator *op = qf_ferm_op_from_fcidump(fcidump);
 ///
 ///     uint32_t num_groups = qf_ferm_op_num_groups(op);

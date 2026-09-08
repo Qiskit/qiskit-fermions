@@ -1,0 +1,21 @@
+---
+upgrade:
+  - |
+    :meth:`~qiskit_fermions.operators.library.FCIDump.from_file` now raises a catchable Python
+    exception when it cannot parse a file, instead of propagating a Rust panic. A path that cannot
+    be opened or read raises :class:`OSError`, while a file that does not honour the FCIDump format
+    (a missing header namelist, a missing ``NORB`` or ``NELEC`` field, or a malformed ``MS2`` field)
+    raises :class:`ValueError`. An FCIDump carrying an MO energy value, which is still unsupported,
+    also raises :class:`ValueError`.
+  - |
+    The C function ``qf_fcidump_from_file`` now returns a :c:enum:`QfExitCode` and takes the parsed
+    :c:struct:`QfFCIDump` through a new out-parameter, matching the convention already used by the
+    mapper functions::
+
+        QfFCIDump *fcidump = NULL;
+        QfExitCode exit = qf_fcidump_from_file("molecule.fcidump", &fcidump);
+
+    It returns ``QfExitCode_ValueError`` for any of the parse failures listed above, leaving the
+    out-parameter untouched. This replaces the previous signature, which returned the pointer
+    directly and had no way to report a failure (an unparsable file unwound a Rust panic across the
+    FFI boundary, which is undefined behaviour).

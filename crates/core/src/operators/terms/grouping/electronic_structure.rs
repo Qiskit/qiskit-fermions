@@ -225,7 +225,7 @@ mod tests {
     #[test]
     fn test_group_terms_by_electronic_structure() {
         let file_path = String::from("../../tests/h2.fcidump");
-        let fcidump = FCIDump::from_file(file_path);
+        let fcidump = FCIDump::from_file(file_path).expect("the fixture must parse");
 
         let op = FermionOperator::from(&fcidump);
         // NOTE: even though the FCIDump loading automatically tracks groups, we can reduce the
@@ -275,7 +275,7 @@ mod tests {
     #[test]
     fn test_group_terms_by_electronic_structure_phys_order() {
         let file_path = String::from("../../tests/h2.fcidump");
-        let fcidump = FCIDump::from_file(file_path);
+        let fcidump = FCIDump::from_file(file_path).expect("the fixture must parse");
 
         let op = FermionOperator::from(&fcidump);
         // NOTE: even though the FCIDump loading automatically tracks groups, we can reduce the

@@ -147,7 +147,7 @@ mod tests {
     #[test]
     fn test_filter_electronic_structure_hamiltonian() {
         let file_path = String::from("../../tests/h2.fcidump");
-        let fcidump = FCIDump::from_file(file_path);
+        let fcidump = FCIDump::from_file(file_path).expect("the fixture must parse");
 
         let mut op = FermionOperator::from(&fcidump)
             .normal_ordered(None)

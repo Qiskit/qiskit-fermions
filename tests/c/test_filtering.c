@@ -78,7 +78,10 @@ static int test_filter_keeps_off_diagonal_hopping(void) {
 }
 
 static int test_filter_electronic_structure_hamiltonian(void) {
-    QfFCIDump *fcidump = qf_fcidump_from_file("../../h2.fcidump");
+    QfFCIDump *fcidump = NULL;
+    if (qf_fcidump_from_file("../../h2.fcidump", &fcidump) != QfExitCode_Success) {
+        return RuntimeError;
+    }
     QfFermionOperator *op = qf_ferm_op_from_fcidump(fcidump);
     qf_fcidump_free(fcidump);
 
