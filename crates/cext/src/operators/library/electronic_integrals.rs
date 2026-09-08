@@ -10,7 +10,7 @@
 // copyright notice, and modified files need to carry a notice indicating
 // that they have been altered from the originals.
 
-use crate::pointers::check_ptr;
+use crate::pointers::slice_from_ptr;
 
 use ndarray::{Array1, ArrayView1};
 use qiskit_fermions_core::operators::fermion_operator::FermionOperator;
@@ -25,7 +25,7 @@ use qiskit_fermions_core::operators::library::electronic_integrals::{From1Body, 
 ///                   triangular matrix.
 /// @param norb the number of orbitals.
 ///
-/// @return The 1-body component of the electronic structure Hamiltonian as defined above.
+/// @return A pointer to the component of the electronic structure Hamiltonian defined below.
 ///
 /// @rst
 ///
@@ -49,6 +49,15 @@ use qiskit_fermions_core::operators::library::electronic_integrals::{From1Body, 
 ///     QfFermionOperator *op = qf_ferm_op_from_1body_tril_spin_sym(one_body_a, norb);
 ///
 /// @endrst
+/// # Safety
+///
+/// Behavior is undefined if any of the following conditions are violated:
+///
+///   * ``one_body_a`` is a non-null, aligned pointer to a ``double`` array of length
+///     ``norb * (norb + 1) / 2``
+///
+/// A null or misaligned pointer is detected and panics; the array *length* cannot be derived from
+/// the pointer, so it remains an unchecked caller contract.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn qf_ferm_op_from_1body_tril_spin_sym(
     one_body_a: *mut f64,
@@ -56,10 +65,8 @@ pub unsafe extern "C" fn qf_ferm_op_from_1body_tril_spin_sym(
 ) -> *mut FermionOperator {
     let len_arr = ((norb * (norb + 1)) / 2) as usize;
 
-    check_ptr(one_body_a).unwrap();
-    // SAFETY: At this point we know the pointers are non-null and aligned. We rely on C that
-    // the pointers point to arrays of appropriate length, as specified in the function docs.
-    let carray = unsafe { ::std::slice::from_raw_parts(one_body_a, len_arr).to_vec() };
+    // SAFETY: per documentation, `one_body_a` is valid for `len_arr` reads of initialized memory.
+    let carray = unsafe { slice_from_ptr(one_body_a, len_arr) }.to_vec();
     let one_body_a_arr = Array1::from_vec(carray);
 
     let op = FermionOperator::from_1body_tril_spin_sym(ArrayView1::from(&one_body_a_arr), norb);
@@ -78,7 +85,7 @@ pub unsafe extern "C" fn qf_ferm_op_from_1body_tril_spin_sym(
 ///                   triangular matrix.
 /// @param norb the number of orbitals.
 ///
-/// @return The 1-body component of the electronic structure Hamiltonian as defined above.
+/// @return A pointer to the component of the electronic structure Hamiltonian defined below.
 ///
 /// @rst
 /// The resulting operator is defined by
@@ -103,6 +110,15 @@ pub unsafe extern "C" fn qf_ferm_op_from_1body_tril_spin_sym(
 ///     QfFermionOperator *op = qf_ferm_op_from_1body_tril_spin(one_body_a, one_body_b, norb);
 ///
 /// @endrst
+/// # Safety
+///
+/// Behavior is undefined if any of the following conditions are violated:
+///
+///   * ``one_body_a`` and ``one_body_b`` are non-null, aligned pointers to ``double`` arrays, each
+///     of length ``norb * (norb + 1) / 2``
+///
+/// A null or misaligned pointer is detected and panics; the array *lengths* cannot be derived from
+/// the pointers, so they remain an unchecked caller contract.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn qf_ferm_op_from_1body_tril_spin(
     one_body_a: *mut f64,
@@ -111,16 +127,12 @@ pub unsafe extern "C" fn qf_ferm_op_from_1body_tril_spin(
 ) -> *mut FermionOperator {
     let len_arr = ((norb * (norb + 1)) / 2) as usize;
 
-    check_ptr(one_body_a).unwrap();
-    // SAFETY: At this point we know the pointers are non-null and aligned. We rely on C that
-    // the pointers point to arrays of appropriate length, as specified in the function docs.
-    let carray = unsafe { ::std::slice::from_raw_parts(one_body_a, len_arr).to_vec() };
+    // SAFETY: per documentation, `one_body_a` is valid for `len_arr` reads of initialized memory.
+    let carray = unsafe { slice_from_ptr(one_body_a, len_arr) }.to_vec();
     let one_body_a_arr = Array1::from_vec(carray);
 
-    check_ptr(one_body_b).unwrap();
-    // SAFETY: At this point we know the pointers are non-null and aligned. We rely on C that
-    // the pointers point to arrays of appropriate length, as specified in the function docs.
-    let carray = unsafe { ::std::slice::from_raw_parts(one_body_b, len_arr).to_vec() };
+    // SAFETY: per documentation, `one_body_b` is valid for `len_arr` reads of initialized memory.
+    let carray = unsafe { slice_from_ptr(one_body_b, len_arr) }.to_vec();
     let one_body_b_arr = Array1::from_vec(carray);
 
     let op = FermionOperator::from_1body_tril_spin(
@@ -139,7 +151,7 @@ pub unsafe extern "C" fn qf_ferm_op_from_1body_tril_spin(
 ///                    coefficients of the alpha/alpha-spin species, as a flattened array.
 /// @param norb the number of orbitals.
 ///
-/// @return The 2-body component of the electronic structure Hamiltonian as defined above.
+/// @return A pointer to the component of the electronic structure Hamiltonian defined below.
 ///
 /// @rst
 ///
@@ -176,6 +188,15 @@ pub unsafe extern "C" fn qf_ferm_op_from_1body_tril_spin(
 ///     QfFermionOperator *op = qf_ferm_op_from_2body_tril_spin_sym(two_body_aa, norb);
 ///
 /// @endrst
+/// # Safety
+///
+/// Behavior is undefined if any of the following conditions are violated:
+///
+///   * ``two_body_aa`` is a non-null, aligned pointer to a ``double`` array of length
+///     ``npair * (npair + 1) / 2``, where ``npair = norb * (norb + 1) / 2``
+///
+/// A null or misaligned pointer is detected and panics; the array *length* cannot be derived from
+/// the pointer, so it remains an unchecked caller contract.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn qf_ferm_op_from_2body_tril_spin_sym(
     two_body_aa: *mut f64,
@@ -184,10 +205,8 @@ pub unsafe extern "C" fn qf_ferm_op_from_2body_tril_spin_sym(
     let npair = ((norb * (norb + 1)) / 2) as usize;
     let len_arr = (npair * (npair + 1)) / 2;
 
-    check_ptr(two_body_aa).unwrap();
-    // SAFETY: At this point we know the pointers are non-null and aligned. We rely on C that
-    // the pointers point to arrays of appropriate length, as specified in the function docs.
-    let carray = unsafe { ::std::slice::from_raw_parts(two_body_aa, len_arr).to_vec() };
+    // SAFETY: per documentation, `two_body_aa` is valid for `len_arr` reads of initialized memory.
+    let carray = unsafe { slice_from_ptr(two_body_aa, len_arr) }.to_vec();
     let two_body_aa_arr = Array1::from_vec(carray);
 
     let op = FermionOperator::from_2body_tril_spin_sym(ArrayView1::from(&two_body_aa_arr), norb);
@@ -207,7 +226,7 @@ pub unsafe extern "C" fn qf_ferm_op_from_2body_tril_spin_sym(
 ///                    coefficients of the beta/beta-spin species, as a flattened array.
 /// @param norb the number of orbitals.
 ///
-/// @return The 2-body component of the electronic structure Hamiltonian as defined above.
+/// @return A pointer to the component of the electronic structure Hamiltonian defined below.
 ///
 /// @rst
 ///
@@ -255,6 +274,17 @@ pub unsafe extern "C" fn qf_ferm_op_from_2body_tril_spin_sym(
 ///         two_body_aa, two_body_ab, two_body_bb, norb);
 ///
 /// @endrst
+/// # Safety
+///
+/// Behavior is undefined if any of the following conditions are violated:
+///
+///   * ``two_body_aa`` and ``two_body_bb`` are non-null, aligned pointers to ``double`` arrays,
+///     each of length ``npair * (npair + 1) / 2``, where ``npair = norb * (norb + 1) / 2``
+///   * ``two_body_ab`` is a non-null, aligned pointer to a ``double`` array of length
+///     ``npair * npair``
+///
+/// A null or misaligned pointer is detected and panics; the array *lengths* cannot be derived from
+/// the pointers, so they remain an unchecked caller contract.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn qf_ferm_op_from_2body_tril_spin(
     two_body_aa: *mut f64,
@@ -266,22 +296,16 @@ pub unsafe extern "C" fn qf_ferm_op_from_2body_tril_spin(
     let len_arr_s4 = npair * npair;
     let len_arr_s8 = (npair * (npair + 1)) / 2;
 
-    check_ptr(two_body_aa).unwrap();
-    // SAFETY: At this point we know the pointers are non-null and aligned. We rely on C that
-    // the pointers point to arrays of appropriate length, as specified in the function docs.
-    let carray = unsafe { ::std::slice::from_raw_parts(two_body_aa, len_arr_s8).to_vec() };
+    // SAFETY: per documentation, `two_body_aa` is valid for `len_arr_s8` reads of initialized memory.
+    let carray = unsafe { slice_from_ptr(two_body_aa, len_arr_s8) }.to_vec();
     let two_body_aa_arr = Array1::from_vec(carray);
 
-    check_ptr(two_body_ab).unwrap();
-    // SAFETY: At this point we know the pointers are non-null and aligned. We rely on C that
-    // the pointers point to arrays of appropriate length, as specified in the function docs.
-    let carray = unsafe { ::std::slice::from_raw_parts(two_body_ab, len_arr_s4).to_vec() };
+    // SAFETY: per documentation, `two_body_ab` is valid for `len_arr_s4` reads of initialized memory.
+    let carray = unsafe { slice_from_ptr(two_body_ab, len_arr_s4) }.to_vec();
     let two_body_ab_arr = Array1::from_vec(carray);
 
-    check_ptr(two_body_bb).unwrap();
-    // SAFETY: At this point we know the pointers are non-null and aligned. We rely on C that
-    // the pointers point to arrays of appropriate length, as specified in the function docs.
-    let carray = unsafe { ::std::slice::from_raw_parts(two_body_bb, len_arr_s8).to_vec() };
+    // SAFETY: per documentation, `two_body_bb` is valid for `len_arr_s8` reads of initialized memory.
+    let carray = unsafe { slice_from_ptr(two_body_bb, len_arr_s8) }.to_vec();
     let two_body_bb_arr = Array1::from_vec(carray);
 
     let op = FermionOperator::from_2body_tril_spin(
