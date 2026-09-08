@@ -1,0 +1,121 @@
+﻿FermionicTrotterization
+=======================
+
+.. currentmodule:: qiskit_fermions.transpiler.passes
+
+.. autoclass:: FermionicTrotterization
+   :show-inheritance:
+   :no-members:
+   :no-inherited-members:
+   :special-members:
+
+
+  
+  
+   .. rubric:: Attributes
+    
+   .. autoattribute:: synthesis
+   .. autoattribute:: filter
+  
+  
+  
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+  
+  
+   .. rubric:: Methods
+    
+   .. automethod:: run
+  
+  
+  
+  
+  
+   .. rubric:: Inherited Methods
+    
+   .. automethod:: execute
+   .. automethod:: name
+   .. automethod:: update_status
+  
+  
+  

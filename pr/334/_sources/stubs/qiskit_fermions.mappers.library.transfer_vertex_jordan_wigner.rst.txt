@@ -1,0 +1,6 @@
+﻿transfer\_vertex\_jordan\_wigner
+================================
+
+.. currentmodule:: qiskit_fermions.mappers.library
+
+.. autofunction:: transfer_vertex_jordan_wigner

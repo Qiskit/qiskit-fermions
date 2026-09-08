@@ -1,0 +1,6 @@
+﻿transfer\_vertex\_to\_edge\_vertex
+==================================
+
+.. currentmodule:: qiskit_fermions.mappers.library
+
+.. autofunction:: transfer_vertex_to_edge_vertex

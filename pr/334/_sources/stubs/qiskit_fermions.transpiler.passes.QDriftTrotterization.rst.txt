@@ -1,0 +1,124 @@
+﻿QDriftTrotterization
+====================
+
+.. currentmodule:: qiskit_fermions.transpiler.passes
+
+.. autoclass:: QDriftTrotterization
+   :show-inheritance:
+   :no-members:
+   :no-inherited-members:
+   :special-members:
+
+
+  
+  
+   .. rubric:: Attributes
+    
+   .. autoattribute:: MAX_SAMPLE_RETRIES
+   .. autoattribute:: num_terms
+   .. autoattribute:: filter_trivial
+  
+  
+  
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+  
+  
+   .. rubric:: Methods
+    
+   .. automethod:: run
+  
+  
+  
+  
+  
+   .. rubric:: Inherited Methods
+    
+   .. automethod:: execute
+   .. automethod:: name
+   .. automethod:: update_status
+  
+  
+  
