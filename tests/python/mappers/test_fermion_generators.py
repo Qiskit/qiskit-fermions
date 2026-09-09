@@ -12,12 +12,12 @@
 
 from functools import cache
 
-from qiskit.quantum_info import SparsePauliOp
+from qiskit.quantum_info import SparseObservable
 from qiskit_fermions.mappers import map_fermion_action_generators
 from qiskit_fermions.operators import FermionAction, FermionOperator
 
 
-def jordan_wigner(op: FermionOperator, layout: dict[int, int]) -> SparsePauliOp:
+def jordan_wigner(op: FermionOperator, layout: dict[int, int]) -> SparseObservable:
     """Custom Jordan-Wigner transformation onto a non-trivial qubit layout.
 
     This is a deliberately minimal implementation, written to exercise
@@ -30,11 +30,11 @@ def jordan_wigner(op: FermionOperator, layout: dict[int, int]) -> SparsePauliOp:
     num_qubits = max(layout.values()) + 1
 
     @cache
-    def map_action(action: FermionAction) -> SparsePauliOp:
+    def map_action(action: FermionAction) -> SparseObservable:
         act, idx = action
         idx = layout[idx]
         qubits = list(range(idx + 1))
-        return SparsePauliOp.from_sparse_list(
+        return SparseObservable.from_sparse_list(
             [
                 ("Z" * idx + "X", qubits, 0.5),
                 ("Z" * idx + "Y", qubits, -0.5j if act else 0.5j),
@@ -45,7 +45,10 @@ def jordan_wigner(op: FermionOperator, layout: dict[int, int]) -> SparsePauliOp:
     return map_fermion_action_generators(
         op,
         map_action,
-        lambda: SparsePauliOp.from_sparse_list([("", [], 1)], num_qubits=num_qubits),
+        lambda: SparseObservable.identity(num_qubits),
+        # `SparseObservable` has no `__and__`, which is what the `compose=None` default
+        # would reach for, so the composition is named explicitly.
+        compose=SparseObservable.compose,
     )
 
 
@@ -71,8 +74,8 @@ def test_jordan_wigner():
     num_qubits = 14
     layout = {0: 13, 1: 12, 2: 11, 3: 10}
     qop = jordan_wigner(op, layout)
-    assert isinstance(qop, SparsePauliOp)
-    expected = SparsePauliOp.from_sparse_list(
+    assert isinstance(qop, SparseObservable)
+    expected = SparseObservable.from_sparse_list(
         [
             ("", [], -0.8105479805373266),
             ("Z", [13], 0.1721839326191555),
@@ -93,4 +96,4 @@ def test_jordan_wigner():
         num_qubits,
     )
     diff = (qop - expected).simplify()
-    assert diff == SparsePauliOp.from_sparse_list([], num_qubits)
+    assert diff == SparseObservable.zero(num_qubits)
