@@ -6,7 +6,7 @@
         <link rel="prefetch" href="_static/images/qiskit-light-logo.svg" as="image">
         <link rel="prefetch" href="_static/images/qiskit-dark-logo.svg" as="image">
 
-    <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 --><title>Index - Qiskit Fermions 0.2.0.dev0+acc2c0c</title>
+    <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 --><title>Index - Qiskit Fermions 0.2.0.dev0+9baf61f</title>
 <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -159,7 +159,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+acc2c0c</div></a>
+      <a href="index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+9baf61f</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -185,7 +185,7 @@
     <img class="sidebar-logo only-dark" src="_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+acc2c0c</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+9baf61f</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="search.html" role="search">
@@ -679,8 +679,6 @@
           <li><a href="stubs/qiskit_fermions.operators.TransferVertexOperator.html#qiskit_fermions.operators.TransferVertexOperator.get_right_indices">(TransferVertexOperator method)</a>
 </li>
         </ul></li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="stubs/qiskit_fermions.operators.EdgeVertexOperator.html#qiskit_fermions.operators.EdgeVertexOperator.get_support">get_support() (EdgeVertexOperator method)</a>
 
         <ul>
@@ -693,6 +691,8 @@
           <li><a href="stubs/qiskit_fermions.operators.TransferVertexOperator.html#qiskit_fermions.operators.TransferVertexOperator.get_support">(TransferVertexOperator method)</a>
 </li>
         </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="stubs/qiskit_fermions.linalg.givens_decomposition.html#qiskit_fermions.linalg.givens_decomposition">givens_decomposition() (in module qiskit_fermions.linalg)</a>
 </li>
         <li><a href="stubs/qiskit_fermions.linalg.givens_decomposition_slater.html#qiskit_fermions.linalg.givens_decomposition_slater">givens_decomposition_slater() (in module qiskit_fermions.linalg)</a>
@@ -702,6 +702,8 @@
         <li><a href="stubs/qiskit_fermions.transpiler.passes.synthesis.GivensDecompositionSlaterDeterminantSynthesis.html#qiskit_fermions.transpiler.passes.synthesis.GivensDecompositionSlaterDeterminantSynthesis">GivensDecompositionSlaterDeterminantSynthesis (class in qiskit_fermions.transpiler.passes.synthesis)</a>
 </li>
         <li><a href="stubs/qiskit_fermions.operators.terms.group_coeff_means.html#qiskit_fermions.operators.terms.group_coeff_means">group_coeff_means() (in module qiskit_fermions.operators.terms)</a>
+</li>
+        <li><a href="stubs/qiskit_fermions.operators.terms.group_order.html#qiskit_fermions.operators.terms.group_order">group_order() (in module qiskit_fermions.operators.terms)</a>
 </li>
         <li><a href="stubs/qiskit_fermions.operators.terms.group_terms_by_electronic_structure.html#qiskit_fermions.operators.terms.group_terms_by_electronic_structure">group_terms_by_electronic_structure() (in module qiskit_fermions.operators.terms)</a>
 </li>
@@ -1136,6 +1138,8 @@
 </li>
         <li><a href="cdoc/qf-operators-terms-grouping.html#c.qf_edge_op_group_coeff_means">qf_edge_op_group_coeff_means (C function)</a>
 </li>
+        <li><a href="cdoc/qf-operators-terms-ordering.html#c.qf_edge_op_group_order">qf_edge_op_group_order (C function)</a>
+</li>
         <li><a href="cdoc/qf-operators-terms-grouping.html#c.qf_edge_op_groups_are_hermitian">qf_edge_op_groups_are_hermitian (C function)</a>
 </li>
         <li><a href="cdoc/qf-operators-terms-grouping.html#c.qf_edge_op_groups_have_uniform_coeffs">qf_edge_op_groups_have_uniform_coeffs (C function)</a>
@@ -1234,6 +1238,8 @@
 </li>
         <li><a href="cdoc/qf-operators-terms-grouping.html#c.qf_ferm_op_group_coeff_means">qf_ferm_op_group_coeff_means (C function)</a>
 </li>
+        <li><a href="cdoc/qf-operators-terms-ordering.html#c.qf_ferm_op_group_order">qf_ferm_op_group_order (C function)</a>
+</li>
         <li><a href="cdoc/qf-operators-terms-grouping.html#c.qf_ferm_op_group_terms_by_electronic_structure">qf_ferm_op_group_terms_by_electronic_structure (C function)</a>
 </li>
         <li><a href="cdoc/qf-operators-terms-grouping.html#c.qf_ferm_op_groups_are_hermitian">qf_ferm_op_groups_are_hermitian (C function)</a>
@@ -1308,12 +1314,14 @@
 </li>
         <li><a href="cdoc/qf-operators-terms-grouping.html#c.qf_maj_op_group_coeff_means">qf_maj_op_group_coeff_means (C function)</a>
 </li>
-        <li><a href="cdoc/qf-operators-terms-grouping.html#c.qf_maj_op_groups_are_hermitian">qf_maj_op_groups_are_hermitian (C function)</a>
+        <li><a href="cdoc/qf-operators-terms-ordering.html#c.qf_maj_op_group_order">qf_maj_op_group_order (C function)</a>
 </li>
-        <li><a href="cdoc/qf-operators-terms-grouping.html#c.qf_maj_op_groups_have_uniform_coeffs">qf_maj_op_groups_have_uniform_coeffs (C function)</a>
+        <li><a href="cdoc/qf-operators-terms-grouping.html#c.qf_maj_op_groups_are_hermitian">qf_maj_op_groups_are_hermitian (C function)</a>
 </li>
     </ul></td>
     <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="cdoc/qf-operators-terms-grouping.html#c.qf_maj_op_groups_have_uniform_coeffs">qf_maj_op_groups_have_uniform_coeffs (C function)</a>
+</li>
         <li><a href="cdoc/qf-maj-op.html#c.qf_maj_op_has_groups">qf_maj_op_has_groups (C function)</a>
 </li>
         <li><a href="cdoc/qf-maj-op.html#c.qf_maj_op_ichop">qf_maj_op_ichop (C function)</a>
@@ -1397,6 +1405,8 @@
         <li><a href="cdoc/qf-transfer-op.html#c.qf_transfer_op_get_right_indices">qf_transfer_op_get_right_indices (C function)</a>
 </li>
         <li><a href="cdoc/qf-operators-terms-grouping.html#c.qf_transfer_op_group_coeff_means">qf_transfer_op_group_coeff_means (C function)</a>
+</li>
+        <li><a href="cdoc/qf-operators-terms-ordering.html#c.qf_transfer_op_group_order">qf_transfer_op_group_order (C function)</a>
 </li>
         <li><a href="cdoc/qf-operators-terms-grouping.html#c.qf_transfer_op_groups_are_hermitian">qf_transfer_op_groups_are_hermitian (C function)</a>
 </li>
@@ -1859,7 +1869,7 @@
       
     </aside>
   </div>
-</div><script src="_static/documentation_options.js?v=48bd3f73"></script>
+</div><script src="_static/documentation_options.js?v=8f3afe7f"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/scripts/furo.js?v=46bd48cc"></script>

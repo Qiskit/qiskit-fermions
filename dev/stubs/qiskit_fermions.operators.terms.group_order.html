@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>map_edge_vertex_generators - Qiskit Fermions 0.2.0.dev0+9baf61f</title>
+        <title>group_order - Qiskit Fermions 0.2.0.dev0+9baf61f</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -244,7 +244,7 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="../_sources/stubs/qiskit_fermions.mappers.map_edge_vertex_generators.rst.txt" title="View this page">
+  <a class="muted-link" href="../_sources/stubs/qiskit_fermions.operators.terms.group_order.rst.txt" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
@@ -262,86 +262,59 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="map-edge-vertex-generators">
-<h1>map_edge_vertex_generators<a class="headerlink" href="#map-edge-vertex-generators" title="Link to this heading">¶</a></h1>
+          <section id="group-order">
+<h1>group_order<a class="headerlink" href="#group-order" title="Link to this heading">¶</a></h1>
 <dl class="py function">
-<dt class="sig sig-object py" id="qiskit_fermions.mappers.map_edge_vertex_generators">
-<span class="sig-name descname"><span class="pre">map_edge_vertex_generators</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">operator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">map_action</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">identity</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qiskit_fermions.mappers.map_edge_vertex_generators" title="Link to this definition">¶</a></dt>
-<dd><p>Map a <a class="reference internal" href="qiskit_fermions.operators.EdgeVertexOperator.html#qiskit_fermions.operators.EdgeVertexOperator" title="qiskit_fermions.operators.EdgeVertexOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">EdgeVertexOperator</span></code></a> to another operator type.</p>
-<p>This is a generic function to aid in implementing new mappers for
-<a class="reference internal" href="qiskit_fermions.operators.EdgeVertexOperator.html#qiskit_fermions.operators.EdgeVertexOperator" title="qiskit_fermions.operators.EdgeVertexOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">EdgeVertexOperator</span></code></a> instances. At its core, it simply iterates over the
-terms of the operator, mapping each encountered <a class="reference internal" href="qiskit_fermions.operators.edge_action.EdgeAction.html#qiskit_fermions.operators.edge_action.EdgeAction" title="qiskit_fermions.operators.edge_action.EdgeAction"><code class="xref py py-class docutils literal notranslate"><span class="pre">EdgeAction</span></code></a> with the
-user-provided <code class="docutils literal notranslate"><span class="pre">map_action</span></code> function. In combination with the user-provided <code class="docutils literal notranslate"><span class="pre">identity</span></code>
-generator, this allows mapping to arbitrary output types.</p>
+<dt class="sig sig-object py" id="qiskit_fermions.operators.terms.group_order">
+<span class="sig-name descname"><span class="pre">group_order</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">op</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qiskit_fermions.operators.terms.group_order" title="Link to this definition">¶</a></dt>
+<dd><p>Returns a copy of an operator with its terms ordered by group index.</p>
+<p>The terms are sorted by their group index alone, which makes each group one contiguous run of
+terms and the group indices non-decreasing. The sort is stable, so terms within a group keep their
+relative order: ordering canonically first and by group second therefore refines the canonical
+order rather than replacing it with an arbitrary permutation. The terms themselves are left
+untouched – this only reorders them, it does not simplify or normal-order the operator.</p>
+<p>This works for any of the built-in operator types implementing the
+<a class="reference internal" href="qiskit_fermions.operators.OperatorTrait.html#qiskit_fermions.operators.OperatorTrait" title="qiskit_fermions.operators.OperatorTrait"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperatorTrait</span></code></a> protocol; the returned operator is of the same
+type as the input.</p>
+<p>Group indices say only which terms belong together, so this changes the operator’s <em>layout</em>, not
+its value. What the layout buys is lookup cost:
+<a class="reference internal" href="qiskit_fermions.operators.OperatorTrait.html#qiskit_fermions.operators.OperatorTrait.split_out_groups" title="qiskit_fermions.operators.OperatorTrait.split_out_groups"><code class="xref py py-meth docutils literal notranslate"><span class="pre">split_out_groups()</span></code></a> has to scan every term to find
+the requested groups in general, but on a group-ordered operator each group’s terms form one
+range it can locate by binary search, so a lookup costs what the <em>requested</em> groups cost rather
+than what the <em>held</em> terms cost. Hoisting this call out of a loop that repeatedly samples a few
+groups from a large operator is what makes those lookups affordable.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>The output type <code class="docutils literal notranslate"><span class="pre">T</span></code> must support multiplication by a scalar via <code class="docutils literal notranslate"><span class="pre">__mul__</span></code>.
-If <code class="docutils literal notranslate"><span class="pre">compose=None</span></code> it must also support composition of two instances via <code class="docutils literal notranslate"><span class="pre">__and__</span></code>.
-<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.quantum_info.SparseObservable" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">SparseObservable</span></code></a> does not, which is why the example below
-names <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.quantum_info.SparseObservable#compose" title="(in Qiskit v2.5)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">compose()</span></code></a> explicitly; a type with an
-<code class="docutils literal notranslate"><span class="pre">__and__</span></code> (such as <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.quantum_info.SparsePauliOp" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">SparsePauliOp</span></code></a>) can rely on the default.</p>
+<p>An operator tracking no groups (see for example
+<a class="reference internal" href="qiskit_fermions.operators.FermionOperator.html#qiskit_fermions.operators.FermionOperator.groups" title="qiskit_fermions.operators.FermionOperator.groups"><code class="xref py py-attr docutils literal notranslate"><span class="pre">groups</span></code></a>) has nothing to order by and is
+returned as an unchanged copy, so this composes in a pipeline without a guard at every step.
+The result tracks no groups either.</p>
 </div>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>The mapping written out below is a deliberately minimal illustration of this function, not a
-replacement for <a class="reference internal" href="qiskit_fermions.mappers.library.edge_vertex_jordan_wigner.html#qiskit_fermions.mappers.library.edge_vertex_jordan_wigner" title="qiskit_fermions.mappers.library.edge_vertex_jordan_wigner"><code class="xref py py-func docutils literal notranslate"><span class="pre">edge_vertex_jordan_wigner()</span></code></a>: it covers only nearest-neighbor
-interactions, and it is neither parallelized nor memory-bounded. Reach for the library
-function rather than copying this one.</p>
-</div>
-<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.mappers</span><span class="w"> </span><span class="kn">import</span> <span class="n">map_edge_vertex_generators</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.operators</span><span class="w"> </span><span class="kn">import</span> <span class="n">EdgeAction</span><span class="p">,</span> <span class="n">EdgeVertexOperator</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit.quantum_info</span><span class="w"> </span><span class="kn">import</span> <span class="n">SparseObservable</span>
-<span class="gp">&gt;&gt;&gt;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">jordan_wigner_nearest_neighbor</span><span class="p">(</span><span class="n">mode</span><span class="p">:</span> <span class="n">EdgeAction</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SparseObservable</span><span class="p">:</span>
-<span class="gp">... </span>    <span class="n">left</span><span class="p">,</span> <span class="n">right</span> <span class="o">=</span> <span class="n">mode</span>
-<span class="gp">... </span>    <span class="k">if</span> <span class="n">left</span> <span class="o">==</span> <span class="n">right</span><span class="p">:</span>
-<span class="gp">... </span>        <span class="k">return</span> <span class="n">SparseObservable</span><span class="o">.</span><span class="n">from_sparse_list</span><span class="p">(</span>
-<span class="gp">... </span>            <span class="p">[(</span><span class="s2">"Z"</span><span class="p">,</span> <span class="p">[</span><span class="n">left</span><span class="p">],</span> <span class="mf">1.0</span><span class="p">)],</span> <span class="n">num_qubits</span><span class="o">=</span><span class="n">num_qubits</span>
-<span class="gp">... </span>        <span class="p">)</span>
-<span class="gp">... </span>    <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">left</span> <span class="o">-</span> <span class="n">right</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
-<span class="gp">... </span>        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
-<span class="gp">... </span>            <span class="s2">"This mapping only handles nearest neighbor interactions"</span>
-<span class="gp">... </span>        <span class="p">)</span>
-<span class="gp">... </span>    <span class="c1"># The orientation must be compared rather than differenced: an edge operator is</span>
-<span class="gp">... </span>    <span class="c1"># antisymmetric, so the sign depends on the index order while the string does not.</span>
-<span class="gp">... </span>    <span class="n">lo</span><span class="p">,</span> <span class="n">hi</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">)</span>
-<span class="gp">... </span>    <span class="n">coeff</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.0</span> <span class="k">if</span> <span class="n">left</span> <span class="o">&lt;</span> <span class="n">right</span> <span class="k">else</span> <span class="mf">1.0</span>
-<span class="gp">... </span>    <span class="k">return</span> <span class="n">SparseObservable</span><span class="o">.</span><span class="n">from_sparse_list</span><span class="p">(</span>
-<span class="gp">... </span>        <span class="p">[(</span><span class="s2">"YX"</span><span class="p">,</span> <span class="p">[</span><span class="n">lo</span><span class="p">,</span> <span class="n">hi</span><span class="p">],</span> <span class="n">coeff</span><span class="p">)],</span> <span class="n">num_qubits</span><span class="o">=</span><span class="n">num_qubits</span>
-<span class="gp">... </span>    <span class="p">)</span>
-<span class="gp">&gt;&gt;&gt;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">num_qubits</span> <span class="o">=</span> <span class="mi">4</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">identity</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">SparseObservable</span><span class="p">:</span>
-<span class="gp">... </span>    <span class="k">return</span> <span class="n">SparseObservable</span><span class="o">.</span><span class="n">identity</span><span class="p">(</span><span class="n">num_qubits</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">op</span> <span class="o">=</span> <span class="n">EdgeVertexOperator</span><span class="o">.</span><span class="n">from_dict</span><span class="p">({</span>
-<span class="gp">... </span>    <span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),):</span> <span class="mf">2.0</span><span class="p">,</span>
-<span class="gp">... </span>    <span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),):</span> <span class="mf">0.5</span><span class="p">,</span>
-<span class="gp">... </span>    <span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)):</span> <span class="mf">1.0</span><span class="p">,</span>
-<span class="gp">... </span><span class="p">})</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">qop</span> <span class="o">=</span> <span class="n">map_edge_vertex_generators</span><span class="p">(</span>
-<span class="gp">... </span>    <span class="n">op</span><span class="p">,</span> <span class="n">jordan_wigner_nearest_neighbor</span><span class="p">,</span> <span class="n">identity</span><span class="p">,</span> <span class="n">compose</span><span class="o">=</span><span class="n">SparseObservable</span><span class="o">.</span><span class="n">compose</span>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.operators</span><span class="w"> </span><span class="kn">import</span> <span class="n">FermionOperator</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.operators.terms.ordering</span><span class="w"> </span><span class="kn">import</span> <span class="n">group_order</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">op</span> <span class="o">=</span> <span class="n">FermionOperator</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="p">{</span>
+<span class="gp">... </span>        <span class="p">((</span><span class="kc">True</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="mi">1</span><span class="p">)):</span> <span class="mf">1.0</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="p">((</span><span class="kc">True</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="mi">0</span><span class="p">)):</span> <span class="mf">2.0</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="p">((</span><span class="kc">True</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="mi">3</span><span class="p">)):</span> <span class="mf">3.0</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="p">}</span>
 <span class="gp">... </span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">qop</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span><span class="o">.</span><span class="n">to_sparse_list</span><span class="p">()))</span>
-<span class="go">[('XX', [1, 2], 1j), ('YX', [0, 1], (-0.5+0j)), ('Z', [0], (2+0j))]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">op</span><span class="o">.</span><span class="n">groups</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>  <span class="c1"># group 1's terms are not contiguous</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ordered</span> <span class="o">=</span> <span class="n">group_order</span><span class="p">(</span><span class="n">op</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">ordered</span><span class="o">.</span><span class="n">groups</span><span class="p">)</span>
+<span class="go">[0, 1, 1]</span>
 </pre></div>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>operator</strong> (<a class="reference internal" href="qiskit_fermions.operators.EdgeVertexOperator.html#qiskit_fermions.operators.EdgeVertexOperator" title="qiskit_fermions.operators.edge_vertex_operator.EdgeVertexOperator"><em>EdgeVertexOperator</em></a>) – the operator to be mapped.</p></li>
-<li><p><strong>map_action</strong> (<a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.14)"><em>Callable</em></a><em>[</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>]</em><em>]</em><em>, </em><em>T</em><em>]</em>) – the function to map a single <a class="reference internal" href="qiskit_fermions.operators.edge_action.EdgeAction.html#qiskit_fermions.operators.edge_action.EdgeAction" title="qiskit_fermions.operators.edge_action.EdgeAction"><code class="xref py py-class docutils literal notranslate"><span class="pre">EdgeAction</span></code></a> to the desired
-output type.</p></li>
-<li><p><strong>identity</strong> (<a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.14)"><em>Callable</em></a><em>[</em><em>[</em><em>]</em><em>, </em><em>T</em><em>]</em>) – the function to generate the multiplicative identity instance of the output type.</p></li>
-<li><p><strong>compose</strong> (<a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.14)"><em>Callable</em></a><em>[</em><em>[</em><em>T</em><em>, </em><em>T</em><em>]</em><em>, </em><em>T</em><em>] </em><em>| </em><em>None</em>) – an optional function to implement the compositiion logic of two output type
-instances. If this is not provided, it will default to using <a class="reference external" href="https://docs.python.org/3/library/operator.html#operator.and_" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">operator.and_()</span></code></a>.</p></li>
-</ul>
+<dd class="field-odd"><p><strong>op</strong> – the operator whose terms to reorder.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>The mapped operator.</p>
+<dd class="field-even"><p>A new operator of the same type with its terms ordered by group index.</p>
 </dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><em>T</em></p>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#TypeError" title="(in Python v3.14)"><strong>TypeError</strong></a> – if <code class="docutils literal notranslate"><span class="pre">op</span></code> is not a supported operator type (see
+    <a class="reference internal" href="qiskit_fermions.operators.OperatorTrait.html#qiskit_fermions.operators.OperatorTrait" title="qiskit_fermions.operators.OperatorTrait"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperatorTrait</span></code></a>).</p>
 </dd>
 </dl>
 </dd></dl>
@@ -386,8 +359,8 @@ instances. If this is not provided, it will default to using <a class="reference
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">map_edge_vertex_generators</a><ul>
-<li><a class="reference internal" href="#qiskit_fermions.mappers.map_edge_vertex_generators"><code class="docutils literal notranslate"><span class="pre">map_edge_vertex_generators()</span></code></a></li>
+<li><a class="reference internal" href="#">group_order</a><ul>
+<li><a class="reference internal" href="#qiskit_fermions.operators.terms.group_order"><code class="docutils literal notranslate"><span class="pre">group_order()</span></code></a></li>
 </ul>
 </li>
 </ul>

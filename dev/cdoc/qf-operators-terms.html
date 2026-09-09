@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Operator Terms - Qiskit Fermions 0.2.0.dev0+acc2c0c</title>
+        <title>Operator Terms - Qiskit Fermions 0.2.0.dev0+9baf61f</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+acc2c0c</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+9baf61f</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+acc2c0c</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+9baf61f</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -317,8 +317,13 @@ that do not contribute meaningfully to a downstream computation.</p>
 </section>
 <section id="ordering">
 <h2>Ordering<a class="headerlink" href="#ordering" title="Link to this heading">¶</a></h2>
-<p>The C API provides functions to reorder the terms of an operator into a canonical,
-coefficient-independent order.</p>
+<p>The C API provides functions to reorder the terms of an operator, either into a
+canonical, coefficient-independent order or by group index.</p>
+<p>Group indices are a per-term tag that says nothing about where those terms sit,
+so the terms of one group are in general scattered throughout an operator.
+Ordering by group gathers each into one contiguous run, which is what lets
+<code class="docutils literal notranslate"><span class="pre">qf_op_type_split_out_groups</span></code> locate a requested group by binary search instead
+of scanning every term.</p>
 <section id="id1">
 <h3>Members<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h3>
 <div class="table-wrapper docutils container">
@@ -336,6 +341,20 @@ coefficient-independent order.</p>
 <tr class="row-even"><td><p><a class="reference internal" href="qf-operators-terms-ordering.html#c.qf_transfer_op_canonical_order" title="qf_transfer_op_canonical_order"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_transfer_op_canonical_order()</span></code></a></p></td>
 <td><p>Reorders the terms of a transfer-vertex operator
 canonically.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="qf-operators-terms-ordering.html#c.qf_ferm_op_group_order" title="qf_ferm_op_group_order"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_ferm_op_group_order()</span></code></a></p></td>
+<td><p>Reorders the terms of a fermionic operator by group index.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="qf-operators-terms-ordering.html#c.qf_maj_op_group_order" title="qf_maj_op_group_order"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_maj_op_group_order()</span></code></a></p></td>
+<td><p>Reorders the terms of a Majorana operator by group index.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="qf-operators-terms-ordering.html#c.qf_edge_op_group_order" title="qf_edge_op_group_order"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_edge_op_group_order()</span></code></a></p></td>
+<td><p>Reorders the terms of an edge-vertex operator by group
+index.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="qf-operators-terms-ordering.html#c.qf_transfer_op_group_order" title="qf_transfer_op_group_order"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_transfer_op_group_order()</span></code></a></p></td>
+<td><p>Reorders the terms of a transfer-vertex operator by group
+index.</p></td>
 </tr>
 </tbody>
 </table>
@@ -407,7 +426,7 @@ canonically.</p></td>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=48bd3f73"></script>
+</div><script src="../_static/documentation_options.js?v=8f3afe7f"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
