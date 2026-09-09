@@ -570,7 +570,7 @@ pub unsafe extern "C" fn qf_transfer_op_set_groups(
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn qf_transfer_op_del_groups(op: *mut TransferVertexOperator) {
     let op = unsafe { mut_ptr_as_ref(op) };
-    op.groups = None;
+    op.clear_groups();
 }
 
 /// @ingroup qf_transfer_op
@@ -701,7 +701,7 @@ pub unsafe extern "C" fn qf_transfer_op_add_term(
         unsafe { slice_from_ptr(right_indices, num_indices) },
     );
 
-    op.groups = None;
+    op.clear_groups();
 }
 
 /// @ingroup qf_transfer_op
