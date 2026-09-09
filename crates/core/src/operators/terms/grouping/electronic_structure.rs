@@ -62,7 +62,9 @@ pub fn group_terms_by_electronic_structure(
         let group_idx = groups.entry(key).or_insert(num_groups as u32);
         group_indices.push(*group_idx);
     }
-    op.groups = Some(group_indices);
+    // `group_indices` was pushed once per term of `op.iter()`, so the length check cannot fire.
+    op.set_groups(Some(group_indices))
+        .expect("one group index is pushed per term");
     Ok(())
 }
 

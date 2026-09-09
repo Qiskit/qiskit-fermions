@@ -201,6 +201,17 @@ impl FermionOperator {
         }
     }
 
+    /// Appends the one-body term `(i, a)` and, when it is off-diagonal, its transpose.
+    ///
+    /// Pushes one group index per appended term when `group_idx` is `Some`, which is the lockstep
+    /// counterpart of [`set_groups`](crate::operators::OperatorTrait::set_groups): the group indices
+    /// grow with the terms rather than being replaced wholesale, so the one-index-per-term invariant
+    /// holds after every call even though no whole-array check runs. `group_idx` must be `Some` iff
+    /// `op` tracks group indices.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `group_idx` is `Some` while `op` does not track group indices.
     #[inline]
     fn _insert_1body_idx(op: &mut Self, c: Complex64, i: u32, a: u32, group_idx: Option<u32>) {
         op.coeffs.push(c);
@@ -225,6 +236,17 @@ impl FermionOperator {
         }
     }
 
+    /// Appends the two-body term `(i, j, b, a)`.
+    ///
+    /// Pushes one group index per appended term when `group_idx` is `Some`, which is the lockstep
+    /// counterpart of [`set_groups`](crate::operators::OperatorTrait::set_groups): the group indices
+    /// grow with the terms rather than being replaced wholesale, so the one-index-per-term invariant
+    /// holds after every call even though no whole-array check runs. `group_idx` must be `Some` iff
+    /// `op` tracks group indices.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `group_idx` is `Some` while `op` does not track group indices.
     #[inline]
     fn _insert_2body_idx(
         op: &mut Self,
@@ -276,7 +298,12 @@ impl From1Body for FermionOperator {
 
     fn from_1body_tril_spin_sym(one_body_a: ArrayView1<f64>, norb: u32) -> Self {
         let mut op = Self::zero();
-        op.groups = Some(vec![]);
+        // Seeded through the gate on an empty operator, where the whole-array check is trivially
+        // satisfied. The operator then *grows*: the builder below appends terms and group indices in
+        // lockstep (see `_insert_1body_idx` / `_insert_2body_idx`), which is the one construction
+        // pattern `set_groups`' contract cannot express, so it is confined to these constructors.
+        op.set_groups(Some(vec![]))
+            .expect("a term-less operator takes an empty group array");
         op.add_1body_tril_spin_sym(one_body_a, norb, Some(0));
         op
     }
@@ -321,7 +348,9 @@ impl From1Body for FermionOperator {
         norb: u32,
     ) -> Self {
         let mut op = Self::zero();
-        op.groups = Some(vec![]);
+        // See `from_1body_tril_spin_sym` for why the group indices are opened empty here.
+        op.set_groups(Some(vec![]))
+            .expect("a term-less operator takes an empty group array");
         op.add_1body_tril_spin(one_body_a, one_body_b, norb, Some(0));
         op
     }
@@ -406,7 +435,9 @@ impl From2Body for FermionOperator {
 
     fn from_2body_tril_spin_sym(two_body_aa: ArrayView1<f64>, norb: u32) -> Self {
         let mut op = Self::zero();
-        op.groups = Some(vec![]);
+        // See `from_1body_tril_spin_sym` for why the group indices are opened empty here.
+        op.set_groups(Some(vec![]))
+            .expect("a term-less operator takes an empty group array");
         op.add_2body_tril_spin_sym(two_body_aa, norb, Some(0));
         op
     }
@@ -489,7 +520,9 @@ impl From2Body for FermionOperator {
         norb: u32,
     ) -> Self {
         let mut op = Self::zero();
-        op.groups = Some(vec![]);
+        // See `from_1body_tril_spin_sym` for why the group indices are opened empty here.
+        op.set_groups(Some(vec![]))
+            .expect("a term-less operator takes an empty group array");
         op.add_2body_tril_spin(two_body_aa, two_body_ab, two_body_bb, norb, Some(0));
         op
     }

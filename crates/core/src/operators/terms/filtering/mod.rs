@@ -60,5 +60,9 @@ fn retain_terms(op: &mut FermionOperator, keep: impl Fn(FermionOperatorTermView)
     op.actions = actions;
     op.modes = modes;
     op.boundaries = boundaries;
-    op.groups = groups;
+    // The buffers above and `groups` were filled in the same pass, one push each per surviving
+    // term, so the length check cannot fire. `groups` is `None` for an ungrouped input, which the
+    // setter accepts unconditionally.
+    op.set_groups(groups)
+        .expect("`groups` was filled in lockstep with `coeffs`");
 }

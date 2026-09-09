@@ -252,7 +252,10 @@ impl FCIDump {
 impl From<&FCIDump> for FermionOperator {
     fn from(fcidump: &FCIDump) -> Self {
         let mut op = Self::zero();
-        op.groups = Some(vec![]);
+        // See `From1Body::from_1body_tril_spin_sym` for why the group indices are opened empty
+        // here: the blocks below grow the terms and the group indices in lockstep.
+        op.set_groups(Some(vec![]))
+            .expect("a term-less operator takes an empty group array");
 
         // The running group index is owned here and threaded through each block, so that no builder
         // has to re-derive it from the operator (see `From1Body::add_1body_tril_spin_sym`).
@@ -261,7 +264,9 @@ impl From<&FCIDump> for FermionOperator {
         if let Some(coeff) = fcidump.constant {
             op.coeffs.push(Complex64::new(coeff, 0.0));
             op.boundaries.push(op.boundaries.len() - 1);
-            op.groups = Some(vec![0]);
+            // Exactly one term was appended above, so the length check cannot fire.
+            op.set_groups(Some(vec![0]))
+                .expect("the constant is the operator's only term at this point");
             next_group_idx = Some(1);
         };
 
