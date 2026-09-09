@@ -550,7 +550,7 @@ impl OperatorTrait for EdgeVertexOperator {
         let offset = self.boundaries[self.boundaries.len() - 1];
         self.boundaries
             .extend(other.boundaries[1..].iter().map(|b| b + offset));
-        self.groups = None;
+        self.clear_groups();
     }
 
     fn __imul__(&mut self, other: Complex64) {
@@ -564,7 +564,7 @@ impl OperatorTrait for EdgeVertexOperator {
         let offset = self.boundaries[self.boundaries.len() - 1];
         self.boundaries
             .extend(other.boundaries[1..].iter().map(|b| b + offset));
-        self.groups = None;
+        self.clear_groups();
     }
 
     fn composed(&self, other: &Self) -> Self {
@@ -616,7 +616,7 @@ impl OperatorTrait for EdgeVertexOperator {
         self.left_indices = left_indices;
         self.right_indices = right_indices;
         self.boundaries = boundaries;
-        self.groups = None;
+        self.clear_groups();
     }
 
     fn iter(&self) -> impl ExactSizeIterator<Item = Self::TermView<'_>> {
@@ -640,17 +640,9 @@ impl OperatorTrait for EdgeVertexOperator {
         self.groups.as_deref()
     }
 
-    fn set_groups(&mut self, groups: Option<Vec<u32>>) -> Result<(), CoherenceError> {
-        if let Some(groups) = &groups
-            && groups.len() != self.coeffs.len()
-        {
-            return Err(CoherenceError::GroupLengthMismatch {
-                num_groups: groups.len(),
-                num_terms: self.coeffs.len(),
-            });
-        }
+    #[inline]
+    fn _write_groups(&mut self, groups: Option<Vec<u32>>) {
         self.groups = groups;
-        Ok(())
     }
 
     fn iter_with_groups(&self) -> impl ExactSizeIterator<Item = Self::GroupTermView<'_>> {
@@ -697,7 +689,11 @@ impl OperatorTrait for EdgeVertexOperator {
             out._append_term(term.coeff, term.left_indices, term.right_indices);
             groups.push(term.group);
         }
-        out.groups = Some(groups);
+        // One group index is pushed per appended term above, so the length check cannot fire; going
+        // through the checked setter anyway keeps that a property of this loop rather than an
+        // assumption spread across the file.
+        out.set_groups(Some(groups))
+            .expect("one group index is pushed per appended term");
         out
     }
 

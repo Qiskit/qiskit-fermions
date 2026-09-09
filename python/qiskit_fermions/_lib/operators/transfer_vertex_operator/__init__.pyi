@@ -966,6 +966,13 @@ class TransferVertexOperator:
     def __setstate__(self, state: typing.Optional[typing.Sequence[builtins.int]]) -> None:
         r"""
         Restores this operator's :attr:`groups` from its pickled state.
+        
+        Raises:
+            ValueError: if the pickled group indices do not number one per term. This is the one
+                route by which externally supplied group indices reach an operator without passing
+                through the :attr:`groups` setter, so it is validated rather than trusted: a payload
+                from an incompatible version, or a hand-edited one, would otherwise construct an
+                operator whose group indices nothing downstream re-checks.
         """
 
 @typing.final

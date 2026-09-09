@@ -17,6 +17,8 @@ from __future__ import annotations
 import copy
 from typing import Protocol
 
+import pytest
+
 
 class _OperatorClassProvider(Protocol):
     """The single hook a test class provides: which operator type to exercise."""
@@ -199,3 +201,44 @@ class OperatorContractTests:
         two = cls.from_dict({(): 2})
         assert two.__pow__(2, None).equiv(cls.from_dict({(): 4}))
         assert pow(two, 2, None).equiv(cls.from_dict({(): 4}))
+
+    def test_set_groups_err(self: _OperatorClassProvider):
+        """The ``groups`` setter rejects an array that does not hold one index per term.
+
+        Nothing downstream re-checks this, which is why it is rejected on assignment rather than
+        detected later: a short array would silently drop the trailing terms wherever terms are
+        iterated together with their groups, and a long one would make ``num_groups`` report groups
+        that no term carries.
+        """
+        cls = self.get_class()
+        op = cls.one() + cls.one()
+        assert len(op.get_coeffs()) == 2
+
+        with pytest.raises(ValueError, match="expected one group index per term"):
+            op.groups = [0]
+
+        with pytest.raises(ValueError, match="expected one group index per term"):
+            op.groups = [0, 0, 1]
+
+        assert not op.has_groups(), "a rejected assignment changed the operator"
+
+        op.groups = [0, 1]
+        op.groups = None
+        assert not op.has_groups(), "clearing the group indices must always be allowed"
+
+    def test_setstate_rejects_a_length_mismatch(self: _OperatorClassProvider):
+        """Unpickling validates the group indices rather than trusting them.
+
+        Unpickling restores the terms via ``__getnewargs__`` and only then the group indices via
+        ``__setstate__``, which makes it the one route by which externally supplied group indices
+        reach an operator without passing through the ``groups`` setter. A payload written by an
+        incompatible version -- or a hand-edited one -- would otherwise construct an operator whose
+        group indices no method downstream re-checks.
+        """
+        cls = self.get_class()
+        op = cls.one()
+
+        with pytest.raises(ValueError, match="expected one group index per term"):
+            op.__setstate__([0, 1])
+
+        assert not op.has_groups(), "a rejected payload changed the operator"

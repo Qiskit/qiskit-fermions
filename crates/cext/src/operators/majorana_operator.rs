@@ -492,7 +492,7 @@ pub unsafe extern "C" fn qf_maj_op_set_groups(
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn qf_maj_op_del_groups(op: *mut MajoranaOperator) {
     let op = unsafe { mut_ptr_as_ref(op) };
-    op.groups = None;
+    op.clear_groups();
 }
 
 /// @ingroup qf_maj_op
@@ -625,7 +625,7 @@ pub unsafe extern "C" fn qf_maj_op_add_term(
         .extend_from_slice(unsafe { slice_from_ptr(modes, num_modes) });
     op.boundaries.push(op.modes.len());
 
-    op.groups = None;
+    op.clear_groups();
 }
 
 /// @ingroup qf_maj_op

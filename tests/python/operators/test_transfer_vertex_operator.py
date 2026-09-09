@@ -523,35 +523,6 @@ class TestTransferVertexOperator(OperatorContractTests):
             op.groups = None
             assert not op.has_groups()
 
-    def test_set_groups_err(self, subtests):
-        cls = self.get_class()
-
-        op = cls.from_dict({((0, 1),): 1.0, ((2, 3),): 1.0})
-        assert len(op.get_coeffs()) == 2
-
-        # a short array would silently drop the trailing term wherever terms are iterated together
-        # with their groups
-        with (
-            subtests.test("too few indices"),
-            pytest.raises(ValueError, match="expected one group index per term"),
-        ):
-            op.groups = [0]
-
-        # a long array would make `num_groups` report groups that no term carries
-        with (
-            subtests.test("too many indices"),
-            pytest.raises(ValueError, match="expected one group index per term"),
-        ):
-            op.groups = [0, 0, 1]
-
-        with subtests.test("a rejected assignment changes nothing"):
-            assert not op.has_groups()
-
-        with subtests.test("clearing is always allowed"):
-            op.groups = [0, 1]
-            op.groups = None
-            assert not op.has_groups()
-
     def test_split_out_groups_err(self):
         cls = self.get_class()
 

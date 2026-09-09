@@ -743,7 +743,10 @@ impl PyMajoranaOperator {
             groups.push(group);
             Ok(())
         })?;
-        inner.groups = Some(groups);
+        // One group index is pushed per appended term above, so the length check cannot fire.
+        inner
+            .set_groups(Some(groups))
+            .expect("one group index is pushed per appended term");
         Ok(inner.into())
     }
 
@@ -1083,8 +1086,15 @@ impl PyMajoranaOperator {
     }
 
     /// Restores this operator's :attr:`groups` from its pickled state.
-    fn __setstate__(&mut self, state: Option<Vec<u32>>) {
-        self.inner.groups = state;
+    ///
+    /// Raises:
+    ///     ValueError: if the pickled group indices do not number one per term. This is the one
+    ///         route by which externally supplied group indices reach an operator without passing
+    ///         through the :attr:`groups` setter, so it is validated rather than trusted: a payload
+    ///         from an incompatible version, or a hand-edited one, would otherwise construct an
+    ///         operator whose group indices nothing downstream re-checks.
+    fn __setstate__(&mut self, state: Option<Vec<u32>>) -> PyResult<()> {
+        self.inner.set_groups(state).map_err(crate::value_err)
     }
 }
 

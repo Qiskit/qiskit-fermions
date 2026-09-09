@@ -1,0 +1,7 @@
+---
+upgrade:
+  - |
+    Unpickling an operator whose pickled group indices do not number one per term now raises a
+    ``ValueError`` instead of producing an operator whose group indices no longer match its terms.
+    This is only reachable for a hand-crafted payload or one written by an incompatible version;
+    pickles written by this version round-trip unchanged.
