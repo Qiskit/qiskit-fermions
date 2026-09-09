@@ -16,7 +16,7 @@ from __future__ import annotations
 
 from qiskit.circuit.library import PauliEvolutionGate
 from qiskit.passmanager import MultiStagePassManager
-from qiskit.quantum_info import SparseObservable, SparsePauliOp
+from qiskit.quantum_info import SparseObservable
 from qiskit.synthesis import LieTrotter, SuzukiTrotter
 from qiskit_fermions.circuit import FermionicCircuit
 from qiskit_fermions.circuit.library import Evolution
@@ -251,10 +251,10 @@ def test_simplify_preserves_the_operator():
     hamil = _flow_set_hamiltonian()
     num_qubits = len(hamil.get_support())
 
-    plain = SparsePauliOp.from_sparse_observable(jordan_wigner(hamil, num_qubits))
-    wrapped = SparsePauliOp.from_sparse_observable(simplify(jordan_wigner)(hamil, num_qubits))
+    plain = jordan_wigner(hamil, num_qubits)
+    wrapped = simplify(jordan_wigner)(hamil, num_qubits)
 
-    assert plain.simplify().equiv(wrapped.simplify())
+    assert (plain - wrapped).simplify() == SparseObservable.zero(num_qubits)
 
 
 def test_group_wise_preserves_the_operator():
@@ -262,10 +262,10 @@ def test_group_wise_preserves_the_operator():
     hamil = _flow_set_hamiltonian()
     num_qubits = len(hamil.get_support())
 
-    monolithic = SparsePauliOp.from_sparse_observable(jordan_wigner(hamil, num_qubits))
-    grouped = SparsePauliOp.from_sparse_observable(group_wise(jordan_wigner)(hamil, num_qubits))
+    monolithic = jordan_wigner(hamil, num_qubits)
+    grouped = group_wise(jordan_wigner)(hamil, num_qubits)
 
-    assert monolithic.simplify().equiv(grouped.simplify())
+    assert (monolithic - grouped).simplify() == SparseObservable.zero(num_qubits)
 
 
 def test_group_wise_emits_each_group_contiguously():
