@@ -13,9 +13,12 @@
 use pyo3::prelude::*;
 
 pub mod canonical;
+pub mod group;
 
 #[pymodule]
 pub mod ordering {
     #[pymodule_export]
     use super::canonical::canonical;
+    #[pymodule_export]
+    use super::group::group;
 }

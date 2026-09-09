@@ -122,6 +122,43 @@ detail in :ref:`this guide <grouping_explanation>`.
    filtering the Hamiltonian initially, rather than on every call, avoids
    redoing work for every circuit generated from it.
 
+.. hint::
+
+   For the same reason, it pays to order the Hamiltonian's terms by group index
+   here. Group indices are a per-term tag that says nothing about where those
+   terms sit, so a group's terms are in general scattered throughout the
+   operator: the grouping applied above assigns indices in order of first
+   encounter, which leaves a group's second term far from its first.
+
+   :class:`.QDriftTrotterization` samples whole groups and looks each drawn group
+   up with
+   :meth:`~qiskit_fermions.operators.OperatorTrait.split_out_groups`. Finding a
+   group among scattered terms means scanning all of them, so that lookup costs
+   the same whether one group is drawn or forty.
+   :func:`~qiskit_fermions.operators.terms.ordering.group_order` gathers each
+   group into one contiguous run, after which a lookup is a binary search over
+   the group boundaries and costs what the *drawn* groups cost rather than what
+   the *held* terms cost. The lookup itself becomes dramatically cheaper; how
+   much of a given transpilation that saves depends on what else the pipeline
+   does, since mapping and synthesis dominate once the scan is gone:
+
+   .. tab-set-code::
+
+       .. code-block:: python
+
+          >>> from qiskit_fermions.operators.terms.ordering import group_order
+          >>>
+          >>> canon = group_order(canon)
+          >>> print(canon.groups[:4])
+          [0, 0, ...]
+
+       .. code-block:: c
+
+          QfFermionOperator* grouped = qf_ferm_op_group_order(canon);
+
+   This reorders the terms without changing the operator's value, and needs to
+   happen only once no matter how many circuit randomizations are drawn from it.
+
 3. Prepare the time evolution circuit
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

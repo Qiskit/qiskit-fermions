@@ -10,6 +10,7 @@
 // copyright notice, and modified files need to carry a notice indicating
 // that they have been altered from the originals.
 
+use crate::operators::terms::grouping::group_term_range;
 use crate::operators::{
     CoherenceError, GroupedTerm, OperatorMacro, OperatorTrait, ScaledTerm, TermSortKey,
 };
@@ -168,7 +169,37 @@ impl FermionOperator {
                 Some(groups)
             }
             Some(group_indices) => {
-                self.groups.as_ref()?;
+                let groups = self.groups.as_ref()?;
+                if groups.is_sorted() {
+                    // Each group is one contiguous run of terms, so its range can be binary-searched
+                    // and its terms gathered directly. That makes a lookup scale with the number of
+                    // groups requested rather than the number of terms held, which is what makes
+                    // repeatedly sampling a few groups out of a large operator affordable. The check
+                    // itself is a short-circuiting scan over a contiguous `&[u32]`, orders of
+                    // magnitude cheaper than the term walk below.
+                    return Some(
+                        group_indices
+                            .iter()
+                            .map(|&idx| {
+                                let mut acc = Self::zero();
+                                // A requested index that no term carries yields a zero operator,
+                                // matching the fallback below.
+                                if let Some(range) = group_term_range(groups, idx) {
+                                    for i in range {
+                                        let (start, end) =
+                                            (self.boundaries[i], self.boundaries[i + 1]);
+                                        acc._append_term(
+                                            self.coeffs[i],
+                                            &self.actions[start..end],
+                                            &self.modes[start..end],
+                                        );
+                                    }
+                                }
+                                acc
+                            })
+                            .collect(),
+                    );
+                }
                 let mut wanted: HashMap<u32, Self> = group_indices
                     .iter()
                     .map(|&idx| (idx, Self::zero()))
@@ -1573,6 +1604,62 @@ mod tests {
 
         assert!(op.split_out_groups(None).is_none());
         assert!(op.split_out_groups(Some(&[0])).is_none());
+    }
+
+    // `split_out_groups(Some(..))` has two implementations: a binary search over the group
+    // boundaries when `groups` is sorted, and a full term scan when it is not. Every other test in
+    // this file happens to use sorted group indices and so only ever exercises the former; this one
+    // pins that the two agree, by running the same requests against an operator holding the same
+    // terms in a group-sorted and a group-scattered layout.
+    #[test]
+    fn test_split_out_groups_paths_agree() {
+        // Terms 0 and 2 in group 0, term 1 in group 1 -- deliberately *not* sorted, so this takes
+        // the scanning path.
+        let scattered = FermionOperator {
+            coeffs: vec![
+                Complex64::new(1.0, 0.0),
+                Complex64::new(2.0, 0.0),
+                Complex64::new(3.0, 0.0),
+            ],
+            actions: vec![true, false, true, false, true, false],
+            modes: vec![0, 1, 2, 3, 4, 5],
+            boundaries: vec![0, 2, 4, 6],
+            groups: Some(vec![0, 1, 0]),
+        };
+        assert!(!scattered.groups.as_ref().unwrap().is_sorted());
+
+        // The same terms, group-ordered, so this takes the binary-search path.
+        let sorted = crate::operators::terms::ordering::group::group_order(&scattered);
+        assert!(sorted.groups.as_ref().unwrap().is_sorted());
+
+        // Both paths agree for every request shape the method documents: a single index, reversed
+        // and non-exhaustive selection, a duplicated index (returned once per occurrence), an empty
+        // request, and an index that no term carries (a zero operator, since a sparse index range is
+        // legal).
+        for request in [
+            vec![0],
+            vec![1],
+            vec![1, 0],
+            vec![0, 0],
+            vec![],
+            vec![7],
+            vec![0, 7, 1],
+        ] {
+            let from_scan = scattered.split_out_groups(Some(&request)).unwrap();
+            let from_search = sorted.split_out_groups(Some(&request)).unwrap();
+            assert_eq!(from_scan.len(), request.len());
+            assert_eq!(from_search.len(), request.len());
+            for (scanned, searched) in from_scan.iter().zip(&from_search) {
+                assert!(
+                    scanned.equiv(searched, 1e-12),
+                    "paths disagree for request {request:?}",
+                );
+                // Neither path tags the results with group indices: each is built on `zero()` via
+                // `_append_term`, which does not maintain `groups`.
+                assert_eq!(scanned.groups, None);
+                assert_eq!(searched.groups, None);
+            }
+        }
     }
 
     #[test]

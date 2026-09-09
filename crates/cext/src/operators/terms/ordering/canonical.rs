@@ -78,7 +78,7 @@ pub unsafe extern "C" fn qf_ferm_op_canonical_order(
 /// The terms are sorted into a canonical order that depends only on each term's structure (the
 /// operator string it represents) and not on its coefficient. The order is therefore deterministic
 /// for a given set of terms regardless of how the operator was assembled. The terms themselves are
-/// left untouched — this only reorders them, it does not simplify the operator.
+/// left untouched — this only reorders them, it does not simplify or normal-order the operator.
 ///
 /// .. note::
 ///    Any group indices (see :c:func:`qf_maj_op_get_groups`) are preserved: each term carries its

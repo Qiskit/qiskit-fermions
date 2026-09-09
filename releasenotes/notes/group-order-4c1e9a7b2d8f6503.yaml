@@ -1,0 +1,28 @@
+---
+features:
+  - |
+    Added :func:`~qiskit_fermions.operators.terms.ordering.group_order`, which returns a copy of an
+    operator with its terms ordered by group index. Each group becomes one contiguous run of terms and
+    the group indices become non-decreasing; the sort is stable, so terms within a group keep their
+    relative order. An operator tracking no group indices has nothing to order by and is returned as
+    an unchanged copy.
+
+    Group indices only say which terms belong together, so this changes an operator's term layout, not
+    its value. The layout is what makes group lookup cheap:
+    :meth:`~qiskit_fermions.operators.OperatorTrait.split_out_groups` has to scan every term to find
+    the requested groups in general, but on a group-ordered operator it binary-searches the group
+    boundaries instead, so a lookup costs what the requested groups cost rather than what the held
+    terms cost. Ordering once up front therefore pays off across repeated lookups::
+
+        from qiskit_fermions.operators.terms.ordering import group_order
+
+        hamil = group_order(hamil)
+        # every subsequent hamil.split_out_groups(group_indices=...) is now a binary search
+
+    This is worth doing before repeatedly transpiling with
+    :class:`~qiskit_fermions.transpiler.passes.optimization.QDriftTrotterization`, which looks up its
+    sampled groups on every call. See :ref:`sqdrift_getting_started` for a worked example.
+  - |
+    Added ``qf_ferm_op_group_order``, along with the equivalent functions for the Majorana
+    (``qf_maj_op_group_order``), edge-vertex (``qf_edge_op_group_order``) and transfer-vertex
+    (``qf_transfer_op_group_order``) operator types.
