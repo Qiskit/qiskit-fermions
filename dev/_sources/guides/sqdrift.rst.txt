@@ -76,9 +76,14 @@ detail in :ref:`this guide <grouping_explanation>`.
 
     .. code-block:: c
 
-       QfFermionOperator* normal;
-       QfExitCode exit = qf_ferm_op_group_terms_by_electronic_structure(normal, num_modes, false);
-       QfFermionOperator* canon = qf_ferm_op_canonical_order(normal);
+       QfFermionOperator* normal = qf_ferm_op_normal_ordered(hamil, NULL);
+       QfFermionOperator* simplified = qf_ferm_op_simplify(normal, 1e-16);
+       QfFermionOperator* canon = qf_ferm_op_canonical_order(simplified);
+       QfExitCode exit = qf_ferm_op_group_terms_by_electronic_structure(canon, num_modes, false);
+       assert(exit == QfExitCode_Success);
+
+       qf_ferm_op_free(normal);
+       qf_ferm_op_free(simplified);
 
 .. hint::
 

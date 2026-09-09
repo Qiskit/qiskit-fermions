@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Simulate 2D Fermi-Hubbard dynamics with flow sets - Qiskit Fermions 0.2.0.dev0+1275c9c</title>
+        <title>Simulate 2D Fermi-Hubbard dynamics with flow sets - Qiskit Fermions 0.2.0.dev0+564dae3</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+1275c9c</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+564dae3</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+1275c9c</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+564dae3</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -755,6 +755,10 @@ between the flow sets is the Pauli string going in, which step 3 already printed
 <span class="gp">... </span><span class="sd">    `pauli` is the flow set's Pauli string, as printed in step 3. Its letters apply</span>
 <span class="gp">... </span><span class="sd">    to the i-th term's qubits in the order below: the two sites of the bond, then</span>
 <span class="gp">... </span><span class="sd">    their ancillas.</span>
+<span class="gp">...</span>
+<span class="gp">... </span><span class="sd">    This is the one check that needs SparsePauliOp: Clifford conjugation wants a</span>
+<span class="gp">... </span><span class="sd">    `Pauli` and its symplectic bits, and SparseObservable exposes neither -- its own</span>
+<span class="gp">... </span><span class="sd">    `evolve` conjugates by a Pauli, not by a Clifford.</span>
 <span class="gp">... </span><span class="sd">    """</span>
 <span class="gp">... </span>    <span class="n">supports</span> <span class="o">=</span> <span class="p">[]</span>
 <span class="gp">... </span>    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
@@ -1094,8 +1098,7 @@ carries the parity factor) commutes.</p>
 above. That is a five-line callback, and it slots into
 <a class="reference internal" href="../stubs/qiskit_fermions.mappers.map_edge_vertex_generators.html#qiskit_fermions.mappers.map_edge_vertex_generators" title="qiskit_fermions.mappers.map_edge_vertex_generators"><code class="xref py py-func docutils literal notranslate"><span class="pre">map_edge_vertex_generators()</span></code></a> exactly as <code class="docutils literal notranslate"><span class="pre">vc_action</span></code> slots into
 <a class="reference internal" href="../stubs/qiskit_fermions.mappers.map_transfer_vertex_generators.html#qiskit_fermions.mappers.map_transfer_vertex_generators" title="qiskit_fermions.mappers.map_transfer_vertex_generators"><code class="xref py py-func docutils literal notranslate"><span class="pre">map_transfer_vertex_generators()</span></code></a>:</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit.quantum_info</span><span class="w"> </span><span class="kn">import</span> <span class="n">SparsePauliOp</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.mappers</span><span class="w"> </span><span class="kn">import</span> <span class="n">map_edge_vertex_generators</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.mappers</span><span class="w"> </span><span class="kn">import</span> <span class="n">map_edge_vertex_generators</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.operators</span><span class="w"> </span><span class="kn">import</span> <span class="n">EdgeVertexOperator</span>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">vc_edge_action</span><span class="p">(</span><span class="n">generator</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">cols</span><span class="p">):</span>
@@ -1137,30 +1140,28 @@ above. That is a five-line callback, and it slots into
 <span class="gp">... </span>    <span class="k">for</span> <span class="n">loop</span> <span class="ow">in</span> <span class="n">plaquette_loops</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">cols</span><span class="p">):</span>
 <span class="gp">... </span>        <span class="n">loop_operator</span> <span class="o">=</span> <span class="n">EdgeVertexOperator</span><span class="o">.</span><span class="n">from_dict</span><span class="p">({</span><span class="nb">tuple</span><span class="p">(</span><span class="n">loop</span><span class="p">):</span> <span class="mf">1.0</span><span class="p">})</span>
 <span class="gp">... </span>        <span class="n">encoded_loop</span> <span class="o">=</span> <span class="n">vc_edge_encoding</span><span class="p">(</span><span class="n">loop_operator</span><span class="p">,</span> <span class="n">num_qubits</span><span class="p">,</span> <span class="n">cols</span><span class="p">)</span>
-<span class="gp">... </span>        <span class="n">stabilizer</span> <span class="o">=</span> <span class="n">SparsePauliOp</span><span class="o">.</span><span class="n">from_sparse_observable</span><span class="p">(</span><span class="n">encoded_loop</span><span class="p">)</span>
-<span class="gp">... </span>        <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">stabilizer</span> <span class="o">/</span> <span class="n">stabilizer</span><span class="o">.</span><span class="n">coeffs</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="gp">... </span>        <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">encoded_loop</span> <span class="o">/</span> <span class="nb">complex</span><span class="p">(</span><span class="n">encoded_loop</span><span class="o">.</span><span class="n">coeffs</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
 <span class="gp">... </span>    <span class="k">return</span> <span class="n">out</span>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">plaquette_stabilizers</span> <span class="o">=</span> <span class="n">stabilizers</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">cols</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">stabilizer</span> <span class="ow">in</span> <span class="n">plaquette_stabilizers</span><span class="p">:</span>
-<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="n">stabilizer</span><span class="o">.</span><span class="n">paulis</span><span class="o">.</span><span class="n">to_labels</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
-<span class="go">IIIIYXIXYIIIIZIIZI</span>
-<span class="go">IIIYXIXYIIIIZIIZII</span>
-<span class="go">IYXIXYIIIIZIIZIIII</span>
-<span class="go">YXIXYIIIIZIIZIIIII</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="n">stabilizer</span><span class="o">.</span><span class="n">to_sparse_list</span><span class="p">())</span>
+<span class="go">[('ZZYXXY', [1, 4, 9, 10, 12, 13], (1+0j))]</span>
+<span class="go">[('ZZYXXY', [2, 5, 10, 11, 13, 14], (1+0j))]</span>
+<span class="go">[('ZZYXXY', [4, 7, 12, 13, 15, 16], (1+0j))]</span>
+<span class="go">[('ZZYXXY', [5, 8, 13, 14, 16, 17], (1+0j))]</span>
 </pre></div>
 </div>
 <p>Each generator has weight <span class="math">\(6\)</span>, spread over two of its plaquette’s physical qubits and
 four ancillas. They are involutory and commute with the encoded Hamiltonian, so the physical
 subspace is preserved by the dynamics. Both properties are statements about operators, so
-they are checked symbolically on the <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.quantum_info.SparsePauliOp" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">SparsePauliOp</span></code></a> algebra,
+they are checked symbolically on the <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.quantum_info.SparseObservable" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">SparseObservable</span></code></a> algebra,
 no <span class="math">\(2^{18} \times 2^{18}\)</span> matrices required:</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">encoded</span> <span class="o">=</span> <span class="n">SparsePauliOp</span><span class="o">.</span><span class="n">from_sparse_observable</span><span class="p">(</span><span class="n">encoding</span><span class="p">(</span><span class="n">hamiltonian</span><span class="p">,</span> <span class="n">num_qubits</span><span class="p">))</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">identity</span> <span class="o">=</span> <span class="n">SparsePauliOp</span><span class="p">(</span><span class="s2">"I"</span> <span class="o">*</span> <span class="n">num_qubits</span><span class="p">)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">encoded</span> <span class="o">=</span> <span class="n">encoding</span><span class="p">(</span><span class="n">hamiltonian</span><span class="p">,</span> <span class="n">num_qubits</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">identity</span> <span class="o">=</span> <span class="n">SparseObservable</span><span class="o">.</span><span class="n">identity</span><span class="p">(</span><span class="n">num_qubits</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">stabilizer</span> <span class="ow">in</span> <span class="n">plaquette_stabilizers</span><span class="p">:</span>
-<span class="gp">... </span>    <span class="n">square</span> <span class="o">=</span> <span class="p">(</span><span class="n">stabilizer</span> <span class="o">@</span> <span class="n">stabilizer</span><span class="p">)</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span>
-<span class="gp">... </span>    <span class="n">commutator</span> <span class="o">=</span> <span class="p">(</span><span class="n">stabilizer</span> <span class="o">@</span> <span class="n">encoded</span> <span class="o">-</span> <span class="n">encoded</span> <span class="o">@</span> <span class="n">stabilizer</span><span class="p">)</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span>
-<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="n">square</span> <span class="o">==</span> <span class="n">identity</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">commutator</span><span class="o">.</span><span class="n">coeffs</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="n">square</span> <span class="o">=</span> <span class="n">stabilizer</span><span class="o">.</span><span class="n">compose</span><span class="p">(</span><span class="n">stabilizer</span><span class="p">)</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="n">square</span> <span class="o">==</span> <span class="n">identity</span><span class="p">,</span> <span class="n">stabilizer</span><span class="o">.</span><span class="n">commutes</span><span class="p">(</span><span class="n">encoded</span><span class="p">))</span>
 <span class="go">True True</span>
 <span class="go">True True</span>
 <span class="go">True True</span>
@@ -1183,9 +1184,13 @@ this section cheap.</p>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># an exact evolution time, unrelated to the Trotter step above</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">evolution_time</span> <span class="o">=</span> <span class="mf">0.6</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">reference</span> <span class="o">=</span> <span class="n">SparsePauliOp</span><span class="o">.</span><span class="n">from_sparse_observable</span><span class="p">(</span>
-<span class="gp">... </span>    <span class="n">transfer_vertex_jordan_wigner</span><span class="p">(</span><span class="n">hamiltonian</span><span class="p">,</span> <span class="n">num_sites</span><span class="p">)</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span>
-<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reference</span> <span class="o">=</span> <span class="n">transfer_vertex_jordan_wigner</span><span class="p">(</span><span class="n">hamiltonian</span><span class="p">,</span> <span class="n">num_sites</span><span class="p">)</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">to_sparse_matrix</span><span class="p">(</span><span class="n">observable</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="c1"># SparseObservable carries no dense- or sparse-matrix method, so route through</span>
+<span class="gp">... </span>    <span class="c1"># SparsePauliOp. This is only ever needed for the numerical checks below --</span>
+<span class="gp">... </span>    <span class="c1"># the encoding itself never leaves SparseObservable.</span>
+<span class="gp">... </span>    <span class="k">return</span> <span class="n">SparsePauliOp</span><span class="o">.</span><span class="n">from_sparse_observable</span><span class="p">(</span><span class="n">observable</span><span class="p">)</span><span class="o">.</span><span class="n">to_matrix</span><span class="p">(</span><span class="n">sparse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">basis_state</span><span class="p">(</span><span class="n">occupation</span><span class="p">,</span> <span class="n">num_qubits</span><span class="p">):</span>
 <span class="gp">... </span><span class="w">    </span><span class="sd">"""The computational basis state with `occupation` on the first qubits.</span>
@@ -1210,7 +1215,7 @@ this section cheap.</p>
 <span class="gp">... </span><span class="sd">    halvings only rescale the result and the final normalization absorbs them.</span>
 <span class="gp">... </span><span class="sd">    """</span>
 <span class="gp">... </span>    <span class="k">for</span> <span class="n">stabilizer</span> <span class="ow">in</span> <span class="n">stabilizers</span><span class="p">:</span>
-<span class="gp">... </span>        <span class="n">state</span> <span class="o">+=</span> <span class="n">stabilizer</span><span class="o">.</span><span class="n">to_matrix</span><span class="p">(</span><span class="n">sparse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">@</span> <span class="n">state</span>
+<span class="gp">... </span>        <span class="n">state</span> <span class="o">+=</span> <span class="n">to_sparse_matrix</span><span class="p">(</span><span class="n">stabilizer</span><span class="p">)</span> <span class="o">@</span> <span class="n">state</span>
 <span class="gp">... </span>    <span class="k">return</span> <span class="n">state</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">occupation</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>  <span class="c1"># site occupations of the initial state</span>
@@ -1220,17 +1225,17 @@ this section cheap.</p>
 <span class="gp">... </span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">evolved_encoded</span> <span class="o">=</span> <span class="n">expm_multiply</span><span class="p">(</span>
-<span class="gp">... </span>    <span class="o">-</span><span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">evolution_time</span> <span class="o">*</span> <span class="n">encoded</span><span class="o">.</span><span class="n">to_matrix</span><span class="p">(</span><span class="n">sparse</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">initial_encoded</span>
+<span class="gp">... </span>    <span class="o">-</span><span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">evolution_time</span> <span class="o">*</span> <span class="n">to_sparse_matrix</span><span class="p">(</span><span class="n">encoded</span><span class="p">),</span> <span class="n">initial_encoded</span>
 <span class="gp">... </span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">evolved_reference</span> <span class="o">=</span> <span class="n">expm_multiply</span><span class="p">(</span>
-<span class="gp">... </span>    <span class="o">-</span><span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">evolution_time</span> <span class="o">*</span> <span class="n">reference</span><span class="o">.</span><span class="n">to_matrix</span><span class="p">(</span><span class="n">sparse</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">initial_reference</span>
+<span class="gp">... </span>    <span class="o">-</span><span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">evolution_time</span> <span class="o">*</span> <span class="n">to_sparse_matrix</span><span class="p">(</span><span class="n">reference</span><span class="p">),</span> <span class="n">initial_reference</span>
 <span class="gp">... </span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">density</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">qubit</span><span class="p">,</span> <span class="n">width</span><span class="p">):</span>
 <span class="gp">... </span><span class="w">    </span><span class="sd">"""Site density &lt;n_j&gt; = (1 - &lt;Z_j&gt;) / 2 of a statevector."""</span>
-<span class="gp">... </span>    <span class="n">z</span> <span class="o">=</span> <span class="n">SparsePauliOp</span><span class="o">.</span><span class="n">from_sparse_list</span><span class="p">(</span>
-<span class="gp">... </span>        <span class="p">[(</span><span class="s2">"Z"</span><span class="p">,</span> <span class="p">[</span><span class="n">qubit</span><span class="p">],</span> <span class="mf">1.0</span><span class="p">)],</span> <span class="n">num_qubits</span><span class="o">=</span><span class="n">width</span>
-<span class="gp">... </span>    <span class="p">)</span><span class="o">.</span><span class="n">to_matrix</span><span class="p">(</span><span class="n">sparse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="n">z</span> <span class="o">=</span> <span class="n">to_sparse_matrix</span><span class="p">(</span>
+<span class="gp">... </span>        <span class="n">SparseObservable</span><span class="o">.</span><span class="n">from_sparse_list</span><span class="p">([(</span><span class="s2">"Z"</span><span class="p">,</span> <span class="p">[</span><span class="n">qubit</span><span class="p">],</span> <span class="mf">1.0</span><span class="p">)],</span> <span class="n">num_qubits</span><span class="o">=</span><span class="n">width</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="p">)</span>
 <span class="gp">... </span>    <span class="k">return</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span> <span class="o">@</span> <span class="p">(</span><span class="n">z</span> <span class="o">@</span> <span class="n">state</span><span class="p">))</span><span class="o">.</span><span class="n">real</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">encoded_densities</span> <span class="o">=</span> <span class="p">[</span><span class="n">density</span><span class="p">(</span><span class="n">evolved_encoded</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">num_qubits</span><span class="p">)</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_sites</span><span class="p">)]</span>
@@ -1268,7 +1273,7 @@ within any one of them:</p>
 <span class="gp">... </span>    <span class="n">basis_state</span><span class="p">(</span><span class="n">occupation</span><span class="p">,</span> <span class="n">num_qubits</span><span class="p">),</span> <span class="n">plaquette_stabilizers</span>
 <span class="gp">... </span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">exact</span> <span class="o">=</span> <span class="n">expm_multiply</span><span class="p">(</span>
-<span class="gp">... </span>    <span class="o">-</span><span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">total_time</span> <span class="o">*</span> <span class="n">encoded</span><span class="o">.</span><span class="n">to_matrix</span><span class="p">(</span><span class="n">sparse</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">initial_state</span>
+<span class="gp">... </span>    <span class="o">-</span><span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">total_time</span> <span class="o">*</span> <span class="n">to_sparse_matrix</span><span class="p">(</span><span class="n">encoded</span><span class="p">),</span> <span class="n">initial_state</span>
 <span class="gp">... </span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">trotter_fidelity</span><span class="p">(</span><span class="n">steps</span><span class="p">):</span>
@@ -1487,7 +1492,7 @@ dimensions, <a class="reference external" href="https://doi.org/10.1103/PRXQuant
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=a7e43e26"></script>
+</div><script src="../_static/documentation_options.js?v=bbc9f436"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

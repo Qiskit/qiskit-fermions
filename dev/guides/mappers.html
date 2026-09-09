@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Map operator representations - Qiskit Fermions 0.2.0.dev0+1275c9c</title>
+        <title>Map operator representations - Qiskit Fermions 0.2.0.dev0+564dae3</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+1275c9c</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+564dae3</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+1275c9c</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+564dae3</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -279,7 +279,7 @@ a <a class="reference internal" href="../stubs/qiskit_fermions.operators.Majoran
 <input checked="checked" id="sd-tab-item-0" name="sd-tab-set-0" type="radio">
 <label class="sd-tab-label" data-sync-group="code" data-sync-id="python" for="sd-tab-item-0">
 PYTHON</label><div class="sd-tab-content docutils">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit.quantum_info</span><span class="w"> </span><span class="kn">import</span> <span class="n">SparsePauliOp</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit.quantum_info</span><span class="w"> </span><span class="kn">import</span> <span class="n">SparseObservable</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.mappers</span><span class="w"> </span><span class="kn">import</span> <span class="n">map_majorana_action_generators</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.operators</span><span class="w"> </span><span class="kn">import</span> <span class="n">MajoranaOperator</span>
 <span class="gp">&gt;&gt;&gt;</span>
@@ -288,24 +288,24 @@ PYTHON</label><div class="sd-tab-content docutils">
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># Define how each Majorana action maps to Pauli strings</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">num_qubits</span> <span class="o">=</span> <span class="mi">2</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">map_action</span><span class="p">(</span><span class="n">mode</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SparsePauliOp</span><span class="p">:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">map_action</span><span class="p">(</span><span class="n">mode</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SparseObservable</span><span class="p">:</span>
 <span class="gp">... </span>    <span class="n">idx</span> <span class="o">=</span> <span class="n">mode</span> <span class="o">//</span> <span class="mi">2</span>
 <span class="gp">... </span>    <span class="n">qubits</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
 <span class="gp">... </span>    <span class="n">pauli</span> <span class="o">=</span> <span class="s2">"Y"</span> <span class="k">if</span> <span class="n">mode</span> <span class="o">%</span> <span class="mi">2</span> <span class="k">else</span> <span class="s2">"X"</span>
-<span class="gp">... </span>    <span class="k">return</span> <span class="n">SparsePauliOp</span><span class="o">.</span><span class="n">from_sparse_list</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="k">return</span> <span class="n">SparseObservable</span><span class="o">.</span><span class="n">from_sparse_list</span><span class="p">(</span>
 <span class="gp">... </span>        <span class="p">[(</span><span class="s2">"Z"</span> <span class="o">*</span> <span class="n">idx</span> <span class="o">+</span> <span class="n">pauli</span><span class="p">,</span> <span class="n">qubits</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)],</span>
 <span class="gp">... </span>        <span class="n">num_qubits</span><span class="o">=</span><span class="n">num_qubits</span><span class="p">,</span>
 <span class="gp">... </span>    <span class="p">)</span>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># Apply the mapping to transform the operator</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">sparse_pauli_op</span> <span class="o">=</span> <span class="n">map_majorana_action_generators</span><span class="p">(</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">custom_observable</span> <span class="o">=</span> <span class="n">map_majorana_action_generators</span><span class="p">(</span>
 <span class="gp">... </span>    <span class="n">maj_op</span><span class="p">,</span>
 <span class="gp">... </span>    <span class="n">map_action</span><span class="p">,</span>
-<span class="gp">... </span>    <span class="n">identity</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="n">SparsePauliOp</span><span class="o">.</span><span class="n">from_sparse_list</span><span class="p">([(</span><span class="s2">""</span><span class="p">,</span> <span class="p">[],</span> <span class="mi">1</span><span class="p">)],</span> <span class="n">num_qubits</span><span class="o">=</span><span class="n">num_qubits</span><span class="p">),</span>
+<span class="gp">... </span>    <span class="n">identity</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="n">SparseObservable</span><span class="o">.</span><span class="n">identity</span><span class="p">(</span><span class="n">num_qubits</span><span class="p">),</span>
+<span class="gp">... </span>    <span class="n">compose</span><span class="o">=</span><span class="n">SparseObservable</span><span class="o">.</span><span class="n">compose</span><span class="p">,</span>
 <span class="gp">... </span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">sparse_pauli_op</span><span class="o">.</span><span class="n">sort</span><span class="p">())</span>
-<span class="go">SparsePauliOp(['II', 'IZ', 'XZ'],</span>
-<span class="go">              coeffs=[0. +0.j, 0. +1.j, 0.5+0.j])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">custom_observable</span><span class="o">.</span><span class="n">simplify</span><span class="p">())</span>
+<span class="go">&lt;SparseObservable with 2 terms on 2 qubits: (0+1j)(Z_0) + (0.5+0j)(X_1 Z_0)&gt;</span>
 </pre></div>
 </div>
 </div>
@@ -361,7 +361,8 @@ PYTHON</label><div class="sd-tab-content docutils">
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># Apply Jordan-Wigner mapper to get qubit operator</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">sparse_observable</span> <span class="o">=</span> <span class="n">jordan_wigner</span><span class="p">(</span><span class="n">ferm_op</span><span class="p">,</span> <span class="n">num_qubits</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">SparsePauliOp</span><span class="o">.</span><span class="n">from_sparse_observable</span><span class="p">(</span><span class="n">sparse_observable</span><span class="p">)</span><span class="o">.</span><span class="n">equiv</span><span class="p">(</span><span class="n">sparse_pauli_op</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">difference</span> <span class="o">=</span> <span class="n">sparse_observable</span> <span class="o">-</span> <span class="n">custom_observable</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">difference</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span> <span class="o">==</span> <span class="n">SparseObservable</span><span class="o">.</span><span class="n">zero</span><span class="p">(</span><span class="n">num_qubits</span><span class="p">))</span>
 <span class="go">True</span>
 </pre></div>
 </div>
@@ -380,15 +381,17 @@ C</label><div class="sd-tab-content docutils">
 <span class="n">QfMajoranaOperator</span><span class="w"> </span><span class="o">*</span><span class="n">maj_op</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_maj_op_new</span><span class="p">(</span><span class="n">num_terms</span><span class="p">,</span><span class="w"> </span><span class="n">num_modes</span><span class="p">,</span><span class="w"> </span><span class="n">coeffs</span><span class="p">,</span><span class="w"> </span><span class="n">modes</span><span class="p">,</span><span class="w"> </span><span class="n">boundaries</span><span class="p">);</span>
 
 <span class="c1">// Convert MajoranaOperator to FermionOperator using library mapper</span>
-<span class="n">QfFermionOperator</span><span class="w"> </span><span class="o">*</span><span class="n">ferm_op</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_maj_op_to_ferm_op</span><span class="p">(</span><span class="n">maj_op</span><span class="p">);</span>
+<span class="n">QfFermionOperator</span><span class="w"> </span><span class="o">*</span><span class="n">ferm_op</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_majorana_to_fermion</span><span class="p">(</span><span class="n">maj_op</span><span class="p">);</span>
 
 <span class="c1">// Apply Jordan-Wigner mapper to get qubit operator</span>
-<span class="n">QfSparseObservable</span><span class="w"> </span><span class="o">*</span><span class="n">qubit_op</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_ferm_op_jordan_wigner</span><span class="p">(</span><span class="n">ferm_op</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span>
+<span class="n">QkObs</span><span class="w"> </span><span class="o">*</span><span class="n">qubit_op</span><span class="p">;</span>
+<span class="n">QfExitCode</span><span class="w"> </span><span class="n">exit</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_ferm_op_jordan_wigner</span><span class="p">(</span><span class="n">ferm_op</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">qubit_op</span><span class="p">);</span>
+<span class="n">assert</span><span class="p">(</span><span class="n">exit</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">QfExitCode_Success</span><span class="p">);</span>
 
 <span class="c1">// Clean up</span>
 <span class="n">qf_ferm_op_free</span><span class="p">(</span><span class="n">ferm_op</span><span class="p">);</span>
 <span class="n">qf_maj_op_free</span><span class="p">(</span><span class="n">maj_op</span><span class="p">);</span>
-<span class="n">qf_sparse_obs_free</span><span class="p">(</span><span class="n">qubit_op</span><span class="p">);</span>
+<span class="n">qk_obs_free</span><span class="p">(</span><span class="n">qubit_op</span><span class="p">);</span>
 </pre></div>
 </div>
 </div>
@@ -487,7 +490,7 @@ internally.</p>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=a7e43e26"></script>
+</div><script src="../_static/documentation_options.js?v=bbc9f436"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
