@@ -37,6 +37,9 @@ def map_fermion_action_generators(
     .. note::
        The output type ``T`` must support multiplication by a scalar via ``__mul__``.
        If ``compose=None`` it must also support composition of two instances via ``__and__``.
+       :class:`~qiskit.quantum_info.SparseObservable` does not, which is why the example below
+       names :meth:`~qiskit.quantum_info.SparseObservable.compose` explicitly; a type with an
+       ``__and__`` (such as :class:`~qiskit.quantum_info.SparsePauliOp`) can rely on the default.
 
     .. note::
        The mapping written out below is a minimal illustration of this function rather than a

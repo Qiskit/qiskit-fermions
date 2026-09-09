@@ -47,8 +47,7 @@ def jordan_wigner_nearest_neighbor(op: EdgeVertexOperator, num_qubits: int) -> S
         op,
         map_action,
         lambda: SparseObservable.identity(num_qubits),
-        # `SparseObservable` has no `__and__`, which is what the `compose=None` default
-        # would reach for, so the composition is named explicitly.
+        # `SparseObservable` has no `__and__`, so the `compose=None` default is unusable.
         compose=SparseObservable.compose,
     )
 
