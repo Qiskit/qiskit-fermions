@@ -63,8 +63,14 @@ Members
 Ordering
 --------
 
-The C API provides functions to reorder the terms of an operator into a canonical,
-coefficient-independent order.
+The C API provides functions to reorder the terms of an operator, either into a
+canonical, coefficient-independent order or by group index.
+
+Group indices are a per-term tag that says nothing about where those terms sit,
+so the terms of one group are in general scattered throughout an operator.
+Ordering by group gathers each into one contiguous run, which is what lets
+``qf_op_type_split_out_groups`` locate a requested group by binary search instead
+of scanning every term.
 
 Members
 ^^^^^^^
@@ -77,6 +83,12 @@ Members
   :c:func:`qf_edge_op_canonical_order`     Reorders the terms of an edge-vertex operator canonically.
   :c:func:`qf_transfer_op_canonical_order` Reorders the terms of a transfer-vertex operator
                                            canonically.
+  :c:func:`qf_ferm_op_group_order`         Reorders the terms of a fermionic operator by group index.
+  :c:func:`qf_maj_op_group_order`          Reorders the terms of a Majorana operator by group index.
+  :c:func:`qf_edge_op_group_order`         Reorders the terms of an edge-vertex operator by group
+                                           index.
+  :c:func:`qf_transfer_op_group_order`     Reorders the terms of a transfer-vertex operator by group
+                                           index.
   ======================================== ============================================================
 
 .. doxygengroup:: qf_operator_terms

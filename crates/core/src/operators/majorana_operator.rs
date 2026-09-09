@@ -10,6 +10,7 @@
 // copyright notice, and modified files need to carry a notice indicating
 // that they have been altered from the originals.
 
+use crate::operators::terms::grouping::group_term_range;
 use crate::operators::{
     CoherenceError, GroupedTerm, OperatorMacro, OperatorTrait, ScaledTerm, TermSortKey,
 };
@@ -155,7 +156,26 @@ impl MajoranaOperator {
                 Some(groups)
             }
             Some(group_indices) => {
-                self.groups.as_ref()?;
+                let groups = self.groups.as_ref()?;
+                if groups.is_sorted() {
+                    // See `FermionOperator::split_out_groups` for why this fast path exists.
+                    return Some(
+                        group_indices
+                            .iter()
+                            .map(|&idx| {
+                                let mut acc = Self::zero();
+                                if let Some(range) = group_term_range(groups, idx) {
+                                    for i in range {
+                                        let (start, end) =
+                                            (self.boundaries[i], self.boundaries[i + 1]);
+                                        acc._append_term(self.coeffs[i], &self.modes[start..end]);
+                                    }
+                                }
+                                acc
+                            })
+                            .collect(),
+                    );
+                }
                 let mut wanted: HashMap<u32, Self> = group_indices
                     .iter()
                     .map(|&idx| (idx, Self::zero()))

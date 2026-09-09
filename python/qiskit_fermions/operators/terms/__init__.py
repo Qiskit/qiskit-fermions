@@ -76,6 +76,12 @@ resulting operators are mathematically identical, the term order can have
 significant implications on algorithm behavior at runtime, due to the term
 iteration order.
 
+Group indices are a per-term tag that says nothing about where those terms sit, so the terms of one
+group are in general scattered throughout an operator. :func:`group_order` gathers each group into one
+contiguous run, which is what lets
+:meth:`~qiskit_fermions.operators.OperatorTrait.split_out_groups` locate a requested group by binary
+search instead of scanning every term.
+
 .. note::
    Unlike :func:`canonical_order`, :func:`order_terms` has no counterpart in the C API.
 
@@ -86,6 +92,7 @@ Members
    :toctree: ../stubs/
 
    canonical_order
+   group_order
    order_terms
 """
 
@@ -96,12 +103,13 @@ from .grouping import (
     groups_are_hermitian,
     groups_have_uniform_coeffs,
 )
-from .ordering import canonical_order, order_terms
+from .ordering import canonical_order, group_order, order_terms
 
 __all__ = [
     "canonical_order",
     "filter_diagonal_terms",
     "group_coeff_means",
+    "group_order",
     "group_terms_by_electronic_structure",
     "groups_are_hermitian",
     "groups_have_uniform_coeffs",

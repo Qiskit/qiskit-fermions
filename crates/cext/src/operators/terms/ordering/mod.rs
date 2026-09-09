@@ -11,3 +11,4 @@
 // that they have been altered from the originals.
 
 pub mod canonical;
+pub mod group;

@@ -15,10 +15,14 @@
 from qiskit_fermions._lib.operators.operators_terms.ordering.canonical import (
     canonical_order,
 )
+from qiskit_fermions._lib.operators.operators_terms.ordering.group import (
+    group_order,
+)
 
 from .callable import order_terms
 
 __all__ = [
     "canonical_order",
+    "group_order",
     "order_terms",
 ]
