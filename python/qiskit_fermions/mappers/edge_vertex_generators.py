@@ -37,6 +37,9 @@ def map_edge_vertex_generators(
     .. note::
        The output type ``T`` must support multiplication by a scalar via ``__mul__``.
        If ``compose=None`` it must also support composition of two instances via ``__and__``.
+       :class:`~qiskit.quantum_info.SparseObservable` does not, which is why the example below
+       names :meth:`~qiskit.quantum_info.SparseObservable.compose` explicitly; a type with an
+       ``__and__`` (such as :class:`~qiskit.quantum_info.SparsePauliOp`) can rely on the default.
 
     .. note::
        The mapping written out below is a deliberately minimal illustration of this function, not a
@@ -48,12 +51,12 @@ def map_edge_vertex_generators(
 
         >>> from qiskit_fermions.mappers import map_edge_vertex_generators
         >>> from qiskit_fermions.operators import EdgeAction, EdgeVertexOperator
-        >>> from qiskit.quantum_info import SparsePauliOp
+        >>> from qiskit.quantum_info import SparseObservable
         >>>
-        >>> def jordan_wigner_nearest_neighbor(mode: EdgeAction) -> SparsePauliOp:
+        >>> def jordan_wigner_nearest_neighbor(mode: EdgeAction) -> SparseObservable:
         ...     left, right = mode
         ...     if left == right:
-        ...         return SparsePauliOp.from_sparse_list(
+        ...         return SparseObservable.from_sparse_list(
         ...             [("Z", [left], 1.0)], num_qubits=num_qubits
         ...         )
         ...     if abs(left - right) != 1:
@@ -64,22 +67,24 @@ def map_edge_vertex_generators(
         ...     # antisymmetric, so the sign depends on the index order while the string does not.
         ...     lo, hi = min(left, right), max(left, right)
         ...     coeff = -1.0 if left < right else 1.0
-        ...     return SparsePauliOp.from_sparse_list(
+        ...     return SparseObservable.from_sparse_list(
         ...         [("YX", [lo, hi], coeff)], num_qubits=num_qubits
         ...     )
         >>>
         >>> num_qubits = 4
-        >>> def identity() -> SparsePauliOp:
-        ...     return SparsePauliOp.from_sparse_list([("", [], 1)], num_qubits)
+        >>> def identity() -> SparseObservable:
+        ...     return SparseObservable.identity(num_qubits)
         >>>
         >>> op = EdgeVertexOperator.from_dict({
         ...     ((0, 0),): 2.0,
         ...     ((0, 1),): 0.5,
         ...     ((1, 1), (1, 2)): 1.0,
         ... })
-        >>> qop = map_edge_vertex_generators(op, jordan_wigner_nearest_neighbor, identity)
-        >>> print([(label, complex(coeff)) for label, coeff in sorted(qop.label_iter())])
-        [('IIII', 0j), ('IIIZ', (2+0j)), ('IIXY', (-0.5+0j)), ('IXXI', 1j)]
+        >>> qop = map_edge_vertex_generators(
+        ...     op, jordan_wigner_nearest_neighbor, identity, compose=SparseObservable.compose
+        ... )
+        >>> print(sorted(qop.simplify().to_sparse_list()))
+        [('XX', [1, 2], 1j), ('YX', [0, 1], (-0.5+0j)), ('Z', [0], (2+0j))]
 
     Args:
         operator: the operator to be mapped.

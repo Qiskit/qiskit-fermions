@@ -12,13 +12,13 @@
 
 from functools import cache
 
-from qiskit.quantum_info import SparseObservable, SparsePauliOp
+from qiskit.quantum_info import SparseObservable
 from qiskit_fermions.mappers import map_transfer_vertex_generators
 from qiskit_fermions.mappers.library import transfer_vertex_jordan_wigner
 from qiskit_fermions.operators import TransferAction, TransferVertexOperator
 
 
-def jordan_wigner_nearest_neighbor(op: TransferVertexOperator, num_qubits: int) -> SparsePauliOp:
+def jordan_wigner_nearest_neighbor(op: TransferVertexOperator, num_qubits: int) -> SparseObservable:
     """Custom Jordan-Wigner transformation for nearest neighbor interactions.
 
     This is a deliberately minimal implementation, written to exercise
@@ -29,10 +29,10 @@ def jordan_wigner_nearest_neighbor(op: TransferVertexOperator, num_qubits: int) 
     """
 
     @cache
-    def map_action(mode: TransferAction) -> SparsePauliOp:
+    def map_action(mode: TransferAction) -> SparseObservable:
         left, right = mode
         if left == right:
-            return SparsePauliOp.from_sparse_list([("Z", [left], 1.0)], num_qubits=num_qubits)
+            return SparseObservable.from_sparse_list([("Z", [left], 1.0)], num_qubits=num_qubits)
         if abs(left - right) != 1:
             raise NotImplementedError("This mapping only handles nearest neighbor interactions")
 
@@ -42,12 +42,14 @@ def jordan_wigner_nearest_neighbor(op: TransferVertexOperator, num_qubits: int) 
         # cannot see the orientation, and so cannot be correct for both.
         lo, hi = min(left, right), max(left, right)
         pauli = "XX" if left < right else "YY"
-        return SparsePauliOp.from_sparse_list([(pauli, [lo, hi], -0.5)], num_qubits=num_qubits)
+        return SparseObservable.from_sparse_list([(pauli, [lo, hi], -0.5)], num_qubits=num_qubits)
 
     return map_transfer_vertex_generators(
         op,
         map_action,
-        lambda: SparsePauliOp.from_sparse_list([("", [], 1)], num_qubits=num_qubits),
+        lambda: SparseObservable.identity(num_qubits),
+        # `SparseObservable` has no `__and__`, so the `compose=None` default is unusable.
+        compose=SparseObservable.compose,
     )
 
 
@@ -61,13 +63,13 @@ def test_jordan_wigner():
     )
     num_qubits = 4
     qop = jordan_wigner_nearest_neighbor(op, num_qubits)
-    assert isinstance(qop, SparsePauliOp)
-    expected = SparsePauliOp.from_sparse_list(
+    assert isinstance(qop, SparseObservable)
+    expected = SparseObservable.from_sparse_list(
         [("Z", [0], 2), ("XX", [0, 1], -0.25), ("YX", [1, 2], -0.5j)],
         num_qubits,
     )
     diff = (qop - expected).simplify()
-    assert diff == SparsePauliOp.from_sparse_list([], num_qubits)
+    assert diff == SparseObservable.zero(num_qubits)
 
 
 def test_jordan_wigner_matches_library_implementation():
@@ -83,6 +85,6 @@ def test_jordan_wigner_matches_library_implementation():
         }
     )
     num_qubits = 4
-    custom = SparseObservable.from_sparse_pauli_op(jordan_wigner_nearest_neighbor(op, num_qubits))
+    custom = jordan_wigner_nearest_neighbor(op, num_qubits)
     expected = transfer_vertex_jordan_wigner(op, num_qubits)
     assert (custom - expected).simplify() == SparseObservable.zero(num_qubits)

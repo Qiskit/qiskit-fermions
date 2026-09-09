@@ -37,6 +37,9 @@ def map_majorana_action_generators(
     .. note::
        The output type ``T`` must support multiplication by a scalar via ``__mul__``.
        If ``compose=None`` it must also support composition of two instances via ``__and__``.
+       :class:`~qiskit.quantum_info.SparseObservable` does not, which is why the example below
+       names :meth:`~qiskit.quantum_info.SparseObservable.compose` explicitly; a type with an
+       ``__and__`` (such as :class:`~qiskit.quantum_info.SparsePauliOp`) can rely on the default.
 
     .. note::
        The mapping written out below is a minimal illustration of this function rather than a
@@ -47,20 +50,20 @@ def map_majorana_action_generators(
 
         >>> from qiskit_fermions.mappers import map_majorana_action_generators
         >>> from qiskit_fermions.operators import MajoranaAction, MajoranaOperator, gamma
-        >>> from qiskit.quantum_info import SparsePauliOp
+        >>> from qiskit.quantum_info import SparseObservable
         >>>
-        >>> def jordan_wigner(mode: MajoranaAction) -> SparsePauliOp:
+        >>> def jordan_wigner(mode: MajoranaAction) -> SparseObservable:
         ...     idx = mode // 2
         ...     qubits = list(range(idx + 1))
         ...     pauli = "Y" if mode % 2 else "X"
-        ...     return SparsePauliOp.from_sparse_list(
+        ...     return SparseObservable.from_sparse_list(
         ...         [("Z" * idx + pauli, qubits, 1.0)],
         ...         num_qubits=num_qubits,
         ...     )
         >>>
         >>> num_qubits = 2
-        >>> def identity() -> SparsePauliOp:
-        ...     return SparsePauliOp.from_sparse_list([("", [], 1)], num_qubits)
+        >>> def identity() -> SparseObservable:
+        ...     return SparseObservable.identity(num_qubits)
         >>>
         >>> op = MajoranaOperator.from_dict({
         ...     (0, 2): 0.5,
@@ -68,9 +71,11 @@ def map_majorana_action_generators(
         ...     (0, 3): 0.5j,
         ...     (1, 2): -0.5j,
         ... })
-        >>> qop = map_majorana_action_generators(op, jordan_wigner, identity)
-        >>> print([(label, complex(coeff)) for label, coeff in sorted(qop.label_iter())])
-        [('II', 0j), ('XX', (0.5-0j)), ('XY', -0.5j), ('YX', 0.5j), ('YY', (0.5+0j))]
+        >>> qop = map_majorana_action_generators(
+        ...     op, jordan_wigner, identity, compose=SparseObservable.compose
+        ... )
+        >>> print(sorted(qop.simplify().to_sparse_list()))
+        [('XX', [0, 1], (0.5-0j)), ('XY', [0, 1], 0.5j), ('YX', [0, 1], -0.5j), ('YY', [0, 1], (0.5+0j))]
 
     Args:
         operator: the operator to be mapped.

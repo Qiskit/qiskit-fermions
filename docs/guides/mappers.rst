@@ -22,7 +22,7 @@ a :class:`.MajoranaOperator` to a qubit operator using :func:`.map_majorana_acti
 
     .. code-block:: python
 
-       >>> from qiskit.quantum_info import SparsePauliOp
+       >>> from qiskit.quantum_info import SparseObservable
        >>> from qiskit_fermions.mappers import map_majorana_action_generators
        >>> from qiskit_fermions.operators import MajoranaOperator
        >>>
@@ -31,24 +31,24 @@ a :class:`.MajoranaOperator` to a qubit operator using :func:`.map_majorana_acti
        >>>
        >>> # Define how each Majorana action maps to Pauli strings
        >>> num_qubits = 2
-       >>> def map_action(mode: int) -> SparsePauliOp:
+       >>> def map_action(mode: int) -> SparseObservable:
        ...     idx = mode // 2
        ...     qubits = list(range(idx + 1))
        ...     pauli = "Y" if mode % 2 else "X"
-       ...     return SparsePauliOp.from_sparse_list(
+       ...     return SparseObservable.from_sparse_list(
        ...         [("Z" * idx + pauli, qubits, 1.0)],
        ...         num_qubits=num_qubits,
        ...     )
        >>>
        >>> # Apply the mapping to transform the operator
-       >>> sparse_pauli_op = map_majorana_action_generators(
+       >>> custom_observable = map_majorana_action_generators(
        ...     maj_op,
        ...     map_action,
-       ...     identity=lambda: SparsePauliOp.from_sparse_list([("", [], 1)], num_qubits=num_qubits),
+       ...     identity=lambda: SparseObservable.identity(num_qubits),
+       ...     compose=SparseObservable.compose,
        ... )
-       >>> print(sparse_pauli_op.sort())
-       SparsePauliOp(['II', 'IZ', 'XZ'],
-                     coeffs=[0. +0.j, 0. +1.j, 0.5+0.j])
+       >>> print(custom_observable.simplify())
+       <SparseObservable with 2 terms on 2 qubits: (0+1j)(Z_0) + (0.5+0j)(X_1 Z_0)>
 
     .. code-block:: c
 
@@ -104,7 +104,8 @@ from the custom mapper section, demonstrating equivalent results:
        >>>
        >>> # Apply Jordan-Wigner mapper to get qubit operator
        >>> sparse_observable = jordan_wigner(ferm_op, num_qubits=2)
-       >>> print(SparsePauliOp.from_sparse_observable(sparse_observable).equiv(sparse_pauli_op))
+       >>> difference = sparse_observable - custom_observable
+       >>> print(difference.simplify() == SparseObservable.zero(num_qubits))
        True
 
     .. code-block:: c
@@ -120,15 +121,17 @@ from the custom mapper section, demonstrating equivalent results:
        QfMajoranaOperator *maj_op = qf_maj_op_new(num_terms, num_modes, coeffs, modes, boundaries);
 
        // Convert MajoranaOperator to FermionOperator using library mapper
-       QfFermionOperator *ferm_op = qf_maj_op_to_ferm_op(maj_op);
+       QfFermionOperator *ferm_op = qf_majorana_to_fermion(maj_op);
 
        // Apply Jordan-Wigner mapper to get qubit operator
-       QfSparseObservable *qubit_op = qf_ferm_op_jordan_wigner(ferm_op, 2);
+       QkObs *qubit_op;
+       QfExitCode exit = qf_ferm_op_jordan_wigner(ferm_op, 2, &qubit_op);
+       assert(exit == QfExitCode_Success);
 
        // Clean up
        qf_ferm_op_free(ferm_op);
        qf_maj_op_free(maj_op);
-       qf_sparse_obs_free(qubit_op);
+       qk_obs_free(qubit_op);
 
 .. note::
    The two-step above is written out to show two library mappers composing. In practice you would map

@@ -122,23 +122,27 @@ construction using the sparse arrays:
 
        #include <qiskit_fermions.h>
 
-       // Construct first operator: 1.0 * c_0 a_1
+       // Construct first operator: 1.0 * +0 -1
        QkComplex64 coeff1[1] = {{1.0, 0.0}};
+       bool actions1[2] = {true, false};
        uint32_t modes1[2] = {0, 1};
        uint32_t boundaries1[2] = {0, 2};
-       QfFermionOperator *op1 = qf_ferm_op_new(1, 2, coeff1, modes1, boundaries1);
+       QfFermionOperator *op1 = qf_ferm_op_new(1, 2, coeff1, actions1, modes1, boundaries1);
 
-       // Construct second operator: 1.0 * c_2 a_3
+       // Construct second operator: 1.0 * +2 -3
        QkComplex64 coeff2[1] = {{1.0, 0.0}};
+       bool actions2[2] = {true, false};
        uint32_t modes2[2] = {2, 3};
        uint32_t boundaries2[2] = {0, 2};
-       QfFermionOperator *op2 = qf_ferm_op_new(1, 2, coeff2, modes2, boundaries2);
+       QfFermionOperator *op2 = qf_ferm_op_new(1, 2, coeff2, actions2, modes2, boundaries2);
 
-       // Add operators
-       qf_ferm_op_add_assign(op1, op2);
+       // Combine the sparse operators. There is no in-place add in the C API, so
+       // the sum is a new operator that the caller owns.
+       QfFermionOperator *sum = qf_ferm_op_add(op1, op2);
 
        qf_ferm_op_free(op1);
        qf_ferm_op_free(op2);
+       qf_ferm_op_free(sum);
 
 Convenient construction methods
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -350,9 +354,10 @@ reference of all available operations.
 
        // Construct a Hermitian operator: H = +0 -1 + +1 -0
        QkComplex64 coeffs[2] = {{1.0, 0.0}, {1.0, 0.0}};
+       bool actions[4] = {true, false, true, false};
        uint32_t modes[4] = {0, 1, 1, 0};
        uint32_t boundaries[3] = {0, 2, 4};
-       QfFermionOperator *op = qf_ferm_op_new(2, 4, coeffs, modes, boundaries);
+       QfFermionOperator *op = qf_ferm_op_new(2, 4, coeffs, actions, modes, boundaries);
 
        // Check if the operator is Hermitian
        bool is_hermitian = qf_ferm_op_is_hermitian(op, 1e-10);
@@ -454,22 +459,24 @@ operator forms for correctness and efficiency.
 
        // Two different representations of the same operator
        QkComplex64 coeff1[1] = {{1.0, 0.0}};
+       bool actions1[2] = {false, true};
        uint32_t modes1[2] = {0, 0};
-       uint32_t boundaries1[3] = {0, 2};
-       QfFermionOperator *op1 = qf_ferm_op_new(1, 2, coeff1, modes1, boundaries1);
+       uint32_t boundaries1[2] = {0, 2};
+       QfFermionOperator *op1 = qf_ferm_op_new(1, 2, coeff1, actions1, modes1, boundaries1);
 
        QkComplex64 coeff2[2] = {{1.0, 0.0}, {-1.0, 0.0}};
+       bool actions2[2] = {true, false};
        uint32_t modes2[2] = {0, 0};
        uint32_t boundaries2[3] = {0, 0, 2};
-       QfFermionOperator *op2 = qf_ferm_op_new(2, 2, coeff2, modes2, boundaries2);
+       QfFermionOperator *op2 = qf_ferm_op_new(2, 2, coeff2, actions2, modes2, boundaries2);
 
        // Direct comparison fails due to different forms
        bool equiv_before = qf_ferm_op_equiv(op1, op2, 1e-10);
        printf("Equivalent before normal ordering: %s\n", equiv_before ? "true" : "false");
 
        // Normal-order both and compare again
-       QfFermionOperator *op1_normal = qf_ferm_op_normal_ordered(op1);
-       QfFermionOperator *op2_normal = qf_ferm_op_normal_ordered(op2);
+       QfFermionOperator *op1_normal = qf_ferm_op_normal_ordered(op1, NULL);
+       QfFermionOperator *op2_normal = qf_ferm_op_normal_ordered(op2, NULL);
        bool equiv_after = qf_ferm_op_equiv(op1_normal, op2_normal, 1e-10);
        printf("Equivalent after normal ordering: %s\n", equiv_after ? "true" : "false");
 

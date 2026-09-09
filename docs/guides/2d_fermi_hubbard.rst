@@ -373,8 +373,7 @@ needs four circuits, where the 1D synthesis needs one.
    all four printed shapes plausible but fails 32 of these 88 pairs.
 
    >>> import itertools
-   >>> import numpy as np
-   >>> from qiskit.quantum_info import SparsePauliOp
+   >>> from qiskit.quantum_info import SparseObservable
    >>>
    >>> def obeys_transfer_vertex_algebra(rows, cols):
    ...     """Check the mixed commutation relations over both orientations of every bond."""
@@ -387,12 +386,10 @@ needs four circuits, where the 1D synthesis needs one.
    ...
    ...     def encoded(j, k):
    ...         term = TransferVertexOperator.from_dict({((j, k),): 1.0})
-   ...         return SparsePauliOp.from_sparse_observable(encoding(term, num_qubits))
+   ...         return encoding(term, num_qubits)
    ...
-   ...     square = (lambda t: (t @ t).simplify())(encoded(*bonds[0]))
-   ...     if square.paulis.to_labels() != ["I" * num_qubits]:
-   ...         return False
-   ...     if not np.allclose(square.coeffs, [0.25]):
+   ...     first = encoded(*bonds[0])
+   ...     if first.compose(first).simplify() != SparseObservable.identity(num_qubits) * 0.25:
    ...         return False
    ...
    ...     for (a, b), (c, d) in itertools.combinations(directed, 2):
@@ -405,8 +402,7 @@ needs four circuits, where the 1D synthesis needs one.
    ...         # the arrows flow when one arrives at the shared site and the other leaves it
    ...         flows = (b == site_ and c == site_) or (d == site_ and a == site_)
    ...         left, right = encoded(a, b), encoded(c, d)
-   ...         commutes = np.allclose((left @ right - right @ left).simplify().coeffs, 0.0)
-   ...         if commutes != flows:
+   ...         if left.commutes(right) != flows:
    ...             return False
    ...     return True
    >>>
@@ -657,6 +653,10 @@ between the flow sets is the Pauli string going in, which step 3 already printed
    ...     `pauli` is the flow set's Pauli string, as printed in step 3. Its letters apply
    ...     to the i-th term's qubits in the order below: the two sites of the bond, then
    ...     their ancillas.
+   ...
+   ...     This is the one check that needs SparsePauliOp: Clifford conjugation wants a
+   ...     `Pauli` and its symplectic bits, and SparseObservable exposes neither -- its own
+   ...     `evolve` conjugates by a Pauli, not by a Clifford.
    ...     """
    ...     supports = []
    ...     for i in range(len(line) - 1):
@@ -1089,7 +1089,6 @@ above. That is a five-line callback, and it slots into
    :nofigs:
    :include-source:
 
-   >>> from qiskit.quantum_info import SparsePauliOp
    >>> from qiskit_fermions.mappers import map_edge_vertex_generators
    >>> from qiskit_fermions.operators import EdgeVertexOperator
    >>>
@@ -1132,17 +1131,16 @@ above. That is a five-line callback, and it slots into
    ...     for loop in plaquette_loops(rows, cols):
    ...         loop_operator = EdgeVertexOperator.from_dict({tuple(loop): 1.0})
    ...         encoded_loop = vc_edge_encoding(loop_operator, num_qubits, cols)
-   ...         stabilizer = SparsePauliOp.from_sparse_observable(encoded_loop)
-   ...         out.append(stabilizer / stabilizer.coeffs[0])
+   ...         out.append(encoded_loop / complex(encoded_loop.coeffs[0]))
    ...     return out
    >>>
    >>> plaquette_stabilizers = stabilizers(rows, cols)
    >>> for stabilizer in plaquette_stabilizers:
-   ...     print(stabilizer.paulis.to_labels()[0])
-   IIIIYXIXYIIIIZIIZI
-   IIIYXIXYIIIIZIIZII
-   IYXIXYIIIIZIIZIIII
-   YXIXYIIIIZIIZIIIII
+   ...     print(stabilizer.to_sparse_list())
+   [('ZZYXXY', [1, 4, 9, 10, 12, 13], (1+0j))]
+   [('ZZYXXY', [2, 5, 10, 11, 13, 14], (1+0j))]
+   [('ZZYXXY', [4, 7, 12, 13, 15, 16], (1+0j))]
+   [('ZZYXXY', [5, 8, 13, 14, 16, 17], (1+0j))]
 
 .. plot::
    :context:
@@ -1156,42 +1154,39 @@ above. That is a five-line callback, and it slots into
    and the Hamiltonian conserves only the global parity, so the local factor is what repairs
    the commutation.
 
-   Second, every stabilizer acts *diagonally* on the site qubits (only ``Z`` and ``I`` there,
-   with the ``X``/``Y`` content confined to the ancillas). That is what lets a site occupation
+   Second, every stabilizer acts *diagonally* on the site qubits (only ``Z`` appears on a site
+   qubit, with the ``X``/``Y`` content confined to the ancillas). That is what lets a site occupation
    be written as a plain basis state and survive the projection below unchanged: a diagonal
    operator cannot move it. An encoding whose plaquette operators reached the sites with
    ``X``/``Y`` would silently scramble the physical state instead.
 
-   >>> encoded_hamiltonian = SparsePauliOp.from_sparse_observable(
-   ...     encoding(hamiltonian, num_qubits)
-   ... )
-   >>>
-   >>> def commutes(left, right):
-   ...     return bool(np.allclose((left @ right - right @ left).simplify().coeffs, 0.0))
+   >>> encoded_hamiltonian = encoding(hamiltonian, num_qubits)
    >>>
    >>> transfer_loops = [
-   ...     SparsePauliOp.from_sparse_observable(
-   ...         encoding(TransferVertexOperator.from_dict({tuple(loop): 1.0}), num_qubits)
-   ...     )
+   ...     encoding(TransferVertexOperator.from_dict({tuple(loop): 1.0}), num_qubits)
    ...     for loop in plaquette_loops(rows, cols)
    ...     ]
-   >>> [commutes(loop, encoded_hamiltonian) for loop in transfer_loops]
+   >>> [loop.commutes(encoded_hamiltonian) for loop in transfer_loops]
    [False, False, False, False]
-   >>> [commutes(s, encoded_hamiltonian) for s in plaquette_stabilizers]
+   >>> [s.commutes(encoded_hamiltonian) for s in plaquette_stabilizers]
    [True, True, True, True]
 
    >>> def site_restriction(stabilizer, num_sites):
    ...     """The stabilizer's Pauli letters on the site qubits only."""
-   ...     per_qubit = stabilizer.paulis.to_labels()[0][::-1]
-   ...     return set(per_qubit[:num_sites])
+   ...     return {
+   ...         letter
+   ...         for label, indices, _ in stabilizer.to_sparse_list()
+   ...         for letter, qubit in zip(label, indices)
+   ...         if qubit < num_sites
+   ...     }
    >>>
-   >>> all(site_restriction(s, num_sites) <= {"Z", "I"} for s in plaquette_stabilizers)
+   >>> all(site_restriction(s, num_sites) <= {"Z"} for s in plaquette_stabilizers)
    True
 
 Each generator has weight :math:`6`, spread over two of its plaquette's physical qubits and
 four ancillas. They are involutory and commute with the encoded Hamiltonian, so the physical
 subspace is preserved by the dynamics. Both properties are statements about operators, so
-they are checked symbolically on the :class:`~qiskit.quantum_info.SparsePauliOp` algebra,
+they are checked symbolically on the :class:`~qiskit.quantum_info.SparseObservable` algebra,
 no :math:`2^{18} \times 2^{18}` matrices required:
 
 .. plot::
@@ -1199,12 +1194,11 @@ no :math:`2^{18} \times 2^{18}` matrices required:
    :nofigs:
    :include-source:
 
-   >>> encoded = SparsePauliOp.from_sparse_observable(encoding(hamiltonian, num_qubits))
-   >>> identity = SparsePauliOp("I" * num_qubits)
+   >>> encoded = encoding(hamiltonian, num_qubits)
+   >>> identity = SparseObservable.identity(num_qubits)
    >>> for stabilizer in plaquette_stabilizers:
-   ...     square = (stabilizer @ stabilizer).simplify()
-   ...     commutator = (stabilizer @ encoded - encoded @ stabilizer).simplify()
-   ...     print(square == identity, np.allclose(commutator.coeffs, 0.0))
+   ...     square = stabilizer.compose(stabilizer).simplify()
+   ...     print(square == identity, stabilizer.commutes(encoded))
    True True
    True True
    True True
@@ -1233,9 +1227,13 @@ this section cheap.
    >>>
    >>> # an exact evolution time, unrelated to the Trotter step above
    >>> evolution_time = 0.6
-   >>> reference = SparsePauliOp.from_sparse_observable(
-   ...     transfer_vertex_jordan_wigner(hamiltonian, num_sites).simplify()
-   ... )
+   >>> reference = transfer_vertex_jordan_wigner(hamiltonian, num_sites).simplify()
+   >>>
+   >>> def to_sparse_matrix(observable):
+   ...     # SparseObservable carries no dense- or sparse-matrix method, so route through
+   ...     # SparsePauliOp. This is only ever needed for the numerical checks below --
+   ...     # the encoding itself never leaves SparseObservable.
+   ...     return SparsePauliOp.from_sparse_observable(observable).to_matrix(sparse=True)
    >>>
    >>> def basis_state(occupation, num_qubits):
    ...     """The computational basis state with `occupation` on the first qubits.
@@ -1260,7 +1258,7 @@ this section cheap.
    ...     halvings only rescale the result and the final normalization absorbs them.
    ...     """
    ...     for stabilizer in stabilizers:
-   ...         state += stabilizer.to_matrix(sparse=True) @ state
+   ...         state += to_sparse_matrix(stabilizer) @ state
    ...     return state / np.linalg.norm(state)
    >>>
    >>> occupation = [1, 0, 1, 0, 1, 0, 0, 1, 0]  # site occupations of the initial state
@@ -1270,17 +1268,17 @@ this section cheap.
    ... )
    >>>
    >>> evolved_encoded = expm_multiply(
-   ...     -1j * evolution_time * encoded.to_matrix(sparse=True), initial_encoded
+   ...     -1j * evolution_time * to_sparse_matrix(encoded), initial_encoded
    ... )
    >>> evolved_reference = expm_multiply(
-   ...     -1j * evolution_time * reference.to_matrix(sparse=True), initial_reference
+   ...     -1j * evolution_time * to_sparse_matrix(reference), initial_reference
    ... )
    >>>
    >>> def density(state, qubit, width):
    ...     """Site density <n_j> = (1 - <Z_j>) / 2 of a statevector."""
-   ...     z = SparsePauliOp.from_sparse_list(
-   ...         [("Z", [qubit], 1.0)], num_qubits=width
-   ...     ).to_matrix(sparse=True)
+   ...     z = to_sparse_matrix(
+   ...         SparseObservable.from_sparse_list([("Z", [qubit], 1.0)], num_qubits=width)
+   ...     )
    ...     return (1 - (state.conj() @ (z @ state)).real) / 2
    >>>
    >>> encoded_densities = [density(evolved_encoded, j, num_qubits) for j in range(num_sites)]
@@ -1327,7 +1325,7 @@ within any one of them:
    ...     basis_state(occupation, num_qubits), plaquette_stabilizers
    ... )
    >>> exact = expm_multiply(
-   ...     -1j * total_time * encoded.to_matrix(sparse=True), initial_state
+   ...     -1j * total_time * to_sparse_matrix(encoded), initial_state
    ... )
    >>>
    >>> def trotter_fidelity(steps):
