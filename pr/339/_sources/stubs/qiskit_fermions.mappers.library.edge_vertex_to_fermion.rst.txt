@@ -1,0 +1,6 @@
+﻿edge\_vertex\_to\_fermion
+=========================
+
+.. currentmodule:: qiskit_fermions.mappers.library
+
+.. autofunction:: edge_vertex_to_fermion
