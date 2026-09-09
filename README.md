@@ -59,8 +59,17 @@ For more installation information, refer to these [installation instructions](do
 
 ### Get started
 
-Several guides exist to help you get started with this package. For an overview of its breadth of
-features, visit the [1D Fermi-Hubbard guide](docs/guides/1d_fermi_hubbard.rst).
+![Overview](https://raw.githubusercontent.com/Qiskit/qiskit-fermions/refs/heads/main/docs/images/overview.svg)
+
+The schematic description in the image above provides a glimpse of the breadth
+of features and general workflow that this package provides. You can work in the
+fermionic regime with both, operator and circuit representation, before you
+define a fermion-to-qubit encoding that plugs into the multi-representation
+transpiler pipeline of Qiskit.
+
+All of these features are explained in [several guides](docs/guides/) to help you get started.
+For an overview working through exactly the pipeline shown above, start with the
+[1D Fermi-Hubbard guide](docs/guides/1d_fermi_hubbard.rst).
 
 ----------------------------------------------------------------------------------------------------
 
