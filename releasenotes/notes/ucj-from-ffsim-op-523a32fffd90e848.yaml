@@ -23,7 +23,7 @@ upgrade:
     :external:meth:`~ffsim.UCJOpSpinBalanced.to_parameters` with identical conventions, and
     additionally offer the compressed (``optimize=True``) double factorization and
     :external:meth:`~ffsim.UCJOpSpinBalanced.from_cisd_vec`, which this package never implemented.
-    The wrapped operator is available as ``UCJ.ucj_op``, so its tensors are reachable as
+    The wrapped operator is available as :attr:`.UCJ.ucj_op`, so its tensors are reachable as
     ``gate.ucj_op.diag_coulomb_mats`` and so on; the gate no longer mirrors them as attributes of its
     own.
 

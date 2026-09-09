@@ -11,9 +11,9 @@ features_c:
     identified by exactly one ``(left, right)`` pair, the two arrays necessarily have the same
     length and the constructors therefore take a single ``num_indices`` argument covering both.
   - |
-    Added ``qf_edge_op_canonical_order`` and ``qf_transfer_op_canonical_order``, along with the
-    commutator, anti-commutator and double-commutator functions for both new operator types
-    (``qf_edge_op_commutator`` and friends).
+    Added :c:func:`qf_edge_op_canonical_order` and :c:func:`qf_transfer_op_canonical_order`, along
+    with the commutator, anti-commutator and double-commutator functions for both new operator types
+    (:c:func:`qf_edge_op_commutator` and friends).
   - |
     Added C API functions for the edge-vertex and transfer-vertex mappers:
     :c:func:`qf_edge_vertex_to_fermion`, :c:func:`qf_edge_vertex_to_majorana`,

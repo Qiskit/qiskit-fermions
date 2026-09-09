@@ -32,7 +32,7 @@ features:
     :class:`.MajoranaOperator`, :class:`.EdgeVertexOperator` or :class:`.TransferVertexOperator` no
     longer raises :class:`NotImplementedError`.
   - |
-    :class:`.FermionOperator` now implements :class:`ffsim.SupportsTrace` through a new ``_trace_``
-    method, so :func:`ffsim.trace` can compute the trace of an operator on a fixed
-    ``(norb, nelec)`` sector. This is what preconditions
+    :class:`.FermionOperator` now implements :class:`ffsim.SupportsTrace` through a new
+    :meth:`~qiskit_fermions.operators.FermionOperator._trace_` method, so :func:`ffsim.trace` can
+    compute the trace of an operator on a fixed ``(norb, nelec)`` sector. This is what preconditions
     :func:`scipy.sparse.linalg.expm_multiply` along the evolution path.
