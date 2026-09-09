@@ -23,8 +23,17 @@ such as:
 Get started
 -----------
 
-Several guides exist to help you get started with this package. For an overview of its breadth of features, visit the
-:doc:`1D Fermi-Hubbard guide <guides/1d_fermi_hubbard>`.
+.. image:: images/overview.svg
+
+The schematic description in the image above provides a glimpse of the breadth
+of features and general workflow that this package provides. You can work in the
+fermionic regime with both, operator and circuit representation, before you
+define a fermion-to-qubit encoding that plugs into the multi-representation
+transpiler pipeline of Qiskit.
+
+All of these features are explained in :doc:`several guides <guides/index>` to
+help you get started. For an overview working through exactly the pipeline shown
+above, start with the :doc:`1D Fermi-Hubbard guide <guides/1d_fermi_hubbard>`.
 
 Use case examples
 -----------------
