@@ -1,0 +1,31 @@
+---
+features:
+  - |
+    The sampling weights of :class:`.QDriftTrotterization` can now be supplied through its new
+    keyword-only ``weights`` argument, instead of being derived from the evolved operator on every call.
+    Leaving it at ``None`` (the default) behaves exactly as before, so existing circuits are sampled
+    identically.
+
+    This is a performance option: the default path reduces one value per operator *term* down to one
+    per group on every call to :meth:`~.QDriftTrotterization.run`, which is repeated work when
+    generating an ensemble from a single Hamiltonian, even though the result is identical every time.
+    Derive it once with :func:`~qiskit_fermions.operators.terms.group_coeff_means` instead, alongside
+    :func:`~qiskit_fermions.operators.terms.group_order`, which hoists the group lookup out of the same
+    loop::
+
+        hamiltonian = group_order(hamiltonian)
+        weights = group_coeff_means(hamiltonian)
+        pm.optimization = FermionicPassManager(
+            [QDriftTrotterization(num_groups, weights=weights)]
+        )
+
+    The entries must be non-negative, since a weight is the magnitude :math:`h_j` of the qDRIFT
+    decomposition :math:`H = \sum_j h_j H_j`, in which a coefficient's sign belongs to :math:`H_j` and
+    is read off the evolved operator directly.
+
+    Two constraints come with a supplied array. Its scale is not free: the sum of the weights also sets
+    the shared evolution time, so multiplying every entry by ``gamma`` samples identically but evolves
+    for ``gamma * t``. And because the array describes the terms (or groups) of one specific operator,
+    its length is validated against every :class:`.Evolution` gate it is applied to, and a circuit
+    holding more than one such gate is rejected; leaving ``weights`` unset keeps such a circuit
+    supported, since each gate then derives its own.

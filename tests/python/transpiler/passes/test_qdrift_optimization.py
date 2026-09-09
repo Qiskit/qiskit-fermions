@@ -18,6 +18,7 @@ from pathlib import Path
 
 import numpy as np
 import pytest
+from qiskit.quantum_info import SparsePauliOp
 from qiskit_fermions.circuit import FermionicCircuit
 from qiskit_fermions.circuit.library import (
     Evolution,
@@ -26,12 +27,14 @@ from qiskit_fermions.circuit.library import (
     PrepareSlaterDeterminant,
 )
 from qiskit_fermions.circuit.library.synthesis import FermionicSuzukiTrotter
+from qiskit_fermions.mappers.library import jordan_wigner
 from qiskit_fermions.operators import FermionOperator
 from qiskit_fermions.operators.library import FCIDump
 from qiskit_fermions.operators.terms.filtering import filter_diagonal_terms
 from qiskit_fermions.operators.terms.grouping import group_terms_by_electronic_structure
 from qiskit_fermions.transpiler.passes import QDriftTrotterization
 from qiskit_fermions.transpiler.passmanager import FermionicPassManager
+from scipy.linalg import expm
 
 
 def test_qdrift_optimization_no_groups(subtests):
@@ -606,3 +609,283 @@ def test_qdrift_output_is_a_decomposition_fixed_point():
     for evolution in _evolutions(qdrift_circ.decompose(reps=5)):
         operator = evolution.operator
         assert operator.adjoint().equiv(operator), f"non-Hermitian factor {operator}"
+
+
+def _ungrouped_hamiltonian() -> FermionOperator:
+    """A 4-mode Hamiltonian with mixed-sign, non-uniform coefficients and no groups."""
+    hamil = FermionOperator.from_terms(
+        [
+            (((True, 0), (False, 1)), 0.7),
+            (((True, 1), (False, 0)), 0.7),
+            (((True, 1), (False, 2)), -0.4),
+            (((True, 2), (False, 1)), -0.4),
+        ]
+    )
+    hamil.groups = None
+    return hamil
+
+
+def _weights_circuit(hamil: FermionOperator, time: float = 1.5) -> FermionicCircuit:
+    circ = FermionicCircuit(4)
+    circ.append(Evolution(4, hamil, time=time), circ.modes)
+    return circ
+
+
+def test_qdrift_explicit_default_weights_are_a_no_op():
+    """Passing the weights the pass would have computed itself must change nothing.
+
+    This pins the equivalence the ``weights`` option relies on: ``|c_j|`` reproduces the textbook
+    distribution *and* the textbook ``delta``, so a caller hoisting the weight computation out of an
+    ensemble loop gets bit-identical circuits rather than merely statistically similar ones.
+    """
+    hamil = _ungrouped_hamiltonian()
+    weights = np.abs(np.array(hamil.get_coeffs()))
+
+    implicit = FermionicPassManager(QDriftTrotterization(4, rng=42)).run(_weights_circuit(hamil))
+    explicit = FermionicPassManager(QDriftTrotterization(4, rng=42, weights=weights)).run(
+        _weights_circuit(hamil)
+    )
+
+    for lhs, rhs in zip(_evolutions(implicit), _evolutions(explicit), strict=True):
+        assert lhs.operator.equiv(rhs.operator)
+        assert lhs.params[0] == rhs.params[0]
+
+
+def test_qdrift_weights_scale_sets_the_evolution_time():
+    """The weights are absolute magnitudes, not relative preferences.
+
+    ``delta * p_j == |w_j| * t / num_terms`` depends on ``w_j`` itself and not merely on its share of
+    the 1-norm, so scaling every weight by ``gamma`` samples identically but evolves for ``gamma * t``.
+    Asserted exactly, since it follows from the arithmetic rather than from the draws.
+    """
+    hamil = _ungrouped_hamiltonian()
+    weights = np.abs(np.array(hamil.get_coeffs()))
+    num_terms = 4
+
+    baseline = FermionicPassManager(QDriftTrotterization(num_terms, rng=42, weights=weights)).run(
+        _weights_circuit(hamil)
+    )
+    scaled = FermionicPassManager(
+        QDriftTrotterization(num_terms, rng=42, weights=2.0 * weights)
+    ).run(_weights_circuit(hamil))
+
+    for lhs, rhs in zip(_evolutions(baseline), _evolutions(scaled), strict=True):
+        # the same draws (the distribution is unchanged) for exactly twice as long
+        assert lhs.operator.equiv(rhs.operator)
+        assert rhs.params[0] == pytest.approx(2.0 * lhs.params[0])
+
+    # and the absolute value follows the documented formula
+    expected = (np.abs(weights).sum() * 1.5) / num_terms
+    assert all(
+        evolution.params[0] == pytest.approx(expected) for evolution in _evolutions(baseline)
+    )
+
+
+def test_qdrift_weights_change_the_sampled_distribution():
+    """A reshaped distribution must actually redirect the draws.
+
+    ``_coupling_hamiltonian`` has uniform coefficients, so the default distribution is uniform too;
+    concentrating all the weight on a single term must make every draw that term.
+    """
+    hamil = _coupling_hamiltonian()
+    weights = np.array([1.0, 0.0, 0.0, 0.0])
+
+    qdrift_circ = FermionicPassManager(QDriftTrotterization(5, rng=42, weights=weights)).run(
+        _weights_circuit(hamil)
+    )
+
+    evolutions = _evolutions(qdrift_circ)
+    assert len(evolutions) == 5
+    only = FermionOperator.from_terms([(((True, 2), (False, 0)), 1.0)])
+    for evolution in evolutions:
+        assert evolution.operator.equiv(only)
+
+
+def test_qdrift_weights_reject_a_path_shaped_array():
+    """An array of length ``num_terms ** M`` must be rejected rather than sampled incorrectly.
+
+    A signed quasi-probability distribution over length-``M`` *paths* has one entry per path, that is
+    ``num_terms ** M`` of them, and is the planned generalization of this argument. Until it is
+    supported, such an array has to fail the length check instead of being consumed as if it held one
+    weight per term.
+    """
+    hamil = _ungrouped_hamiltonian()
+    num_terms = len(hamil)
+
+    for slices in (2, 3):
+        paths = np.ones(num_terms**slices)
+        with pytest.raises(ValueError, match="exactly one entry per sampled piece"):
+            FermionicPassManager(QDriftTrotterization(4, weights=paths)).run(
+                _weights_circuit(hamil)
+            )
+
+
+def test_qdrift_weights_length_must_match_the_operator(subtests):
+    """One entry per sampled piece: per group when the operator is grouped, per term otherwise."""
+    with subtests.test("ungrouped, too few"):
+        qdrift = QDriftTrotterization(4, weights=np.ones(3))
+        with pytest.raises(ValueError, match="one entry per sampled piece"):
+            FermionicPassManager(qdrift).run(_weights_circuit(_ungrouped_hamiltonian()))
+
+    with subtests.test("ungrouped, too many"):
+        qdrift = QDriftTrotterization(4, weights=np.ones(5))
+        with pytest.raises(ValueError, match="one entry per sampled piece"):
+            FermionicPassManager(qdrift).run(_weights_circuit(_ungrouped_hamiltonian()))
+
+    with subtests.test("grouped counts groups, not terms"):
+        hamil = _ungrouped_hamiltonian()
+        hamil.groups = [0, 0, 1, 1]
+        # four terms but only two groups, so a per-term array is rejected ...
+        with pytest.raises(ValueError, match="2 groups"):
+            FermionicPassManager(QDriftTrotterization(4, weights=np.ones(4))).run(
+                _weights_circuit(hamil)
+            )
+        # ... while a per-group one is accepted
+        qdrift_circ = FermionicPassManager(QDriftTrotterization(4, rng=42, weights=np.ones(2))).run(
+            _weights_circuit(hamil)
+        )
+        assert qdrift_circ.count_ops() == {"Evolution": 4}
+
+
+def test_qdrift_weights_reject_several_evolution_gates():
+    """A weights array describes one specific operator, so a circuit holding several Evolution gates
+    is ambiguous and must be rejected rather than sampled against the wrong operator. Without custom
+    weights the same circuit stays supported, since each gate derives its own."""
+    hamil = _ungrouped_hamiltonian()
+    circ = FermionicCircuit(4)
+    circ.append(Evolution(4, hamil, time=1.5), circ.modes)
+    circ.append(Evolution(4, hamil, time=1.5), circ.modes)
+
+    weights = np.abs(np.array(hamil.get_coeffs()))
+    with pytest.raises(ValueError, match="more than one Evolution gate"):
+        FermionicPassManager(QDriftTrotterization(3, rng=42, weights=weights)).run(circ)
+
+    qdrift_circ = FermionicPassManager(QDriftTrotterization(3, rng=42)).run(circ)
+    assert qdrift_circ.count_ops() == {"Evolution": 6}
+
+
+def test_qdrift_rejects_invalid_weights(subtests):
+    """Malformed weights are rejected at construction, before any circuit is seen."""
+    with subtests.test("empty"), pytest.raises(ValueError, match="must not be empty"):
+        QDriftTrotterization(4, weights=[])
+
+    with subtests.test("multi-dimensional"), pytest.raises(ValueError, match="one-dimensional"):
+        QDriftTrotterization(4, weights=np.ones((2, 2)))
+
+    with subtests.test("non-finite"):
+        with pytest.raises(ValueError, match="finite"):
+            QDriftTrotterization(4, weights=[1.0, np.nan, 1.0])
+        with pytest.raises(ValueError, match="finite"):
+            QDriftTrotterization(4, weights=[1.0, np.inf, 1.0])
+
+    with subtests.test("negative entries"):
+        # A weight is the magnitude of the qDRIFT decomposition, whose sign belongs to the sampled
+        # operator instead; a signed (quasi-probability) distribution needs post-processing support
+        # this pass does not provide, so it must be refused rather than silently used.
+        with pytest.raises(ValueError, match="Negative sampling weights"):
+            QDriftTrotterization(4, weights=[1.0, -1.0, 1.0, 1.0])
+        with pytest.raises(ValueError, match="Negative sampling weights"):
+            QDriftTrotterization(4, weights=-np.ones(4))
+
+    with subtests.test("vanishing sum"), pytest.raises(ValueError, match="must not sum to zero"):
+        QDriftTrotterization(4, weights=np.zeros(4))
+
+
+def test_qdrift_weights_accepts_a_plain_sequence():
+    """A list is as good as an array; it is converted once at construction."""
+    qdrift = QDriftTrotterization(4, rng=42, weights=[0.7, 0.7, 0.4, 0.4])
+    assert isinstance(qdrift.weights, np.ndarray)
+
+    qdrift_circ = FermionicPassManager(qdrift).run(_weights_circuit(_ungrouped_hamiltonian()))
+    assert qdrift_circ.count_ops() == {"Evolution": 4}
+
+
+def _dense_matrix(operator: FermionOperator, num_modes: int) -> np.ndarray:
+    """Maps ``operator`` to qubits and materializes it densely.
+
+    Deliberately routed through :func:`.jordan_wigner` rather than through a simulation backend, so
+    that this needs no optional dependency.
+    """
+    return SparsePauliOp.from_sparse_observable(jordan_wigner(operator, num_modes)).to_matrix()
+
+
+def _ensemble_mean(circuit_factory, num_samples: int, num_modes: int) -> np.ndarray:
+    """Averages the unitary implemented by ``num_samples`` randomizations.
+
+    The per-factor propagators are memoized on the sampled operator, since a randomization draws
+    repeatedly from the same handful of terms and each ``expm`` is far costlier than the lookup.
+    """
+    dim = 2**num_modes
+    accumulated = np.zeros((dim, dim), dtype=complex)
+    propagators: dict[tuple, np.ndarray] = {}
+
+    for _ in range(num_samples):
+        product = np.eye(dim, dtype=complex)
+        for evolution in _evolutions(circuit_factory()):
+            key = (
+                tuple(
+                    (tuple(actions), coeff) for actions, coeff in evolution.operator.iter_terms()
+                ),
+                evolution.params[0],
+            )
+            propagator = propagators.get(key)
+            if propagator is None:
+                factor = _dense_matrix(evolution.operator, num_modes)
+                propagator = expm(-1j * evolution.params[0] * factor)
+                propagators[key] = propagator
+            product = propagator @ product
+        accumulated += product
+
+    return accumulated / num_samples
+
+
+def test_qdrift_ensemble_mean_approximates_the_target_evolution(subtests):
+    """The *ensemble* of randomizations is what approximates ``exp(-i t H)``, and a rescaled weights
+    array retargets it onto ``exp(-i (gamma t) H)``.
+
+    A single randomization is a crude approximation, so this averages over many and checks that the
+    error *shrinks* as ``num_terms`` grows. The tolerances are deliberately loose: the residual mixes
+    the Trotter error (falling as ``1 / num_terms``) with Monte-Carlo noise (falling only as
+    ``1 / sqrt(num_samples)``), so this is a guard against a gross sign or normalization inversion
+    rather than a measurement of accuracy. The exact arithmetic is pinned by
+    ``test_qdrift_weights_scale_sets_the_evolution_time`` instead.
+    """
+    num_modes = 4
+    hamil = FermionOperator.from_terms(
+        [
+            (((True, 0), (False, 1)), 0.7),
+            (((True, 1), (False, 0)), 0.7),
+            (((True, 1), (False, 2)), -0.4),
+            (((True, 2), (False, 1)), -0.4),
+        ]
+    )
+    hamil.groups = None
+    time = 0.25
+    weights = np.abs(np.array(hamil.get_coeffs()))
+    matrix = _dense_matrix(hamil, num_modes)
+    num_samples = 400
+
+    def sampler(num_terms, sampling_weights):
+        qdrift = QDriftTrotterization(num_terms, rng=42, weights=sampling_weights)
+        pass_manager = FermionicPassManager(qdrift)
+        return lambda: pass_manager.run(_weights_circuit(hamil, time=time))
+
+    with subtests.test("converges towards the exact evolution"):
+        target = expm(-1j * time * matrix)
+        coarse_error = np.linalg.norm(
+            _ensemble_mean(sampler(5, weights), num_samples, num_modes) - target, 2
+        )
+        fine_error = np.linalg.norm(
+            _ensemble_mean(sampler(40, weights), num_samples, num_modes) - target, 2
+        )
+        assert fine_error < coarse_error, f"error grew: {coarse_error} -> {fine_error}"
+        assert fine_error < 5e-2
+
+    with subtests.test("rescaled weights retarget the evolution time"):
+        # 2x the weights evolves for 2t, so the SAME ensemble is close to exp(-i (2t) H) and far
+        # from exp(-i t H) -- which is what makes the scale a physical parameter, not a gauge.
+        mean = _ensemble_mean(sampler(40, 2.0 * weights), num_samples, num_modes)
+        towards_scaled = np.linalg.norm(mean - expm(-1j * (2.0 * time) * matrix), 2)
+        towards_unscaled = np.linalg.norm(mean - expm(-1j * time * matrix), 2)
+        assert towards_scaled < 5e-2
+        assert towards_scaled < towards_unscaled

@@ -15,6 +15,7 @@
 from __future__ import annotations
 
 import warnings
+from collections.abc import Sequence
 from typing import Any
 
 import numpy as np
@@ -43,20 +44,27 @@ class QDriftTrotterization(FermionicDAGCircuitPass):
     This pass replaces the exact evolution :math:`e^{-i t H}` of each :class:`.Evolution` gate by a
     randomized product formula: it draws ``num_terms`` samples from the Hamiltonian's terms (or
     :attr:`~qiskit_fermions.operators.FermionOperator.groups`, if assigned), with each term sampled
-    with a probability proportional to the magnitude of its coefficient, and emits one
-    :class:`.Evolution` gate per sample. Every sampled gate evolves its (unit-magnitude,
+    with a probability proportional to the magnitude of its sampling weight :math:`w_j`, and emits
+    one :class:`.Evolution` gate per sample. Every sampled gate evolves its (unit-magnitude,
     sign-preserving) term (or, when the Hamiltonian carries groups, its whole sampled group) for
     the same time
 
     .. math::
 
-        \delta = \frac{\lambda t}{\texttt{num\_terms}}, \qquad \lambda = \sum_j |c_j|,
+        \delta = \frac{\lambda t}{\texttt{num\_terms}}, \qquad
+        p_j = \frac{w_j}{\lambda}, \qquad
+        \lambda = \sum_j w_j,
 
-    where the :math:`c_j` are the coefficients of the sampled terms/groups. The ordered product of
-    the sampled evolutions does not reproduce :math:`e^{-i t H}` exactly; rather, its expectation
-    over the sampling approximates the exact evolution, with an error that decreases as
-    ``num_terms`` grows. Because the output depends on the random draws, it differs from run to run
-    unless a fixed ``rng`` is supplied.
+    so that each draw contributes :math:`\delta \cdot p_j = w_j t / \texttt{num\_terms}`. By default
+    :math:`w_j = |c_j|`, the magnitude of the sampled term's (or group's) coefficient, which recovers
+    the textbook qDRIFT normalization :math:`\lambda = \sum_j |c_j|`; the sign of :math:`c_j` is not
+    part of the weight but of the sampled operator, and is read off it directly. Supply
+    :attr:`weights` to precompute that array once instead of deriving it on every call.
+
+    The ordered product of the sampled evolutions does not reproduce :math:`e^{-i t H}` exactly;
+    rather, its expectation over the sampling approximates the exact evolution, with an error that
+    decreases as ``num_terms`` grows. Because the output depends on the random draws, it differs
+    from run to run unless a fixed ``rng`` is supplied.
 
     .. note::
        The sampled gates are marked :attr:`.Evolution.atomic`: the random draw *is* the
@@ -82,6 +90,19 @@ class QDriftTrotterization(FermionicDAGCircuitPass):
        this pass runs once per transpiled circuit, so filtering upstream avoids repeating the same
        filtering work for every circuit generated from the same Hamiltonian.
 
+    .. caution::
+       The *scale* of :attr:`weights` is not free: it sets the evolution time. Since
+       :math:`\delta \cdot p_j = w_j t / \texttt{num\_terms}` above depends on :math:`w_j` itself and
+       not merely on its share of :math:`\lambda`, rescaling every weight by :math:`\gamma` leaves the
+       distribution untouched but evolves for :math:`\gamma t` rather than :math:`t`. Weights are
+       therefore absolute magnitudes, not relative preferences, and only :math:`w_j = |c_j|`
+       reproduces :math:`e^{-i t H}`.
+
+       A distribution whose *shape* differs from :math:`|c_j|` no longer approximates
+       :math:`e^{-i t H}` on its own either. Recovering the target evolution then requires
+       reweighting the measured outcomes, which is the caller's responsibility: this pass emits
+       circuits and cannot post-process their results. See :attr:`weights`.
+
     .. seealso::
        The qDRIFT protocol was introduced in `arXiv:1811.08017 <https://arxiv.org/abs/1811.08017>`_.
     """
@@ -98,6 +119,7 @@ class QDriftTrotterization(FermionicDAGCircuitPass):
         num_terms: int,
         *,
         filter_trivial: bool = False,
+        weights: Sequence[float] | np.ndarray | None = None,
         rng: np.random.Generator | int | None = None,
     ) -> None:
         """Initializing this transpiler pass can be done with the arguments listed below.
@@ -124,9 +146,49 @@ class QDriftTrotterization(FermionicDAGCircuitPass):
                 occupied/unoccupied sets from its ``occupation``, then immediately marks every mode
                 it acts on as "uncertain" because of its rotation. See the :meth:`run` docstring for
                 the precise acceptance rule.
+            weights: the sampling weights to use instead of the coefficient magnitudes derived from
+                the Hamiltonian. If ``None`` (the default), they are computed from the evolved
+                operator on every call, which reproduces the textbook qDRIFT distribution. See
+                :attr:`weights` for the expected length, the sign convention and the effect on the
+                evolution time.
             rng: the random number generator (rng) to be used. When this is an ``int``, the internal
                 rng will be initialized with ``np.random.default_rng(seed=rng)``.
+
+        Raises:
+            ValueError: if ``weights`` is not one-dimensional, is empty, holds a non-finite or
+                negative entry, or sums to zero.
         """
+        sampling_weights: np.ndarray | None = None
+        if weights is not None:
+            sampling_weights = np.asarray(weights, dtype=float)
+            if sampling_weights.ndim != 1:
+                raise ValueError(
+                    f"The sampling weights must be a one-dimensional array, but got one with "
+                    f"{sampling_weights.ndim} dimensions."
+                )
+            if sampling_weights.size == 0:
+                raise ValueError("The sampling weights must not be empty, but got an empty array.")
+            if not np.all(np.isfinite(sampling_weights)):
+                raise ValueError(
+                    "The sampling weights must all be finite, but got an array containing NaN or "
+                    "an infinity."
+                )
+            negative = sampling_weights < 0.0
+            if negative.any():
+                raise ValueError(
+                    f"Negative sampling weights are not supported yet: sampling from a signed "
+                    f"(quasi-probability) distribution additionally requires the accumulated sign "
+                    f"of the sampled entries to be reported for the post-processing of the measured "
+                    f"outcomes, which this pass does not do. Pass the magnitudes instead, but got "
+                    f"{int(negative.sum())} negative entries."
+                )
+            if sampling_weights.sum() == 0.0:
+                raise ValueError(
+                    "The sampling weights must not sum to zero, since that sum normalizes the "
+                    "sampling distribution and scales the evolution time, but got an array whose "
+                    "entries are all zero."
+                )
+
         super().__init__()
 
         self.num_terms = num_terms
@@ -135,6 +197,44 @@ class QDriftTrotterization(FermionicDAGCircuitPass):
         self.filter_trivial = filter_trivial
         """Whether to reject sampled terms that cannot affect the sampled bitstring (see the
         class docstring for the ``filter_trivial`` argument)."""
+
+        self.weights: np.ndarray | None = sampling_weights
+        r"""The sampling weights :math:`w_j`, or ``None`` to derive them from the evolved operator.
+
+        Supplying them hoists their computation out of the transpilation: the default path recomputes
+        them on *every* call to :meth:`run`, which is repeated work when generating an ensemble from a
+        single Hamiltonian. Deriving them once with
+        :func:`~qiskit_fermions.operators.terms.group_coeff_means` and passing the result here keeps
+        this pass stateless while paying that cost a single time. That is the reason to reach for this
+        argument; passing anything other than the Hamiltonian's own coefficient magnitudes changes
+        which evolution the ensemble approximates (see the caution below).
+
+        One entry is expected per *group* when the evolved operator carries
+        :attr:`~qiskit_fermions.operators.OperatorTrait.groups`, and per *term* otherwise; a
+        mismatch raises :class:`ValueError`. Because such an array describes one specific operator,
+        a circuit holding more than one :class:`.Evolution` gate is rejected as well: leave this
+        unset for such a circuit, so that every gate derives its own weights, or transpile one gate
+        at a time.
+
+        The granularity follows what the pass samples, which is why it is the grouping that decides
+        it: a grouped operator is sampled group-wise, so a weight describes a whole group. Whether
+        the grouping is the appropriate unit for a given operator is a property of that operator, not
+        of this argument -- see :ref:`grouping_explanation`, and
+        :func:`~qiskit_fermions.operators.terms.groups_are_hermitian` to check the most
+        common convention.
+
+        Entries must be non-negative. A weight is the magnitude :math:`h_j` of the qDRIFT
+        decomposition :math:`H = \sum_j h_j H_j`, in which a coefficient's sign belongs to
+        :math:`H_j` rather than to :math:`h_j` and is read off the operator directly, so a sign here
+        would have nothing to describe. Sampling from a signed (quasi-probability) distribution is a
+        separate feature: it additionally requires the accumulated sign of the sampled entries to be
+        reported back for post-processing, which this pass does not do.
+
+        .. caution::
+           These are absolute magnitudes, not relative preferences: their sum also sets the evolution
+           time, so rescaling every entry by :math:`\gamma` evolves for :math:`\gamma t` while
+           sampling identically. See the class docstring.
+        """
 
         self._rng = rng if isinstance(rng, np.random.Generator) else np.random.default_rng(rng)
 
@@ -147,6 +247,11 @@ class QDriftTrotterization(FermionicDAGCircuitPass):
         :attr:`.Evolution.synthesis` method of the node they replace. Nodes that are not
         :class:`.Evolution` gates are copied to the output unchanged. Since the sampling is random,
         the output varies between runs unless the ``rng`` was seeded.
+
+        The sampling weights are recomputed from each evolved operator here, unless :attr:`weights`
+        was supplied, in which case that array is used as-is and this method never touches the
+        operator's coefficients. A supplied array is validated against the operator it is applied to,
+        and restricts the circuit to a single :class:`.Evolution` gate (see :attr:`weights`).
 
         When :attr:`filter_trivial` is set, this method tracks the sets of modes that are known to
         be occupied or unoccupied, seeded from any :class:`.InitializeModes` gate(s) preceding the
@@ -174,8 +279,16 @@ class QDriftTrotterization(FermionicDAGCircuitPass):
         Raises:
             RuntimeError: if ``filter_trivial`` is ``True`` and :attr:`MAX_SAMPLE_RETRIES`
                 consecutive samples are rejected without finding a non-trivial term to emit.
+            ValueError: if :attr:`weights` was supplied and its length does not match the number of
+                groups (or terms) of an evolved operator, or if the circuit holds more than one
+                :class:`.Evolution` gate.
         """
         out_dag = dag.copy_empty_like()
+
+        # Counts the `Evolution` gates Trotterized by this call, to reject a circuit holding several
+        # of them when `weights` was supplied (see below). Deliberately a local rather than an
+        # instance attribute: the pass must stay stateless across `run` calls.
+        num_evolutions = 0
 
         # The sets of modes that are currently known to be occupied/unoccupied, respectively. Seeded
         # by any preceding `InitializeModes` gate(s); both remain empty until the first one is
@@ -228,30 +341,65 @@ class QDriftTrotterization(FermionicDAGCircuitPass):
             time = node.op.params[0]
             num_modes = len(node.qargs)
 
+            num_evolutions += 1
+            if self.weights is not None and num_evolutions > 1:
+                raise ValueError(
+                    "A custom sampling weights array describes the terms (or groups) of one "
+                    "specific operator, so it cannot be applied to a circuit holding more than one "
+                    "Evolution gate. Either leave weights unset, so that each gate derives its own, "
+                    "or transpile one Evolution gate at a time."
+                )
+
+            has_groups = hamil.has_groups()
+
+            if self.weights is not None:
+                # One weight per group when the operator is grouped, else one per term. `len()`
+                # is free, while `num_groups()` walks the group indices natively -- a cost only
+                # paid when weights were supplied, and small next to the `split_out_groups` lookups
+                # that follow, but the price of catching a wrong-length array here rather than
+                # sampling against the wrong operator.
+                expected = hamil.num_groups() if has_groups else len(hamil)
+                if len(self.weights) != expected:
+                    granularity = "groups" if has_groups else "terms"
+                    raise ValueError(
+                        f"The sampling weights must hold exactly one entry per sampled piece, that "
+                        f"is {expected} entries for an operator with {expected} {granularity}, but "
+                        f"got {len(self.weights)}."
+                    )
+
             # `terms` is a list of operator terms, or None when `hamil.has_groups()` is False
             terms: list[Any] | None
-            if not hamil.has_groups():
+            if not has_groups:
                 # NOTE: the qDRIFT protocol normalizes each term to unit magnitude because the
                 # evolution time is entirely dictated by `delta` (computed below). Only the
                 # magnitude of a coefficient sets its sampling probability, but its sign fixes the
                 # direction of the rotation and must be preserved for the Trotterization to
                 # approximate the target time evolution.
                 terms = [(actions, np.sign(coeff)) for actions, coeff in hamil.iter_terms()]
-                weights = np.abs(hamil.get_coeffs())
+                # NOTE: skipped entirely when the caller supplied the weights, which is what makes
+                # hoisting this out of a large ensemble loop worthwhile: `get_coeffs()` copies one
+                # value per term out of the operator on every call.
+                if self.weights is None:
+                    weights = np.abs(hamil.get_coeffs())
             else:
-                # NOTE: computed natively rather than by reducing `hamil.get_coeffs()` and
-                # `hamil.groups` here. Those two accessors each copy one value per *ungrouped*
-                # term out of the operator, only for both arrays to be aggregated straight back
-                # down to one weight per group -- which dominates the cost of the reduction itself
-                # for a Hamiltonian holding far more terms than groups. The mean is the magnitude
-                # of one atomic group, which is the scale the protocol needs: grouping is what makes
-                # each sampled piece Hermitian, and hence its evolution unitary, to begin with.
-                weights = np.array(group_coeff_means(hamil))
+                if self.weights is None:
+                    # NOTE: computed natively rather than by reducing `hamil.get_coeffs()` and
+                    # `hamil.groups` here. Those two accessors each copy one value per *ungrouped*
+                    # term out of the operator, only for both arrays to be aggregated straight back
+                    # down to one weight per group -- which dominates the cost of the reduction
+                    # itself for a Hamiltonian holding far more terms than groups. The mean is the
+                    # magnitude of one atomic group, which is the scale the protocol needs: grouping
+                    # is what makes each sampled piece Hermitian, and hence its evolution unitary,
+                    # to begin with.
+                    weights = np.array(group_coeff_means(hamil))
                 # NOTE: we do not materialize the group operators here. Since only a small
                 # fraction of the (potentially much larger) set of groups ends up being sampled,
                 # we look up each sampled group's operator lazily via `split_out_groups`, once we
                 # know which indices were actually drawn.
                 terms = None
+
+            if self.weights is not None:
+                weights = self.weights
 
             def _unit_terms(term):
                 if isinstance(term, tuple):
@@ -263,6 +411,9 @@ class QDriftTrotterization(FermionicDAGCircuitPass):
                 # so that the sampled rotation points in the correct direction.
                 return [(actions, np.sign(coeff)) for actions, coeff in term.iter_terms()]
 
+            # NOTE: the weights are non-negative, so this sum is the protocol's `lambda`. It both
+            # normalizes the sampling distribution and sets the shared evolution time, which is why
+            # a supplied array's scale is not free (see the class docstring).
             lambd = np.sum(weights)
             delta = (lambd * time) / self.num_terms
             probabilities = weights / lambd

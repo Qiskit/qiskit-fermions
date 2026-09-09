@@ -219,6 +219,8 @@ circuits to generate:
 
 * The number of circuits to generate: ``num_sqdrift_randomizations``
 * The length of each circuit in terms of excitation groups: ``num_groups``
+* Optionally, precomputed sampling weights, if the transpilation itself becomes a
+  bottleneck: ``weights`` (see :ref:`sqdrift_sampling_weights` below)
 
 .. tab-set-code::
 
@@ -336,6 +338,73 @@ once the first excitation touched them.
    has no occupation information to filter against. It emits a
    :class:`UserWarning` and leaves the sampling unfiltered for that
    :class:`.Evolution` gate.
+
+.. _sqdrift_sampling_weights:
+
+(Optional) Precompute the sampling weights
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Reach for this only if the transpilation itself is a bottleneck. It changes
+nothing about the circuits you get.
+
+:class:`.QDriftTrotterization` draws each group with a probability proportional to
+the magnitude of its coefficient, and derives those magnitudes from the
+Hamiltonian on every call: one value per Hamiltonian *term*, reduced down to one
+per group. Because the pass is stateless it repeats that reduction for every
+randomization, even though the result is identical every time. The ``weights``
+argument lets you compute it once with
+:func:`~qiskit_fermions.operators.terms.group_coeff_means` and hand the result
+over, moving the cost out of the loop while leaving the pass free of any cached,
+Hamiltonian-dependent state.
+
+This is the counterpart of the term ordering in step 2. That one hoists the group
+*lookup* out of the loop, this one the weight *reduction*, and each is only as
+noticeable as the other is absent, so it is worth applying both together. Since
+``canon`` was already reordered above, the two compose directly:
+
+.. tab-set-code::
+
+    .. code-block:: python
+
+       >>> from qiskit_fermions.operators.terms.grouping import group_coeff_means
+       >>>
+       >>> weights = group_coeff_means(canon)  # `canon` is group-ordered, from step 2
+       >>> qdrift_weighted = QDriftTrotterization(num_groups, rng=19, weights=weights)
+       >>>
+       >>> pm.optimization = FermionicPassManager([qdrift_weighted])
+       >>> weighted_circuits = [
+       ...     pm.run(circ) for _ in range(num_sqdrift_randomizations)
+       ... ]
+       >>> len(weighted_circuits)
+       10
+
+    .. code-block:: c
+
+       // WARNING: Qiskit's C API does not yet allow us to implement circuits
+       // with custom gate definitions, which we therefore also cannot transpile
+       // via this API.
+
+Since those are exactly the weights the pass would have computed, the circuits are
+the same as before; only the repeated reduction is gone.
+
+One entry is expected per *group*, not per term, whenever the operator carries
+groups, since a grouped operator is sampled group-wise. Entries must be
+non-negative: a weight is a *magnitude*, because the qDRIFT protocol decomposes
+:math:`H = \sum_j h_j H_j` with positive :math:`h_j`, and a coefficient's sign
+belongs to :math:`H_j`, where the pass reads it off the operator directly.
+
+.. caution::
+   The weights are absolute magnitudes, not relative preferences. Their sum also
+   fixes the evolution time, so multiplying every entry by :math:`\gamma` samples
+   identically but evolves for :math:`\gamma t` instead of :math:`t`. Passing
+   anything other than the Hamiltonian's own coefficient magnitudes therefore
+   changes which evolution the ensemble approximates, which is why this is a
+   performance tool rather than a way to tune the sampling.
+
+Because a weights array describes the groups of one particular operator, it is
+validated against each :class:`.Evolution` gate it is applied to, and a circuit
+holding more than one such gate is rejected. Leaving ``weights`` unset keeps such
+a circuit supported, since each gate then derives its own.
 
 (Optional) Optimize the fermionic mode indexing
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
