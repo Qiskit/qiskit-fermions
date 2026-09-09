@@ -121,7 +121,7 @@ from the custom mapper section, demonstrating equivalent results:
        QfMajoranaOperator *maj_op = qf_maj_op_new(num_terms, num_modes, coeffs, modes, boundaries);
 
        // Convert MajoranaOperator to FermionOperator using library mapper
-       QfFermionOperator *ferm_op = qf_maj_op_to_ferm_op(maj_op);
+       QfFermionOperator *ferm_op = qf_majorana_to_fermion(maj_op);
 
        // Apply Jordan-Wigner mapper to get qubit operator
        QkObs *qubit_op;
