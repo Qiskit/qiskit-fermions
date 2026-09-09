@@ -47,12 +47,12 @@ def map_fermion_action_generators(
 
         >>> from qiskit_fermions.mappers import map_fermion_action_generators
         >>> from qiskit_fermions.operators import FermionAction, FermionOperator, ann, cre
-        >>> from qiskit.quantum_info import SparsePauliOp
+        >>> from qiskit.quantum_info import SparseObservable
         >>>
-        >>> def jordan_wigner(action: FermionAction) -> SparsePauliOp:
+        >>> def jordan_wigner(action: FermionAction) -> SparseObservable:
         ...     act, idx = action
         ...     qubits = list(range(idx + 1))
-        ...     return SparsePauliOp.from_sparse_list(
+        ...     return SparseObservable.from_sparse_list(
         ...         [
         ...             ("Z" * idx + "X", qubits, 0.5),
         ...             ("Z" * idx + "Y", qubits, -0.5j if act else 0.5j),
@@ -61,13 +61,15 @@ def map_fermion_action_generators(
         ...     )
         >>>
         >>> num_qubits = 2
-        >>> def identity() -> SparsePauliOp:
-        ...     return SparsePauliOp.from_sparse_list([("", [], 1)], num_qubits)
+        >>> def identity() -> SparseObservable:
+        ...     return SparseObservable.identity(num_qubits)
         >>>
         >>> op = FermionOperator.from_dict({(cre(0), ann(1)): 2.0})
-        >>> qop = map_fermion_action_generators(op, jordan_wigner, identity)
-        >>> print([(label, complex(coeff)) for label, coeff in sorted(qop.label_iter())])
-        [('II', 0j), ('XX', (0.5+0j)), ('XY', -0.5j), ('YX', 0.5j), ('YY', (0.5+0j))]
+        >>> qop = map_fermion_action_generators(
+        ...     op, jordan_wigner, identity, compose=SparseObservable.compose
+        ... )
+        >>> print(sorted(qop.simplify().to_sparse_list()))
+        [('XX', [0, 1], (0.5+0j)), ('XY', [0, 1], 0.5j), ('YX', [0, 1], -0.5j), ('YY', [0, 1], (0.5+0j))]
 
     Args:
         operator: the operator to be mapped.
