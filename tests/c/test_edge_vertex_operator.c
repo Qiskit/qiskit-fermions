@@ -100,6 +100,42 @@ static int test_getters(void) {
     return Ok;
 }
 
+static int test_get_support(void) {
+    // The right indices contribute to the support just as the left ones do, so mode 1 appears
+    // even though it is only ever a right index. Mode 2 is shared to cover de-duplication.
+    uint32_t left_indices[3] = {2, 0, 2};
+    uint32_t right_indices[3] = {2, 1, 2};
+    QkComplex64 coeffs[2] = {{1.0, 0.0}, {1.0, 0.0}};
+    uint32_t boundaries[3] = {0, 2, 3};
+    QfEdgeVertexOperator *op =
+        qf_edge_op_new(2, 3, coeffs, left_indices, right_indices, boundaries);
+
+    bool passed_all = true;
+
+    uint32_t num_support = qf_edge_op_num_support(op);
+    passed_all = passed_all && (num_support == 3);
+
+    uint32_t support_out[3];
+    qf_edge_op_get_support(op, support_out);
+
+    uint32_t expected[3] = {0, 1, 2};
+    for (uint32_t i = 0; i < num_support; i++) {
+        passed_all = passed_all && (support_out[i] == expected[i]);
+    }
+
+    // An operator without terms has an empty support, so the buffer is never written to.
+    QfEdgeVertexOperator *empty = qf_edge_op_zero();
+    passed_all = passed_all && (qf_edge_op_num_support(empty) == 0);
+
+    qf_edge_op_free(op);
+    qf_edge_op_free(empty);
+
+    if (!passed_all) {
+        return EqualityError;
+    }
+    return Ok;
+}
+
 static int test_add(void) {
     QfEdgeVertexOperator *one = qf_edge_op_one();
     QfEdgeVertexOperator *zero = qf_edge_op_zero();
@@ -113,6 +149,139 @@ static int test_add(void) {
     qf_edge_op_free(result);
 
     if (!is_equal) {
+        return EqualityError;
+    }
+    return Ok;
+}
+
+// `scaled_add` is the only subtraction the C API offers, so the -1 factor is the load-bearing
+// case: it must agree with a hand-built difference.
+static int test_scaled_add(void) {
+    uint32_t left_a[2] = {0, 1};
+    uint32_t right_a[2] = {1, 2};
+    uint32_t boundaries[2] = {0, 2};
+    QkComplex64 coeff = {1.0, 0.0};
+    QfEdgeVertexOperator *op_a = qf_edge_op_new(1, 2, &coeff, left_a, right_a, boundaries);
+    uint32_t left_b[2] = {2, 3};
+    uint32_t right_b[2] = {3, 4};
+    QfEdgeVertexOperator *op_b = qf_edge_op_new(1, 2, &coeff, left_b, right_b, boundaries);
+
+    bool passed_all = true;
+
+    // A factor of -1 subtracts, so adding the result back to `op_b` recovers `op_a`.
+    QkComplex64 minus_one = {-1.0, 0.0};
+    QkComplex64 plus_one_early = {1.0, 0.0};
+    QfEdgeVertexOperator *difference = qf_edge_op_scaled_add(op_a, op_b, &minus_one);
+    QfEdgeVertexOperator *restored = qf_edge_op_scaled_add(difference, op_b, &plus_one_early);
+    QfEdgeVertexOperator *simplified_restored = qf_edge_op_simplify(restored, 1e-10);
+    QfEdgeVertexOperator *simplified_a = qf_edge_op_simplify(op_a, 1e-10);
+    passed_all = passed_all && qf_edge_op_equiv(simplified_restored, simplified_a, 1e-10);
+    qf_edge_op_free(simplified_restored);
+    qf_edge_op_free(simplified_a);
+
+    // A factor of +1 is plain addition.
+    QkComplex64 plus_one = {1.0, 0.0};
+    QfEdgeVertexOperator *summed = qf_edge_op_scaled_add(op_a, op_b, &plus_one);
+    QfEdgeVertexOperator *added = qf_edge_op_add(op_a, op_b);
+    passed_all = passed_all && qf_edge_op_equal(summed, added);
+
+    // Scaling by zero still appends the terms; only their coefficients vanish.
+    QkComplex64 zero_factor = {0.0, 0.0};
+    QfEdgeVertexOperator *scaled_zero = qf_edge_op_scaled_add(op_a, op_b, &zero_factor);
+    passed_all = passed_all && (qf_edge_op_len(scaled_zero) == qf_edge_op_len(added));
+    QfEdgeVertexOperator *chopped = qf_edge_op_simplify(scaled_zero, 1e-10);
+    passed_all = passed_all && (qf_edge_op_len(chopped) == qf_edge_op_len(op_a));
+
+    // Appending terms drops the grouping, exactly as `add` does.
+    uint32_t groups_in[1] = {0};
+    qf_edge_op_set_groups(op_a, groups_in, 1);
+    QfEdgeVertexOperator *from_grouped = qf_edge_op_scaled_add(op_a, op_b, &plus_one);
+    passed_all = passed_all && !qf_edge_op_has_groups(from_grouped);
+    qf_edge_op_del_groups(op_a);
+
+    qf_edge_op_free(op_a);
+    qf_edge_op_free(op_b);
+    qf_edge_op_free(difference);
+    qf_edge_op_free(restored);
+    qf_edge_op_free(summed);
+    qf_edge_op_free(added);
+    qf_edge_op_free(scaled_zero);
+    qf_edge_op_free(chopped);
+    qf_edge_op_free(from_grouped);
+
+    if (!passed_all) {
+        return EqualityError;
+    }
+    return Ok;
+}
+
+// Each in-place operation must agree with its out-of-place counterpart. The group handling is
+// asserted in both directions, because the three do *not* behave alike: the two additions change
+// the number of terms and therefore drop the grouping, whereas scaling the coefficients keeps it.
+static int test_inplace_arithmetic(void) {
+    uint32_t left_a[2] = {0, 1};
+    uint32_t right_a[2] = {1, 2};
+    uint32_t boundaries[2] = {0, 2};
+    QkComplex64 coeff = {1.0, 0.0};
+    QfEdgeVertexOperator *op_a = qf_edge_op_new(1, 2, &coeff, left_a, right_a, boundaries);
+    uint32_t left_b[2] = {2, 3};
+    uint32_t right_b[2] = {3, 4};
+    QfEdgeVertexOperator *op_b = qf_edge_op_new(1, 2, &coeff, left_b, right_b, boundaries);
+    QfEdgeVertexOperator *scratch = qf_edge_op_new(1, 2, &coeff, left_a, right_a, boundaries);
+
+    bool passed_all = true;
+
+    // add_inplace == add
+    QfEdgeVertexOperator *expected_sum = qf_edge_op_add(op_a, op_b);
+    qf_edge_op_add_inplace(scratch, op_b);
+    passed_all = passed_all && qf_edge_op_equal(scratch, expected_sum);
+
+    // scaled_add_inplace == scaled_add
+    QkComplex64 factor = {-2.0, 0.5};
+    QfEdgeVertexOperator *expected_scaled = qf_edge_op_scaled_add(op_a, op_b, &factor);
+    QfEdgeVertexOperator *scaled = qf_edge_op_new(1, 2, &coeff, left_a, right_a, boundaries);
+    qf_edge_op_scaled_add_inplace(scaled, op_b, &factor);
+    passed_all = passed_all && qf_edge_op_equal(scaled, expected_scaled);
+
+    // mul_inplace == mul
+    QkComplex64 scalar = {0.0, 3.0};
+    QfEdgeVertexOperator *expected_scalar = qf_edge_op_mul(op_a, &scalar);
+    QfEdgeVertexOperator *multiplied = qf_edge_op_new(1, 2, &coeff, left_a, right_a, boundaries);
+    qf_edge_op_mul_inplace(multiplied, &scalar);
+    passed_all = passed_all && qf_edge_op_equal(multiplied, expected_scalar);
+
+    // The two appending operations drop the grouping, ...
+    QfEdgeVertexOperator *grouped_add = qf_edge_op_new(1, 2, &coeff, left_a, right_a, boundaries);
+    uint32_t groups_in[1] = {0};
+    qf_edge_op_set_groups(grouped_add, groups_in, 1);
+    qf_edge_op_add_inplace(grouped_add, op_b);
+    passed_all = passed_all && !qf_edge_op_has_groups(grouped_add);
+
+    QfEdgeVertexOperator *grouped_scaled =
+        qf_edge_op_new(1, 2, &coeff, left_a, right_a, boundaries);
+    qf_edge_op_set_groups(grouped_scaled, groups_in, 1);
+    qf_edge_op_scaled_add_inplace(grouped_scaled, op_b, &factor);
+    passed_all = passed_all && !qf_edge_op_has_groups(grouped_scaled);
+
+    // ... while scaling the coefficients keeps it.
+    QfEdgeVertexOperator *grouped_mul = qf_edge_op_new(1, 2, &coeff, left_a, right_a, boundaries);
+    qf_edge_op_set_groups(grouped_mul, groups_in, 1);
+    qf_edge_op_mul_inplace(grouped_mul, &scalar);
+    passed_all = passed_all && qf_edge_op_has_groups(grouped_mul);
+
+    qf_edge_op_free(op_a);
+    qf_edge_op_free(op_b);
+    qf_edge_op_free(scratch);
+    qf_edge_op_free(expected_sum);
+    qf_edge_op_free(expected_scaled);
+    qf_edge_op_free(scaled);
+    qf_edge_op_free(expected_scalar);
+    qf_edge_op_free(multiplied);
+    qf_edge_op_free(grouped_add);
+    qf_edge_op_free(grouped_scaled);
+    qf_edge_op_free(grouped_mul);
+
+    if (!passed_all) {
         return EqualityError;
     }
     return Ok;
@@ -621,7 +790,10 @@ int test_edge_vertex_operator(void) {
     int num_failed = 0;
     num_failed += RUN_TEST(test_new);
     num_failed += RUN_TEST(test_getters);
+    num_failed += RUN_TEST(test_get_support);
     num_failed += RUN_TEST(test_add);
+    num_failed += RUN_TEST(test_scaled_add);
+    num_failed += RUN_TEST(test_inplace_arithmetic);
     num_failed += RUN_TEST(test_add_term);
     num_failed += RUN_TEST(test_mul);
     num_failed += RUN_TEST(test_compose);

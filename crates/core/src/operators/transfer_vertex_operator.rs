@@ -529,8 +529,8 @@ impl OperatorTrait for TransferVertexOperator {
         self.coeffs.iter_mut().for_each(|c| *c *= other);
     }
 
-    fn __isub__(&mut self, other: &Self) {
-        self.coeffs.extend(other.coeffs.iter().map(|c| -c));
+    fn __iscaled_add__(&mut self, other: &Self, factor: Complex64) {
+        self.coeffs.extend(other.coeffs.iter().map(|c| c * factor));
         self.left_indices.extend_from_slice(&other.left_indices);
         self.right_indices.extend_from_slice(&other.right_indices);
         let offset = self.boundaries[self.boundaries.len() - 1];

@@ -85,14 +85,26 @@ pub trait OperatorTrait {
     fn __imatmul__(&mut self, other: &Self);
     fn ichop(&mut self, atol: f64);
 
+    /// Adds `factor * other` to `self` in place.
+    ///
+    /// Implemented per operator type rather than as `__iadd__(&other.__mul__(factor))` because
+    /// [`__mul__`](OperatorMacro::__mul__) deep-copies *all* of `other`'s buffers - index data
+    /// included - only to scale its coefficients, which `__iadd__` then copies a second time.
+    /// Appending `other`'s terms while scaling just the newly appended coefficients does the same
+    /// work in one pass and with no temporary.
+    ///
+    /// Like [`__iadd__`](Self::__iadd__), this changes the number of terms and therefore clears the
+    /// group indices.
+    fn __iscaled_add__(&mut self, other: &Self, factor: Complex64);
+
     /// Subtracts `other` from `self` in place.
     ///
-    /// Implemented per operator type rather than as `__iadd__(&other.__neg__())` because
-    /// [`__neg__`](OperatorMacro::__neg__) deep-copies *all* of `other`'s buffers - index data
-    /// included - only to scale its coefficients, which `__iadd__` then copies a second time.
-    /// Appending `other`'s terms while negating just the newly appended coefficients does the same
-    /// work in one pass and with no temporary.
-    fn __isub__(&mut self, other: &Self);
+    /// The negation is folded into the coefficient scaling of
+    /// [`__iscaled_add__`](Self::__iscaled_add__), so this too appends in a single pass without
+    /// building a negated copy of `other` first.
+    fn __isub__(&mut self, other: &Self) {
+        self.__iscaled_add__(other, Complex64::new(-1.0, 0.0));
+    }
 
     /// Returns the composition `self & other`, i.e. with `other` applied first.
     ///
@@ -263,6 +275,12 @@ pub trait OperatorTrait {
 pub trait OperatorMacro {
     fn __add__(&self, other: &Self) -> Self;
     fn __sub__(&self, other: &Self) -> Self;
+    /// Returns `self + factor * other`.
+    ///
+    /// The fused counterpart of `self.__add__(&other.__mul__(factor))`, which would materialize a
+    /// fully scaled copy of `other` just to append it. Both `__add__` and `__sub__` are the special
+    /// cases `factor = 1` and `factor = -1`.
+    fn __scaled_add__(&self, other: &Self, factor: Complex64) -> Self;
     fn __mul__(&self, other: Complex64) -> Self;
     fn __div__(&self, other: Complex64) -> Self;
     fn __neg__(&self) -> Self;
@@ -296,6 +314,17 @@ macro_rules! impl_operator_macro {
                 // `self`.
                 let mut result = self.clone();
                 result.__isub__(other);
+                result
+            }
+
+            fn __scaled_add__(&self, other: &Self, factor: Complex64) -> Self
+            where
+                Self: OperatorTrait,
+            {
+                // As for `__sub__`, this clone is load-bearing rather than wasteful: the in-place
+                // operation appends to the buffers it is given.
+                let mut result = self.clone();
+                result.__iscaled_add__(other, factor);
                 result
             }
 

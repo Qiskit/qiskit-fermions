@@ -91,6 +91,40 @@ static int test_getters(void) {
     return Ok;
 }
 
+static int test_get_support(void) {
+    // Two terms deliberately share mode 2, and the modes are supplied out of order, so the
+    // test covers both de-duplication and the ascending-order guarantee.
+    uint32_t modes[3] = {2, 0, 2};
+    QkComplex64 coeffs[2] = {{1.0, 0.0}, {1.0, 0.0}};
+    uint32_t boundaries[3] = {0, 2, 3};
+    QfMajoranaOperator *op = qf_maj_op_new(2, 3, coeffs, modes, boundaries);
+
+    bool passed_all = true;
+
+    uint32_t num_support = qf_maj_op_num_support(op);
+    passed_all = passed_all && (num_support == 2);
+
+    uint32_t support_out[2];
+    qf_maj_op_get_support(op, support_out);
+
+    uint32_t expected[2] = {0, 2};
+    for (uint32_t i = 0; i < num_support; i++) {
+        passed_all = passed_all && (support_out[i] == expected[i]);
+    }
+
+    // An operator without terms has an empty support, so the buffer is never written to.
+    QfMajoranaOperator *empty = qf_maj_op_zero();
+    passed_all = passed_all && (qf_maj_op_num_support(empty) == 0);
+
+    qf_maj_op_free(op);
+    qf_maj_op_free(empty);
+
+    if (!passed_all) {
+        return EqualityError;
+    }
+    return Ok;
+}
+
 static int test_add(void) {
     QfMajoranaOperator *zero = qf_maj_op_zero();
     QfMajoranaOperator *one = qf_maj_op_one();
@@ -104,6 +138,134 @@ static int test_add(void) {
     qf_maj_op_free(one);
 
     if (!is_equal) {
+        return EqualityError;
+    }
+    return Ok;
+}
+
+// `scaled_add` is the only subtraction the C API offers, so the -1 factor is the load-bearing
+// case: it must agree with a hand-built difference.
+static int test_scaled_add(void) {
+    uint32_t modes_a[2] = {0, 1};
+    uint32_t boundaries[2] = {0, 2};
+    QkComplex64 coeff = {1.0, 0.0};
+    QfMajoranaOperator *op_a = qf_maj_op_new(1, 2, &coeff, modes_a, boundaries);
+    uint32_t modes_b[2] = {2, 3};
+    QfMajoranaOperator *op_b = qf_maj_op_new(1, 2, &coeff, modes_b, boundaries);
+
+    bool passed_all = true;
+
+    // A factor of -1 subtracts, so adding the result back to `op_b` recovers `op_a`.
+    QkComplex64 minus_one = {-1.0, 0.0};
+    QkComplex64 plus_one_early = {1.0, 0.0};
+    QfMajoranaOperator *difference = qf_maj_op_scaled_add(op_a, op_b, &minus_one);
+    QfMajoranaOperator *restored = qf_maj_op_scaled_add(difference, op_b, &plus_one_early);
+    QfMajoranaOperator *simplified_restored = qf_maj_op_simplify(restored, 1e-10);
+    QfMajoranaOperator *simplified_a = qf_maj_op_simplify(op_a, 1e-10);
+    passed_all = passed_all && qf_maj_op_equiv(simplified_restored, simplified_a, 1e-10);
+    qf_maj_op_free(simplified_restored);
+    qf_maj_op_free(simplified_a);
+
+    // A factor of +1 is plain addition.
+    QkComplex64 plus_one = {1.0, 0.0};
+    QfMajoranaOperator *summed = qf_maj_op_scaled_add(op_a, op_b, &plus_one);
+    QfMajoranaOperator *added = qf_maj_op_add(op_a, op_b);
+    passed_all = passed_all && qf_maj_op_equal(summed, added);
+
+    // Scaling by zero still appends the terms; only their coefficients vanish.
+    QkComplex64 zero_factor = {0.0, 0.0};
+    QfMajoranaOperator *scaled_zero = qf_maj_op_scaled_add(op_a, op_b, &zero_factor);
+    passed_all = passed_all && (qf_maj_op_len(scaled_zero) == qf_maj_op_len(added));
+    QfMajoranaOperator *chopped = qf_maj_op_simplify(scaled_zero, 1e-10);
+    passed_all = passed_all && (qf_maj_op_len(chopped) == qf_maj_op_len(op_a));
+
+    // Appending terms drops the grouping, exactly as `add` does.
+    uint32_t groups_in[1] = {0};
+    qf_maj_op_set_groups(op_a, groups_in, 1);
+    QfMajoranaOperator *from_grouped = qf_maj_op_scaled_add(op_a, op_b, &plus_one);
+    passed_all = passed_all && !qf_maj_op_has_groups(from_grouped);
+    qf_maj_op_del_groups(op_a);
+
+    qf_maj_op_free(op_a);
+    qf_maj_op_free(op_b);
+    qf_maj_op_free(difference);
+    qf_maj_op_free(restored);
+    qf_maj_op_free(summed);
+    qf_maj_op_free(added);
+    qf_maj_op_free(scaled_zero);
+    qf_maj_op_free(chopped);
+    qf_maj_op_free(from_grouped);
+
+    if (!passed_all) {
+        return EqualityError;
+    }
+    return Ok;
+}
+
+// Each in-place operation must agree with its out-of-place counterpart. The group handling is
+// asserted in both directions, because the three do *not* behave alike: the two additions change
+// the number of terms and therefore drop the grouping, whereas scaling the coefficients keeps it.
+static int test_inplace_arithmetic(void) {
+    uint32_t modes_a[2] = {0, 1};
+    uint32_t boundaries[2] = {0, 2};
+    QkComplex64 coeff = {1.0, 0.0};
+    QfMajoranaOperator *op_a = qf_maj_op_new(1, 2, &coeff, modes_a, boundaries);
+    uint32_t modes_b[2] = {2, 3};
+    QfMajoranaOperator *op_b = qf_maj_op_new(1, 2, &coeff, modes_b, boundaries);
+    QfMajoranaOperator *scratch = qf_maj_op_new(1, 2, &coeff, modes_a, boundaries);
+
+    bool passed_all = true;
+
+    // add_inplace == add
+    QfMajoranaOperator *expected_sum = qf_maj_op_add(op_a, op_b);
+    qf_maj_op_add_inplace(scratch, op_b);
+    passed_all = passed_all && qf_maj_op_equal(scratch, expected_sum);
+
+    // scaled_add_inplace == scaled_add
+    QkComplex64 factor = {-2.0, 0.5};
+    QfMajoranaOperator *expected_scaled = qf_maj_op_scaled_add(op_a, op_b, &factor);
+    QfMajoranaOperator *scaled = qf_maj_op_new(1, 2, &coeff, modes_a, boundaries);
+    qf_maj_op_scaled_add_inplace(scaled, op_b, &factor);
+    passed_all = passed_all && qf_maj_op_equal(scaled, expected_scaled);
+
+    // mul_inplace == mul
+    QkComplex64 scalar = {0.0, 3.0};
+    QfMajoranaOperator *expected_scalar = qf_maj_op_mul(op_a, &scalar);
+    QfMajoranaOperator *multiplied = qf_maj_op_new(1, 2, &coeff, modes_a, boundaries);
+    qf_maj_op_mul_inplace(multiplied, &scalar);
+    passed_all = passed_all && qf_maj_op_equal(multiplied, expected_scalar);
+
+    // The two appending operations drop the grouping, ...
+    QfMajoranaOperator *grouped_add = qf_maj_op_new(1, 2, &coeff, modes_a, boundaries);
+    uint32_t groups_in[1] = {0};
+    qf_maj_op_set_groups(grouped_add, groups_in, 1);
+    qf_maj_op_add_inplace(grouped_add, op_b);
+    passed_all = passed_all && !qf_maj_op_has_groups(grouped_add);
+
+    QfMajoranaOperator *grouped_scaled = qf_maj_op_new(1, 2, &coeff, modes_a, boundaries);
+    qf_maj_op_set_groups(grouped_scaled, groups_in, 1);
+    qf_maj_op_scaled_add_inplace(grouped_scaled, op_b, &factor);
+    passed_all = passed_all && !qf_maj_op_has_groups(grouped_scaled);
+
+    // ... while scaling the coefficients keeps it.
+    QfMajoranaOperator *grouped_mul = qf_maj_op_new(1, 2, &coeff, modes_a, boundaries);
+    qf_maj_op_set_groups(grouped_mul, groups_in, 1);
+    qf_maj_op_mul_inplace(grouped_mul, &scalar);
+    passed_all = passed_all && qf_maj_op_has_groups(grouped_mul);
+
+    qf_maj_op_free(op_a);
+    qf_maj_op_free(op_b);
+    qf_maj_op_free(scratch);
+    qf_maj_op_free(expected_sum);
+    qf_maj_op_free(expected_scaled);
+    qf_maj_op_free(scaled);
+    qf_maj_op_free(expected_scalar);
+    qf_maj_op_free(multiplied);
+    qf_maj_op_free(grouped_add);
+    qf_maj_op_free(grouped_scaled);
+    qf_maj_op_free(grouped_mul);
+
+    if (!passed_all) {
         return EqualityError;
     }
     return Ok;
@@ -604,7 +766,10 @@ int test_majorana_operator(void) {
     int num_failed = 0;
     num_failed += RUN_TEST(test_new);
     num_failed += RUN_TEST(test_getters);
+    num_failed += RUN_TEST(test_get_support);
     num_failed += RUN_TEST(test_add);
+    num_failed += RUN_TEST(test_scaled_add);
+    num_failed += RUN_TEST(test_inplace_arithmetic);
     num_failed += RUN_TEST(test_add_term);
     num_failed += RUN_TEST(test_equiv_pos);
     num_failed += RUN_TEST(test_equiv_neg);

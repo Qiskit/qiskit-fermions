@@ -491,8 +491,8 @@ impl OperatorTrait for FermionOperator {
         self.coeffs.iter_mut().for_each(|c| *c *= other);
     }
 
-    fn __isub__(&mut self, other: &Self) {
-        self.coeffs.extend(other.coeffs.iter().map(|c| -c));
+    fn __iscaled_add__(&mut self, other: &Self, factor: Complex64) {
+        self.coeffs.extend(other.coeffs.iter().map(|c| c * factor));
         self.actions.extend_from_slice(&other.actions);
         self.modes.extend_from_slice(&other.modes);
         let offset = self.boundaries[self.boundaries.len() - 1];
@@ -742,6 +742,81 @@ mod tests {
                 groups: None,
             }
         );
+    }
+
+    #[test]
+    fn test_scaled_add() {
+        let one = FermionOperator::one();
+        let two = FermionOperator {
+            coeffs: vec![Complex64::new(2.0, 0.0)],
+            actions: vec![],
+            modes: vec![],
+            boundaries: vec![0, 0],
+            groups: None,
+        };
+
+        // The appended coefficients are scaled, the existing ones are untouched.
+        let result = two.__scaled_add__(&one, Complex64::new(0.0, 3.0));
+        assert_eq!(
+            result,
+            FermionOperator {
+                coeffs: vec![Complex64::new(2.0, 0.0), Complex64::new(0.0, 3.0)],
+                actions: vec![],
+                modes: vec![],
+                boundaries: vec![0, 0, 0],
+                groups: None,
+            }
+        );
+    }
+
+    /// `__isub__` is defined in terms of `__iscaled_add__`, so the two must agree exactly.
+    #[test]
+    fn test_scaled_add_subsumes_sub() {
+        let hop = FermionOperator {
+            coeffs: vec![Complex64::new(1.5, -0.5)],
+            actions: vec![true, false],
+            modes: vec![0, 1],
+            boundaries: vec![0, 2],
+            groups: None,
+        };
+        let num = FermionOperator {
+            coeffs: vec![Complex64::new(0.25, 2.0)],
+            actions: vec![true, false],
+            modes: vec![1, 1],
+            boundaries: vec![0, 2],
+            groups: None,
+        };
+
+        let mut subtracted = hop.clone();
+        subtracted.__isub__(&num);
+
+        let mut scaled = hop.clone();
+        scaled.__iscaled_add__(&num, Complex64::new(-1.0, 0.0));
+
+        assert_eq!(subtracted, scaled);
+
+        // A unit factor is plain addition.
+        let mut added = hop.clone();
+        added.__iadd__(&num);
+        let mut scaled_one = hop.clone();
+        scaled_one.__iscaled_add__(&num, Complex64::new(1.0, 0.0));
+        assert_eq!(added, scaled_one);
+    }
+
+    /// Appending terms invalidates the one-index-per-term invariant, so the grouping must go.
+    #[test]
+    fn test_scaled_add_clears_groups() {
+        let mut grouped = FermionOperator {
+            coeffs: vec![Complex64::new(1.0, 0.0)],
+            actions: vec![true, false],
+            modes: vec![0, 1],
+            boundaries: vec![0, 2],
+            groups: Some(vec![0]),
+        };
+        assert!(grouped.has_groups());
+
+        grouped.__iscaled_add__(&FermionOperator::one(), Complex64::new(2.0, 0.0));
+        assert!(!grouped.has_groups());
     }
 
     #[test]

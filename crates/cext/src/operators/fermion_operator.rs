@@ -311,6 +311,105 @@ pub unsafe extern "C" fn qf_ferm_op_get_boundaries(
 
 /// @ingroup qf_ferm_op
 ///
+/// @brief Gets the size of the support of an operator.
+///
+/// @param op A pointer to the fermionic operator whose support size to get.
+///
+/// @return The number of distinct mode indices acted upon by the operator.
+///
+/// @rst
+///
+/// Use this to size the output buffer of :c:func:`qf_ferm_op_get_support`, which does not report a
+/// length of its own.
+///
+/// Example
+/// -------
+///
+/// .. code-block:: c
+///     :linenos:
+///
+///     bool actions[3] = {true, false, true};
+///     uint32_t modes[3] = {2, 0, 2};
+///     QkComplex64 coeffs[2] = {{1.0, 0.0}, {1.0, 0.0}};
+///     uint32_t boundaries[3] = {0, 2, 3};
+///     QfFermionOperator *op = qf_ferm_op_new(2, 3, coeffs, actions, modes, boundaries);
+///
+///     uint32_t num_support = qf_ferm_op_num_support(op);
+///
+///     assert(num_support == 2);
+///
+/// @endrst
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn qf_ferm_op_num_support(op: *const FermionOperator) -> u32 {
+    // SAFETY: Per documentation, the pointer is non-null and aligned.
+    let op = unsafe { const_ptr_as_ref(op) };
+
+    op.get_support()
+        .len()
+        .try_into()
+        .expect("the number of distinct modes cannot exceed u32::MAX")
+}
+
+/// @ingroup qf_ferm_op
+///
+/// @brief Gets the support of an operator, i.e. the mode indices acted upon by the operator.
+///
+/// @param op A pointer to the fermionic operator whose support to get.
+/// @param support_out A pointer to the integer array into which to write the support. It must be
+///     sized to at least :c:func:`qf_ferm_op_num_support` elements.
+///
+/// @rst
+///
+/// The indices are written in **ascending** order, and every index appears exactly once no matter
+/// how many terms act upon it.
+///
+/// .. note::
+///    Unlike the other getters, this does not hand out a pointer into the operator: the support is
+///    computed on demand rather than stored, so the caller provides the output buffer. Query its
+///    required length with :c:func:`qf_ferm_op_num_support` first.
+///
+///
+/// Example
+/// -------
+///
+/// .. code-block:: c
+///     :linenos:
+///
+///     bool actions[3] = {true, false, true};
+///     uint32_t modes[3] = {2, 0, 2};
+///     QkComplex64 coeffs[2] = {{1.0, 0.0}, {1.0, 0.0}};
+///     uint32_t boundaries[3] = {0, 2, 3};
+///     QfFermionOperator *op = qf_ferm_op_new(2, 3, coeffs, actions, modes, boundaries);
+///
+///     uint32_t num_support = qf_ferm_op_num_support(op);
+///     uint32_t *support_out = malloc(num_support * sizeof(uint32_t));
+///
+///     qf_ferm_op_get_support(op, support_out);
+///
+///     assert(support_out[0] == 0);
+///     assert(support_out[1] == 2);
+///
+///     free(support_out);
+///
+/// @endrst
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn qf_ferm_op_get_support(op: *const FermionOperator, support_out: *mut u32) {
+    // SAFETY: Per documentation, the pointer is non-null and aligned.
+    let op = unsafe { const_ptr_as_ref(op) };
+
+    // The support is gathered into a `HashSet`, whose iteration order is not reproducible. Sorting
+    // makes the output deterministic, which is what lets a caller index into it meaningfully.
+    let mut support: Vec<u32> = op.get_support().into_iter().collect();
+    support.sort_unstable();
+
+    for (i, mode) in support.iter().enumerate() {
+        // SAFETY: Per documentation, `support_out` is sized to hold the whole support.
+        unsafe { support_out.add(i).write(*mode) };
+    }
+}
+
+/// @ingroup qf_ferm_op
+///
 /// @brief Constructs the additive identity operator.
 ///
 /// @return A pointer to the created operator.
@@ -739,6 +838,188 @@ pub unsafe extern "C" fn qf_ferm_op_add(
 
 /// @ingroup qf_ferm_op
 ///
+/// @brief Adds two operators together, scaling the coefficients of the right one.
+///
+/// @param left A pointer to the left operator.
+/// @param right A pointer to the right operator.
+/// @param factor A pointer to the factor to scale the right operator's coefficients with.
+///
+/// @return A pointer to the resulting operator, ``left + factor * right``.
+///
+/// @rst
+///
+/// This fuses the scaling into the addition, which avoids building a fully scaled copy of ``right``
+/// just to append it. Passing a factor of ``-1`` therefore subtracts, which is why no separate
+/// subtraction function is provided.
+///
+/// .. note::
+///    Like :c:func:`qf_ferm_op_add`, this appends the terms of ``right`` without combining them with
+///    those of ``left``, so the result tracks no group indices. Call :c:func:`qf_ferm_op_simplify` to
+///    collect equal terms afterwards.
+///
+/// Example
+/// -------
+///
+/// .. code-block:: c
+///     :linenos:
+///
+///     QfFermionOperator *one = qf_ferm_op_one();
+///     QfFermionOperator *other = qf_ferm_op_one();
+///
+///     // Subtracting via a factor of -1 leaves the two terms cancelling each other out.
+///     QkComplex64 factor = {-1.0, 0.0};
+///     QfFermionOperator *result = qf_ferm_op_scaled_add(one, other, &factor);
+///
+///     QfFermionOperator *simplified = qf_ferm_op_simplify(result, 1e-10);
+///     assert(qf_ferm_op_len(simplified) == 0);
+///
+/// @endrst
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn qf_ferm_op_scaled_add(
+    left: *const FermionOperator,
+    right: *const FermionOperator,
+    factor: *const Complex64,
+) -> *mut FermionOperator {
+    // SAFETY: Per documentation, the pointers are non-null and aligned.
+    let left = unsafe { const_ptr_as_ref(left) };
+    let right = unsafe { const_ptr_as_ref(right) };
+    let factor = unsafe { const_ptr_as_ref(factor) };
+
+    let result = left.__scaled_add__(right, *factor);
+    Box::into_raw(Box::new(result))
+}
+
+/// @ingroup qf_ferm_op
+///
+/// @brief Adds an operator into another one, in place.
+///
+/// @param left A pointer to the operator to add into.
+/// @param right A pointer to the operator to add.
+///
+/// @rst
+///
+/// The in-place counterpart of :c:func:`qf_ferm_op_add`, which saves copying ``left`` into a freshly
+/// allocated result.
+///
+/// .. caution::
+///    This function resets the operator's ``groups`` attribute to ``NULL``.
+///
+/// Example
+/// -------
+///
+/// .. code-block:: c
+///     :linenos:
+///
+///     QfFermionOperator *left = qf_ferm_op_one();
+///     QfFermionOperator *right = qf_ferm_op_one();
+///
+///     qf_ferm_op_add_inplace(left, right);
+///
+///     assert(qf_ferm_op_len(left) == 2);
+///
+/// @endrst
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn qf_ferm_op_add_inplace(
+    left: *mut FermionOperator,
+    right: *const FermionOperator,
+) {
+    // SAFETY: Per documentation, the pointers are non-null and aligned.
+    let left = unsafe { mut_ptr_as_ref(left) };
+    let right = unsafe { const_ptr_as_ref(right) };
+
+    left.__iadd__(right);
+}
+
+/// @ingroup qf_ferm_op
+///
+/// @brief Adds an operator into another one in place, scaling the coefficients of the right one.
+///
+/// @param left A pointer to the operator to add into.
+/// @param right A pointer to the operator to add.
+/// @param factor A pointer to the factor to scale the right operator's coefficients with.
+///
+/// @rst
+///
+/// The in-place counterpart of :c:func:`qf_ferm_op_scaled_add`, computing ``left + factor * right``
+/// without allocating a result. As there, a factor of ``-1`` subtracts.
+///
+/// .. caution::
+///    This function resets the operator's ``groups`` attribute to ``NULL``.
+///
+/// Example
+/// -------
+///
+/// .. code-block:: c
+///     :linenos:
+///
+///     QfFermionOperator *left = qf_ferm_op_one();
+///     QfFermionOperator *right = qf_ferm_op_one();
+///
+///     // Subtract, leaving two terms that cancel each other out.
+///     QkComplex64 factor = {-1.0, 0.0};
+///     qf_ferm_op_scaled_add_inplace(left, right, &factor);
+///
+///     QfFermionOperator *simplified = qf_ferm_op_simplify(left, 1e-10);
+///     assert(qf_ferm_op_len(simplified) == 0);
+///
+/// @endrst
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn qf_ferm_op_scaled_add_inplace(
+    left: *mut FermionOperator,
+    right: *const FermionOperator,
+    factor: *const Complex64,
+) {
+    // SAFETY: Per documentation, the pointers are non-null and aligned.
+    let left = unsafe { mut_ptr_as_ref(left) };
+    let right = unsafe { const_ptr_as_ref(right) };
+    let factor = unsafe { const_ptr_as_ref(factor) };
+
+    left.__iscaled_add__(right, *factor);
+}
+
+/// @ingroup qf_ferm_op
+///
+/// @brief Multiplies an operator by a scalar, in place.
+///
+/// @param op A pointer to the operator to scale.
+/// @param scalar A pointer to the scalar.
+///
+/// @rst
+///
+/// The in-place counterpart of :c:func:`qf_ferm_op_mul`, which saves copying the operator into a
+/// freshly allocated result.
+///
+/// .. note::
+///    Unlike the two in-place additions above, this **preserves** the ``groups`` attribute: scaling
+///    the coefficients leaves the number of terms, and hence the one-index-per-term invariant,
+///    untouched.
+///
+/// Example
+/// -------
+///
+/// .. code-block:: c
+///     :linenos:
+///
+///     QfFermionOperator *op = qf_ferm_op_one();
+///     QkComplex64 scalar = {2.0, 0.0};
+///
+///     qf_ferm_op_mul_inplace(op, &scalar);
+///
+/// @endrst
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn qf_ferm_op_mul_inplace(
+    op: *mut FermionOperator,
+    scalar: *const Complex64,
+) {
+    // SAFETY: Per documentation, the pointers are non-null and aligned.
+    let op = unsafe { mut_ptr_as_ref(op) };
+    let scalar = unsafe { const_ptr_as_ref(scalar) };
+
+    op.__imul__(*scalar);
+}
+
+/// @ingroup qf_ferm_op
+///
 /// @brief Multiplies an operator by a scalar.
 ///
 /// @param op A pointer to the operator.
@@ -786,9 +1067,14 @@ pub unsafe extern "C" fn qf_ferm_op_mul(
 /// @param left A pointer to the left operator.
 /// @param right A pointer to the right operator.
 ///
-/// @return A pointer to the resulting operator.
+/// @return A pointer to ``left.compose(right)``, which equals the operator
+///     ``result = right @ left`` in terms of the matrix multiplication ``@``. In other words,
+///     ``right`` is applied first. To obtain ``left @ right``, swap the arguments.
 ///
 /// @rst
+///
+/// .. note::
+///    The composition of two operators tracks no groups, even when both operands do.
 ///
 /// Example
 /// -------
@@ -1128,24 +1414,32 @@ pub unsafe extern "C" fn qf_ferm_op_max_rank(op: *const FermionOperator) -> u32 
 ///
 /// @rst
 ///
+/// This is the special case of :c:func:`qf_ferm_op_conserves_sector` that treats all modes as a
+/// single block. Use that function to additionally require conservation *within* mode blocks, for
+/// example to check conservation of the spin z-component alongside the particle number.
+///
 /// Example
 /// -------
 ///
 /// .. code-block:: c
 ///     :linenos:
 ///
+///     // A hopping term conserves the particle number, ...
 ///     QfFermionOperator *op = qf_ferm_op_zero();
-///     bool actions1[2] = {true, false};
-///     uint32_t modes1[2] = {0, 1};
-///     QkComplex64 coeff1 = {0.0, 1.00001};
-///     qf_ferm_op_add_term(op, 2, actions1, modes1, &coeff1);
-///     bool actions2[2] = {true, false};
-///     uint32_t modes2[2] = {1, 0};
-///     QkComplex64 coeff2 = {0.0, -1};
-///     qf_ferm_op_add_term(op, 2, actions2, modes2, &coeff2);
+///     bool actions[2] = {true, false};
+///     uint32_t modes[2] = {0, 2};
+///     QkComplex64 coeff = {1.0, 0.0};
+///     qf_ferm_op_add_term(op, 2, actions, modes, &coeff);
 ///
-///     assert(qf_ferm_op_is_hermitian(op, 1e-4));
-///     assert(!qf_ferm_op_is_hermitian(op, 1e-8));
+///     assert(qf_ferm_op_conserves_particle_number(op));
+///
+///     // ... whereas a bare creation operator does not.
+///     QfFermionOperator *cre = qf_ferm_op_zero();
+///     bool cre_actions[1] = {true};
+///     uint32_t cre_modes[1] = {0};
+///     qf_ferm_op_add_term(cre, 1, cre_actions, cre_modes, &coeff);
+///
+///     assert(!qf_ferm_op_conserves_particle_number(cre));
 ///
 /// @endrst
 #[unsafe(no_mangle)]
@@ -1154,6 +1448,79 @@ pub unsafe extern "C" fn qf_ferm_op_conserves_particle_number(op: *const Fermion
     let op = unsafe { const_ptr_as_ref(op) };
 
     op.conserves_particle_number()
+}
+
+/// @ingroup qf_ferm_op
+///
+/// @brief Checks whether an operator conserves the particle number within each mode block.
+///
+/// @param op A pointer to the fermionic operator to be checked.
+/// @param block_sizes A pointer to the array of block sizes partitioning the mode range. May be
+///     ``NULL`` to treat all modes as a single block.
+/// @param num_blocks The number of entries in the ``block_sizes`` array.
+///
+/// @return Whether the provided operator conserves the particle number within every block.
+///
+/// @rst
+///
+/// The ``block_sizes`` partition the mode range into consecutive, non-overlapping blocks: block
+/// ``b`` spans the modes ``[start_b, start_b + block_sizes[b])`` where ``start_b`` is the sum of all
+/// preceding block sizes. A term conserves the sector if and only if, in *every* block, its number
+/// of creation operators equals its number of annihilation operators. A term acting on a mode beyond
+/// the last block never conserves the sector, because there is no block whose count it could
+/// balance.
+///
+/// For a spin-orbital layout of ``norb`` spatial orbitals, ``[norb]`` checks the particle number of
+/// a spinless system, while ``[norb, norb]`` requires the alpha block ``[0, norb)`` and the beta
+/// block ``[norb, 2 * norb)`` to be conserved *separately*, i.e. strict conservation of both the
+/// particle number and the z-component of the spin.
+///
+/// .. note::
+///    Passing ``NULL`` (with ``num_blocks`` set to ``0``) treats all modes as one unbounded block,
+///    making this equivalent to :c:func:`qf_ferm_op_conserves_particle_number`.
+///
+/// Example
+/// -------
+///
+/// .. code-block:: c
+///     :linenos:
+///
+///     // This term hops an electron from the beta block into the alpha block.
+///     QfFermionOperator *op = qf_ferm_op_zero();
+///     bool actions[2] = {true, false};
+///     uint32_t modes[2] = {0, 2};
+///     QkComplex64 coeff = {1.0, 0.0};
+///     qf_ferm_op_add_term(op, 2, actions, modes, &coeff);
+///
+///     // The total particle number is conserved, ...
+///     uint32_t one_block[1] = {4};
+///     assert(qf_ferm_op_conserves_sector(op, one_block, 1));
+///     assert(qf_ferm_op_conserves_sector(op, NULL, 0));
+///
+///     // ... but the two spin sectors are not conserved individually.
+///     uint32_t spin_blocks[2] = {2, 2};
+///     assert(!qf_ferm_op_conserves_sector(op, spin_blocks, 2));
+///
+/// @endrst
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn qf_ferm_op_conserves_sector(
+    op: *const FermionOperator,
+    block_sizes: *const u32,
+    num_blocks: u64,
+) -> bool {
+    // SAFETY: Per documentation, the pointer is non-null and aligned.
+    let op = unsafe { const_ptr_as_ref(op) };
+
+    // A null pointer stands for "no blocks", which the core implementation reads as one unbounded
+    // block. Guarding here keeps `slice_from_ptr` away from a null pointer.
+    let block_sizes = if block_sizes.is_null() {
+        &[][..]
+    } else {
+        // SAFETY: Per documentation, `block_sizes` holds `num_blocks` readable elements.
+        unsafe { slice_from_ptr(block_sizes, num_blocks as usize) }
+    };
+
+    op.conserves_sector(block_sizes)
 }
 
 /// @ingroup qf_ferm_op

@@ -1,0 +1,20 @@
+---
+features:
+  - |
+    Added ``scaled_add`` to the C API for all four operator representations:
+    :c:func:`qf_ferm_op_scaled_add`, :c:func:`qf_maj_op_scaled_add`,
+    :c:func:`qf_edge_op_scaled_add` and :c:func:`qf_transfer_op_scaled_add`. Each returns
+    ``left + factor * right``, folding the scaling into the addition so that no scaled copy of the
+    right operand is built along the way.
+
+    This is also how the C API spells subtraction, since a factor of ``-1`` negates the appended
+    coefficients:
+
+    .. code-block:: c
+
+        QkComplex64 minus_one = {-1.0, 0.0};
+        QfFermionOperator *difference = qf_ferm_op_scaled_add(left, right, &minus_one);
+
+    As for :c:func:`qf_ferm_op_add`, the terms of the right operand are appended rather than
+    combined with those of the left, so the result tracks no group indices. Call the corresponding
+    ``simplify`` function to collect equal terms.
