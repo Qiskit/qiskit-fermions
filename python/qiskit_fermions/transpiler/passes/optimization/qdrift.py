@@ -81,6 +81,31 @@ class QDriftTrotterization(FermionicDAGCircuitPass):
        randomizations and recording the seed therefore works as expected (see
        :ref:`sqdrift_getting_started`); addressing one member directly is not supported.
 
+    .. warning::
+       The optional ``filter_trivial`` mode exists to stop the sampling from spending one of the
+       ``num_terms`` slots on an excitation that cannot move a particle, and which therefore tells
+       you nothing about the sampled bitstrings. It buys that with the protocol's convergence
+       guarantee, and it is off by default for that reason.
+
+       It does not make the circuit shorter. ``num_terms`` is fixed, so a rejected draw is replaced
+       rather than dropped, and the cheap term it would have contributed (a diagonal rotation, say)
+       gives way to a coupling excitation that costs more to synthesize. Expect the filtered circuit
+       to be deeper than the unfiltered one: the budget of sampled slots is what the filtering
+       conserves, not the depth.
+
+       Rejecting a drawn term and re-drawing renormalizes the sampling distribution over the
+       accepted terms only, so the sampled product no longer averages to :math:`e^{-i t H}` for the
+       Hamiltonian you passed in: the effective coefficient of every retained term is inflated by
+       the reciprocal of the acceptance probability, and the rejected terms drop out. Neither
+       :math:`\lambda` nor :math:`\delta` is adjusted to compensate, so the distortion does not
+       cancel.
+
+       Use it only when the sampled bitstrings are the quantity of interest, as in the SqDRIFT
+       workflow of :ref:`sqdrift_getting_started`. Do not use it when the sampled circuits are used
+       to estimate an expectation value, a time-evolved observable, or anything else that relies on
+       the qDRIFT error bound: those results are biased by an amount the pass does not track. See
+       :attr:`filter_trivial` for the acceptance rule and its prerequisites.
+
     .. hint::
        Terms that are diagonal in the occupation-number basis (that is, products of number operators)
        have no effect on the sampled bitstrings, so including them only increases the sampling
@@ -105,14 +130,32 @@ class QDriftTrotterization(FermionicDAGCircuitPass):
 
     .. seealso::
        The qDRIFT protocol was introduced in `arXiv:1811.08017 <https://arxiv.org/abs/1811.08017>`_.
+
+    .. rubric:: Filtering diagnostics
+
+    When ``filter_trivial`` actually filters a gate, the returned :class:`.FermionicDAGCircuit`
+    records how many draws it discarded in its :attr:`~qiskit.dagcircuit.DAGCircuit.metadata`, under
+    ``filter_trivial.discarded`` and ``filter_trivial.emitted``. Both hold one entry per filtered
+    :class:`.Evolution` gate, in circuit order. Their ratio estimates the acceptance probability,
+    and hence the factor by which the filtering inflated the coefficients of the terms it kept: an
+    acceptance probability close to one means the filtering barely moved the distribution, while a
+    small one means the retained terms were weighted far above their true share of the Hamiltonian.
+
+    .. important::
+       Neither field is present when no gate was filtered, which covers ``filter_trivial=False`` and
+       every case in which filtering was skipped with a :class:`UserWarning`. Read them defensively,
+       for example with ``qcirc.metadata.get("filter_trivial.discarded")``. A discarded count of
+       zero is different from an absent field: it says the filtering ran on that gate and accepted
+       every draw, so it left the sampling distribution untouched.
     """
 
     MAX_SAMPLE_RETRIES = 1_000_000
     """The maximum number of consecutive rejected samples tolerated by ``filter_trivial`` before
     :meth:`run` gives up and raises :class:`RuntimeError`. This guards against an infinite loop when
-    the Hamiltonian's remaining terms cannot bridge the tracked occupied/unoccupied mode sets. For
-    example, when both sets remain small and disjoint (few modes have been marked occupied or
-    unoccupied, and none have yet become "uncertain") and no remaining term's support touches both."""
+    the Hamiltonian's remaining terms cannot bridge the tracked occupied/unoccupied mode sets. That
+    happens when both sets remain small and disjoint (few modes have been marked occupied or
+    unoccupied, and none has yet become "uncertain") and no remaining term's support touches
+    both."""
 
     def __init__(
         self,
@@ -128,24 +171,13 @@ class QDriftTrotterization(FermionicDAGCircuitPass):
             num_terms: the number of terms to sample for the qDRIFT Trotterization. This equals the
                 number of :class:`.Evolution` gates emitted per input gate; a larger value reduces
                 the Trotterization error at the cost of a deeper circuit.
-            filter_trivial: when set to ``True``, the sampling loop rejects a sampled term unless it
-                couples a mode known to be occupied with a mode known to be unoccupied. Any term
-                acting only within one of these two sets cannot change the occupation and, thus, has
-                no effect on a sampled bitstring, so re-drawing avoids wasting one of the
-                ``num_terms`` slots on it. This requires an :class:`.InitializeModes` or
-                :class:`.PrepareSlaterDeterminant` gate to precede the :class:`.Evolution` gates
-                being Trotterized (to seed the initial occupied and unoccupied mode sets); if none is
-                found, or if the mode sets it seeds turn out to be entirely occupied or entirely
-                unoccupied, filtering is skipped for that gate and a :class:`UserWarning` is emitted
-                instead. Any :class:`.OrbitalRotation` gate encountered before or between the
-                :class:`.Evolution` gates also updates these sets: every mode it acts on becomes
-                "uncertain" (since the rotation may mix it with any other mode it touches), just like
-                a mode touched by an accepted qDRIFT term. A :class:`.PrepareSlaterDeterminant` gate
-                updates these sets the same way its :class:`.InitializeModes` and
-                :class:`.OrbitalRotation` components would if applied in sequence: it seeds the
-                occupied/unoccupied sets from its ``occupation``, then immediately marks every mode
-                it acts on as "uncertain" because of its rotation. See the :meth:`run` docstring for
-                the precise acceptance rule.
+            filter_trivial: when set to ``True``, the sampling loop rejects a drawn term unless its
+                support couples a mode tracked as occupied with a mode tracked as unoccupied, and
+                draws a replacement in its place. This spends every one of the ``num_terms``
+                slots on an excitation that can move a particle, at the cost of biasing the
+                Trotterization and of a deeper circuit, so it defaults to ``False``. See also
+                :attr:`filter_trivial` for the acceptance rule and its prerequisites, and the
+                warning in the class docstring for the bias it introduces.
             weights: the sampling weights to use instead of the coefficient magnitudes derived from
                 the Hamiltonian. If ``None`` (the default), they are computed from the evolved
                 operator on every call, which reproduces the textbook qDRIFT distribution. See
@@ -195,8 +227,30 @@ class QDriftTrotterization(FermionicDAGCircuitPass):
         """The number of terms to include in the qDRIFT Trotterization."""
 
         self.filter_trivial = filter_trivial
-        """Whether to reject sampled terms that cannot affect the sampled bitstring (see the
-        class docstring for the ``filter_trivial`` argument)."""
+        """Whether to reject drawn terms that do not couple the tracked occupied/unoccupied modes.
+
+        When this is ``True``, the sampling loop accepts a drawn term only if its support intersects
+        both the set of modes tracked as occupied and the set tracked as unoccupied, and it draws a
+        replacement for every term it rejects, so that none of the :attr:`num_terms` slots is spent
+        on a term that leaves the occupation unchanged and therefore says nothing about the sampled
+        bitstrings. Rejection renormalizes the sampling distribution over the accepted terms, which
+        biases the Trotterization, and the replacement it draws is more expensive to synthesize than
+        the term it displaced: see the warning in the class docstring before enabling this.
+
+        Filtering requires an :class:`.InitializeModes` or :class:`.PrepareSlaterDeterminant` gate
+        to precede the :class:`.Evolution` gates being Trotterized, to seed the initial occupied and
+        unoccupied mode sets. If none is found, or if the sets it seeds turn out to be entirely
+        occupied or entirely unoccupied, filtering is skipped for that gate and a
+        :class:`UserWarning` is emitted instead.
+
+        Any :class:`.OrbitalRotation` gate encountered before or between the :class:`.Evolution`
+        gates also updates these sets: every mode it acts on becomes "uncertain", since the rotation
+        can mix it with any other mode it touches, just like a mode touched by an accepted term. A
+        :class:`.PrepareSlaterDeterminant` gate updates the sets the same way its
+        :class:`.InitializeModes` and :class:`.OrbitalRotation` components would if applied in
+        sequence: it seeds the occupied and unoccupied sets from its ``occupation``, then
+        immediately marks every mode it acts on as "uncertain" because of its rotation. See the
+        :meth:`run` docstring for the precise acceptance rule."""
 
         self.weights: np.ndarray | None = sampling_weights
         r"""The sampling weights :math:`w_j`, or ``None`` to derive them from the evolved operator.
@@ -255,18 +309,19 @@ class QDriftTrotterization(FermionicDAGCircuitPass):
 
         When :attr:`filter_trivial` is set, this method tracks the sets of modes that are known to
         be occupied or unoccupied, seeded from any :class:`.InitializeModes` gate(s) preceding the
-        :class:`.Evolution` gates in the circuit (several such gates placed in parallel, e.g. one per
-        spin sector, are accumulated together). A sampled term is only accepted if its support
-        intersects *both* sets, that is, it couples a known-occupied mode with a known-unoccupied one;
-        otherwise it is discarded and re-sampled, since it cannot affect the sampled bitstring. Once a
-        term is accepted, every mode in its support becomes "uncertain" and is added to *both* sets,
-        making it eligible to participate in either role for subsequent samples. Any
-        :class:`.OrbitalRotation` gate found in the circuit updates these sets the same way: every
-        mode it acts on becomes "uncertain" too, since the rotation may mix it with any other mode
-        in its support. A :class:`.PrepareSlaterDeterminant` gate is treated as its
-        :class:`.InitializeModes` and :class:`.OrbitalRotation` components applied back-to-back: its
-        ``occupation`` first seeds the occupied/unoccupied sets, and then every mode it acts on is
-        immediately marked "uncertain", since it also carries a rotation.
+        :class:`.Evolution` gates in the circuit (several such gates placed in parallel, for example
+        one per spin sector, are accumulated together). A drawn term is accepted only if its support
+        intersects *both* sets, that is, it couples a known-occupied mode with a known-unoccupied
+        one; otherwise it is discarded and a replacement is drawn. Rejection renormalizes the
+        sampling distribution over the accepted terms, which biases the Trotterization: see the
+        warning in the class docstring. Once a term is accepted, every mode in its support becomes
+        "uncertain" and is added to *both* sets, making it eligible to participate in either role
+        for subsequent samples. Any :class:`.OrbitalRotation` gate found in the circuit updates
+        these sets the same way: every mode it acts on becomes "uncertain" too, since the rotation
+        can mix it with any other mode in its support. A :class:`.PrepareSlaterDeterminant` gate is
+        treated as its :class:`.InitializeModes` and :class:`.OrbitalRotation` components applied
+        back-to-back: its ``occupation`` first seeds the occupied/unoccupied sets, and then every
+        mode it acts on is immediately marked "uncertain", since it also carries a rotation.
 
         Args:
             dag: the input circuit with fermion-based instructions. Only
@@ -274,11 +329,15 @@ class QDriftTrotterization(FermionicDAGCircuitPass):
                 :attr:`~qiskit.dagcircuit.DAGOpNode.op` are supported.
 
         Returns:
-            The output circuit which is still acting on a fermionic register.
+            The output circuit which is still acting on a fermionic register. When filtering
+            actually ran, its :attr:`~qiskit.dagcircuit.DAGCircuit.metadata` also carries the
+            ``filter_trivial.discarded`` and ``filter_trivial.emitted`` counts described in the
+            class docstring.
 
         Raises:
             RuntimeError: if ``filter_trivial`` is ``True`` and :attr:`MAX_SAMPLE_RETRIES`
-                consecutive samples are rejected without finding a non-trivial term to emit.
+                consecutive draws are rejected without any of them coupling the tracked occupied and
+                unoccupied mode sets.
             ValueError: if :attr:`weights` was supplied and its length does not match the number of
                 groups (or terms) of an evolved operator, or if the circuit holds more than one
                 :class:`.Evolution` gate.
@@ -299,6 +358,13 @@ class QDriftTrotterization(FermionicDAGCircuitPass):
         # forward.
         occupied: set[int] = set()
         unoccupied: set[int] = set()
+
+        # Per-gate rejection statistics, recorded into the output DAG's metadata below. One entry is
+        # appended per `Evolution` gate that was actually filtered, so a gate whose filtering was
+        # skipped (see the warnings below) contributes nothing and both lists stay empty when
+        # `filter_trivial` is not in effect anywhere.
+        discarded_per_gate: list[int] = []
+        emitted_per_gate: list[int] = []
 
         for node in dag.op_nodes():
             if isinstance(node.op, InitializeModes):
@@ -480,7 +546,11 @@ class QDriftTrotterization(FermionicDAGCircuitPass):
             cdf /= cdf[-1]  # guards against float-sum drift from 1.0, matching numpy's own choice()
 
             added_terms = 0
+            # `failed_attempts` is reset on every acceptance because it guards against an infinite
+            # loop, so it counts *consecutive* rejections only. `discarded` is the running total for
+            # this gate, which is what the metadata reports.
             failed_attempts = 0
+            discarded = 0
             while added_terms < self.num_terms:
                 # Equivalent to `self._rng.choice(np.arange(len(weights)), p=probabilities)`:
                 # this is numpy's own implementation of weighted sampling (see `Generator.choice`),
@@ -494,10 +564,12 @@ class QDriftTrotterization(FermionicDAGCircuitPass):
                 op = hamil.__class__.from_terms(unit_terms)
 
                 term_support = op.get_support()
-                # The term is non-trivial exactly when it couples a known-occupied mode with a
-                # known-unoccupied one; otherwise it cannot change which bitstring gets sampled.
+                # A term is retained when it couples a known-occupied mode with a known-unoccupied
+                # one. This is a support-based over-approximation of "cannot change the sampled
+                # bitstring", not an equivalence: see the class docstring's warning.
                 if not (term_support & occupied and term_support & unoccupied):
                     failed_attempts += 1
+                    discarded += 1
                     if failed_attempts > self.MAX_SAMPLE_RETRIES:
                         raise RuntimeError(
                             f"Failed to sample a non-trivial term after "
@@ -522,5 +594,15 @@ class QDriftTrotterization(FermionicDAGCircuitPass):
                 )
                 out_dag.apply_operation_back(evo, qargs=out_dag.qubits)
                 added_terms += 1
+
+            discarded_per_gate.append(discarded)
+            emitted_per_gate.append(added_terms)
+
+        # Only record the diagnostics when filtering actually ran, matching `RelabelModes`, which
+        # leaves the metadata untouched when it has no effect. Callers must therefore read these
+        # fields defensively (see the class docstring).
+        if discarded_per_gate:
+            out_dag.metadata["filter_trivial.discarded"] = discarded_per_gate
+            out_dag.metadata["filter_trivial.emitted"] = emitted_per_gate
 
         return out_dag
