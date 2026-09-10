@@ -608,6 +608,52 @@ static int test_conserves_particle_number(void) {
     return Ok;
 }
 
+// The interesting case for `conserves_sector` is the one that distinguishes it from
+// `conserves_particle_number`: a term that balances globally but not within the individual blocks.
+static int test_conserves_sector(void) {
+    // Hops an electron from the beta block [2, 4) into the alpha block [0, 2).
+    QfFermionOperator *op = qf_ferm_op_zero();
+    bool actions[2] = {true, false};
+    uint32_t modes[2] = {0, 2};
+    QkComplex64 coeff = {1.0, 0.0};
+    qf_ferm_op_add_term(op, 2, actions, modes, &coeff);
+
+    bool passed_all = true;
+
+    // Treating all four modes as one block is just particle-number conservation.
+    uint32_t one_block[1] = {4};
+    passed_all = passed_all && qf_ferm_op_conserves_sector(op, one_block, 1);
+
+    // A NULL block array means the same thing, and must agree with the dedicated function.
+    passed_all = passed_all && qf_ferm_op_conserves_sector(op, NULL, 0);
+    passed_all = passed_all && (qf_ferm_op_conserves_sector(op, NULL, 0) ==
+                                qf_ferm_op_conserves_particle_number(op));
+
+    // Splitting into two spin blocks is what this term violates.
+    uint32_t spin_blocks[2] = {2, 2};
+    passed_all = passed_all && !qf_ferm_op_conserves_sector(op, spin_blocks, 2);
+
+    // A number operator stays within its block, so it conserves both.
+    QfFermionOperator *num_op = qf_ferm_op_zero();
+    bool num_actions[2] = {true, false};
+    uint32_t num_modes[2] = {0, 0};
+    qf_ferm_op_add_term(num_op, 2, num_actions, num_modes, &coeff);
+
+    passed_all = passed_all && qf_ferm_op_conserves_sector(num_op, spin_blocks, 2);
+
+    // A term acting beyond the last block can never balance, since no block covers that mode.
+    uint32_t short_block[1] = {2};
+    passed_all = passed_all && !qf_ferm_op_conserves_sector(op, short_block, 1);
+
+    qf_ferm_op_free(op);
+    qf_ferm_op_free(num_op);
+
+    if (!passed_all) {
+        return EqualityError;
+    }
+    return Ok;
+}
+
 static int test_len(void) {
     QfFermionOperator *op = qf_ferm_op_zero();
     bool action[4] = {true, false, true, false};
@@ -807,6 +853,7 @@ int test_fermion_operator(void) {
     num_failed += RUN_TEST(test_is_hermitian);
     num_failed += RUN_TEST(test_max_rank);
     num_failed += RUN_TEST(test_conserves_particle_number);
+    num_failed += RUN_TEST(test_conserves_sector);
     num_failed += RUN_TEST(test_len);
     num_failed += RUN_TEST(test_relabel_modes);
     num_failed += RUN_TEST(test_relabel_modes_duplicate_err);

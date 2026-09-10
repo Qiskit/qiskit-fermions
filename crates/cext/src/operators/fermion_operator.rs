@@ -1232,24 +1232,32 @@ pub unsafe extern "C" fn qf_ferm_op_max_rank(op: *const FermionOperator) -> u32 
 ///
 /// @rst
 ///
+/// This is the special case of :c:func:`qf_ferm_op_conserves_sector` that treats all modes as a
+/// single block. Use that function to additionally require conservation *within* mode blocks, for
+/// example to check conservation of the spin z-component alongside the particle number.
+///
 /// Example
 /// -------
 ///
 /// .. code-block:: c
 ///     :linenos:
 ///
+///     // A hopping term conserves the particle number, ...
 ///     QfFermionOperator *op = qf_ferm_op_zero();
-///     bool actions1[2] = {true, false};
-///     uint32_t modes1[2] = {0, 1};
-///     QkComplex64 coeff1 = {0.0, 1.00001};
-///     qf_ferm_op_add_term(op, 2, actions1, modes1, &coeff1);
-///     bool actions2[2] = {true, false};
-///     uint32_t modes2[2] = {1, 0};
-///     QkComplex64 coeff2 = {0.0, -1};
-///     qf_ferm_op_add_term(op, 2, actions2, modes2, &coeff2);
+///     bool actions[2] = {true, false};
+///     uint32_t modes[2] = {0, 2};
+///     QkComplex64 coeff = {1.0, 0.0};
+///     qf_ferm_op_add_term(op, 2, actions, modes, &coeff);
 ///
-///     assert(qf_ferm_op_is_hermitian(op, 1e-4));
-///     assert(!qf_ferm_op_is_hermitian(op, 1e-8));
+///     assert(qf_ferm_op_conserves_particle_number(op));
+///
+///     // ... whereas a bare creation operator does not.
+///     QfFermionOperator *cre = qf_ferm_op_zero();
+///     bool cre_actions[1] = {true};
+///     uint32_t cre_modes[1] = {0};
+///     qf_ferm_op_add_term(cre, 1, cre_actions, cre_modes, &coeff);
+///
+///     assert(!qf_ferm_op_conserves_particle_number(cre));
 ///
 /// @endrst
 #[unsafe(no_mangle)]
@@ -1258,6 +1266,79 @@ pub unsafe extern "C" fn qf_ferm_op_conserves_particle_number(op: *const Fermion
     let op = unsafe { const_ptr_as_ref(op) };
 
     op.conserves_particle_number()
+}
+
+/// @ingroup qf_ferm_op
+///
+/// @brief Checks whether an operator conserves the particle number within each mode block.
+///
+/// @param op A pointer to the fermionic operator to be checked.
+/// @param block_sizes A pointer to the array of block sizes partitioning the mode range. May be
+///     ``NULL`` to treat all modes as a single block.
+/// @param num_blocks The number of entries in the ``block_sizes`` array.
+///
+/// @return Whether the provided operator conserves the particle number within every block.
+///
+/// @rst
+///
+/// The ``block_sizes`` partition the mode range into consecutive, non-overlapping blocks: block
+/// ``b`` spans the modes ``[start_b, start_b + block_sizes[b])`` where ``start_b`` is the sum of all
+/// preceding block sizes. A term conserves the sector if and only if, in *every* block, its number
+/// of creation operators equals its number of annihilation operators. A term acting on a mode beyond
+/// the last block never conserves the sector, because there is no block whose count it could
+/// balance.
+///
+/// For a spin-orbital layout of ``norb`` spatial orbitals, ``[norb]`` checks the particle number of
+/// a spinless system, while ``[norb, norb]`` requires the alpha block ``[0, norb)`` and the beta
+/// block ``[norb, 2 * norb)`` to be conserved *separately*, i.e. strict conservation of both the
+/// particle number and the z-component of the spin.
+///
+/// .. note::
+///    Passing ``NULL`` (with ``num_blocks`` set to ``0``) treats all modes as one unbounded block,
+///    making this equivalent to :c:func:`qf_ferm_op_conserves_particle_number`.
+///
+/// Example
+/// -------
+///
+/// .. code-block:: c
+///     :linenos:
+///
+///     // This term hops an electron from the beta block into the alpha block.
+///     QfFermionOperator *op = qf_ferm_op_zero();
+///     bool actions[2] = {true, false};
+///     uint32_t modes[2] = {0, 2};
+///     QkComplex64 coeff = {1.0, 0.0};
+///     qf_ferm_op_add_term(op, 2, actions, modes, &coeff);
+///
+///     // The total particle number is conserved, ...
+///     uint32_t one_block[1] = {4};
+///     assert(qf_ferm_op_conserves_sector(op, one_block, 1));
+///     assert(qf_ferm_op_conserves_sector(op, NULL, 0));
+///
+///     // ... but the two spin sectors are not conserved individually.
+///     uint32_t spin_blocks[2] = {2, 2};
+///     assert(!qf_ferm_op_conserves_sector(op, spin_blocks, 2));
+///
+/// @endrst
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn qf_ferm_op_conserves_sector(
+    op: *const FermionOperator,
+    block_sizes: *const u32,
+    num_blocks: u64,
+) -> bool {
+    // SAFETY: Per documentation, the pointer is non-null and aligned.
+    let op = unsafe { const_ptr_as_ref(op) };
+
+    // A null pointer stands for "no blocks", which the core implementation reads as one unbounded
+    // block. Guarding here keeps `slice_from_ptr` away from a null pointer.
+    let block_sizes = if block_sizes.is_null() {
+        &[][..]
+    } else {
+        // SAFETY: Per documentation, `block_sizes` holds `num_blocks` readable elements.
+        unsafe { slice_from_ptr(block_sizes, num_blocks as usize) }
+    };
+
+    op.conserves_sector(block_sizes)
 }
 
 /// @ingroup qf_ferm_op

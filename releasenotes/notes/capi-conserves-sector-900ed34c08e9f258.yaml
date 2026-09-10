@@ -1,0 +1,17 @@
+---
+features:
+  - |
+    Added :c:func:`qf_ferm_op_conserves_sector`, which checks that every term of a
+    :c:struct:`QfFermionOperator` conserves the particle number *within each block* of modes. It
+    complements the existing :c:func:`qf_ferm_op_conserves_particle_number`, which only checks the
+    total. For a spin-orbital layout of ``norb`` spatial orbitals, passing the two blocks
+    ``{norb, norb}`` requires the alpha and beta sectors to be conserved separately, i.e. strict
+    conservation of both the particle number and the z-component of the spin:
+
+    .. code-block:: c
+
+        uint32_t spin_blocks[2] = {norb, norb};
+        bool conserves = qf_ferm_op_conserves_sector(op, spin_blocks, 2);
+
+    Passing ``NULL`` with a block count of ``0`` treats all modes as a single block, which is
+    equivalent to calling :c:func:`qf_ferm_op_conserves_particle_number`.
