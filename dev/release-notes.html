@@ -8,7 +8,7 @@
         <link rel="prefetch" href="_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Release Notes - Qiskit Fermions 0.2.0.dev0+9baf61f</title>
+        <title>Release Notes - Qiskit Fermions 0.2.0.dev0+409a54c</title>
       <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+9baf61f</div></a>
+      <a href="index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+409a54c</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+9baf61f</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+409a54c</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="search.html" role="search">
@@ -269,6 +269,55 @@
 <section id="new-features">
 <span id="release-notes-upcoming-release-main-new-features"></span><h3>New Features<a class="headerlink" href="#new-features" title="Link to this heading">¶</a></h3>
 <ul>
+<li><p>Added <a class="reference internal" href="cdoc/qf-ferm-op.html#c.qf_ferm_op_conserves_sector" title="qf_ferm_op_conserves_sector"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_ferm_op_conserves_sector()</span></code></a>, which checks that every term of a
+<a class="reference internal" href="cdoc/qf-ferm-op.html#c.QfFermionOperator" title="QfFermionOperator"><code class="xref c c-struct docutils literal notranslate"><span class="pre">QfFermionOperator</span></code></a> conserves the particle number <em>within each block</em> of modes. It
+complements the existing <a class="reference internal" href="cdoc/qf-ferm-op.html#c.qf_ferm_op_conserves_particle_number" title="qf_ferm_op_conserves_particle_number"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_ferm_op_conserves_particle_number()</span></code></a>, which only checks the
+total. For a spin-orbital layout of <code class="docutils literal notranslate"><span class="pre">norb</span></code> spatial orbitals, passing the two blocks
+<code class="docutils literal notranslate"><span class="pre">{norb,</span> <span class="pre">norb}</span></code> requires the alpha and beta sectors to be conserved separately, i.e. strict
+conservation of both the particle number and the z-component of the spin:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">spin_blocks</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="n">norb</span><span class="p">,</span><span class="w"> </span><span class="n">norb</span><span class="p">};</span>
+<span class="kt">bool</span><span class="w"> </span><span class="n">conserves</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_ferm_op_conserves_sector</span><span class="p">(</span><span class="n">op</span><span class="p">,</span><span class="w"> </span><span class="n">spin_blocks</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>Passing <code class="docutils literal notranslate"><span class="pre">NULL</span></code> with a block count of <code class="docutils literal notranslate"><span class="pre">0</span></code> treats all modes as a single block, which is
+equivalent to calling <a class="reference internal" href="cdoc/qf-ferm-op.html#c.qf_ferm_op_conserves_particle_number" title="qf_ferm_op_conserves_particle_number"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_ferm_op_conserves_particle_number()</span></code></a>.</p>
+</li>
+</ul>
+<ul>
+<li><p>Added the operator support to the C API, which was previously available only from Python via
+<code class="docutils literal notranslate"><span class="pre">get_support</span></code>. Each of the four operator representations gained a pair of functions:
+<a class="reference internal" href="cdoc/qf-ferm-op.html#c.qf_ferm_op_num_support" title="qf_ferm_op_num_support"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_ferm_op_num_support()</span></code></a> and <a class="reference internal" href="cdoc/qf-ferm-op.html#c.qf_ferm_op_get_support" title="qf_ferm_op_get_support"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_ferm_op_get_support()</span></code></a>, plus the <code class="docutils literal notranslate"><span class="pre">qf_maj_op</span></code>,
+<code class="docutils literal notranslate"><span class="pre">qf_edge_op</span></code> and <code class="docutils literal notranslate"><span class="pre">qf_transfer_op</span></code> equivalents.</p>
+<p>Unlike the other getters, these do not hand out a pointer into the operator, because the
+support is computed on demand rather than stored. Call the <code class="docutils literal notranslate"><span class="pre">num_support</span></code> function first to
+size the output buffer, then pass that buffer to <code class="docutils literal notranslate"><span class="pre">get_support</span></code>:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">num_support</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_ferm_op_num_support</span><span class="p">(</span><span class="n">op</span><span class="p">);</span>
+<span class="kt">uint32_t</span><span class="w"> </span><span class="o">*</span><span class="n">support</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">malloc</span><span class="p">(</span><span class="n">num_support</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="kt">uint32_t</span><span class="p">));</span>
+<span class="n">qf_ferm_op_get_support</span><span class="p">(</span><span class="n">op</span><span class="p">,</span><span class="w"> </span><span class="n">support</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>The C functions write the mode indices in ascending order, whereas the Python method returns an
+unordered <code class="docutils literal notranslate"><span class="pre">set</span></code>.</p>
+</li>
+</ul>
+<ul>
+<li><p>Added in-place operator arithmetic to the C API, which avoids allocating a result operator when
+the left operand can be overwritten. Each of the four operator representations gained
+<code class="docutils literal notranslate"><span class="pre">add_inplace</span></code>, <code class="docutils literal notranslate"><span class="pre">scaled_add_inplace</span></code> and <code class="docutils literal notranslate"><span class="pre">mul_inplace</span></code>, for example
+<a class="reference internal" href="cdoc/qf-ferm-op.html#c.qf_ferm_op_add_inplace" title="qf_ferm_op_add_inplace"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_ferm_op_add_inplace()</span></code></a>, <a class="reference internal" href="cdoc/qf-ferm-op.html#c.qf_ferm_op_scaled_add_inplace" title="qf_ferm_op_scaled_add_inplace"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_ferm_op_scaled_add_inplace()</span></code></a> and
+<a class="reference internal" href="cdoc/qf-ferm-op.html#c.qf_ferm_op_mul_inplace" title="qf_ferm_op_mul_inplace"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_ferm_op_mul_inplace()</span></code></a>:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="c1">// Accumulate `factor * right` into `left` without building an intermediate.</span>
+<span class="n">QkComplex64</span><span class="w"> </span><span class="n">factor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mf">-1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">};</span>
+<span class="n">qf_ferm_op_scaled_add_inplace</span><span class="p">(</span><span class="n">left</span><span class="p">,</span><span class="w"> </span><span class="n">right</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">factor</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>Mind that the three differ in their treatment of group indices. The two additions append the
+terms of the right operand and therefore reset the <code class="docutils literal notranslate"><span class="pre">groups</span></code> attribute to <code class="docutils literal notranslate"><span class="pre">NULL</span></code>, just as
+<a class="reference internal" href="cdoc/qf-ferm-op.html#c.qf_ferm_op_add" title="qf_ferm_op_add"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_ferm_op_add()</span></code></a> does. <code class="docutils literal notranslate"><span class="pre">mul_inplace</span></code> only scales the coefficients, which leaves the
+number of terms unchanged, and so it preserves the grouping.</p>
+</li>
+</ul>
+<ul>
 <li><p>Added a C API for the edge-vertex and transfer-vertex operator representations, which were
 previously available only from Python. This includes two new opaque structs,
 <a class="reference internal" href="cdoc/qf-edge-op.html#c.QfEdgeVertexOperator" title="QfEdgeVertexOperator"><code class="xref c c-struct docutils literal notranslate"><span class="pre">QfEdgeVertexOperator</span></code></a> and <a class="reference internal" href="cdoc/qf-transfer-op.html#c.QfTransferVertexOperator" title="QfTransferVertexOperator"><code class="xref c c-struct docutils literal notranslate"><span class="pre">QfTransferVertexOperator</span></code></a>, each one with an
@@ -289,6 +338,23 @@ commutator, anti-commutator and double-commutator functions for both new operato
 <a class="reference internal" href="cdoc/qf-mappers-library.html#c.qf_edge_vertex_to_fermion" title="qf_edge_vertex_to_fermion"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_edge_vertex_to_fermion()</span></code></a>, <a class="reference internal" href="cdoc/qf-mappers-library.html#c.qf_edge_vertex_to_majorana" title="qf_edge_vertex_to_majorana"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_edge_vertex_to_majorana()</span></code></a>,
 <a class="reference internal" href="cdoc/qf-mappers-library.html#c.qf_transfer_vertex_to_fermion" title="qf_transfer_vertex_to_fermion"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_transfer_vertex_to_fermion()</span></code></a>, <a class="reference internal" href="cdoc/qf-mappers-library.html#c.qf_transfer_vertex_to_majorana" title="qf_transfer_vertex_to_majorana"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_transfer_vertex_to_majorana()</span></code></a>, and
 <a class="reference internal" href="cdoc/qf-mappers-library.html#c.qf_transfer_vertex_to_edge_vertex" title="qf_transfer_vertex_to_edge_vertex"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_transfer_vertex_to_edge_vertex()</span></code></a>.</p></li>
+</ul>
+<ul>
+<li><p>Added <code class="docutils literal notranslate"><span class="pre">scaled_add</span></code> to the C API for all four operator representations:
+<a class="reference internal" href="cdoc/qf-ferm-op.html#c.qf_ferm_op_scaled_add" title="qf_ferm_op_scaled_add"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_ferm_op_scaled_add()</span></code></a>, <a class="reference internal" href="cdoc/qf-maj-op.html#c.qf_maj_op_scaled_add" title="qf_maj_op_scaled_add"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_maj_op_scaled_add()</span></code></a>,
+<a class="reference internal" href="cdoc/qf-edge-op.html#c.qf_edge_op_scaled_add" title="qf_edge_op_scaled_add"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_edge_op_scaled_add()</span></code></a> and <a class="reference internal" href="cdoc/qf-transfer-op.html#c.qf_transfer_op_scaled_add" title="qf_transfer_op_scaled_add"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_transfer_op_scaled_add()</span></code></a>. Each returns
+<code class="docutils literal notranslate"><span class="pre">left</span> <span class="pre">+</span> <span class="pre">factor</span> <span class="pre">*</span> <span class="pre">right</span></code>, folding the scaling into the addition so that no scaled copy of the
+right operand is built along the way.</p>
+<p>This is also how the C API spells subtraction, since a factor of <code class="docutils literal notranslate"><span class="pre">-1</span></code> negates the appended
+coefficients:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">QkComplex64</span><span class="w"> </span><span class="n">minus_one</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mf">-1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">};</span>
+<span class="n">QfFermionOperator</span><span class="w"> </span><span class="o">*</span><span class="n">difference</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_ferm_op_scaled_add</span><span class="p">(</span><span class="n">left</span><span class="p">,</span><span class="w"> </span><span class="n">right</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">minus_one</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>As for <a class="reference internal" href="cdoc/qf-ferm-op.html#c.qf_ferm_op_add" title="qf_ferm_op_add"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_ferm_op_add()</span></code></a>, the terms of the right operand are appended rather than
+combined with those of the left, so the result tracks no group indices. Call the corresponding
+<code class="docutils literal notranslate"><span class="pre">simplify</span></code> function to collect equal terms.</p>
+</li>
 </ul>
 <ul>
 <li><p>How an <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate gets decomposed in fermionic space is now configurable through its
@@ -799,7 +865,7 @@ Following Qiskit’s design philosophy, the core of this package is written in R
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on 2026/09/09</div>
+              Last updated on 2026/09/10</div>
           </div>
           <div class="right-details">
             
@@ -842,7 +908,7 @@ Following Qiskit’s design philosophy, the core of this package is written in R
       
     </aside>
   </div>
-</div><script src="_static/documentation_options.js?v=8f3afe7f"></script>
+</div><script src="_static/documentation_options.js?v=0b246eec"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/scripts/furo.js?v=46bd48cc"></script>
