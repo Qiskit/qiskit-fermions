@@ -1,0 +1,40 @@
+---
+features:
+  - |
+    :class:`~qiskit_fermions.operators.library.FCIDump` now exposes the electronic integrals it
+    parsed, which previously were reachable only by converting the whole data structure into a
+    :class:`~qiskit_fermions.operators.FermionOperator`. The new methods return read-only copies as
+    NumPy arrays, in the same flattened layout the electronic-integral constructors consume:
+    :meth:`~qiskit_fermions.operators.library.FCIDump.get_one_body_tril_a`,
+    :meth:`~qiskit_fermions.operators.library.FCIDump.get_one_body_tril_b`,
+    :meth:`~qiskit_fermions.operators.library.FCIDump.get_two_body_tril_aa`,
+    :meth:`~qiskit_fermions.operators.library.FCIDump.get_two_body_tril_ab` and
+    :meth:`~qiskit_fermions.operators.library.FCIDump.get_two_body_tril_bb`. The beta-spin arrays
+    return ``None`` for a spin-restricted file; the new
+    :attr:`~qiskit_fermions.operators.library.FCIDump.is_unrestricted` attribute reports on all three
+    at once. The new :attr:`~qiskit_fermions.operators.library.FCIDump.constant` attribute gives the
+    constant (nuclear-repulsion) energy, or ``None`` when the file carries none::
+
+        fcidump = FCIDump.from_file("molecule.fcidump")
+        one_body = fcidump.get_one_body_tril_a()
+        two_body = fcidump.get_two_body_tril_aa()
+
+    Note that ``get_two_body_tril_ab`` is packed differently from the other two-body arrays: it is
+    only 4-fold symmetric, so it holds the full ``(npair, npair)`` matrix, whose row pair indexes the
+    alpha-spin and whose column pair the beta-spin species. Refer to the class documentation for the
+    index formula of every array. Expanding these into dense ``(norb, norb)`` or ``(norb,) * 4``
+    tensors, as required by sample-based diagonalization tooling for example, is left to the caller.
+  - |
+    The C API gained the matching accessors. ``qf_fcidump_get_one_body_tril_a``,
+    ``qf_fcidump_get_one_body_tril_b``, ``qf_fcidump_get_two_body_tril_aa``,
+    ``qf_fcidump_get_two_body_tril_ab`` and ``qf_fcidump_get_two_body_tril_bb`` borrow the internal
+    buffer, writing a pointer and a length through out-parameters::
+
+        double *integrals;
+        uint64_t len;
+        qf_fcidump_get_one_body_tril_a(fcidump, &integrals, &len);
+
+    The returned pointer must not be freed and stays valid only until the :c:struct:`QfFCIDump` is
+    freed. Guard the three beta-spin getters with the new ``qf_fcidump_is_unrestricted``, and
+    ``qf_fcidump_constant`` with the new ``qf_fcidump_has_constant``; calling either without its guard
+    panics.

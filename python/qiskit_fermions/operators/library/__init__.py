@@ -52,6 +52,9 @@ Hamiltonians as an input. Different flavors exist:
 * ``spin``: these methods take separate arrays for the different spin species
 * ``sym``: these methods take a single array for one spin species and infer the other spin species
 
+The same ``tril`` and ``full`` vocabulary names the layout of arrays that are *returned* rather than
+consumed, such as the integral accessors of :class:`.FCIDump`.
+
 * 1-Body Terms
 
 .. table::
