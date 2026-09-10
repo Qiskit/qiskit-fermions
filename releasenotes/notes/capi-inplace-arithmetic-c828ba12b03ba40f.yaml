@@ -1,0 +1,19 @@
+---
+features:
+  - |
+    Added in-place operator arithmetic to the C API, which avoids allocating a result operator when
+    the left operand can be overwritten. Each of the four operator representations gained
+    ``add_inplace``, ``scaled_add_inplace`` and ``mul_inplace``, for example
+    :c:func:`qf_ferm_op_add_inplace`, :c:func:`qf_ferm_op_scaled_add_inplace` and
+    :c:func:`qf_ferm_op_mul_inplace`:
+
+    .. code-block:: c
+
+        // Accumulate `factor * right` into `left` without building an intermediate.
+        QkComplex64 factor = {-1.0, 0.0};
+        qf_ferm_op_scaled_add_inplace(left, right, &factor);
+
+    Mind that the three differ in their treatment of group indices. The two additions append the
+    terms of the right operand and therefore reset the ``groups`` attribute to ``NULL``, just as
+    :c:func:`qf_ferm_op_add` does. ``mul_inplace`` only scales the coefficients, which leaves the
+    number of terms unchanged, and so it preserves the grouping.

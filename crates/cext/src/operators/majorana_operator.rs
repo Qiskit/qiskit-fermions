@@ -823,6 +823,135 @@ pub unsafe extern "C" fn qf_maj_op_scaled_add(
 
 /// @ingroup qf_maj_op
 ///
+/// @brief Adds an operator into another one, in place.
+///
+/// @param left A pointer to the operator to add into.
+/// @param right A pointer to the operator to add.
+///
+/// @rst
+///
+/// The in-place counterpart of :c:func:`qf_maj_op_add`, which saves copying ``left`` into a freshly
+/// allocated result.
+///
+/// .. caution::
+///    This function resets the operator's ``groups`` attribute to ``NULL``.
+///
+/// Example
+/// -------
+///
+/// .. code-block:: c
+///     :linenos:
+///
+///     QfMajoranaOperator *left = qf_maj_op_one();
+///     QfMajoranaOperator *right = qf_maj_op_one();
+///
+///     qf_maj_op_add_inplace(left, right);
+///
+///     assert(qf_maj_op_len(left) == 2);
+///
+/// @endrst
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn qf_maj_op_add_inplace(
+    left: *mut MajoranaOperator,
+    right: *const MajoranaOperator,
+) {
+    // SAFETY: Per documentation, the pointers are non-null and aligned.
+    let left = unsafe { mut_ptr_as_ref(left) };
+    let right = unsafe { const_ptr_as_ref(right) };
+
+    left.__iadd__(right);
+}
+
+/// @ingroup qf_maj_op
+///
+/// @brief Adds an operator into another one in place, scaling the coefficients of the right one.
+///
+/// @param left A pointer to the operator to add into.
+/// @param right A pointer to the operator to add.
+/// @param factor A pointer to the factor to scale the right operator's coefficients with.
+///
+/// @rst
+///
+/// The in-place counterpart of :c:func:`qf_maj_op_scaled_add`, computing ``left + factor * right``
+/// without allocating a result. As there, a factor of ``-1`` subtracts.
+///
+/// .. caution::
+///    This function resets the operator's ``groups`` attribute to ``NULL``.
+///
+/// Example
+/// -------
+///
+/// .. code-block:: c
+///     :linenos:
+///
+///     QfMajoranaOperator *left = qf_maj_op_one();
+///     QfMajoranaOperator *right = qf_maj_op_one();
+///
+///     // Subtract, leaving two terms that cancel each other out.
+///     QkComplex64 factor = {-1.0, 0.0};
+///     qf_maj_op_scaled_add_inplace(left, right, &factor);
+///
+///     QfMajoranaOperator *simplified = qf_maj_op_simplify(left, 1e-10);
+///     assert(qf_maj_op_len(simplified) == 0);
+///
+/// @endrst
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn qf_maj_op_scaled_add_inplace(
+    left: *mut MajoranaOperator,
+    right: *const MajoranaOperator,
+    factor: *const Complex64,
+) {
+    // SAFETY: Per documentation, the pointers are non-null and aligned.
+    let left = unsafe { mut_ptr_as_ref(left) };
+    let right = unsafe { const_ptr_as_ref(right) };
+    let factor = unsafe { const_ptr_as_ref(factor) };
+
+    left.__iscaled_add__(right, *factor);
+}
+
+/// @ingroup qf_maj_op
+///
+/// @brief Multiplies an operator by a scalar, in place.
+///
+/// @param op A pointer to the operator to scale.
+/// @param scalar A pointer to the scalar.
+///
+/// @rst
+///
+/// The in-place counterpart of :c:func:`qf_maj_op_mul`, which saves copying the operator into a
+/// freshly allocated result.
+///
+/// .. note::
+///    Unlike the two in-place additions above, this **preserves** the ``groups`` attribute: scaling
+///    the coefficients leaves the number of terms, and hence the one-index-per-term invariant,
+///    untouched.
+///
+/// Example
+/// -------
+///
+/// .. code-block:: c
+///     :linenos:
+///
+///     QfMajoranaOperator *op = qf_maj_op_one();
+///     QkComplex64 scalar = {2.0, 0.0};
+///
+///     qf_maj_op_mul_inplace(op, &scalar);
+///
+/// @endrst
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn qf_maj_op_mul_inplace(
+    op: *mut MajoranaOperator,
+    scalar: *const Complex64,
+) {
+    // SAFETY: Per documentation, the pointers are non-null and aligned.
+    let op = unsafe { mut_ptr_as_ref(op) };
+    let scalar = unsafe { const_ptr_as_ref(scalar) };
+
+    op.__imul__(*scalar);
+}
+
+/// @ingroup qf_maj_op
+///
 /// @brief Multiplies an operator by a scalar.
 ///
 /// @param op A pointer to the operator.

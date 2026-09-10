@@ -215,6 +215,78 @@ static int test_scaled_add(void) {
     return Ok;
 }
 
+// Each in-place operation must agree with its out-of-place counterpart. The group handling is
+// asserted in both directions, because the three do *not* behave alike: the two additions change
+// the number of terms and therefore drop the grouping, whereas scaling the coefficients keeps it.
+static int test_inplace_arithmetic(void) {
+    uint32_t left_a[2] = {0, 1};
+    uint32_t right_a[2] = {1, 2};
+    uint32_t boundaries[2] = {0, 2};
+    QkComplex64 coeff = {1.0, 0.0};
+    QfEdgeVertexOperator *op_a = qf_edge_op_new(1, 2, &coeff, left_a, right_a, boundaries);
+    uint32_t left_b[2] = {2, 3};
+    uint32_t right_b[2] = {3, 4};
+    QfEdgeVertexOperator *op_b = qf_edge_op_new(1, 2, &coeff, left_b, right_b, boundaries);
+    QfEdgeVertexOperator *scratch = qf_edge_op_new(1, 2, &coeff, left_a, right_a, boundaries);
+
+    bool passed_all = true;
+
+    // add_inplace == add
+    QfEdgeVertexOperator *expected_sum = qf_edge_op_add(op_a, op_b);
+    qf_edge_op_add_inplace(scratch, op_b);
+    passed_all = passed_all && qf_edge_op_equal(scratch, expected_sum);
+
+    // scaled_add_inplace == scaled_add
+    QkComplex64 factor = {-2.0, 0.5};
+    QfEdgeVertexOperator *expected_scaled = qf_edge_op_scaled_add(op_a, op_b, &factor);
+    QfEdgeVertexOperator *scaled = qf_edge_op_new(1, 2, &coeff, left_a, right_a, boundaries);
+    qf_edge_op_scaled_add_inplace(scaled, op_b, &factor);
+    passed_all = passed_all && qf_edge_op_equal(scaled, expected_scaled);
+
+    // mul_inplace == mul
+    QkComplex64 scalar = {0.0, 3.0};
+    QfEdgeVertexOperator *expected_scalar = qf_edge_op_mul(op_a, &scalar);
+    QfEdgeVertexOperator *multiplied = qf_edge_op_new(1, 2, &coeff, left_a, right_a, boundaries);
+    qf_edge_op_mul_inplace(multiplied, &scalar);
+    passed_all = passed_all && qf_edge_op_equal(multiplied, expected_scalar);
+
+    // The two appending operations drop the grouping, ...
+    QfEdgeVertexOperator *grouped_add = qf_edge_op_new(1, 2, &coeff, left_a, right_a, boundaries);
+    uint32_t groups_in[1] = {0};
+    qf_edge_op_set_groups(grouped_add, groups_in, 1);
+    qf_edge_op_add_inplace(grouped_add, op_b);
+    passed_all = passed_all && !qf_edge_op_has_groups(grouped_add);
+
+    QfEdgeVertexOperator *grouped_scaled =
+        qf_edge_op_new(1, 2, &coeff, left_a, right_a, boundaries);
+    qf_edge_op_set_groups(grouped_scaled, groups_in, 1);
+    qf_edge_op_scaled_add_inplace(grouped_scaled, op_b, &factor);
+    passed_all = passed_all && !qf_edge_op_has_groups(grouped_scaled);
+
+    // ... while scaling the coefficients keeps it.
+    QfEdgeVertexOperator *grouped_mul = qf_edge_op_new(1, 2, &coeff, left_a, right_a, boundaries);
+    qf_edge_op_set_groups(grouped_mul, groups_in, 1);
+    qf_edge_op_mul_inplace(grouped_mul, &scalar);
+    passed_all = passed_all && qf_edge_op_has_groups(grouped_mul);
+
+    qf_edge_op_free(op_a);
+    qf_edge_op_free(op_b);
+    qf_edge_op_free(scratch);
+    qf_edge_op_free(expected_sum);
+    qf_edge_op_free(expected_scaled);
+    qf_edge_op_free(scaled);
+    qf_edge_op_free(expected_scalar);
+    qf_edge_op_free(multiplied);
+    qf_edge_op_free(grouped_add);
+    qf_edge_op_free(grouped_scaled);
+    qf_edge_op_free(grouped_mul);
+
+    if (!passed_all) {
+        return EqualityError;
+    }
+    return Ok;
+}
+
 static int test_add_term(void) {
     QfEdgeVertexOperator *one = qf_edge_op_one();
 
@@ -721,6 +793,7 @@ int test_edge_vertex_operator(void) {
     num_failed += RUN_TEST(test_get_support);
     num_failed += RUN_TEST(test_add);
     num_failed += RUN_TEST(test_scaled_add);
+    num_failed += RUN_TEST(test_inplace_arithmetic);
     num_failed += RUN_TEST(test_add_term);
     num_failed += RUN_TEST(test_mul);
     num_failed += RUN_TEST(test_compose);
