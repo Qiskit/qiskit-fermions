@@ -1,0 +1,6 @@
+﻿FermionAction
+=============
+
+.. currentmodule:: qiskit_fermions.operators.fermion_action
+
+.. autodata:: FermionAction

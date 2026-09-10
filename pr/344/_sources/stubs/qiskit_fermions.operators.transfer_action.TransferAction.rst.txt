@@ -1,0 +1,6 @@
+﻿TransferAction
+==============
+
+.. currentmodule:: qiskit_fermions.operators.transfer_action
+
+.. autodata:: TransferAction
