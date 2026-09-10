@@ -165,8 +165,14 @@ References
 
    Documentation Home <self>
    Installation Instructions <install>
-   Guides <guides/index>
-   GitHub <https://github.com/Qiskit/qiskit-fermions>
+
+.. toctree::
+   :hidden:
+   :caption: Guides
+
+   Simulate 1D Fermi-Hubbard dynamics with flow sets <guides/1d_fermi_hubbard>
+   Simulate 2D Fermi-Hubbard dynamics with flow sets <guides/2d_fermi_hubbard>
+   More guides <guides/index>
 
 .. toctree::
    :hidden:
@@ -182,3 +188,4 @@ References
    Python API reference <https://quantum.cloud.ibm.com/docs/api/qiskit-fermions>
    C API reference <https://quantum.cloud.ibm.com/docs/api/qiskit-fermions-c>
    Release notes <release-notes>
+   GitHub <https://github.com/Qiskit/qiskit-fermions>
