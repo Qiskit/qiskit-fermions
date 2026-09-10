@@ -12,6 +12,7 @@
 
 from pathlib import Path
 
+import numpy as np
 import pytest
 from qiskit_fermions.operators import FermionOperator, ann, cre
 from qiskit_fermions.operators.library import FCIDump
@@ -153,6 +154,151 @@ class TestFCIDump:
             }
         )
         assert op.equiv(expected)
+
+    # The exact integral values are pinned by the Rust unittests (`test_from_file` / `..._beta` in
+    # `crates/core/src/operators/library/fcidump.rs`), so the literals below are copied from there
+    # deliberately: there is one ground truth for the parsed data, and these tests cover what the
+    # binding adds on top of it (the packing lengths, the copy semantics and the absence convention).
+
+    def test_packed_arrays(self):
+        file_path = Path(__file__).parent / "../../../h2.fcidump"
+        fcidump = FCIDump.from_file(str(file_path))
+
+        norb = fcidump.norb
+        npair = norb * (norb + 1) // 2
+
+        one_body_a = fcidump.get_one_body_tril_a()
+        two_body_aa = fcidump.get_two_body_tril_aa()
+
+        # The stub type is dimension-erased, so the shape contract only holds if asserted here.
+        assert one_body_a.shape == (npair,)
+        assert two_body_aa.shape == (npair * (npair + 1) // 2,)
+        assert one_body_a.dtype == np.float64
+        assert two_body_aa.dtype == np.float64
+
+        np.testing.assert_allclose(
+            one_body_a,
+            [-1.2563390730032502, -2.3575299028703285e-16, -0.4718960072811406],
+        )
+        np.testing.assert_allclose(
+            two_body_aa,
+            [
+                0.6757101548035165,
+                0.0,
+                0.18093119978423133,
+                0.6645817302552967,
+                0.0,
+                0.6985737227320183,
+            ],
+        )
+
+    def test_packed_arrays_beta(self):
+        file_path = Path(__file__).parent / "../../../heh.fcidump"
+        fcidump = FCIDump.from_file(str(file_path))
+
+        norb = fcidump.norb
+        npair = norb * (norb + 1) // 2
+
+        np.testing.assert_allclose(
+            fcidump.get_one_body_tril_b(),
+            [-2.6172710340816154, 0.13523295000711089, -1.334676966650596],
+        )
+        np.testing.assert_allclose(
+            fcidump.get_two_body_tril_bb(),
+            [
+                0.9643310447658793,
+                -0.17219894237602218,
+                0.1373946928086696,
+                0.6634447909580112,
+                0.03696599236891227,
+                0.7584738484657803,
+            ],
+        )
+
+        # Unlike its siblings, the alpha-beta block is only 4-fold symmetric, so it stores the *full*
+        # (npair, npair) matrix rather than its lower triangle.
+        two_body_ab = fcidump.get_two_body_tril_ab()
+        assert two_body_ab.shape == (npair**2,)
+
+        # Its row pair indexes the alpha-spin species and its column pair the beta-spin one, so it is
+        # genuinely asymmetric under exchanging the two. A transposed packing would pass every
+        # length check above but fail here.
+        matrix = two_body_ab.reshape(npair, npair)
+        assert not np.allclose(matrix, matrix.T)
+
+    def test_restricted_file_has_no_beta_blocks(self):
+        """The three beta blocks are absent together, which :attr:`is_unrestricted` reports on."""
+        restricted = FCIDump.from_file(str(Path(__file__).parent / "../../../h2.fcidump"))
+        assert not restricted.is_unrestricted
+        assert restricted.get_one_body_tril_b() is None
+        assert restricted.get_two_body_tril_ab() is None
+        assert restricted.get_two_body_tril_bb() is None
+
+        unrestricted = FCIDump.from_file(str(Path(__file__).parent / "../../../heh.fcidump"))
+        assert unrestricted.is_unrestricted
+        assert unrestricted.get_one_body_tril_b() is not None
+        assert unrestricted.get_two_body_tril_ab() is not None
+        assert unrestricted.get_two_body_tril_bb() is not None
+
+    def test_arrays_are_copies(self):
+        """Mutating a returned array must not reach the data structure behind it."""
+        file_path = Path(__file__).parent / "../../../h2.fcidump"
+        fcidump = FCIDump.from_file(str(file_path))
+
+        original = fcidump.get_one_body_tril_a()[0]
+        mutated = fcidump.get_one_body_tril_a()
+        mutated[0] = 42.0
+
+        assert fcidump.get_one_body_tril_a()[0] == original
+
+    def test_constant(self):
+        h2 = FCIDump.from_file(str(Path(__file__).parent / "../../../h2.fcidump"))
+        assert h2.constant == 0.7199689944489797
+
+        heh = FCIDump.from_file(str(Path(__file__).parent / "../../../heh.fcidump"))
+        assert heh.constant == 1.4399379888979593
+
+    def test_constant_is_none_when_absent(self, tmp_path):
+        """A missing constant is ``None``, not ``0.0``: the two are different facts."""
+        path = tmp_path / "no_constant.fcidump"
+        path.write_text("&FCI NORB=   1,NELEC=   2,MS2= 0,\n /\n 0.5   1   1   0   0\n")
+        assert FCIDump.from_file(str(path)).constant is None
+
+    @pytest.mark.parametrize("fixture", ["h2.fcidump", "heh.fcidump"])
+    def test_arrays_round_trip_through_the_constructors(self, fixture):
+        """The accessors are the inverses of the electronic-integral constructors.
+
+        Feeding each returned array straight back into the matching ``from_*_tril_*`` constructor must
+        rebuild the same operator that :meth:`.FermionOperator.from_fcidump` produces, up to the
+        constant term (which those constructors do not carry). This pins the packing end to end
+        without restating any integral value.
+        """
+        fcidump = FCIDump.from_file(str(Path(__file__).parent / "../../.." / fixture))
+        norb = fcidump.norb
+
+        if fcidump.is_unrestricted:
+            one_body = FermionOperator.from_1body_tril_spin(
+                fcidump.get_one_body_tril_a(), fcidump.get_one_body_tril_b(), norb
+            )
+            two_body = FermionOperator.from_2body_tril_spin(
+                fcidump.get_two_body_tril_aa(),
+                fcidump.get_two_body_tril_ab(),
+                fcidump.get_two_body_tril_bb(),
+                norb,
+            )
+        else:
+            one_body = FermionOperator.from_1body_tril_spin_sym(fcidump.get_one_body_tril_a(), norb)
+            two_body = FermionOperator.from_2body_tril_spin_sym(
+                fcidump.get_two_body_tril_aa(), norb
+            )
+
+        rebuilt = one_body + two_body
+        expected = FermionOperator.from_fcidump(fcidump)
+        # `from_fcidump` prepends the constant as the identity term; subtract it back out.
+        if fcidump.constant is not None:
+            expected = expected - fcidump.constant * FermionOperator.one()
+
+        assert rebuilt.equiv(expected)
 
 
 class TestFCIDumpErrors:

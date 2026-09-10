@@ -11,6 +11,7 @@
 // that they have been altered from the originals.
 
 use crate::operators::fermion_operator::PyFermionOperator;
+use numpy::{IntoPyArray, PyArray1};
 use pyo3::prelude::*;
 use pyo3::types::PyType;
 use pyo3_stub_gen::derive::*;
@@ -47,9 +48,50 @@ use qiskit_fermions_core::operators::library::fcidump::{FCIDump, FCIDumpError};
 /// The two-body integrals are expected in `chemist` ordering, :math:`(ij|kl)`, matching the FCIDump
 /// convention.
 ///
+/// .. _FCIDump-implementation:
+///
+/// Implementation
+/// ==============
+///
+/// The integrals are stored as flattened arrays exploiting their permutational symmetry, which is
+/// also the layout the :class:`.FermionOperator` electronic-integral constructors expect. Writing
+/// :math:`n` for the number of orbitals (:attr:`norb`) and
+/// :math:`\text{npair} = n (n + 1) / 2`, a single data structure contains up to 5 arrays:
+///
+/// .. table::
+///
+///    =============== =========================================== ==========================================
+///    ``one_body_a``  :math:`\text{npair}`                        The :math:`\alpha`-spin 1-body integrals.
+///    ``one_body_b``  :math:`\text{npair}`                        The :math:`\beta`-spin 1-body integrals.
+///    ``two_body_aa`` :math:`\text{npair} (\text{npair} + 1) / 2` The :math:`\alpha\alpha` 2-body integrals.
+///    ``two_body_ab`` :math:`\text{npair}^2`                      The :math:`\alpha\beta` 2-body integrals.
+///    ``two_body_bb`` :math:`\text{npair} (\text{npair} + 1) / 2` The :math:`\beta\beta` 2-body integrals.
+///    =============== =========================================== ==========================================
+///
+/// The 1-body arrays are the flattened lower triangle of an :math:`(n, n)` matrix, indexed as
+/// ``ia = i * (i + 1) // 2 + a`` with ``a <= i``. The ``two_body_aa`` and ``two_body_bb`` arrays are
+/// 8-fold (S8) symmetric: the flattened lower triangle of a
+/// :math:`(\text{npair}, \text{npair})` matrix, whose own two axes are each such a pair index.
+///
+/// .. warning::
+///    ``two_body_ab`` is packed *differently* from its siblings. It is only 4-fold (S4) symmetric, so
+///    it holds the **full** :math:`(\text{npair}, \text{npair})` matrix in row-major order, indexed as
+///    ``iajb = ia * npair + jb``. Its row pair indexes the :math:`\alpha`-spin species and its column
+///    pair the :math:`\beta`-spin species, so it is *not* symmetric under exchanging the two pairs.
+///
 /// .. note::
-///    The implementation of this data structure is opaque to Python and only provides a few
-///    attributes and methods documented at the end of this page.
+///    You can access **read-only copies** of these internal arrays via their respective methods:
+///    :meth:`.get_one_body_tril_a`, :meth:`.get_one_body_tril_b`, :meth:`.get_two_body_tril_aa`,
+///    :meth:`.get_two_body_tril_ab`, and :meth:`.get_two_body_tril_bb`.
+///
+/// The 1-body :math:`\beta`-spin and the :math:`\alpha\beta` / :math:`\beta\beta` 2-body arrays are
+/// only present for a file carrying unrestricted spin data. They are absent together, so
+/// :attr:`is_unrestricted` reports on all three at once.
+///
+/// The stored values are the integrals as they appear in the file. In particular, they do **not**
+/// carry the conventional factor of :math:`\frac{1}{2}` that the 2-body operator terms do, so a
+/// coefficient of an operator built via :meth:`.FermionOperator.from_fcidump` is half the
+/// corresponding value returned here.
 ///
 /// Conversion
 /// ==========
@@ -139,6 +181,169 @@ impl PyFCIDump {
     #[getter]
     fn ms2(&self) -> u32 {
         self.inner.ms2
+    }
+
+    /// Returns the constant energy offset, if the file provides one.
+    ///
+    /// This is the value of the integral line whose four indices are all zero, which for an
+    /// electronic structure Hamiltonian is the nuclear-repulsion energy. It is ``None`` when the file
+    /// carries no such line.
+    ///
+    /// .. seealso::
+    ///    :meth:`.FermionOperator.from_fcidump`, which includes this value as the identity term.
+    ///
+    /// .. doctest::
+    ///
+    ///     >>> from qiskit_fermions.operators.library import FCIDump
+    ///     >>> fcidump = FCIDump.from_file("tests/h2.fcidump")
+    ///     >>> fcidump.constant
+    ///     0.7199689944489797
+    ///
+    /// Returns:
+    ///     The constant energy offset, or ``None`` when the file provides none.
+    #[getter]
+    fn constant(&self) -> Option<f64> {
+        self.inner.constant
+    }
+
+    /// Whether this data structure carries unrestricted (spin-dependent) integrals.
+    ///
+    /// The :math:`\beta`-spin 1-body and the :math:`\alpha\beta` / :math:`\beta\beta` 2-body arrays
+    /// are present exactly when this is ``True``; they are absent together.
+    ///
+    /// .. doctest::
+    ///
+    ///     >>> from qiskit_fermions.operators.library import FCIDump
+    ///     >>> FCIDump.from_file("tests/h2.fcidump").is_unrestricted
+    ///     False
+    ///     >>> FCIDump.from_file("tests/heh.fcidump").is_unrestricted
+    ///     True
+    ///
+    /// Returns:
+    ///     Whether the beta-spin integral arrays are present.
+    #[getter]
+    fn is_unrestricted(&self) -> bool {
+        self.inner.one_body_b.is_some()
+    }
+
+    /// Returns a read-only copy of the :math:`\alpha`-spin 1-body integrals.
+    ///
+    /// .. note::
+    ///    This method returns a **copy** of the internal data.
+    ///
+    /// .. seealso::
+    ///    The explanation of the internal data structure, :ref:`here <FCIDump-implementation>`, and
+    ///    :meth:`.FermionOperator.from_1body_tril_spin_sym`, which consumes this array.
+    ///
+    /// .. doctest::
+    ///
+    ///     >>> from qiskit_fermions.operators.library import FCIDump
+    ///     >>> fcidump = FCIDump.from_file("tests/h2.fcidump")
+    ///     >>> fcidump.get_one_body_tril_a().shape
+    ///     (3,)
+    ///
+    /// Returns:
+    ///     The flattened lower-triangular 1-body integrals, of length
+    ///     :math:`\text{npair} = n (n + 1) / 2`.
+    fn get_one_body_tril_a<'py>(&self, py: Python<'py>) -> Bound<'py, PyArray1<f64>> {
+        self.inner.one_body_a.clone().into_pyarray(py)
+    }
+
+    /// Returns a read-only copy of the :math:`\beta`-spin 1-body integrals.
+    ///
+    /// .. note::
+    ///    This method returns a **copy** of the internal data.
+    ///
+    /// .. seealso::
+    ///    The explanation of the internal data structure, :ref:`here <FCIDump-implementation>`, and
+    ///    :meth:`.FermionOperator.from_1body_tril_spin`, which consumes this array.
+    ///
+    /// Returns:
+    ///     The flattened lower-triangular 1-body integrals, of length
+    ///     :math:`\text{npair} = n (n + 1) / 2`, or ``None`` when
+    ///     :attr:`is_unrestricted` is ``False``.
+    fn get_one_body_tril_b<'py>(&self, py: Python<'py>) -> Option<Bound<'py, PyArray1<f64>>> {
+        self.inner
+            .one_body_b
+            .as_ref()
+            .map(|arr| arr.clone().into_pyarray(py))
+    }
+
+    /// Returns a read-only copy of the :math:`\alpha\alpha`-spin 2-body integrals.
+    ///
+    /// The values are in `chemist` ordering, :math:`(ij|kl)`, and carry no factor of
+    /// :math:`\frac{1}{2}`.
+    ///
+    /// .. note::
+    ///    This method returns a **copy** of the internal data.
+    ///
+    /// .. seealso::
+    ///    The explanation of the internal data structure, :ref:`here <FCIDump-implementation>`, and
+    ///    :meth:`.FermionOperator.from_2body_tril_spin_sym`, which consumes this array.
+    ///
+    /// .. doctest::
+    ///
+    ///     >>> from qiskit_fermions.operators.library import FCIDump
+    ///     >>> fcidump = FCIDump.from_file("tests/h2.fcidump")
+    ///     >>> fcidump.get_two_body_tril_aa().shape
+    ///     (6,)
+    ///
+    /// Returns:
+    ///     The 8-fold symmetric (S8) flattened 2-body integrals, of length
+    ///     :math:`\text{npair} (\text{npair} + 1) / 2`.
+    fn get_two_body_tril_aa<'py>(&self, py: Python<'py>) -> Bound<'py, PyArray1<f64>> {
+        self.inner.two_body_aa.clone().into_pyarray(py)
+    }
+
+    /// Returns a read-only copy of the :math:`\alpha\beta`-spin 2-body integrals.
+    ///
+    /// The values are in `chemist` ordering, :math:`(ij|kl)`, and carry no factor of
+    /// :math:`\frac{1}{2}`.
+    ///
+    /// .. warning::
+    ///    Unlike the other 2-body arrays, this one is only 4-fold (S4) symmetric: it holds the
+    ///    **full** :math:`(\text{npair}, \text{npair})` matrix, whose row pair indexes the
+    ///    :math:`\alpha`-spin and whose column pair indexes the :math:`\beta`-spin species. It is
+    ///    therefore *not* symmetric under exchanging the two pairs.
+    ///
+    /// .. note::
+    ///    This method returns a **copy** of the internal data.
+    ///
+    /// .. seealso::
+    ///    The explanation of the internal data structure, :ref:`here <FCIDump-implementation>`, and
+    ///    :meth:`.FermionOperator.from_2body_tril_spin`, which consumes this array.
+    ///
+    /// Returns:
+    ///     The 4-fold symmetric (S4) flattened 2-body integrals, of length
+    ///     :math:`\text{npair}^2`, or ``None`` when :attr:`is_unrestricted` is ``False``.
+    fn get_two_body_tril_ab<'py>(&self, py: Python<'py>) -> Option<Bound<'py, PyArray1<f64>>> {
+        self.inner
+            .two_body_ab
+            .as_ref()
+            .map(|arr| arr.clone().into_pyarray(py))
+    }
+
+    /// Returns a read-only copy of the :math:`\beta\beta`-spin 2-body integrals.
+    ///
+    /// The values are in `chemist` ordering, :math:`(ij|kl)`, and carry no factor of
+    /// :math:`\frac{1}{2}`.
+    ///
+    /// .. note::
+    ///    This method returns a **copy** of the internal data.
+    ///
+    /// .. seealso::
+    ///    The explanation of the internal data structure, :ref:`here <FCIDump-implementation>`, and
+    ///    :meth:`.FermionOperator.from_2body_tril_spin`, which consumes this array.
+    ///
+    /// Returns:
+    ///     The 8-fold symmetric (S8) flattened 2-body integrals, of length
+    ///     :math:`\text{npair} (\text{npair} + 1) / 2`, or ``None`` when
+    ///     :attr:`is_unrestricted` is ``False``.
+    fn get_two_body_tril_bb<'py>(&self, py: Python<'py>) -> Option<Bound<'py, PyArray1<f64>>> {
+        self.inner
+            .two_body_bb
+            .as_ref()
+            .map(|arr| arr.clone().into_pyarray(py))
     }
 }
 
