@@ -433,8 +433,8 @@ impl OperatorTrait for MajoranaOperator {
         self.coeffs.iter_mut().for_each(|c| *c *= other);
     }
 
-    fn __isub__(&mut self, other: &Self) {
-        self.coeffs.extend(other.coeffs.iter().map(|c| -c));
+    fn __iscaled_add__(&mut self, other: &Self, factor: Complex64) {
+        self.coeffs.extend(other.coeffs.iter().map(|c| c * factor));
         self.modes.extend_from_slice(&other.modes);
         let offset = self.boundaries[self.boundaries.len() - 1];
         self.boundaries

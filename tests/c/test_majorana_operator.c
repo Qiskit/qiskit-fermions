@@ -143,6 +143,65 @@ static int test_add(void) {
     return Ok;
 }
 
+// `scaled_add` is the only subtraction the C API offers, so the -1 factor is the load-bearing
+// case: it must agree with a hand-built difference.
+static int test_scaled_add(void) {
+    uint32_t modes_a[2] = {0, 1};
+    uint32_t boundaries[2] = {0, 2};
+    QkComplex64 coeff = {1.0, 0.0};
+    QfMajoranaOperator *op_a = qf_maj_op_new(1, 2, &coeff, modes_a, boundaries);
+    uint32_t modes_b[2] = {2, 3};
+    QfMajoranaOperator *op_b = qf_maj_op_new(1, 2, &coeff, modes_b, boundaries);
+
+    bool passed_all = true;
+
+    // A factor of -1 subtracts, so adding the result back to `op_b` recovers `op_a`.
+    QkComplex64 minus_one = {-1.0, 0.0};
+    QkComplex64 plus_one_early = {1.0, 0.0};
+    QfMajoranaOperator *difference = qf_maj_op_scaled_add(op_a, op_b, &minus_one);
+    QfMajoranaOperator *restored = qf_maj_op_scaled_add(difference, op_b, &plus_one_early);
+    QfMajoranaOperator *simplified_restored = qf_maj_op_simplify(restored, 1e-10);
+    QfMajoranaOperator *simplified_a = qf_maj_op_simplify(op_a, 1e-10);
+    passed_all = passed_all && qf_maj_op_equiv(simplified_restored, simplified_a, 1e-10);
+    qf_maj_op_free(simplified_restored);
+    qf_maj_op_free(simplified_a);
+
+    // A factor of +1 is plain addition.
+    QkComplex64 plus_one = {1.0, 0.0};
+    QfMajoranaOperator *summed = qf_maj_op_scaled_add(op_a, op_b, &plus_one);
+    QfMajoranaOperator *added = qf_maj_op_add(op_a, op_b);
+    passed_all = passed_all && qf_maj_op_equal(summed, added);
+
+    // Scaling by zero still appends the terms; only their coefficients vanish.
+    QkComplex64 zero_factor = {0.0, 0.0};
+    QfMajoranaOperator *scaled_zero = qf_maj_op_scaled_add(op_a, op_b, &zero_factor);
+    passed_all = passed_all && (qf_maj_op_len(scaled_zero) == qf_maj_op_len(added));
+    QfMajoranaOperator *chopped = qf_maj_op_simplify(scaled_zero, 1e-10);
+    passed_all = passed_all && (qf_maj_op_len(chopped) == qf_maj_op_len(op_a));
+
+    // Appending terms drops the grouping, exactly as `add` does.
+    uint32_t groups_in[1] = {0};
+    qf_maj_op_set_groups(op_a, groups_in, 1);
+    QfMajoranaOperator *from_grouped = qf_maj_op_scaled_add(op_a, op_b, &plus_one);
+    passed_all = passed_all && !qf_maj_op_has_groups(from_grouped);
+    qf_maj_op_del_groups(op_a);
+
+    qf_maj_op_free(op_a);
+    qf_maj_op_free(op_b);
+    qf_maj_op_free(difference);
+    qf_maj_op_free(restored);
+    qf_maj_op_free(summed);
+    qf_maj_op_free(added);
+    qf_maj_op_free(scaled_zero);
+    qf_maj_op_free(chopped);
+    qf_maj_op_free(from_grouped);
+
+    if (!passed_all) {
+        return EqualityError;
+    }
+    return Ok;
+}
+
 static int test_add_term(void) {
     QfMajoranaOperator *one = qf_maj_op_one();
 
@@ -640,6 +699,7 @@ int test_majorana_operator(void) {
     num_failed += RUN_TEST(test_getters);
     num_failed += RUN_TEST(test_get_support);
     num_failed += RUN_TEST(test_add);
+    num_failed += RUN_TEST(test_scaled_add);
     num_failed += RUN_TEST(test_add_term);
     num_failed += RUN_TEST(test_equiv_pos);
     num_failed += RUN_TEST(test_equiv_neg);

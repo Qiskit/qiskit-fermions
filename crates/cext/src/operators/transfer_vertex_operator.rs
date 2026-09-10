@@ -853,6 +853,59 @@ pub unsafe extern "C" fn qf_transfer_op_add(
 
 /// @ingroup qf_transfer_op
 ///
+/// @brief Adds two operators together, scaling the coefficients of the right one.
+///
+/// @param left A pointer to the left operator.
+/// @param right A pointer to the right operator.
+/// @param factor A pointer to the factor to scale the right operator's coefficients with.
+///
+/// @return A pointer to the resulting operator, ``left + factor * right``.
+///
+/// @rst
+///
+/// This fuses the scaling into the addition, which avoids building a fully scaled copy of ``right``
+/// just to append it. Passing a factor of ``-1`` therefore subtracts, which is why no separate
+/// subtraction function is provided.
+///
+/// .. note::
+///    Like :c:func:`qf_transfer_op_add`, this appends the terms of ``right`` without combining them with
+///    those of ``left``, so the result tracks no group indices. Call :c:func:`qf_transfer_op_simplify` to
+///    collect equal terms afterwards.
+///
+/// Example
+/// -------
+///
+/// .. code-block:: c
+///     :linenos:
+///
+///     QfTransferVertexOperator *one = qf_transfer_op_one();
+///     QfTransferVertexOperator *other = qf_transfer_op_one();
+///
+///     // Subtracting via a factor of -1 leaves the two terms cancelling each other out.
+///     QkComplex64 factor = {-1.0, 0.0};
+///     QfTransferVertexOperator *result = qf_transfer_op_scaled_add(one, other, &factor);
+///
+///     QfTransferVertexOperator *simplified = qf_transfer_op_simplify(result, 1e-10);
+///     assert(qf_transfer_op_len(simplified) == 0);
+///
+/// @endrst
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn qf_transfer_op_scaled_add(
+    left: *const TransferVertexOperator,
+    right: *const TransferVertexOperator,
+    factor: *const Complex64,
+) -> *mut TransferVertexOperator {
+    // SAFETY: Per documentation, the pointers are non-null and aligned.
+    let left = unsafe { const_ptr_as_ref(left) };
+    let right = unsafe { const_ptr_as_ref(right) };
+    let factor = unsafe { const_ptr_as_ref(factor) };
+
+    let result = left.__scaled_add__(right, *factor);
+    Box::into_raw(Box::new(result))
+}
+
+/// @ingroup qf_transfer_op
+///
 /// @brief Multiplies an operator by a scalar.
 ///
 /// @param op A pointer to the operator.

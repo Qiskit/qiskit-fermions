@@ -154,6 +154,68 @@ static int test_add(void) {
     return Ok;
 }
 
+// `scaled_add` is the only subtraction the C API offers, so the -1 factor is the load-bearing
+// case: it must agree with a hand-built difference.
+static int test_scaled_add(void) {
+    uint32_t left_a[2] = {0, 1};
+    uint32_t right_a[2] = {1, 2};
+    uint32_t boundaries[2] = {0, 2};
+    QkComplex64 coeff = {1.0, 0.0};
+    QfTransferVertexOperator *op_a = qf_transfer_op_new(1, 2, &coeff, left_a, right_a, boundaries);
+    uint32_t left_b[2] = {2, 3};
+    uint32_t right_b[2] = {3, 4};
+    QfTransferVertexOperator *op_b = qf_transfer_op_new(1, 2, &coeff, left_b, right_b, boundaries);
+
+    bool passed_all = true;
+
+    // A factor of -1 subtracts, so adding the result back to `op_b` recovers `op_a`.
+    QkComplex64 minus_one = {-1.0, 0.0};
+    QkComplex64 plus_one_early = {1.0, 0.0};
+    QfTransferVertexOperator *difference = qf_transfer_op_scaled_add(op_a, op_b, &minus_one);
+    QfTransferVertexOperator *restored =
+        qf_transfer_op_scaled_add(difference, op_b, &plus_one_early);
+    QfTransferVertexOperator *simplified_restored = qf_transfer_op_simplify(restored, 1e-10);
+    QfTransferVertexOperator *simplified_a = qf_transfer_op_simplify(op_a, 1e-10);
+    passed_all = passed_all && qf_transfer_op_equiv(simplified_restored, simplified_a, 1e-10);
+    qf_transfer_op_free(simplified_restored);
+    qf_transfer_op_free(simplified_a);
+
+    // A factor of +1 is plain addition.
+    QkComplex64 plus_one = {1.0, 0.0};
+    QfTransferVertexOperator *summed = qf_transfer_op_scaled_add(op_a, op_b, &plus_one);
+    QfTransferVertexOperator *added = qf_transfer_op_add(op_a, op_b);
+    passed_all = passed_all && qf_transfer_op_equal(summed, added);
+
+    // Scaling by zero still appends the terms; only their coefficients vanish.
+    QkComplex64 zero_factor = {0.0, 0.0};
+    QfTransferVertexOperator *scaled_zero = qf_transfer_op_scaled_add(op_a, op_b, &zero_factor);
+    passed_all = passed_all && (qf_transfer_op_len(scaled_zero) == qf_transfer_op_len(added));
+    QfTransferVertexOperator *chopped = qf_transfer_op_simplify(scaled_zero, 1e-10);
+    passed_all = passed_all && (qf_transfer_op_len(chopped) == qf_transfer_op_len(op_a));
+
+    // Appending terms drops the grouping, exactly as `add` does.
+    uint32_t groups_in[1] = {0};
+    qf_transfer_op_set_groups(op_a, groups_in, 1);
+    QfTransferVertexOperator *from_grouped = qf_transfer_op_scaled_add(op_a, op_b, &plus_one);
+    passed_all = passed_all && !qf_transfer_op_has_groups(from_grouped);
+    qf_transfer_op_del_groups(op_a);
+
+    qf_transfer_op_free(op_a);
+    qf_transfer_op_free(op_b);
+    qf_transfer_op_free(difference);
+    qf_transfer_op_free(restored);
+    qf_transfer_op_free(summed);
+    qf_transfer_op_free(added);
+    qf_transfer_op_free(scaled_zero);
+    qf_transfer_op_free(chopped);
+    qf_transfer_op_free(from_grouped);
+
+    if (!passed_all) {
+        return EqualityError;
+    }
+    return Ok;
+}
+
 static int test_add_term(void) {
     QfTransferVertexOperator *one = qf_transfer_op_one();
 
@@ -675,6 +737,7 @@ int test_transfer_vertex_operator(void) {
     num_failed += RUN_TEST(test_getters);
     num_failed += RUN_TEST(test_get_support);
     num_failed += RUN_TEST(test_add);
+    num_failed += RUN_TEST(test_scaled_add);
     num_failed += RUN_TEST(test_add_term);
     num_failed += RUN_TEST(test_mul);
     num_failed += RUN_TEST(test_compose);
