@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>FCIDump - Qiskit Fermions 0.2.0.dev0+f7ffac2</title>
+        <title>FCIDump - Qiskit Fermions 0.2.0.dev0+fdf61a4</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+f7ffac2</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+fdf61a4</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+f7ffac2</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+fdf61a4</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -331,11 +331,63 @@ based on the intervals in which the indices fall (assuming a header with <code c
 <p>The only required values are the 1-body alpha-spin integrals.</p>
 <p>The two-body integrals are expected in <cite>chemist</cite> ordering, <span class="math">\((ij|kl)\)</span>, matching the FCIDump
 convention.</p>
+</section>
+<section id="implementation">
+<span id="fcidump-implementation"></span><h2>Implementation<a class="headerlink" href="#implementation" title="Link to this heading">¶</a></h2>
+<p>The integrals are stored as flattened arrays exploiting their permutational symmetry, which is
+also the layout the <a class="reference internal" href="qiskit_fermions.operators.FermionOperator.html#qiskit_fermions.operators.FermionOperator" title="qiskit_fermions.operators.FermionOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionOperator</span></code></a> electronic-integral constructors expect. Writing
+<span class="math">\(n\)</span> for the number of orbitals (<a class="reference internal" href="#qiskit_fermions.operators.library.FCIDump.norb" title="qiskit_fermions.operators.library.FCIDump.norb"><code class="xref py py-attr docutils literal notranslate"><span class="pre">norb</span></code></a>) and
+<span class="math">\(\text{npair} = n (n + 1) / 2\)</span>, a single data structure contains up to 5 arrays:</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">one_body_a</span></code></p></td>
+<td><p><span class="math">\(\text{npair}\)</span></p></td>
+<td><p>The <span class="math">\(\alpha\)</span>-spin 1-body integrals.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">one_body_b</span></code></p></td>
+<td><p><span class="math">\(\text{npair}\)</span></p></td>
+<td><p>The <span class="math">\(\beta\)</span>-spin 1-body integrals.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">two_body_aa</span></code></p></td>
+<td><p><span class="math">\(\text{npair} (\text{npair} + 1) / 2\)</span></p></td>
+<td><p>The <span class="math">\(\alpha\alpha\)</span> 2-body integrals.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">two_body_ab</span></code></p></td>
+<td><p><span class="math">\(\text{npair}^2\)</span></p></td>
+<td><p>The <span class="math">\(\alpha\beta\)</span> 2-body integrals.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">two_body_bb</span></code></p></td>
+<td><p><span class="math">\(\text{npair} (\text{npair} + 1) / 2\)</span></p></td>
+<td><p>The <span class="math">\(\beta\beta\)</span> 2-body integrals.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The 1-body arrays are the flattened lower triangle of an <span class="math">\((n, n)\)</span> matrix, indexed as
+<code class="docutils literal notranslate"><span class="pre">ia</span> <span class="pre">=</span> <span class="pre">i</span> <span class="pre">*</span> <span class="pre">(i</span> <span class="pre">+</span> <span class="pre">1)</span> <span class="pre">//</span> <span class="pre">2</span> <span class="pre">+</span> <span class="pre">a</span></code> with <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">&lt;=</span> <span class="pre">i</span></code>. The <code class="docutils literal notranslate"><span class="pre">two_body_aa</span></code> and <code class="docutils literal notranslate"><span class="pre">two_body_bb</span></code> arrays are
+8-fold (S8) symmetric: the flattened lower triangle of a
+<span class="math">\((\text{npair}, \text{npair})\)</span> matrix, whose own two axes are each such a pair index.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p><code class="docutils literal notranslate"><span class="pre">two_body_ab</span></code> is packed <em>differently</em> from its siblings. It is only 4-fold (S4) symmetric, so
+it holds the <strong>full</strong> <span class="math">\((\text{npair}, \text{npair})\)</span> matrix in row-major order, indexed as
+<code class="docutils literal notranslate"><span class="pre">iajb</span> <span class="pre">=</span> <span class="pre">ia</span> <span class="pre">*</span> <span class="pre">npair</span> <span class="pre">+</span> <span class="pre">jb</span></code>. Its row pair indexes the <span class="math">\(\alpha\)</span>-spin species and its column
+pair the <span class="math">\(\beta\)</span>-spin species, so it is <em>not</em> symmetric under exchanging the two pairs.</p>
+</div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>The implementation of this data structure is opaque to Python and only provides a few
-attributes and methods documented at the end of this page.</p>
+<p>You can access <strong>read-only copies</strong> of these internal arrays via their respective methods:
+<a class="reference internal" href="#qiskit_fermions.operators.library.FCIDump.get_one_body_tril_a" title="qiskit_fermions.operators.library.FCIDump.get_one_body_tril_a"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_one_body_tril_a()</span></code></a>, <a class="reference internal" href="#qiskit_fermions.operators.library.FCIDump.get_one_body_tril_b" title="qiskit_fermions.operators.library.FCIDump.get_one_body_tril_b"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_one_body_tril_b()</span></code></a>, <a class="reference internal" href="#qiskit_fermions.operators.library.FCIDump.get_two_body_tril_aa" title="qiskit_fermions.operators.library.FCIDump.get_two_body_tril_aa"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_two_body_tril_aa()</span></code></a>,
+<a class="reference internal" href="#qiskit_fermions.operators.library.FCIDump.get_two_body_tril_ab" title="qiskit_fermions.operators.library.FCIDump.get_two_body_tril_ab"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_two_body_tril_ab()</span></code></a>, and <a class="reference internal" href="#qiskit_fermions.operators.library.FCIDump.get_two_body_tril_bb" title="qiskit_fermions.operators.library.FCIDump.get_two_body_tril_bb"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_two_body_tril_bb()</span></code></a>.</p>
 </div>
+<p>The 1-body <span class="math">\(\beta\)</span>-spin and the <span class="math">\(\alpha\beta\)</span> / <span class="math">\(\beta\beta\)</span> 2-body arrays are
+only present for a file carrying unrestricted spin data. They are absent together, so
+<a class="reference internal" href="#qiskit_fermions.operators.library.FCIDump.is_unrestricted" title="qiskit_fermions.operators.library.FCIDump.is_unrestricted"><code class="xref py py-attr docutils literal notranslate"><span class="pre">is_unrestricted</span></code></a> reports on all three at once.</p>
+<p>The stored values are the integrals as they appear in the file. In particular, they do <strong>not</strong>
+carry the conventional factor of <span class="math">\(\frac{1}{2}\)</span> that the 2-body operator terms do, so a
+coefficient of an operator built via <a class="reference internal" href="qiskit_fermions.operators.FermionOperator.html#qiskit_fermions.operators.FermionOperator.from_fcidump" title="qiskit_fermions.operators.FermionOperator.from_fcidump"><code class="xref py py-meth docutils literal notranslate"><span class="pre">FermionOperator.from_fcidump()</span></code></a> is half the
+corresponding value returned here.</p>
 </section>
 <section id="conversion">
 <h2>Conversion<a class="headerlink" href="#conversion" title="Link to this heading">¶</a></h2>
@@ -362,6 +414,50 @@ a <code class="docutils literal notranslate"><span class="pre">from_fcidump</spa
 </aside>
 </aside>
 <p class="rubric">Attributes</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qiskit_fermions.operators.library.FCIDump.constant">
+<span class="sig-name descname"><span class="pre">constant</span></span><a class="headerlink" href="#qiskit_fermions.operators.library.FCIDump.constant" title="Link to this definition">¶</a></dt>
+<dd><p>Returns the constant energy offset, if the file provides one.</p>
+<p>This is the value of the integral line whose four indices are all zero, which for an
+electronic structure Hamiltonian is the nuclear-repulsion energy. It is <code class="docutils literal notranslate"><span class="pre">None</span></code> when the file
+carries no such line.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="qiskit_fermions.operators.FermionOperator.html#qiskit_fermions.operators.FermionOperator.from_fcidump" title="qiskit_fermions.operators.FermionOperator.from_fcidump"><code class="xref py py-meth docutils literal notranslate"><span class="pre">FermionOperator.from_fcidump()</span></code></a>, which includes this value as the identity term.</p>
+</div>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.operators.library</span><span class="w"> </span><span class="kn">import</span> <span class="n">FCIDump</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fcidump</span> <span class="o">=</span> <span class="n">FCIDump</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="s2">"tests/h2.fcidump"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fcidump</span><span class="o">.</span><span class="n">constant</span>
+<span class="go">0.7199689944489797</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The constant energy offset, or <code class="docutils literal notranslate"><span class="pre">None</span></code> when the file provides none.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qiskit_fermions.operators.library.FCIDump.is_unrestricted">
+<span class="sig-name descname"><span class="pre">is_unrestricted</span></span><a class="headerlink" href="#qiskit_fermions.operators.library.FCIDump.is_unrestricted" title="Link to this definition">¶</a></dt>
+<dd><p>Whether this data structure carries unrestricted (spin-dependent) integrals.</p>
+<p>The <span class="math">\(\beta\)</span>-spin 1-body and the <span class="math">\(\alpha\beta\)</span> / <span class="math">\(\beta\beta\)</span> 2-body arrays
+are present exactly when this is <code class="docutils literal notranslate"><span class="pre">True</span></code>; they are absent together.</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.operators.library</span><span class="w"> </span><span class="kn">import</span> <span class="n">FCIDump</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">FCIDump</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="s2">"tests/h2.fcidump"</span><span class="p">)</span><span class="o">.</span><span class="n">is_unrestricted</span>
+<span class="go">False</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">FCIDump</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="s2">"tests/heh.fcidump"</span><span class="p">)</span><span class="o">.</span><span class="n">is_unrestricted</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Whether the beta-spin integral arrays are present.</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qiskit_fermions.operators.library.FCIDump.ms2">
 <span class="sig-name descname"><span class="pre">ms2</span></span><a class="headerlink" href="#qiskit_fermions.operators.library.FCIDump.ms2" title="Link to this definition">¶</a></dt>
@@ -414,6 +510,138 @@ file.</p>
 </dl>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="qiskit_fermions.operators.library.FCIDump.get_one_body_tril_a">
+<span class="sig-name descname"><span class="pre">get_one_body_tril_a</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qiskit_fermions.operators.library.FCIDump.get_one_body_tril_a" title="Link to this definition">¶</a></dt>
+<dd><p>Returns a read-only copy of the <span class="math">\(\alpha\)</span>-spin 1-body integrals.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This method returns a <strong>copy</strong> of the internal data.</p>
+</div>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p>The explanation of the internal data structure, <a class="reference internal" href="#fcidump-implementation"><span class="std std-ref">here</span></a>, and
+<a class="reference internal" href="qiskit_fermions.operators.FermionOperator.html#qiskit_fermions.operators.FermionOperator.from_1body_tril_spin_sym" title="qiskit_fermions.operators.FermionOperator.from_1body_tril_spin_sym"><code class="xref py py-meth docutils literal notranslate"><span class="pre">FermionOperator.from_1body_tril_spin_sym()</span></code></a>, which consumes this array.</p>
+</div>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.operators.library</span><span class="w"> </span><span class="kn">import</span> <span class="n">FCIDump</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fcidump</span> <span class="o">=</span> <span class="n">FCIDump</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="s2">"tests/h2.fcidump"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fcidump</span><span class="o">.</span><span class="n">get_one_body_tril_a</span><span class="p">()</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">(3,)</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The flattened lower-triangular 1-body integrals, of length
+<span class="math">\(\text{npair} = n (n + 1) / 2\)</span>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qiskit_fermions.operators.library.FCIDump.get_one_body_tril_b">
+<span class="sig-name descname"><span class="pre">get_one_body_tril_b</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qiskit_fermions.operators.library.FCIDump.get_one_body_tril_b" title="Link to this definition">¶</a></dt>
+<dd><p>Returns a read-only copy of the <span class="math">\(\beta\)</span>-spin 1-body integrals.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This method returns a <strong>copy</strong> of the internal data.</p>
+</div>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p>The explanation of the internal data structure, <a class="reference internal" href="#fcidump-implementation"><span class="std std-ref">here</span></a>, and
+<a class="reference internal" href="qiskit_fermions.operators.FermionOperator.html#qiskit_fermions.operators.FermionOperator.from_1body_tril_spin" title="qiskit_fermions.operators.FermionOperator.from_1body_tril_spin"><code class="xref py py-meth docutils literal notranslate"><span class="pre">FermionOperator.from_1body_tril_spin()</span></code></a>, which consumes this array.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The flattened lower-triangular 1-body integrals, of length
+<span class="math">\(\text{npair} = n (n + 1) / 2\)</span>, or <code class="docutils literal notranslate"><span class="pre">None</span></code> when
+<a class="reference internal" href="#qiskit_fermions.operators.library.FCIDump.is_unrestricted" title="qiskit_fermions.operators.library.FCIDump.is_unrestricted"><code class="xref py py-attr docutils literal notranslate"><span class="pre">is_unrestricted</span></code></a> is <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qiskit_fermions.operators.library.FCIDump.get_two_body_tril_aa">
+<span class="sig-name descname"><span class="pre">get_two_body_tril_aa</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qiskit_fermions.operators.library.FCIDump.get_two_body_tril_aa" title="Link to this definition">¶</a></dt>
+<dd><p>Returns a read-only copy of the <span class="math">\(\alpha\alpha\)</span>-spin 2-body integrals.</p>
+<p>The values are in <cite>chemist</cite> ordering, <span class="math">\((ij|kl)\)</span>, and carry no factor of
+<span class="math">\(\frac{1}{2}\)</span>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This method returns a <strong>copy</strong> of the internal data.</p>
+</div>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p>The explanation of the internal data structure, <a class="reference internal" href="#fcidump-implementation"><span class="std std-ref">here</span></a>, and
+<a class="reference internal" href="qiskit_fermions.operators.FermionOperator.html#qiskit_fermions.operators.FermionOperator.from_2body_tril_spin_sym" title="qiskit_fermions.operators.FermionOperator.from_2body_tril_spin_sym"><code class="xref py py-meth docutils literal notranslate"><span class="pre">FermionOperator.from_2body_tril_spin_sym()</span></code></a>, which consumes this array.</p>
+</div>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.operators.library</span><span class="w"> </span><span class="kn">import</span> <span class="n">FCIDump</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fcidump</span> <span class="o">=</span> <span class="n">FCIDump</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="s2">"tests/h2.fcidump"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fcidump</span><span class="o">.</span><span class="n">get_two_body_tril_aa</span><span class="p">()</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">(6,)</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The 8-fold symmetric (S8) flattened 2-body integrals, of length
+<span class="math">\(\text{npair} (\text{npair} + 1) / 2\)</span>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qiskit_fermions.operators.library.FCIDump.get_two_body_tril_ab">
+<span class="sig-name descname"><span class="pre">get_two_body_tril_ab</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qiskit_fermions.operators.library.FCIDump.get_two_body_tril_ab" title="Link to this definition">¶</a></dt>
+<dd><p>Returns a read-only copy of the <span class="math">\(\alpha\beta\)</span>-spin 2-body integrals.</p>
+<p>The values are in <cite>chemist</cite> ordering, <span class="math">\((ij|kl)\)</span>, and carry no factor of
+<span class="math">\(\frac{1}{2}\)</span>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Unlike the other 2-body arrays, this one is only 4-fold (S4) symmetric: it holds the
+<strong>full</strong> <span class="math">\((\text{npair}, \text{npair})\)</span> matrix, whose row pair indexes the
+<span class="math">\(\alpha\)</span>-spin and whose column pair indexes the <span class="math">\(\beta\)</span>-spin species. It is
+therefore <em>not</em> symmetric under exchanging the two pairs.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This method returns a <strong>copy</strong> of the internal data.</p>
+</div>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p>The explanation of the internal data structure, <a class="reference internal" href="#fcidump-implementation"><span class="std std-ref">here</span></a>, and
+<a class="reference internal" href="qiskit_fermions.operators.FermionOperator.html#qiskit_fermions.operators.FermionOperator.from_2body_tril_spin" title="qiskit_fermions.operators.FermionOperator.from_2body_tril_spin"><code class="xref py py-meth docutils literal notranslate"><span class="pre">FermionOperator.from_2body_tril_spin()</span></code></a>, which consumes this array.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The 4-fold symmetric (S4) flattened 2-body integrals, of length
+<span class="math">\(\text{npair}^2\)</span>, or <code class="docutils literal notranslate"><span class="pre">None</span></code> when <a class="reference internal" href="#qiskit_fermions.operators.library.FCIDump.is_unrestricted" title="qiskit_fermions.operators.library.FCIDump.is_unrestricted"><code class="xref py py-attr docutils literal notranslate"><span class="pre">is_unrestricted</span></code></a> is <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qiskit_fermions.operators.library.FCIDump.get_two_body_tril_bb">
+<span class="sig-name descname"><span class="pre">get_two_body_tril_bb</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qiskit_fermions.operators.library.FCIDump.get_two_body_tril_bb" title="Link to this definition">¶</a></dt>
+<dd><p>Returns a read-only copy of the <span class="math">\(\beta\beta\)</span>-spin 2-body integrals.</p>
+<p>The values are in <cite>chemist</cite> ordering, <span class="math">\((ij|kl)\)</span>, and carry no factor of
+<span class="math">\(\frac{1}{2}\)</span>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This method returns a <strong>copy</strong> of the internal data.</p>
+</div>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p>The explanation of the internal data structure, <a class="reference internal" href="#fcidump-implementation"><span class="std std-ref">here</span></a>, and
+<a class="reference internal" href="qiskit_fermions.operators.FermionOperator.html#qiskit_fermions.operators.FermionOperator.from_2body_tril_spin" title="qiskit_fermions.operators.FermionOperator.from_2body_tril_spin"><code class="xref py py-meth docutils literal notranslate"><span class="pre">FermionOperator.from_2body_tril_spin()</span></code></a>, which consumes this array.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The 8-fold symmetric (S8) flattened 2-body integrals, of length
+<span class="math">\(\text{npair} (\text{npair} + 1) / 2\)</span>, or <code class="docutils literal notranslate"><span class="pre">None</span></code> when
+<a class="reference internal" href="#qiskit_fermions.operators.library.FCIDump.is_unrestricted" title="qiskit_fermions.operators.library.FCIDump.is_unrestricted"><code class="xref py py-attr docutils literal notranslate"><span class="pre">is_unrestricted</span></code></a> is <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 </dd></dl>
 
@@ -436,7 +664,7 @@ file.</p>
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on 2026/09/09</div>
+              Last updated on 2026/09/10</div>
           </div>
           <div class="right-details">
             
@@ -459,10 +687,17 @@ file.</p>
             <ul>
 <li><a class="reference internal" href="#">FCIDump</a><ul>
 <li><a class="reference internal" href="#qiskit_fermions.operators.library.FCIDump"><code class="docutils literal notranslate"><span class="pre">FCIDump</span></code></a><ul>
+<li><a class="reference internal" href="#qiskit_fermions.operators.library.FCIDump.constant"><code class="docutils literal notranslate"><span class="pre">FCIDump.constant</span></code></a></li>
+<li><a class="reference internal" href="#qiskit_fermions.operators.library.FCIDump.is_unrestricted"><code class="docutils literal notranslate"><span class="pre">FCIDump.is_unrestricted</span></code></a></li>
 <li><a class="reference internal" href="#qiskit_fermions.operators.library.FCIDump.ms2"><code class="docutils literal notranslate"><span class="pre">FCIDump.ms2</span></code></a></li>
 <li><a class="reference internal" href="#qiskit_fermions.operators.library.FCIDump.nelec"><code class="docutils literal notranslate"><span class="pre">FCIDump.nelec</span></code></a></li>
 <li><a class="reference internal" href="#qiskit_fermions.operators.library.FCIDump.norb"><code class="docutils literal notranslate"><span class="pre">FCIDump.norb</span></code></a></li>
 <li><a class="reference internal" href="#qiskit_fermions.operators.library.FCIDump.from_file"><code class="docutils literal notranslate"><span class="pre">FCIDump.from_file()</span></code></a></li>
+<li><a class="reference internal" href="#qiskit_fermions.operators.library.FCIDump.get_one_body_tril_a"><code class="docutils literal notranslate"><span class="pre">FCIDump.get_one_body_tril_a()</span></code></a></li>
+<li><a class="reference internal" href="#qiskit_fermions.operators.library.FCIDump.get_one_body_tril_b"><code class="docutils literal notranslate"><span class="pre">FCIDump.get_one_body_tril_b()</span></code></a></li>
+<li><a class="reference internal" href="#qiskit_fermions.operators.library.FCIDump.get_two_body_tril_aa"><code class="docutils literal notranslate"><span class="pre">FCIDump.get_two_body_tril_aa()</span></code></a></li>
+<li><a class="reference internal" href="#qiskit_fermions.operators.library.FCIDump.get_two_body_tril_ab"><code class="docutils literal notranslate"><span class="pre">FCIDump.get_two_body_tril_ab()</span></code></a></li>
+<li><a class="reference internal" href="#qiskit_fermions.operators.library.FCIDump.get_two_body_tril_bb"><code class="docutils literal notranslate"><span class="pre">FCIDump.get_two_body_tril_bb()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -476,7 +711,7 @@ file.</p>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=1e492a6f"></script>
+</div><script src="../_static/documentation_options.js?v=a60857e3"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

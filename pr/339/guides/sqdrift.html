@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Generate SqDRIFT circuits - Qiskit Fermions 0.2.0.dev0+f7ffac2</title>
+        <title>Generate SqDRIFT circuits - Qiskit Fermions 0.2.0.dev0+fdf61a4</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+f7ffac2</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+fdf61a4</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+f7ffac2</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+fdf61a4</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -496,8 +496,8 @@ circuits to generate:</p>
 <ul class="simple">
 <li><p>The number of circuits to generate: <code class="docutils literal notranslate"><span class="pre">num_sqdrift_randomizations</span></code></p></li>
 <li><p>The length of each circuit in terms of excitation groups: <code class="docutils literal notranslate"><span class="pre">num_groups</span></code></p></li>
-<li><p>Optionally, the distribution to sample those groups from: <code class="docutils literal notranslate"><span class="pre">weights</span></code> (see
-<a class="reference internal" href="#sqdrift-sampling-weights"><span class="std std-ref">(Optional) Choose the sampling distribution</span></a> below)</p></li>
+<li><p>Optionally, precomputed sampling weights, if the transpilation itself becomes a
+bottleneck: <code class="docutils literal notranslate"><span class="pre">weights</span></code> (see <a class="reference internal" href="#sqdrift-sampling-weights"><span class="std std-ref">(Optional) Precompute the sampling weights</span></a> below)</p></li>
 </ul>
 <div class="sd-tab-set docutils">
 <input checked="checked" id="sd-tab-item-10" name="sd-tab-set-5" type="radio">
@@ -627,33 +627,30 @@ has no occupation information to filter against. It emits a
 <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate.</p>
 </div>
 </section>
-<section id="optional-choose-the-sampling-distribution">
-<span id="sqdrift-sampling-weights"></span><h2>(Optional) Choose the sampling distribution<a class="headerlink" href="#optional-choose-the-sampling-distribution" title="Link to this heading">¶</a></h2>
-<p>By default, <a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.QDriftTrotterization.html#qiskit_fermions.transpiler.passes.QDriftTrotterization" title="qiskit_fermions.transpiler.passes.QDriftTrotterization"><code class="xref py py-class docutils literal notranslate"><span class="pre">QDriftTrotterization</span></code></a> derives its sampling weights from the
-Hamiltonian on every call: it draws each group with a probability proportional to
-the magnitude of its coefficient, and evolves every sampled group for the shared
-time <span class="math">\(\delta = \|w\|_1 t / \texttt{num\_groups}\)</span>. Passing the <code class="docutils literal notranslate"><span class="pre">weights</span></code>
-argument supplies that array yourself instead.</p>
-<p>This is worth doing for two independent reasons. The first is performance.
-Deriving the weights means reducing one value per Hamiltonian <em>term</em> down to one
-per group. Because the pass is stateless, it repeats that work for every
-randomization, even though the result is the same every time. Computing the
-weights once with
-<a class="reference internal" href="../stubs/qiskit_fermions.operators.terms.group_coeff_means.html#qiskit_fermions.operators.terms.group_coeff_means" title="qiskit_fermions.operators.terms.group_coeff_means"><code class="xref py py-func docutils literal notranslate"><span class="pre">group_coeff_means()</span></code></a> and handing
-the result over moves the cost out of the loop, while leaving the pass free of
-any cached, Hamiltonian-dependent state.</p>
-<p>This pairs with the term ordering recommended in step 2: that hoists the group
-<em>lookup</em> out of the loop, this hoists the weight <em>reduction</em>, and each is only as
-visible as the other is absent. Together they leave little of the per-call work
-behind, which is what makes generating a large ensemble from one Hamiltonian
-cheap:</p>
+<section id="optional-precompute-the-sampling-weights">
+<span id="sqdrift-sampling-weights"></span><h2>(Optional) Precompute the sampling weights<a class="headerlink" href="#optional-precompute-the-sampling-weights" title="Link to this heading">¶</a></h2>
+<p>Reach for this only if the transpilation itself is a bottleneck. It changes
+nothing about the circuits you get.</p>
+<p><a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.QDriftTrotterization.html#qiskit_fermions.transpiler.passes.QDriftTrotterization" title="qiskit_fermions.transpiler.passes.QDriftTrotterization"><code class="xref py py-class docutils literal notranslate"><span class="pre">QDriftTrotterization</span></code></a> draws each group with a probability proportional to
+the magnitude of its coefficient, and derives those magnitudes from the
+Hamiltonian on every call: one value per Hamiltonian <em>term</em>, reduced down to one
+per group. Because the pass is stateless it repeats that reduction for every
+randomization, even though the result is identical every time. The <code class="docutils literal notranslate"><span class="pre">weights</span></code>
+argument lets you compute it once with
+<a class="reference internal" href="../stubs/qiskit_fermions.operators.terms.group_coeff_means.html#qiskit_fermions.operators.terms.group_coeff_means" title="qiskit_fermions.operators.terms.group_coeff_means"><code class="xref py py-func docutils literal notranslate"><span class="pre">group_coeff_means()</span></code></a> and hand the result
+over, moving the cost out of the loop while leaving the pass free of any cached,
+Hamiltonian-dependent state.</p>
+<p>This is the counterpart of the term ordering in step 2. That one hoists the group
+<em>lookup</em> out of the loop, this one the weight <em>reduction</em>, and each is only as
+noticeable as the other is absent, so it is worth applying both together. Since
+<code class="docutils literal notranslate"><span class="pre">canon</span></code> was already reordered above, the two compose directly:</p>
 <div class="sd-tab-set docutils">
 <input checked="checked" id="sd-tab-item-14" name="sd-tab-set-7" type="radio">
 <label class="sd-tab-label" data-sync-group="code" data-sync-id="python" for="sd-tab-item-14">
 PYTHON</label><div class="sd-tab-content docutils">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.operators.terms.grouping</span><span class="w"> </span><span class="kn">import</span> <span class="n">group_coeff_means</span>
 <span class="gp">&gt;&gt;&gt;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">weights</span> <span class="o">=</span> <span class="n">group_coeff_means</span><span class="p">(</span><span class="n">canon</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">weights</span> <span class="o">=</span> <span class="n">group_coeff_means</span><span class="p">(</span><span class="n">canon</span><span class="p">)</span>  <span class="c1"># `canon` is group-ordered, from step 2</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">qdrift_weighted</span> <span class="o">=</span> <span class="n">QDriftTrotterization</span><span class="p">(</span><span class="n">num_groups</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="mi">19</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">pm</span><span class="o">.</span><span class="n">optimization</span> <span class="o">=</span> <span class="n">FermionicPassManager</span><span class="p">([</span><span class="n">qdrift_weighted</span><span class="p">])</span>
@@ -675,44 +672,21 @@ C</label><div class="sd-tab-content docutils">
 </div>
 </div>
 </div>
-<p>Since those are exactly the weights the pass would have computed, the circuits
-are the same as before; only the repeated reduction is gone.</p>
-<p>The second reason is that the distribution becomes yours to choose, which is what
-makes a deliberate deviation from the coefficient magnitudes possible at all.</p>
+<p>Since those are exactly the weights the pass would have computed, the circuits are
+the same as before; only the repeated reduction is gone.</p>
 <p>One entry is expected per <em>group</em>, not per term, whenever the operator carries
-groups, since a grouped operator is sampled group-wise. For the Hamiltonian used
-here that is also the physically meaningful unit: the grouping applied above pairs
-each <span class="math">\(a^\dagger_p a_q\)</span> with its conjugate <span class="math">\(a^\dagger_q a_p\)</span>, and only
-that pair is Hermitian, so only its evolution is unitary. Weighting such terms
-separately would describe pieces that cannot be sampled on their own.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>This has no counterpart in the qubit-space treatments of qDRIFT found in most of
-the literature, where every sampled Pauli string is Hermitian by construction.
-It is a property of the grouping rather than of <code class="docutils literal notranslate"><span class="pre">weights</span></code>, though: an operator
-whose individual terms are already Hermitian needs no grouping to be sampled.
-See <a class="reference internal" href="grouping.html#grouping-explanation"><span class="std std-ref">Group operator terms: use the operator structure</span></a> for the checks that verify a given grouping
-follows this convention.</p>
-</div>
+groups, since a grouped operator is sampled group-wise. Entries must be
+non-negative: a weight is a <em>magnitude</em>, because the qDRIFT protocol decomposes
+<span class="math">\(H = \sum_j h_j H_j\)</span> with positive <span class="math">\(h_j\)</span>, and a coefficient’s sign
+belongs to <span class="math">\(H_j\)</span>, where the pass reads it off the operator directly.</p>
 <div class="admonition caution">
 <p class="admonition-title">Caution</p>
-<p>The weights are absolute magnitudes, not relative preferences. Their 1-norm
-also fixes the evolution time, so multiplying every entry by <span class="math">\(\gamma\)</span>
-samples identically but evolves for <span class="math">\(\gamma t\)</span> instead of <span class="math">\(t\)</span>.
-Only weights equal to the coefficient magnitudes reproduce
-<span class="math">\(e^{-i t H}\)</span>; a distribution of a different <em>shape</em> approximates a
-different operator unless you reweight the measured outcomes accordingly.</p>
-</div>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Entries may be negative, which is what makes a <em>quasi</em>-probability
-distribution expressible: the sampling draws from <span class="math">\(|w_j| / \|w\|_1\)</span> and
-the sign of <span class="math">\(w_j\)</span> is folded into the emitted gate’s rotation direction.
-Recovering the target evolution then requires rescaling the measured outcomes
-by the sampling overhead <span class="math">\(\|w\|_1\)</span>, carrying that sign – a
-post-processing step outside the scope of this transpiler pass, which only
-emits circuits. See <a class="reference external" href="https://arxiv.org/abs/2608.29756">arXiv:2608.29756</a> for
-a protocol built on such a distribution.</p>
+<p>The weights are absolute magnitudes, not relative preferences. Their sum also
+fixes the evolution time, so multiplying every entry by <span class="math">\(\gamma\)</span> samples
+identically but evolves for <span class="math">\(\gamma t\)</span> instead of <span class="math">\(t\)</span>. Passing
+anything other than the Hamiltonian’s own coefficient magnitudes therefore
+changes which evolution the ensemble approximates, which is why this is a
+performance tool rather than a way to tune the sampling.</p>
 </div>
 <p>Because a weights array describes the groups of one particular operator, it is
 validated against each <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate it is applied to, and a circuit
@@ -818,7 +792,7 @@ tutorials</a>.</p>
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on 2026/09/09</div>
+              Last updated on 2026/09/10</div>
           </div>
           <div class="right-details">
             
@@ -845,7 +819,7 @@ tutorials</a>.</p>
 <li><a class="reference internal" href="#prepare-the-time-evolution-circuit">3. Prepare the time evolution circuit</a></li>
 <li><a class="reference internal" href="#transpile-the-circuit-with-qdrift-trotterization">4. Transpile the circuit with QDrift Trotterization</a></li>
 <li><a class="reference internal" href="#filter-out-trivial-excitations">5. Filter out trivial excitations</a></li>
-<li><a class="reference internal" href="#optional-choose-the-sampling-distribution">(Optional) Choose the sampling distribution</a></li>
+<li><a class="reference internal" href="#optional-precompute-the-sampling-weights">(Optional) Precompute the sampling weights</a></li>
 <li><a class="reference internal" href="#optional-optimize-the-fermionic-mode-indexing">(Optional) Optimize the fermionic mode indexing</a></li>
 <li><a class="reference internal" href="#next-steps">Next steps</a></li>
 </ul>
@@ -859,7 +833,7 @@ tutorials</a>.</p>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=1e492a6f"></script>
+</div><script src="../_static/documentation_options.js?v=a60857e3"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

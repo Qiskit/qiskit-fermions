@@ -219,8 +219,8 @@ circuits to generate:
 
 * The number of circuits to generate: ``num_sqdrift_randomizations``
 * The length of each circuit in terms of excitation groups: ``num_groups``
-* Optionally, the distribution to sample those groups from: ``weights`` (see
-  :ref:`sqdrift_sampling_weights` below)
+* Optionally, precomputed sampling weights, if the transpilation itself becomes a
+  bottleneck: ``weights`` (see :ref:`sqdrift_sampling_weights` below)
 
 .. tab-set-code::
 
@@ -341,29 +341,26 @@ once the first excitation touched them.
 
 .. _sqdrift_sampling_weights:
 
-(Optional) Choose the sampling distribution
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(Optional) Precompute the sampling weights
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-By default, :class:`.QDriftTrotterization` derives its sampling weights from the
-Hamiltonian on every call: it draws each group with a probability proportional to
-the magnitude of its coefficient, and evolves every sampled group for the shared
-time :math:`\delta = \|w\|_1 t / \texttt{num\_groups}`. Passing the ``weights``
-argument supplies that array yourself instead.
+Reach for this only if the transpilation itself is a bottleneck. It changes
+nothing about the circuits you get.
 
-This is worth doing for two independent reasons. The first is performance.
-Deriving the weights means reducing one value per Hamiltonian *term* down to one
-per group. Because the pass is stateless, it repeats that work for every
-randomization, even though the result is the same every time. Computing the
-weights once with
-:func:`~qiskit_fermions.operators.terms.group_coeff_means` and handing
-the result over moves the cost out of the loop, while leaving the pass free of
-any cached, Hamiltonian-dependent state.
+:class:`.QDriftTrotterization` draws each group with a probability proportional to
+the magnitude of its coefficient, and derives those magnitudes from the
+Hamiltonian on every call: one value per Hamiltonian *term*, reduced down to one
+per group. Because the pass is stateless it repeats that reduction for every
+randomization, even though the result is identical every time. The ``weights``
+argument lets you compute it once with
+:func:`~qiskit_fermions.operators.terms.group_coeff_means` and hand the result
+over, moving the cost out of the loop while leaving the pass free of any cached,
+Hamiltonian-dependent state.
 
-This pairs with the term ordering recommended in step 2: that hoists the group
-*lookup* out of the loop, this hoists the weight *reduction*, and each is only as
-visible as the other is absent. Together they leave little of the per-call work
-behind, which is what makes generating a large ensemble from one Hamiltonian
-cheap:
+This is the counterpart of the term ordering in step 2. That one hoists the group
+*lookup* out of the loop, this one the weight *reduction*, and each is only as
+noticeable as the other is absent, so it is worth applying both together. Since
+``canon`` was already reordered above, the two compose directly:
 
 .. tab-set-code::
 
@@ -371,7 +368,7 @@ cheap:
 
        >>> from qiskit_fermions.operators.terms.grouping import group_coeff_means
        >>>
-       >>> weights = group_coeff_means(canon)
+       >>> weights = group_coeff_means(canon)  # `canon` is group-ordered, from step 2
        >>> qdrift_weighted = QDriftTrotterization(num_groups, rng=19, weights=weights)
        >>>
        >>> pm.optimization = FermionicPassManager([qdrift_weighted])
@@ -387,44 +384,22 @@ cheap:
        // with custom gate definitions, which we therefore also cannot transpile
        // via this API.
 
-Since those are exactly the weights the pass would have computed, the circuits
-are the same as before; only the repeated reduction is gone.
-
-The second reason is that the distribution becomes yours to choose, which is what
-makes a deliberate deviation from the coefficient magnitudes possible at all.
+Since those are exactly the weights the pass would have computed, the circuits are
+the same as before; only the repeated reduction is gone.
 
 One entry is expected per *group*, not per term, whenever the operator carries
-groups, since a grouped operator is sampled group-wise. For the Hamiltonian used
-here that is also the physically meaningful unit: the grouping applied above pairs
-each :math:`a^\dagger_p a_q` with its conjugate :math:`a^\dagger_q a_p`, and only
-that pair is Hermitian, so only its evolution is unitary. Weighting such terms
-separately would describe pieces that cannot be sampled on their own.
-
-.. note::
-   This has no counterpart in the qubit-space treatments of qDRIFT found in most of
-   the literature, where every sampled Pauli string is Hermitian by construction.
-   It is a property of the grouping rather than of ``weights``, though: an operator
-   whose individual terms are already Hermitian needs no grouping to be sampled.
-   See :ref:`grouping_explanation` for the checks that verify a given grouping
-   follows this convention.
+groups, since a grouped operator is sampled group-wise. Entries must be
+non-negative: a weight is a *magnitude*, because the qDRIFT protocol decomposes
+:math:`H = \sum_j h_j H_j` with positive :math:`h_j`, and a coefficient's sign
+belongs to :math:`H_j`, where the pass reads it off the operator directly.
 
 .. caution::
-   The weights are absolute magnitudes, not relative preferences. Their 1-norm
-   also fixes the evolution time, so multiplying every entry by :math:`\gamma`
-   samples identically but evolves for :math:`\gamma t` instead of :math:`t`.
-   Only weights equal to the coefficient magnitudes reproduce
-   :math:`e^{-i t H}`; a distribution of a different *shape* approximates a
-   different operator unless you reweight the measured outcomes accordingly.
-
-.. note::
-   Entries may be negative, which is what makes a *quasi*-probability
-   distribution expressible: the sampling draws from :math:`|w_j| / \|w\|_1` and
-   the sign of :math:`w_j` is folded into the emitted gate's rotation direction.
-   Recovering the target evolution then requires rescaling the measured outcomes
-   by the sampling overhead :math:`\|w\|_1`, carrying that sign -- a
-   post-processing step outside the scope of this transpiler pass, which only
-   emits circuits. See `arXiv:2608.29756 <https://arxiv.org/abs/2608.29756>`_ for
-   a protocol built on such a distribution.
+   The weights are absolute magnitudes, not relative preferences. Their sum also
+   fixes the evolution time, so multiplying every entry by :math:`\gamma` samples
+   identically but evolves for :math:`\gamma t` instead of :math:`t`. Passing
+   anything other than the Hamiltonian's own coefficient magnitudes therefore
+   changes which evolution the ensemble approximates, which is why this is a
+   performance tool rather than a way to tune the sampling.
 
 Because a weights array describes the groups of one particular operator, it is
 validated against each :class:`.Evolution` gate it is applied to, and a circuit

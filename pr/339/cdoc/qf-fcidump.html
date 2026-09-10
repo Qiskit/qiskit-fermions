@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>FCIDump - Qiskit Fermions 0.2.0.dev0+f7ffac2</title>
+        <title>FCIDump - Qiskit Fermions 0.2.0.dev0+fdf61a4</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+f7ffac2</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+fdf61a4</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+f7ffac2</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+fdf61a4</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -331,6 +331,69 @@ based on the intervals in which the indices fall (assuming a header with <code c
 </table>
 </div>
 <p>The only required values are the 1-body alpha-spin integrals.</p>
+<p>The two-body integrals are expected in <cite>chemist</cite> ordering, <span class="math">\((ij|kl)\)</span>, matching the FCIDump
+convention.</p>
+<hr class="docutils" />
+</section>
+<section id="data-layout">
+<span id="qf-fcidump-implementation"></span><h2>Data layout<a class="headerlink" href="#data-layout" title="Link to this heading">¶</a></h2>
+<p>The integrals are stored as flattened arrays exploiting their permutational symmetry, which is also
+the layout the electronic integral constructors (<a class="reference internal" href="qf-electronic-integrals.html"><span class="doc">Electronic Integrals</span></a>) expect. Writing
+<span class="math">\(n\)</span> for the number of orbitals (<a class="reference internal" href="#c.qf_fcidump_norb" title="qf_fcidump_norb"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_fcidump_norb()</span></code></a>) and
+<span class="math">\(\text{npair} = n (n + 1) / 2\)</span>, a single data structure contains up to 5 arrays:</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Array</p></th>
+<th class="head"><p>Length</p></th>
+<th class="head"><p>Contents</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">one_body_a</span></code></p></td>
+<td><p><span class="math">\(\text{npair}\)</span></p></td>
+<td><p>The <span class="math">\(\alpha\)</span>-spin 1-body integrals.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">one_body_b</span></code></p></td>
+<td><p><span class="math">\(\text{npair}\)</span></p></td>
+<td><p>The <span class="math">\(\beta\)</span>-spin 1-body integrals.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">two_body_aa</span></code></p></td>
+<td><p><span class="math">\(\text{npair} (\text{npair} + 1) / 2\)</span></p></td>
+<td><p>The <span class="math">\(\alpha\alpha\)</span> 2-body integrals.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">two_body_ab</span></code></p></td>
+<td><p><span class="math">\(\text{npair}^2\)</span></p></td>
+<td><p>The <span class="math">\(\alpha\beta\)</span> 2-body integrals.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">two_body_bb</span></code></p></td>
+<td><p><span class="math">\(\text{npair} (\text{npair} + 1) / 2\)</span></p></td>
+<td><p>The <span class="math">\(\beta\beta\)</span> 2-body integrals.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The 1-body arrays are the flattened lower triangle of an <span class="math">\((n, n)\)</span> matrix, indexed as
+<code class="docutils literal notranslate"><span class="pre">ia</span> <span class="pre">=</span> <span class="pre">i</span> <span class="pre">*</span> <span class="pre">(i</span> <span class="pre">+</span> <span class="pre">1)</span> <span class="pre">/</span> <span class="pre">2</span> <span class="pre">+</span> <span class="pre">a</span></code> with <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">&lt;=</span> <span class="pre">i</span></code>. The <code class="docutils literal notranslate"><span class="pre">two_body_aa</span></code> and <code class="docutils literal notranslate"><span class="pre">two_body_bb</span></code> arrays are
+8-fold (S8) symmetric: the flattened lower triangle of a
+<span class="math">\((\text{npair}, \text{npair})\)</span> matrix, whose own two axes are each such a pair index.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p><code class="docutils literal notranslate"><span class="pre">two_body_ab</span></code> is packed <em>differently</em> from its siblings. It is only 4-fold (S4) symmetric, so it
+holds the <strong>full</strong> <span class="math">\((\text{npair}, \text{npair})\)</span> matrix in row-major order, indexed as
+<code class="docutils literal notranslate"><span class="pre">iajb</span> <span class="pre">=</span> <span class="pre">ia</span> <span class="pre">*</span> <span class="pre">npair</span> <span class="pre">+</span> <span class="pre">jb</span></code>. Its row pair indexes the <span class="math">\(\alpha\)</span>-spin species and its column
+pair the <span class="math">\(\beta\)</span>-spin species, so it is <em>not</em> symmetric under exchanging the two pairs.</p>
+</div>
+<p>The <span class="math">\(\beta\)</span>-spin 1-body and the <span class="math">\(\alpha\beta\)</span> / <span class="math">\(\beta\beta\)</span> 2-body arrays are only
+present for a file carrying unrestricted spin data. They are absent together, so
+<a class="reference internal" href="#c.qf_fcidump_is_unrestricted" title="qf_fcidump_is_unrestricted"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_fcidump_is_unrestricted()</span></code></a> reports on all three at once and gates the getters that read
+them.</p>
+<p>The stored values are the integrals as they appear in the file. In particular, they do <strong>not</strong> carry
+the conventional factor of <span class="math">\(\frac{1}{2}\)</span> that the 2-body operator terms do, so a coefficient of
+an operator built via <a class="reference internal" href="#c.qf_ferm_op_from_fcidump" title="qf_ferm_op_from_fcidump"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_ferm_op_from_fcidump()</span></code></a> is half the corresponding value returned here.</p>
+<p>Building a dense <span class="math">\((n, n)\)</span> or <span class="math">\((n, n, n, n)\)</span> tensor from these arrays (as required by, for
+example, sample-based diagonalization tooling) is the caller’s task; the index formulae above are what
+that expansion needs.</p>
 <hr class="docutils" />
 <aside class="footnote-list brackets">
 <aside class="footnote brackets" id="id2" role="doc-footnote">
@@ -381,8 +444,9 @@ based on the intervals in which the indices fall (assuming a header with <code c
 <dd><p>Frees an existing FCIDump data structure. </p>
 <p><p><section id="id3">
 <h3>Example<a class="headerlink" href="#id3" title="Link to this heading">¶</a></h3>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="n">QfFCIDump</span><span class="w"> </span><span class="o">*</span><span class="n">fcidump</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_fcidump_from_file</span><span class="p">(</span><span class="s">"molecule.fcidump"</span><span class="p">);</span>
-<span class="linenos">2</span><span class="n">qf_fcidump_free</span><span class="p">(</span><span class="n">fcidump</span><span class="p">);</span>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="n">QfFCIDump</span><span class="w"> </span><span class="o">*</span><span class="n">fcidump</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span>
+<span class="linenos">2</span><span class="n">qf_fcidump_from_file</span><span class="p">(</span><span class="s">"molecule.fcidump"</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">fcidump</span><span class="p">);</span>
+<span class="linenos">3</span><span class="n">qf_fcidump_free</span><span class="p">(</span><span class="n">fcidump</span><span class="p">);</span>
 </pre></div>
 </div>
 </section>
@@ -405,8 +469,9 @@ based on the intervals in which the indices fall (assuming a header with <code c
 file.</p>
 <section id="id4">
 <h3>Example<a class="headerlink" href="#id4" title="Link to this heading">¶</a></h3>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="n">QfFCIDump</span><span class="w"> </span><span class="o">*</span><span class="n">fcidump</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_fcidump_from_file</span><span class="p">(</span><span class="s">"molecule.fcidump"</span><span class="p">);</span>
-<span class="linenos">2</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">norb</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_fcidump_norb</span><span class="p">(</span><span class="n">fcidump</span><span class="p">);</span>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="n">QfFCIDump</span><span class="w"> </span><span class="o">*</span><span class="n">fcidump</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span>
+<span class="linenos">2</span><span class="n">qf_fcidump_from_file</span><span class="p">(</span><span class="s">"molecule.fcidump"</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">fcidump</span><span class="p">);</span>
+<span class="linenos">3</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">norb</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_fcidump_norb</span><span class="p">(</span><span class="n">fcidump</span><span class="p">);</span>
 </pre></div>
 </div>
 </section>
@@ -415,7 +480,7 @@ file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>fcidump</strong> – A pointer to the FCIDump data structure to be freed.</p></li>
+<li><p><strong>fcidump</strong> – A pointer to the FCIDump data structure to query.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -432,8 +497,9 @@ file.</p>
 file.</p>
 <section id="id5">
 <h3>Example<a class="headerlink" href="#id5" title="Link to this heading">¶</a></h3>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="n">QfFCIDump</span><span class="w"> </span><span class="o">*</span><span class="n">fcidump</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_fcidump_from_file</span><span class="p">(</span><span class="s">"molecule.fcidump"</span><span class="p">);</span>
-<span class="linenos">2</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">nelec</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_fcidump_nelec</span><span class="p">(</span><span class="n">fcidump</span><span class="p">);</span>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="n">QfFCIDump</span><span class="w"> </span><span class="o">*</span><span class="n">fcidump</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span>
+<span class="linenos">2</span><span class="n">qf_fcidump_from_file</span><span class="p">(</span><span class="s">"molecule.fcidump"</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">fcidump</span><span class="p">);</span>
+<span class="linenos">3</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">nelec</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_fcidump_nelec</span><span class="p">(</span><span class="n">fcidump</span><span class="p">);</span>
 </pre></div>
 </div>
 </section>
@@ -442,7 +508,7 @@ file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>fcidump</strong> – A pointer to the FCIDump data structure to be freed.</p></li>
+<li><p><strong>fcidump</strong> – A pointer to the FCIDump data structure to query.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -459,8 +525,9 @@ file.</p>
 file.</p>
 <section id="id6">
 <h3>Example<a class="headerlink" href="#id6" title="Link to this heading">¶</a></h3>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="n">QfFCIDump</span><span class="w"> </span><span class="o">*</span><span class="n">fcidump</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_fcidump_from_file</span><span class="p">(</span><span class="s">"molecule.fcidump"</span><span class="p">);</span>
-<span class="linenos">2</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">ms2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_fcidump_ms2</span><span class="p">(</span><span class="n">fcidump</span><span class="p">);</span>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="n">QfFCIDump</span><span class="w"> </span><span class="o">*</span><span class="n">fcidump</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span>
+<span class="linenos">2</span><span class="n">qf_fcidump_from_file</span><span class="p">(</span><span class="s">"molecule.fcidump"</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">fcidump</span><span class="p">);</span>
+<span class="linenos">3</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">ms2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_fcidump_ms2</span><span class="p">(</span><span class="n">fcidump</span><span class="p">);</span>
 </pre></div>
 </div>
 </section>
@@ -469,11 +536,327 @@ file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>fcidump</strong> – A pointer to the FCIDump data structure to be freed.</p></li>
+<li><p><strong>fcidump</strong> – A pointer to the FCIDump data structure to query.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>The spin quantum number (multiplied by 2 to ensure an integer value).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.qf_fcidump_is_unrestricted">
+<span class="target" id="group__qf__fcidump_1gac60366eb7c34dadeb51eea92fe37394b"></span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">qf_fcidump_is_unrestricted</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.QfFCIDump" title="QfFCIDump"><span class="n"><span class="pre">QfFCIDump</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">fcidump</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.qf_fcidump_is_unrestricted" title="Link to this definition">¶</a><br /></dt>
+<dd><p>Checks whether an FCIDump carries unrestricted (spin-dependent) integrals. </p>
+<p><p><p>The beta-spin 1-body and the alpha-beta / beta-beta 2-body arrays are present exactly when this
+returns <code class="docutils literal notranslate"><span class="pre">true</span></code>; they are absent together. Use it to guard
+<a class="reference internal" href="#c.qf_fcidump_get_one_body_tril_b" title="qf_fcidump_get_one_body_tril_b"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_fcidump_get_one_body_tril_b()</span></code></a>, <a class="reference internal" href="#c.qf_fcidump_get_two_body_tril_ab" title="qf_fcidump_get_two_body_tril_ab"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_fcidump_get_two_body_tril_ab()</span></code></a> and
+<a class="reference internal" href="#c.qf_fcidump_get_two_body_tril_bb" title="qf_fcidump_get_two_body_tril_bb"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_fcidump_get_two_body_tril_bb()</span></code></a>.</p>
+<section id="id7">
+<h3>Example<a class="headerlink" href="#id7" title="Link to this heading">¶</a></h3>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="n">QfFCIDump</span><span class="w"> </span><span class="o">*</span><span class="n">fcidump</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span>
+<span class="linenos">2</span><span class="n">qf_fcidump_from_file</span><span class="p">(</span><span class="s">"molecule.fcidump"</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">fcidump</span><span class="p">);</span>
+<span class="linenos">3</span>
+<span class="linenos">4</span><span class="kt">bool</span><span class="w"> </span><span class="n">unrestricted</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_fcidump_is_unrestricted</span><span class="p">(</span><span class="n">fcidump</span><span class="p">);</span>
+</pre></div>
+</div>
+</section>
+</p>
+ </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fcidump</strong> – A pointer to the FCIDump data structure to query.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">true</span></code> if the beta-spin integrals are present.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.qf_fcidump_has_constant">
+<span class="target" id="group__qf__fcidump_1ga1b51399cf4b7a857a1d5f95d20cdeeaf"></span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">qf_fcidump_has_constant</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.QfFCIDump" title="QfFCIDump"><span class="n"><span class="pre">QfFCIDump</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">fcidump</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.qf_fcidump_has_constant" title="Link to this definition">¶</a><br /></dt>
+<dd><p>Checks whether an FCIDump provides a constant energy offset. </p>
+<p><p><p>Use this to guard <a class="reference internal" href="#c.qf_fcidump_constant" title="qf_fcidump_constant"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_fcidump_constant()</span></code></a>. This is independent of
+<a class="reference internal" href="#c.qf_fcidump_is_unrestricted" title="qf_fcidump_is_unrestricted"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_fcidump_is_unrestricted()</span></code></a>: a spin-restricted file may well carry a constant.</p>
+<section id="id8">
+<h3>Example<a class="headerlink" href="#id8" title="Link to this heading">¶</a></h3>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="n">QfFCIDump</span><span class="w"> </span><span class="o">*</span><span class="n">fcidump</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span>
+<span class="linenos">2</span><span class="n">qf_fcidump_from_file</span><span class="p">(</span><span class="s">"molecule.fcidump"</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">fcidump</span><span class="p">);</span>
+<span class="linenos">3</span>
+<span class="linenos">4</span><span class="kt">bool</span><span class="w"> </span><span class="n">has_constant</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_fcidump_has_constant</span><span class="p">(</span><span class="n">fcidump</span><span class="p">);</span>
+</pre></div>
+</div>
+</section>
+</p>
+ </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fcidump</strong> – A pointer to the FCIDump data structure to query.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">true</span></code> if the file carried an integral line whose four indices are all zero.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.qf_fcidump_constant">
+<span class="target" id="group__qf__fcidump_1ga47c1b519e455f11fa995e71f0558672e"></span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">qf_fcidump_constant</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.QfFCIDump" title="QfFCIDump"><span class="n"><span class="pre">QfFCIDump</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">fcidump</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.qf_fcidump_constant" title="Link to this definition">¶</a><br /></dt>
+<dd><p>Gets the constant energy offset from an FCIDump. </p>
+<p><p><p>This is the value of the integral line whose four indices are all zero, which for an electronic
+structure Hamiltonian is the nuclear-repulsion energy.</p>
+<section id="id9">
+<h3>Example<a class="headerlink" href="#id9" title="Link to this heading">¶</a></h3>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="n">QfFCIDump</span><span class="w"> </span><span class="o">*</span><span class="n">fcidump</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span>
+<span class="linenos">2</span><span class="n">qf_fcidump_from_file</span><span class="p">(</span><span class="s">"molecule.fcidump"</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">fcidump</span><span class="p">);</span>
+<span class="linenos">3</span>
+<span class="linenos">4</span><span class="kt">double</span><span class="w"> </span><span class="n">constant</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span>
+<span class="linenos">5</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">qf_fcidump_has_constant</span><span class="p">(</span><span class="n">fcidump</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="linenos">6</span><span class="w">    </span><span class="n">constant</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_fcidump_constant</span><span class="p">(</span><span class="n">fcidump</span><span class="p">);</span>
+<span class="linenos">7</span><span class="p">}</span>
+</pre></div>
+</div>
+</section>
+</p>
+ </p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Only call this when <a class="reference internal" href="#c.qf_fcidump_has_constant" title="qf_fcidump_has_constant"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_fcidump_has_constant()</span></code></a> returns <code class="docutils literal notranslate"><span class="pre">true</span></code>; calling it otherwise
+panics.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fcidump</strong> – A pointer to the FCIDump data structure to query.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The constant energy offset.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.qf_fcidump_get_one_body_tril_a">
+<span class="target" id="group__qf__fcidump_1gabbf3bbc45f47580b73f187835b84a41b"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">qf_fcidump_get_one_body_tril_a</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.QfFCIDump" title="QfFCIDump"><span class="n"><span class="pre">QfFCIDump</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">fcidump</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">out</span></span>, <span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">out_len</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.qf_fcidump_get_one_body_tril_a" title="Link to this definition">¶</a><br /></dt>
+<dd><p>Provides read-only access to the alpha-spin 1-body integrals. </p>
+<p><p><div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p>The explanation of the internal data layout, <a class="reference internal" href="#qf-fcidump-implementation"><span class="std std-ref">here</span></a>.</p>
+</div>
+<section id="id10">
+<h3>Example<a class="headerlink" href="#id10" title="Link to this heading">¶</a></h3>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="n">QfFCIDump</span><span class="w"> </span><span class="o">*</span><span class="n">fcidump</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span>
+<span class="linenos">2</span><span class="n">qf_fcidump_from_file</span><span class="p">(</span><span class="s">"molecule.fcidump"</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">fcidump</span><span class="p">);</span>
+<span class="linenos">3</span>
+<span class="linenos">4</span><span class="kt">double</span><span class="w"> </span><span class="o">*</span><span class="n">integrals</span><span class="p">;</span>
+<span class="linenos">5</span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">len</span><span class="p">;</span>
+<span class="linenos">6</span><span class="n">qf_fcidump_get_one_body_tril_a</span><span class="p">(</span><span class="n">fcidump</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">integrals</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">len</span><span class="p">);</span>
+</pre></div>
+</div>
+</section>
+</p>
+ </p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This function borrows the FCIDump’s internal buffer rather than copying it. The returned
+pointer stays valid only until the data structure is freed; do not free it yourself.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fcidump</strong> – A pointer to the FCIDump data structure whose integrals to access. </p></li>
+<li><p><strong>out</strong> – A pointer to the array of doubles into which to write the integrals. </p></li>
+<li><p><strong>out_len</strong> – A pointer to the integer into which to write the length of the output array.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.qf_fcidump_get_one_body_tril_b">
+<span class="target" id="group__qf__fcidump_1ga87dceec95211969391ce4e3f2a0b9c31"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">qf_fcidump_get_one_body_tril_b</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.QfFCIDump" title="QfFCIDump"><span class="n"><span class="pre">QfFCIDump</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">fcidump</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">out</span></span>, <span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">out_len</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.qf_fcidump_get_one_body_tril_b" title="Link to this definition">¶</a><br /></dt>
+<dd><p>Provides read-only access to the beta-spin 1-body integrals. </p>
+<p><div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p>The explanation of the internal data layout, <a class="reference internal" href="#qf-fcidump-implementation"><span class="std std-ref">here</span></a>.</p>
+</div>
+<section id="id11">
+<h3>Example<a class="headerlink" href="#id11" title="Link to this heading">¶</a></h3>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="n">QfFCIDump</span><span class="w"> </span><span class="o">*</span><span class="n">fcidump</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span>
+<span class="linenos">2</span><span class="n">qf_fcidump_from_file</span><span class="p">(</span><span class="s">"molecule.fcidump"</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">fcidump</span><span class="p">);</span>
+<span class="linenos">3</span>
+<span class="linenos">4</span><span class="kt">double</span><span class="w"> </span><span class="o">*</span><span class="n">integrals</span><span class="p">;</span>
+<span class="linenos">5</span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">len</span><span class="p">;</span>
+<span class="linenos">6</span><span class="n">qf_fcidump_get_one_body_tril_b</span><span class="p">(</span><span class="n">fcidump</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">integrals</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">len</span><span class="p">);</span>
+</pre></div>
+</div>
+</section>
+</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Only call this on a data structure carrying unrestricted spin data. Check
+<a class="reference internal" href="#c.qf_fcidump_is_unrestricted" title="qf_fcidump_is_unrestricted"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_fcidump_is_unrestricted()</span></code></a> first; calling it otherwise panics.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This function borrows the FCIDump’s internal buffer rather than copying it. The returned
+pointer stays valid only until the data structure is freed; do not free it yourself.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fcidump</strong> – A pointer to the FCIDump data structure whose integrals to access. </p></li>
+<li><p><strong>out</strong> – A pointer to the array of doubles into which to write the integrals. </p></li>
+<li><p><strong>out_len</strong> – A pointer to the integer into which to write the length of the output array.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.qf_fcidump_get_two_body_tril_aa">
+<span class="target" id="group__qf__fcidump_1gafb878b06601fcd8a83a6a01a3c462b56"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">qf_fcidump_get_two_body_tril_aa</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.QfFCIDump" title="QfFCIDump"><span class="n"><span class="pre">QfFCIDump</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">fcidump</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">out</span></span>, <span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">out_len</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.qf_fcidump_get_two_body_tril_aa" title="Link to this definition">¶</a><br /></dt>
+<dd><p>Provides read-only access to the alpha-alpha-spin 2-body integrals. </p>
+<p><p><div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p>The explanation of the internal data layout, <a class="reference internal" href="#qf-fcidump-implementation"><span class="std std-ref">here</span></a>.</p>
+</div>
+<section id="id12">
+<h3>Example<a class="headerlink" href="#id12" title="Link to this heading">¶</a></h3>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="n">QfFCIDump</span><span class="w"> </span><span class="o">*</span><span class="n">fcidump</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span>
+<span class="linenos">2</span><span class="n">qf_fcidump_from_file</span><span class="p">(</span><span class="s">"molecule.fcidump"</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">fcidump</span><span class="p">);</span>
+<span class="linenos">3</span>
+<span class="linenos">4</span><span class="kt">double</span><span class="w"> </span><span class="o">*</span><span class="n">integrals</span><span class="p">;</span>
+<span class="linenos">5</span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">len</span><span class="p">;</span>
+<span class="linenos">6</span><span class="n">qf_fcidump_get_two_body_tril_aa</span><span class="p">(</span><span class="n">fcidump</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">integrals</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">len</span><span class="p">);</span>
+</pre></div>
+</div>
+</section>
+</p>
+ </p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This function borrows the FCIDump’s internal buffer rather than copying it. The returned
+pointer stays valid only until the data structure is freed; do not free it yourself.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The values are in <cite>chemist</cite> ordering, <span class="math">\((ij|kl)\)</span>, and carry no factor of
+<span class="math">\(\frac{1}{2}\)</span>.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fcidump</strong> – A pointer to the FCIDump data structure whose integrals to access. </p></li>
+<li><p><strong>out</strong> – A pointer to the array of doubles into which to write the integrals. </p></li>
+<li><p><strong>out_len</strong> – A pointer to the integer into which to write the length of the output array.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.qf_fcidump_get_two_body_tril_ab">
+<span class="target" id="group__qf__fcidump_1gaafa9d79d4ef67720074716b95c9e45cd"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">qf_fcidump_get_two_body_tril_ab</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.QfFCIDump" title="QfFCIDump"><span class="n"><span class="pre">QfFCIDump</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">fcidump</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">out</span></span>, <span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">out_len</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.qf_fcidump_get_two_body_tril_ab" title="Link to this definition">¶</a><br /></dt>
+<dd><p>Provides read-only access to the alpha-beta-spin 2-body integrals. </p>
+<p><div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p>The explanation of the internal data layout, <a class="reference internal" href="#qf-fcidump-implementation"><span class="std std-ref">here</span></a>.</p>
+</div>
+<section id="id13">
+<h3>Example<a class="headerlink" href="#id13" title="Link to this heading">¶</a></h3>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="n">QfFCIDump</span><span class="w"> </span><span class="o">*</span><span class="n">fcidump</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span>
+<span class="linenos">2</span><span class="n">qf_fcidump_from_file</span><span class="p">(</span><span class="s">"molecule.fcidump"</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">fcidump</span><span class="p">);</span>
+<span class="linenos">3</span>
+<span class="linenos">4</span><span class="kt">double</span><span class="w"> </span><span class="o">*</span><span class="n">integrals</span><span class="p">;</span>
+<span class="linenos">5</span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">len</span><span class="p">;</span>
+<span class="linenos">6</span><span class="n">qf_fcidump_get_two_body_tril_ab</span><span class="p">(</span><span class="n">fcidump</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">integrals</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">len</span><span class="p">);</span>
+</pre></div>
+</div>
+</section>
+</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Only call this on a data structure carrying unrestricted spin data. Check
+<a class="reference internal" href="#c.qf_fcidump_is_unrestricted" title="qf_fcidump_is_unrestricted"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_fcidump_is_unrestricted()</span></code></a> first; calling it otherwise panics.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This function borrows the FCIDump’s internal buffer rather than copying it. The returned
+pointer stays valid only until the data structure is freed; do not free it yourself.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The values are in <cite>chemist</cite> ordering, <span class="math">\((ij|kl)\)</span>, and carry no factor of
+<span class="math">\(\frac{1}{2}\)</span>.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Unlike the other 2-body arrays, this one is only 4-fold (S4) symmetric: it holds the
+<strong>full</strong> <code class="docutils literal notranslate"><span class="pre">(npair,</span> <span class="pre">npair)</span></code> matrix, whose row pair indexes the alpha-spin and whose
+column pair indexes the beta-spin species. It is therefore <em>not</em> symmetric under
+exchanging the two pairs.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fcidump</strong> – A pointer to the FCIDump data structure whose integrals to access. </p></li>
+<li><p><strong>out</strong> – A pointer to the array of doubles into which to write the integrals. </p></li>
+<li><p><strong>out_len</strong> – A pointer to the integer into which to write the length of the output array.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.qf_fcidump_get_two_body_tril_bb">
+<span class="target" id="group__qf__fcidump_1ga798df299d019162634bf7c1863fd1cee"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">qf_fcidump_get_two_body_tril_bb</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.QfFCIDump" title="QfFCIDump"><span class="n"><span class="pre">QfFCIDump</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">fcidump</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">out</span></span>, <span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">out_len</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.qf_fcidump_get_two_body_tril_bb" title="Link to this definition">¶</a><br /></dt>
+<dd><p>Provides read-only access to the beta-beta-spin 2-body integrals. </p>
+<p><div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p>The explanation of the internal data layout, <a class="reference internal" href="#qf-fcidump-implementation"><span class="std std-ref">here</span></a>.</p>
+</div>
+<section id="id14">
+<h3>Example<a class="headerlink" href="#id14" title="Link to this heading">¶</a></h3>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="n">QfFCIDump</span><span class="w"> </span><span class="o">*</span><span class="n">fcidump</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span>
+<span class="linenos">2</span><span class="n">qf_fcidump_from_file</span><span class="p">(</span><span class="s">"molecule.fcidump"</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">fcidump</span><span class="p">);</span>
+<span class="linenos">3</span>
+<span class="linenos">4</span><span class="kt">double</span><span class="w"> </span><span class="o">*</span><span class="n">integrals</span><span class="p">;</span>
+<span class="linenos">5</span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">len</span><span class="p">;</span>
+<span class="linenos">6</span><span class="n">qf_fcidump_get_two_body_tril_bb</span><span class="p">(</span><span class="n">fcidump</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">integrals</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">len</span><span class="p">);</span>
+</pre></div>
+</div>
+</section>
+</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Only call this on a data structure carrying unrestricted spin data. Check
+<a class="reference internal" href="#c.qf_fcidump_is_unrestricted" title="qf_fcidump_is_unrestricted"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_fcidump_is_unrestricted()</span></code></a> first; calling it otherwise panics.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This function borrows the FCIDump’s internal buffer rather than copying it. The returned
+pointer stays valid only until the data structure is freed; do not free it yourself.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The values are in <cite>chemist</cite> ordering, <span class="math">\((ij|kl)\)</span>, and carry no factor of
+<span class="math">\(\frac{1}{2}\)</span>.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fcidump</strong> – A pointer to the FCIDump data structure whose integrals to access. </p></li>
+<li><p><strong>out</strong> – A pointer to the array of doubles into which to write the integrals. </p></li>
+<li><p><strong>out_len</strong> – A pointer to the integer into which to write the length of the output array.</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
@@ -488,10 +871,11 @@ file.</p>
 <dt class="sig sig-object c" id="c.qf_ferm_op_from_fcidump">
 <span class="target" id="group__qf__fcidump__constructors_1gae5f7080c6c6e1b892ffe15a6cfb50179"></span><a class="reference internal" href="qf-ferm-op.html#c.QfFermionOperator" title="QfFermionOperator"><span class="n"><span class="pre">QfFermionOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">qf_ferm_op_from_fcidump</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.QfFCIDump" title="QfFCIDump"><span class="n"><span class="pre">QfFCIDump</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">fcidump</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.qf_ferm_op_from_fcidump" title="Link to this definition">¶</a><br /></dt>
 <dd><p>Constructs an :c:struct:<code class="docutils literal notranslate"><span class="pre">QfFermionOperator</span></code> from a :c:struct:<code class="docutils literal notranslate"><span class="pre">QfFCIDump</span></code>. </p>
-<p><p><section id="id7">
-<h3>Example<a class="headerlink" href="#id7" title="Link to this heading">¶</a></h3>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="n">QfFCIDump</span><span class="w"> </span><span class="o">*</span><span class="n">fcidump</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_fcidump_from_file</span><span class="p">(</span><span class="s">"molecule.fcidump"</span><span class="p">);</span>
-<span class="linenos">2</span><span class="n">QfFermionOperator</span><span class="w"> </span><span class="o">*</span><span class="n">op</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_ferm_op_from_fcidump</span><span class="p">(</span><span class="n">fcidump</span><span class="p">);</span>
+<p><p><section id="id15">
+<h3>Example<a class="headerlink" href="#id15" title="Link to this heading">¶</a></h3>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="n">QfFCIDump</span><span class="w"> </span><span class="o">*</span><span class="n">fcidump</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span>
+<span class="linenos">2</span><span class="n">qf_fcidump_from_file</span><span class="p">(</span><span class="s">"molecule.fcidump"</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">fcidump</span><span class="p">);</span>
+<span class="linenos">3</span><span class="n">QfFermionOperator</span><span class="w"> </span><span class="o">*</span><span class="n">op</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_ferm_op_from_fcidump</span><span class="p">(</span><span class="n">fcidump</span><span class="p">);</span>
 </pre></div>
 </div>
 </section>
@@ -529,7 +913,7 @@ file.</p>
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on 2026/09/09</div>
+              Last updated on 2026/09/10</div>
           </div>
           <div class="right-details">
             
@@ -553,12 +937,21 @@ file.</p>
 <li><a class="reference internal" href="#">FCIDump</a><ul>
 <li><a class="reference internal" href="#c.QfFCIDump"><code class="docutils literal notranslate"><span class="pre">QfFCIDump</span></code></a></li>
 <li><a class="reference internal" href="#definition">Definition</a></li>
+<li><a class="reference internal" href="#data-layout">Data layout</a></li>
 <li><a class="reference internal" href="#members">Members</a><ul>
 <li><a class="reference internal" href="#c.qf_fcidump_from_file"><code class="docutils literal notranslate"><span class="pre">qf_fcidump_from_file()</span></code></a></li>
 <li><a class="reference internal" href="#c.qf_fcidump_free"><code class="docutils literal notranslate"><span class="pre">qf_fcidump_free()</span></code></a></li>
 <li><a class="reference internal" href="#c.qf_fcidump_norb"><code class="docutils literal notranslate"><span class="pre">qf_fcidump_norb()</span></code></a></li>
 <li><a class="reference internal" href="#c.qf_fcidump_nelec"><code class="docutils literal notranslate"><span class="pre">qf_fcidump_nelec()</span></code></a></li>
 <li><a class="reference internal" href="#c.qf_fcidump_ms2"><code class="docutils literal notranslate"><span class="pre">qf_fcidump_ms2()</span></code></a></li>
+<li><a class="reference internal" href="#c.qf_fcidump_is_unrestricted"><code class="docutils literal notranslate"><span class="pre">qf_fcidump_is_unrestricted()</span></code></a></li>
+<li><a class="reference internal" href="#c.qf_fcidump_has_constant"><code class="docutils literal notranslate"><span class="pre">qf_fcidump_has_constant()</span></code></a></li>
+<li><a class="reference internal" href="#c.qf_fcidump_constant"><code class="docutils literal notranslate"><span class="pre">qf_fcidump_constant()</span></code></a></li>
+<li><a class="reference internal" href="#c.qf_fcidump_get_one_body_tril_a"><code class="docutils literal notranslate"><span class="pre">qf_fcidump_get_one_body_tril_a()</span></code></a></li>
+<li><a class="reference internal" href="#c.qf_fcidump_get_one_body_tril_b"><code class="docutils literal notranslate"><span class="pre">qf_fcidump_get_one_body_tril_b()</span></code></a></li>
+<li><a class="reference internal" href="#c.qf_fcidump_get_two_body_tril_aa"><code class="docutils literal notranslate"><span class="pre">qf_fcidump_get_two_body_tril_aa()</span></code></a></li>
+<li><a class="reference internal" href="#c.qf_fcidump_get_two_body_tril_ab"><code class="docutils literal notranslate"><span class="pre">qf_fcidump_get_two_body_tril_ab()</span></code></a></li>
+<li><a class="reference internal" href="#c.qf_fcidump_get_two_body_tril_bb"><code class="docutils literal notranslate"><span class="pre">qf_fcidump_get_two_body_tril_bb()</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#conversion">Conversion</a><ul>
@@ -576,7 +969,7 @@ file.</p>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=1e492a6f"></script>
+</div><script src="../_static/documentation_options.js?v=a60857e3"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

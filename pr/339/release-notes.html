@@ -8,7 +8,7 @@
         <link rel="prefetch" href="_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Release Notes - Qiskit Fermions 0.2.0.dev0+f7ffac2</title>
+        <title>Release Notes - Qiskit Fermions 0.2.0.dev0+fdf61a4</title>
       <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+f7ffac2</div></a>
+      <a href="index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+fdf61a4</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+f7ffac2</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+fdf61a4</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="search.html" role="search">
@@ -269,6 +269,55 @@
 <section id="new-features">
 <span id="release-notes-upcoming-release-339-merge-new-features"></span><h3>New Features<a class="headerlink" href="#new-features" title="Link to this heading">¶</a></h3>
 <ul>
+<li><p>Added <a class="reference internal" href="cdoc/qf-ferm-op.html#c.qf_ferm_op_conserves_sector" title="qf_ferm_op_conserves_sector"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_ferm_op_conserves_sector()</span></code></a>, which checks that every term of a
+<a class="reference internal" href="cdoc/qf-ferm-op.html#c.QfFermionOperator" title="QfFermionOperator"><code class="xref c c-struct docutils literal notranslate"><span class="pre">QfFermionOperator</span></code></a> conserves the particle number <em>within each block</em> of modes. It
+complements the existing <a class="reference internal" href="cdoc/qf-ferm-op.html#c.qf_ferm_op_conserves_particle_number" title="qf_ferm_op_conserves_particle_number"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_ferm_op_conserves_particle_number()</span></code></a>, which only checks the
+total. For a spin-orbital layout of <code class="docutils literal notranslate"><span class="pre">norb</span></code> spatial orbitals, passing the two blocks
+<code class="docutils literal notranslate"><span class="pre">{norb,</span> <span class="pre">norb}</span></code> requires the alpha and beta sectors to be conserved separately, i.e. strict
+conservation of both the particle number and the z-component of the spin:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">spin_blocks</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="n">norb</span><span class="p">,</span><span class="w"> </span><span class="n">norb</span><span class="p">};</span>
+<span class="kt">bool</span><span class="w"> </span><span class="n">conserves</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_ferm_op_conserves_sector</span><span class="p">(</span><span class="n">op</span><span class="p">,</span><span class="w"> </span><span class="n">spin_blocks</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>Passing <code class="docutils literal notranslate"><span class="pre">NULL</span></code> with a block count of <code class="docutils literal notranslate"><span class="pre">0</span></code> treats all modes as a single block, which is
+equivalent to calling <a class="reference internal" href="cdoc/qf-ferm-op.html#c.qf_ferm_op_conserves_particle_number" title="qf_ferm_op_conserves_particle_number"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_ferm_op_conserves_particle_number()</span></code></a>.</p>
+</li>
+</ul>
+<ul>
+<li><p>Added the operator support to the C API, which was previously available only from Python via
+<code class="docutils literal notranslate"><span class="pre">get_support</span></code>. Each of the four operator representations gained a pair of functions:
+<a class="reference internal" href="cdoc/qf-ferm-op.html#c.qf_ferm_op_num_support" title="qf_ferm_op_num_support"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_ferm_op_num_support()</span></code></a> and <a class="reference internal" href="cdoc/qf-ferm-op.html#c.qf_ferm_op_get_support" title="qf_ferm_op_get_support"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_ferm_op_get_support()</span></code></a>, plus the <code class="docutils literal notranslate"><span class="pre">qf_maj_op</span></code>,
+<code class="docutils literal notranslate"><span class="pre">qf_edge_op</span></code> and <code class="docutils literal notranslate"><span class="pre">qf_transfer_op</span></code> equivalents.</p>
+<p>Unlike the other getters, these do not hand out a pointer into the operator, because the
+support is computed on demand rather than stored. Call the <code class="docutils literal notranslate"><span class="pre">num_support</span></code> function first to
+size the output buffer, then pass that buffer to <code class="docutils literal notranslate"><span class="pre">get_support</span></code>:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">num_support</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_ferm_op_num_support</span><span class="p">(</span><span class="n">op</span><span class="p">);</span>
+<span class="kt">uint32_t</span><span class="w"> </span><span class="o">*</span><span class="n">support</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">malloc</span><span class="p">(</span><span class="n">num_support</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="kt">uint32_t</span><span class="p">));</span>
+<span class="n">qf_ferm_op_get_support</span><span class="p">(</span><span class="n">op</span><span class="p">,</span><span class="w"> </span><span class="n">support</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>The C functions write the mode indices in ascending order, whereas the Python method returns an
+unordered <code class="docutils literal notranslate"><span class="pre">set</span></code>.</p>
+</li>
+</ul>
+<ul>
+<li><p>Added in-place operator arithmetic to the C API, which avoids allocating a result operator when
+the left operand can be overwritten. Each of the four operator representations gained
+<code class="docutils literal notranslate"><span class="pre">add_inplace</span></code>, <code class="docutils literal notranslate"><span class="pre">scaled_add_inplace</span></code> and <code class="docutils literal notranslate"><span class="pre">mul_inplace</span></code>, for example
+<a class="reference internal" href="cdoc/qf-ferm-op.html#c.qf_ferm_op_add_inplace" title="qf_ferm_op_add_inplace"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_ferm_op_add_inplace()</span></code></a>, <a class="reference internal" href="cdoc/qf-ferm-op.html#c.qf_ferm_op_scaled_add_inplace" title="qf_ferm_op_scaled_add_inplace"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_ferm_op_scaled_add_inplace()</span></code></a> and
+<a class="reference internal" href="cdoc/qf-ferm-op.html#c.qf_ferm_op_mul_inplace" title="qf_ferm_op_mul_inplace"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_ferm_op_mul_inplace()</span></code></a>:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="c1">// Accumulate `factor * right` into `left` without building an intermediate.</span>
+<span class="n">QkComplex64</span><span class="w"> </span><span class="n">factor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mf">-1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">};</span>
+<span class="n">qf_ferm_op_scaled_add_inplace</span><span class="p">(</span><span class="n">left</span><span class="p">,</span><span class="w"> </span><span class="n">right</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">factor</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>Mind that the three differ in their treatment of group indices. The two additions append the
+terms of the right operand and therefore reset the <code class="docutils literal notranslate"><span class="pre">groups</span></code> attribute to <code class="docutils literal notranslate"><span class="pre">NULL</span></code>, just as
+<a class="reference internal" href="cdoc/qf-ferm-op.html#c.qf_ferm_op_add" title="qf_ferm_op_add"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_ferm_op_add()</span></code></a> does. <code class="docutils literal notranslate"><span class="pre">mul_inplace</span></code> only scales the coefficients, which leaves the
+number of terms unchanged, and so it preserves the grouping.</p>
+</li>
+</ul>
+<ul>
 <li><p>Added a C API for the edge-vertex and transfer-vertex operator representations, which were
 previously available only from Python. This includes two new opaque structs,
 <a class="reference internal" href="cdoc/qf-edge-op.html#c.QfEdgeVertexOperator" title="QfEdgeVertexOperator"><code class="xref c c-struct docutils literal notranslate"><span class="pre">QfEdgeVertexOperator</span></code></a> and <a class="reference internal" href="cdoc/qf-transfer-op.html#c.QfTransferVertexOperator" title="QfTransferVertexOperator"><code class="xref c c-struct docutils literal notranslate"><span class="pre">QfTransferVertexOperator</span></code></a>, each one with an
@@ -291,6 +340,23 @@ commutator, anti-commutator and double-commutator functions for both new operato
 <a class="reference internal" href="cdoc/qf-mappers-library.html#c.qf_transfer_vertex_to_edge_vertex" title="qf_transfer_vertex_to_edge_vertex"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_transfer_vertex_to_edge_vertex()</span></code></a>.</p></li>
 </ul>
 <ul>
+<li><p>Added <code class="docutils literal notranslate"><span class="pre">scaled_add</span></code> to the C API for all four operator representations:
+<a class="reference internal" href="cdoc/qf-ferm-op.html#c.qf_ferm_op_scaled_add" title="qf_ferm_op_scaled_add"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_ferm_op_scaled_add()</span></code></a>, <a class="reference internal" href="cdoc/qf-maj-op.html#c.qf_maj_op_scaled_add" title="qf_maj_op_scaled_add"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_maj_op_scaled_add()</span></code></a>,
+<a class="reference internal" href="cdoc/qf-edge-op.html#c.qf_edge_op_scaled_add" title="qf_edge_op_scaled_add"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_edge_op_scaled_add()</span></code></a> and <a class="reference internal" href="cdoc/qf-transfer-op.html#c.qf_transfer_op_scaled_add" title="qf_transfer_op_scaled_add"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_transfer_op_scaled_add()</span></code></a>. Each returns
+<code class="docutils literal notranslate"><span class="pre">left</span> <span class="pre">+</span> <span class="pre">factor</span> <span class="pre">*</span> <span class="pre">right</span></code>, folding the scaling into the addition so that no scaled copy of the
+right operand is built along the way.</p>
+<p>This is also how the C API spells subtraction, since a factor of <code class="docutils literal notranslate"><span class="pre">-1</span></code> negates the appended
+coefficients:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">QkComplex64</span><span class="w"> </span><span class="n">minus_one</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mf">-1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">};</span>
+<span class="n">QfFermionOperator</span><span class="w"> </span><span class="o">*</span><span class="n">difference</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_ferm_op_scaled_add</span><span class="p">(</span><span class="n">left</span><span class="p">,</span><span class="w"> </span><span class="n">right</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">minus_one</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>As for <a class="reference internal" href="cdoc/qf-ferm-op.html#c.qf_ferm_op_add" title="qf_ferm_op_add"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_ferm_op_add()</span></code></a>, the terms of the right operand are appended rather than
+combined with those of the left, so the result tracks no group indices. Call the corresponding
+<code class="docutils literal notranslate"><span class="pre">simplify</span></code> function to collect equal terms.</p>
+</li>
+</ul>
+<ul>
 <li><p>How an <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate gets decomposed in fermionic space is now configurable through its
 new keyword-only <code class="docutils literal notranslate"><span class="pre">synthesis</span></code> argument, mirroring the <code class="docutils literal notranslate"><span class="pre">synthesis</span></code> argument of Qiskit’s
 <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.library.PauliEvolutionGate" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">PauliEvolutionGate</span></code></a>. The available methods live in the new
@@ -311,16 +377,16 @@ identically.</p>
 </li>
 </ul>
 <ul>
-<li><p>Which distribution <a class="reference internal" href="stubs/qiskit_fermions.transpiler.passes.QDriftTrotterization.html#qiskit_fermions.transpiler.passes.QDriftTrotterization" title="qiskit_fermions.transpiler.passes.QDriftTrotterization"><code class="xref py py-class docutils literal notranslate"><span class="pre">QDriftTrotterization</span></code></a> samples from is now configurable through its new
-keyword-only <code class="docutils literal notranslate"><span class="pre">weights</span></code> argument. Leaving it at <code class="docutils literal notranslate"><span class="pre">None</span></code> (the default) derives the weights from the
-evolved operator on every call, exactly as before, so existing circuits are sampled identically.</p>
-<p>Supplying them samples from a distribution of your choosing, and hoists their computation out of
-the transpilation: the default path derives them on every call to
-<a class="reference internal" href="stubs/qiskit_fermions.transpiler.passes.QDriftTrotterization.html#qiskit_fermions.transpiler.passes.QDriftTrotterization.run" title="qiskit_fermions.transpiler.passes.QDriftTrotterization.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a>, which is repeated work when generating an ensemble from a
-single Hamiltonian. Derive them once with
-<a class="reference internal" href="stubs/qiskit_fermions.operators.terms.group_coeff_means.html#qiskit_fermions.operators.terms.group_coeff_means" title="qiskit_fermions.operators.terms.group_coeff_means"><code class="xref py py-func docutils literal notranslate"><span class="pre">group_coeff_means()</span></code></a> instead, alongside
-<a class="reference internal" href="stubs/qiskit_fermions.operators.terms.group_order.html#qiskit_fermions.operators.terms.group_order" title="qiskit_fermions.operators.terms.group_order"><code class="xref py py-func docutils literal notranslate"><span class="pre">group_order()</span></code></a>, which hoists the group lookup out
-of the same loop:</p>
+<li><p>The sampling weights of <a class="reference internal" href="stubs/qiskit_fermions.transpiler.passes.QDriftTrotterization.html#qiskit_fermions.transpiler.passes.QDriftTrotterization" title="qiskit_fermions.transpiler.passes.QDriftTrotterization"><code class="xref py py-class docutils literal notranslate"><span class="pre">QDriftTrotterization</span></code></a> can now be supplied through its new
+keyword-only <code class="docutils literal notranslate"><span class="pre">weights</span></code> argument, instead of being derived from the evolved operator on every call.
+Leaving it at <code class="docutils literal notranslate"><span class="pre">None</span></code> (the default) behaves exactly as before, so existing circuits are sampled
+identically.</p>
+<p>This is a performance option: the default path reduces one value per operator <em>term</em> down to one
+per group on every call to <a class="reference internal" href="stubs/qiskit_fermions.transpiler.passes.QDriftTrotterization.html#qiskit_fermions.transpiler.passes.QDriftTrotterization.run" title="qiskit_fermions.transpiler.passes.QDriftTrotterization.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a>, which is repeated work when
+generating an ensemble from a single Hamiltonian, even though the result is identical every time.
+Derive it once with <a class="reference internal" href="stubs/qiskit_fermions.operators.terms.group_coeff_means.html#qiskit_fermions.operators.terms.group_coeff_means" title="qiskit_fermions.operators.terms.group_coeff_means"><code class="xref py py-func docutils literal notranslate"><span class="pre">group_coeff_means()</span></code></a> instead, alongside
+<a class="reference internal" href="stubs/qiskit_fermions.operators.terms.group_order.html#qiskit_fermions.operators.terms.group_order" title="qiskit_fermions.operators.terms.group_order"><code class="xref py py-func docutils literal notranslate"><span class="pre">group_order()</span></code></a>, which hoists the group lookup out of the same
+loop:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">hamiltonian</span> <span class="o">=</span> <span class="n">group_order</span><span class="p">(</span><span class="n">hamiltonian</span><span class="p">)</span>
 <span class="n">weights</span> <span class="o">=</span> <span class="n">group_coeff_means</span><span class="p">(</span><span class="n">hamiltonian</span><span class="p">)</span>
 <span class="n">pm</span><span class="o">.</span><span class="n">optimization</span> <span class="o">=</span> <span class="n">FermionicPassManager</span><span class="p">(</span>
@@ -328,23 +394,63 @@ of the same loop:</p>
 <span class="p">)</span>
 </pre></div>
 </div>
-<p>Entries may be negative, which makes a <em>quasi</em>-probability distribution expressible: the sampling
-draws from <span class="math">\(|w_j| / \|w\|_1\)</span> and the sign of <span class="math">\(w_j\)</span> is folded into the emitted gate’s
-rotation direction. Recovering the target evolution then requires rescaling the measured outcomes
-by the sampling overhead <span class="math">\(\|w\|_1\)</span>, carrying that sign, which is a post-processing step this
-pass cannot perform on your behalf.</p>
-<p>Two constraints come with a supplied array. Its scale is not free: the 1-norm also sets the shared
-evolution time, so multiplying every entry by <code class="docutils literal notranslate"><span class="pre">gamma</span></code> samples identically but evolves for
-<code class="docutils literal notranslate"><span class="pre">gamma</span> <span class="pre">*</span> <span class="pre">t</span></code>. And because the array describes the terms (or groups) of one specific operator, its
-length is validated against every <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate it is applied to, and a circuit holding
-more than one such gate is rejected; leaving <code class="docutils literal notranslate"><span class="pre">weights</span></code> unset keeps such a circuit supported,
-since each gate then derives its own.</p>
+<p>The entries must be non-negative, since a weight is the magnitude <span class="math">\(h_j\)</span> of the qDRIFT
+decomposition <span class="math">\(H = \sum_j h_j H_j\)</span>, in which a coefficient’s sign belongs to <span class="math">\(H_j\)</span> and
+is read off the evolved operator directly.</p>
+<p>Two constraints come with a supplied array. Its scale is not free: the sum of the weights also sets
+the shared evolution time, so multiplying every entry by <code class="docutils literal notranslate"><span class="pre">gamma</span></code> samples identically but evolves
+for <code class="docutils literal notranslate"><span class="pre">gamma</span> <span class="pre">*</span> <span class="pre">t</span></code>. And because the array describes the terms (or groups) of one specific operator,
+its length is validated against every <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate it is applied to, and a circuit
+holding more than one such gate is rejected; leaving <code class="docutils literal notranslate"><span class="pre">weights</span></code> unset keeps such a circuit
+supported, since each gate then derives its own.</p>
 </li>
 </ul>
 <ul class="simple">
 <li><p>Improved the numerical conditioning of state-vector simulation for
 <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> and <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.OrbitalRotation.html#qiskit_fermions.circuit.library.OrbitalRotation" title="qiskit_fermions.circuit.library.OrbitalRotation"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrbitalRotation</span></code></a> gates by supplying the
 exact fixed-sector operator trace to SciPy’s matrix exponential routine.</p></li>
+</ul>
+<ul>
+<li><p><a class="reference internal" href="stubs/qiskit_fermions.operators.library.FCIDump.html#qiskit_fermions.operators.library.FCIDump" title="qiskit_fermions.operators.library.FCIDump"><code class="xref py py-class docutils literal notranslate"><span class="pre">FCIDump</span></code></a> now exposes the electronic integrals it
+parsed, which previously were reachable only by converting the whole data structure into a
+<a class="reference internal" href="stubs/qiskit_fermions.operators.FermionOperator.html#qiskit_fermions.operators.FermionOperator" title="qiskit_fermions.operators.FermionOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionOperator</span></code></a>. The new methods return read-only copies as
+NumPy arrays, in the same flattened layout the electronic-integral constructors consume:
+<a class="reference internal" href="stubs/qiskit_fermions.operators.library.FCIDump.html#qiskit_fermions.operators.library.FCIDump.get_one_body_tril_a" title="qiskit_fermions.operators.library.FCIDump.get_one_body_tril_a"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_one_body_tril_a()</span></code></a>,
+<a class="reference internal" href="stubs/qiskit_fermions.operators.library.FCIDump.html#qiskit_fermions.operators.library.FCIDump.get_one_body_tril_b" title="qiskit_fermions.operators.library.FCIDump.get_one_body_tril_b"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_one_body_tril_b()</span></code></a>,
+<a class="reference internal" href="stubs/qiskit_fermions.operators.library.FCIDump.html#qiskit_fermions.operators.library.FCIDump.get_two_body_tril_aa" title="qiskit_fermions.operators.library.FCIDump.get_two_body_tril_aa"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_two_body_tril_aa()</span></code></a>,
+<a class="reference internal" href="stubs/qiskit_fermions.operators.library.FCIDump.html#qiskit_fermions.operators.library.FCIDump.get_two_body_tril_ab" title="qiskit_fermions.operators.library.FCIDump.get_two_body_tril_ab"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_two_body_tril_ab()</span></code></a> and
+<a class="reference internal" href="stubs/qiskit_fermions.operators.library.FCIDump.html#qiskit_fermions.operators.library.FCIDump.get_two_body_tril_bb" title="qiskit_fermions.operators.library.FCIDump.get_two_body_tril_bb"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_two_body_tril_bb()</span></code></a>. The beta-spin arrays
+return <code class="docutils literal notranslate"><span class="pre">None</span></code> for a spin-restricted file; the new
+<a class="reference internal" href="stubs/qiskit_fermions.operators.library.FCIDump.html#qiskit_fermions.operators.library.FCIDump.is_unrestricted" title="qiskit_fermions.operators.library.FCIDump.is_unrestricted"><code class="xref py py-attr docutils literal notranslate"><span class="pre">is_unrestricted</span></code></a> attribute reports on all three
+at once. The new <a class="reference internal" href="stubs/qiskit_fermions.operators.library.FCIDump.html#qiskit_fermions.operators.library.FCIDump.constant" title="qiskit_fermions.operators.library.FCIDump.constant"><code class="xref py py-attr docutils literal notranslate"><span class="pre">constant</span></code></a> attribute gives the
+constant (nuclear-repulsion) energy, or <code class="docutils literal notranslate"><span class="pre">None</span></code> when the file carries none:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fcidump</span> <span class="o">=</span> <span class="n">FCIDump</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="s2">"molecule.fcidump"</span><span class="p">)</span>
+<span class="n">one_body</span> <span class="o">=</span> <span class="n">fcidump</span><span class="o">.</span><span class="n">get_one_body_tril_a</span><span class="p">()</span>
+<span class="n">two_body</span> <span class="o">=</span> <span class="n">fcidump</span><span class="o">.</span><span class="n">get_two_body_tril_aa</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Note that <code class="docutils literal notranslate"><span class="pre">get_two_body_tril_ab</span></code> is packed differently from the other two-body arrays: it is
+only 4-fold symmetric, so it holds the full <code class="docutils literal notranslate"><span class="pre">(npair,</span> <span class="pre">npair)</span></code> matrix, whose row pair indexes the
+alpha-spin and whose column pair the beta-spin species. Refer to the class documentation for the
+index formula of every array. Expanding these into dense <code class="docutils literal notranslate"><span class="pre">(norb,</span> <span class="pre">norb)</span></code> or <code class="docutils literal notranslate"><span class="pre">(norb,)</span> <span class="pre">*</span> <span class="pre">4</span></code>
+tensors, as required by sample-based diagonalization tooling for example, is left to the caller.</p>
+</li>
+</ul>
+<ul>
+<li><p>The C API gained the matching accessors. <code class="docutils literal notranslate"><span class="pre">qf_fcidump_get_one_body_tril_a</span></code>,
+<code class="docutils literal notranslate"><span class="pre">qf_fcidump_get_one_body_tril_b</span></code>, <code class="docutils literal notranslate"><span class="pre">qf_fcidump_get_two_body_tril_aa</span></code>,
+<code class="docutils literal notranslate"><span class="pre">qf_fcidump_get_two_body_tril_ab</span></code> and <code class="docutils literal notranslate"><span class="pre">qf_fcidump_get_two_body_tril_bb</span></code> borrow the internal
+buffer, writing a pointer and a length through out-parameters:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="o">*</span><span class="n">integrals</span><span class="p">;</span>
+<span class="n">uint64_t</span> <span class="nb">len</span><span class="p">;</span>
+<span class="n">qf_fcidump_get_one_body_tril_a</span><span class="p">(</span><span class="n">fcidump</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">integrals</span><span class="p">,</span> <span class="o">&amp;</span><span class="nb">len</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>The returned pointer must not be freed and stays valid only until the <a class="reference internal" href="cdoc/qf-fcidump.html#c.QfFCIDump" title="QfFCIDump"><code class="xref c c-struct docutils literal notranslate"><span class="pre">QfFCIDump</span></code></a> is
+freed. Guard the three beta-spin getters with the new <code class="docutils literal notranslate"><span class="pre">qf_fcidump_is_unrestricted</span></code>, and
+<code class="docutils literal notranslate"><span class="pre">qf_fcidump_constant</span></code> with the new <code class="docutils literal notranslate"><span class="pre">qf_fcidump_has_constant</span></code>; calling either without its guard
+panics.</p>
+</li>
 </ul>
 <ul>
 <li><p>Added <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter.html#qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter" title="qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicSuzukiTrotter</span></code></a>, a higher-order
@@ -830,7 +936,7 @@ Following Qiskit’s design philosophy, the core of this package is written in R
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on 2026/09/09</div>
+              Last updated on 2026/09/10</div>
           </div>
           <div class="right-details">
             
@@ -873,7 +979,7 @@ Following Qiskit’s design philosophy, the core of this package is written in R
       
     </aside>
   </div>
-</div><script src="_static/documentation_options.js?v=1e492a6f"></script>
+</div><script src="_static/documentation_options.js?v=a60857e3"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/scripts/furo.js?v=46bd48cc"></script>

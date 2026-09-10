@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>QDriftTrotterization - Qiskit Fermions 0.2.0.dev0+f7ffac2</title>
+        <title>QDriftTrotterization - Qiskit Fermions 0.2.0.dev0+fdf61a4</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+f7ffac2</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+fdf61a4</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+f7ffac2</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+fdf61a4</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -278,14 +278,15 @@ sign-preserving) term (or, when the Hamiltonian carries groups, its whole sample
 the same time</p>
 <div class="math-wrapper docutils container">
 <div class="math">
-\[\delta = \frac{\|w\|_1 t}{\texttt{num\_terms}}, \qquad
-p_j = \frac{|w_j|}{\|w\|_1}, \qquad
-\|w\|_1 = \sum_j |w_j|,\]</div>
+\[\delta = \frac{\lambda t}{\texttt{num\_terms}}, \qquad
+p_j = \frac{w_j}{\lambda}, \qquad
+\lambda = \sum_j w_j,\]</div>
 </div>
-<p>so that each draw contributes <span class="math">\(\delta \cdot p_j = |w_j| t / \texttt{num\_terms}\)</span>. By
-default <span class="math">\(w_j = |c_j|\)</span>, the magnitude of the sampled term’s (or group’s) coefficient, which
-recovers the textbook qDRIFT normalization <span class="math">\(\|w\|_1 = \lambda = \sum_j |c_j|\)</span>. Supply
-<a class="reference internal" href="#qiskit_fermions.transpiler.passes.QDriftTrotterization.weights" title="qiskit_fermions.transpiler.passes.QDriftTrotterization.weights"><code class="xref py py-attr docutils literal notranslate"><span class="pre">weights</span></code></a> to sample from a different (quasi-)probability distribution instead.</p>
+<p>so that each draw contributes <span class="math">\(\delta \cdot p_j = w_j t / \texttt{num\_terms}\)</span>. By default
+<span class="math">\(w_j = |c_j|\)</span>, the magnitude of the sampled term’s (or group’s) coefficient, which recovers
+the textbook qDRIFT normalization <span class="math">\(\lambda = \sum_j |c_j|\)</span>; the sign of <span class="math">\(c_j\)</span> is not
+part of the weight but of the sampled operator, and is read off it directly. Supply
+<a class="reference internal" href="#qiskit_fermions.transpiler.passes.QDriftTrotterization.weights" title="qiskit_fermions.transpiler.passes.QDriftTrotterization.weights"><code class="xref py py-attr docutils literal notranslate"><span class="pre">weights</span></code></a> to precompute that array once instead of deriving it on every call.</p>
 <p>The ordered product of the sampled evolutions does not reproduce <span class="math">\(e^{-i t H}\)</span> exactly;
 rather, its expectation over the sampling approximates the exact evolution, with an error that
 decreases as <code class="docutils literal notranslate"><span class="pre">num_terms</span></code> grows. Because the output depends on the random draws, it differs
@@ -320,11 +321,11 @@ filtering work for every circuit generated from the same Hamiltonian.</p>
 <div class="admonition caution">
 <p class="admonition-title">Caution</p>
 <p>The <em>scale</em> of <a class="reference internal" href="#qiskit_fermions.transpiler.passes.QDriftTrotterization.weights" title="qiskit_fermions.transpiler.passes.QDriftTrotterization.weights"><code class="xref py py-attr docutils literal notranslate"><span class="pre">weights</span></code></a> is not free: it sets the evolution time. Since
-<span class="math">\(\delta \cdot p_j = |w_j| t / \texttt{num\_terms}\)</span> above depends on <span class="math">\(w_j\)</span> itself
-and not merely on its share of <span class="math">\(\|w\|_1\)</span>, rescaling every weight by <span class="math">\(\gamma\)</span>
-leaves the distribution untouched but evolves for <span class="math">\(\gamma t\)</span> rather than <span class="math">\(t\)</span>.
-Weights are therefore absolute magnitudes, not relative preferences, and only
-<span class="math">\(w_j = |c_j|\)</span> reproduces <span class="math">\(e^{-i t H}\)</span>.</p>
+<span class="math">\(\delta \cdot p_j = w_j t / \texttt{num\_terms}\)</span> above depends on <span class="math">\(w_j\)</span> itself and
+not merely on its share of <span class="math">\(\lambda\)</span>, rescaling every weight by <span class="math">\(\gamma\)</span> leaves the
+distribution untouched but evolves for <span class="math">\(\gamma t\)</span> rather than <span class="math">\(t\)</span>. Weights are
+therefore absolute magnitudes, not relative preferences, and only <span class="math">\(w_j = |c_j|\)</span>
+reproduces <span class="math">\(e^{-i t H}\)</span>.</p>
 <p>A distribution whose <em>shape</em> differs from <span class="math">\(|c_j|\)</span> no longer approximates
 <span class="math">\(e^{-i t H}\)</span> on its own either. Recovering the target evolution then requires
 reweighting the measured outcomes, which is the caller’s responsibility: this pass emits
@@ -332,10 +333,7 @@ circuits and cannot post-process their results. See <a class="reference internal
 </div>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p>The qDRIFT protocol was introduced in <a class="reference external" href="https://arxiv.org/abs/1811.08017">arXiv:1811.08017</a>.
-Sampling from a <em>quasi</em>-probability distribution (that is, one with negative entries), and the
-sign-weighted rescaling of the measured outcomes that it requires, is discussed in
-<a class="reference external" href="https://arxiv.org/abs/2608.29756">arXiv:2608.29756</a>.</p>
+<p>The qDRIFT protocol was introduced in <a class="reference external" href="https://arxiv.org/abs/1811.08017">arXiv:1811.08017</a>.</p>
 </div>
 <p>Initializing this transpiler pass can be done with the arguments listed below.</p>
 <dl class="field-list simple">
@@ -372,8 +370,8 @@ rng will be initialized with <code class="docutils literal notranslate"><span cl
 </ul>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – if <code class="docutils literal notranslate"><span class="pre">weights</span></code> is not one-dimensional, is empty, holds a non-finite entry, or
-    has a vanishing 1-norm.</p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – if <code class="docutils literal notranslate"><span class="pre">weights</span></code> is not one-dimensional, is empty, holds a non-finite or
+    negative entry, or sums to zero.</p>
 </dd>
 </dl>
 <p class="rubric">Attributes</p>
@@ -404,12 +402,13 @@ class docstring for the <code class="docutils literal notranslate"><span class="
 <dt class="sig sig-object py" id="qiskit_fermions.transpiler.passes.QDriftTrotterization.weights">
 <span class="sig-name descname"><span class="pre">weights</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">np.ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><a class="headerlink" href="#qiskit_fermions.transpiler.passes.QDriftTrotterization.weights" title="Link to this definition">¶</a></dt>
 <dd><p>The sampling weights <span class="math">\(w_j\)</span>, or <code class="docutils literal notranslate"><span class="pre">None</span></code> to derive them from the evolved operator.</p>
-<p>Supplying them serves two purposes. It samples from a distribution of your choosing rather
-than from the coefficient magnitudes, and it hoists their computation out of the
-transpilation: the default path recomputes them on <em>every</em> call to <a class="reference internal" href="#qiskit_fermions.transpiler.passes.QDriftTrotterization.run" title="qiskit_fermions.transpiler.passes.QDriftTrotterization.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a>, which is
-repeated work when generating an ensemble from a single Hamiltonian. Deriving them once with
-<a class="reference internal" href="qiskit_fermions.operators.terms.group_coeff_means.html#qiskit_fermions.operators.terms.group_coeff_means" title="qiskit_fermions.operators.terms.group_coeff_means"><code class="xref py py-func docutils literal notranslate"><span class="pre">group_coeff_means()</span></code></a> and passing the result
-here keeps this pass stateless while paying that cost a single time.</p>
+<p>Supplying them hoists their computation out of the transpilation: the default path recomputes
+them on <em>every</em> call to <a class="reference internal" href="#qiskit_fermions.transpiler.passes.QDriftTrotterization.run" title="qiskit_fermions.transpiler.passes.QDriftTrotterization.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a>, which is repeated work when generating an ensemble from a
+single Hamiltonian. Deriving them once with
+<a class="reference internal" href="qiskit_fermions.operators.terms.group_coeff_means.html#qiskit_fermions.operators.terms.group_coeff_means" title="qiskit_fermions.operators.terms.group_coeff_means"><code class="xref py py-func docutils literal notranslate"><span class="pre">group_coeff_means()</span></code></a> and passing the result here keeps
+this pass stateless while paying that cost a single time. That is the reason to reach for this
+argument; passing anything other than the Hamiltonian’s own coefficient magnitudes changes
+which evolution the ensemble approximates (see the caution below).</p>
 <p>One entry is expected per <em>group</em> when the evolved operator carries
 <a class="reference internal" href="qiskit_fermions.operators.OperatorTrait.html#qiskit_fermions.operators.OperatorTrait.groups" title="qiskit_fermions.operators.OperatorTrait.groups"><code class="xref py py-attr docutils literal notranslate"><span class="pre">groups</span></code></a>, and per <em>term</em> otherwise; a
 mismatch raises <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ValueError</span></code></a>. Because such an array describes one specific operator,
@@ -422,16 +421,17 @@ the grouping is the appropriate unit for a given operator is a property of that 
 of this argument – see <a class="reference internal" href="../guides/grouping.html#grouping-explanation"><span class="std std-ref">Group operator terms: use the operator structure</span></a>, and
 <a class="reference internal" href="qiskit_fermions.operators.terms.groups_are_hermitian.html#qiskit_fermions.operators.terms.groups_are_hermitian" title="qiskit_fermions.operators.terms.groups_are_hermitian"><code class="xref py py-func docutils literal notranslate"><span class="pre">groups_are_hermitian()</span></code></a> to check the most
 common convention.</p>
-<p>Entries may be negative, which is what makes a <em>quasi</em>-probability distribution expressible:
-sampling draws from <span class="math">\(|w_j| / \|w\|_1\)</span> and the sign of <span class="math">\(w_j\)</span> is folded into the
-emitted gate’s rotation direction. The 1-norm <span class="math">\(\|w\|_1\)</span> is then the sampling overhead
-by which the measured outcomes have to be rescaled to recover the target evolution – a
-post-processing step this pass cannot perform on your behalf.</p>
+<p>Entries must be non-negative. A weight is the magnitude <span class="math">\(h_j\)</span> of the qDRIFT
+decomposition <span class="math">\(H = \sum_j h_j H_j\)</span>, in which a coefficient’s sign belongs to
+<span class="math">\(H_j\)</span> rather than to <span class="math">\(h_j\)</span> and is read off the operator directly, so a sign here
+would have nothing to describe. Sampling from a signed (quasi-probability) distribution is a
+separate feature: it additionally requires the accumulated sign of the sampled entries to be
+reported back for post-processing, which this pass does not do.</p>
 <div class="admonition caution">
 <p class="admonition-title">Caution</p>
-<p>These are absolute magnitudes, not relative preferences: <span class="math">\(\|w\|_1\)</span> also sets the
-evolution time, so rescaling every entry by <span class="math">\(\gamma\)</span> evolves for <span class="math">\(\gamma t\)</span>
-while sampling identically. See the class docstring.</p>
+<p>These are absolute magnitudes, not relative preferences: their sum also sets the evolution
+time, so rescaling every entry by <span class="math">\(\gamma\)</span> evolves for <span class="math">\(\gamma t\)</span> while
+sampling identically. See the class docstring.</p>
 </div>
 </dd></dl>
 
@@ -562,7 +562,7 @@ immediately marked “uncertain”, since it also carries a rotation.</p>
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on 2026/09/09</div>
+              Last updated on 2026/09/10</div>
           </div>
           <div class="right-details">
             
@@ -606,7 +606,7 @@ immediately marked “uncertain”, since it also carries a rotation.</p>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=1e492a6f"></script>
+</div><script src="../_static/documentation_options.js?v=a60857e3"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

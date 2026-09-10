@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>QfFermionOperator - Qiskit Fermions 0.2.0.dev0+f7ffac2</title>
+        <title>QfFermionOperator - Qiskit Fermions 0.2.0.dev0+fdf61a4</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+f7ffac2</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+fdf61a4</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+f7ffac2</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+fdf61a4</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -673,12 +673,90 @@ Alternatively, an empty <a class="reference internal" href="#c.QfFermionOperator
 </dd></dl>
 
 <dl class="c function">
+<dt class="sig sig-object c" id="c.qf_ferm_op_num_support">
+<span class="target" id="group__qf__ferm__op_1ga414948ea3919af7826c8a6ad2051cc51"></span><span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">qf_ferm_op_num_support</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.QfFermionOperator" title="QfFermionOperator"><span class="n"><span class="pre">QfFermionOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">op</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.qf_ferm_op_num_support" title="Link to this definition">¶</a><br /></dt>
+<dd><p>Gets the size of the support of an operator. </p>
+<p><p><p>Use this to size the output buffer of <a class="reference internal" href="#c.qf_ferm_op_get_support" title="qf_ferm_op_get_support"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_ferm_op_get_support()</span></code></a>, which does not report a
+length of its own.</p>
+<section id="id8">
+<h3>Example<a class="headerlink" href="#id8" title="Link to this heading">¶</a></h3>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="kt">bool</span><span class="w"> </span><span class="n">actions</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="nb">true</span><span class="p">,</span><span class="w"> </span><span class="nb">false</span><span class="p">,</span><span class="w"> </span><span class="nb">true</span><span class="p">};</span>
+<span class="linenos">2</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">modes</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">};</span>
+<span class="linenos">3</span><span class="n">QkComplex64</span><span class="w"> </span><span class="n">coeffs</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{{</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">}};</span>
+<span class="linenos">4</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">boundaries</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">};</span>
+<span class="linenos">5</span><span class="n">QfFermionOperator</span><span class="w"> </span><span class="o">*</span><span class="n">op</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_ferm_op_new</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="n">coeffs</span><span class="p">,</span><span class="w"> </span><span class="n">actions</span><span class="p">,</span><span class="w"> </span><span class="n">modes</span><span class="p">,</span><span class="w"> </span><span class="n">boundaries</span><span class="p">);</span>
+<span class="linenos">6</span>
+<span class="linenos">7</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">num_support</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_ferm_op_num_support</span><span class="p">(</span><span class="n">op</span><span class="p">);</span>
+<span class="linenos">8</span>
+<span class="linenos">9</span><span class="n">assert</span><span class="p">(</span><span class="n">num_support</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span>
+</pre></div>
+</div>
+</section>
+</p>
+ </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>op</strong> – A pointer to the fermionic operator whose support size to get.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The number of distinct mode indices acted upon by the operator.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.qf_ferm_op_get_support">
+<span class="target" id="group__qf__ferm__op_1ga4f9030d9517b72fadb8b2491e9f70a70"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">qf_ferm_op_get_support</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.QfFermionOperator" title="QfFermionOperator"><span class="n"><span class="pre">QfFermionOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">op</span></span>, <span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">support_out</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.qf_ferm_op_get_support" title="Link to this definition">¶</a><br /></dt>
+<dd><p>Gets the support of an operator, i.e. the mode indices acted upon by the operator. </p>
+<p><p><p>The indices are written in <strong>ascending</strong> order, and every index appears exactly once no matter
+how many terms act upon it.</p>
+<section id="id9">
+<h3>Example<a class="headerlink" href="#id9" title="Link to this heading">¶</a></h3>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kt">bool</span><span class="w"> </span><span class="n">actions</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="nb">true</span><span class="p">,</span><span class="w"> </span><span class="nb">false</span><span class="p">,</span><span class="w"> </span><span class="nb">true</span><span class="p">};</span>
+<span class="linenos"> 2</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">modes</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">};</span>
+<span class="linenos"> 3</span><span class="n">QkComplex64</span><span class="w"> </span><span class="n">coeffs</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{{</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">}};</span>
+<span class="linenos"> 4</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">boundaries</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">};</span>
+<span class="linenos"> 5</span><span class="n">QfFermionOperator</span><span class="w"> </span><span class="o">*</span><span class="n">op</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_ferm_op_new</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="n">coeffs</span><span class="p">,</span><span class="w"> </span><span class="n">actions</span><span class="p">,</span><span class="w"> </span><span class="n">modes</span><span class="p">,</span><span class="w"> </span><span class="n">boundaries</span><span class="p">);</span>
+<span class="linenos"> 6</span>
+<span class="linenos"> 7</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">num_support</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_ferm_op_num_support</span><span class="p">(</span><span class="n">op</span><span class="p">);</span>
+<span class="linenos"> 8</span><span class="kt">uint32_t</span><span class="w"> </span><span class="o">*</span><span class="n">support_out</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">malloc</span><span class="p">(</span><span class="n">num_support</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="kt">uint32_t</span><span class="p">));</span>
+<span class="linenos"> 9</span>
+<span class="linenos">10</span><span class="n">qf_ferm_op_get_support</span><span class="p">(</span><span class="n">op</span><span class="p">,</span><span class="w"> </span><span class="n">support_out</span><span class="p">);</span>
+<span class="linenos">11</span>
+<span class="linenos">12</span><span class="n">assert</span><span class="p">(</span><span class="n">support_out</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+<span class="linenos">13</span><span class="n">assert</span><span class="p">(</span><span class="n">support_out</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span>
+<span class="linenos">14</span>
+<span class="linenos">15</span><span class="n">free</span><span class="p">(</span><span class="n">support_out</span><span class="p">);</span>
+</pre></div>
+</div>
+</section>
+</p>
+ </p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Unlike the other getters, this does not hand out a pointer into the operator: the support is
+computed on demand rather than stored, so the caller provides the output buffer. Query its
+required length with <a class="reference internal" href="#c.qf_ferm_op_num_support" title="qf_ferm_op_num_support"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_ferm_op_num_support()</span></code></a> first.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>op</strong> – A pointer to the fermionic operator whose support to get. </p></li>
+<li><p><strong>support_out</strong> – A pointer to the integer array into which to write the support. It must be sized to at least :c:func:<code class="docutils literal notranslate"><a class="reference internal" href="#group__qf__ferm__op_1ga414948ea3919af7826c8a6ad2051cc51"><span class="std std-ref"><span class="pre">qf_ferm_op_num_support</span></span></a></code> elements.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
 <dt class="sig sig-object c" id="c.qf_ferm_op_zero">
 <span class="target" id="group__qf__ferm__op_1gad806a26bf31e8da5325f96b068576d52"></span><a class="reference internal" href="#c.QfFermionOperator" title="QfFermionOperator"><span class="n"><span class="pre">QfFermionOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">qf_ferm_op_zero</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.qf_ferm_op_zero" title="Link to this definition">¶</a><br /></dt>
 <dd><p>Constructs the additive identity operator. </p>
 <p><p><p>Adding the operator that is constructed by this method to another one has no effect.</p>
-<section id="id8">
-<h3>Example<a class="headerlink" href="#id8" title="Link to this heading">¶</a></h3>
+<section id="id10">
+<h3>Example<a class="headerlink" href="#id10" title="Link to this heading">¶</a></h3>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="n">QfFermionOperator</span><span class="w"> </span><span class="o">*</span><span class="n">zero</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_ferm_op_zero</span><span class="p">();</span>
 <span class="linenos">2</span>
 <span class="linenos">3</span><span class="n">QfFermionOperator</span><span class="w"> </span><span class="o">*</span><span class="n">op_plus_zero</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_ferm_op_add</span><span class="p">(</span><span class="n">op</span><span class="p">,</span><span class="w"> </span><span class="n">zero</span><span class="p">);</span>
@@ -701,8 +779,8 @@ Alternatively, an empty <a class="reference internal" href="#c.QfFermionOperator
 <span class="target" id="group__qf__ferm__op_1ga3d9bcc94ca148d6bc22d8351604ba1ef"></span><a class="reference internal" href="#c.QfFermionOperator" title="QfFermionOperator"><span class="n"><span class="pre">QfFermionOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">qf_ferm_op_one</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.qf_ferm_op_one" title="Link to this definition">¶</a><br /></dt>
 <dd><p>Constructs the multiplicative identity operator. </p>
 <p><p><p>Composing the operator that is constructed by this method with another one has no effect.</p>
-<section id="id9">
-<h3>Example<a class="headerlink" href="#id9" title="Link to this heading">¶</a></h3>
+<section id="id11">
+<h3>Example<a class="headerlink" href="#id11" title="Link to this heading">¶</a></h3>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="n">QfFermionOperator</span><span class="w"> </span><span class="o">*</span><span class="n">one</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_ferm_op_one</span><span class="p">();</span>
 <span class="linenos">2</span>
 <span class="linenos">3</span><span class="n">QfFermionOperator</span><span class="w"> </span><span class="o">*</span><span class="n">op_times_one</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_ferm_op_compose</span><span class="p">(</span><span class="n">op</span><span class="p">,</span><span class="w"> </span><span class="n">one</span><span class="p">);</span>
@@ -728,8 +806,8 @@ Alternatively, an empty <a class="reference internal" href="#c.QfFermionOperator
 <p class="admonition-title">See also</p>
 <p>The explanation on <a class="reference internal" href="../guides/grouping.html#grouping-explanation"><span class="std std-ref">Group operator terms: use the operator structure</span></a>.</p>
 </div>
-<section id="id10">
-<h3>Example<a class="headerlink" href="#id10" title="Link to this heading">¶</a></h3>
+<section id="id12">
+<h3>Example<a class="headerlink" href="#id12" title="Link to this heading">¶</a></h3>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="n">QfFCIDump</span><span class="w"> </span><span class="o">*</span><span class="n">fcidump</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span>
 <span class="linenos">2</span><span class="n">qf_fcidump_from_file</span><span class="p">(</span><span class="s">"molecule.fcidump"</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">fcidump</span><span class="p">);</span>
 <span class="linenos">3</span><span class="n">QfFermionOperator</span><span class="w"> </span><span class="o">*</span><span class="n">op</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_ferm_op_from_fcidump</span><span class="p">(</span><span class="n">fcidump</span><span class="p">);</span>
@@ -762,8 +840,8 @@ Alternatively, an empty <a class="reference internal" href="#c.QfFermionOperator
 <p class="admonition-title">See also</p>
 <p>The explanation on <a class="reference internal" href="../guides/grouping.html#grouping-explanation"><span class="std std-ref">Group operator terms: use the operator structure</span></a>.</p>
 </div>
-<section id="id11">
-<h3>Example<a class="headerlink" href="#id11" title="Link to this heading">¶</a></h3>
+<section id="id13">
+<h3>Example<a class="headerlink" href="#id13" title="Link to this heading">¶</a></h3>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="n">QfFCIDump</span><span class="w"> </span><span class="o">*</span><span class="n">fcidump</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span>
 <span class="linenos">2</span><span class="n">qf_fcidump_from_file</span><span class="p">(</span><span class="s">"molecule.fcidump"</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">fcidump</span><span class="p">);</span>
 <span class="linenos">3</span><span class="n">QfFermionOperator</span><span class="w"> </span><span class="o">*</span><span class="n">op</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_ferm_op_from_fcidump</span><span class="p">(</span><span class="n">fcidump</span><span class="p">);</span>
@@ -798,8 +876,8 @@ Alternatively, an empty <a class="reference internal" href="#c.QfFermionOperator
 <p class="admonition-title">See also</p>
 <p>The explanation on <a class="reference internal" href="../guides/grouping.html#grouping-explanation"><span class="std std-ref">Group operator terms: use the operator structure</span></a>.</p>
 </div>
-<section id="id12">
-<h3>Example<a class="headerlink" href="#id12" title="Link to this heading">¶</a></h3>
+<section id="id14">
+<h3>Example<a class="headerlink" href="#id14" title="Link to this heading">¶</a></h3>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="n">QfFermionOperator</span><span class="w"> </span><span class="o">*</span><span class="n">op</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">...;</span>
 <span class="linenos">2</span><span class="kt">uint32_t</span><span class="w"> </span><span class="o">*</span><span class="n">groups_out</span><span class="p">;</span>
 <span class="linenos">3</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">groups_len</span><span class="p">;</span>
@@ -832,8 +910,8 @@ many would make <a class="reference internal" href="#c.qf_ferm_op_num_groups" ti
 <p class="admonition-title">See also</p>
 <p>The explanation on <a class="reference internal" href="../guides/grouping.html#grouping-explanation"><span class="std std-ref">Group operator terms: use the operator structure</span></a>.</p>
 </div>
-<section id="id13">
-<h3>Example<a class="headerlink" href="#id13" title="Link to this heading">¶</a></h3>
+<section id="id15">
+<h3>Example<a class="headerlink" href="#id15" title="Link to this heading">¶</a></h3>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="n">QfFermionOperator</span><span class="w"> </span><span class="o">*</span><span class="n">op</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">...;</span>
 <span class="linenos">2</span>
 <span class="linenos">3</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">num_terms</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">4</span><span class="p">;</span>
@@ -870,8 +948,8 @@ many would make <a class="reference internal" href="#c.qf_ferm_op_num_groups" ti
 <p class="admonition-title">See also</p>
 <p>The explanation on <a class="reference internal" href="../guides/grouping.html#grouping-explanation"><span class="std std-ref">Group operator terms: use the operator structure</span></a>.</p>
 </div>
-<section id="id14">
-<h3>Example<a class="headerlink" href="#id14" title="Link to this heading">¶</a></h3>
+<section id="id16">
+<h3>Example<a class="headerlink" href="#id16" title="Link to this heading">¶</a></h3>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="n">QfFermionOperator</span><span class="w"> </span><span class="o">*</span><span class="n">op</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">...;</span>
 <span class="linenos">2</span>
 <span class="linenos">3</span><span class="n">qf_ferm_op_del_groups</span><span class="p">(</span><span class="n">op</span><span class="p">);</span>
@@ -901,8 +979,8 @@ skipped rather than appended anywhere.</p>
 <p class="admonition-title">See also</p>
 <p>The explanation on <a class="reference internal" href="../guides/grouping.html#grouping-explanation"><span class="std std-ref">Group operator terms: use the operator structure</span></a>.</p>
 </div>
-<section id="id15">
-<h3>Example<a class="headerlink" href="#id15" title="Link to this heading">¶</a></h3>
+<section id="id17">
+<h3>Example<a class="headerlink" href="#id17" title="Link to this heading">¶</a></h3>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">num_terms</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">4</span><span class="p">;</span>
 <span class="linenos"> 2</span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">num_actions</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">8</span><span class="p">;</span>
 <span class="linenos"> 3</span><span class="kt">bool</span><span class="w"> </span><span class="n">actions</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="nb">true</span><span class="p">,</span><span class="w"> </span><span class="nb">false</span><span class="p">,</span><span class="w"> </span><span class="nb">true</span><span class="p">,</span><span class="w"> </span><span class="nb">false</span><span class="p">,</span><span class="w"> </span><span class="nb">true</span><span class="p">,</span><span class="w"> </span><span class="nb">false</span><span class="p">,</span><span class="w"> </span><span class="nb">true</span><span class="p">,</span><span class="w"> </span><span class="nb">false</span><span class="p">};</span>
@@ -949,8 +1027,8 @@ skipped rather than appended anywhere.</p>
 <p class="admonition-title">Caution</p>
 <p>This function resets the operator’s <code class="docutils literal notranslate"><span class="pre">groups</span></code> attribute to <code class="docutils literal notranslate"><span class="pre">NULL</span></code>.</p>
 </div>
-<section id="id16">
-<h3>Example<a class="headerlink" href="#id16" title="Link to this heading">¶</a></h3>
+<section id="id18">
+<h3>Example<a class="headerlink" href="#id18" title="Link to this heading">¶</a></h3>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="n">QfFermionOperator</span><span class="w"> </span><span class="o">*</span><span class="n">one</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_ferm_op_one</span><span class="p">();</span>
 <span class="linenos"> 2</span>
 <span class="linenos"> 3</span><span class="n">QfFermionOperator</span><span class="w"> </span><span class="o">*</span><span class="n">op</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_ferm_op_zero</span><span class="p">();</span>
@@ -983,8 +1061,8 @@ skipped rather than appended anywhere.</p>
 <dt class="sig sig-object c" id="c.qf_ferm_op_add">
 <span class="target" id="group__qf__ferm__op_1ga573ecbd6a5be476057b39d74cbe6e906"></span><a class="reference internal" href="#c.QfFermionOperator" title="QfFermionOperator"><span class="n"><span class="pre">QfFermionOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">qf_ferm_op_add</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.QfFermionOperator" title="QfFermionOperator"><span class="n"><span class="pre">QfFermionOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">left</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.QfFermionOperator" title="QfFermionOperator"><span class="n"><span class="pre">QfFermionOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">right</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.qf_ferm_op_add" title="Link to this definition">¶</a><br /></dt>
 <dd><p>Adds two operators together. </p>
-<p><p><section id="id17">
-<h3>Example<a class="headerlink" href="#id17" title="Link to this heading">¶</a></h3>
+<p><p><section id="id19">
+<h3>Example<a class="headerlink" href="#id19" title="Link to this heading">¶</a></h3>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="n">QfFermionOperator</span><span class="w"> </span><span class="o">*</span><span class="n">one</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_ferm_op_one</span><span class="p">();</span>
 <span class="linenos">2</span><span class="n">QfFermionOperator</span><span class="w"> </span><span class="o">*</span><span class="n">zero</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_ferm_op_zero</span><span class="p">();</span>
 <span class="linenos">3</span>
@@ -1010,11 +1088,157 @@ skipped rather than appended anywhere.</p>
 </dd></dl>
 
 <dl class="c function">
+<dt class="sig sig-object c" id="c.qf_ferm_op_scaled_add">
+<span class="target" id="group__qf__ferm__op_1ga0ac8c62aace3d566d56f7ec2f254932a"></span><a class="reference internal" href="#c.QfFermionOperator" title="QfFermionOperator"><span class="n"><span class="pre">QfFermionOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">qf_ferm_op_scaled_add</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.QfFermionOperator" title="QfFermionOperator"><span class="n"><span class="pre">QfFermionOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">left</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.QfFermionOperator" title="QfFermionOperator"><span class="n"><span class="pre">QfFermionOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">right</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit-c/qk-complex-64#qkcomplex64" title="(in Qiskit v2.5)"><span class="n"><span class="pre">QkComplex64</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">factor</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.qf_ferm_op_scaled_add" title="Link to this definition">¶</a><br /></dt>
+<dd><p>Adds two operators together, scaling the coefficients of the right one. </p>
+<p><p><p>This fuses the scaling into the addition, which avoids building a fully scaled copy of <code class="docutils literal notranslate"><span class="pre">right</span></code>
+just to append it. Passing a factor of <code class="docutils literal notranslate"><span class="pre">-1</span></code> therefore subtracts, which is why no separate
+subtraction function is provided.</p>
+<section id="id20">
+<h3>Example<a class="headerlink" href="#id20" title="Link to this heading">¶</a></h3>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="n">QfFermionOperator</span><span class="w"> </span><span class="o">*</span><span class="n">one</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_ferm_op_one</span><span class="p">();</span>
+<span class="linenos">2</span><span class="n">QfFermionOperator</span><span class="w"> </span><span class="o">*</span><span class="n">other</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_ferm_op_one</span><span class="p">();</span>
+<span class="linenos">3</span>
+<span class="linenos">4</span><span class="c1">// Subtracting via a factor of -1 leaves the two terms cancelling each other out.</span>
+<span class="linenos">5</span><span class="n">QkComplex64</span><span class="w"> </span><span class="n">factor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mf">-1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">};</span>
+<span class="linenos">6</span><span class="n">QfFermionOperator</span><span class="w"> </span><span class="o">*</span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_ferm_op_scaled_add</span><span class="p">(</span><span class="n">one</span><span class="p">,</span><span class="w"> </span><span class="n">other</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">factor</span><span class="p">);</span>
+<span class="linenos">7</span>
+<span class="linenos">8</span><span class="n">QfFermionOperator</span><span class="w"> </span><span class="o">*</span><span class="n">simplified</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_ferm_op_simplify</span><span class="p">(</span><span class="n">result</span><span class="p">,</span><span class="w"> </span><span class="mf">1e-10</span><span class="p">);</span>
+<span class="linenos">9</span><span class="n">assert</span><span class="p">(</span><span class="n">qf_ferm_op_len</span><span class="p">(</span><span class="n">simplified</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+</pre></div>
+</div>
+</section>
+</p>
+ </p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Like <a class="reference internal" href="#c.qf_ferm_op_add" title="qf_ferm_op_add"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_ferm_op_add()</span></code></a>, this appends the terms of <code class="docutils literal notranslate"><span class="pre">right</span></code> without combining them with
+those of <code class="docutils literal notranslate"><span class="pre">left</span></code>, so the result tracks no group indices. Call <a class="reference internal" href="#c.qf_ferm_op_simplify" title="qf_ferm_op_simplify"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_ferm_op_simplify()</span></code></a> to
+collect equal terms afterwards.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>left</strong> – A pointer to the left operator. </p></li>
+<li><p><strong>right</strong> – A pointer to the right operator. </p></li>
+<li><p><strong>factor</strong> – A pointer to the factor to scale the right operator’s coefficients with.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A pointer to the resulting operator, <code class="docutils literal notranslate"><span class="pre">left</span> <span class="pre">+</span> <span class="pre">factor</span> <span class="pre">*</span> <span class="pre">right</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.qf_ferm_op_add_inplace">
+<span class="target" id="group__qf__ferm__op_1gafd4bc96e32117d5415a1fb8e2e0db951"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">qf_ferm_op_add_inplace</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.QfFermionOperator" title="QfFermionOperator"><span class="n"><span class="pre">QfFermionOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">left</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.QfFermionOperator" title="QfFermionOperator"><span class="n"><span class="pre">QfFermionOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">right</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.qf_ferm_op_add_inplace" title="Link to this definition">¶</a><br /></dt>
+<dd><p>Adds an operator into another one, in place. </p>
+<p><p><p>The in-place counterpart of <a class="reference internal" href="#c.qf_ferm_op_add" title="qf_ferm_op_add"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_ferm_op_add()</span></code></a>, which saves copying <code class="docutils literal notranslate"><span class="pre">left</span></code> into a freshly
+allocated result.</p>
+<div class="admonition caution">
+<p class="admonition-title">Caution</p>
+<p>This function resets the operator’s <code class="docutils literal notranslate"><span class="pre">groups</span></code> attribute to <code class="docutils literal notranslate"><span class="pre">NULL</span></code>.</p>
+</div>
+<section id="id21">
+<h3>Example<a class="headerlink" href="#id21" title="Link to this heading">¶</a></h3>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="n">QfFermionOperator</span><span class="w"> </span><span class="o">*</span><span class="n">left</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_ferm_op_one</span><span class="p">();</span>
+<span class="linenos">2</span><span class="n">QfFermionOperator</span><span class="w"> </span><span class="o">*</span><span class="n">right</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_ferm_op_one</span><span class="p">();</span>
+<span class="linenos">3</span>
+<span class="linenos">4</span><span class="n">qf_ferm_op_add_inplace</span><span class="p">(</span><span class="n">left</span><span class="p">,</span><span class="w"> </span><span class="n">right</span><span class="p">);</span>
+<span class="linenos">5</span>
+<span class="linenos">6</span><span class="n">assert</span><span class="p">(</span><span class="n">qf_ferm_op_len</span><span class="p">(</span><span class="n">left</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span>
+</pre></div>
+</div>
+</section>
+</p>
+ </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>left</strong> – A pointer to the operator to add into. </p></li>
+<li><p><strong>right</strong> – A pointer to the operator to add.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.qf_ferm_op_scaled_add_inplace">
+<span class="target" id="group__qf__ferm__op_1gac45eced42e89a575d2e97d4723509f5f"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">qf_ferm_op_scaled_add_inplace</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.QfFermionOperator" title="QfFermionOperator"><span class="n"><span class="pre">QfFermionOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">left</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.QfFermionOperator" title="QfFermionOperator"><span class="n"><span class="pre">QfFermionOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">right</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit-c/qk-complex-64#qkcomplex64" title="(in Qiskit v2.5)"><span class="n"><span class="pre">QkComplex64</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">factor</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.qf_ferm_op_scaled_add_inplace" title="Link to this definition">¶</a><br /></dt>
+<dd><p>Adds an operator into another one in place, scaling the coefficients of the right one. </p>
+<p><p><p>The in-place counterpart of <a class="reference internal" href="#c.qf_ferm_op_scaled_add" title="qf_ferm_op_scaled_add"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_ferm_op_scaled_add()</span></code></a>, computing <code class="docutils literal notranslate"><span class="pre">left</span> <span class="pre">+</span> <span class="pre">factor</span> <span class="pre">*</span> <span class="pre">right</span></code>
+without allocating a result. As there, a factor of <code class="docutils literal notranslate"><span class="pre">-1</span></code> subtracts.</p>
+<div class="admonition caution">
+<p class="admonition-title">Caution</p>
+<p>This function resets the operator’s <code class="docutils literal notranslate"><span class="pre">groups</span></code> attribute to <code class="docutils literal notranslate"><span class="pre">NULL</span></code>.</p>
+</div>
+<section id="id22">
+<h3>Example<a class="headerlink" href="#id22" title="Link to this heading">¶</a></h3>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="n">QfFermionOperator</span><span class="w"> </span><span class="o">*</span><span class="n">left</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_ferm_op_one</span><span class="p">();</span>
+<span class="linenos">2</span><span class="n">QfFermionOperator</span><span class="w"> </span><span class="o">*</span><span class="n">right</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_ferm_op_one</span><span class="p">();</span>
+<span class="linenos">3</span>
+<span class="linenos">4</span><span class="c1">// Subtract, leaving two terms that cancel each other out.</span>
+<span class="linenos">5</span><span class="n">QkComplex64</span><span class="w"> </span><span class="n">factor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mf">-1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">};</span>
+<span class="linenos">6</span><span class="n">qf_ferm_op_scaled_add_inplace</span><span class="p">(</span><span class="n">left</span><span class="p">,</span><span class="w"> </span><span class="n">right</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">factor</span><span class="p">);</span>
+<span class="linenos">7</span>
+<span class="linenos">8</span><span class="n">QfFermionOperator</span><span class="w"> </span><span class="o">*</span><span class="n">simplified</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_ferm_op_simplify</span><span class="p">(</span><span class="n">left</span><span class="p">,</span><span class="w"> </span><span class="mf">1e-10</span><span class="p">);</span>
+<span class="linenos">9</span><span class="n">assert</span><span class="p">(</span><span class="n">qf_ferm_op_len</span><span class="p">(</span><span class="n">simplified</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+</pre></div>
+</div>
+</section>
+</p>
+ </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>left</strong> – A pointer to the operator to add into. </p></li>
+<li><p><strong>right</strong> – A pointer to the operator to add. </p></li>
+<li><p><strong>factor</strong> – A pointer to the factor to scale the right operator’s coefficients with.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.qf_ferm_op_mul_inplace">
+<span class="target" id="group__qf__ferm__op_1gaf56048e20669fd17ded806ccde772598"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">qf_ferm_op_mul_inplace</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.QfFermionOperator" title="QfFermionOperator"><span class="n"><span class="pre">QfFermionOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">op</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit-c/qk-complex-64#qkcomplex64" title="(in Qiskit v2.5)"><span class="n"><span class="pre">QkComplex64</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">scalar</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.qf_ferm_op_mul_inplace" title="Link to this definition">¶</a><br /></dt>
+<dd><p>Multiplies an operator by a scalar, in place. </p>
+<p><p><p>The in-place counterpart of <a class="reference internal" href="#c.qf_ferm_op_mul" title="qf_ferm_op_mul"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_ferm_op_mul()</span></code></a>, which saves copying the operator into a
+freshly allocated result.</p>
+<section id="id23">
+<h3>Example<a class="headerlink" href="#id23" title="Link to this heading">¶</a></h3>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="n">QfFermionOperator</span><span class="w"> </span><span class="o">*</span><span class="n">op</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_ferm_op_one</span><span class="p">();</span>
+<span class="linenos">2</span><span class="n">QkComplex64</span><span class="w"> </span><span class="n">scalar</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mf">2.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">};</span>
+<span class="linenos">3</span>
+<span class="linenos">4</span><span class="n">qf_ferm_op_mul_inplace</span><span class="p">(</span><span class="n">op</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">scalar</span><span class="p">);</span>
+</pre></div>
+</div>
+</section>
+</p>
+ </p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Unlike the two in-place additions above, this <strong>preserves</strong> the <code class="docutils literal notranslate"><span class="pre">groups</span></code> attribute: scaling
+the coefficients leaves the number of terms, and hence the one-index-per-term invariant,
+untouched.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>op</strong> – A pointer to the operator to scale. </p></li>
+<li><p><strong>scalar</strong> – A pointer to the scalar.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
 <dt class="sig sig-object c" id="c.qf_ferm_op_mul">
 <span class="target" id="group__qf__ferm__op_1gabb76268242413b81089c00f4d3deb788"></span><a class="reference internal" href="#c.QfFermionOperator" title="QfFermionOperator"><span class="n"><span class="pre">QfFermionOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">qf_ferm_op_mul</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.QfFermionOperator" title="QfFermionOperator"><span class="n"><span class="pre">QfFermionOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">op</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit-c/qk-complex-64#qkcomplex64" title="(in Qiskit v2.5)"><span class="n"><span class="pre">QkComplex64</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">scalar</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.qf_ferm_op_mul" title="Link to this definition">¶</a><br /></dt>
 <dd><p>Multiplies an operator by a scalar. </p>
-<p><p><section id="id18">
-<h3>Example<a class="headerlink" href="#id18" title="Link to this heading">¶</a></h3>
+<p><p><section id="id24">
+<h3>Example<a class="headerlink" href="#id24" title="Link to this heading">¶</a></h3>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="n">QfFermionOperator</span><span class="w"> </span><span class="o">*</span><span class="n">one</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_ferm_op_one</span><span class="p">();</span>
 <span class="linenos"> 2</span><span class="n">QkComplex64</span><span class="w"> </span><span class="n">coeff</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mf">2.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">};</span>
 <span class="linenos"> 3</span><span class="n">QfFermionOperator</span><span class="w"> </span><span class="o">*</span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_ferm_op_mul</span><span class="p">(</span><span class="n">one</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">coeff</span><span class="p">);</span>
@@ -1047,8 +1271,8 @@ skipped rather than appended anywhere.</p>
 <dt class="sig sig-object c" id="c.qf_ferm_op_compose">
 <span class="target" id="group__qf__ferm__op_1gae0ec39a569fb57501918aa28e31a0d6d"></span><a class="reference internal" href="#c.QfFermionOperator" title="QfFermionOperator"><span class="n"><span class="pre">QfFermionOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">qf_ferm_op_compose</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.QfFermionOperator" title="QfFermionOperator"><span class="n"><span class="pre">QfFermionOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">left</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.QfFermionOperator" title="QfFermionOperator"><span class="n"><span class="pre">QfFermionOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">right</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.qf_ferm_op_compose" title="Link to this definition">¶</a><br /></dt>
 <dd><p>Composes two operators with each other. </p>
-<p><p><section id="id19">
-<h3>Example<a class="headerlink" href="#id19" title="Link to this heading">¶</a></h3>
+<p><p><section id="id25">
+<h3>Example<a class="headerlink" href="#id25" title="Link to this heading">¶</a></h3>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="n">QfFermionOperator</span><span class="w"> </span><span class="o">*</span><span class="n">one</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_ferm_op_one</span><span class="p">();</span>
 <span class="linenos">2</span><span class="n">QfFermionOperator</span><span class="w"> </span><span class="o">*</span><span class="n">zero</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_ferm_op_zero</span><span class="p">();</span>
 <span class="linenos">3</span>
@@ -1060,6 +1284,10 @@ skipped rather than appended anywhere.</p>
 </section>
 </p>
  </p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The composition of two operators tracks no groups, even when both operands do.</p>
+</div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -1068,7 +1296,7 @@ skipped rather than appended anywhere.</p>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A pointer to the resulting operator.</p>
+<dd class="field-even"><p>A pointer to <code class="docutils literal notranslate"><span class="pre">left.compose(right)</span></code>, which equals the operator <code class="docutils literal notranslate"><span class="pre">result</span> <span class="pre">=</span> <span class="pre">right</span> <span class="pre">&#64;</span> <span class="pre">left</span></code> in terms of the matrix multiplication <code class="docutils literal notranslate"><span class="pre">&#64;</span></code>. In other words, <code class="docutils literal notranslate"><span class="pre">right</span></code> is applied first. To obtain <code class="docutils literal notranslate"><span class="pre">left</span> <span class="pre">&#64;</span> <span class="pre">right</span></code>, swap the arguments.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1083,8 +1311,8 @@ skipped rather than appended anywhere.</p>
 <li><p>the coefficients are complex conjugated</p></li>
 </ul>
 </p>
-<p><p><section id="id20">
-<h3>Example<a class="headerlink" href="#id20" title="Link to this heading">¶</a></h3>
+<p><p><section id="id26">
+<h3>Example<a class="headerlink" href="#id26" title="Link to this heading">¶</a></h3>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="n">QfFermionOperator</span><span class="w"> </span><span class="o">*</span><span class="n">op</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_ferm_op_zero</span><span class="p">();</span>
 <span class="linenos"> 2</span><span class="kt">bool</span><span class="w"> </span><span class="n">actions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{};</span>
 <span class="linenos"> 3</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">modes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{};</span>
@@ -1125,8 +1353,8 @@ skipped rather than appended anywhere.</p>
 separate coefficients for duplicate terms consider calling <a class="reference internal" href="#c.qf_ferm_op_simplify" title="qf_ferm_op_simplify"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_ferm_op_simplify()</span></code></a>
 instead!</p>
 </div>
-<section id="id21">
-<h3>Example<a class="headerlink" href="#id21" title="Link to this heading">¶</a></h3>
+<section id="id27">
+<h3>Example<a class="headerlink" href="#id27" title="Link to this heading">¶</a></h3>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="n">QfFermionOperator</span><span class="w"> </span><span class="o">*</span><span class="n">op</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_ferm_op_zero</span><span class="p">();</span>
 <span class="linenos"> 2</span><span class="kt">bool</span><span class="w"> </span><span class="n">actions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{};</span>
 <span class="linenos"> 3</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">modes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{};</span>
@@ -1217,8 +1445,8 @@ coefficient magnitude which should not be truncated:</p>
 <li><p><code class="docutils literal notranslate"><span class="pre">False</span></code>: smaller indices appear towards the middle, i.e. creation actions are lexicographically descending while annihilation ones are ascending (e.g. <code class="docutils literal notranslate"><span class="pre">+_1</span> <span class="pre">+_0</span> <span class="pre">-_0</span> <span class="pre">-_1</span></code>)</p></li>
 </ul>
 </p>
-<p><p><section id="id22">
-<h3>Example<a class="headerlink" href="#id22" title="Link to this heading">¶</a></h3>
+<p><p><section id="id28">
+<h3>Example<a class="headerlink" href="#id28" title="Link to this heading">¶</a></h3>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="n">QfFermionOperator</span><span class="w"> </span><span class="o">*</span><span class="n">op</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_ferm_op_zero</span><span class="p">();</span>
 <span class="linenos"> 2</span><span class="kt">bool</span><span class="w"> </span><span class="n">actions</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="nb">false</span><span class="p">,</span><span class="w"> </span><span class="nb">true</span><span class="p">,</span><span class="w"> </span><span class="nb">false</span><span class="p">,</span><span class="w"> </span><span class="nb">true</span><span class="p">};</span>
 <span class="linenos"> 3</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">modes</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">};</span>
@@ -1267,8 +1495,8 @@ number of terms might change.</p>
 <dt class="sig sig-object c" id="c.qf_ferm_op_is_hermitian">
 <span class="target" id="group__qf__ferm__op_1ga668e72443cdb09df73fc44925cf3ea53"></span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">qf_ferm_op_is_hermitian</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.QfFermionOperator" title="QfFermionOperator"><span class="n"><span class="pre">QfFermionOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">op</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n"><span class="pre">atol</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.qf_ferm_op_is_hermitian" title="Link to this definition">¶</a><br /></dt>
 <dd><p>Checks whether an operator is Hermitian. </p>
-<p><p><section id="id23">
-<h3>Example<a class="headerlink" href="#id23" title="Link to this heading">¶</a></h3>
+<p><p><section id="id29">
+<h3>Example<a class="headerlink" href="#id29" title="Link to this heading">¶</a></h3>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="n">QfFermionOperator</span><span class="w"> </span><span class="o">*</span><span class="n">op</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_ferm_op_zero</span><span class="p">();</span>
 <span class="linenos"> 2</span><span class="kt">bool</span><span class="w"> </span><span class="n">actions1</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="nb">true</span><span class="p">,</span><span class="w"> </span><span class="nb">false</span><span class="p">};</span>
 <span class="linenos"> 3</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">modes1</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">};</span>
@@ -1309,8 +1537,8 @@ number of terms might change.</p>
 <dt class="sig sig-object c" id="c.qf_ferm_op_max_rank">
 <span class="target" id="group__qf__ferm__op_1ga8510f0d018590d9d025657f4e60044fe"></span><span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">qf_ferm_op_max_rank</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.QfFermionOperator" title="QfFermionOperator"><span class="n"><span class="pre">QfFermionOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">op</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.qf_ferm_op_max_rank" title="Link to this definition">¶</a><br /></dt>
 <dd><p>Checks the maximum rank of an operator. </p>
-<p><p><section id="id24">
-<h3>Example<a class="headerlink" href="#id24" title="Link to this heading">¶</a></h3>
+<p><p><section id="id30">
+<h3>Example<a class="headerlink" href="#id30" title="Link to this heading">¶</a></h3>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="n">QfFermionOperator</span><span class="w"> </span><span class="o">*</span><span class="n">op</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_ferm_op_zero</span><span class="p">();</span>
 <span class="linenos">2</span><span class="kt">bool</span><span class="w"> </span><span class="n">actions</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="nb">true</span><span class="p">,</span><span class="w"> </span><span class="nb">false</span><span class="p">,</span><span class="w"> </span><span class="nb">true</span><span class="p">,</span><span class="w"> </span><span class="nb">false</span><span class="p">};</span>
 <span class="linenos">3</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">modes</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">};</span>
@@ -1344,20 +1572,27 @@ example) operator simplification or normal-ordering can result in a different ma
 <dt class="sig sig-object c" id="c.qf_ferm_op_conserves_particle_number">
 <span class="target" id="group__qf__ferm__op_1ga9594f9079e9f5f8ed5dbff6d08136b7e"></span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">qf_ferm_op_conserves_particle_number</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.QfFermionOperator" title="QfFermionOperator"><span class="n"><span class="pre">QfFermionOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">op</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.qf_ferm_op_conserves_particle_number" title="Link to this definition">¶</a><br /></dt>
 <dd><p>Checks whether an operator is particle-number conserving. </p>
-<p><p><section id="id25">
-<h3>Example<a class="headerlink" href="#id25" title="Link to this heading">¶</a></h3>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="n">QfFermionOperator</span><span class="w"> </span><span class="o">*</span><span class="n">op</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_ferm_op_zero</span><span class="p">();</span>
-<span class="linenos"> 2</span><span class="kt">bool</span><span class="w"> </span><span class="n">actions1</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="nb">true</span><span class="p">,</span><span class="w"> </span><span class="nb">false</span><span class="p">};</span>
-<span class="linenos"> 3</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">modes1</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">};</span>
-<span class="linenos"> 4</span><span class="n">QkComplex64</span><span class="w"> </span><span class="n">coeff1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">1.00001</span><span class="p">};</span>
-<span class="linenos"> 5</span><span class="n">qf_ferm_op_add_term</span><span class="p">(</span><span class="n">op</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="n">actions1</span><span class="p">,</span><span class="w"> </span><span class="n">modes1</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">coeff1</span><span class="p">);</span>
-<span class="linenos"> 6</span><span class="kt">bool</span><span class="w"> </span><span class="n">actions2</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="nb">true</span><span class="p">,</span><span class="w"> </span><span class="nb">false</span><span class="p">};</span>
-<span class="linenos"> 7</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">modes2</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">};</span>
-<span class="linenos"> 8</span><span class="n">QkComplex64</span><span class="w"> </span><span class="n">coeff2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mi">-1</span><span class="p">};</span>
-<span class="linenos"> 9</span><span class="n">qf_ferm_op_add_term</span><span class="p">(</span><span class="n">op</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="n">actions2</span><span class="p">,</span><span class="w"> </span><span class="n">modes2</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">coeff2</span><span class="p">);</span>
-<span class="linenos">10</span>
-<span class="linenos">11</span><span class="n">assert</span><span class="p">(</span><span class="n">qf_ferm_op_is_hermitian</span><span class="p">(</span><span class="n">op</span><span class="p">,</span><span class="w"> </span><span class="mf">1e-4</span><span class="p">));</span>
-<span class="linenos">12</span><span class="n">assert</span><span class="p">(</span><span class="o">!</span><span class="n">qf_ferm_op_is_hermitian</span><span class="p">(</span><span class="n">op</span><span class="p">,</span><span class="w"> </span><span class="mf">1e-8</span><span class="p">));</span>
+<p><p><p>This is the special case of <a class="reference internal" href="#c.qf_ferm_op_conserves_sector" title="qf_ferm_op_conserves_sector"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_ferm_op_conserves_sector()</span></code></a> that treats all modes as a
+single block. Use that function to additionally require conservation <em>within</em> mode blocks, for
+example to check conservation of the spin z-component alongside the particle number.</p>
+<section id="id31">
+<h3>Example<a class="headerlink" href="#id31" title="Link to this heading">¶</a></h3>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1">// A hopping term conserves the particle number, ...</span>
+<span class="linenos"> 2</span><span class="n">QfFermionOperator</span><span class="w"> </span><span class="o">*</span><span class="n">op</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_ferm_op_zero</span><span class="p">();</span>
+<span class="linenos"> 3</span><span class="kt">bool</span><span class="w"> </span><span class="n">actions</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="nb">true</span><span class="p">,</span><span class="w"> </span><span class="nb">false</span><span class="p">};</span>
+<span class="linenos"> 4</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">modes</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">};</span>
+<span class="linenos"> 5</span><span class="n">QkComplex64</span><span class="w"> </span><span class="n">coeff</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">};</span>
+<span class="linenos"> 6</span><span class="n">qf_ferm_op_add_term</span><span class="p">(</span><span class="n">op</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="n">actions</span><span class="p">,</span><span class="w"> </span><span class="n">modes</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">coeff</span><span class="p">);</span>
+<span class="linenos"> 7</span>
+<span class="linenos"> 8</span><span class="n">assert</span><span class="p">(</span><span class="n">qf_ferm_op_conserves_particle_number</span><span class="p">(</span><span class="n">op</span><span class="p">));</span>
+<span class="linenos"> 9</span>
+<span class="linenos">10</span><span class="c1">// ... whereas a bare creation operator does not.</span>
+<span class="linenos">11</span><span class="n">QfFermionOperator</span><span class="w"> </span><span class="o">*</span><span class="n">cre</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_ferm_op_zero</span><span class="p">();</span>
+<span class="linenos">12</span><span class="kt">bool</span><span class="w"> </span><span class="n">cre_actions</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="nb">true</span><span class="p">};</span>
+<span class="linenos">13</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">cre_modes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="p">};</span>
+<span class="linenos">14</span><span class="n">qf_ferm_op_add_term</span><span class="p">(</span><span class="n">cre</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">cre_actions</span><span class="p">,</span><span class="w"> </span><span class="n">cre_modes</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">coeff</span><span class="p">);</span>
+<span class="linenos">15</span>
+<span class="linenos">16</span><span class="n">assert</span><span class="p">(</span><span class="o">!</span><span class="n">qf_ferm_op_conserves_particle_number</span><span class="p">(</span><span class="n">cre</span><span class="p">));</span>
 </pre></div>
 </div>
 </section>
@@ -1376,11 +1611,66 @@ example) operator simplification or normal-ordering can result in a different ma
 </dd></dl>
 
 <dl class="c function">
+<dt class="sig sig-object c" id="c.qf_ferm_op_conserves_sector">
+<span class="target" id="group__qf__ferm__op_1gaadd5db36683a3f5d9896fcfdb3c97352"></span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">qf_ferm_op_conserves_sector</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.QfFermionOperator" title="QfFermionOperator"><span class="n"><span class="pre">QfFermionOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">op</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">block_sizes</span></span>, <span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="n"><span class="pre">num_blocks</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.qf_ferm_op_conserves_sector" title="Link to this definition">¶</a><br /></dt>
+<dd><p>Checks whether an operator conserves the particle number within each mode block. </p>
+<p><p><p>The <code class="docutils literal notranslate"><span class="pre">block_sizes</span></code> partition the mode range into consecutive, non-overlapping blocks: block
+<code class="docutils literal notranslate"><span class="pre">b</span></code> spans the modes <code class="docutils literal notranslate"><span class="pre">[start_b,</span> <span class="pre">start_b</span> <span class="pre">+</span> <span class="pre">block_sizes[b])</span></code> where <code class="docutils literal notranslate"><span class="pre">start_b</span></code> is the sum of all
+preceding block sizes. A term conserves the sector if and only if, in <em>every</em> block, its number
+of creation operators equals its number of annihilation operators. A term acting on a mode beyond
+the last block never conserves the sector, because there is no block whose count it could
+balance.</p>
+<p>For a spin-orbital layout of <code class="docutils literal notranslate"><span class="pre">norb</span></code> spatial orbitals, <code class="docutils literal notranslate"><span class="pre">[norb]</span></code> checks the particle number of
+a spinless system, while <code class="docutils literal notranslate"><span class="pre">[norb,</span> <span class="pre">norb]</span></code> requires the alpha block <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">norb)</span></code> and the beta
+block <code class="docutils literal notranslate"><span class="pre">[norb,</span> <span class="pre">2</span> <span class="pre">*</span> <span class="pre">norb)</span></code> to be conserved <em>separately</em>, i.e. strict conservation of both the
+particle number and the z-component of the spin.</p>
+<section id="id32">
+<h3>Example<a class="headerlink" href="#id32" title="Link to this heading">¶</a></h3>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1">// This term hops an electron from the beta block into the alpha block.</span>
+<span class="linenos"> 2</span><span class="n">QfFermionOperator</span><span class="w"> </span><span class="o">*</span><span class="n">op</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_ferm_op_zero</span><span class="p">();</span>
+<span class="linenos"> 3</span><span class="kt">bool</span><span class="w"> </span><span class="n">actions</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="nb">true</span><span class="p">,</span><span class="w"> </span><span class="nb">false</span><span class="p">};</span>
+<span class="linenos"> 4</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">modes</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">};</span>
+<span class="linenos"> 5</span><span class="n">QkComplex64</span><span class="w"> </span><span class="n">coeff</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">};</span>
+<span class="linenos"> 6</span><span class="n">qf_ferm_op_add_term</span><span class="p">(</span><span class="n">op</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="n">actions</span><span class="p">,</span><span class="w"> </span><span class="n">modes</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">coeff</span><span class="p">);</span>
+<span class="linenos"> 7</span>
+<span class="linenos"> 8</span><span class="c1">// The total particle number is conserved, ...</span>
+<span class="linenos"> 9</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">one_block</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">4</span><span class="p">};</span>
+<span class="linenos">10</span><span class="n">assert</span><span class="p">(</span><span class="n">qf_ferm_op_conserves_sector</span><span class="p">(</span><span class="n">op</span><span class="p">,</span><span class="w"> </span><span class="n">one_block</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">));</span>
+<span class="linenos">11</span><span class="n">assert</span><span class="p">(</span><span class="n">qf_ferm_op_conserves_sector</span><span class="p">(</span><span class="n">op</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">));</span>
+<span class="linenos">12</span>
+<span class="linenos">13</span><span class="c1">// ... but the two spin sectors are not conserved individually.</span>
+<span class="linenos">14</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">spin_blocks</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">};</span>
+<span class="linenos">15</span><span class="n">assert</span><span class="p">(</span><span class="o">!</span><span class="n">qf_ferm_op_conserves_sector</span><span class="p">(</span><span class="n">op</span><span class="p">,</span><span class="w"> </span><span class="n">spin_blocks</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">));</span>
+</pre></div>
+</div>
+</section>
+</p>
+ </p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Passing <code class="docutils literal notranslate"><span class="pre">NULL</span></code> (with <code class="docutils literal notranslate"><span class="pre">num_blocks</span></code> set to <code class="docutils literal notranslate"><span class="pre">0</span></code>) treats all modes as one unbounded block,
+making this equivalent to <a class="reference internal" href="#c.qf_ferm_op_conserves_particle_number" title="qf_ferm_op_conserves_particle_number"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_ferm_op_conserves_particle_number()</span></code></a>.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>op</strong> – A pointer to the fermionic operator to be checked. </p></li>
+<li><p><strong>block_sizes</strong> – A pointer to the array of block sizes partitioning the mode range. May be <code class="docutils literal notranslate"><span class="pre">NULL</span></code> to treat all modes as a single block. </p></li>
+<li><p><strong>num_blocks</strong> – The number of entries in the <code class="docutils literal notranslate"><span class="pre">block_sizes</span></code> array.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Whether the provided operator conserves the particle number within every block.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
 <dt class="sig sig-object c" id="c.qf_ferm_op_equal">
 <span class="target" id="group__qf__ferm__op_1ga63ec2c23b9ca891fb6df029ab7ff779a"></span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">qf_ferm_op_equal</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.QfFermionOperator" title="QfFermionOperator"><span class="n"><span class="pre">QfFermionOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">left</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.QfFermionOperator" title="QfFermionOperator"><span class="n"><span class="pre">QfFermionOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">right</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.qf_ferm_op_equal" title="Link to this definition">¶</a><br /></dt>
 <dd><p>Compare two operators for equality. </p>
-<p><p><section id="id26">
-<h3>Example<a class="headerlink" href="#id26" title="Link to this heading">¶</a></h3>
+<p><p><section id="id33">
+<h3>Example<a class="headerlink" href="#id33" title="Link to this heading">¶</a></h3>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="n">QfFermionOperator</span><span class="w"> </span><span class="o">*</span><span class="n">one</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_ferm_op_one</span><span class="p">();</span>
 <span class="linenos">2</span><span class="n">QfFermionOperator</span><span class="w"> </span><span class="o">*</span><span class="n">zero</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_ferm_op_zero</span><span class="p">();</span>
 <span class="linenos">3</span>
@@ -1409,8 +1699,8 @@ example) operator simplification or normal-ordering can result in a different ma
 <span class="target" id="group__qf__ferm__op_1gad5b83d730fd46bc9e910447f94a4c8d3"></span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">qf_ferm_op_equiv</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.QfFermionOperator" title="QfFermionOperator"><span class="n"><span class="pre">QfFermionOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">left</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.QfFermionOperator" title="QfFermionOperator"><span class="n"><span class="pre">QfFermionOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">right</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n"><span class="pre">atol</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.qf_ferm_op_equiv" title="Link to this definition">¶</a><br /></dt>
 <dd><p>Compare two operators for equivalence. </p>
 <p>Equivalence in this context means approximate equality up to the specified absolute tolerance. To be more precise, this method returns <code class="docutils literal notranslate"><span class="pre">True</span></code>, when all the absolute values of the coefficients in the difference <code class="docutils literal notranslate"><span class="pre">other</span> <span class="pre">-</span> <span class="pre">self</span></code> are below the specified threshold <code class="docutils literal notranslate"><span class="pre">atol</span></code>.</p>
-<p><p><section id="id27">
-<h3>Example<a class="headerlink" href="#id27" title="Link to this heading">¶</a></h3>
+<p><p><section id="id34">
+<h3>Example<a class="headerlink" href="#id34" title="Link to this heading">¶</a></h3>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="n">QfFermionOperator</span><span class="w"> </span><span class="o">*</span><span class="n">zero</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_ferm_op_zero</span><span class="p">();</span>
 <span class="linenos"> 2</span>
 <span class="linenos"> 3</span><span class="n">QfFermionOperator</span><span class="w"> </span><span class="o">*</span><span class="n">op</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_ferm_op_zero</span><span class="p">();</span>
@@ -1444,8 +1734,8 @@ example) operator simplification or normal-ordering can result in a different ma
 <dt class="sig sig-object c" id="c.qf_ferm_op_len">
 <span class="target" id="group__qf__ferm__op_1ga4e74027057483baed413bbb99db41ead"></span><span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">qf_ferm_op_len</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.QfFermionOperator" title="QfFermionOperator"><span class="n"><span class="pre">QfFermionOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">op</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.qf_ferm_op_len" title="Link to this definition">¶</a><br /></dt>
 <dd><p>Returns the length (or number of terms) of the provided operator. </p>
-<p><p><section id="id28">
-<h3>Example<a class="headerlink" href="#id28" title="Link to this heading">¶</a></h3>
+<p><p><section id="id35">
+<h3>Example<a class="headerlink" href="#id35" title="Link to this heading">¶</a></h3>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="n">QfFermionOperator</span><span class="w"> </span><span class="o">*</span><span class="n">op</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_ferm_op_zero</span><span class="p">();</span>
 <span class="linenos">2</span><span class="kt">bool</span><span class="w"> </span><span class="n">actions</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="nb">true</span><span class="p">,</span><span class="w"> </span><span class="nb">false</span><span class="p">,</span><span class="w"> </span><span class="nb">true</span><span class="p">,</span><span class="w"> </span><span class="nb">false</span><span class="p">};</span>
 <span class="linenos">3</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">modes</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">};</span>
@@ -1474,8 +1764,8 @@ example) operator simplification or normal-ordering can result in a different ma
 <dt class="sig sig-object c" id="c.qf_ferm_op_relabel_modes">
 <span class="target" id="group__qf__ferm__op_1ga63f036547f4d1b2f35deb75524aa9a5f"></span><a class="reference internal" href="qf-exit-code.html#c.QfExitCode" title="QfExitCode"><span class="n"><span class="pre">QfExitCode</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">qf_ferm_op_relabel_modes</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#c.QfFermionOperator" title="QfFermionOperator"><span class="n"><span class="pre">QfFermionOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">op</span></span>, <span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="n"><span class="pre">num_modes</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">permutation</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.qf_ferm_op_relabel_modes" title="Link to this definition">¶</a><br /></dt>
 <dd><p>Relabels the indices of the provided operator. </p>
-<p><p><section id="id29">
-<h3>Example<a class="headerlink" href="#id29" title="Link to this heading">¶</a></h3>
+<p><p><section id="id36">
+<h3>Example<a class="headerlink" href="#id36" title="Link to this heading">¶</a></h3>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="n">QfFermionOperator</span><span class="w"> </span><span class="o">*</span><span class="n">op</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_ferm_op_zero</span><span class="p">();</span>
 <span class="linenos"> 2</span><span class="kt">bool</span><span class="w"> </span><span class="n">actions</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="nb">true</span><span class="p">,</span><span class="w"> </span><span class="nb">false</span><span class="p">,</span><span class="w"> </span><span class="nb">true</span><span class="p">,</span><span class="w"> </span><span class="nb">false</span><span class="p">};</span>
 <span class="linenos"> 3</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">indices</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">};</span>
@@ -1531,7 +1821,7 @@ example) operator simplification or normal-ordering can result in a different ma
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on 2026/09/09</div>
+              Last updated on 2026/09/10</div>
           </div>
           <div class="right-details">
             
@@ -1569,6 +1859,8 @@ example) operator simplification or normal-ordering can result in a different ma
 <li><a class="reference internal" href="#c.qf_ferm_op_get_actions"><code class="docutils literal notranslate"><span class="pre">qf_ferm_op_get_actions()</span></code></a></li>
 <li><a class="reference internal" href="#c.qf_ferm_op_get_modes"><code class="docutils literal notranslate"><span class="pre">qf_ferm_op_get_modes()</span></code></a></li>
 <li><a class="reference internal" href="#c.qf_ferm_op_get_boundaries"><code class="docutils literal notranslate"><span class="pre">qf_ferm_op_get_boundaries()</span></code></a></li>
+<li><a class="reference internal" href="#c.qf_ferm_op_num_support"><code class="docutils literal notranslate"><span class="pre">qf_ferm_op_num_support()</span></code></a></li>
+<li><a class="reference internal" href="#c.qf_ferm_op_get_support"><code class="docutils literal notranslate"><span class="pre">qf_ferm_op_get_support()</span></code></a></li>
 <li><a class="reference internal" href="#c.qf_ferm_op_zero"><code class="docutils literal notranslate"><span class="pre">qf_ferm_op_zero()</span></code></a></li>
 <li><a class="reference internal" href="#c.qf_ferm_op_one"><code class="docutils literal notranslate"><span class="pre">qf_ferm_op_one()</span></code></a></li>
 <li><a class="reference internal" href="#c.qf_ferm_op_has_groups"><code class="docutils literal notranslate"><span class="pre">qf_ferm_op_has_groups()</span></code></a></li>
@@ -1579,6 +1871,10 @@ example) operator simplification or normal-ordering can result in a different ma
 <li><a class="reference internal" href="#c.qf_ferm_op_split_out_groups"><code class="docutils literal notranslate"><span class="pre">qf_ferm_op_split_out_groups()</span></code></a></li>
 <li><a class="reference internal" href="#c.qf_ferm_op_add_term"><code class="docutils literal notranslate"><span class="pre">qf_ferm_op_add_term()</span></code></a></li>
 <li><a class="reference internal" href="#c.qf_ferm_op_add"><code class="docutils literal notranslate"><span class="pre">qf_ferm_op_add()</span></code></a></li>
+<li><a class="reference internal" href="#c.qf_ferm_op_scaled_add"><code class="docutils literal notranslate"><span class="pre">qf_ferm_op_scaled_add()</span></code></a></li>
+<li><a class="reference internal" href="#c.qf_ferm_op_add_inplace"><code class="docutils literal notranslate"><span class="pre">qf_ferm_op_add_inplace()</span></code></a></li>
+<li><a class="reference internal" href="#c.qf_ferm_op_scaled_add_inplace"><code class="docutils literal notranslate"><span class="pre">qf_ferm_op_scaled_add_inplace()</span></code></a></li>
+<li><a class="reference internal" href="#c.qf_ferm_op_mul_inplace"><code class="docutils literal notranslate"><span class="pre">qf_ferm_op_mul_inplace()</span></code></a></li>
 <li><a class="reference internal" href="#c.qf_ferm_op_mul"><code class="docutils literal notranslate"><span class="pre">qf_ferm_op_mul()</span></code></a></li>
 <li><a class="reference internal" href="#c.qf_ferm_op_compose"><code class="docutils literal notranslate"><span class="pre">qf_ferm_op_compose()</span></code></a></li>
 <li><a class="reference internal" href="#c.qf_ferm_op_adjoint"><code class="docutils literal notranslate"><span class="pre">qf_ferm_op_adjoint()</span></code></a></li>
@@ -1588,6 +1884,7 @@ example) operator simplification or normal-ordering can result in a different ma
 <li><a class="reference internal" href="#c.qf_ferm_op_is_hermitian"><code class="docutils literal notranslate"><span class="pre">qf_ferm_op_is_hermitian()</span></code></a></li>
 <li><a class="reference internal" href="#c.qf_ferm_op_max_rank"><code class="docutils literal notranslate"><span class="pre">qf_ferm_op_max_rank()</span></code></a></li>
 <li><a class="reference internal" href="#c.qf_ferm_op_conserves_particle_number"><code class="docutils literal notranslate"><span class="pre">qf_ferm_op_conserves_particle_number()</span></code></a></li>
+<li><a class="reference internal" href="#c.qf_ferm_op_conserves_sector"><code class="docutils literal notranslate"><span class="pre">qf_ferm_op_conserves_sector()</span></code></a></li>
 <li><a class="reference internal" href="#c.qf_ferm_op_equal"><code class="docutils literal notranslate"><span class="pre">qf_ferm_op_equal()</span></code></a></li>
 <li><a class="reference internal" href="#c.qf_ferm_op_equiv"><code class="docutils literal notranslate"><span class="pre">qf_ferm_op_equiv()</span></code></a></li>
 <li><a class="reference internal" href="#c.qf_ferm_op_len"><code class="docutils literal notranslate"><span class="pre">qf_ferm_op_len()</span></code></a></li>
@@ -1605,7 +1902,7 @@ example) operator simplification or normal-ordering can result in a different ma
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=1e492a6f"></script>
+</div><script src="../_static/documentation_options.js?v=a60857e3"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
