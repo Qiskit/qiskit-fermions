@@ -240,6 +240,60 @@ static int test_compose(void) {
     return Ok;
 }
 
+// Pins the operand order of `qf_ferm_op_compose`, which its docstring documents as
+// `left.compose(right) == right @ left`, i.e. `right` is applied first. The operands are chosen so
+// that the two orders give *different* results: with `A = a^dag_0 a_1` and `B = a^dag_1 a_0`,
+// normal ordering turns `A.compose(B)` into `n_1 + ...` but the opposite order into `n_0 + ...`. A
+// commuting pair (such as the `one`/`zero` operators used elsewhere) would pass under either
+// convention and prove nothing.
+static int test_compose_operand_order(void) {
+    bool actions[2] = {true, false};
+    uint32_t boundaries[2] = {0, 2};
+    QkComplex64 coeff = {1.0, 0.0};
+
+    // A = a^dag_0 a_1
+    uint32_t modes_a[2] = {0, 1};
+    QfFermionOperator *op_a = qf_ferm_op_new(1, 2, &coeff, actions, modes_a, boundaries);
+    // B = a^dag_1 a_0
+    uint32_t modes_b[2] = {1, 0};
+    QfFermionOperator *op_b = qf_ferm_op_new(1, 2, &coeff, actions, modes_b, boundaries);
+
+    QfFermionOperator *composed = qf_ferm_op_compose(op_a, op_b);
+    QfFermionOperator *ordered = qf_ferm_op_normal_ordered(composed, NULL);
+    QfFermionOperator *actual = qf_ferm_op_simplify(ordered, 1e-10);
+
+    // The expected result of `A.compose(B)`: n_1 + a^dag_1 a^dag_0 a_1 a_0.
+    bool actions_exp[6] = {true, false, true, true, false, false};
+    uint32_t modes_exp[6] = {1, 1, 1, 0, 1, 0};
+    QkComplex64 coeffs_exp[2] = {{1.0, 0.0}, {1.0, 0.0}};
+    uint32_t boundaries_exp[3] = {0, 2, 6};
+    QfFermionOperator *expected =
+        qf_ferm_op_new(2, 6, coeffs_exp, actions_exp, modes_exp, boundaries_exp);
+
+    bool correct_order = qf_ferm_op_equiv(actual, expected, 1e-10);
+
+    // The swapped order must *not* agree, otherwise this test could not tell them apart.
+    QfFermionOperator *swapped = qf_ferm_op_compose(op_b, op_a);
+    QfFermionOperator *swapped_ordered = qf_ferm_op_normal_ordered(swapped, NULL);
+    QfFermionOperator *swapped_actual = qf_ferm_op_simplify(swapped_ordered, 1e-10);
+    bool orders_differ = !qf_ferm_op_equiv(swapped_actual, expected, 1e-10);
+
+    qf_ferm_op_free(op_a);
+    qf_ferm_op_free(op_b);
+    qf_ferm_op_free(composed);
+    qf_ferm_op_free(ordered);
+    qf_ferm_op_free(actual);
+    qf_ferm_op_free(expected);
+    qf_ferm_op_free(swapped);
+    qf_ferm_op_free(swapped_ordered);
+    qf_ferm_op_free(swapped_actual);
+
+    if (!correct_order || !orders_differ) {
+        return EqualityError;
+    }
+    return Ok;
+}
+
 static int test_ichop(void) {
     QfFermionOperator *op = qf_ferm_op_zero();
     QkComplex64 coeff = {1e-8, 0.0};
@@ -706,6 +760,7 @@ int test_fermion_operator(void) {
     num_failed += RUN_TEST(test_equiv_neg);
     num_failed += RUN_TEST(test_mul);
     num_failed += RUN_TEST(test_compose);
+    num_failed += RUN_TEST(test_compose_operand_order);
     num_failed += RUN_TEST(test_ichop);
     num_failed += RUN_TEST(test_simplify);
     num_failed += RUN_TEST(test_simplify_vs_ichop);

@@ -786,9 +786,14 @@ pub unsafe extern "C" fn qf_ferm_op_mul(
 /// @param left A pointer to the left operator.
 /// @param right A pointer to the right operator.
 ///
-/// @return A pointer to the resulting operator.
+/// @return A pointer to ``left.compose(right)``, which equals the operator
+///     ``result = right @ left`` in terms of the matrix multiplication ``@``. In other words,
+///     ``right`` is applied first. To obtain ``left @ right``, swap the arguments.
 ///
 /// @rst
+///
+/// .. note::
+///    The composition of two operators tracks no groups, even when both operands do.
 ///
 /// Example
 /// -------
