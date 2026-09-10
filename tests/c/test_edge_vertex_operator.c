@@ -100,6 +100,42 @@ static int test_getters(void) {
     return Ok;
 }
 
+static int test_get_support(void) {
+    // The right indices contribute to the support just as the left ones do, so mode 1 appears
+    // even though it is only ever a right index. Mode 2 is shared to cover de-duplication.
+    uint32_t left_indices[3] = {2, 0, 2};
+    uint32_t right_indices[3] = {2, 1, 2};
+    QkComplex64 coeffs[2] = {{1.0, 0.0}, {1.0, 0.0}};
+    uint32_t boundaries[3] = {0, 2, 3};
+    QfEdgeVertexOperator *op =
+        qf_edge_op_new(2, 3, coeffs, left_indices, right_indices, boundaries);
+
+    bool passed_all = true;
+
+    uint32_t num_support = qf_edge_op_num_support(op);
+    passed_all = passed_all && (num_support == 3);
+
+    uint32_t support_out[3];
+    qf_edge_op_get_support(op, support_out);
+
+    uint32_t expected[3] = {0, 1, 2};
+    for (uint32_t i = 0; i < num_support; i++) {
+        passed_all = passed_all && (support_out[i] == expected[i]);
+    }
+
+    // An operator without terms has an empty support, so the buffer is never written to.
+    QfEdgeVertexOperator *empty = qf_edge_op_zero();
+    passed_all = passed_all && (qf_edge_op_num_support(empty) == 0);
+
+    qf_edge_op_free(op);
+    qf_edge_op_free(empty);
+
+    if (!passed_all) {
+        return EqualityError;
+    }
+    return Ok;
+}
+
 static int test_add(void) {
     QfEdgeVertexOperator *one = qf_edge_op_one();
     QfEdgeVertexOperator *zero = qf_edge_op_zero();
@@ -621,6 +657,7 @@ int test_edge_vertex_operator(void) {
     int num_failed = 0;
     num_failed += RUN_TEST(test_new);
     num_failed += RUN_TEST(test_getters);
+    num_failed += RUN_TEST(test_get_support);
     num_failed += RUN_TEST(test_add);
     num_failed += RUN_TEST(test_add_term);
     num_failed += RUN_TEST(test_mul);

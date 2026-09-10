@@ -1,0 +1,20 @@
+---
+features:
+  - |
+    Added the operator support to the C API, which was previously available only from Python via
+    ``get_support``. Each of the four operator representations gained a pair of functions:
+    :c:func:`qf_ferm_op_num_support` and :c:func:`qf_ferm_op_get_support`, plus the ``qf_maj_op``,
+    ``qf_edge_op`` and ``qf_transfer_op`` equivalents.
+
+    Unlike the other getters, these do not hand out a pointer into the operator, because the
+    support is computed on demand rather than stored. Call the ``num_support`` function first to
+    size the output buffer, then pass that buffer to ``get_support``:
+
+    .. code-block:: c
+
+        uint32_t num_support = qf_ferm_op_num_support(op);
+        uint32_t *support = malloc(num_support * sizeof(uint32_t));
+        qf_ferm_op_get_support(op, support);
+
+    The C functions write the mode indices in ascending order, whereas the Python method returns an
+    unordered ``set``.

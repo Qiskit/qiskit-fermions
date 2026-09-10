@@ -91,6 +91,40 @@ static int test_getters(void) {
     return Ok;
 }
 
+static int test_get_support(void) {
+    // Two terms deliberately share mode 2, and the modes are supplied out of order, so the
+    // test covers both de-duplication and the ascending-order guarantee.
+    uint32_t modes[3] = {2, 0, 2};
+    QkComplex64 coeffs[2] = {{1.0, 0.0}, {1.0, 0.0}};
+    uint32_t boundaries[3] = {0, 2, 3};
+    QfMajoranaOperator *op = qf_maj_op_new(2, 3, coeffs, modes, boundaries);
+
+    bool passed_all = true;
+
+    uint32_t num_support = qf_maj_op_num_support(op);
+    passed_all = passed_all && (num_support == 2);
+
+    uint32_t support_out[2];
+    qf_maj_op_get_support(op, support_out);
+
+    uint32_t expected[2] = {0, 2};
+    for (uint32_t i = 0; i < num_support; i++) {
+        passed_all = passed_all && (support_out[i] == expected[i]);
+    }
+
+    // An operator without terms has an empty support, so the buffer is never written to.
+    QfMajoranaOperator *empty = qf_maj_op_zero();
+    passed_all = passed_all && (qf_maj_op_num_support(empty) == 0);
+
+    qf_maj_op_free(op);
+    qf_maj_op_free(empty);
+
+    if (!passed_all) {
+        return EqualityError;
+    }
+    return Ok;
+}
+
 static int test_add(void) {
     QfMajoranaOperator *zero = qf_maj_op_zero();
     QfMajoranaOperator *one = qf_maj_op_one();
@@ -604,6 +638,7 @@ int test_majorana_operator(void) {
     int num_failed = 0;
     num_failed += RUN_TEST(test_new);
     num_failed += RUN_TEST(test_getters);
+    num_failed += RUN_TEST(test_get_support);
     num_failed += RUN_TEST(test_add);
     num_failed += RUN_TEST(test_add_term);
     num_failed += RUN_TEST(test_equiv_pos);

@@ -254,6 +254,108 @@ pub unsafe extern "C" fn qf_maj_op_get_boundaries(
 
 /// @ingroup qf_maj_op
 ///
+/// @brief Gets the size of the support of an operator.
+///
+/// @param op A pointer to the Majorana operator whose support size to get.
+///
+/// @return The number of distinct mode indices acted upon by the operator.
+///
+/// @rst
+///
+/// Use this to size the output buffer of :c:func:`qf_maj_op_get_support`, which does not report a
+/// length of its own.
+///
+/// Example
+/// -------
+///
+/// .. code-block:: c
+///     :linenos:
+///
+///     uint32_t modes[3] = {2, 0, 2};
+///     QkComplex64 coeffs[2] = {{1.0, 0.0}, {1.0, 0.0}};
+///     uint32_t boundaries[3] = {0, 2, 3};
+///     QfMajoranaOperator *op = qf_maj_op_new(2, 3, coeffs, modes, boundaries);
+///
+///     uint32_t num_support = qf_maj_op_num_support(op);
+///
+///     assert(num_support == 2);
+///
+/// @endrst
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn qf_maj_op_num_support(op: *const MajoranaOperator) -> u32 {
+    // SAFETY: Per documentation, the pointer is non-null and aligned.
+    let op = unsafe { const_ptr_as_ref(op) };
+
+    op.get_support()
+        .len()
+        .try_into()
+        .expect("the number of distinct modes cannot exceed u32::MAX")
+}
+
+/// @ingroup qf_maj_op
+///
+/// @brief Gets the support of an operator, i.e. the Majorana mode indices acted upon by the operator.
+///
+/// @param op A pointer to the Majorana operator whose support to get.
+/// @param support_out A pointer to the integer array into which to write the support. It must be
+///     sized to at least :c:func:`qf_maj_op_num_support` elements.
+///
+/// @rst
+///
+/// The indices are written in **ascending** order, and every index appears exactly once no matter
+/// how many terms act upon it.
+///
+/// .. note::
+///    Unlike the other getters, this does not hand out a pointer into the operator: the support is
+///    computed on demand rather than stored, so the caller provides the output buffer. Query its
+///    required length with :c:func:`qf_maj_op_num_support` first.
+///
+///
+/// .. note::
+///    These are the *Majorana* mode indices, not the fermionic ones: they are not divided
+///    by two. A Majorana operator on fermionic mode ``j`` therefore reports the indices
+///    ``2 * j`` and/or ``2 * j + 1``.
+///
+/// Example
+/// -------
+///
+/// .. code-block:: c
+///     :linenos:
+///
+///     uint32_t modes[3] = {2, 0, 2};
+///     QkComplex64 coeffs[2] = {{1.0, 0.0}, {1.0, 0.0}};
+///     uint32_t boundaries[3] = {0, 2, 3};
+///     QfMajoranaOperator *op = qf_maj_op_new(2, 3, coeffs, modes, boundaries);
+///
+///     uint32_t num_support = qf_maj_op_num_support(op);
+///     uint32_t *support_out = malloc(num_support * sizeof(uint32_t));
+///
+///     qf_maj_op_get_support(op, support_out);
+///
+///     assert(support_out[0] == 0);
+///     assert(support_out[1] == 2);
+///
+///     free(support_out);
+///
+/// @endrst
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn qf_maj_op_get_support(op: *const MajoranaOperator, support_out: *mut u32) {
+    // SAFETY: Per documentation, the pointer is non-null and aligned.
+    let op = unsafe { const_ptr_as_ref(op) };
+
+    // The support is gathered into a `HashSet`, whose iteration order is not reproducible. Sorting
+    // makes the output deterministic, which is what lets a caller index into it meaningfully.
+    let mut support: Vec<u32> = op.get_support().into_iter().collect();
+    support.sort_unstable();
+
+    for (i, mode) in support.iter().enumerate() {
+        // SAFETY: Per documentation, `support_out` is sized to hold the whole support.
+        unsafe { support_out.add(i).write(*mode) };
+    }
+}
+
+/// @ingroup qf_maj_op
+///
 /// @brief Constructs the additive identity operator.
 ///
 /// @return A pointer to the created operator.
