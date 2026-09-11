@@ -7,4 +7,4 @@ description = "Raw bindings to libqiskit"
 version = "2.2.3"
 
 [build-dependencies]
-bindgen = "0.72.0"
+bindgen = "0.73.2"
