@@ -8,7 +8,7 @@
         <link rel="prefetch" href="_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Release Notes - Qiskit Fermions 0.2.0+ad7187c</title>
+        <title>Release Notes - Qiskit Fermions 0.3.0.dev0+4eec205</title>
       <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="index.html"><div class="brand">Qiskit Fermions 0.2.0+ad7187c</div></a>
+      <a href="index.html"><div class="brand">Qiskit Fermions 0.3.0.dev0+4eec205</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0+ad7187c</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.3.0.dev0+4eec205</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="search.html" role="search">
@@ -267,16 +267,16 @@
         <article role="main" id="furo-main-content">
           <section id="release-notes">
 <span id="id1"></span><h1>Release Notes<a class="headerlink" href="#release-notes" title="Link to this heading">¶</a></h1>
-<section id="upcoming-release-main">
-<span id="release-notes-upcoming-release-main"></span><h2>Upcoming release (<code class="docutils literal notranslate"><span class="pre">main</span></code>)<a class="headerlink" href="#upcoming-release-main" title="Link to this heading">¶</a></h2>
+<section id="release-notes-0-2-0">
+<span id="id2"></span><h2>0.2.0<a class="headerlink" href="#release-notes-0-2-0" title="Link to this heading">¶</a></h2>
 <section id="prelude">
-<span id="release-notes-upcoming-release-main-prelude"></span><h3>Prelude<a class="headerlink" href="#prelude" title="Link to this heading">¶</a></h3>
+<span id="release-notes-0-2-0-prelude"></span><h3>Prelude<a class="headerlink" href="#prelude" title="Link to this heading">¶</a></h3>
 <p>This release grows the control this package gives over circuit synthesis. An <code class="docutils literal notranslate"><span class="pre">Evolution</span></code> gate now takes an explicit <code class="docutils literal notranslate"><span class="pre">synthesis</span></code> method, a new <code class="docutils literal notranslate"><span class="pre">synthesis</span></code> module supplies fermionic product formulas of first and higher order, and the <code class="docutils literal notranslate"><span class="pre">FermionicTrotterization</span></code> pass selects and applies one across every evolution in a circuit at once. Alongside it, the Jordan-Wigner mapper gained direct implementations for all four operator representations, and new adapters let a mapper’s output be simplified or emitted group by group.
 The C API caught up considerably. The edge-vertex and transfer-vertex representations, their mappers and their algebra are now reachable from C, as are the operator support, sector conservation, in-place and scaled arithmetic, and group ordering. Both APIs also gained access to the electronic integrals parsed by an FCIDump, which previously could only be reached by converting the whole data structure into an operator.
 Additionally, this release draws a sharper boundary around what this package is for: fermionic operators, the mappers that convert them, and the mapper-agnostic circuit and its transpilation. Simulation is <a class="reference external" href="https://github.com/qiskit-community/ffsim">ffsim</a>’s concern, so the native FCI kernel and the linear-algebra utilities that duplicated it have been removed in favor of delegating to ffsim, and the <code class="docutils literal notranslate"><span class="pre">UCC</span></code> and <code class="docutils literal notranslate"><span class="pre">UCJ</span></code> gates now wrap ffsim’s operators instead of reimplementing their parameterizations. Simulation consequently requires the <code class="docutils literal notranslate"><span class="pre">ffsim</span></code> extra and, through ffsim’s dependency on PySCF, is unavailable on Windows; building operators, mapping them and transpiling the resulting circuits remain supported everywhere. Since this is still a pre-1.0 release, all of this was done by removal rather than deprecation: the upgrade notes below pair every removed API with its replacement, and are worth reading in full before upgrading.</p>
 </section>
 <section id="python-api-features">
-<span id="release-notes-upcoming-release-main-python-api-features"></span><h3>Python API Features<a class="headerlink" href="#python-api-features" title="Link to this heading">¶</a></h3>
+<span id="release-notes-0-2-0-python-api-features"></span><h3>Python API Features<a class="headerlink" href="#python-api-features" title="Link to this heading">¶</a></h3>
 <ul>
 <li><p>How an <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate gets decomposed in fermionic space is now configurable through its
 new keyword-only <code class="docutils literal notranslate"><span class="pre">synthesis</span></code> argument, mirroring the <code class="docutils literal notranslate"><span class="pre">synthesis</span></code> argument of Qiskit’s
@@ -499,7 +499,7 @@ compute the trace of an operator on a fixed <code class="docutils literal notran
 </ul>
 </section>
 <section id="c-api-features">
-<span id="release-notes-upcoming-release-main-c-api-features"></span><h3>C API Features<a class="headerlink" href="#c-api-features" title="Link to this heading">¶</a></h3>
+<span id="release-notes-0-2-0-c-api-features"></span><h3>C API Features<a class="headerlink" href="#c-api-features" title="Link to this heading">¶</a></h3>
 <ul>
 <li><p>Added <a class="reference internal" href="cdoc/qf-ferm-op.html#c.qf_ferm_op_conserves_sector" title="qf_ferm_op_conserves_sector"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_ferm_op_conserves_sector()</span></code></a>, which checks that every term of a
 <a class="reference internal" href="cdoc/qf-ferm-op.html#c.QfFermionOperator" title="QfFermionOperator"><code class="xref c c-struct docutils literal notranslate"><span class="pre">QfFermionOperator</span></code></a> conserves the particle number <em>within each block</em> of modes. It
@@ -631,7 +631,7 @@ the existing <a class="reference internal" href="cdoc/qf-mappers-library.html#c.
 </ul>
 </section>
 <section id="python-api-upgrade-notes">
-<span id="release-notes-upcoming-release-main-python-api-upgrade-notes"></span><h3>Python API Upgrade Notes<a class="headerlink" href="#python-api-upgrade-notes" title="Link to this heading">¶</a></h3>
+<span id="release-notes-0-2-0-python-api-upgrade-notes"></span><h3>Python API Upgrade Notes<a class="headerlink" href="#python-api-upgrade-notes" title="Link to this heading">¶</a></h3>
 <ul>
 <li><p>The <code class="docutils literal notranslate"><span class="pre">qiskit_fermions.linalg.apply_unitary</span></code> and
 <code class="docutils literal notranslate"><span class="pre">qiskit_fermions.linalg.linear_operator</span></code> functions have been removed. They were thin wrappers
@@ -825,7 +825,7 @@ pickles written by this version round-trip unchanged.</p></li>
 </ul>
 </section>
 <section id="c-api-upgrade-notes">
-<span id="release-notes-upcoming-release-main-c-api-upgrade-notes"></span><h3>C API Upgrade Notes<a class="headerlink" href="#c-api-upgrade-notes" title="Link to this heading">¶</a></h3>
+<span id="release-notes-0-2-0-c-api-upgrade-notes"></span><h3>C API Upgrade Notes<a class="headerlink" href="#c-api-upgrade-notes" title="Link to this heading">¶</a></h3>
 <ul>
 <li><p><a class="reference internal" href="cdoc/qf-fcidump.html#c.qf_fcidump_from_file" title="qf_fcidump_from_file"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_fcidump_from_file()</span></code></a> now returns a <a class="reference internal" href="cdoc/qf-exit-code.html#c.QfExitCode" title="QfExitCode"><code class="xref c c-enum docutils literal notranslate"><span class="pre">QfExitCode</span></code></a> and takes the parsed
 <a class="reference internal" href="cdoc/qf-fcidump.html#c.QfFCIDump" title="QfFCIDump"><code class="xref c c-struct docutils literal notranslate"><span class="pre">QfFCIDump</span></code></a> through a new out-parameter, matching the convention already used by the
@@ -854,7 +854,7 @@ terms returns <a class="reference internal" href="cdoc/qf-exit-code.html#c.QfExi
 </ul>
 </section>
 <section id="build-system-changes">
-<span id="release-notes-upcoming-release-main-build-system-changes"></span><h3>Build System Changes<a class="headerlink" href="#build-system-changes" title="Link to this heading">¶</a></h3>
+<span id="release-notes-0-2-0-build-system-changes"></span><h3>Build System Changes<a class="headerlink" href="#build-system-changes" title="Link to this heading">¶</a></h3>
 <ul class="simple">
 <li><p>The <code class="docutils literal notranslate"><span class="pre">simulation</span></code> optional dependency has been renamed to <code class="docutils literal notranslate"><span class="pre">ffsim</span></code>, so
 <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">&quot;qiskit-fermions[simulation]&quot;</span></code> becomes
@@ -874,7 +874,7 @@ visible at install time. Installing <code class="docutils literal notranslate"><
 </ul>
 </section>
 <section id="bug-fixes">
-<span id="release-notes-upcoming-release-main-bug-fixes"></span><h3>Bug Fixes<a class="headerlink" href="#bug-fixes" title="Link to this heading">¶</a></h3>
+<span id="release-notes-0-2-0-bug-fixes"></span><h3>Bug Fixes<a class="headerlink" href="#bug-fixes" title="Link to this heading">¶</a></h3>
 <ul>
 <li><p>Fixed the excessive memory consumption of
 <a class="reference internal" href="stubs/qiskit_fermions.mappers.library.fermion_jordan_wigner.html#qiskit_fermions.mappers.library.fermion_jordan_wigner" title="qiskit_fermions.mappers.library.fermion_jordan_wigner"><code class="xref py py-func docutils literal notranslate"><span class="pre">fermion_jordan_wigner()</span></code></a> and of
@@ -953,7 +953,7 @@ a plain <a class="reference external" href="https://quantum.cloud.ibm.com/docs/a
 </ul>
 </section>
 <section id="performance-improvements">
-<span id="release-notes-upcoming-release-main-performance-improvements"></span><h3>Performance Improvements<a class="headerlink" href="#performance-improvements" title="Link to this heading">¶</a></h3>
+<span id="release-notes-0-2-0-performance-improvements"></span><h3>Performance Improvements<a class="headerlink" href="#performance-improvements" title="Link to this heading">¶</a></h3>
 <ul class="simple">
 <li><p>Improved the numerical conditioning of state-vector simulation for
 <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> and <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.OrbitalRotation.html#qiskit_fermions.circuit.library.OrbitalRotation" title="qiskit_fermions.circuit.library.OrbitalRotation"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrbitalRotation</span></code></a> gates by supplying the
@@ -967,9 +967,9 @@ the input <a class="reference internal" href="stubs/qiskit_fermions.operators.Fe
 </section>
 </section>
 <section id="release-notes-0-1-0">
-<span id="id2"></span><h2>0.1.0<a class="headerlink" href="#release-notes-0-1-0" title="Link to this heading">¶</a></h2>
+<span id="id3"></span><h2>0.1.0<a class="headerlink" href="#release-notes-0-1-0" title="Link to this heading">¶</a></h2>
 <section id="release-notes-0-1-0-prelude">
-<span id="id3"></span><h3>Prelude<a class="headerlink" href="#release-notes-0-1-0-prelude" title="Link to this heading">¶</a></h3>
+<span id="id4"></span><h3>Prelude<a class="headerlink" href="#release-notes-0-1-0-prelude" title="Link to this heading">¶</a></h3>
 <p>This is the first release of Qiskit Fermions, an extension of Qiskit with tools for fermionic systems.  It provides operator data structures, a framework and library for converting those operators to qubit form (mappers), and a framework and library for synthesizing the corresponding quantum circuits.
 Following Qiskit’s design philosophy, the core of this package is written in Rust and exposed through first-party bindings for both Python and C.</p>
 </section>
@@ -1025,7 +1025,7 @@ Following Qiskit’s design philosophy, the core of this package is written in R
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">Release Notes</a><ul>
-<li><a class="reference internal" href="#upcoming-release-main">Upcoming release (<code class="docutils literal notranslate"><span class="pre">main</span></code>)</a><ul>
+<li><a class="reference internal" href="#release-notes-0-2-0">0.2.0</a><ul>
 <li><a class="reference internal" href="#prelude">Prelude</a></li>
 <li><a class="reference internal" href="#python-api-features">Python API Features</a></li>
 <li><a class="reference internal" href="#c-api-features">C API Features</a></li>
@@ -1051,7 +1051,7 @@ Following Qiskit’s design philosophy, the core of this package is written in R
       
     </aside>
   </div>
-</div><script src="_static/documentation_options.js?v=4637476a"></script>
+</div><script src="_static/documentation_options.js?v=d084782e"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/scripts/furo.js?v=46bd48cc"></script>
