@@ -8,7 +8,7 @@
         <link rel="prefetch" href="_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Release Notes - Qiskit Fermions 0.2.0.dev0+8dccb6e</title>
+        <title>Release Notes - Qiskit Fermions 0.2.0.dev0+c8cc52d</title>
       <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+8dccb6e</div></a>
+      <a href="index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+c8cc52d</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+8dccb6e</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+c8cc52d</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="search.html" role="search">
@@ -286,6 +286,35 @@ what these methods can exploit and Qiskit’s <a class="reference external" href
 <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter.html#qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter" title="qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicLieTrotter</span></code></a>, which reproduces exactly
 the decomposition that <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> performed before, so existing circuits synthesize
 identically.</p>
+</li>
+</ul>
+<ul>
+<li><p>The sampling weights of <a class="reference internal" href="stubs/qiskit_fermions.transpiler.passes.QDriftTrotterization.html#qiskit_fermions.transpiler.passes.QDriftTrotterization" title="qiskit_fermions.transpiler.passes.QDriftTrotterization"><code class="xref py py-class docutils literal notranslate"><span class="pre">QDriftTrotterization</span></code></a> can now be supplied through its new
+keyword-only <code class="docutils literal notranslate"><span class="pre">weights</span></code> argument, instead of being derived from the evolved operator on every call.
+Leaving it at <code class="docutils literal notranslate"><span class="pre">None</span></code> (the default) behaves exactly as before, so existing circuits are sampled
+identically.</p>
+<p>This is a performance option: the default path reduces one value per operator <em>term</em> down to one
+per group on every call to <a class="reference internal" href="stubs/qiskit_fermions.transpiler.passes.QDriftTrotterization.html#qiskit_fermions.transpiler.passes.QDriftTrotterization.run" title="qiskit_fermions.transpiler.passes.QDriftTrotterization.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a>, which is repeated work when
+generating an ensemble from a single Hamiltonian, even though the result is identical every time.
+Derive it once with <a class="reference internal" href="stubs/qiskit_fermions.operators.terms.group_coeff_means.html#qiskit_fermions.operators.terms.group_coeff_means" title="qiskit_fermions.operators.terms.group_coeff_means"><code class="xref py py-func docutils literal notranslate"><span class="pre">group_coeff_means()</span></code></a> instead, alongside
+<a class="reference internal" href="stubs/qiskit_fermions.operators.terms.group_order.html#qiskit_fermions.operators.terms.group_order" title="qiskit_fermions.operators.terms.group_order"><code class="xref py py-func docutils literal notranslate"><span class="pre">group_order()</span></code></a>, which hoists the group lookup out of the same
+loop:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">hamiltonian</span> <span class="o">=</span> <span class="n">group_order</span><span class="p">(</span><span class="n">hamiltonian</span><span class="p">)</span>
+<span class="n">weights</span> <span class="o">=</span> <span class="n">group_coeff_means</span><span class="p">(</span><span class="n">hamiltonian</span><span class="p">)</span>
+<span class="n">pm</span><span class="o">.</span><span class="n">optimization</span> <span class="o">=</span> <span class="n">FermionicPassManager</span><span class="p">(</span>
+    <span class="p">[</span><span class="n">QDriftTrotterization</span><span class="p">(</span><span class="n">num_groups</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">)]</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>The entries must be non-negative, since a weight is the magnitude <span class="math">\(h_j\)</span> of the qDRIFT
+decomposition <span class="math">\(H = \sum_j h_j H_j\)</span>, in which a coefficient’s sign belongs to <span class="math">\(H_j\)</span> and
+is read off the evolved operator directly.</p>
+<p>Two constraints come with a supplied array. Its scale is not free: the sum of the weights also sets
+the shared evolution time, so multiplying every entry by <code class="docutils literal notranslate"><span class="pre">gamma</span></code> samples identically but evolves
+for <code class="docutils literal notranslate"><span class="pre">gamma</span> <span class="pre">*</span> <span class="pre">t</span></code>. And because the array describes the terms (or groups) of one specific operator,
+its length is validated against every <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate it is applied to, and a circuit
+holding more than one such gate is rejected; leaving <code class="docutils literal notranslate"><span class="pre">weights</span></code> unset keeps such a circuit
+supported, since each gate then derives its own.</p>
 </li>
 </ul>
 <ul>
@@ -988,7 +1017,7 @@ Following Qiskit’s design philosophy, the core of this package is written in R
       
     </aside>
   </div>
-</div><script src="_static/documentation_options.js?v=b53cdf87"></script>
+</div><script src="_static/documentation_options.js?v=b87481a1"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/scripts/furo.js?v=46bd48cc"></script>

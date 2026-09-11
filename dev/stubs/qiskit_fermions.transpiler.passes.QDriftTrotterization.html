@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>QDriftTrotterization - Qiskit Fermions 0.2.0.dev0+8dccb6e</title>
+        <title>QDriftTrotterization - Qiskit Fermions 0.2.0.dev0+c8cc52d</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+8dccb6e</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+c8cc52d</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+8dccb6e</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+c8cc52d</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -266,25 +266,31 @@
 <h1>QDriftTrotterization<a class="headerlink" href="#qdrifttrotterization" title="Link to this heading">¶</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="qiskit_fermions.transpiler.passes.QDriftTrotterization">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">QDriftTrotterization</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_terms</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter_trivial</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rng</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qiskit_fermions.transpiler.passes.QDriftTrotterization" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">QDriftTrotterization</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_terms</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter_trivial</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rng</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qiskit_fermions.transpiler.passes.QDriftTrotterization" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.GenericPass" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">GenericPass</span></code></a>[<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.dagcircuit.DAGCircuit" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DAGCircuit</span></code></a>, <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.dagcircuit.DAGCircuit" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DAGCircuit</span></code></a>]</p>
 <p>A transpilation pass to Trotterize <a class="reference internal" href="qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gates via the qDRIFT protocol.</p>
 <p>This pass replaces the exact evolution <span class="math">\(e^{-i t H}\)</span> of each <a class="reference internal" href="qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate by a
 randomized product formula: it draws <code class="docutils literal notranslate"><span class="pre">num_terms</span></code> samples from the Hamiltonian’s terms (or
 <a class="reference internal" href="qiskit_fermions.operators.FermionOperator.html#qiskit_fermions.operators.FermionOperator.groups" title="qiskit_fermions.operators.FermionOperator.groups"><code class="xref py py-attr docutils literal notranslate"><span class="pre">groups</span></code></a>, if assigned), with each term sampled
-with a probability proportional to the magnitude of its coefficient, and emits one
-<a class="reference internal" href="qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate per sample. Every sampled gate evolves its (unit-magnitude,
+with a probability proportional to the magnitude of its sampling weight <span class="math">\(w_j\)</span>, and emits
+one <a class="reference internal" href="qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate per sample. Every sampled gate evolves its (unit-magnitude,
 sign-preserving) term (or, when the Hamiltonian carries groups, its whole sampled group) for
 the same time</p>
 <div class="math-wrapper docutils container">
 <div class="math">
-\[\delta = \frac{\lambda t}{\texttt{num\_terms}}, \qquad \lambda = \sum_j |c_j|,\]</div>
+\[\delta = \frac{\lambda t}{\texttt{num\_terms}}, \qquad
+p_j = \frac{w_j}{\lambda}, \qquad
+\lambda = \sum_j w_j,\]</div>
 </div>
-<p>where the <span class="math">\(c_j\)</span> are the coefficients of the sampled terms/groups. The ordered product of
-the sampled evolutions does not reproduce <span class="math">\(e^{-i t H}\)</span> exactly; rather, its expectation
-over the sampling approximates the exact evolution, with an error that decreases as
-<code class="docutils literal notranslate"><span class="pre">num_terms</span></code> grows. Because the output depends on the random draws, it differs from run to run
-unless a fixed <code class="docutils literal notranslate"><span class="pre">rng</span></code> is supplied.</p>
+<p>so that each draw contributes <span class="math">\(\delta \cdot p_j = w_j t / \texttt{num\_terms}\)</span>. By default
+<span class="math">\(w_j = |c_j|\)</span>, the magnitude of the sampled term’s (or group’s) coefficient, which recovers
+the textbook qDRIFT normalization <span class="math">\(\lambda = \sum_j |c_j|\)</span>; the sign of <span class="math">\(c_j\)</span> is not
+part of the weight but of the sampled operator, and is read off it directly. Supply
+<a class="reference internal" href="#qiskit_fermions.transpiler.passes.QDriftTrotterization.weights" title="qiskit_fermions.transpiler.passes.QDriftTrotterization.weights"><code class="xref py py-attr docutils literal notranslate"><span class="pre">weights</span></code></a> to precompute that array once instead of deriving it on every call.</p>
+<p>The ordered product of the sampled evolutions does not reproduce <span class="math">\(e^{-i t H}\)</span> exactly;
+rather, its expectation over the sampling approximates the exact evolution, with an error that
+decreases as <code class="docutils literal notranslate"><span class="pre">num_terms</span></code> grows. Because the output depends on the random draws, it differs
+from run to run unless a fixed <code class="docutils literal notranslate"><span class="pre">rng</span></code> is supplied.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>The sampled gates are marked <a class="reference internal" href="qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution.atomic" title="qiskit_fermions.circuit.library.Evolution.atomic"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Evolution.atomic</span></code></a>: the random draw <em>is</em> the
@@ -311,6 +317,19 @@ overhead. Filter them out with
 <em>before</em> constructing the <a class="reference internal" href="qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate, rather than on every call to <a class="reference internal" href="#qiskit_fermions.transpiler.passes.QDriftTrotterization.run" title="qiskit_fermions.transpiler.passes.QDriftTrotterization.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a>:
 this pass runs once per transpiled circuit, so filtering upstream avoids repeating the same
 filtering work for every circuit generated from the same Hamiltonian.</p>
+</div>
+<div class="admonition caution">
+<p class="admonition-title">Caution</p>
+<p>The <em>scale</em> of <a class="reference internal" href="#qiskit_fermions.transpiler.passes.QDriftTrotterization.weights" title="qiskit_fermions.transpiler.passes.QDriftTrotterization.weights"><code class="xref py py-attr docutils literal notranslate"><span class="pre">weights</span></code></a> is not free: it sets the evolution time. Since
+<span class="math">\(\delta \cdot p_j = w_j t / \texttt{num\_terms}\)</span> above depends on <span class="math">\(w_j\)</span> itself and
+not merely on its share of <span class="math">\(\lambda\)</span>, rescaling every weight by <span class="math">\(\gamma\)</span> leaves the
+distribution untouched but evolves for <span class="math">\(\gamma t\)</span> rather than <span class="math">\(t\)</span>. Weights are
+therefore absolute magnitudes, not relative preferences, and only <span class="math">\(w_j = |c_j|\)</span>
+reproduces <span class="math">\(e^{-i t H}\)</span>.</p>
+<p>A distribution whose <em>shape</em> differs from <span class="math">\(|c_j|\)</span> no longer approximates
+<span class="math">\(e^{-i t H}\)</span> on its own either. Recovering the target evolution then requires
+reweighting the measured outcomes, which is the caller’s responsibility: this pass emits
+circuits and cannot post-process their results. See <a class="reference internal" href="#qiskit_fermions.transpiler.passes.QDriftTrotterization.weights" title="qiskit_fermions.transpiler.passes.QDriftTrotterization.weights"><code class="xref py py-attr docutils literal notranslate"><span class="pre">weights</span></code></a>.</p>
 </div>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
@@ -341,9 +360,18 @@ updates these sets the same way its <a class="reference internal" href="qiskit_f
 occupied/unoccupied sets from its <code class="docutils literal notranslate"><span class="pre">occupation</span></code>, then immediately marks every mode
 it acts on as “uncertain” because of its rotation. See the <a class="reference internal" href="#qiskit_fermions.transpiler.passes.QDriftTrotterization.run" title="qiskit_fermions.transpiler.passes.QDriftTrotterization.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a> docstring for
 the precise acceptance rule.</p></li>
+<li><p><strong>weights</strong> (<em>Sequence</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>] </em><em>| </em><em>np.ndarray</em><em> | </em><em>None</em>) – the sampling weights to use instead of the coefficient magnitudes derived from
+the Hamiltonian. If <code class="docutils literal notranslate"><span class="pre">None</span></code> (the default), they are computed from the evolved
+operator on every call, which reproduces the textbook qDRIFT distribution. See
+<a class="reference internal" href="#qiskit_fermions.transpiler.passes.QDriftTrotterization.weights" title="qiskit_fermions.transpiler.passes.QDriftTrotterization.weights"><code class="xref py py-attr docutils literal notranslate"><span class="pre">weights</span></code></a> for the expected length, the sign convention and the effect on the
+evolution time.</p></li>
 <li><p><strong>rng</strong> (<em>np.random.Generator</em><em> | </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em> | </em><em>None</em>) – the random number generator (rng) to be used. When this is an <code class="docutils literal notranslate"><span class="pre">int</span></code>, the internal
 rng will be initialized with <code class="docutils literal notranslate"><span class="pre">np.random.default_rng(seed=rng)</span></code>.</p></li>
 </ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – if <code class="docutils literal notranslate"><span class="pre">weights</span></code> is not one-dimensional, is empty, holds a non-finite or
+    negative entry, or sums to zero.</p>
 </dd>
 </dl>
 <p class="rubric">Attributes</p>
@@ -370,6 +398,43 @@ unoccupied, and none have yet become “uncertain”) and no remaining term’s 
 class docstring for the <code class="docutils literal notranslate"><span class="pre">filter_trivial</span></code> argument).</p>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qiskit_fermions.transpiler.passes.QDriftTrotterization.weights">
+<span class="sig-name descname"><span class="pre">weights</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">np.ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><a class="headerlink" href="#qiskit_fermions.transpiler.passes.QDriftTrotterization.weights" title="Link to this definition">¶</a></dt>
+<dd><p>The sampling weights <span class="math">\(w_j\)</span>, or <code class="docutils literal notranslate"><span class="pre">None</span></code> to derive them from the evolved operator.</p>
+<p>Supplying them hoists their computation out of the transpilation: the default path recomputes
+them on <em>every</em> call to <a class="reference internal" href="#qiskit_fermions.transpiler.passes.QDriftTrotterization.run" title="qiskit_fermions.transpiler.passes.QDriftTrotterization.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a>, which is repeated work when generating an ensemble from a
+single Hamiltonian. Deriving them once with
+<a class="reference internal" href="qiskit_fermions.operators.terms.group_coeff_means.html#qiskit_fermions.operators.terms.group_coeff_means" title="qiskit_fermions.operators.terms.group_coeff_means"><code class="xref py py-func docutils literal notranslate"><span class="pre">group_coeff_means()</span></code></a> and passing the result here keeps
+this pass stateless while paying that cost a single time. That is the reason to reach for this
+argument; passing anything other than the Hamiltonian’s own coefficient magnitudes changes
+which evolution the ensemble approximates (see the caution below).</p>
+<p>One entry is expected per <em>group</em> when the evolved operator carries
+<a class="reference internal" href="qiskit_fermions.operators.OperatorTrait.html#qiskit_fermions.operators.OperatorTrait.groups" title="qiskit_fermions.operators.OperatorTrait.groups"><code class="xref py py-attr docutils literal notranslate"><span class="pre">groups</span></code></a>, and per <em>term</em> otherwise; a
+mismatch raises <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ValueError</span></code></a>. Because such an array describes one specific operator,
+a circuit holding more than one <a class="reference internal" href="qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate is rejected as well: leave this
+unset for such a circuit, so that every gate derives its own weights, or transpile one gate
+at a time.</p>
+<p>The granularity follows what the pass samples, which is why it is the grouping that decides
+it: a grouped operator is sampled group-wise, so a weight describes a whole group. Whether
+the grouping is the appropriate unit for a given operator is a property of that operator, not
+of this argument – see <a class="reference internal" href="../guides/grouping.html#grouping-explanation"><span class="std std-ref">Group operator terms: use the operator structure</span></a>, and
+<a class="reference internal" href="qiskit_fermions.operators.terms.groups_are_hermitian.html#qiskit_fermions.operators.terms.groups_are_hermitian" title="qiskit_fermions.operators.terms.groups_are_hermitian"><code class="xref py py-func docutils literal notranslate"><span class="pre">groups_are_hermitian()</span></code></a> to check the most
+common convention.</p>
+<p>Entries must be non-negative. A weight is the magnitude <span class="math">\(h_j\)</span> of the qDRIFT
+decomposition <span class="math">\(H = \sum_j h_j H_j\)</span>, in which a coefficient’s sign belongs to
+<span class="math">\(H_j\)</span> rather than to <span class="math">\(h_j\)</span> and is read off the operator directly, so a sign here
+would have nothing to describe. Sampling from a signed (quasi-probability) distribution is a
+separate feature: it additionally requires the accumulated sign of the sampled entries to be
+reported back for post-processing, which this pass does not do.</p>
+<div class="admonition caution">
+<p class="admonition-title">Caution</p>
+<p>These are absolute magnitudes, not relative preferences: their sum also sets the evolution
+time, so rescaling every entry by <span class="math">\(\gamma\)</span> evolves for <span class="math">\(\gamma t\)</span> while
+sampling identically. See the class docstring.</p>
+</div>
+</dd></dl>
+
 <p class="rubric">Methods</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qiskit_fermions.transpiler.passes.QDriftTrotterization.run">
@@ -381,6 +446,10 @@ class docstring). The emitted gates are marked <a class="reference internal" hre
 <a class="reference internal" href="qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution.synthesis" title="qiskit_fermions.circuit.library.Evolution.synthesis"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Evolution.synthesis</span></code></a> method of the node they replace. Nodes that are not
 <a class="reference internal" href="qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gates are copied to the output unchanged. Since the sampling is random,
 the output varies between runs unless the <code class="docutils literal notranslate"><span class="pre">rng</span></code> was seeded.</p>
+<p>The sampling weights are recomputed from each evolved operator here, unless <a class="reference internal" href="#qiskit_fermions.transpiler.passes.QDriftTrotterization.weights" title="qiskit_fermions.transpiler.passes.QDriftTrotterization.weights"><code class="xref py py-attr docutils literal notranslate"><span class="pre">weights</span></code></a>
+was supplied, in which case that array is used as-is and this method never touches the
+operator’s coefficients. A supplied array is validated against the operator it is applied to,
+and restricts the circuit to a single <a class="reference internal" href="qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate (see <a class="reference internal" href="#qiskit_fermions.transpiler.passes.QDriftTrotterization.weights" title="qiskit_fermions.transpiler.passes.QDriftTrotterization.weights"><code class="xref py py-attr docutils literal notranslate"><span class="pre">weights</span></code></a>).</p>
 <p>When <a class="reference internal" href="#qiskit_fermions.transpiler.passes.QDriftTrotterization.filter_trivial" title="qiskit_fermions.transpiler.passes.QDriftTrotterization.filter_trivial"><code class="xref py py-attr docutils literal notranslate"><span class="pre">filter_trivial</span></code></a> is set, this method tracks the sets of modes that are known to
 be occupied or unoccupied, seeded from any <a class="reference internal" href="qiskit_fermions.circuit.library.InitializeModes.html#qiskit_fermions.circuit.library.InitializeModes" title="qiskit_fermions.circuit.library.InitializeModes"><code class="xref py py-class docutils literal notranslate"><span class="pre">InitializeModes</span></code></a> gate(s) preceding the
 <a class="reference internal" href="qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gates in the circuit (several such gates placed in parallel, e.g. one per
@@ -405,8 +474,13 @@ immediately marked “uncertain”, since it also carries a rotation.</p>
 <dd class="field-even"><p>The output circuit which is still acting on a fermionic register.</p>
 </dd>
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#RuntimeError" title="(in Python v3.14)"><strong>RuntimeError</strong></a> – if <code class="docutils literal notranslate"><span class="pre">filter_trivial</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code> and <a class="reference internal" href="#qiskit_fermions.transpiler.passes.QDriftTrotterization.MAX_SAMPLE_RETRIES" title="qiskit_fermions.transpiler.passes.QDriftTrotterization.MAX_SAMPLE_RETRIES"><code class="xref py py-attr docutils literal notranslate"><span class="pre">MAX_SAMPLE_RETRIES</span></code></a>
-    consecutive samples are rejected without finding a non-trivial term to emit.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#RuntimeError" title="(in Python v3.14)"><strong>RuntimeError</strong></a> – if <code class="docutils literal notranslate"><span class="pre">filter_trivial</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code> and <a class="reference internal" href="#qiskit_fermions.transpiler.passes.QDriftTrotterization.MAX_SAMPLE_RETRIES" title="qiskit_fermions.transpiler.passes.QDriftTrotterization.MAX_SAMPLE_RETRIES"><code class="xref py py-attr docutils literal notranslate"><span class="pre">MAX_SAMPLE_RETRIES</span></code></a>
+    consecutive samples are rejected without finding a non-trivial term to emit.</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – if <a class="reference internal" href="#qiskit_fermions.transpiler.passes.QDriftTrotterization.weights" title="qiskit_fermions.transpiler.passes.QDriftTrotterization.weights"><code class="xref py py-attr docutils literal notranslate"><span class="pre">weights</span></code></a> was supplied and its length does not match the number of
+    groups (or terms) of an evolved operator, or if the circuit holds more than one
+    <a class="reference internal" href="qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate.</p></li>
+</ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.dagcircuit.DAGCircuit" title="(in Qiskit v2.5)"><em>DAGCircuit</em></a></p>
@@ -514,6 +588,7 @@ immediately marked “uncertain”, since it also carries a rotation.</p>
 <li><a class="reference internal" href="#qiskit_fermions.transpiler.passes.QDriftTrotterization.MAX_SAMPLE_RETRIES"><code class="docutils literal notranslate"><span class="pre">QDriftTrotterization.MAX_SAMPLE_RETRIES</span></code></a></li>
 <li><a class="reference internal" href="#qiskit_fermions.transpiler.passes.QDriftTrotterization.num_terms"><code class="docutils literal notranslate"><span class="pre">QDriftTrotterization.num_terms</span></code></a></li>
 <li><a class="reference internal" href="#qiskit_fermions.transpiler.passes.QDriftTrotterization.filter_trivial"><code class="docutils literal notranslate"><span class="pre">QDriftTrotterization.filter_trivial</span></code></a></li>
+<li><a class="reference internal" href="#qiskit_fermions.transpiler.passes.QDriftTrotterization.weights"><code class="docutils literal notranslate"><span class="pre">QDriftTrotterization.weights</span></code></a></li>
 <li><a class="reference internal" href="#qiskit_fermions.transpiler.passes.QDriftTrotterization.run"><code class="docutils literal notranslate"><span class="pre">QDriftTrotterization.run()</span></code></a></li>
 <li><a class="reference internal" href="#qiskit_fermions.transpiler.passes.QDriftTrotterization.execute"><code class="docutils literal notranslate"><span class="pre">QDriftTrotterization.execute()</span></code></a></li>
 <li><a class="reference internal" href="#qiskit_fermions.transpiler.passes.QDriftTrotterization.name"><code class="docutils literal notranslate"><span class="pre">QDriftTrotterization.name()</span></code></a></li>
@@ -531,7 +606,7 @@ immediately marked “uncertain”, since it also carries a rotation.</p>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=b53cdf87"></script>
+</div><script src="../_static/documentation_options.js?v=b87481a1"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
