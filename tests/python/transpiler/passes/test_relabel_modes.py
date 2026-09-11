@@ -23,6 +23,7 @@ from qiskit.dagcircuit import DAGCircuit
 from qiskit.passmanager import MultiStagePassManager
 from qiskit_fermions.circuit import FermionicCircuit
 from qiskit_fermions.circuit.library import Evolution, InitializeModes
+from qiskit_fermions.circuit.library.synthesis import FermionicSuzukiTrotter
 from qiskit_fermions.mappers.library import jordan_wigner
 from qiskit_fermions.operators import FermionOperator, MajoranaOperator
 from qiskit_fermions.transpiler import FermionicCircuitToDAG, QuantumDAGToCircuit
@@ -250,3 +251,57 @@ def test_find_permutation_rejects_non_fermion_operator(monkeypatch):
     relabel = RelabelModes(solver=object())
     with pytest.raises(NotImplementedError, match="build_excitation_span_minimization_model"):
         relabel.find_permutation(dag)
+
+
+def _gathered_excitations(circ, monkeypatch):
+    """Returns the excitation set that ``find_permutation`` feeds to the optimization model.
+
+    The model itself is stubbed out rather than built, so this needs no ``pyomo``: what the gathering
+    produces is plain index arithmetic, and asserting on it should not depend on an optional
+    dependency being installed.
+    """
+    captured: list[tuple[int, ...]] = []
+
+    def stub(excitations, num_modes, **kwargs):
+        captured.extend(tuple(int(idx) for idx in exc) for exc in excitations)
+        raise RuntimeError("stop before solving; only the gathered excitations are of interest")
+
+    monkeypatch.setattr(relabel_modes_module, "build_excitation_span_minimization_model", stub)
+    monkeypatch.setattr(relabel_modes_module, "HAS_PYOMO", True)
+
+    dag = FermionicCircuitToDAG().run(circ)
+    with pytest.raises(RuntimeError, match="stop before solving"):
+        RelabelModes(solver=object()).find_permutation(dag)
+    return sorted(set(captured))
+
+
+def test_find_permutation_uses_global_mode_indices(monkeypatch):
+    """A decomposed evolution must yield the same excitations as the undecomposed one.
+
+    A synthesis method narrows every factor it emits onto that factor's support, so the factor's
+    operator carries mode indices local to the gate while its position in the register lives in the
+    node's ``qargs``. Reading the operator alone gathered those local indices, which collapsed every
+    narrowed two-mode factor onto the excitation ``(0, 1)`` and dropped long-range couplings from
+    the model entirely.
+    """
+    # group 1 is a long-range coupling: it is the excitation the model most wants to see, and the
+    # one that used to disappear once the gate was decomposed.
+    hamil = FermionOperator.from_terms_with_groups(
+        [
+            (((True, 0), (False, 1)), -1.0, 0),
+            (((True, 1), (False, 0)), -1.0, 0),
+            (((True, 0), (False, 5)), -0.5, 1),
+            (((True, 5), (False, 0)), -0.5, 1),
+        ]
+    )
+    num_modes = 6
+    circ = FermionicCircuit(num_modes)
+    circ.append(
+        Evolution(num_modes, hamil, time=1.0, synthesis=FermionicSuzukiTrotter(order=2, reps=1)),
+        circ.modes,
+    )
+
+    expected = [(0, 1), (0, 5), (1, 0), (5, 0)]
+    assert _gathered_excitations(circ, monkeypatch) == expected
+    # decomposing splits the gate into narrowed factors, which must not change the model's input
+    assert _gathered_excitations(circ.decompose(), monkeypatch) == expected

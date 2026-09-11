@@ -26,10 +26,8 @@ this project split the transpilation into the following stages:
    passes use fermionic structure and commutation relations while
    problem-aware knowledge remains fully available. :class:`.FermionicTrotterization` and
    :class:`.QDriftTrotterization` are the passes that Trotterize an :class:`.Evolution` gate here;
-   see :ref:`qiskit_fermions-transpiler-passes-optimization` for the full set. The former only
-   *selects* a synthesis method, so pair it with Qiskit's
-   :class:`~qiskit.transpiler.passes.Decompose` to expand the evolution (see
-   :ref:`fermionic_synthesis_explanation`).
+   see :ref:`qiskit_fermions-transpiler-passes-optimization` for the full set and
+   :ref:`fermionic_synthesis_explanation` for how a product formula is chosen.
 
 **Layout**
    Maps fermionic mode registers to quantum registers. For occupation-basis

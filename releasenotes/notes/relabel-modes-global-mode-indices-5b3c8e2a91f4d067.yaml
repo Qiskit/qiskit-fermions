@@ -1,0 +1,16 @@
+---
+fixes:
+  - |
+    Fixed :class:`.RelabelModes` finding a permutation for the wrong Hamiltonian when a circuit's
+    :class:`.Evolution` gates had already been decomposed. A
+    :class:`~qiskit_fermions.circuit.library.synthesis.FermionicEvolutionSynthesis` narrows every
+    factor it emits onto that factor's support, so the factor's operator carries mode indices local to
+    the gate, while its position in the register is given by the node's qubit arguments. The automatic
+    optimization read the operator alone, which gathered those local indices: every narrowed two-mode
+    factor became the excitation ``(0, 1)`` regardless of which modes it actually coupled, and a
+    long-range coupling dropped out of the model entirely.
+
+    The permutation this returned was valid but optimized for a Hamiltonian that was not the
+    circuit's, and nothing raised, since local indices are themselves valid mode indices. Circuits
+    whose evolutions reached the pass whole were unaffected. If you relied on the permutation of a
+    decomposed circuit, re-run the pass: it may now return a different (and better) one.

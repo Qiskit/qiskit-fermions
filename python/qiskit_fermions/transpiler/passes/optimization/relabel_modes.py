@@ -29,6 +29,7 @@ from qiskit_fermions.operators import FermionOperator
 from qiskit_fermions.utils.optionals import HAS_PYOMO
 
 from ... import FermionicDAGCircuitPass
+from .qdrift import _global_modes
 
 if TYPE_CHECKING:
     import pyomo
@@ -256,10 +257,18 @@ class RelabelModes(FermionicDAGCircuitPass):
                     type(hamil),
                 )
 
+            # The operator's mode indices are local to the gate: a synthesis method narrows each
+            # factor it emits onto that factor's support (see `FermionicSuzukiTrotter.synthesize`),
+            # leaving the factor's position in the register encoded in the node's `qargs` alone. The
+            # model is defined over the register's modes, so translate through `qargs` -- without
+            # this, every narrowed two-mode factor would be gathered as the excitation (0, 1)
+            # regardless of which modes it actually couples.
+            global_modes = _global_modes(dag, node)
+
             modes = hamil.get_modes()
             boundaries = hamil.get_boundaries()
             for start, stop in _sliding_window(boundaries, 2):
-                gathered_excitations.append(tuple(modes[start:stop]))
+                gathered_excitations.append(tuple(global_modes[modes[start:stop]]))
 
         num_modes = dag.num_qubits()
         model = build_excitation_span_minimization_model(

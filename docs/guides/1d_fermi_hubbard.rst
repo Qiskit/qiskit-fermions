@@ -1165,7 +1165,8 @@ with the chain. At 14 modes it is already 12 against 34.
    The same applies one level up, to the fermionic synthesis. An :class:`.Evolution` gate that is
    never decomposed goes to the fermion-to-qubit stage whole, which maps it without consulting
    :attr:`.Evolution.synthesis` at all, so :attr:`~.FermionicLieTrotter.reps` would silently have no
-   effect. ``trotter_steps`` from step 5 performs that decomposition.
+   effect. ``trotter_steps`` from step 5 performs that decomposition; a pipeline that sets the
+   method with :class:`.FermionicTrotterization` gets the same expansion from the pass instead.
 
 As a final cross-check, the site densities :math:`\langle n_j(t) \rangle = (1 - \langle
 V_j \rangle)/2` computed in the encoded space must reproduce the Jordan-Wigner result. This
