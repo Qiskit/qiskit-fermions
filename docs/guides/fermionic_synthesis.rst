@@ -251,7 +251,8 @@ contribute. It also works in the fixed-particle-number sector, which is both sma
    ...         Evolution(num_sites, hamiltonian, time=total_time, synthesis=synthesis),
    ...         circuit.modes,
    ...     )
-   ...     # decompose() expands the chosen formula; see the preceding warning
+   ...     # the method is set on the gate, so decompose() is what expands it here; a pipeline
+   ...     # would reach for FermionicTrotterization instead (see the note above)
    ...     circuit = circuit.decompose()
    ...     evolved = ffsim.apply_unitary(initial, circuit, norb=norb, nelec=nelec)
    ...     error = 1 - abs(np.vdot(evolved, exact)) ** 2
@@ -328,6 +329,51 @@ Coulomb operators of a :class:`.UCJ` have this shape, which is why
 :attr:`.FermionicTrotterization.filter` exists: it takes a predicate over the
 :class:`~qiskit.dagcircuit.DAGOpNode` and leaves the rejected gates untouched, so one pass can raise
 the order on the gates that benefit and leave the rest at first order.
+
+A circuit holding both kinds of evolution shows what that saves. The predicate below accepts a gate
+only when its operator moves particles between modes, which is exactly when the groups fail to
+commute and a higher order has something to buy:
+
+.. plot::
+   :context:
+   :nofigs:
+   :include-source:
+
+   >>> def is_diagonal(operator):
+   ...     """Whether every term only counts particles, rather than moving them between modes."""
+   ...     return all(
+   ...         sorted(mode for created, mode in actions if created)
+   ...         == sorted(mode for created, mode in actions if not created)
+   ...         for actions, _ in operator.iter_terms()
+   ...     )
+   >>>
+   >>> def mixed_circuit():
+   ...     circuit = FermionicCircuit(num_sites)
+   ...     circuit.append(Evolution(num_sites, hamiltonian, time=total_time), circuit.modes)
+   ...     circuit.append(Evolution(num_sites, diagonal, time=total_time), circuit.modes)
+   ...     return circuit
+   >>>
+   >>> def cx_count(circuit):
+   ...     return generate_preset_jw_pass_manager().run(circuit).decompose(reps=6).count_ops()["cx"]
+   >>>
+   >>> order_2 = FermionicSuzukiTrotter(order=2)
+   >>>
+   >>> cx_count(mixed_circuit())  # first order everywhere
+   40
+   >>> cx_count(FermionicPassManager(FermionicTrotterization(order_2)).run(mixed_circuit()))
+   68
+   >>> cx_count(
+   ...     FermionicPassManager(
+   ...         FermionicTrotterization(
+   ...             order_2, filter=lambda node: not is_diagonal(node.op.operator)
+   ...         )
+   ...     ).run(mixed_circuit())
+   ... )
+   60
+
+Raising the order on both gates costs 28 extra entangling gates; restricting it to the Hamiltonian
+costs 20 and buys the same accuracy, because the eight the filter saved were spent on an evolution
+that was already exact at first order.
 
 .. caution::
    Neither knob verifies that the factors are Hermitian, and an incorrectly grouped operator can
