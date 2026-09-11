@@ -32,7 +32,7 @@ fermionic regime with both, operator and circuit representation, before you
 define a fermion-to-qubit encoding that plugs into the multi-representation
 transpiler pipeline of Qiskit.
 
-All of these features are explained in :doc:`several guides <guides/index>` to
+All of these features are explained in :doc:`several guides <guides/overview>` to
 help you get started. For an overview working through exactly the pipeline shown
 above, start with the :doc:`1D Fermi-Hubbard guide <guides/1d_fermi_hubbard>`.
 
@@ -165,8 +165,14 @@ References
 
    Documentation Home <self>
    Installation Instructions <install>
-   Guides <guides/index>
-   GitHub <https://github.com/Qiskit/qiskit-fermions>
+
+.. toctree::
+   :hidden:
+   :caption: Guides
+
+   Simulate 1D Fermi-Hubbard dynamics with flow sets <guides/1d_fermi_hubbard>
+   Simulate 2D Fermi-Hubbard dynamics with flow sets <guides/2d_fermi_hubbard>
+   More guides <guides/overview>
 
 .. toctree::
    :hidden:
@@ -182,3 +188,4 @@ References
    Python API reference <https://quantum.cloud.ibm.com/docs/api/qiskit-fermions>
    C API reference <https://quantum.cloud.ibm.com/docs/api/qiskit-fermions-c>
    Release notes <release-notes>
+   GitHub <https://github.com/Qiskit/qiskit-fermions>
