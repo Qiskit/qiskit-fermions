@@ -3,3 +3,80 @@ encoding: utf8
 default_branch: main
 unreleased_version_title: "Upcoming release"
 earliest_version: 0.1.0
+sections:
+  - [features, Python API Features]
+  - [features_c, C API Features]
+  - [upgrade, Python API Upgrade Notes]
+  - [upgrade_c, C API Upgrade Notes]
+  - [deprecations, Python API Deprecation Notes]
+  - [deprecations_c, C API Deprecations]
+  - [build, Build System Changes]
+  - [issues, Known Issues]
+  - [critical, Critical Issues]
+  - [security, Security Issues]
+  - [fixes, Bug Fixes]
+  - [performance, Performance Improvements]
+  - [other, Other Notes]
+template: |
+  ---
+  # Delete all sections that you do not need.  You can have more than one section in a file, and
+  # more than one bullet point per section.  This is a regular YAML file, and all text should use
+  # Sphinx's flavor of rST (restructured text).  Each bullet point is a separate "release note".
+  #
+  # Each public bug fix, feature, deprecation, and behavior change needs a release note.
+  # Documentation- or internal-only changes do not need release notes.
+  #
+  # Each bullet point appears without any context, so make sure each can be read in isolation.  The
+  # reader will not see your code change, the issue, or any other bullet points in this file.  You
+  # might need to repeat yourself between bullets.
+  #
+  # Use Sphinx cross-references like :meth:`.YourClass.your_method` whenever mentioning a
+  # function/class/method by name.
+  #
+  # Use `- |` for multiline YAML strings (like in the "fixes" example in this template) to preserve
+  # newlines, which you need for Sphinx syntax.
+  #
+  # There are some rare additional sections listed in `releasenotes/config.yaml` not included here.
+
+  fixes:
+    - |
+      Give each bug fix a separate bullet point in here, or delete this section.
+      Each bug-fix note should be about one sentence long.  You can link to
+      issues such as by doing:
+
+      See `#1 <https://github.com/Qiskit-fermions/qiskit/issues/1>`__.
+
+  # Performance release notes are for runtime and output quality improvements which do not
+  # include API or semantic changes.
+  performance:
+    - Measurable performance improvements.
+
+  # A feature is a new user-visible functionality.  It can come in the form of a new function,
+  # class, parameter, environment variable or any other user accessible and publicly documented
+  # endpoint.  In addition, new capabilities, newly supported workflows and new types of language
+  # interoperability are considered features.  Choose the "features" section based on the API you
+  # need and delete the other.  Try to be concise.  You may use a code example for complicated
+  # features.
+  features:
+    - New features in the Python API.
+  features_c:
+    - New features in the C API.
+
+  # Release notes for changes that might require users to modify their code.  These should not be
+  # common, because breaking user code is against the deprecation policy.
+  upgrade:
+    - Changes needing user action in the Python API.
+  upgrade_c:
+    - Changes needing user action in the C API.
+
+  # New deprecations in this release.  Each deprecation should explain why the deprecation is
+  # necessary, and what users should do instead.  Include examples.
+  deprecations:
+    - New deprecations in the Python API.
+  deprecations_c:
+    - New deprecations in the C API.
+
+  # Build release notes are for things like Rust-version updates, Python-packaging updates, etc.
+  # These generally shouldn't concern users, just people building from source.
+  build:
+    - Changes to the build system that packagers might need to be aware of.
