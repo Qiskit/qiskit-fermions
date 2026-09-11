@@ -255,15 +255,17 @@ skip = [
 ]
 # Run straight from the source checkout: passing an explicit path (`{project}/tests/python`) on
 # the command line makes pytest ignore `[tool.pytest.ini_options].testpaths`, so it never walks
-# into `python/qiskit_fermions/` and picks up the Sybil-collected doctests there (those need the
-# `doctest` dependency group and stay owned by `test_latest_versions.yml`; here we only want the
-# plain `tests/python` suite against the installed wheel). Deliberately narrower than the full
-# `test` dependency group for the same reason: doctests aren't run here (`-p no:doctest`).
+# into `python/qiskit_fermions/` and picks up the Sybil-collected doctests there (those stay owned
+# by `test_latest_versions.yml`; here we only want the plain `tests/python` suite against the
+# installed wheel). The doctests are not *run* here (`-p no:doctest`), but `doctest` is still the
+# group to install rather than `basetest`: `tests/python/conftest.py` imports Sybil to infer the
+# `optionaldep` marker, so the collection needs the doctest machinery importable even though it
+# collects no doctests. `guidetest` stays out, since nothing here needs the optional dependencies.
 # Both the `--group` and the test path are qualified with `{project}` rather than relying on a
 # `cd`, since cibuildwheel runs the test command from its own scratch directory (not the source
 # checkout) and, on Windows, a `cd ... &&`-chained command does not reliably carry its directory
 # change through to the rest of the chain.
-test-command = "pip install --group {project}/pyproject.toml:basetest && python -m pytest -p no:doctest -s {project}/tests/python"
+test-command = "pip install --group {project}/pyproject.toml:doctest && python -m pytest -p no:doctest -s {project}/tests/python"
 environment = 'RUSTUP_TOOLCHAIN="stable"'
 
 [tool.cibuildwheel.linux]

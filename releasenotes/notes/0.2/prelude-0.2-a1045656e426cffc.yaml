@@ -1,0 +1,25 @@
+---
+prelude: >
+    This release grows the control this package gives over circuit synthesis. An ``Evolution`` gate
+    now takes an explicit ``synthesis`` method, a new ``synthesis`` module supplies fermionic product
+    formulas of first and higher order, and the ``FermionicTrotterization`` pass selects and applies
+    one across every evolution in a circuit at once. Alongside it, the Jordan-Wigner mapper gained
+    direct implementations for all four operator representations, and new adapters let a mapper's
+    output be simplified or emitted group by group.
+
+    The C API caught up considerably. The edge-vertex and transfer-vertex representations, their
+    mappers and their algebra are now reachable from C, as are the operator support, sector
+    conservation, in-place and scaled arithmetic, and group ordering. Both APIs also gained access to
+    the electronic integrals parsed by an FCIDump, which previously could only be reached by
+    converting the whole data structure into an operator.
+
+    Additionally, this release draws a sharper boundary around what this package is for: fermionic
+    operators, the mappers that convert them, and the mapper-agnostic circuit and its transpilation.
+    Simulation is `ffsim <https://github.com/qiskit-community/ffsim>`__'s concern, so the native FCI
+    kernel and the linear-algebra utilities that duplicated it have been removed in favor of
+    delegating to ffsim, and the ``UCC`` and ``UCJ`` gates now wrap ffsim's operators instead of
+    reimplementing their parameterizations. Simulation consequently requires the ``ffsim`` extra and,
+    through ffsim's dependency on PySCF, is unavailable on Windows; building operators, mapping them
+    and transpiling the resulting circuits remain supported everywhere. Since this is still a pre-1.0
+    release, all of this was done by removal rather than deprecation: the upgrade notes below pair
+    every removed API with its replacement, and are worth reading in full before upgrading.
