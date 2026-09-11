@@ -1,0 +1,6 @@
+﻿F2QSynthesisConfig
+==================
+
+.. currentmodule:: qiskit_fermions.transpiler.passes.synthesis.synthesis
+
+.. autodata:: F2QSynthesisConfig
