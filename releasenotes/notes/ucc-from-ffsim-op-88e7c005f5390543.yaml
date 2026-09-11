@@ -23,7 +23,7 @@ upgrade:
     :class:`.Evolution` over your own cluster operator directly, which also gives you control over
     the Trotter ordering of its terms.
 
-    The wrapped operator is available as ``UCC.uccsd_op``, so its amplitudes are reachable as
+    The wrapped operator is available as :attr:`.UCC.uccsd_op`, so its amplitudes are reachable as
     ``gate.uccsd_op.t1`` and ``gate.uccsd_op.t2``; the gate no longer mirrors them as attributes of
     its own. :meth:`.UCC.cluster_operator` is unchanged. A
     ``final_orbital_rotation`` carried by the ffsim operator is now appended as a closing

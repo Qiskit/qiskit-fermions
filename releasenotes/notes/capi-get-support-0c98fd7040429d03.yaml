@@ -1,5 +1,5 @@
 ---
-features:
+features_c:
   - |
     Added the operator support to the C API, which was previously available only from Python via
     ``get_support``. Each of the four operator representations gained a pair of functions:

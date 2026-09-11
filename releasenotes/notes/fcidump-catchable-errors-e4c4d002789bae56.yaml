@@ -7,15 +7,18 @@ upgrade:
     (a missing header namelist, a missing ``NORB`` or ``NELEC`` field, or a malformed ``MS2`` field)
     raises :class:`ValueError`. An FCIDump carrying an MO energy value, which is still unsupported,
     also raises :class:`ValueError`.
+upgrade_c:
   - |
-    The C function ``qf_fcidump_from_file`` now returns a :c:enum:`QfExitCode` and takes the parsed
+    :c:func:`qf_fcidump_from_file` now returns a :c:enum:`QfExitCode` and takes the parsed
     :c:struct:`QfFCIDump` through a new out-parameter, matching the convention already used by the
     mapper functions::
 
         QfFCIDump *fcidump = NULL;
         QfExitCode exit = qf_fcidump_from_file("molecule.fcidump", &fcidump);
 
-    It returns ``QfExitCode_ValueError`` for any of the parse failures listed above, leaving the
-    out-parameter untouched. This replaces the previous signature, which returned the pointer
-    directly and had no way to report a failure (an unparsable file unwound a Rust panic across the
-    FFI boundary, which is undefined behaviour).
+    It returns :c:enumerator:`QfExitCode_ValueError` when a file does not honour the FCIDump format
+    (a missing header namelist, a missing ``NORB`` or ``NELEC`` field, a malformed ``MS2`` field, or
+    an MO energy value, which is still unsupported), leaving the out-parameter untouched. This
+    replaces the previous signature, which returned the pointer directly and had no way to report a
+    failure (an unparsable file unwound a Rust panic across the FFI boundary, which is undefined
+    behaviour).

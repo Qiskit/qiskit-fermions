@@ -1,5 +1,5 @@
 ---
-features:
+features_c:
   - |
     Added :c:func:`qf_ferm_op_conserves_sector`, which checks that every term of a
     :c:struct:`QfFermionOperator` conserves the particle number *within each block* of modes. It

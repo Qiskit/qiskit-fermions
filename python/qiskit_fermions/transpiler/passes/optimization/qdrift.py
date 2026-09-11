@@ -77,7 +77,7 @@ class QDriftTrotterization(FermionicDAGCircuitPass):
        Terms that are diagonal in the occupation-number basis (that is, products of number operators)
        have no effect on the sampled bitstrings, so including them only increases the sampling
        overhead. Filter them out with
-       :func:`~qiskit_fermions.operators.terms.filtering.filter_diagonal_terms` on the Hamiltonian
+       :func:`~qiskit_fermions.operators.terms.filter_diagonal_terms` on the Hamiltonian
        *before* constructing the :class:`.Evolution` gate, rather than on every call to :meth:`run`:
        this pass runs once per transpiled circuit, so filtering upstream avoids repeating the same
        filtering work for every circuit generated from the same Hamiltonian.
