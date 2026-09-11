@@ -81,7 +81,7 @@ jobs:
           python-version: ${{ inputs.python-version }}
       - name: Install Rust
         run: rustup toolchain install stable --override --profile minimal --no-self-update
-      - uses: pypa/cibuildwheel@v4.2.0
+      - uses: pypa/cibuildwheel@v4.2.1
       - uses: actions/upload-artifact@v7
         with:
           path: ./wheelhouse/*.whl
@@ -99,7 +99,7 @@ jobs:
           python-version: ${{ inputs.python-version }}
       - name: Install Rust
         run: rustup toolchain install stable --override --profile minimal --no-self-update
-      - uses: pypa/cibuildwheel@v4.2.0
+      - uses: pypa/cibuildwheel@v4.2.1
       - uses: actions/upload-artifact@v7
         with:
           path: ./wheelhouse/*.whl
@@ -117,7 +117,7 @@ jobs:
           python-version: ${{ inputs.python-version }}
       - name: Install Rust
         run: rustup toolchain install stable --override --profile minimal --no-self-update
-      - uses: pypa/cibuildwheel@v4.2.0
+      - uses: pypa/cibuildwheel@v4.2.1
       - uses: actions/upload-artifact@v7
         with:
           path: ./wheelhouse/*.whl
@@ -135,7 +135,7 @@ jobs:
           python-version: ${{ inputs.python-version }}
       - name: Install Rust
         run: rustup toolchain install stable --override --profile minimal --no-self-update
-      - uses: pypa/cibuildwheel@v4.2.0
+      - uses: pypa/cibuildwheel@v4.2.1
       - uses: actions/upload-artifact@v7
         with:
           path: ./wheelhouse/*.whl
