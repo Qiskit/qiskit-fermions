@@ -1,0 +1,10 @@
+---
+features:
+  - |
+    :class:`.QDriftTrotterization` now records how many draws its ``filter_trivial`` mode discarded.
+    When at least one :class:`.Evolution` gate was actually filtered, the returned circuit's
+    :attr:`~qiskit.dagcircuit.DAGCircuit.metadata` carries ``filter_trivial.discarded`` and
+    ``filter_trivial.emitted``, each holding one count per filtered gate in circuit order. Their
+    ratio estimates the acceptance probability, which is the factor by which the filtering inflated
+    the coefficients of the terms it retained. Neither field is present when no gate was filtered,
+    so read them with ``.get()``.

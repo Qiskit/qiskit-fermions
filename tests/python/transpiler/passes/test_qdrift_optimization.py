@@ -14,6 +14,7 @@
 
 from __future__ import annotations
 
+import pickle
 from pathlib import Path
 
 import numpy as np
@@ -889,3 +890,108 @@ def test_qdrift_ensemble_mean_approximates_the_target_evolution(subtests):
         towards_unscaled = np.linalg.norm(mean - expm(-1j * time * matrix), 2)
         assert towards_scaled < 5e-2
         assert towards_scaled < towards_unscaled
+
+
+def test_qdrift_filter_trivial_records_discarded_metadata():
+    """Filtering must report how many draws it rejected, since the acceptance rate is what
+    quantifies the bias the rejection introduces. The counts land in the output DAG's metadata, one
+    entry per filtered Evolution gate.
+
+    The Hamiltonian below is weighted so that rejection is unavoidable: the two trivial terms carry
+    almost all of the coefficient magnitude, so the first draw is overwhelmingly likely to be one of
+    them, and on the first draw the tracked sets are still tight enough to reject it. Note that a
+    Hamiltonian with balanced weights can legitimately discard nothing, because an early accepted
+    term marks the modes it touches "uncertain" and thereby makes the remaining terms acceptable.
+    """
+    num_modes = 4
+    hamil = FermionOperator.from_terms(
+        [
+            (((True, 0), (False, 0)), 1.0e4),  # n_0: trivial (within occupied)
+            (((True, 3), (False, 2)), 1.0e4),  # 2 -> 3: trivial (within unoccupied)
+            (((True, 2), (False, 0)), 1.0),  # 0 -> 2: couples occupied/unoccupied
+        ]
+    )
+    hamil.groups = None
+
+    circ = FermionicCircuit(num_modes)
+    circ.append(InitializeModes([True, True, False, False]), circ.modes)
+    circ.append(Evolution(num_modes, hamil, time=1.0), circ.modes)
+
+    num_terms = 5
+    qdrift = QDriftTrotterization(num_terms, filter_trivial=True, rng=42)
+
+    qdrift_circ = FermionicPassManager(qdrift).run(circ)
+
+    assert qdrift_circ.metadata["filter_trivial.emitted"] == [num_terms]
+    # The exact count depends on the rng stream and must not be pinned; that it is positive is what
+    # proves the rejections are being counted.
+    assert qdrift_circ.metadata["filter_trivial.discarded"][0] > 0
+
+
+def test_qdrift_filter_trivial_metadata_absent_when_not_filtering():
+    """The metadata is only written when filtering actually ran, so callers must read it
+    defensively. Neither a disabled flag nor a skipped (warned) gate may leave the fields
+    behind."""
+    hamil = _coupling_hamiltonian()
+
+    with_flag_off = FermionicPassManager(QDriftTrotterization(3, rng=1)).run(
+        _filter_trivial_circuit(hamil)
+    )
+    assert "filter_trivial.discarded" not in with_flag_off.metadata
+    assert "filter_trivial.emitted" not in with_flag_off.metadata
+
+    # A gate whose filtering is skipped (no InitializeModes to seed against) must not record either.
+    circ = FermionicCircuit(4)
+    circ.append(Evolution(4, hamil, time=1.0), circ.modes)
+    qdrift = QDriftTrotterization(3, filter_trivial=True, rng=1)
+    with pytest.warns(UserWarning, match="not preceded by an InitializeModes gate"):
+        skipped = FermionicPassManager(qdrift).run(circ)
+    assert "filter_trivial.discarded" not in skipped.metadata
+    assert "filter_trivial.emitted" not in skipped.metadata
+
+
+def test_qdrift_filter_trivial_metadata_records_zero_discards():
+    """A discarded count of zero must be distinguishable from an absent field: it says the filtering
+    ran and accepted every draw, leaving the sampling distribution untouched, which is exactly the
+    case a user reading the diagnostic wants to see."""
+    hamil = _coupling_hamiltonian()  # every term couples, so nothing gets rejected
+    qdrift = QDriftTrotterization(4, filter_trivial=True, rng=1)
+
+    qdrift_circ = FermionicPassManager(qdrift).run(_filter_trivial_circuit(hamil))
+
+    assert qdrift_circ.metadata["filter_trivial.discarded"] == [0]
+    assert qdrift_circ.metadata["filter_trivial.emitted"] == [4]
+
+
+def test_qdrift_filter_trivial_metadata_is_per_gate():
+    """The counts are recorded per Evolution gate rather than summed, because the tracked mode sets
+    carry across gates and the rejection bites hardest on the earliest draws."""
+    num_modes = 4
+    hamil = _coupling_hamiltonian()
+
+    circ = FermionicCircuit(num_modes)
+    circ.append(InitializeModes([True, True, False, False]), circ.modes)
+    circ.append(Evolution(num_modes, hamil, time=1.0), circ.modes)
+    circ.append(Evolution(num_modes, hamil, time=1.0), circ.modes)
+
+    num_terms = 3
+    qdrift = QDriftTrotterization(num_terms, filter_trivial=True, rng=42)
+
+    qdrift_circ = FermionicPassManager(qdrift).run(circ)
+
+    assert qdrift_circ.metadata["filter_trivial.emitted"] == [num_terms, num_terms]
+    assert len(qdrift_circ.metadata["filter_trivial.discarded"]) == 2
+
+
+def test_qdrift_filter_trivial_metadata_pickle():
+    """Circuits carrying the filtering diagnostics must remain serializable, mirroring the guard put
+    in place for the RelabelModes metadata (see qiskit-fermions issue #225)."""
+    qdrift = QDriftTrotterization(3, filter_trivial=True, rng=42)
+    circ = _filter_trivial_circuit(_coupling_hamiltonian())
+
+    qdrift_circ = FermionicPassManager(qdrift).run(circ)
+    assert "filter_trivial.emitted" in qdrift_circ.metadata
+
+    reconstructed = pickle.loads(pickle.dumps(qdrift_circ._inner))
+    for key in ("filter_trivial.discarded", "filter_trivial.emitted"):
+        assert reconstructed.metadata[key] == qdrift_circ.metadata[key]

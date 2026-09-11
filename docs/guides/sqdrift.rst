@@ -98,9 +98,13 @@ detail in :ref:`this guide <grouping_explanation>`.
    in the occupation-number basis, that is, the products of number operators
    (:math:`a^\dagger_i a_i`). This includes the constant energy offset, whose
    time evolution only introduces a global phase into the circuit, the
-   individual number-operators whose time evolution amounts to single-qubit Z
-   rotations, as well as higher-order products such as :math:`n_i n_j`. None
-   of these impact the sampled bitstrings.
+   individual number operators whose time evolution amounts to single-qubit Z
+   rotations, as well as higher-order products such as :math:`n_i n_j`. None of
+   them can change a mode's occupation, so dropping them costs no excitation
+   content. Unlike the per-draw rejection in step 5, this filtering happens
+   once, on the Hamiltonian itself, so the coefficient distribution the protocol
+   samples from is rebuilt consistently from the filtered operator rather than
+   renormalized mid-draw.
 
    The :func:`~qiskit_fermions.operators.terms.filter_diagonal_terms`
    function removes such terms from an operator in place:
@@ -252,18 +256,46 @@ circuits to generate:
    generator used inside of the :class:`.QDriftTrotterization` transpilation
    pass.
 
-5. Filter out trivial excitations
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+5. Filter drawn excitations by occupation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Beyond the diagonal terms filtered out in the previous step, a sampled
-excitation can *still* fail to affect the sampled bitstrings. Whenever it acts
-entirely within a set of modes whose occupation is already fixed (all occupied
-or all unoccupied), it cannot move a particle from one to the other, so it
-leaves the state (and thus the eventual measurement outcome) unchanged.
-Setting ``filter_trivial=True`` on the :class:`.QDriftTrotterization` pass
-rejects such terms as they are sampled and re-draws a replacement, so that
-each of the ``num_groups`` slots of the resulting circuit contributes a
-non-trivial excitation.
+Beyond the diagonal terms filtered out in the previous step, a drawn excitation
+can act entirely within a set of modes whose occupation is already fixed (all
+occupied or all unoccupied), where it cannot move a particle from one side to
+the other. Such an excitation tells you nothing about the sampled bitstrings, so
+a slot spent on it is a slot wasted. Setting ``filter_trivial=True`` on the
+:class:`.QDriftTrotterization` pass rejects such excitations as they are drawn
+and draws a replacement, so that each of the ``num_groups`` slots of the
+resulting circuit carries an excitation that couples the two sides.
+
+.. warning::
+   This filtering is not free, and it is off by default for that reason. What it
+   conserves is the budget of ``num_groups`` sampled slots, not the circuit
+   depth: since that budget is fixed, a rejected excitation is replaced rather
+   than dropped, and a cheap one gives way to a coupling excitation that costs
+   more to synthesize. Expect a filtered circuit to be deeper than an unfiltered
+   one drawn from the same seed.
+
+   Renormalizing the draw over the accepted excitations changes the distribution
+   the qDRIFT protocol samples from, and unlike the grouping in step 2 it also
+   breaks the protocol's convergence guarantee: the sampled product no longer
+   averages to the evolution under the Hamiltonian you passed in. Every retained
+   excitation ends up weighted by the reciprocal of the acceptance probability,
+   the rejected ones contribute nothing, and neither the total coefficient
+   magnitude nor the per-gate evolution time is adjusted to compensate.
+
+   The acceptance rule is also an over-approximation. It compares mode supports
+   only, so it carries no amplitude information, and the tracked sets only ever
+   grow: an excitation confined to the occupied set is genuinely inert on a
+   product state, but the same reasoning gets weaker for later draws, once
+   earlier accepted excitations have left the state entangled and marked most
+   modes "uncertain".
+
+   Use ``filter_trivial=True`` for the bitstring-sampling workflow this guide
+   describes, where the circuits feed SQD post-processing and only the sampled
+   bitstrings matter. Do not use it if you intend to estimate an expectation
+   value from these circuits, or to rely on the qDRIFT error bound in any other
+   way: those results carry a bias that the pass does not correct for.
 
 This filtering needs to know which modes start out occupied. It therefore
 requires an :class:`.InitializeModes` gate preceding the :class:`.Evolution`
@@ -314,10 +346,9 @@ sampled excitations with and without ``filter_trivial=True``:
        // with custom gate definitions, which we therefore also cannot transpile
        // via this API.
 
-None of the excitations sampled without filtering touch the occupied set
+None of the excitations drawn without filtering touch the occupied set
 (``0-6`` and ``28-34``) at all, so none of them can move a particle between an
-occupied and an unoccupied mode; every single one is trivial and would have
-no effect on the sampled bitstrings. With ``filter_trivial=True``, all five are
+occupied and an unoccupied mode. With ``filter_trivial=True``, all five are
 rejected and replaced by excitations that do couple an occupied mode with an
 unoccupied one. For example, the first accepted excitation ``[0, 1, 6, 7]`` moves a
 particle between occupied modes ``0``, ``1``, and ``6`` and unoccupied mode
@@ -333,11 +364,49 @@ unoccupied mode. It is only accepted because modes ``0`` and ``1`` became
 uncertain (and thus eligible as the "unoccupied" side of the coupling)
 once the first excitation touched them.
 
+This growth is what makes the rule an over-approximation rather than a test: as
+more modes turn uncertain, fewer draws are rejected, and the filtering does the
+most to the sampling distribution on the earliest draws.
+
+To judge how far the filtering moved the distribution, read the rejection counts
+the pass records in the circuit metadata. One entry is stored per filtered
+:class:`.Evolution` gate, and the accepted-to-total ratio estimates the
+acceptance probability, which is the factor by which the retained excitations
+were over-weighted:
+
+.. tab-set-code::
+
+    .. code-block:: python
+
+       >>> # a freshly seeded pass, so the counts do not depend on earlier draws
+       >>> qdrift_counted = QDriftTrotterization(
+       ...     num_groups, filter_trivial=True, rng=3480
+       ... )
+       >>> filtered = FermionicPassManager(qdrift_counted).run(hf_circ)
+       >>> discarded = filtered.metadata.get("filter_trivial.discarded")
+       >>> emitted = filtered.metadata.get("filter_trivial.emitted")
+       >>> print(f"{emitted[0]} kept, {discarded[0]} discarded")
+       5 kept, 7 discarded
+       >>> print(f"acceptance probability: {emitted[0] / (emitted[0] + discarded[0]):.2f}")
+       acceptance probability: 0.42
+
+    .. code-block:: c
+
+       // WARNING: Qiskit's C API does not yet allow us to implement circuits
+       // with custom gate definitions, which we therefore also cannot transpile
+       // via this API.
+
 .. note::
-   Without a preceding :class:`.InitializeModes` gate, ``filter_trivial=True``
-   has no occupation information to filter against. It emits a
-   :class:`UserWarning` and leaves the sampling unfiltered for that
-   :class:`.Evolution` gate.
+   Filtering needs occupation information to filter against. A
+   :class:`.PrepareSlaterDeterminant` gate seeds it just as
+   :class:`.InitializeModes` does, and any :class:`.OrbitalRotation` marks every
+   mode it acts on as "uncertain". Without any of them, or when the seeded modes
+   all land on one side (every mode occupied, or every mode unoccupied),
+   ``filter_trivial=True`` emits a :class:`UserWarning` and leaves the sampling
+   unfiltered for that :class:`.Evolution` gate. On a Hamiltonian whose remaining
+   terms can no longer couple the two tracked sets, the pass instead raises
+   :class:`RuntimeError` after
+   :attr:`.QDriftTrotterization.MAX_SAMPLE_RETRIES` consecutive rejections.
 
 .. _sqdrift_sampling_weights:
 
