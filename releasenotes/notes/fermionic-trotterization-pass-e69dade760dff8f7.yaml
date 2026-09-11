@@ -1,8 +1,8 @@
 ---
 features:
   - |
-    Added :class:`.FermionicTrotterization`, a transpiler pass that selects the fermion-to-fermion
-    synthesis method of every :class:`.Evolution` gate in a circuit::
+    Added :class:`.FermionicTrotterization`, a transpiler pass that Trotterizes every
+    :class:`.Evolution` gate in a circuit with one fermion-to-fermion synthesis method::
 
         pm.optimization = FermionicPassManager(
             [FermionicTrotterization(FermionicSuzukiTrotter(order=2, reps=4))]
@@ -15,8 +15,8 @@ features:
     benefit from a higher order with ones that do not, such as the all-commuting diagonal-Coulomb
     operators of a :class:`.UCJ`.
 
-    The pass *selects* a method rather than expanding the evolution immediately, so each
-    :class:`.Evolution` stays a single node for the passes that follow -- notably
-    :class:`.RelabelModes`, which needs whole operators to build its mode-relabeling model. This is the
-    opposite choice from :class:`.QDriftTrotterization`, whose random one-shot sampling cannot be
-    deferred.
+    The pass expands each selected gate into the factors its method emits, so no separate expansion
+    step is needed. Pass ``apply=False`` to only select the method and leave the expansion to
+    something else, such as Qiskit's :class:`~qiskit.transpiler.passes.Decompose`; note that a gate
+    which is never expanded reaches the fermion-to-qubit stage whole, where it is mapped without
+    :attr:`.Evolution.synthesis` ever being read.

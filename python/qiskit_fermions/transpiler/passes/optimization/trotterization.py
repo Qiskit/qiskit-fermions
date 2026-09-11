@@ -30,7 +30,7 @@ if TYPE_CHECKING:
 
 
 class FermionicTrotterization(FermionicDAGCircuitPass):
-    r"""A transpilation pass selecting the fermion-to-fermion synthesis of :class:`.Evolution` gates.
+    r"""A transpilation pass Trotterizing :class:`.Evolution` gates in fermionic space.
 
     An :class:`.Evolution` gate carries the synthesis method with which it gets decomposed in fermionic
     space (see :attr:`.Evolution.synthesis`). Setting it per gate means threading the choice through
@@ -41,48 +41,40 @@ class FermionicTrotterization(FermionicDAGCircuitPass):
     .. code-block:: python
 
        pm.optimization = FermionicPassManager(
-           [
-               FermionicTrotterization(FermionicSuzukiTrotter(order=2, reps=4)),
-               Decompose("Evolution"),
-           ]
+           [FermionicTrotterization(FermionicSuzukiTrotter(order=2, reps=4))]
        )
 
-    Nodes that are not :class:`.Evolution` gates are left untouched, as are those rejected by an
-    optional :attr:`filter`.
-
-    .. important::
-       Something must expand the evolution for the selected method to have any effect, and no pass
-       in the preset pipelines does. Qiskit's :class:`~qiskit.transpiler.passes.Decompose` is that
-       trigger, as in the snippet above; a :meth:`~.FermionicCircuit.decompose` call on the circuit
-       before transpiling works equally well.
-
-       Without it the gate reaches the fermion-to-qubit stage whole, where it is mapped without
-       :attr:`.Evolution.synthesis` ever being read, and every synthesis method produces identical
-       output. Restricting the expansion by name (``Decompose("Evolution")``) leaves the other
-       fermionic gates for their own synthesis plugins to lower.
-
-       Place it *after* any pass that needs whole operators, :class:`.RelabelModes` in particular.
-       Expanding is idempotent, since the factors a synthesis method emits are
-       :attr:`.Evolution.atomic` and therefore carry no definition of their own.
+    Each selected gate is replaced by the factors its method emits, so the pass both chooses the
+    formula and carries it out. Nodes that are not :class:`.Evolution` gates are left untouched, as
+    are those rejected by an optional :attr:`filter`.
 
     .. note::
-       The pass *selects* a synthesis method rather than expanding the evolution there and then. The
-       expansion happens later, when the gate's definition is built, which keeps each
-       :class:`.Evolution` intact as a single node for the passes that follow -- notably
-       :class:`.RelabelModes`, which reads the operator of every :class:`.Evolution` to build its
-       mode-relabeling model and would otherwise see a fragment per factor.
+       Running the pass again is harmless: the factors a synthesis method emits are
+       :attr:`.Evolution.atomic`, and an atomic gate is a terminal factor which this pass leaves in
+       place rather than splitting further. The same exemption makes the pass a fixed point over the
+       output of :class:`.QDriftTrotterization`, whose sampled gates are atomic because the random
+       draw *is* the Trotterization it performs.
 
-       This is the opposite choice from :class:`.QDriftTrotterization`, which replaces each gate with
-       its sampled factors immediately -- and marks them :attr:`.Evolution.atomic`, since the sample
-       is the Trotterization. That pass has no alternative: its sampling is random and one-shot, so
-       deferring it would draw a different sample every time the definition were rebuilt. A
-       deterministic product formula is a pure function of the gate and can safely be deferred.
+    .. note::
+       Set :attr:`apply` to ``False`` to only *select* the method and leave the expansion to
+       something else, such as Qiskit's :class:`~qiskit.transpiler.passes.Decompose` or a
+       :meth:`~.FermionicCircuit.decompose` call. Be aware that a gate which is never expanded
+       reaches the fermion-to-qubit stage whole, where it is mapped without
+       :attr:`.Evolution.synthesis` ever being read -- and every synthesis method then produces
+       identical output.
 
     .. caution::
        Not every synthesis method suits every operator. An :class:`.Evolution` whose operator groups
        all mutually commute (the diagonal-Coulomb operators of a :class:`.UCJ`, for example) is
        synthesized exactly at any order, so a higher order only adds depth. Use :attr:`filter` to
        restrict the pass to the gates that benefit.
+
+       Expanding an operator that carries no :attr:`~qiskit_fermions.operators.OperatorTrait.groups`
+       splits it term by term, and a lone :math:`a^\dagger_i a_j` is not Hermitian, so its
+       exponential is not unitary. Nothing complains until the mapped operator reaches
+       :class:`~qiskit.circuit.library.PauliEvolutionGate`, which raises ``ValueError: Operator
+       contains complex coefficients, which are not supported``. Assigning conjugate-paired groups
+       is what makes each factor Hermitian.
     """
 
     def __init__(
