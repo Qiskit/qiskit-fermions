@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Generate SqDRIFT circuits - Qiskit Fermions 0.2.0.dev0+14561e8</title>
+        <title>Generate SqDRIFT circuits - Qiskit Fermions 0.2.0.dev0+8dccb6e</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+14561e8</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+8dccb6e</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+14561e8</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+8dccb6e</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -368,7 +368,7 @@ time evolution only introduces a global phase into the circuit, the
 individual number-operators whose time evolution amounts to single-qubit Z
 rotations, as well as higher-order products such as <span class="math">\(n_i n_j\)</span>. None
 of these impact the sampled bitstrings.</p>
-<p>The <code class="xref py py-func docutils literal notranslate"><span class="pre">filter_diagonal_terms()</span></code>
+<p>The <a class="reference internal" href="../stubs/qiskit_fermions.operators.terms.filter_diagonal_terms.html#qiskit_fermions.operators.terms.filter_diagonal_terms" title="qiskit_fermions.operators.terms.filter_diagonal_terms"><code class="xref py py-func docutils literal notranslate"><span class="pre">filter_diagonal_terms()</span></code></a>
 function removes such terms from an operator in place:</p>
 <div class="sd-tab-set docutils">
 <input checked="checked" id="sd-tab-item-4" name="sd-tab-set-2" type="radio">
@@ -405,7 +405,7 @@ up with
 <a class="reference internal" href="../stubs/qiskit_fermions.operators.OperatorTrait.html#qiskit_fermions.operators.OperatorTrait.split_out_groups" title="qiskit_fermions.operators.OperatorTrait.split_out_groups"><code class="xref py py-meth docutils literal notranslate"><span class="pre">split_out_groups()</span></code></a>. Finding a
 group among scattered terms means scanning all of them, so that lookup costs
 the same whether one group is drawn or forty.
-<code class="xref py py-func docutils literal notranslate"><span class="pre">group_order()</span></code> gathers each
+<a class="reference internal" href="../stubs/qiskit_fermions.operators.terms.group_order.html#qiskit_fermions.operators.terms.group_order" title="qiskit_fermions.operators.terms.group_order"><code class="xref py py-func docutils literal notranslate"><span class="pre">group_order()</span></code></a> gathers each
 group into one contiguous run, after which a lookup is a binary search over
 the group boundaries and costs what the <em>drawn</em> groups cost rather than what
 the <em>held</em> terms cost. The lookup itself becomes dramatically cheaper; how
@@ -724,7 +724,7 @@ tutorials</a>.</p>
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on 2026/09/10</div>
+              Last updated on 2026/09/11</div>
           </div>
           <div class="right-details">
             
@@ -764,7 +764,7 @@ tutorials</a>.</p>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=27a65a0e"></script>
+</div><script src="../_static/documentation_options.js?v=b53cdf87"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

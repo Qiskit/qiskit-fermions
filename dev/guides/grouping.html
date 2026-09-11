@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Group operator terms: use the operator structure - Qiskit Fermions 0.2.0.dev0+14561e8</title>
+        <title>Group operator terms: use the operator structure - Qiskit Fermions 0.2.0.dev0+8dccb6e</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+14561e8</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+8dccb6e</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+14561e8</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+8dccb6e</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -458,9 +458,9 @@ that no term carries.</p>
 </section>
 <section id="the-two-checks-are-independent">
 <h3>The two checks are independent<a class="headerlink" href="#the-two-checks-are-independent" title="Link to this heading">¶</a></h3>
-<p><code class="xref py py-func docutils literal notranslate"><span class="pre">groups_have_uniform_coeffs()</span></code> reports whether a
+<p><a class="reference internal" href="../stubs/qiskit_fermions.operators.terms.groups_have_uniform_coeffs.html#qiskit_fermions.operators.terms.groups_have_uniform_coeffs" title="qiskit_fermions.operators.terms.groups_have_uniform_coeffs"><code class="xref py py-func docutils literal notranslate"><span class="pre">groups_have_uniform_coeffs()</span></code></a> reports whether a
 group’s coefficients agree, which is the assumption
-<code class="xref py py-func docutils literal notranslate"><span class="pre">group_coeff_means()</span></code> makes when it averages
+<a class="reference internal" href="../stubs/qiskit_fermions.operators.terms.group_coeff_means.html#qiskit_fermions.operators.terms.group_coeff_means" title="qiskit_fermions.operators.terms.group_coeff_means"><code class="xref py py-func docutils literal notranslate"><span class="pre">group_coeff_means()</span></code></a> makes when it averages
 magnitudes. It is not a weaker form of the Hermiticity check: neither check implies the other, in
 either direction.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.operators.terms.grouping</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
@@ -492,7 +492,7 @@ either direction.</p>
 </pre></div>
 </div>
 <p>By default the magnitudes are compared, because that is what
-<code class="xref py py-func docutils literal notranslate"><span class="pre">group_coeff_means()</span></code> averages. A Hermitian conjugate
+<a class="reference internal" href="../stubs/qiskit_fermions.operators.terms.group_coeff_means.html#qiskit_fermions.operators.terms.group_coeff_means" title="qiskit_fermions.operators.terms.group_coeff_means"><code class="xref py py-func docutils literal notranslate"><span class="pre">group_coeff_means()</span></code></a> averages. A Hermitian conjugate
 pair with complex coefficients has equal magnitudes but unequal coefficients, so it satisfies only
 the default form.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">conjugate</span> <span class="o">=</span> <span class="n">FermionOperator</span><span class="p">(</span>
@@ -510,7 +510,7 @@ the default form.</p>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p><code class="xref py py-func docutils literal notranslate"><span class="pre">groups_are_hermitian()</span></code> inherits the one-sided
+<p><a class="reference internal" href="../stubs/qiskit_fermions.operators.terms.groups_are_hermitian.html#qiskit_fermions.operators.terms.groups_are_hermitian" title="qiskit_fermions.operators.terms.groups_are_hermitian"><code class="xref py py-func docutils literal notranslate"><span class="pre">groups_are_hermitian()</span></code></a> inherits the one-sided
 guarantee of <a class="reference internal" href="../stubs/qiskit_fermions.operators.OperatorTrait.html#qiskit_fermions.operators.OperatorTrait.is_hermitian" title="qiskit_fermions.operators.OperatorTrait.is_hermitian"><code class="xref py py-meth docutils literal notranslate"><span class="pre">is_hermitian()</span></code></a>: a <code class="docutils literal notranslate"><span class="pre">True</span></code> entry is
 always reliable, while a <code class="docutils literal notranslate"><span class="pre">False</span></code> entry is reliable only for operator types whose normal form is
 a genuine canonical form. Consult the specific operator type to find out which applies.</p>
@@ -562,7 +562,7 @@ with local qubit encodings, <a class="reference external" href="https://arxiv.or
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on 2026/09/10</div>
+              Last updated on 2026/09/11</div>
           </div>
           <div class="right-details">
             
@@ -601,7 +601,7 @@ with local qubit encodings, <a class="reference external" href="https://arxiv.or
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=27a65a0e"></script>
+</div><script src="../_static/documentation_options.js?v=b53cdf87"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

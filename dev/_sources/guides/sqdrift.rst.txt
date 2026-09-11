@@ -102,7 +102,7 @@ detail in :ref:`this guide <grouping_explanation>`.
    rotations, as well as higher-order products such as :math:`n_i n_j`. None
    of these impact the sampled bitstrings.
 
-   The :func:`~qiskit_fermions.operators.terms.filtering.filter_diagonal_terms`
+   The :func:`~qiskit_fermions.operators.terms.filter_diagonal_terms`
    function removes such terms from an operator in place:
 
    .. tab-set-code::
@@ -135,7 +135,7 @@ detail in :ref:`this guide <grouping_explanation>`.
    :meth:`~qiskit_fermions.operators.OperatorTrait.split_out_groups`. Finding a
    group among scattered terms means scanning all of them, so that lookup costs
    the same whether one group is drawn or forty.
-   :func:`~qiskit_fermions.operators.terms.ordering.group_order` gathers each
+   :func:`~qiskit_fermions.operators.terms.group_order` gathers each
    group into one contiguous run, after which a lookup is a binary search over
    the group boundaries and costs what the *drawn* groups cost rather than what
    the *held* terms cost. The lookup itself becomes dramatically cheaper; how

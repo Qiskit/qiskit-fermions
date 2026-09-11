@@ -203,9 +203,9 @@ Clearing the group indices by assigning ``None`` is always allowed.
 The two checks are independent
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-:func:`~qiskit_fermions.operators.terms.grouping.groups_have_uniform_coeffs` reports whether a
+:func:`~qiskit_fermions.operators.terms.groups_have_uniform_coeffs` reports whether a
 group's coefficients agree, which is the assumption
-:func:`~qiskit_fermions.operators.terms.grouping.group_coeff_means` makes when it averages
+:func:`~qiskit_fermions.operators.terms.group_coeff_means` makes when it averages
 magnitudes. It is not a weaker form of the Hermiticity check: neither check implies the other, in
 either direction.
 
@@ -241,7 +241,7 @@ either direction.
    ([True], [False])
 
 By default the magnitudes are compared, because that is what
-:func:`~qiskit_fermions.operators.terms.grouping.group_coeff_means` averages. A Hermitian conjugate
+:func:`~qiskit_fermions.operators.terms.group_coeff_means` averages. A Hermitian conjugate
 pair with complex coefficients has equal magnitudes but unequal coefficients, so it satisfies only
 the default form.
 
@@ -263,7 +263,7 @@ the default form.
    [False]
 
 .. note::
-   :func:`~qiskit_fermions.operators.terms.grouping.groups_are_hermitian` inherits the one-sided
+   :func:`~qiskit_fermions.operators.terms.groups_are_hermitian` inherits the one-sided
    guarantee of :meth:`~qiskit_fermions.operators.OperatorTrait.is_hermitian`: a ``True`` entry is
    always reliable, while a ``False`` entry is reliable only for operator types whose normal form is
    a genuine canonical form. Consult the specific operator type to find out which applies.
