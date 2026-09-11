@@ -1,6 +1,0 @@
-﻿fermion\_to\_majorana
-=====================
-
-.. currentmodule:: qiskit_fermions.mappers.library
-
-.. autofunction:: fermion_to_majorana
