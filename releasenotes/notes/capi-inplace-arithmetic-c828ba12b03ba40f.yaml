@@ -1,5 +1,5 @@
 ---
-features:
+features_c:
   - |
     Added in-place operator arithmetic to the C API, which avoids allocating a result operator when
     the left operand can be overwritten. Each of the four operator representations gained

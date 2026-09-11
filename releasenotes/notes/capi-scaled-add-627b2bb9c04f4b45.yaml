@@ -1,5 +1,5 @@
 ---
-features:
+features_c:
   - |
     Added ``scaled_add`` to the C API for all four operator representations:
     :c:func:`qf_ferm_op_scaled_add`, :c:func:`qf_maj_op_scaled_add`,

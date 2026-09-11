@@ -1,5 +1,5 @@
 ---
-features:
+features_c:
   - |
     Added a C API for the edge-vertex and transfer-vertex operator representations, which were
     previously available only from Python. This includes two new opaque structs,

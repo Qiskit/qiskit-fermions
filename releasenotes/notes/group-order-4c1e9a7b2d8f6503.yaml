@@ -22,7 +22,11 @@ features:
     This is worth doing before repeatedly transpiling with
     :class:`~qiskit_fermions.transpiler.passes.optimization.QDriftTrotterization`, which looks up its
     sampled groups on every call. See :ref:`sqdrift_getting_started` for a worked example.
+features_c:
   - |
-    Added ``qf_ferm_op_group_order``, along with the equivalent functions for the Majorana
-    (``qf_maj_op_group_order``), edge-vertex (``qf_edge_op_group_order``) and transfer-vertex
-    (``qf_transfer_op_group_order``) operator types.
+    Added ``qf_ferm_op_group_order``, which returns a copy of an operator with its terms ordered by
+    group index, along with the equivalent functions for the Majorana (``qf_maj_op_group_order``),
+    edge-vertex (``qf_edge_op_group_order``) and transfer-vertex (``qf_transfer_op_group_order``)
+    operator types. Each group becomes one contiguous run of terms, which lets
+    ``qf_ferm_op_split_out_groups`` binary-search the group boundaries instead of scanning every
+    term.

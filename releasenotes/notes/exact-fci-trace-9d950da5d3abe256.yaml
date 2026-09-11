@@ -1,5 +1,5 @@
 ---
-features:
+performance:
   - |
     Improved the numerical conditioning of state-vector simulation for
     :class:`.Evolution` and :class:`.OrbitalRotation` gates by supplying the

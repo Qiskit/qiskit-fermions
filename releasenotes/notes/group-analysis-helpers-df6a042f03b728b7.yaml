@@ -13,16 +13,19 @@ upgrade:
         from qiskit_fermions.operators.terms.grouping import group_coeff_means
 
         weights = group_coeff_means(op)
-
-    In the C API, ``qf_ferm_op_group_weights`` and its per-type counterparts have likewise been
-    renamed to ``qf_ferm_op_group_coeff_means`` and friends.
   - |
     Assigning a :attr:`~qiskit_fermions.operators.FermionOperator.groups` array whose length differs
     from the operator's number of terms now raises a ``ValueError`` instead of being accepted
     silently. Assigning ``None`` to clear the group indices is unaffected.
-
-    In the C API, ``qf_ferm_op_set_groups`` and its per-type counterparts now return a
-    :c:enum:`QfExitCode` (``QfExitCode_ValueError`` on a length mismatch) rather than ``void``.
+upgrade_c:
+  - |
+    ``qf_ferm_op_group_weights`` and its per-type counterparts have been renamed to
+    ``qf_ferm_op_group_coeff_means`` and friends. Their behavior is unchanged.
+  - |
+    ``qf_ferm_op_set_groups`` and its per-type counterparts now return a :c:enum:`QfExitCode` rather
+    than ``void``. Passing a group array whose length differs from the operator's number of terms
+    returns ``QfExitCode_ValueError`` instead of being accepted silently; passing ``NULL`` to clear
+    the group indices is unaffected.
 features:
   - |
     The :mod:`qiskit_fermions.operators.terms.grouping` module now covers the *analysis* of an
@@ -38,8 +41,10 @@ features:
     * :func:`~qiskit_fermions.operators.terms.grouping.groups_have_uniform_coeffs` reports, for each
       group, whether its coefficients are numerically equal (by magnitude, by default).
 
-    Each function is available from the C API once per operator type, for example
-    ``qf_ferm_op_groups_are_hermitian``. See :ref:`grouping_explanation` for a worked example.
+    See :ref:`grouping_explanation` for a worked example.
+features_c:
   - |
-    Added ``qf_ferm_op_groups_are_hermitian`` and ``qf_ferm_op_groups_have_uniform_coeffs``, along
-    with the equivalent functions for the Majorana, edge-vertex and transfer-vertex operator types.
+    Added ``qf_ferm_op_groups_are_hermitian`` and ``qf_ferm_op_groups_have_uniform_coeffs``, which
+    report for each group whether the operator formed by its terms is Hermitian and whether its
+    coefficients are numerically equal, along with the equivalent functions for the Majorana,
+    edge-vertex and transfer-vertex operator types.

@@ -1,5 +1,5 @@
 ---
-upgrade:
+build:
   - |
     The ``optimization`` optional dependency has been renamed to ``pyomo``, so
     ``pip install "qiskit-fermions[optimization]"`` becomes

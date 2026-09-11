@@ -2,7 +2,8 @@
 fixes:
   - |
     Fixed the excessive memory consumption of
-    :func:`~qiskit_fermions.mappers.library.fermion_jordan_wigner` (and therefore of
+    :func:`~qiskit_fermions.mappers.library.fermion_jordan_wigner` and of
+    :c:func:`qf_ferm_op_jordan_wigner` (and therefore of
     :func:`~qiskit_fermions.mappers.library.jordan_wigner` when applied to a
     :class:`~qiskit_fermions.operators.FermionOperator`). The mapper accumulated the mapped terms
     using an addition that concatenates rather than merges duplicate Pauli terms, so the
@@ -21,7 +22,11 @@ fixes:
     memory is tight.
 
     The mapped operator is unchanged: canonicalization only merges duplicate terms, so the result
-    represents exactly the same observable as before.
+    represents exactly the same observable as before. It is, however, no longer guaranteed to be
+    fully simplified, and the number of terms it holds may vary with the thread count. Call
+    :meth:`~qiskit.quantum_info.SparseObservable.simplify` (``qk_obs_canonicalize`` in C) if you
+    need every duplicate combined.
+performance:
   - |
     :func:`~qiskit_fermions.mappers.library.fermion_jordan_wigner` no longer copies the operator it
     is given. The Python binding took its argument by value, which duplicated every term buffer of

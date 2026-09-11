@@ -38,6 +38,7 @@ upgrade:
     objects of this package that implemented them still do; only the local restatement of the
     interface is gone. :class:`.SupportsApplyUnitaryPlaced` stays, since it extends
     :class:`ffsim.SupportsApplyUnitary` with a mode placement and has no ffsim counterpart.
+build:
   - |
     The ``simulation`` optional dependency has been renamed to ``ffsim``, so
     ``pip install "qiskit-fermions[simulation]"`` becomes
