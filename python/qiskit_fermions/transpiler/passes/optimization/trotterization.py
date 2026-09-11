@@ -17,6 +17,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from typing import TYPE_CHECKING
 
+from qiskit.converters import circuit_to_dag
 from qiskit.dagcircuit import DAGOpNode
 
 from qiskit_fermions.circuit import FermionicDAGCircuit
@@ -88,6 +89,7 @@ class FermionicTrotterization(FermionicDAGCircuitPass):
         self,
         synthesis: FermionicEvolutionSynthesis,
         *,
+        apply: bool = True,
         filter: Callable[[DAGOpNode], bool] | None = None,  # noqa: A002
     ) -> None:
         """Initializing this transpiler pass can be done with the arguments listed below.
@@ -95,6 +97,9 @@ class FermionicTrotterization(FermionicDAGCircuitPass):
         Args:
             synthesis: the fermion-to-fermion synthesis method to apply to the :class:`.Evolution`
                 gates of the circuit.
+            apply: whether to expand each selected gate into the factors ``synthesis`` produces.
+                When ``False``, the gate is only tagged with ``synthesis`` and something else has to
+                expand it later. See :attr:`apply`.
             filter: an optional predicate deciding which :class:`.Evolution` nodes to apply
                 ``synthesis`` to. It is called with the :class:`~qiskit.dagcircuit.DAGOpNode` and the
                 node is left untouched unless it returns ``True``. If ``None`` (the default), every
@@ -105,15 +110,27 @@ class FermionicTrotterization(FermionicDAGCircuitPass):
         self.synthesis = synthesis
         """The fermion-to-fermion synthesis method applied to the selected gates."""
 
+        self.apply = apply
+        """Whether to expand each selected gate into the factors :attr:`synthesis` produces.
+
+        When this is ``False``, the pass only *selects* the method: it tags each selected gate with
+        :attr:`synthesis` and leaves the expansion to whatever builds the gate's definition later,
+        such as Qiskit's :class:`~qiskit.transpiler.passes.Decompose` or a
+        :meth:`~.FermionicCircuit.decompose` call. Note that a gate which is never expanded reaches
+        the fermion-to-qubit stage whole, where it is mapped without :attr:`.Evolution.synthesis`
+        ever being read, and every synthesis method then produces identical output.
+        """
+
         self.filter = filter
         """The predicate selecting which :class:`.Evolution` nodes to apply :attr:`synthesis` to."""
 
     def run(self, dag: FermionicDAGCircuit) -> FermionicDAGCircuit:
         """Runs this transpilation pass.
 
-        Every :class:`.Evolution` node accepted by :attr:`filter` is replaced by an equivalent gate
-        carrying :attr:`synthesis`. All other nodes are left untouched. The input DAG is modified in
-        place.
+        Every :class:`.Evolution` node accepted by :attr:`filter` is replaced by the factors that
+        :attr:`synthesis` produces, or (when :attr:`apply` is ``False``) by an equivalent gate
+        merely carrying :attr:`synthesis`. All other nodes are left untouched. The input DAG is
+        modified in place.
 
         Args:
             dag: the input circuit with fermion-based instructions. Only
@@ -132,16 +149,26 @@ class FermionicTrotterization(FermionicDAGCircuitPass):
             # A *new* gate rather than an assignment to `node.op`: a gate instance can be shared
             # between circuits (Qiskit copies gates with a shallow `__dict__` copy), so mutating it
             # would retroactively change the synthesis of every other circuit holding the same object.
-            dag.substitute_node(
-                node,
-                Evolution(
-                    node.op.num_modes,
-                    node.op.operator,
-                    time=node.op.params[0],
-                    synthesis=self.synthesis,
-                    atomic=node.op.atomic,
-                ),
-                inplace=True,
+            gate = Evolution(
+                node.op.num_modes,
+                node.op.operator,
+                time=node.op.params[0],
+                synthesis=self.synthesis,
+                atomic=node.op.atomic,
             )
+
+            # An atomic gate is a terminal factor with no fermionic definition, so there is nothing
+            # to expand even when `apply` is set: `synthesis` would happily split it further, but
+            # that is precisely what `atomic` exists to prevent (see `Evolution.atomic`). Tagging it
+            # keeps the pass a fixed point over its own output and over `QDriftTrotterization`'s.
+            if not self.apply or node.op.atomic:
+                dag.substitute_node(node, gate, inplace=True)
+                continue
+
+            # Synthesize directly rather than going through the gate's definition: the factors are
+            # all that is wanted here, and this avoids both the definition cache and the overhead of
+            # running a separate expansion pass over the whole DAG.
+            expanded = circuit_to_dag(self.synthesis.synthesize(gate)._inner)
+            dag.substitute_node_with_dag(node, expanded)
 
         return dag
