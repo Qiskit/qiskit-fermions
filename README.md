@@ -37,6 +37,9 @@ Additionally, `qiskit-fermions` integrates with other tools of the ecosystem, su
 [Documentation](https://quantum.cloud.ibm.com/docs/addons/qiskit-fermions) for this package is
 available on IBM Quantum Platform.
 
+You can also preview the docs of the development branch on
+[Github pages](https://qiskit.github.io/qiskit-fermions/dev/index.html).
+
 ----------------------------------------------------------------------------------------------------
 
 ### Installation
