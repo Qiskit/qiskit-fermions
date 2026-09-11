@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>QDriftTrotterization - Qiskit Fermions 0.2.0.dev0+c8cc52d</title>
+        <title>QDriftTrotterization - Qiskit Fermions 0.2.0.dev0+c43f4fb</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+c8cc52d</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+c43f4fb</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+c8cc52d</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+c43f4fb</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -203,7 +203,12 @@
 <li class="toctree-l2"><a class="reference internal" href="../install-py.html"> Python</a></li>
 </ul>
 </li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../guides/index.html"> Guides</a><input aria-label="Toggle navigation of  Guides" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Guides</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../guides/1d_fermi_hubbard.html">Simulate 1D Fermi-Hubbard dynamics with flow sets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guides/2d_fermi_hubbard.html">Simulate 2D Fermi-Hubbard dynamics with flow sets</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../guides/overview.html">More guides</a><input aria-label="Toggle navigation of More guides" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../guides/operators.html">Design principles of operator representations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../guides/grouping.html">Group operator terms: use the operator structure</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../guides/mappers.html">Map operator representations</a></li>
@@ -214,18 +219,16 @@
 <li class="toctree-l2"><a class="reference internal" href="../guides/fermionic_synthesis.html">Synthesize an Evolution gate in fermionic space</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../guides/merge_slater_determinant.html">Optimize Slater determinant preparation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../guides/lucj.html">Transpile an LUCJ ansatz</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../guides/1d_fermi_hubbard.html">Simulate 1D Fermi-Hubbard dynamics with flow sets</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../guides/2d_fermi_hubbard.html">Simulate 2D Fermi-Hubbard dynamics with flow sets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../guides/ffsim.html">How this package relates to ffsim</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference external" href="https://github.com/Qiskit/qiskit-fermions"> GitHub</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API reference</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference external" href="../pydoc/index.html">Python API reference</a></li>
 <li class="toctree-l1"><a class="reference external" href="../cdoc/index.html">C API reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../release-notes.html">Release notes</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/Qiskit/qiskit-fermions">GitHub</a></li>
 </ul>
 
 </div></div>
@@ -308,6 +311,29 @@ cannot be obtained without drawing the preceding ones first. Generating a batch 
 randomizations and recording the seed therefore works as expected (see
 <a class="reference internal" href="../guides/sqdrift.html#sqdrift-getting-started"><span class="std std-ref">Generate SqDRIFT circuits</span></a>); addressing one member directly is not supported.</p>
 </div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The optional <code class="docutils literal notranslate"><span class="pre">filter_trivial</span></code> mode exists to stop the sampling from spending one of the
+<code class="docutils literal notranslate"><span class="pre">num_terms</span></code> slots on an excitation that cannot move a particle, and which therefore tells
+you nothing about the sampled bitstrings. It buys that with the protocol’s convergence
+guarantee, and it is off by default for that reason.</p>
+<p>It does not make the circuit shorter. <code class="docutils literal notranslate"><span class="pre">num_terms</span></code> is fixed, so a rejected draw is replaced
+rather than dropped, and the cheap term it would have contributed (a diagonal rotation, say)
+gives way to a coupling excitation that costs more to synthesize. Expect the filtered circuit
+to be deeper than the unfiltered one: the budget of sampled slots is what the filtering
+conserves, not the depth.</p>
+<p>Rejecting a drawn term and re-drawing renormalizes the sampling distribution over the
+accepted terms only, so the sampled product no longer averages to <span class="math">\(e^{-i t H}\)</span> for the
+Hamiltonian you passed in: the effective coefficient of every retained term is inflated by
+the reciprocal of the acceptance probability, and the rejected terms drop out. Neither
+<span class="math">\(\lambda\)</span> nor <span class="math">\(\delta\)</span> is adjusted to compensate, so the distortion does not
+cancel.</p>
+<p>Use it only when the sampled bitstrings are the quantity of interest, as in the SqDRIFT
+workflow of <a class="reference internal" href="../guides/sqdrift.html#sqdrift-getting-started"><span class="std std-ref">Generate SqDRIFT circuits</span></a>. Do not use it when the sampled circuits are used
+to estimate an expectation value, a time-evolved observable, or anything else that relies on
+the qDRIFT error bound: those results are biased by an amount the pass does not track. See
+<a class="reference internal" href="#qiskit_fermions.transpiler.passes.QDriftTrotterization.filter_trivial" title="qiskit_fermions.transpiler.passes.QDriftTrotterization.filter_trivial"><code class="xref py py-attr docutils literal notranslate"><span class="pre">filter_trivial</span></code></a> for the acceptance rule and its prerequisites.</p>
+</div>
 <div class="admonition hint">
 <p class="admonition-title">Hint</p>
 <p>Terms that are diagonal in the occupation-number basis (that is, products of number operators)
@@ -335,6 +361,22 @@ circuits and cannot post-process their results. See <a class="reference internal
 <p class="admonition-title">See also</p>
 <p>The qDRIFT protocol was introduced in <a class="reference external" href="https://arxiv.org/abs/1811.08017">arXiv:1811.08017</a>.</p>
 </div>
+<p class="rubric">Filtering diagnostics</p>
+<p>When <code class="docutils literal notranslate"><span class="pre">filter_trivial</span></code> actually filters a gate, the returned <a class="reference internal" href="qiskit_fermions.circuit.FermionicDAGCircuit.html#qiskit_fermions.circuit.FermionicDAGCircuit" title="qiskit_fermions.circuit.FermionicDAGCircuit"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicDAGCircuit</span></code></a>
+records how many draws it discarded in its <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.dagcircuit.DAGCircuit#metadata" title="(in Qiskit v2.5)"><code class="xref py py-attr docutils literal notranslate"><span class="pre">metadata</span></code></a>, under
+<code class="docutils literal notranslate"><span class="pre">filter_trivial.discarded</span></code> and <code class="docutils literal notranslate"><span class="pre">filter_trivial.emitted</span></code>. Both hold one entry per filtered
+<a class="reference internal" href="qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate, in circuit order. Their ratio estimates the acceptance probability,
+and hence the factor by which the filtering inflated the coefficients of the terms it kept: an
+acceptance probability close to one means the filtering barely moved the distribution, while a
+small one means the retained terms were weighted far above their true share of the Hamiltonian.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>Neither field is present when no gate was filtered, which covers <code class="docutils literal notranslate"><span class="pre">filter_trivial=False</span></code> and
+every case in which filtering was skipped with a <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#UserWarning" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">UserWarning</span></code></a>. Read them defensively,
+for example with <code class="docutils literal notranslate"><span class="pre">qcirc.metadata.get(&quot;filter_trivial.discarded&quot;)</span></code>. A discarded count of
+zero is different from an absent field: it says the filtering ran on that gate and accepted
+every draw, so it left the sampling distribution untouched.</p>
+</div>
 <p>Initializing this transpiler pass can be done with the arguments listed below.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -342,24 +384,13 @@ circuits and cannot post-process their results. See <a class="reference internal
 <li><p><strong>num_terms</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – the number of terms to sample for the qDRIFT Trotterization. This equals the
 number of <a class="reference internal" href="qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gates emitted per input gate; a larger value reduces
 the Trotterization error at the cost of a deeper circuit.</p></li>
-<li><p><strong>filter_trivial</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – when set to <code class="docutils literal notranslate"><span class="pre">True</span></code>, the sampling loop rejects a sampled term unless it
-couples a mode known to be occupied with a mode known to be unoccupied. Any term
-acting only within one of these two sets cannot change the occupation and, thus, has
-no effect on a sampled bitstring, so re-drawing avoids wasting one of the
-<code class="docutils literal notranslate"><span class="pre">num_terms</span></code> slots on it. This requires an <a class="reference internal" href="qiskit_fermions.circuit.library.InitializeModes.html#qiskit_fermions.circuit.library.InitializeModes" title="qiskit_fermions.circuit.library.InitializeModes"><code class="xref py py-class docutils literal notranslate"><span class="pre">InitializeModes</span></code></a> or
-<a class="reference internal" href="qiskit_fermions.circuit.library.PrepareSlaterDeterminant.html#qiskit_fermions.circuit.library.PrepareSlaterDeterminant" title="qiskit_fermions.circuit.library.PrepareSlaterDeterminant"><code class="xref py py-class docutils literal notranslate"><span class="pre">PrepareSlaterDeterminant</span></code></a> gate to precede the <a class="reference internal" href="qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gates
-being Trotterized (to seed the initial occupied and unoccupied mode sets); if none is
-found, or if the mode sets it seeds turn out to be entirely occupied or entirely
-unoccupied, filtering is skipped for that gate and a <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#UserWarning" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">UserWarning</span></code></a> is emitted
-instead. Any <a class="reference internal" href="qiskit_fermions.circuit.library.OrbitalRotation.html#qiskit_fermions.circuit.library.OrbitalRotation" title="qiskit_fermions.circuit.library.OrbitalRotation"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrbitalRotation</span></code></a> gate encountered before or between the
-<a class="reference internal" href="qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gates also updates these sets: every mode it acts on becomes
-“uncertain” (since the rotation may mix it with any other mode it touches), just like
-a mode touched by an accepted qDRIFT term. A <a class="reference internal" href="qiskit_fermions.circuit.library.PrepareSlaterDeterminant.html#qiskit_fermions.circuit.library.PrepareSlaterDeterminant" title="qiskit_fermions.circuit.library.PrepareSlaterDeterminant"><code class="xref py py-class docutils literal notranslate"><span class="pre">PrepareSlaterDeterminant</span></code></a> gate
-updates these sets the same way its <a class="reference internal" href="qiskit_fermions.circuit.library.InitializeModes.html#qiskit_fermions.circuit.library.InitializeModes" title="qiskit_fermions.circuit.library.InitializeModes"><code class="xref py py-class docutils literal notranslate"><span class="pre">InitializeModes</span></code></a> and
-<a class="reference internal" href="qiskit_fermions.circuit.library.OrbitalRotation.html#qiskit_fermions.circuit.library.OrbitalRotation" title="qiskit_fermions.circuit.library.OrbitalRotation"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrbitalRotation</span></code></a> components would if applied in sequence: it seeds the
-occupied/unoccupied sets from its <code class="docutils literal notranslate"><span class="pre">occupation</span></code>, then immediately marks every mode
-it acts on as “uncertain” because of its rotation. See the <a class="reference internal" href="#qiskit_fermions.transpiler.passes.QDriftTrotterization.run" title="qiskit_fermions.transpiler.passes.QDriftTrotterization.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a> docstring for
-the precise acceptance rule.</p></li>
+<li><p><strong>filter_trivial</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – when set to <code class="docutils literal notranslate"><span class="pre">True</span></code>, the sampling loop rejects a drawn term unless its
+support couples a mode tracked as occupied with a mode tracked as unoccupied, and
+draws a replacement in its place. This spends every one of the <code class="docutils literal notranslate"><span class="pre">num_terms</span></code>
+slots on an excitation that can move a particle, at the cost of biasing the
+Trotterization and of a deeper circuit, so it defaults to <code class="docutils literal notranslate"><span class="pre">False</span></code>. See also
+<a class="reference internal" href="#qiskit_fermions.transpiler.passes.QDriftTrotterization.filter_trivial" title="qiskit_fermions.transpiler.passes.QDriftTrotterization.filter_trivial"><code class="xref py py-attr docutils literal notranslate"><span class="pre">filter_trivial</span></code></a> for the acceptance rule and its prerequisites, and the
+warning in the class docstring for the bias it introduces.</p></li>
 <li><p><strong>weights</strong> (<em>Sequence</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>] </em><em>| </em><em>np.ndarray</em><em> | </em><em>None</em>) – the sampling weights to use instead of the coefficient magnitudes derived from
 the Hamiltonian. If <code class="docutils literal notranslate"><span class="pre">None</span></code> (the default), they are computed from the evolved
 operator on every call, which reproduces the textbook qDRIFT distribution. See
@@ -380,9 +411,10 @@ rng will be initialized with <code class="docutils literal notranslate"><span cl
 <span class="sig-name descname"><span class="pre">MAX_SAMPLE_RETRIES</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1000000</span></span><a class="headerlink" href="#qiskit_fermions.transpiler.passes.QDriftTrotterization.MAX_SAMPLE_RETRIES" title="Link to this definition">¶</a></dt>
 <dd><p>The maximum number of consecutive rejected samples tolerated by <code class="docutils literal notranslate"><span class="pre">filter_trivial</span></code> before
 <a class="reference internal" href="#qiskit_fermions.transpiler.passes.QDriftTrotterization.run" title="qiskit_fermions.transpiler.passes.QDriftTrotterization.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a> gives up and raises <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#RuntimeError" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">RuntimeError</span></code></a>. This guards against an infinite loop when
-the Hamiltonian’s remaining terms cannot bridge the tracked occupied/unoccupied mode sets. For
-example, when both sets remain small and disjoint (few modes have been marked occupied or
-unoccupied, and none have yet become “uncertain”) and no remaining term’s support touches both.</p>
+the Hamiltonian’s remaining terms cannot bridge the tracked occupied/unoccupied mode sets. That
+happens when both sets remain small and disjoint (few modes have been marked occupied or
+unoccupied, and none has yet become “uncertain”) and no remaining term’s support touches
+both.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -394,8 +426,27 @@ unoccupied, and none have yet become “uncertain”) and no remaining term’s 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qiskit_fermions.transpiler.passes.QDriftTrotterization.filter_trivial">
 <span class="sig-name descname"><span class="pre">filter_trivial</span></span><a class="headerlink" href="#qiskit_fermions.transpiler.passes.QDriftTrotterization.filter_trivial" title="Link to this definition">¶</a></dt>
-<dd><p>Whether to reject sampled terms that cannot affect the sampled bitstring (see the
-class docstring for the <code class="docutils literal notranslate"><span class="pre">filter_trivial</span></code> argument).</p>
+<dd><p>Whether to reject drawn terms that do not couple the tracked occupied/unoccupied modes.</p>
+<p>When this is <code class="docutils literal notranslate"><span class="pre">True</span></code>, the sampling loop accepts a drawn term only if its support intersects
+both the set of modes tracked as occupied and the set tracked as unoccupied, and it draws a
+replacement for every term it rejects, so that none of the <a class="reference internal" href="#qiskit_fermions.transpiler.passes.QDriftTrotterization.num_terms" title="qiskit_fermions.transpiler.passes.QDriftTrotterization.num_terms"><code class="xref py py-attr docutils literal notranslate"><span class="pre">num_terms</span></code></a> slots is spent
+on a term that leaves the occupation unchanged and therefore says nothing about the sampled
+bitstrings. Rejection renormalizes the sampling distribution over the accepted terms, which
+biases the Trotterization, and the replacement it draws is more expensive to synthesize than
+the term it displaced: see the warning in the class docstring before enabling this.</p>
+<p>Filtering requires an <a class="reference internal" href="qiskit_fermions.circuit.library.InitializeModes.html#qiskit_fermions.circuit.library.InitializeModes" title="qiskit_fermions.circuit.library.InitializeModes"><code class="xref py py-class docutils literal notranslate"><span class="pre">InitializeModes</span></code></a> or <a class="reference internal" href="qiskit_fermions.circuit.library.PrepareSlaterDeterminant.html#qiskit_fermions.circuit.library.PrepareSlaterDeterminant" title="qiskit_fermions.circuit.library.PrepareSlaterDeterminant"><code class="xref py py-class docutils literal notranslate"><span class="pre">PrepareSlaterDeterminant</span></code></a> gate
+to precede the <a class="reference internal" href="qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gates being Trotterized, to seed the initial occupied and
+unoccupied mode sets. If none is found, or if the sets it seeds turn out to be entirely
+occupied or entirely unoccupied, filtering is skipped for that gate and a
+<a class="reference external" href="https://docs.python.org/3/library/exceptions.html#UserWarning" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">UserWarning</span></code></a> is emitted instead.</p>
+<p>Any <a class="reference internal" href="qiskit_fermions.circuit.library.OrbitalRotation.html#qiskit_fermions.circuit.library.OrbitalRotation" title="qiskit_fermions.circuit.library.OrbitalRotation"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrbitalRotation</span></code></a> gate encountered before or between the <a class="reference internal" href="qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a>
+gates also updates these sets: every mode it acts on becomes “uncertain”, since the rotation
+can mix it with any other mode it touches, just like a mode touched by an accepted term. A
+<a class="reference internal" href="qiskit_fermions.circuit.library.PrepareSlaterDeterminant.html#qiskit_fermions.circuit.library.PrepareSlaterDeterminant" title="qiskit_fermions.circuit.library.PrepareSlaterDeterminant"><code class="xref py py-class docutils literal notranslate"><span class="pre">PrepareSlaterDeterminant</span></code></a> gate updates the sets the same way its
+<a class="reference internal" href="qiskit_fermions.circuit.library.InitializeModes.html#qiskit_fermions.circuit.library.InitializeModes" title="qiskit_fermions.circuit.library.InitializeModes"><code class="xref py py-class docutils literal notranslate"><span class="pre">InitializeModes</span></code></a> and <a class="reference internal" href="qiskit_fermions.circuit.library.OrbitalRotation.html#qiskit_fermions.circuit.library.OrbitalRotation" title="qiskit_fermions.circuit.library.OrbitalRotation"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrbitalRotation</span></code></a> components would if applied in
+sequence: it seeds the occupied and unoccupied sets from its <code class="docutils literal notranslate"><span class="pre">occupation</span></code>, then
+immediately marks every mode it acts on as “uncertain” because of its rotation. See the
+<a class="reference internal" href="#qiskit_fermions.transpiler.passes.QDriftTrotterization.run" title="qiskit_fermions.transpiler.passes.QDriftTrotterization.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a> docstring for the precise acceptance rule.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -452,18 +503,19 @@ operator’s coefficients. A supplied array is validated against the operator it
 and restricts the circuit to a single <a class="reference internal" href="qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate (see <a class="reference internal" href="#qiskit_fermions.transpiler.passes.QDriftTrotterization.weights" title="qiskit_fermions.transpiler.passes.QDriftTrotterization.weights"><code class="xref py py-attr docutils literal notranslate"><span class="pre">weights</span></code></a>).</p>
 <p>When <a class="reference internal" href="#qiskit_fermions.transpiler.passes.QDriftTrotterization.filter_trivial" title="qiskit_fermions.transpiler.passes.QDriftTrotterization.filter_trivial"><code class="xref py py-attr docutils literal notranslate"><span class="pre">filter_trivial</span></code></a> is set, this method tracks the sets of modes that are known to
 be occupied or unoccupied, seeded from any <a class="reference internal" href="qiskit_fermions.circuit.library.InitializeModes.html#qiskit_fermions.circuit.library.InitializeModes" title="qiskit_fermions.circuit.library.InitializeModes"><code class="xref py py-class docutils literal notranslate"><span class="pre">InitializeModes</span></code></a> gate(s) preceding the
-<a class="reference internal" href="qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gates in the circuit (several such gates placed in parallel, e.g. one per
-spin sector, are accumulated together). A sampled term is only accepted if its support
-intersects <em>both</em> sets, that is, it couples a known-occupied mode with a known-unoccupied one;
-otherwise it is discarded and re-sampled, since it cannot affect the sampled bitstring. Once a
-term is accepted, every mode in its support becomes “uncertain” and is added to <em>both</em> sets,
-making it eligible to participate in either role for subsequent samples. Any
-<a class="reference internal" href="qiskit_fermions.circuit.library.OrbitalRotation.html#qiskit_fermions.circuit.library.OrbitalRotation" title="qiskit_fermions.circuit.library.OrbitalRotation"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrbitalRotation</span></code></a> gate found in the circuit updates these sets the same way: every
-mode it acts on becomes “uncertain” too, since the rotation may mix it with any other mode
-in its support. A <a class="reference internal" href="qiskit_fermions.circuit.library.PrepareSlaterDeterminant.html#qiskit_fermions.circuit.library.PrepareSlaterDeterminant" title="qiskit_fermions.circuit.library.PrepareSlaterDeterminant"><code class="xref py py-class docutils literal notranslate"><span class="pre">PrepareSlaterDeterminant</span></code></a> gate is treated as its
-<a class="reference internal" href="qiskit_fermions.circuit.library.InitializeModes.html#qiskit_fermions.circuit.library.InitializeModes" title="qiskit_fermions.circuit.library.InitializeModes"><code class="xref py py-class docutils literal notranslate"><span class="pre">InitializeModes</span></code></a> and <a class="reference internal" href="qiskit_fermions.circuit.library.OrbitalRotation.html#qiskit_fermions.circuit.library.OrbitalRotation" title="qiskit_fermions.circuit.library.OrbitalRotation"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrbitalRotation</span></code></a> components applied back-to-back: its
-<code class="docutils literal notranslate"><span class="pre">occupation</span></code> first seeds the occupied/unoccupied sets, and then every mode it acts on is
-immediately marked “uncertain”, since it also carries a rotation.</p>
+<a class="reference internal" href="qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gates in the circuit (several such gates placed in parallel, for example
+one per spin sector, are accumulated together). A drawn term is accepted only if its support
+intersects <em>both</em> sets, that is, it couples a known-occupied mode with a known-unoccupied
+one; otherwise it is discarded and a replacement is drawn. Rejection renormalizes the
+sampling distribution over the accepted terms, which biases the Trotterization: see the
+warning in the class docstring. Once a term is accepted, every mode in its support becomes
+“uncertain” and is added to <em>both</em> sets, making it eligible to participate in either role
+for subsequent samples. Any <a class="reference internal" href="qiskit_fermions.circuit.library.OrbitalRotation.html#qiskit_fermions.circuit.library.OrbitalRotation" title="qiskit_fermions.circuit.library.OrbitalRotation"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrbitalRotation</span></code></a> gate found in the circuit updates
+these sets the same way: every mode it acts on becomes “uncertain” too, since the rotation
+can mix it with any other mode in its support. A <a class="reference internal" href="qiskit_fermions.circuit.library.PrepareSlaterDeterminant.html#qiskit_fermions.circuit.library.PrepareSlaterDeterminant" title="qiskit_fermions.circuit.library.PrepareSlaterDeterminant"><code class="xref py py-class docutils literal notranslate"><span class="pre">PrepareSlaterDeterminant</span></code></a> gate is
+treated as its <a class="reference internal" href="qiskit_fermions.circuit.library.InitializeModes.html#qiskit_fermions.circuit.library.InitializeModes" title="qiskit_fermions.circuit.library.InitializeModes"><code class="xref py py-class docutils literal notranslate"><span class="pre">InitializeModes</span></code></a> and <a class="reference internal" href="qiskit_fermions.circuit.library.OrbitalRotation.html#qiskit_fermions.circuit.library.OrbitalRotation" title="qiskit_fermions.circuit.library.OrbitalRotation"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrbitalRotation</span></code></a> components applied
+back-to-back: its <code class="docutils literal notranslate"><span class="pre">occupation</span></code> first seeds the occupied/unoccupied sets, and then every
+mode it acts on is immediately marked “uncertain”, since it also carries a rotation.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>dag</strong> (<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.dagcircuit.DAGCircuit" title="(in Qiskit v2.5)"><em>DAGCircuit</em></a>) – the input circuit with fermion-based instructions. Only
@@ -471,12 +523,16 @@ immediately marked “uncertain”, since it also carries a rotation.</p>
 <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.dagcircuit.DAGOpNode#op" title="(in Qiskit v2.5)"><code class="xref py py-attr docutils literal notranslate"><span class="pre">op</span></code></a> are supported.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>The output circuit which is still acting on a fermionic register.</p>
+<dd class="field-even"><p>The output circuit which is still acting on a fermionic register. When filtering
+actually ran, its <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.dagcircuit.DAGCircuit#metadata" title="(in Qiskit v2.5)"><code class="xref py py-attr docutils literal notranslate"><span class="pre">metadata</span></code></a> also carries the
+<code class="docutils literal notranslate"><span class="pre">filter_trivial.discarded</span></code> and <code class="docutils literal notranslate"><span class="pre">filter_trivial.emitted</span></code> counts described in the
+class docstring.</p>
 </dd>
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#RuntimeError" title="(in Python v3.14)"><strong>RuntimeError</strong></a> – if <code class="docutils literal notranslate"><span class="pre">filter_trivial</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code> and <a class="reference internal" href="#qiskit_fermions.transpiler.passes.QDriftTrotterization.MAX_SAMPLE_RETRIES" title="qiskit_fermions.transpiler.passes.QDriftTrotterization.MAX_SAMPLE_RETRIES"><code class="xref py py-attr docutils literal notranslate"><span class="pre">MAX_SAMPLE_RETRIES</span></code></a>
-    consecutive samples are rejected without finding a non-trivial term to emit.</p></li>
+    consecutive draws are rejected without any of them coupling the tracked occupied and
+    unoccupied mode sets.</p></li>
 <li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – if <a class="reference internal" href="#qiskit_fermions.transpiler.passes.QDriftTrotterization.weights" title="qiskit_fermions.transpiler.passes.QDriftTrotterization.weights"><code class="xref py py-attr docutils literal notranslate"><span class="pre">weights</span></code></a> was supplied and its length does not match the number of
     groups (or terms) of an evolved operator, or if the circuit holds more than one
     <a class="reference internal" href="qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate.</p></li>
@@ -606,7 +662,7 @@ immediately marked “uncertain”, since it also carries a rotation.</p>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=b87481a1"></script>
+</div><script src="../_static/documentation_options.js?v=1d120a6e"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

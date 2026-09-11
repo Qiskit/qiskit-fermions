@@ -75,17 +75,6 @@ Guides explaining how a :class:`.FermionicCircuit` becomes a :class:`~qiskit.cir
    lucj
 
 
-Workflow examples
-=================
-
-.. toctree::
-   :maxdepth: 1
-   :glob:
-
-   1d_fermi_hubbard
-   2d_fermi_hubbard
-
-
 Relationship to other packages
 ==============================
 

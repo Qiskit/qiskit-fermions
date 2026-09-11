@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Generate SqDRIFT circuits - Qiskit Fermions 0.2.0.dev0+c8cc52d</title>
+        <title>Generate SqDRIFT circuits - Qiskit Fermions 0.2.0.dev0+c43f4fb</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+c8cc52d</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+c43f4fb</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+c8cc52d</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+c43f4fb</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -196,14 +196,19 @@
   <input type="hidden" name="area" value="default">
 </form>
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
-  <ul class="current">
+  <ul>
 <li class="toctree-l1"><a class="reference internal" href="../index.html"> Documentation Home</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../install.html"> Installation Instructions</a><input aria-label="Toggle navigation of  Installation Instructions" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../install-c.html"> C</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../install-py.html"> Python</a></li>
 </ul>
 </li>
-<li class="toctree-l1 current has-children"><a class="reference internal" href="index.html"> Guides</a><input aria-label="Toggle navigation of  Guides" checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Guides</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="1d_fermi_hubbard.html">Simulate 1D Fermi-Hubbard dynamics with flow sets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="2d_fermi_hubbard.html">Simulate 2D Fermi-Hubbard dynamics with flow sets</a></li>
+<li class="toctree-l1 current has-children"><a class="reference internal" href="overview.html">More guides</a><input aria-label="Toggle navigation of More guides" checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="operators.html">Design principles of operator representations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="grouping.html">Group operator terms: use the operator structure</a></li>
 <li class="toctree-l2"><a class="reference internal" href="mappers.html">Map operator representations</a></li>
@@ -214,18 +219,16 @@
 <li class="toctree-l2"><a class="reference internal" href="fermionic_synthesis.html">Synthesize an Evolution gate in fermionic space</a></li>
 <li class="toctree-l2"><a class="reference internal" href="merge_slater_determinant.html">Optimize Slater determinant preparation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="lucj.html">Transpile an LUCJ ansatz</a></li>
-<li class="toctree-l2"><a class="reference internal" href="1d_fermi_hubbard.html">Simulate 1D Fermi-Hubbard dynamics with flow sets</a></li>
-<li class="toctree-l2"><a class="reference internal" href="2d_fermi_hubbard.html">Simulate 2D Fermi-Hubbard dynamics with flow sets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ffsim.html">How this package relates to ffsim</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference external" href="https://github.com/Qiskit/qiskit-fermions"> GitHub</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API reference</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference external" href="../pydoc/index.html">Python API reference</a></li>
 <li class="toctree-l1"><a class="reference external" href="../cdoc/index.html">C API reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../release-notes.html">Release notes</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/Qiskit/qiskit-fermions">GitHub</a></li>
 </ul>
 
 </div></div>
@@ -365,9 +368,13 @@ in the next step.</p>
 in the occupation-number basis, that is, the products of number operators
 (<span class="math">\(a^\dagger_i a_i\)</span>). This includes the constant energy offset, whose
 time evolution only introduces a global phase into the circuit, the
-individual number-operators whose time evolution amounts to single-qubit Z
-rotations, as well as higher-order products such as <span class="math">\(n_i n_j\)</span>. None
-of these impact the sampled bitstrings.</p>
+individual number operators whose time evolution amounts to single-qubit Z
+rotations, as well as higher-order products such as <span class="math">\(n_i n_j\)</span>. None of
+them can change a mode’s occupation, so dropping them costs no excitation
+content. Unlike the per-draw rejection in step 5, this filtering happens
+once, on the Hamiltonian itself, so the coefficient distribution the protocol
+samples from is rebuilt consistently from the filtered operator rather than
+renormalized mid-draw.</p>
 <p>The <a class="reference internal" href="../stubs/qiskit_fermions.operators.terms.filter_diagonal_terms.html#qiskit_fermions.operators.terms.filter_diagonal_terms" title="qiskit_fermions.operators.terms.filter_diagonal_terms"><code class="xref py py-func docutils literal notranslate"><span class="pre">filter_diagonal_terms()</span></code></a>
 function removes such terms from an operator in place:</p>
 <div class="sd-tab-set docutils">
@@ -537,17 +544,43 @@ generator used inside of the <a class="reference internal" href="../stubs/qiskit
 pass.</p>
 </div>
 </section>
-<section id="filter-out-trivial-excitations">
-<h2>5. Filter out trivial excitations<a class="headerlink" href="#filter-out-trivial-excitations" title="Link to this heading">¶</a></h2>
-<p>Beyond the diagonal terms filtered out in the previous step, a sampled
-excitation can <em>still</em> fail to affect the sampled bitstrings. Whenever it acts
-entirely within a set of modes whose occupation is already fixed (all occupied
-or all unoccupied), it cannot move a particle from one to the other, so it
-leaves the state (and thus the eventual measurement outcome) unchanged.
-Setting <code class="docutils literal notranslate"><span class="pre">filter_trivial=True</span></code> on the <a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.QDriftTrotterization.html#qiskit_fermions.transpiler.passes.QDriftTrotterization" title="qiskit_fermions.transpiler.passes.QDriftTrotterization"><code class="xref py py-class docutils literal notranslate"><span class="pre">QDriftTrotterization</span></code></a> pass
-rejects such terms as they are sampled and re-draws a replacement, so that
-each of the <code class="docutils literal notranslate"><span class="pre">num_groups</span></code> slots of the resulting circuit contributes a
-non-trivial excitation.</p>
+<section id="filter-drawn-excitations-by-occupation">
+<h2>5. Filter drawn excitations by occupation<a class="headerlink" href="#filter-drawn-excitations-by-occupation" title="Link to this heading">¶</a></h2>
+<p>Beyond the diagonal terms filtered out in the previous step, a drawn excitation
+can act entirely within a set of modes whose occupation is already fixed (all
+occupied or all unoccupied), where it cannot move a particle from one side to
+the other. Such an excitation tells you nothing about the sampled bitstrings, so
+a slot spent on it is a slot wasted. Setting <code class="docutils literal notranslate"><span class="pre">filter_trivial=True</span></code> on the
+<a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.QDriftTrotterization.html#qiskit_fermions.transpiler.passes.QDriftTrotterization" title="qiskit_fermions.transpiler.passes.QDriftTrotterization"><code class="xref py py-class docutils literal notranslate"><span class="pre">QDriftTrotterization</span></code></a> pass rejects such excitations as they are drawn
+and draws a replacement, so that each of the <code class="docutils literal notranslate"><span class="pre">num_groups</span></code> slots of the
+resulting circuit carries an excitation that couples the two sides.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>This filtering is not free, and it is off by default for that reason. What it
+conserves is the budget of <code class="docutils literal notranslate"><span class="pre">num_groups</span></code> sampled slots, not the circuit
+depth: since that budget is fixed, a rejected excitation is replaced rather
+than dropped, and a cheap one gives way to a coupling excitation that costs
+more to synthesize. Expect a filtered circuit to be deeper than an unfiltered
+one drawn from the same seed.</p>
+<p>Renormalizing the draw over the accepted excitations changes the distribution
+the qDRIFT protocol samples from, and unlike the grouping in step 2 it also
+breaks the protocol’s convergence guarantee: the sampled product no longer
+averages to the evolution under the Hamiltonian you passed in. Every retained
+excitation ends up weighted by the reciprocal of the acceptance probability,
+the rejected ones contribute nothing, and neither the total coefficient
+magnitude nor the per-gate evolution time is adjusted to compensate.</p>
+<p>The acceptance rule is also an over-approximation. It compares mode supports
+only, so it carries no amplitude information, and the tracked sets only ever
+grow: an excitation confined to the occupied set is genuinely inert on a
+product state, but the same reasoning gets weaker for later draws, once
+earlier accepted excitations have left the state entangled and marked most
+modes “uncertain”.</p>
+<p>Use <code class="docutils literal notranslate"><span class="pre">filter_trivial=True</span></code> for the bitstring-sampling workflow this guide
+describes, where the circuits feed SQD post-processing and only the sampled
+bitstrings matter. Do not use it if you intend to estimate an expectation
+value from these circuits, or to rely on the qDRIFT error bound in any other
+way: those results carry a bias that the pass does not correct for.</p>
+</div>
 <p>This filtering needs to know which modes start out occupied. It therefore
 requires an <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.InitializeModes.html#qiskit_fermions.circuit.library.InitializeModes" title="qiskit_fermions.circuit.library.InitializeModes"><code class="xref py py-class docutils literal notranslate"><span class="pre">InitializeModes</span></code></a> gate preceding the <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a>
 gates in the circuit; <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.InitializeModes.html#qiskit_fermions.circuit.library.InitializeModes.from_hartree_fock" title="qiskit_fermions.circuit.library.InitializeModes.from_hartree_fock"><code class="xref py py-meth docutils literal notranslate"><span class="pre">InitializeModes.from_hartree_fock()</span></code></a> is a
@@ -602,10 +635,9 @@ C</label><div class="sd-tab-content docutils">
 </div>
 </div>
 </div>
-<p>None of the excitations sampled without filtering touch the occupied set
+<p>None of the excitations drawn without filtering touch the occupied set
 (<code class="docutils literal notranslate"><span class="pre">0-6</span></code> and <code class="docutils literal notranslate"><span class="pre">28-34</span></code>) at all, so none of them can move a particle between an
-occupied and an unoccupied mode; every single one is trivial and would have
-no effect on the sampled bitstrings. With <code class="docutils literal notranslate"><span class="pre">filter_trivial=True</span></code>, all five are
+occupied and an unoccupied mode. With <code class="docutils literal notranslate"><span class="pre">filter_trivial=True</span></code>, all five are
 rejected and replaced by excitations that do couple an occupied mode with an
 unoccupied one. For example, the first accepted excitation <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">1,</span> <span class="pre">6,</span> <span class="pre">7]</span></code> moves a
 particle between occupied modes <code class="docutils literal notranslate"><span class="pre">0</span></code>, <code class="docutils literal notranslate"><span class="pre">1</span></code>, and <code class="docutils literal notranslate"><span class="pre">6</span></code> and unoccupied mode
@@ -619,12 +651,54 @@ get accepted. This is what makes the second excitation,
 unoccupied mode. It is only accepted because modes <code class="docutils literal notranslate"><span class="pre">0</span></code> and <code class="docutils literal notranslate"><span class="pre">1</span></code> became
 uncertain (and thus eligible as the “unoccupied” side of the coupling)
 once the first excitation touched them.</p>
+<p>This growth is what makes the rule an over-approximation rather than a test: as
+more modes turn uncertain, fewer draws are rejected, and the filtering does the
+most to the sampling distribution on the earliest draws.</p>
+<p>To judge how far the filtering moved the distribution, read the rejection counts
+the pass records in the circuit metadata. One entry is stored per filtered
+<a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate, and the accepted-to-total ratio estimates the
+acceptance probability, which is the factor by which the retained excitations
+were over-weighted:</p>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-14" name="sd-tab-set-7" type="radio">
+<label class="sd-tab-label" data-sync-group="code" data-sync-id="python" for="sd-tab-item-14">
+PYTHON</label><div class="sd-tab-content docutils">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># a freshly seeded pass, so the counts do not depend on earlier draws</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">qdrift_counted</span> <span class="o">=</span> <span class="n">QDriftTrotterization</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">num_groups</span><span class="p">,</span> <span class="n">filter_trivial</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="mi">3480</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">filtered</span> <span class="o">=</span> <span class="n">FermionicPassManager</span><span class="p">(</span><span class="n">qdrift_counted</span><span class="p">)</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">hf_circ</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">discarded</span> <span class="o">=</span> <span class="n">filtered</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"filter_trivial.discarded"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">emitted</span> <span class="o">=</span> <span class="n">filtered</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"filter_trivial.emitted"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">emitted</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> kept, </span><span class="si">{</span><span class="n">discarded</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> discarded"</span><span class="p">)</span>
+<span class="go">5 kept, 7 discarded</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"acceptance probability: </span><span class="si">{</span><span class="n">emitted</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="p">(</span><span class="n">emitted</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">discarded</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="go">acceptance probability: 0.42</span>
+</pre></div>
+</div>
+</div>
+<input id="sd-tab-item-15" name="sd-tab-set-7" type="radio">
+<label class="sd-tab-label" data-sync-group="code" data-sync-id="c" for="sd-tab-item-15">
+C</label><div class="sd-tab-content docutils">
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="c1">// WARNING: Qiskit's C API does not yet allow us to implement circuits</span>
+<span class="c1">// with custom gate definitions, which we therefore also cannot transpile</span>
+<span class="c1">// via this API.</span>
+</pre></div>
+</div>
+</div>
+</div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Without a preceding <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.InitializeModes.html#qiskit_fermions.circuit.library.InitializeModes" title="qiskit_fermions.circuit.library.InitializeModes"><code class="xref py py-class docutils literal notranslate"><span class="pre">InitializeModes</span></code></a> gate, <code class="docutils literal notranslate"><span class="pre">filter_trivial=True</span></code>
-has no occupation information to filter against. It emits a
-<a class="reference external" href="https://docs.python.org/3/library/exceptions.html#UserWarning" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">UserWarning</span></code></a> and leaves the sampling unfiltered for that
-<a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate.</p>
+<p>Filtering needs occupation information to filter against. A
+<a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.PrepareSlaterDeterminant.html#qiskit_fermions.circuit.library.PrepareSlaterDeterminant" title="qiskit_fermions.circuit.library.PrepareSlaterDeterminant"><code class="xref py py-class docutils literal notranslate"><span class="pre">PrepareSlaterDeterminant</span></code></a> gate seeds it just as
+<a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.InitializeModes.html#qiskit_fermions.circuit.library.InitializeModes" title="qiskit_fermions.circuit.library.InitializeModes"><code class="xref py py-class docutils literal notranslate"><span class="pre">InitializeModes</span></code></a> does, and any <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.OrbitalRotation.html#qiskit_fermions.circuit.library.OrbitalRotation" title="qiskit_fermions.circuit.library.OrbitalRotation"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrbitalRotation</span></code></a> marks every
+mode it acts on as “uncertain”. Without any of them, or when the seeded modes
+all land on one side (every mode occupied, or every mode unoccupied),
+<code class="docutils literal notranslate"><span class="pre">filter_trivial=True</span></code> emits a <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#UserWarning" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">UserWarning</span></code></a> and leaves the sampling
+unfiltered for that <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate. On a Hamiltonian whose remaining
+terms can no longer couple the two tracked sets, the pass instead raises
+<a class="reference external" href="https://docs.python.org/3/library/exceptions.html#RuntimeError" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">RuntimeError</span></code></a> after
+<a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.QDriftTrotterization.html#qiskit_fermions.transpiler.passes.QDriftTrotterization.MAX_SAMPLE_RETRIES" title="qiskit_fermions.transpiler.passes.QDriftTrotterization.MAX_SAMPLE_RETRIES"><code class="xref py py-attr docutils literal notranslate"><span class="pre">QDriftTrotterization.MAX_SAMPLE_RETRIES</span></code></a> consecutive rejections.</p>
 </div>
 </section>
 <section id="optional-precompute-the-sampling-weights">
@@ -645,8 +719,8 @@ Hamiltonian-dependent state.</p>
 noticeable as the other is absent, so it is worth applying both together. Since
 <code class="docutils literal notranslate"><span class="pre">canon</span></code> was already reordered above, the two compose directly:</p>
 <div class="sd-tab-set docutils">
-<input checked="checked" id="sd-tab-item-14" name="sd-tab-set-7" type="radio">
-<label class="sd-tab-label" data-sync-group="code" data-sync-id="python" for="sd-tab-item-14">
+<input checked="checked" id="sd-tab-item-16" name="sd-tab-set-8" type="radio">
+<label class="sd-tab-label" data-sync-group="code" data-sync-id="python" for="sd-tab-item-16">
 PYTHON</label><div class="sd-tab-content docutils">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.operators.terms.grouping</span><span class="w"> </span><span class="kn">import</span> <span class="n">group_coeff_means</span>
 <span class="gp">&gt;&gt;&gt;</span>
@@ -662,8 +736,8 @@ PYTHON</label><div class="sd-tab-content docutils">
 </pre></div>
 </div>
 </div>
-<input id="sd-tab-item-15" name="sd-tab-set-7" type="radio">
-<label class="sd-tab-label" data-sync-group="code" data-sync-id="c" for="sd-tab-item-15">
+<input id="sd-tab-item-17" name="sd-tab-set-8" type="radio">
+<label class="sd-tab-label" data-sync-group="code" data-sync-id="c" for="sd-tab-item-17">
 C</label><div class="sd-tab-content docutils">
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="c1">// WARNING: Qiskit's C API does not yet allow us to implement circuits</span>
 <span class="c1">// with custom gate definitions, which we therefore also cannot transpile</span>
@@ -702,8 +776,8 @@ and is implemented by <a class="reference internal" href="../stubs/qiskit_fermio
 be easily inserted into the transpiler pipeline by using the <a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.RelabelModes.html#qiskit_fermions.transpiler.passes.RelabelModes" title="qiskit_fermions.transpiler.passes.RelabelModes"><code class="xref py py-class docutils literal notranslate"><span class="pre">RelabelModes</span></code></a>
 pass:</p>
 <div class="sd-tab-set docutils">
-<input checked="checked" id="sd-tab-item-16" name="sd-tab-set-8" type="radio">
-<label class="sd-tab-label" data-sync-group="code" data-sync-id="python" for="sd-tab-item-16">
+<input checked="checked" id="sd-tab-item-18" name="sd-tab-set-9" type="radio">
+<label class="sd-tab-label" data-sync-group="code" data-sync-id="python" for="sd-tab-item-18">
 PYTHON</label><div class="sd-tab-content docutils">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">pyomo.environ</span><span class="w"> </span><span class="kn">import</span> <span class="n">SolverFactory</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.transpiler.passes</span><span class="w"> </span><span class="kn">import</span> <span class="n">RelabelModes</span>
@@ -722,8 +796,8 @@ PYTHON</label><div class="sd-tab-content docutils">
 </pre></div>
 </div>
 </div>
-<input id="sd-tab-item-17" name="sd-tab-set-8" type="radio">
-<label class="sd-tab-label" data-sync-group="code" data-sync-id="c" for="sd-tab-item-17">
+<input id="sd-tab-item-19" name="sd-tab-set-9" type="radio">
+<label class="sd-tab-label" data-sync-group="code" data-sync-id="c" for="sd-tab-item-19">
 C</label><div class="sd-tab-content docutils">
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="c1">// WARNING: This feature is not available via the C API.</span>
 </pre></div>
@@ -818,7 +892,7 @@ tutorials</a>.</p>
 <li><a class="reference internal" href="#group-hamiltonian-terms">2. Group Hamiltonian terms</a></li>
 <li><a class="reference internal" href="#prepare-the-time-evolution-circuit">3. Prepare the time evolution circuit</a></li>
 <li><a class="reference internal" href="#transpile-the-circuit-with-qdrift-trotterization">4. Transpile the circuit with QDrift Trotterization</a></li>
-<li><a class="reference internal" href="#filter-out-trivial-excitations">5. Filter out trivial excitations</a></li>
+<li><a class="reference internal" href="#filter-drawn-excitations-by-occupation">5. Filter drawn excitations by occupation</a></li>
 <li><a class="reference internal" href="#optional-precompute-the-sampling-weights">(Optional) Precompute the sampling weights</a></li>
 <li><a class="reference internal" href="#optional-optimize-the-fermionic-mode-indexing">(Optional) Optimize the fermionic mode indexing</a></li>
 <li><a class="reference internal" href="#next-steps">Next steps</a></li>
@@ -833,7 +907,7 @@ tutorials</a>.</p>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=b87481a1"></script>
+</div><script src="../_static/documentation_options.js?v=1d120a6e"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
