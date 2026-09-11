@@ -1,0 +1,98 @@
+﻿F2QSynthesisPluginManager
+=========================
+
+.. currentmodule:: qiskit_fermions.transpiler.passes.synthesis
+
+.. autoclass:: F2QSynthesisPluginManager
+   :show-inheritance:
+   :no-members:
+   :no-inherited-members:
+   :special-members:
+
+
+  
+  
+   .. rubric:: Attributes
+    
+   .. autoattribute:: plugins
+  
+  
+  
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+  
+  
+   .. rubric:: Methods
+    
+   .. automethod:: method
+   .. automethod:: method_names
+   .. automethod:: op_names
+  
+  
+  
+  
+  
+  
+  

@@ -1,0 +1,6 @@
+﻿gamma
+=====
+
+.. currentmodule:: qiskit_fermions.operators
+
+.. autofunction:: gamma
