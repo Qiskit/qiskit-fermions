@@ -24,7 +24,8 @@ such as:
 Get started
 -----------
 
-.. image:: images/overview.svg
+.. figure:: images/overview.svg
+   :alt: Schematic description of Qiskit Fermions
 
 The schematic description in the image above provides a glimpse of the breadth
 of features and general workflow that this package provides. You can work in the
