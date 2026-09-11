@@ -8,7 +8,7 @@
         <link rel="prefetch" href="_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Release Notes - Qiskit Fermions 0.2.0.dev0+c43f4fb</title>
+        <title>Release Notes - Qiskit Fermions 0.2.0.dev0+7ef4f94</title>
       <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+c43f4fb</div></a>
+      <a href="index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+7ef4f94</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+c43f4fb</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+7ef4f94</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="search.html" role="search">
@@ -372,8 +372,8 @@ raising the order here while the latter stays first-order buys little.</p>
 </li>
 </ul>
 <ul>
-<li><p>Added <a class="reference internal" href="stubs/qiskit_fermions.transpiler.passes.FermionicTrotterization.html#qiskit_fermions.transpiler.passes.FermionicTrotterization" title="qiskit_fermions.transpiler.passes.FermionicTrotterization"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicTrotterization</span></code></a>, a transpiler pass that selects the fermion-to-fermion
-synthesis method of every <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate in a circuit:</p>
+<li><p>Added <a class="reference internal" href="stubs/qiskit_fermions.transpiler.passes.FermionicTrotterization.html#qiskit_fermions.transpiler.passes.FermionicTrotterization" title="qiskit_fermions.transpiler.passes.FermionicTrotterization"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicTrotterization</span></code></a>, a transpiler pass that Trotterizes every
+<a class="reference internal" href="stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate in a circuit with one fermion-to-fermion synthesis method:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pm</span><span class="o">.</span><span class="n">optimization</span> <span class="o">=</span> <span class="n">FermionicPassManager</span><span class="p">(</span>
     <span class="p">[</span><span class="n">FermionicTrotterization</span><span class="p">(</span><span class="n">FermionicSuzukiTrotter</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">reps</span><span class="o">=</span><span class="mi">4</span><span class="p">))]</span>
 <span class="p">)</span>
@@ -385,11 +385,11 @@ This pass makes the choice once for a whole pipeline instead. An optional <code 
 restricts it to a subset of the gates, which is worth using when a circuit mixes evolutions that
 benefit from a higher order with ones that do not, such as the all-commuting diagonal-Coulomb
 operators of a <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.UCJ.html#qiskit_fermions.circuit.library.UCJ" title="qiskit_fermions.circuit.library.UCJ"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCJ</span></code></a>.</p>
-<p>The pass <em>selects</em> a method rather than expanding the evolution immediately, so each
-<a class="reference internal" href="stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> stays a single node for the passes that follow – notably
-<a class="reference internal" href="stubs/qiskit_fermions.transpiler.passes.RelabelModes.html#qiskit_fermions.transpiler.passes.RelabelModes" title="qiskit_fermions.transpiler.passes.RelabelModes"><code class="xref py py-class docutils literal notranslate"><span class="pre">RelabelModes</span></code></a>, which needs whole operators to build its mode-relabeling model. This is the
-opposite choice from <a class="reference internal" href="stubs/qiskit_fermions.transpiler.passes.QDriftTrotterization.html#qiskit_fermions.transpiler.passes.QDriftTrotterization" title="qiskit_fermions.transpiler.passes.QDriftTrotterization"><code class="xref py py-class docutils literal notranslate"><span class="pre">QDriftTrotterization</span></code></a>, whose random one-shot sampling cannot be
-deferred.</p>
+<p>The pass expands each selected gate into the factors its method emits, so no separate expansion
+step is needed. Pass <code class="docutils literal notranslate"><span class="pre">apply=False</span></code> to only select the method and leave the expansion to
+something else, such as Qiskit’s <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.transpiler.passes.Decompose" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Decompose</span></code></a>; note that a gate
+which is never expanded reaches the fermion-to-qubit stage whole, where it is mapped without
+<a class="reference internal" href="stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution.synthesis" title="qiskit_fermions.circuit.library.Evolution.synthesis"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Evolution.synthesis</span></code></a> ever being read.</p>
 </li>
 </ul>
 <ul>
@@ -902,6 +902,21 @@ factors. The sampled gates now carry over the synthesis method of the gate they 
 marked <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution.atomic" title="qiskit_fermions.circuit.library.Evolution.atomic"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Evolution.atomic</span></code></a>.</p></li>
 </ul>
 <ul>
+<li><p>Fixed <a class="reference internal" href="stubs/qiskit_fermions.transpiler.passes.RelabelModes.html#qiskit_fermions.transpiler.passes.RelabelModes" title="qiskit_fermions.transpiler.passes.RelabelModes"><code class="xref py py-class docutils literal notranslate"><span class="pre">RelabelModes</span></code></a> finding a permutation for the wrong Hamiltonian when a circuit’s
+<a class="reference internal" href="stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gates had already been decomposed. A
+<a class="reference internal" href="stubs/qiskit_fermions.circuit.library.synthesis.FermionicEvolutionSynthesis.html#qiskit_fermions.circuit.library.synthesis.FermionicEvolutionSynthesis" title="qiskit_fermions.circuit.library.synthesis.FermionicEvolutionSynthesis"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicEvolutionSynthesis</span></code></a> narrows every
+factor it emits onto that factor’s support, so the factor’s operator carries mode indices local to
+the gate, while its position in the register is given by the node’s qubit arguments. The automatic
+optimization read the operator alone, which gathered those local indices: every narrowed two-mode
+factor became the excitation <code class="docutils literal notranslate"><span class="pre">(0,</span> <span class="pre">1)</span></code> regardless of which modes it actually coupled, and a
+long-range coupling dropped out of the model entirely.</p>
+<p>The permutation this returned was valid but optimized for a Hamiltonian that was not the
+circuit’s, and nothing raised, since local indices are themselves valid mode indices. Circuits
+whose evolutions reached the pass whole were unaffected. If you relied on the permutation of a
+decomposed circuit, re-run the pass: it may now return a different (and better) one.</p>
+</li>
+</ul>
+<ul>
 <li><p>Fixed a decomposition of the <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate that never terminated. The evolution of a
 single operator term used to decompose into an identical single-term <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a>, so
 repeated expansion made no progress. Most visibly this made <code class="docutils literal notranslate"><span class="pre">inverse()</span></code> raise a
@@ -1029,7 +1044,7 @@ Following Qiskit’s design philosophy, the core of this package is written in R
       
     </aside>
   </div>
-</div><script src="_static/documentation_options.js?v=1d120a6e"></script>
+</div><script src="_static/documentation_options.js?v=cb27635e"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/scripts/furo.js?v=46bd48cc"></script>

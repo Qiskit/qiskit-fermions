@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Simulate 1D Fermi-Hubbard dynamics with flow sets - Qiskit Fermions 0.2.0.dev0+c43f4fb</title>
+        <title>Simulate 1D Fermi-Hubbard dynamics with flow sets - Qiskit Fermions 0.2.0.dev0+7ef4f94</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+c43f4fb</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+7ef4f94</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+c43f4fb</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+7ef4f94</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -1231,7 +1231,8 @@ for a deliberately wrong synthesis.</p>
 <p>The same applies one level up, to the fermionic synthesis. An <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate that is
 never decomposed goes to the fermion-to-qubit stage whole, which maps it without consulting
 <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution.synthesis" title="qiskit_fermions.circuit.library.Evolution.synthesis"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Evolution.synthesis</span></code></a> at all, so <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter.html#qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter.reps" title="qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter.reps"><code class="xref py py-attr docutils literal notranslate"><span class="pre">reps</span></code></a> would silently have no
-effect. <code class="docutils literal notranslate"><span class="pre">trotter_steps</span></code> from step 5 performs that decomposition.</p>
+effect. <code class="docutils literal notranslate"><span class="pre">trotter_steps</span></code> from step 5 performs that decomposition; a pipeline that sets the
+method with <a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.FermionicTrotterization.html#qiskit_fermions.transpiler.passes.FermionicTrotterization" title="qiskit_fermions.transpiler.passes.FermionicTrotterization"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicTrotterization</span></code></a> gets the same expansion from the pass instead.</p>
 </div>
 <p>As a final cross-check, the site densities <span class="math">\(\langle n_j(t) \rangle = (1 - \langle
 V_j \rangle)/2\)</span> computed in the encoded space must reproduce the Jordan-Wigner result. This
@@ -1422,7 +1423,7 @@ qubit encodings (2026), <a class="reference external" href="https://arxiv.org/ab
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=1d120a6e"></script>
+</div><script src="../_static/documentation_options.js?v=cb27635e"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

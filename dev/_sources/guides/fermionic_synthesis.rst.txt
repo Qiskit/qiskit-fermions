@@ -172,21 +172,11 @@ builds one, including :class:`.UCC` and :class:`.UCJ`, which construct their gat
 :class:`.FermionicTrotterization` pass applies one method to every :class:`.Evolution` in a circuit
 instead, so the choice is made once for the pipeline:
 
-The pass *selects* the method rather than expanding the evolution on the spot. That keeps each
-:class:`.Evolution` a single node for the passes that follow, which
-:class:`.RelabelModes` in particular needs: it reads the operator of every gate to build its
-mode-relabeling model, and would otherwise see one fragment per emitted gate.
-
-Something else therefore has to perform the expansion, and Qiskit's
-:class:`~qiskit.transpiler.passes.Decompose` is that pass. Naming the gate restricts it to the
-evolutions, leaving the other fermionic gates to their own synthesis plugins:
-
 .. plot::
    :context:
    :nofigs:
    :include-source:
 
-   >>> from qiskit.transpiler.passes import Decompose
    >>> from qiskit_fermions.transpiler import FermionicPassManager
    >>> from qiskit_fermions.transpiler.passes import FermionicTrotterization
    >>>
@@ -194,33 +184,27 @@ evolutions, leaving the other fermionic gates to their own synthesis plugins:
    >>> circuit.append(Evolution(num_sites, hamiltonian, time=total_time), circuit.modes)
    >>>
    >>> expanded = FermionicPassManager(
-   ...     [
-   ...         FermionicTrotterization(FermionicSuzukiTrotter(order=2, reps=4)),
-   ...         Decompose("Evolution"),
-   ...     ]
+   ...     FermionicTrotterization(FermionicSuzukiTrotter(order=2, reps=4))
    ... ).run(circuit)
    >>> expanded.count_ops()["Evolution"]
    20
 
-Twenty gates: five factors per order-two sweep, times four repetitions. Place
-:class:`~qiskit.transpiler.passes.Decompose` after any pass that needs whole operators, and note
-that it is idempotent here, since the factors a synthesis method emits are
-:attr:`~.Evolution.atomic` and so carry no definition of their own.
+Twenty gates: five factors per order-two sweep, times four repetitions -- the same count
+:meth:`~.FermionicCircuit.decompose` gives for that method above. The pass carries the formula out
+itself, so no separate expansion step is needed, and running it twice changes nothing, since the
+factors it emits are :attr:`~.Evolution.atomic` and so carry no definition of their own.
 
-.. warning::
-   Without that expansion the selected method has no effect at all. An :class:`.Evolution` gate that
-   is never decomposed reaches the fermion-to-qubit stage whole, where it is mapped without
-   :attr:`~.Evolution.synthesis` being consulted.
+.. note::
+   Pass ``apply=False`` to only *select* the method and leave the expansion to something else, such
+   as Qiskit's :class:`~qiskit.transpiler.passes.Decompose` (naming the gate as
+   ``Decompose("Evolution")`` restricts it to the evolutions, leaving the other fermionic gates to
+   their own synthesis plugins).
 
-   This makes for an easy mistake when comparing methods: every one of them produces identical
-   output and the comparison silently measures nothing. On the Hamiltonian above, dropping the
-   :class:`~qiskit.transpiler.passes.Decompose` pass turns the 200-gate order-two circuit below into
-   the same 30-gate circuit that first order gives.
-
-   The preset pass managers do not include it, so a pipeline built on
-   :func:`.generate_preset_jw_pass_manager` needs it added explicitly (or a
-   :meth:`~.FermionicCircuit.decompose` call on the circuit beforehand, which the rest of this guide
-   uses).
+   Be aware of what an unexpanded gate does, though: it reaches the fermion-to-qubit stage whole,
+   where it is mapped without :attr:`~.Evolution.synthesis` being consulted. That makes for an easy
+   mistake when comparing methods, because every one of them then produces identical output and the
+   comparison silently measures nothing. On the Hamiltonian above, leaving the order-two gate
+   unexpanded turns the 200-gate circuit below into the same 30-gate circuit that first order gives.
 
 Measure the payoff
 ------------------
@@ -267,7 +251,8 @@ contribute. It also works in the fixed-particle-number sector, which is both sma
    ...         Evolution(num_sites, hamiltonian, time=total_time, synthesis=synthesis),
    ...         circuit.modes,
    ...     )
-   ...     # decompose() expands the chosen formula; see the preceding warning
+   ...     # the method is set on the gate, so decompose() is what expands it here; a pipeline
+   ...     # would reach for FermionicTrotterization instead (see the note above)
    ...     circuit = circuit.decompose()
    ...     evolved = ffsim.apply_unitary(initial, circuit, norb=norb, nelec=nelec)
    ...     error = 1 - abs(np.vdot(evolved, exact)) ** 2
@@ -344,6 +329,51 @@ Coulomb operators of a :class:`.UCJ` have this shape, which is why
 :attr:`.FermionicTrotterization.filter` exists: it takes a predicate over the
 :class:`~qiskit.dagcircuit.DAGOpNode` and leaves the rejected gates untouched, so one pass can raise
 the order on the gates that benefit and leave the rest at first order.
+
+A circuit holding both kinds of evolution shows what that saves. The predicate below accepts a gate
+only when its operator moves particles between modes, which is exactly when the groups fail to
+commute and a higher order has something to buy:
+
+.. plot::
+   :context:
+   :nofigs:
+   :include-source:
+
+   >>> def is_diagonal(operator):
+   ...     """Whether every term only counts particles, rather than moving them between modes."""
+   ...     return all(
+   ...         sorted(mode for created, mode in actions if created)
+   ...         == sorted(mode for created, mode in actions if not created)
+   ...         for actions, _ in operator.iter_terms()
+   ...     )
+   >>>
+   >>> def mixed_circuit():
+   ...     circuit = FermionicCircuit(num_sites)
+   ...     circuit.append(Evolution(num_sites, hamiltonian, time=total_time), circuit.modes)
+   ...     circuit.append(Evolution(num_sites, diagonal, time=total_time), circuit.modes)
+   ...     return circuit
+   >>>
+   >>> def cx_count(circuit):
+   ...     return generate_preset_jw_pass_manager().run(circuit).decompose(reps=6).count_ops()["cx"]
+   >>>
+   >>> order_2 = FermionicSuzukiTrotter(order=2)
+   >>>
+   >>> cx_count(mixed_circuit())  # first order everywhere
+   40
+   >>> cx_count(FermionicPassManager(FermionicTrotterization(order_2)).run(mixed_circuit()))
+   68
+   >>> cx_count(
+   ...     FermionicPassManager(
+   ...         FermionicTrotterization(
+   ...             order_2, filter=lambda node: not is_diagonal(node.op.operator)
+   ...         )
+   ...     ).run(mixed_circuit())
+   ... )
+   60
+
+Raising the order on both gates costs 28 extra entangling gates; restricting it to the Hamiltonian
+costs 20 and buys the same accuracy, because the eight the filter saved were spent on an evolution
+that was already exact at first order.
 
 .. caution::
    Neither knob verifies that the factors are Hermitian, and an incorrectly grouped operator can

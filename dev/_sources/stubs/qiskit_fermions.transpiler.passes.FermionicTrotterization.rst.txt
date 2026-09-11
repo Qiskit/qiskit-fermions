@@ -15,6 +15,7 @@
    .. rubric:: Attributes
     
    .. autoattribute:: synthesis
+   .. autoattribute:: apply
    .. autoattribute:: filter
   
   

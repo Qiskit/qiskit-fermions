@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Synthesize an Evolution gate in fermionic space - Qiskit Fermions 0.2.0.dev0+c43f4fb</title>
+        <title>Synthesize an Evolution gate in fermionic space - Qiskit Fermions 0.2.0.dev0+7ef4f94</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+c43f4fb</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0.dev0+7ef4f94</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+c43f4fb</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0.dev0+7ef4f94</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -411,47 +411,34 @@ safe to call <a class="reference internal" href="../stubs/qiskit_fermions.circui
 builds one, including <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.UCC.html#qiskit_fermions.circuit.library.UCC" title="qiskit_fermions.circuit.library.UCC"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCC</span></code></a> and <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.UCJ.html#qiskit_fermions.circuit.library.UCJ" title="qiskit_fermions.circuit.library.UCJ"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCJ</span></code></a>, which construct their gates internally. The
 <a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.FermionicTrotterization.html#qiskit_fermions.transpiler.passes.FermionicTrotterization" title="qiskit_fermions.transpiler.passes.FermionicTrotterization"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicTrotterization</span></code></a> pass applies one method to every <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> in a circuit
 instead, so the choice is made once for the pipeline:</p>
-<p>The pass <em>selects</em> the method rather than expanding the evolution on the spot. That keeps each
-<a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> a single node for the passes that follow, which
-<a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.RelabelModes.html#qiskit_fermions.transpiler.passes.RelabelModes" title="qiskit_fermions.transpiler.passes.RelabelModes"><code class="xref py py-class docutils literal notranslate"><span class="pre">RelabelModes</span></code></a> in particular needs: it reads the operator of every gate to build its
-mode-relabeling model, and would otherwise see one fragment per emitted gate.</p>
-<p>Something else therefore has to perform the expansion, and Qiskit’s
-<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.transpiler.passes.Decompose" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Decompose</span></code></a> is that pass. Naming the gate restricts it to the
-evolutions, leaving the other fermionic gates to their own synthesis plugins:</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit.transpiler.passes</span><span class="w"> </span><span class="kn">import</span> <span class="n">Decompose</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.transpiler</span><span class="w"> </span><span class="kn">import</span> <span class="n">FermionicPassManager</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.transpiler</span><span class="w"> </span><span class="kn">import</span> <span class="n">FermionicPassManager</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.transpiler.passes</span><span class="w"> </span><span class="kn">import</span> <span class="n">FermionicTrotterization</span>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">circuit</span> <span class="o">=</span> <span class="n">FermionicCircuit</span><span class="p">(</span><span class="n">num_sites</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">circuit</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Evolution</span><span class="p">(</span><span class="n">num_sites</span><span class="p">,</span> <span class="n">hamiltonian</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="n">total_time</span><span class="p">),</span> <span class="n">circuit</span><span class="o">.</span><span class="n">modes</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">expanded</span> <span class="o">=</span> <span class="n">FermionicPassManager</span><span class="p">(</span>
-<span class="gp">... </span>    <span class="p">[</span>
-<span class="gp">... </span>        <span class="n">FermionicTrotterization</span><span class="p">(</span><span class="n">FermionicSuzukiTrotter</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">reps</span><span class="o">=</span><span class="mi">4</span><span class="p">)),</span>
-<span class="gp">... </span>        <span class="n">Decompose</span><span class="p">(</span><span class="s2">"Evolution"</span><span class="p">),</span>
-<span class="gp">... </span>    <span class="p">]</span>
+<span class="gp">... </span>    <span class="n">FermionicTrotterization</span><span class="p">(</span><span class="n">FermionicSuzukiTrotter</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">reps</span><span class="o">=</span><span class="mi">4</span><span class="p">))</span>
 <span class="gp">... </span><span class="p">)</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">circuit</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">expanded</span><span class="o">.</span><span class="n">count_ops</span><span class="p">()[</span><span class="s2">"Evolution"</span><span class="p">]</span>
 <span class="go">20</span>
 </pre></div>
 </div>
-<p>Twenty gates: five factors per order-two sweep, times four repetitions. Place
-<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.transpiler.passes.Decompose" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Decompose</span></code></a> after any pass that needs whole operators, and note
-that it is idempotent here, since the factors a synthesis method emits are
-<a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution.atomic" title="qiskit_fermions.circuit.library.Evolution.atomic"><code class="xref py py-attr docutils literal notranslate"><span class="pre">atomic</span></code></a> and so carry no definition of their own.</p>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>Without that expansion the selected method has no effect at all. An <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate that
-is never decomposed reaches the fermion-to-qubit stage whole, where it is mapped without
-<a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution.synthesis" title="qiskit_fermions.circuit.library.Evolution.synthesis"><code class="xref py py-attr docutils literal notranslate"><span class="pre">synthesis</span></code></a> being consulted.</p>
-<p>This makes for an easy mistake when comparing methods: every one of them produces identical
-output and the comparison silently measures nothing. On the Hamiltonian above, dropping the
-<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.transpiler.passes.Decompose" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Decompose</span></code></a> pass turns the 200-gate order-two circuit below into
-the same 30-gate circuit that first order gives.</p>
-<p>The preset pass managers do not include it, so a pipeline built on
-<a class="reference internal" href="../stubs/qiskit_fermions.transpiler.presets.generate_preset_jw_pass_manager.html#qiskit_fermions.transpiler.presets.generate_preset_jw_pass_manager" title="qiskit_fermions.transpiler.presets.generate_preset_jw_pass_manager"><code class="xref py py-func docutils literal notranslate"><span class="pre">generate_preset_jw_pass_manager()</span></code></a> needs it added explicitly (or a
-<a class="reference internal" href="../stubs/qiskit_fermions.circuit.FermionicCircuit.html#qiskit_fermions.circuit.FermionicCircuit.decompose" title="qiskit_fermions.circuit.FermionicCircuit.decompose"><code class="xref py py-meth docutils literal notranslate"><span class="pre">decompose()</span></code></a> call on the circuit beforehand, which the rest of this guide
-uses).</p>
+<p>Twenty gates: five factors per order-two sweep, times four repetitions – the same count
+<a class="reference internal" href="../stubs/qiskit_fermions.circuit.FermionicCircuit.html#qiskit_fermions.circuit.FermionicCircuit.decompose" title="qiskit_fermions.circuit.FermionicCircuit.decompose"><code class="xref py py-meth docutils literal notranslate"><span class="pre">decompose()</span></code></a> gives for that method above. The pass carries the formula out
+itself, so no separate expansion step is needed, and running it twice changes nothing, since the
+factors it emits are <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution.atomic" title="qiskit_fermions.circuit.library.Evolution.atomic"><code class="xref py py-attr docutils literal notranslate"><span class="pre">atomic</span></code></a> and so carry no definition of their own.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Pass <code class="docutils literal notranslate"><span class="pre">apply=False</span></code> to only <em>select</em> the method and leave the expansion to something else, such
+as Qiskit’s <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.transpiler.passes.Decompose" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Decompose</span></code></a> (naming the gate as
+<code class="docutils literal notranslate"><span class="pre">Decompose(&quot;Evolution&quot;)</span></code> restricts it to the evolutions, leaving the other fermionic gates to
+their own synthesis plugins).</p>
+<p>Be aware of what an unexpanded gate does, though: it reaches the fermion-to-qubit stage whole,
+where it is mapped without <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution.synthesis" title="qiskit_fermions.circuit.library.Evolution.synthesis"><code class="xref py py-attr docutils literal notranslate"><span class="pre">synthesis</span></code></a> being consulted. That makes for an easy
+mistake when comparing methods, because every one of them then produces identical output and the
+comparison silently measures nothing. On the Hamiltonian above, leaving the order-two gate
+unexpanded turns the 200-gate circuit below into the same 30-gate circuit that first order gives.</p>
 </div>
 </section>
 <section id="measure-the-payoff">
@@ -485,7 +472,8 @@ contribute. It also works in the fixed-particle-number sector, which is both sma
 <span class="gp">... </span>        <span class="n">Evolution</span><span class="p">(</span><span class="n">num_sites</span><span class="p">,</span> <span class="n">hamiltonian</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="n">total_time</span><span class="p">,</span> <span class="n">synthesis</span><span class="o">=</span><span class="n">synthesis</span><span class="p">),</span>
 <span class="gp">... </span>        <span class="n">circuit</span><span class="o">.</span><span class="n">modes</span><span class="p">,</span>
 <span class="gp">... </span>    <span class="p">)</span>
-<span class="gp">... </span>    <span class="c1"># decompose() expands the chosen formula; see the preceding warning</span>
+<span class="gp">... </span>    <span class="c1"># the method is set on the gate, so decompose() is what expands it here; a pipeline</span>
+<span class="gp">... </span>    <span class="c1"># would reach for FermionicTrotterization instead (see the note above)</span>
 <span class="gp">... </span>    <span class="n">circuit</span> <span class="o">=</span> <span class="n">circuit</span><span class="o">.</span><span class="n">decompose</span><span class="p">()</span>
 <span class="gp">... </span>    <span class="n">evolved</span> <span class="o">=</span> <span class="n">ffsim</span><span class="o">.</span><span class="n">apply_unitary</span><span class="p">(</span><span class="n">initial</span><span class="p">,</span> <span class="n">circuit</span><span class="p">,</span> <span class="n">norb</span><span class="o">=</span><span class="n">norb</span><span class="p">,</span> <span class="n">nelec</span><span class="o">=</span><span class="n">nelec</span><span class="p">)</span>
 <span class="gp">... </span>    <span class="n">error</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="nb">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">vdot</span><span class="p">(</span><span class="n">evolved</span><span class="p">,</span> <span class="n">exact</span><span class="p">))</span> <span class="o">**</span> <span class="mi">2</span>
@@ -555,6 +543,45 @@ Coulomb operators of a <a class="reference internal" href="../stubs/qiskit_fermi
 <a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.FermionicTrotterization.html#qiskit_fermions.transpiler.passes.FermionicTrotterization.filter" title="qiskit_fermions.transpiler.passes.FermionicTrotterization.filter"><code class="xref py py-attr docutils literal notranslate"><span class="pre">FermionicTrotterization.filter</span></code></a> exists: it takes a predicate over the
 <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.dagcircuit.DAGOpNode" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DAGOpNode</span></code></a> and leaves the rejected gates untouched, so one pass can raise
 the order on the gates that benefit and leave the rest at first order.</p>
+<p>A circuit holding both kinds of evolution shows what that saves. The predicate below accepts a gate
+only when its operator moves particles between modes, which is exactly when the groups fail to
+commute and a higher order has something to buy:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">is_diagonal</span><span class="p">(</span><span class="n">operator</span><span class="p">):</span>
+<span class="gp">... </span><span class="w">    </span><span class="sd">"""Whether every term only counts particles, rather than moving them between modes."""</span>
+<span class="gp">... </span>    <span class="k">return</span> <span class="nb">all</span><span class="p">(</span>
+<span class="gp">... </span>        <span class="nb">sorted</span><span class="p">(</span><span class="n">mode</span> <span class="k">for</span> <span class="n">created</span><span class="p">,</span> <span class="n">mode</span> <span class="ow">in</span> <span class="n">actions</span> <span class="k">if</span> <span class="n">created</span><span class="p">)</span>
+<span class="gp">... </span>        <span class="o">==</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">mode</span> <span class="k">for</span> <span class="n">created</span><span class="p">,</span> <span class="n">mode</span> <span class="ow">in</span> <span class="n">actions</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">created</span><span class="p">)</span>
+<span class="gp">... </span>        <span class="k">for</span> <span class="n">actions</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">operator</span><span class="o">.</span><span class="n">iter_terms</span><span class="p">()</span>
+<span class="gp">... </span>    <span class="p">)</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">mixed_circuit</span><span class="p">():</span>
+<span class="gp">... </span>    <span class="n">circuit</span> <span class="o">=</span> <span class="n">FermionicCircuit</span><span class="p">(</span><span class="n">num_sites</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="n">circuit</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Evolution</span><span class="p">(</span><span class="n">num_sites</span><span class="p">,</span> <span class="n">hamiltonian</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="n">total_time</span><span class="p">),</span> <span class="n">circuit</span><span class="o">.</span><span class="n">modes</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="n">circuit</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Evolution</span><span class="p">(</span><span class="n">num_sites</span><span class="p">,</span> <span class="n">diagonal</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="n">total_time</span><span class="p">),</span> <span class="n">circuit</span><span class="o">.</span><span class="n">modes</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="k">return</span> <span class="n">circuit</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">cx_count</span><span class="p">(</span><span class="n">circuit</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="k">return</span> <span class="n">generate_preset_jw_pass_manager</span><span class="p">()</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">circuit</span><span class="p">)</span><span class="o">.</span><span class="n">decompose</span><span class="p">(</span><span class="n">reps</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span><span class="o">.</span><span class="n">count_ops</span><span class="p">()[</span><span class="s2">"cx"</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">order_2</span> <span class="o">=</span> <span class="n">FermionicSuzukiTrotter</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cx_count</span><span class="p">(</span><span class="n">mixed_circuit</span><span class="p">())</span>  <span class="c1"># first order everywhere</span>
+<span class="go">40</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cx_count</span><span class="p">(</span><span class="n">FermionicPassManager</span><span class="p">(</span><span class="n">FermionicTrotterization</span><span class="p">(</span><span class="n">order_2</span><span class="p">))</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">mixed_circuit</span><span class="p">()))</span>
+<span class="go">68</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cx_count</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">FermionicPassManager</span><span class="p">(</span>
+<span class="gp">... </span>        <span class="n">FermionicTrotterization</span><span class="p">(</span>
+<span class="gp">... </span>            <span class="n">order_2</span><span class="p">,</span> <span class="nb">filter</span><span class="o">=</span><span class="k">lambda</span> <span class="n">node</span><span class="p">:</span> <span class="ow">not</span> <span class="n">is_diagonal</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">op</span><span class="o">.</span><span class="n">operator</span><span class="p">)</span>
+<span class="gp">... </span>        <span class="p">)</span>
+<span class="gp">... </span>    <span class="p">)</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">mixed_circuit</span><span class="p">())</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="go">60</span>
+</pre></div>
+</div>
+<p>Raising the order on both gates costs 28 extra entangling gates; restricting it to the Hamiltonian
+costs 20 and buys the same accuracy, because the eight the filter saved were spent on an evolution
+that was already exact at first order.</p>
 <div class="admonition caution">
 <p class="admonition-title">Caution</p>
 <p>Neither knob verifies that the factors are Hermitian, and an incorrectly grouped operator can
@@ -650,7 +677,7 @@ and <a class="reference internal" href="../stubs/qiskit_fermions.transpiler.pass
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=1d120a6e"></script>
+</div><script src="../_static/documentation_options.js?v=cb27635e"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
