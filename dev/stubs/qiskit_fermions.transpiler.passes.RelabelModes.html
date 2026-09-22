@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>RelabelModes - Qiskit Fermions 0.3.0.dev0+4eec205</title>
+        <title>RelabelModes - Qiskit Fermions 0.3.0.dev0+2c29833</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.3.0.dev0+4eec205</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.3.0.dev0+2c29833</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.3.0.dev0+4eec205</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.3.0.dev0+2c29833</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -358,7 +358,7 @@ trick to reduce the implementation depth, and then undoes the relabeling on the 
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>permutation</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>] </em><em>| </em><em>None</em>) – the index permutation used to relabel the fermionic mode indices. When this
+<li><p><strong>permutation</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>] </em><em>| </em><em>None</em>) – the index permutation used to relabel the fermionic mode indices. When this
 is <code class="docutils literal notranslate"><span class="pre">None</span></code>, a permutation will be determined automatically based on
 <a class="reference internal" href="qiskit_fermions.mappers.optimization.build_excitation_span_minimization_model.html#qiskit_fermions.mappers.optimization.build_excitation_span_minimization_model" title="qiskit_fermions.mappers.optimization.build_excitation_span_minimization_model"><code class="xref py py-func docutils literal notranslate"><span class="pre">build_excitation_span_minimization_model()</span></code></a>. See also <a class="reference internal" href="#qiskit_fermions.transpiler.passes.RelabelModes.permutation" title="qiskit_fermions.transpiler.passes.RelabelModes.permutation"><code class="xref py py-attr docutils literal notranslate"><span class="pre">permutation</span></code></a> for
 more details.</p></li>
@@ -430,11 +430,11 @@ was constructed.</p></li>
 <dd class="field-even"><p>The permutation to use. When <code class="docutils literal notranslate"><span class="pre">None</span></code>, this transpiler pass will have no effect.</p>
 </dd>
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#NotImplementedError" title="(in Python v3.14)"><strong>NotImplementedError</strong></a> – when encountering an <a class="reference internal" href="qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate containing an
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#NotImplementedError" title="(in Python v3.14)"><strong>NotImplementedError</strong></a> – when encountering an <a class="reference internal" href="qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate containing an
     operator that is not a <a class="reference internal" href="qiskit_fermions.operators.FermionOperator.html#qiskit_fermions.operators.FermionOperator" title="qiskit_fermions.operators.FermionOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionOperator</span></code></a> instance.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)">list</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)">int</a>] | None, <a class="reference external" href="https://pyomo.readthedocs.io/en/stable/api/pyomo.opt.results.results_.SolverResults.html#pyomo.opt.results.results_.SolverResults" title="(in Pyomo v6.10.1)">pyomo.opt.results.results_.SolverResults</a> | None]</p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.14)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.14)">list</a>[<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)">int</a>] | None, <a class="reference external" href="https://pyomo.readthedocs.io/en/stable/api/pyomo.opt.results.results_.SolverResults.html#pyomo.opt.results.results_.SolverResults" title="(in Pyomo v6.10.1)">pyomo.opt.results.results_.SolverResults</a> | None]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -453,7 +453,7 @@ was constructed.</p></li>
 <dd class="field-even"><p>The output circuit which is still acting on a fermionic register.</p>
 </dd>
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#NotImplementedError" title="(in Python v3.14)"><strong>NotImplementedError</strong></a> – when the provided input circuit has more than a single register.</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#NotImplementedError" title="(in Python v3.14)"><strong>NotImplementedError</strong></a> – when the provided input circuit has more than a single register.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.dagcircuit.DAGCircuit" title="(in Qiskit v2.5)"><em>DAGCircuit</em></a></p>
@@ -471,14 +471,14 @@ was constructed.</p></li>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>passmanager_ir</strong> (<em>IR</em>) – Qiskit IR to optimize.</p></li>
 <li><p><strong>state</strong> (<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.PassManagerState" title="(in Qiskit v2.5)"><em>PassManagerState</em></a>) – State associated with workflow execution by the pass manager itself.</p></li>
-<li><p><strong>callback</strong> (<a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.14)"><em>Callable</em></a><em>[</em><em>[</em><a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.Task" title="(in Qiskit v2.5)"><em>Task</em></a><em>, </em><em>IR_OUT</em><em>, </em><a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.PropertySet" title="(in Qiskit v2.5)"><em>PropertySet</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>]</em><em>, </em><em>None</em><em>] </em><em>| </em><em>None</em>) – A callback function which is called per execution of optimization task.</p></li>
+<li><p><strong>callback</strong> (<a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.14)"><em>Callable</em></a><em>[</em><em>[</em><a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.Task" title="(in Qiskit v2.5)"><em>Task</em></a><em>, </em><em>IR_OUT</em><em>, </em><a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.PropertySet" title="(in Qiskit v2.5)"><em>PropertySet</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>]</em><em>, </em><em>None</em><em>] </em><em>| </em><em>None</em>) – A callback function which is called per execution of optimization task.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Optimized Qiskit IR and state of the workflow.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)">tuple</a>[<em>IR_OUT</em>, <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.PassManagerState" title="(in Qiskit v2.5)"><em>PassManagerState</em></a>]</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.14)">tuple</a>[<em>IR_OUT</em>, <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.PassManagerState" title="(in Qiskit v2.5)"><em>PassManagerState</em></a>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -489,7 +489,7 @@ was constructed.</p></li>
 <dd><p>Name of the pass.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -535,7 +535,7 @@ was constructed.</p></li>
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on 2026/09/11</div>
+              Last updated on 2026/09/22</div>
           </div>
           <div class="right-details">
             
@@ -578,7 +578,7 @@ was constructed.</p></li>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=d084782e"></script>
+</div><script src="../_static/documentation_options.js?v=d20205a9"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

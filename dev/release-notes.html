@@ -8,7 +8,7 @@
         <link rel="prefetch" href="_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Release Notes - Qiskit Fermions 0.3.0.dev0+4eec205</title>
+        <title>Release Notes - Qiskit Fermions 0.3.0.dev0+2c29833</title>
       <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="index.html"><div class="brand">Qiskit Fermions 0.3.0.dev0+4eec205</div></a>
+      <a href="index.html"><div class="brand">Qiskit Fermions 0.3.0.dev0+2c29833</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.3.0.dev0+4eec205</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.3.0.dev0+2c29833</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="search.html" role="search">
@@ -448,7 +448,7 @@ sampled groups on every call. See <a class="reference internal" href="guides/sqd
 <li><p><a class="reference internal" href="stubs/qiskit_fermions.mappers.library.jordan_wigner.html#qiskit_fermions.mappers.library.jordan_wigner" title="qiskit_fermions.mappers.library.jordan_wigner"><code class="xref py py-func docutils literal notranslate"><span class="pre">jordan_wigner()</span></code></a> now dispatches on all four operator types
 rather than only <a class="reference internal" href="stubs/qiskit_fermions.operators.FermionOperator.html#qiskit_fermions.operators.FermionOperator" title="qiskit_fermions.operators.FermionOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionOperator</span></code></a>, delegating to whichever
 direct implementation matches the operator it is given. Passing one of the other three operator
-types previously raised a <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#TypeError" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeError</span></code></a>.</p></li>
+types previously raised a <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#TypeError" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeError</span></code></a>.</p></li>
 </ul>
 <ul>
 <li><p>The <a class="reference internal" href="stubs/qiskit_fermions.operators.OperatorTrait.html#qiskit_fermions.operators.OperatorTrait.is_hermitian" title="qiskit_fermions.operators.OperatorTrait.is_hermitian"><code class="xref py py-meth docutils literal notranslate"><span class="pre">is_hermitian()</span></code></a> method is now part of the
@@ -489,7 +489,7 @@ so read them with <code class="docutils literal notranslate"><span class="pre">.
 <a class="reference internal" href="stubs/qiskit_fermions.operators.FermionOperator.html#qiskit_fermions.operators.FermionOperator" title="qiskit_fermions.operators.FermionOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionOperator</span></code></a>. An operator of another type is converted through its fermionic image
 (the <a class="reference internal" href="stubs/qiskit_fermions.protocols.SupportsFermionOperator.html#qiskit_fermions.protocols.SupportsFermionOperator" title="qiskit_fermions.protocols.SupportsFermionOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">SupportsFermionOperator</span></code></a> protocol) before being simulated, so evolving a
 <a class="reference internal" href="stubs/qiskit_fermions.operators.MajoranaOperator.html#qiskit_fermions.operators.MajoranaOperator" title="qiskit_fermions.operators.MajoranaOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">MajoranaOperator</span></code></a>, <a class="reference internal" href="stubs/qiskit_fermions.operators.EdgeVertexOperator.html#qiskit_fermions.operators.EdgeVertexOperator" title="qiskit_fermions.operators.EdgeVertexOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">EdgeVertexOperator</span></code></a> or <a class="reference internal" href="stubs/qiskit_fermions.operators.TransferVertexOperator.html#qiskit_fermions.operators.TransferVertexOperator" title="qiskit_fermions.operators.TransferVertexOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransferVertexOperator</span></code></a> no
-longer raises <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#NotImplementedError" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">NotImplementedError</span></code></a>.</p></li>
+longer raises <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#NotImplementedError" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">NotImplementedError</span></code></a>.</p></li>
 </ul>
 <ul class="simple">
 <li><p><a class="reference internal" href="stubs/qiskit_fermions.operators.FermionOperator.html#qiskit_fermions.operators.FermionOperator" title="qiskit_fermions.operators.FermionOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionOperator</span></code></a> now implements <a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.SupportsTrace.html#ffsim.SupportsTrace" title="(in ffsim)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ffsim.SupportsTrace</span></code></a> through a new
@@ -675,10 +675,10 @@ interface is gone. <a class="reference internal" href="stubs/qiskit_fermions.pro
 <ul class="simple">
 <li><p><a class="reference internal" href="stubs/qiskit_fermions.operators.library.FCIDump.html#qiskit_fermions.operators.library.FCIDump.from_file" title="qiskit_fermions.operators.library.FCIDump.from_file"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_file()</span></code></a> now raises a catchable Python
 exception when it cannot parse a file, instead of propagating a Rust panic. A path that cannot
-be opened or read raises <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#OSError" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSError</span></code></a>, while a file that does not honour the FCIDump format
+be opened or read raises <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#OSError" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSError</span></code></a>, while a file that does not honour the FCIDump format
 (a missing header namelist, a missing <code class="docutils literal notranslate"><span class="pre">NORB</span></code> or <code class="docutils literal notranslate"><span class="pre">NELEC</span></code> field, or a malformed <code class="docutils literal notranslate"><span class="pre">MS2</span></code> field)
-raises <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ValueError</span></code></a>. An FCIDump carrying an MO energy value, which is still unsupported,
-also raises <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ValueError</span></code></a>.</p></li>
+raises <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ValueError</span></code></a>. An FCIDump carrying an MO energy value, which is still unsupported,
+also raises <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ValueError</span></code></a>.</p></li>
 </ul>
 <ul>
 <li><p>The <code class="docutils literal notranslate"><span class="pre">group_weights</span></code> method has been removed from every operator class and from the
@@ -1003,7 +1003,7 @@ Following Qiskit’s design philosophy, the core of this package is written in R
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on 2026/09/11</div>
+              Last updated on 2026/09/22</div>
           </div>
           <div class="right-details">
             
@@ -1051,7 +1051,7 @@ Following Qiskit’s design philosophy, the core of this package is written in R
       
     </aside>
   </div>
-</div><script src="_static/documentation_options.js?v=d084782e"></script>
+</div><script src="_static/documentation_options.js?v=d20205a9"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/scripts/furo.js?v=46bd48cc"></script>

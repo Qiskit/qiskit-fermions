@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>EdgeVertexOperator - Qiskit Fermions 0.3.0.dev0+4eec205</title>
+        <title>EdgeVertexOperator - Qiskit Fermions 0.3.0.dev0+2c29833</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.3.0.dev0+4eec205</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.3.0.dev0+2c29833</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.3.0.dev0+4eec205</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.3.0.dev0+2c29833</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -270,7 +270,7 @@
 <dl class="py class">
 <dt class="sig sig-object py" id="qiskit_fermions.operators.EdgeVertexOperator">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">EdgeVertexOperator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coeffs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">left_indices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">right_indices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundaries</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qiskit_fermions.operators.EdgeVertexOperator" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>An edge-vertex operator.</p>
 <section id="definition">
 <span id="edgevertexoperator-definition"></span><h2>Definition<a class="headerlink" href="#definition" title="Link to this heading">¶</a></h2>
@@ -416,7 +416,7 @@ These must be resolved manually through the use of <a class="reference internal"
 <section id="formatting">
 <h3>Formatting<a class="headerlink" href="#formatting" title="Link to this heading">¶</a></h3>
 <p>In the examples above, the constructed operators have been printed using the output from
-<a class="reference external" href="https://docs.python.org/3/library/functions.html#format" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">format()</span></code></a>, which results in a human-readable form of the operator.</p>
+<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#format" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">format()</span></code></a>, which results in a human-readable form of the operator.</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="nb">format</span><span class="p">(</span><span class="n">op</span><span class="p">))</span>
 <span class="go">  1.000000e0 +0.000000e0j * ()</span>
 <span class="go">  2.000000e0 +0.000000e0j * (E(0,1))</span>
@@ -430,7 +430,7 @@ These must be resolved manually through the use of <a class="reference internal"
 <p>The printing order of <code class="docutils literal notranslate"><span class="pre">format(op)</span></code> gets explicitly sorted before printing. As such, it
 does not reflect the order of the terms inside the operator.</p>
 </div>
-<p>An alternative form can be obtained from the <a class="reference external" href="https://docs.python.org/3/library/functions.html#repr" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">repr()</span></code></a> function, which results in a
+<p>An alternative form can be obtained from the <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#repr" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">repr()</span></code></a> function, which results in a
 Python-interpretable representation. In other words, this output can readily be copied and
 pasted into a Python shell:</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">op</span><span class="p">))</span>
@@ -1099,7 +1099,7 @@ index).</p>
 <dd class="field-even"><p>A new operator with its modes relabeled.</p>
 </dd>
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – if <code class="docutils literal notranslate"><span class="pre">permutation</span></code> contains duplicate entries, or is too short to relabel
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – if <code class="docutils literal notranslate"><span class="pre">permutation</span></code> contains duplicate entries, or is too short to relabel
     some mode the operator acts upon.</p>
 </dd>
 </dl>
@@ -1251,7 +1251,7 @@ order. When omitted, every group is built, in index order.</p>
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on 2026/09/11</div>
+              Last updated on 2026/09/22</div>
           </div>
           <div class="right-details">
             
@@ -1315,7 +1315,7 @@ order. When omitted, every group is built, in index order.</p>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=d084782e"></script>
+</div><script src="../_static/documentation_options.js?v=d20205a9"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

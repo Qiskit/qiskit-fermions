@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>order_terms - Qiskit Fermions 0.3.0.dev0+4eec205</title>
+        <title>order_terms - Qiskit Fermions 0.3.0.dev0+2c29833</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.3.0.dev0+4eec205</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.3.0.dev0+2c29833</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.3.0.dev0+4eec205</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.3.0.dev0+2c29833</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -273,7 +273,7 @@
 <dd><p>Returns a copy of an operator with its terms reordered by a user-provided key.</p>
 <p>Unlike <a class="reference internal" href="qiskit_fermions.operators.terms.canonical_order.html#qiskit_fermions.operators.terms.canonical_order" title="qiskit_fermions.operators.terms.canonical_order"><code class="xref py py-func docutils literal notranslate"><span class="pre">canonical_order()</span></code></a>, which imposes a single fixed, coefficient-independent order,
 this function lets you sort the terms by any criterion you like: the <code class="docutils literal notranslate"><span class="pre">key</span></code> function is applied
-to each term exactly as <a class="reference external" href="https://docs.python.org/3/library/functions.html#sorted" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">sorted()</span></code></a> would, and the terms are rebuilt into a new operator of
+to each term exactly as <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#sorted" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">sorted()</span></code></a> would, and the terms are rebuilt into a new operator of
 the same type in the resulting order. This is useful whenever the <em>order</em> of the terms matters
 for a downstream computation (e.g. randomized product-formula sampling), since it gives you a
 deterministic, reproducible order independent of how the operator happened to be assembled.</p>
@@ -308,9 +308,9 @@ moves – and if the input tracks no groups, neither does the result.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>op</strong> (<a class="reference internal" href="qiskit_fermions.operators.OperatorTrait.html#qiskit_fermions.operators.OperatorTrait" title="qiskit_fermions.operators.operator_trait.OperatorTrait"><em>OperatorTrait</em></a>) – the operator whose terms to reorder.</p></li>
-<li><p><strong>key</strong> (<a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.14)"><em>Callable</em></a><em>[</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a><em>]</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><em>Any</em></a><em>]</em>) – a function of a single term, used exactly as the <code class="docutils literal notranslate"><span class="pre">key</span></code> argument of <a class="reference external" href="https://docs.python.org/3/library/functions.html#sorted" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">sorted()</span></code></a>. It
+<li><p><strong>key</strong> (<a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.14)"><em>Callable</em></a><em>[</em><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a><em>]</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><em>Any</em></a><em>]</em>) – a function of a single term, used exactly as the <code class="docutils literal notranslate"><span class="pre">key</span></code> argument of <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#sorted" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">sorted()</span></code></a>. It
 receives each term as the tuple described in the note above.</p></li>
-<li><p><strong>reverse</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – if <code class="docutils literal notranslate"><span class="pre">True</span></code>, the terms are sorted in descending order of <code class="docutils literal notranslate"><span class="pre">key</span></code>.</p></li>
+<li><p><strong>reverse</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – if <code class="docutils literal notranslate"><span class="pre">True</span></code>, the terms are sorted in descending order of <code class="docutils literal notranslate"><span class="pre">key</span></code>.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -341,7 +341,7 @@ receives each term as the tuple described in the note above.</p></li>
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on 2026/09/11</div>
+              Last updated on 2026/09/22</div>
           </div>
           <div class="right-details">
             
@@ -375,7 +375,7 @@ receives each term as the tuple described in the note above.</p></li>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=d084782e"></script>
+</div><script src="../_static/documentation_options.js?v=d20205a9"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
