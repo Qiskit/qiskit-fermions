@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>QDriftTrotterization - Qiskit Fermions 0.2.0</title>
+        <title>QDriftTrotterization - Qiskit Fermions 0.2.0+904ffbd</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0+904ffbd</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0+904ffbd</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -372,7 +372,7 @@ small one means the retained terms were weighted far above their true share of t
 <div class="admonition important">
 <p class="admonition-title">Important</p>
 <p>Neither field is present when no gate was filtered, which covers <code class="docutils literal notranslate"><span class="pre">filter_trivial=False</span></code> and
-every case in which filtering was skipped with a <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#UserWarning" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">UserWarning</span></code></a>. Read them defensively,
+every case in which filtering was skipped with a <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#UserWarning" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">UserWarning</span></code></a>. Read them defensively,
 for example with <code class="docutils literal notranslate"><span class="pre">qcirc.metadata.get(&quot;filter_trivial.discarded&quot;)</span></code>. A discarded count of
 zero is different from an absent field: it says the filtering ran on that gate and accepted
 every draw, so it left the sampling distribution untouched.</p>
@@ -381,27 +381,27 @@ every draw, so it left the sampling distribution untouched.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>num_terms</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – the number of terms to sample for the qDRIFT Trotterization. This equals the
+<li><p><strong>num_terms</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – the number of terms to sample for the qDRIFT Trotterization. This equals the
 number of <a class="reference internal" href="qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gates emitted per input gate; a larger value reduces
 the Trotterization error at the cost of a deeper circuit.</p></li>
-<li><p><strong>filter_trivial</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – when set to <code class="docutils literal notranslate"><span class="pre">True</span></code>, the sampling loop rejects a drawn term unless its
+<li><p><strong>filter_trivial</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – when set to <code class="docutils literal notranslate"><span class="pre">True</span></code>, the sampling loop rejects a drawn term unless its
 support couples a mode tracked as occupied with a mode tracked as unoccupied, and
 draws a replacement in its place. This spends every one of the <code class="docutils literal notranslate"><span class="pre">num_terms</span></code>
 slots on an excitation that can move a particle, at the cost of biasing the
 Trotterization and of a deeper circuit, so it defaults to <code class="docutils literal notranslate"><span class="pre">False</span></code>. See also
 <a class="reference internal" href="#qiskit_fermions.transpiler.passes.QDriftTrotterization.filter_trivial" title="qiskit_fermions.transpiler.passes.QDriftTrotterization.filter_trivial"><code class="xref py py-attr docutils literal notranslate"><span class="pre">filter_trivial</span></code></a> for the acceptance rule and its prerequisites, and the
 warning in the class docstring for the bias it introduces.</p></li>
-<li><p><strong>weights</strong> (<em>Sequence</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>] </em><em>| </em><em>np.ndarray</em><em> | </em><em>None</em>) – the sampling weights to use instead of the coefficient magnitudes derived from
+<li><p><strong>weights</strong> (<em>Sequence</em><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>] </em><em>| </em><em>np.ndarray</em><em> | </em><em>None</em>) – the sampling weights to use instead of the coefficient magnitudes derived from
 the Hamiltonian. If <code class="docutils literal notranslate"><span class="pre">None</span></code> (the default), they are computed from the evolved
 operator on every call, which reproduces the textbook qDRIFT distribution. See
 <a class="reference internal" href="#qiskit_fermions.transpiler.passes.QDriftTrotterization.weights" title="qiskit_fermions.transpiler.passes.QDriftTrotterization.weights"><code class="xref py py-attr docutils literal notranslate"><span class="pre">weights</span></code></a> for the expected length, the sign convention and the effect on the
 evolution time.</p></li>
-<li><p><strong>rng</strong> (<em>np.random.Generator</em><em> | </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em> | </em><em>None</em>) – the random number generator (rng) to be used. When this is an <code class="docutils literal notranslate"><span class="pre">int</span></code>, the internal
+<li><p><strong>rng</strong> (<em>np.random.Generator</em><em> | </em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em> | </em><em>None</em>) – the random number generator (rng) to be used. When this is an <code class="docutils literal notranslate"><span class="pre">int</span></code>, the internal
 rng will be initialized with <code class="docutils literal notranslate"><span class="pre">np.random.default_rng(seed=rng)</span></code>.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – if <code class="docutils literal notranslate"><span class="pre">weights</span></code> is not one-dimensional, is empty, holds a non-finite or
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – if <code class="docutils literal notranslate"><span class="pre">weights</span></code> is not one-dimensional, is empty, holds a non-finite or
     negative entry, or sums to zero.</p>
 </dd>
 </dl>
@@ -410,7 +410,7 @@ rng will be initialized with <code class="docutils literal notranslate"><span cl
 <dt class="sig sig-object py" id="qiskit_fermions.transpiler.passes.QDriftTrotterization.MAX_SAMPLE_RETRIES">
 <span class="sig-name descname"><span class="pre">MAX_SAMPLE_RETRIES</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1000000</span></span><a class="headerlink" href="#qiskit_fermions.transpiler.passes.QDriftTrotterization.MAX_SAMPLE_RETRIES" title="Link to this definition">¶</a></dt>
 <dd><p>The maximum number of consecutive rejected samples tolerated by <code class="docutils literal notranslate"><span class="pre">filter_trivial</span></code> before
-<a class="reference internal" href="#qiskit_fermions.transpiler.passes.QDriftTrotterization.run" title="qiskit_fermions.transpiler.passes.QDriftTrotterization.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a> gives up and raises <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#RuntimeError" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">RuntimeError</span></code></a>. This guards against an infinite loop when
+<a class="reference internal" href="#qiskit_fermions.transpiler.passes.QDriftTrotterization.run" title="qiskit_fermions.transpiler.passes.QDriftTrotterization.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a> gives up and raises <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#RuntimeError" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">RuntimeError</span></code></a>. This guards against an infinite loop when
 the Hamiltonian’s remaining terms cannot bridge the tracked occupied/unoccupied mode sets. That
 happens when both sets remain small and disjoint (few modes have been marked occupied or
 unoccupied, and none has yet become “uncertain”) and no remaining term’s support touches
@@ -438,7 +438,7 @@ the term it displaced: see the warning in the class docstring before enabling th
 to precede the <a class="reference internal" href="qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gates being Trotterized, to seed the initial occupied and
 unoccupied mode sets. If none is found, or if the sets it seeds turn out to be entirely
 occupied or entirely unoccupied, filtering is skipped for that gate and a
-<a class="reference external" href="https://docs.python.org/3/library/exceptions.html#UserWarning" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">UserWarning</span></code></a> is emitted instead.</p>
+<a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#UserWarning" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">UserWarning</span></code></a> is emitted instead.</p>
 <p>Any <a class="reference internal" href="qiskit_fermions.circuit.library.OrbitalRotation.html#qiskit_fermions.circuit.library.OrbitalRotation" title="qiskit_fermions.circuit.library.OrbitalRotation"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrbitalRotation</span></code></a> gate encountered before or between the <a class="reference internal" href="qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a>
 gates also updates these sets: every mode it acts on becomes “uncertain”, since the rotation
 can mix it with any other mode it touches, just like a mode touched by an accepted term. A
@@ -451,7 +451,7 @@ immediately marks every mode it acts on as “uncertain” because of its rotati
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qiskit_fermions.transpiler.passes.QDriftTrotterization.weights">
-<span class="sig-name descname"><span class="pre">weights</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">np.ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><a class="headerlink" href="#qiskit_fermions.transpiler.passes.QDriftTrotterization.weights" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">weights</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">np.ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><a class="headerlink" href="#qiskit_fermions.transpiler.passes.QDriftTrotterization.weights" title="Link to this definition">¶</a></dt>
 <dd><p>The sampling weights <span class="math">\(w_j\)</span>, or <code class="docutils literal notranslate"><span class="pre">None</span></code> to derive them from the evolved operator.</p>
 <p>Supplying them hoists their computation out of the transpilation: the default path recomputes
 them on <em>every</em> call to <a class="reference internal" href="#qiskit_fermions.transpiler.passes.QDriftTrotterization.run" title="qiskit_fermions.transpiler.passes.QDriftTrotterization.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a>, which is repeated work when generating an ensemble from a
@@ -462,7 +462,7 @@ argument; passing anything other than the Hamiltonian’s own coefficient magnit
 which evolution the ensemble approximates (see the caution below).</p>
 <p>One entry is expected per <em>group</em> when the evolved operator carries
 <a class="reference internal" href="qiskit_fermions.operators.OperatorTrait.html#qiskit_fermions.operators.OperatorTrait.groups" title="qiskit_fermions.operators.OperatorTrait.groups"><code class="xref py py-attr docutils literal notranslate"><span class="pre">groups</span></code></a>, and per <em>term</em> otherwise; a
-mismatch raises <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ValueError</span></code></a>. Because such an array describes one specific operator,
+mismatch raises <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ValueError</span></code></a>. Because such an array describes one specific operator,
 a circuit holding more than one <a class="reference internal" href="qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate is rejected as well: leave this
 unset for such a circuit, so that every gate derives its own weights, or transpile one gate
 at a time.</p>
@@ -530,10 +530,10 @@ class docstring.</p>
 </dd>
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#RuntimeError" title="(in Python v3.14)"><strong>RuntimeError</strong></a> – if <code class="docutils literal notranslate"><span class="pre">filter_trivial</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code> and <a class="reference internal" href="#qiskit_fermions.transpiler.passes.QDriftTrotterization.MAX_SAMPLE_RETRIES" title="qiskit_fermions.transpiler.passes.QDriftTrotterization.MAX_SAMPLE_RETRIES"><code class="xref py py-attr docutils literal notranslate"><span class="pre">MAX_SAMPLE_RETRIES</span></code></a>
+<li><p><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#RuntimeError" title="(in Python v3.14)"><strong>RuntimeError</strong></a> – if <code class="docutils literal notranslate"><span class="pre">filter_trivial</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code> and <a class="reference internal" href="#qiskit_fermions.transpiler.passes.QDriftTrotterization.MAX_SAMPLE_RETRIES" title="qiskit_fermions.transpiler.passes.QDriftTrotterization.MAX_SAMPLE_RETRIES"><code class="xref py py-attr docutils literal notranslate"><span class="pre">MAX_SAMPLE_RETRIES</span></code></a>
     consecutive draws are rejected without any of them coupling the tracked occupied and
     unoccupied mode sets.</p></li>
-<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – if <a class="reference internal" href="#qiskit_fermions.transpiler.passes.QDriftTrotterization.weights" title="qiskit_fermions.transpiler.passes.QDriftTrotterization.weights"><code class="xref py py-attr docutils literal notranslate"><span class="pre">weights</span></code></a> was supplied and its length does not match the number of
+<li><p><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – if <a class="reference internal" href="#qiskit_fermions.transpiler.passes.QDriftTrotterization.weights" title="qiskit_fermions.transpiler.passes.QDriftTrotterization.weights"><code class="xref py py-attr docutils literal notranslate"><span class="pre">weights</span></code></a> was supplied and its length does not match the number of
     groups (or terms) of an evolved operator, or if the circuit holds more than one
     <a class="reference internal" href="qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate.</p></li>
 </ul>
@@ -554,14 +554,14 @@ class docstring.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>passmanager_ir</strong> (<em>IR</em>) – Qiskit IR to optimize.</p></li>
 <li><p><strong>state</strong> (<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.PassManagerState" title="(in Qiskit v2.5)"><em>PassManagerState</em></a>) – State associated with workflow execution by the pass manager itself.</p></li>
-<li><p><strong>callback</strong> (<a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.14)"><em>Callable</em></a><em>[</em><em>[</em><a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.Task" title="(in Qiskit v2.5)"><em>Task</em></a><em>, </em><em>IR_OUT</em><em>, </em><a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.PropertySet" title="(in Qiskit v2.5)"><em>PropertySet</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>]</em><em>, </em><em>None</em><em>] </em><em>| </em><em>None</em>) – A callback function which is called per execution of optimization task.</p></li>
+<li><p><strong>callback</strong> (<a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.14)"><em>Callable</em></a><em>[</em><em>[</em><a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.Task" title="(in Qiskit v2.5)"><em>Task</em></a><em>, </em><em>IR_OUT</em><em>, </em><a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.PropertySet" title="(in Qiskit v2.5)"><em>PropertySet</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>]</em><em>, </em><em>None</em><em>] </em><em>| </em><em>None</em>) – A callback function which is called per execution of optimization task.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Optimized Qiskit IR and state of the workflow.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)">tuple</a>[<em>IR_OUT</em>, <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.PassManagerState" title="(in Qiskit v2.5)"><em>PassManagerState</em></a>]</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.14)">tuple</a>[<em>IR_OUT</em>, <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.PassManagerState" title="(in Qiskit v2.5)"><em>PassManagerState</em></a>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -572,7 +572,7 @@ class docstring.</p>
 <dd><p>Name of the pass.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -618,7 +618,7 @@ class docstring.</p>
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on 2026/09/11</div>
+              Last updated on 2026/09/22</div>
           </div>
           <div class="right-details">
             
@@ -662,7 +662,7 @@ class docstring.</p>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=938c9ccc"></script>
+</div><script src="../_static/documentation_options.js?v=80a36d72"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
