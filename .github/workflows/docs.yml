@@ -103,6 +103,20 @@ jobs:
         run: |
           make docs
 
+      # `tools/rewrite_docs_links.py` fails on a link to this project's own documentation on the
+      # platform that nobody has mapped, which would otherwise leave a standalone build -- a branch
+      # or pull-request preview -- linking away from itself.  That guard previously ran only in
+      # `make docs-local` and in the publishing action, which is label-gated and
+      # `continue-on-error`, so nothing it caught could ever fail a pull request.  Run it here.
+      #
+      # On a *copy*: the script rewrites in place, and the artifact uploaded below is also what the
+      # platform's documentation ingestion pulls, so it has to keep its absolute links.
+      - name: Check the API-reference links are all accounted for
+        shell: bash
+        run: |
+          cp -a docs/_build/html "${RUNNER_TEMP}/html-linkcheck"
+          python tools/rewrite_docs_links.py "${RUNNER_TEMP}/html-linkcheck"
+
       # Provide a nicely named artifact that extracts into an
       # identically named subdirectory.
       - name: Prepare nice docs artifact for humans
