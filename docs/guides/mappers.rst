@@ -79,8 +79,8 @@ term in the operator while preserving mathematical equivalence.
 .. hint::
 
    You can also iterate the terms of an operator manually rather than
-   using one of the provided iterator functions. See the section on `term iteration
-   <term_iteration_and_reconstruction>`_ in the operators guide for details.
+   using one of the provided iterator functions. See the section on :ref:`term iteration
+   <term_iteration_and_reconstruction>` in the operators guide for details.
 
 Library implementations
 -----------------------
