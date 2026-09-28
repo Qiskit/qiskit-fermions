@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Synthesize an Evolution gate in fermionic space - Qiskit Fermions 0.2.0+d9cae58</title>
+        <title>Synthesize an Evolution gate in fermionic space - Qiskit Fermions 0.2.0+67777e9</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0+d9cae58</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0+67777e9</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0+d9cae58</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0+67777e9</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -424,8 +424,8 @@ instead, so the choice is made once for the pipeline:</p>
 <span class="go">20</span>
 </pre></div>
 </div>
-<p>Twenty gates: five factors per order-two sweep, times four repetitions – the same count
-<a class="reference internal" href="../stubs/qiskit_fermions.circuit.FermionicCircuit.html#qiskit_fermions.circuit.FermionicCircuit.decompose" title="qiskit_fermions.circuit.FermionicCircuit.decompose"><code class="xref py py-meth docutils literal notranslate"><span class="pre">decompose()</span></code></a> gives for that method above. The pass carries the formula out
+<p>Twenty gates: five factors per order-two sweep, times four repetitions (the same count
+<a class="reference internal" href="../stubs/qiskit_fermions.circuit.FermionicCircuit.html#qiskit_fermions.circuit.FermionicCircuit.decompose" title="qiskit_fermions.circuit.FermionicCircuit.decompose"><code class="xref py py-meth docutils literal notranslate"><span class="pre">decompose()</span></code></a> gives for that method above). The pass carries the formula out
 itself, so no separate expansion step is needed, and running it twice changes nothing, since the
 factors it emits are <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution.atomic" title="qiskit_fermions.circuit.library.Evolution.atomic"><code class="xref py py-attr docutils literal notranslate"><span class="pre">atomic</span></code></a> and so carry no definition of their own.</p>
 <div class="admonition note">
@@ -438,7 +438,8 @@ their own synthesis plugins).</p>
 where it is mapped without <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution.synthesis" title="qiskit_fermions.circuit.library.Evolution.synthesis"><code class="xref py py-attr docutils literal notranslate"><span class="pre">synthesis</span></code></a> being consulted. That makes for an easy
 mistake when comparing methods, because every one of them then produces identical output and the
 comparison silently measures nothing. On the Hamiltonian above, leaving the order-two gate
-unexpanded turns the 200-gate circuit below into the same 30-gate circuit that first order gives.</p>
+unexpanded collapses the much larger circuit below to the cost of a single mapped evolution, no
+matter which method was selected.</p>
 </div>
 </section>
 <section id="measure-the-payoff">
@@ -487,19 +488,31 @@ contribute. It also works in the fixed-particle-number sector, which is both sma
 <span class="gp">... </span>    <span class="p">(</span><span class="s2">"order 1, reps 10"</span><span class="p">,</span> <span class="n">FermionicLieTrotter</span><span class="p">(</span><span class="n">reps</span><span class="o">=</span><span class="mi">10</span><span class="p">)),</span>
 <span class="gp">... </span>    <span class="p">(</span><span class="s2">"order 2, reps 4 "</span><span class="p">,</span> <span class="n">FermionicSuzukiTrotter</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">reps</span><span class="o">=</span><span class="mi">4</span><span class="p">)),</span>
 <span class="gp">... </span><span class="p">]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">label</span><span class="p">,</span> <span class="n">synthesis</span> <span class="ow">in</span> <span class="n">methods</span><span class="p">:</span>
-<span class="gp">... </span>    <span class="n">error</span><span class="p">,</span> <span class="n">gates</span><span class="p">,</span> <span class="n">depth</span> <span class="o">=</span> <span class="n">cost_and_error</span><span class="p">(</span><span class="n">synthesis</span><span class="p">)</span>
-<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s2">  error </span><span class="si">{</span><span class="n">error</span><span class="si">:</span><span class="s2">.6f</span><span class="si">}</span><span class="s2">  (</span><span class="si">{</span><span class="n">gates</span><span class="si">:</span><span class="s2">3d</span><span class="si">}</span><span class="s2"> CX, depth </span><span class="si">{</span><span class="n">depth</span><span class="si">:</span><span class="s2">3d</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
-<span class="go">order 1, reps 1   error 0.515997  ( 30 CX, depth  18)</span>
-<span class="go">order 2, reps 1   error 0.180958  ( 50 CX, depth  26)</span>
-<span class="go">order 1, reps 10  error 0.004026  (300 CX, depth 162)</span>
-<span class="go">order 2, reps 4   error 0.000421  (200 CX, depth 104)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">costs</span> <span class="o">=</span> <span class="p">{</span><span class="n">label</span><span class="p">:</span> <span class="n">cost_and_error</span><span class="p">(</span><span class="n">synthesis</span><span class="p">)</span> <span class="k">for</span> <span class="n">label</span><span class="p">,</span> <span class="n">synthesis</span> <span class="ow">in</span> <span class="n">methods</span><span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">labels</span><span class="p">,</span> <span class="n">counts</span><span class="p">,</span> <span class="n">depths</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">label</span><span class="p">,</span> <span class="p">(</span><span class="n">error</span><span class="p">,</span> <span class="n">gates</span><span class="p">,</span> <span class="n">depth</span><span class="p">)</span> <span class="ow">in</span> <span class="n">costs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+<span class="gp">... </span>    <span class="n">labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">label</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">", "</span><span class="p">,</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="p">))</span>
+<span class="gp">... </span>    <span class="n">counts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">gates</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="n">depths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">depth</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s2">  error </span><span class="si">{</span><span class="n">error</span><span class="si">:</span><span class="s2">.6f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="go">order 1, reps 1   error 0.515997</span>
+<span class="go">order 2, reps 1   error 0.180958</span>
+<span class="go">order 1, reps 10  error 0.004026</span>
+<span class="go">order 2, reps 4   error 0.000421</span>
 </pre></div>
 </div>
-<p>Read the last two rows together, because they are the comparison that matters. Order two with four
-repetitions is roughly ten times more accurate than order one with ten, and it gets there with a
-third fewer entangling gates. Spending a gate budget on a higher order beats spending it on more
-first-order steps here.</p>
+<p>The two-qubit cost is left out of that table on purpose. It depends on the qubit-side synthesis
+Qiskit selects, which improves between releases, so the numbers printed here would be a snapshot
+rather than a property of the product formula. The figure below plots them instead, and what the
+comparison rests on is asserted as a relation:</p>
+<p>(<a class="reference download internal" download="" href="../_downloads/314edc584733dacef7fbdc8d01be3d56/fermionic_synthesis-7.png"><code class="xref download docutils literal notranslate"><span class="pre">png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/96442f8257a5fa2c2767662ef7e2f646/fermionic_synthesis-7.hires.png"><code class="xref download docutils literal notranslate"><span class="pre">hires.png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/4c89a1294bba0791be588a8467cfc0db/fermionic_synthesis-7.pdf"><code class="xref download docutils literal notranslate"><span class="pre">pdf</span></code></a>)</p>
+<figure class="align-default">
+<img alt="Grouped bars of CX count and depth per method, with order two at four repetitions clearly shorter than order one at ten." class="plot-directive" src="../_images/fermionic_synthesis-7.png" />
+</figure>
+<p>Read the last two methods together, because they are the comparison that matters. Order two with
+four repetitions is roughly ten times more accurate than order one with ten, and it gets there with
+fewer entangling gates rather than more, as the figure shows. Spending a gate budget on a higher
+order beats spending it on more first-order steps here.</p>
 <p>That result is not universal. Increasing <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter.html#qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter.reps" title="qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter.reps"><code class="xref py py-attr docutils literal notranslate"><span class="pre">reps</span></code></a> and increasing
 <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter.html#qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter.order" title="qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter.order"><code class="xref py py-attr docutils literal notranslate"><span class="pre">order</span></code></a> reduce the error at different rates for the same kind of
 cost, and which wins depends on the operator and on the time being evolved. The two rows above are
@@ -560,28 +573,40 @@ commute and a higher order has something to buy:</p>
 <span class="gp">... </span>    <span class="n">circuit</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Evolution</span><span class="p">(</span><span class="n">num_sites</span><span class="p">,</span> <span class="n">diagonal</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="n">total_time</span><span class="p">),</span> <span class="n">circuit</span><span class="o">.</span><span class="n">modes</span><span class="p">)</span>
 <span class="gp">... </span>    <span class="k">return</span> <span class="n">circuit</span>
 <span class="gp">&gt;&gt;&gt;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">cx_count</span><span class="p">(</span><span class="n">circuit</span><span class="p">):</span>
-<span class="gp">... </span>    <span class="k">return</span> <span class="n">generate_preset_jw_pass_manager</span><span class="p">()</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">circuit</span><span class="p">)</span><span class="o">.</span><span class="n">decompose</span><span class="p">(</span><span class="n">reps</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span><span class="o">.</span><span class="n">count_ops</span><span class="p">()[</span><span class="s2">"cx"</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">two_qubit_cost</span><span class="p">(</span><span class="n">circuit</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="n">transpiled</span> <span class="o">=</span> <span class="n">generate_preset_jw_pass_manager</span><span class="p">()</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">circuit</span><span class="p">)</span><span class="o">.</span><span class="n">decompose</span><span class="p">(</span><span class="n">reps</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="n">two_qubit</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">instruction</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">instruction</span><span class="o">.</span><span class="n">qubits</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span>
+<span class="gp">... </span>    <span class="k">return</span> <span class="n">transpiled</span><span class="o">.</span><span class="n">count_ops</span><span class="p">()[</span><span class="s2">"cx"</span><span class="p">],</span> <span class="n">transpiled</span><span class="o">.</span><span class="n">depth</span><span class="p">(</span><span class="n">two_qubit</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">order_2</span> <span class="o">=</span> <span class="n">FermionicSuzukiTrotter</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">cx_count</span><span class="p">(</span><span class="n">mixed_circuit</span><span class="p">())</span>  <span class="c1"># first order everywhere</span>
-<span class="go">40</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">cx_count</span><span class="p">(</span><span class="n">FermionicPassManager</span><span class="p">(</span><span class="n">FermionicTrotterization</span><span class="p">(</span><span class="n">order_2</span><span class="p">))</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">mixed_circuit</span><span class="p">()))</span>
-<span class="go">68</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">cx_count</span><span class="p">(</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">everywhere</span> <span class="o">=</span> <span class="n">two_qubit_cost</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">FermionicPassManager</span><span class="p">(</span><span class="n">FermionicTrotterization</span><span class="p">(</span><span class="n">order_2</span><span class="p">))</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">mixed_circuit</span><span class="p">())</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">restricted</span> <span class="o">=</span> <span class="n">two_qubit_cost</span><span class="p">(</span>
 <span class="gp">... </span>    <span class="n">FermionicPassManager</span><span class="p">(</span>
 <span class="gp">... </span>        <span class="n">FermionicTrotterization</span><span class="p">(</span>
 <span class="gp">... </span>            <span class="n">order_2</span><span class="p">,</span> <span class="nb">filter</span><span class="o">=</span><span class="k">lambda</span> <span class="n">node</span><span class="p">:</span> <span class="ow">not</span> <span class="n">is_diagonal</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">op</span><span class="o">.</span><span class="n">operator</span><span class="p">)</span>
 <span class="gp">... </span>        <span class="p">)</span>
 <span class="gp">... </span>    <span class="p">)</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">mixed_circuit</span><span class="p">())</span>
 <span class="gp">... </span><span class="p">)</span>
-<span class="go">60</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">everywhere</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">restricted</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># the gates the filter saved</span>
+<span class="go">8</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">restricted</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">everywhere</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="n">restricted</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">everywhere</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+<span class="go">True</span>
 </pre></div>
 </div>
-<p>Raising the order on both gates costs 28 extra entangling gates; restricting it to the Hamiltonian
-costs 20 and buys the same accuracy, because the eight the filter saved were spent on an evolution
-that was already exact at first order.</p>
+<p>The gates the filter saves are exactly the ones order two spent on the diagonal evolution, which the
+diagonal comparison above prices at eight (18 against 10). They bought nothing there, because that
+evolution is already exact at first order, so dropping them costs no accuracy.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Compare the two order-two circuits with each other, not against the unexpanded one. Leaving both
+gates unexpanded sends each to the fermion-to-qubit stage whole, which is the mistake the
+<code class="docutils literal notranslate"><span class="pre">apply=False</span></code> note above describes: it can land on the same entangling-gate count as the
+filtered circuit while being a different circuit at a different depth, so reading the filter’s
+benefit off that number measures nothing.</p>
+</div>
 <div class="admonition caution">
 <p class="admonition-title">Caution</p>
 <p>Neither knob verifies that the factors are Hermitian, and an incorrectly grouped operator can
@@ -638,7 +663,7 @@ and <a class="reference internal" href="../stubs/qiskit_fermions.transpiler.pass
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on 2026/09/23</div>
+              Last updated on 2026/09/28</div>
           </div>
           <div class="right-details">
             
@@ -677,7 +702,7 @@ and <a class="reference internal" href="../stubs/qiskit_fermions.transpiler.pass
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=a84474ad"></script>
+</div><script src="../_static/documentation_options.js?v=4cde2d8d"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
