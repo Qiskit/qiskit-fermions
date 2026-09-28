@@ -189,8 +189,8 @@ instead, so the choice is made once for the pipeline:
    >>> expanded.count_ops()["Evolution"]
    20
 
-Twenty gates: five factors per order-two sweep, times four repetitions -- the same count
-:meth:`~.FermionicCircuit.decompose` gives for that method above. The pass carries the formula out
+Twenty gates: five factors per order-two sweep, times four repetitions (the same count
+:meth:`~.FermionicCircuit.decompose` gives for that method above). The pass carries the formula out
 itself, so no separate expansion step is needed, and running it twice changes nothing, since the
 factors it emits are :attr:`~.Evolution.atomic` and so carry no definition of their own.
 
@@ -204,7 +204,8 @@ factors it emits are :attr:`~.Evolution.atomic` and so carry no definition of th
    where it is mapped without :attr:`~.Evolution.synthesis` being consulted. That makes for an easy
    mistake when comparing methods, because every one of them then produces identical output and the
    comparison silently measures nothing. On the Hamiltonian above, leaving the order-two gate
-   unexpanded turns the 200-gate circuit below into the same 30-gate circuit that first order gives.
+   unexpanded collapses the much larger circuit below to the cost of a single mapped evolution, no
+   matter which method was selected.
 
 Measure the payoff
 ------------------
@@ -266,20 +267,60 @@ contribute. It also works in the fixed-particle-number sector, which is both sma
    ...     ("order 1, reps 10", FermionicLieTrotter(reps=10)),
    ...     ("order 2, reps 4 ", FermionicSuzukiTrotter(order=2, reps=4)),
    ... ]
-   >>> for label, synthesis in methods:
-   ...     error, gates, depth = cost_and_error(synthesis)
-   ...     print(f"{label}  error {error:.6f}  ({gates:3d} CX, depth {depth:3d})")
-   order 1, reps 1   error 0.515997  ( 30 CX, depth  18)
-   order 2, reps 1   error 0.180958  ( 50 CX, depth  26)
-   order 1, reps 10  error 0.004026  (300 CX, depth 162)
-   order 2, reps 4   error 0.000421  (200 CX, depth 104)
+   >>> costs = {label: cost_and_error(synthesis) for label, synthesis in methods}
+   >>> labels, counts, depths = [], [], []
+   >>> for label, (error, gates, depth) in costs.items():
+   ...     labels.append(label.strip().replace(", ", "\n"))
+   ...     counts.append(gates)
+   ...     depths.append(depth)
+   ...     print(f"{label}  error {error:.6f}")
+   order 1, reps 1   error 0.515997
+   order 2, reps 1   error 0.180958
+   order 1, reps 10  error 0.004026
+   order 2, reps 4   error 0.000421
+
+The two-qubit cost is left out of that table on purpose. It depends on the qubit-side synthesis
+Qiskit selects, which improves between releases, so the numbers printed here would be a snapshot
+rather than a property of the product formula. The figure below plots them instead, and what the
+comparison rests on is asserted as a relation:
+
+.. invisible-code-block: python
+
+   >>> error, gates, _ = costs["order 2, reps 4 "]
+   >>> reference_error, reference_gates, _ = costs["order 1, reps 10"]
+   >>> bool(error < reference_error) and gates < reference_gates  # more accurate *and* cheaper
+   True
+   >>> bool(costs["order 1, reps 10"][0] < costs["order 1, reps 1 "][0])  # more reps, less error
+   True
+   >>> bool(costs["order 2, reps 4 "][0] < costs["order 2, reps 1 "][0])
+   True
+
+.. plot::
+   :context: close-figs
+   :alt: Grouped bars of CX count and depth per method, with order two at four
+         repetitions clearly shorter than order one at ten.
+
+   >>> import matplotlib.pyplot as plt
+   >>>
+   >>> positions = np.arange(len(labels))
+   >>> fig, axes = plt.subplots(figsize=(7, 4))
+   >>> bars = axes.bar(positions - 0.2, counts, 0.4, label="CX gates")
+   >>> labelled = axes.bar_label(bars, fontsize=8)
+   >>> bars = axes.bar(positions + 0.2, depths, 0.4, label="CX depth")
+   >>> labelled = axes.bar_label(bars, fontsize=8)
+   >>>
+   >>> ticks = axes.set_xticks(positions, labels)
+   >>> _ = axes.set_ylabel("count")
+   >>> _ = axes.set_title("CX cost of each product formula")
+   >>> legend = axes.legend()
+   >>> fig.tight_layout()
 
 .. skip: end
 
-Read the last two rows together, because they are the comparison that matters. Order two with four
-repetitions is roughly ten times more accurate than order one with ten, and it gets there with a
-third fewer entangling gates. Spending a gate budget on a higher order beats spending it on more
-first-order steps here.
+Read the last two methods together, because they are the comparison that matters. Order two with
+four repetitions is roughly ten times more accurate than order one with ten, and it gets there with
+fewer entangling gates rather than more, as the figure shows. Spending a gate budget on a higher
+order beats spending it on more first-order steps here.
 
 That result is not universal. Increasing :attr:`~.FermionicSuzukiTrotter.reps` and increasing
 :attr:`~.FermionicSuzukiTrotter.order` reduce the error at different rates for the same kind of
@@ -353,27 +394,38 @@ commute and a higher order has something to buy:
    ...     circuit.append(Evolution(num_sites, diagonal, time=total_time), circuit.modes)
    ...     return circuit
    >>>
-   >>> def cx_count(circuit):
-   ...     return generate_preset_jw_pass_manager().run(circuit).decompose(reps=6).count_ops()["cx"]
+   >>> def two_qubit_cost(circuit):
+   ...     transpiled = generate_preset_jw_pass_manager().run(circuit).decompose(reps=6)
+   ...     two_qubit = lambda instruction: len(instruction.qubits) == 2
+   ...     return transpiled.count_ops()["cx"], transpiled.depth(two_qubit)
    >>>
    >>> order_2 = FermionicSuzukiTrotter(order=2)
    >>>
-   >>> cx_count(mixed_circuit())  # first order everywhere
-   40
-   >>> cx_count(FermionicPassManager(FermionicTrotterization(order_2)).run(mixed_circuit()))
-   68
-   >>> cx_count(
+   >>> everywhere = two_qubit_cost(
+   ...     FermionicPassManager(FermionicTrotterization(order_2)).run(mixed_circuit())
+   ... )
+   >>> restricted = two_qubit_cost(
    ...     FermionicPassManager(
    ...         FermionicTrotterization(
    ...             order_2, filter=lambda node: not is_diagonal(node.op.operator)
    ...         )
    ...     ).run(mixed_circuit())
    ... )
-   60
+   >>> everywhere[0] - restricted[0]  # the gates the filter saved
+   8
+   >>> restricted[0] < everywhere[0] and restricted[1] < everywhere[1]
+   True
 
-Raising the order on both gates costs 28 extra entangling gates; restricting it to the Hamiltonian
-costs 20 and buys the same accuracy, because the eight the filter saved were spent on an evolution
-that was already exact at first order.
+The gates the filter saves are exactly the ones order two spent on the diagonal evolution, which the
+diagonal comparison above prices at eight (18 against 10). They bought nothing there, because that
+evolution is already exact at first order, so dropping them costs no accuracy.
+
+.. note::
+   Compare the two order-two circuits with each other, not against the unexpanded one. Leaving both
+   gates unexpanded sends each to the fermion-to-qubit stage whole, which is the mistake the
+   ``apply=False`` note above describes: it can land on the same entangling-gate count as the
+   filtered circuit while being a different circuit at a different depth, so reading the filter's
+   benefit off that number measures nothing.
 
 .. caution::
    Neither knob verifies that the factors are Hermitian, and an incorrectly grouped operator can
