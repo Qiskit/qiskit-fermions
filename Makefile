@@ -126,7 +126,7 @@ pycoverage:
 
 .PHONY: doctest
 doctest:
-	python -m pytest docs/ -s -p no:doctest docs/
+	python -m pytest -s -p no:doctest docs/
 
 # ==============================================================================
 # Variables that can be set/modified to modify the C builds.
