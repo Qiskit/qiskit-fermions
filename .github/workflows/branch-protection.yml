@@ -122,6 +122,9 @@ jobs:
         uses: ./.github/actions/publish-docs
         with:
           prefix: pr/${{ github.event.pull_request.number }}
+          # Labels this preview's entry on the landing page.  Taken from the event payload rather than
+          # queried, so it is the title as of this run; a later edit re-titles the entry on the next push.
+          pr-title: ${{ github.event.pull_request.title }}
           github-token: ${{ github.token }}
 
       - name: Comment the preview link
