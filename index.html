@@ -6,6 +6,10 @@
 <meta name="robots" content="noindex">
 <title>Qiskit Fermions documentation previews</title>
 <style>
+/* Two columns: a sidebar carrying the logo and the orientation text, and a main column carrying the
+   listing.  Deliberately echoes the Furo layout of the builds this page links to -- same 67em collapse
+   point and same 1rem/0.5rem item spacing -- so arriving here and then opening a build does not feel
+   like crossing between two unrelated sites. */
 :root {
   color-scheme: light dark;
   --bg: #ffffff;
@@ -14,6 +18,8 @@
   --accent: #6929c4;
   --border: #e0e0e0;
   --card: #f7f7f9;
+  --sidebar-bg: #f7f7f9;
+  --sidebar-width: 18rem;
 }
 @media (prefers-color-scheme: dark) {
   :root {
@@ -23,27 +29,75 @@
     --accent: #be95ff;
     --border: #393939;
     --card: #212121;
+    --sidebar-bg: #1c1c1c;
   }
 }
 * { box-sizing: border-box; }
+html, body { min-height: 100%; }
 body {
   margin: 0;
-  padding: 2.5rem 1.25rem 4rem;
   background: var(--bg);
   color: var(--fg);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   line-height: 1.5;
+  display: grid;
+  grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
+  align-items: start;
 }
-main { max-width: 46rem; margin: 0 auto; }
-h1 { font-size: 1.75rem; margin: 0 0 .35rem; font-weight: 600; }
-p.lede { margin: 0 0 2rem; color: var(--muted); }
+.sidebar {
+  position: sticky;
+  /* Not `0`: the published page may sit behind a phone's status bar. */
+  top: env(safe-area-inset-top, 0px);
+  align-self: start;
+  max-height: 100vh;
+  overflow-y: auto;
+  padding: 2rem 1rem;
+  background: var(--sidebar-bg);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+.brand { display: flex; flex-direction: column; gap: .5rem; }
+/* Deliberately no `display` here: `.brand img` is (0,1,1) and would outrank the (0,1,0) class selectors
+   below, pinning both logos visible.  Sizing only; the rules below own visibility. */
+.brand img { width: 100%; max-width: 11rem; height: auto; }
+/* The two logo files differ only in the colour of the wordmark, so exactly one is ever shown.  This
+   page has no theme switcher -- unlike the Sphinx builds, which is why they need a `data-theme`
+   attribute and this does not -- so the OS preference alone decides, matching the palette above. */
+.logo-light { display: block; }
+.logo-dark { display: none; }
+@media (prefers-color-scheme: dark) {
+  .logo-light { display: none; }
+  .logo-dark { display: block; }
+}
+.sidebar-text { font-size: .875rem; color: var(--muted); }
+.sidebar-text p { margin: 0; }
+.sidebar-text p + p { margin-top: .75rem; }
+.sidebar-text strong { color: var(--fg); }
+.sidebar-text a { color: var(--accent); }
+main {
+  min-width: 0;
+  max-width: 46rem;
+  padding: 2.5rem 2rem 3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  /* Fill the viewport so the footer's `margin-top: auto` actually drops it to the bottom.  Without a
+     height to push against, a short listing would leave the copyright floating under the last card. */
+  min-height: 100vh;
+}
+h1 { font-size: 1.75rem; margin: 0; font-weight: 600; text-wrap: balance; }
+section { display: flex; flex-direction: column; gap: .6rem; }
 h2 {
   font-size: .8rem; text-transform: uppercase; letter-spacing: .07em;
   color: var(--muted); font-weight: 600;
-  margin: 2rem 0 .6rem; padding-bottom: .4rem; border-bottom: 1px solid var(--border);
+  margin: 0; padding-bottom: .4rem; border-bottom: 1px solid var(--border);
 }
-ul { list-style: none; margin: 0; padding: 0; }
-li { margin: 0 0 .5rem; }
+p.section-note { margin: 0; font-size: .875rem; color: var(--muted); }
+p.section-note a { color: var(--accent); }
+ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .5rem; }
+li { margin: 0; }
 a.entry {
   display: flex; flex-wrap: wrap; gap: .25rem .75rem; align-items: baseline;
   padding: .7rem .9rem; border: 1px solid var(--border); border-radius: 6px;
@@ -55,31 +109,61 @@ a.entry .note { color: var(--muted); font-size: .875rem; }
 li.paired { display: flex; align-items: center; gap: .75rem; }
 li.paired a.entry { flex: 1; }
 a.aside-link { color: var(--accent); font-size: .875rem; white-space: nowrap; }
-.aside { margin-top: 2.5rem; font-size: .875rem; color: var(--muted); }
-.aside a { color: var(--accent); }
+footer {
+  margin-top: auto; padding-top: 1rem; border-top: 1px solid var(--border);
+  font-size: .8125rem; color: var(--muted);
+}
+footer p { margin: 0; }
 code {
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   font-size: .875em;
 }
+/* Furo's own collapse point, so the two layouts reflow at the same width.  The sidebar stops being a
+   column and becomes a banner above the content: on a phone the orientation text still has to be read
+   before the listing, which is exactly the order the source is already in. */
+@media (max-width: 67em) {
+  body { grid-template-columns: minmax(0, 1fr); }
+  .sidebar {
+    position: static; max-height: none; overflow: visible;
+    border-right: 0; border-bottom: 1px solid var(--border);
+    padding: 1.5rem 1.25rem;
+  }
+  .brand img { max-width: 9rem; }
+  main { padding: 2rem 1.25rem 3rem; min-height: 0; }
+}
 </style>
 </head>
 <body>
+<div class="sidebar">
+<div class="brand"><img class="logo-light" src="dev/_static/images/qiskit-light-logo.svg" alt="Qiskit logo"><img class="logo-dark" src="dev/_static/images/qiskit-dark-logo.svg" alt="" aria-hidden="true"></div>
+<div class="sidebar-text">
+<p><strong>This is not the released documentation.</strong> The documentation for released versions of
+<code>Qiskit/qiskit-fermions</code> is published on the
+<a href="https://quantum.cloud.ibm.com/docs/addons/qiskit-fermions">IBM Quantum Platform</a>.</p>
+<p>This site hosts unreleased builds, so these pages may be outdated, incomplete, or describe features
+that never ship.</p>
+<p>Each button takes you to the documentation build for that branch or pull request, rebuilt each time
+the ref changes.</p>
+</div>
+</div>
 <main>
 <h1>Qiskit Fermions documentation previews</h1>
-<p class="lede">Rendered documentation builds for branches and pull requests of
-<code>Qiskit/qiskit-fermions</code>.</p>
-<h2>Development</h2>
+<section>
+<h2>Official branches</h2>
+<p class="section-note">Protected branches, which only a merged pull request can advance.</p>
 <ul>
-<li><a class="entry" href="dev/"><span class="name">main</span><span class="note">latest development build</span></a></li>
+<li><a class="entry" href="dev/"><span class="name">main</span><span class="note">the development branch</span></a></li>
+<li><a class="entry" href="stable/0.2/"><span class="name">stable/0.2</span><span class="note">the 0.2 release series</span></a></li>
+<li><a class="entry" href="stable/0.1/"><span class="name">stable/0.1</span><span class="note">the 0.1 release series</span></a></li>
 </ul>
-<h2>Stable</h2>
-<ul>
-<li><a class="entry" href="stable/0.2/"><span class="name">0.2</span></a></li>
-<li><a class="entry" href="stable/0.1/"><span class="name">0.1</span></a></li>
-</ul>
-<p class="aside">These are previews and may be outdated or incomplete. The released documentation is
-published on the
-<a href="https://quantum.cloud.ibm.com/docs/api/qiskit-fermions">IBM Quantum Platform</a>.</p>
+</section>
+<section>
+<h2>Pull requests</h2>
+<p class="section-note">No pull request is being previewed right now. Applying the <a href="https://github.com/Qiskit/qiskit-fermions/labels/ci%3A%20preview%20docs"><code>ci: preview docs</code></a> label to a pull request builds its documentation and lists it here.</p>
+</section>
+<footer>
+<p>Copyright &#169; 2026, Qiskit addons team</p>
+</footer>
 </main>
 </body>
 </html>
