@@ -37,6 +37,14 @@ inputs:
       Directory within the branch to publish into, e.g. `dev`, `stable/0.2` or `pr/123`.  Its previous
       contents are replaced wholesale.
     required: true
+  pr-title:
+    description: >
+      Title of the pull request being previewed, used as the label of its entry on the site's landing
+      page.  Only meaningful when `prefix` is a `pr/<N>` directory; ignored otherwise.  Stored inside the
+      preview directory, so removing the preview removes the title with it.  Optional: an entry whose
+      title is missing is simply rendered without one.
+    required: false
+    default: ''
   rewrite-links:
     description: >
       Rewrite the absolute IBM Quantum Platform API-reference links to point inside the published tree.
@@ -136,6 +144,9 @@ runs:
       env:
         TREE: ${{ steps.tree.outputs.path }}
         PREFIX: ${{ inputs.prefix }}
+        # Through the environment rather than interpolated into the script: a pull-request title is
+        # attacker-controlled text, and `${{ }}` inside `run:` would splice it into the shell source.
+        PR_TITLE: ${{ inputs.pr-title }}
       run: |
         set -euo pipefail
         target="gh-pages/$PREFIX"
@@ -145,6 +156,16 @@ runs:
         mkdir -p "$target"
         cp -a "$TREE/." "$target/"
         echo "Staged $(find "$target" -name '*.html' | wc -l) HTML file(s) into $PREFIX."
+
+        # Written after the copy, so the wholesale replacement above cannot drop it, and inside the
+        # preview directory, so that `rm -rf pr/<N>` during cleanup takes the title with it rather than
+        # leaving a stale label behind.  `printf '%s'` rather than `echo`: a title beginning with `-`
+        # would otherwise be eaten as an option, and a literal `\n` in one would be expanded by some
+        # shells.  Only ever consumed as text by the index generator, never executed.
+        if [[ -n "$PR_TITLE" && "$PREFIX" == pr/* ]]; then
+          printf '%s' "$PR_TITLE" > "$target/.pr-title"
+          echo "Recorded the pull-request title for the landing page."
+        fi
 
     - name: Commit and push
       shell: bash
