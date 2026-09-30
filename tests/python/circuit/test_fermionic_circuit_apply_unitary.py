@@ -389,3 +389,20 @@ def test_repeat_insert_barriers_blocks_the_merge():
         fused._apply_unitary_(vec0, norb, nelec, True),
         atol=1e-10,
     )
+
+
+def test_apply_unitary_rejects_measurement():
+    """A measured circuit cannot be applied as a unitary, and says so specifically.
+
+    A barrier is skipped because it is unitarily the identity; a measurement is not, so skipping it
+    would silently simulate a different circuit. The check is that the error names the cause rather
+    than falling through to the generic "does not implement the protocol" message.
+    """
+    norb, nelec = 2, (1, 1)
+    circ = FermionicCircuit(2 * norb)
+    circ.append(InitializeModes([1, 0, 1, 0]), circ.modes)
+    circ.measure_all()
+
+    vec = ffsim.hartree_fock_state(norb, nelec)
+    with pytest.raises(TypeError, match="measurement is not a unitary operation"):
+        circ._apply_unitary_(vec, norb, nelec, True)

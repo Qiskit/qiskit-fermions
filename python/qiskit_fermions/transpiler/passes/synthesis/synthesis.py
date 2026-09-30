@@ -182,7 +182,12 @@ class F2QSynthesis(GenericPass[FermionicDAGCircuit, DAGCircuit]):
             out_dag.add_creg(creg)
 
         for node in dag.op_nodes():
-            op_type = type(node.op)
+            # Key on `base_class`, not `type(...)`: a singleton instruction (such as
+            # `FermionicMeasure`, which subclasses Qiskit's `Measure` so the drawers render it) is an
+            # instance of a generated `_Singleton...` subclass, whose name no entry point could match.
+            # `base_class` is the user-facing class, and is identical to `type(...)` for every
+            # non-singleton instruction, so this is the right key in both cases.
+            op_type = node.op.base_class
 
             # A barrier is not a FermionicGate but is supported: it carries no fermionic content, so it
             # needs no synthesis plugin, only a placement on the mapped qubits. Because an F2QLayout

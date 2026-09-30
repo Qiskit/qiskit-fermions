@@ -32,12 +32,22 @@ This module provides a library of :class:`.FermionicGate` implementations.
    UCC
    UCJ
 
+Measurement is the one non-unitary operation a :class:`.FermionicCircuit` can carry, so it is a
+:class:`.FermionicInstruction` rather than a :class:`.FermionicGate`:
+
+.. autosummary::
+   :toctree: ../stubs/
+   :template: autosummary/class_without_inheritance.rst
+
+   FermionicMeasure
+
 Should an :class:`.Evolution` gate be decomposed in fermionic space (an optional step) how that is
 done is determined by a synthesis method from the
 :mod:`~qiskit_fermions.circuit.library.synthesis` module.
 """
 
 from .evolution import Evolution
+from .fermionic_measure import FermionicMeasure
 from .initialize_modes import InitializeModes
 from .orbital_rotation import OrbitalRotation
 from .prepare_slater_determinant import PrepareSlaterDeterminant
@@ -48,6 +58,7 @@ __all__ = [
     "UCC",
     "UCJ",
     "Evolution",
+    "FermionicMeasure",
     "InitializeModes",
     "OrbitalRotation",
     "PrepareSlaterDeterminant",
