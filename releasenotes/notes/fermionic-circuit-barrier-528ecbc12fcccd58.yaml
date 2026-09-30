@@ -1,0 +1,19 @@
+---
+features:
+  - |
+    Added :meth:`.FermionicCircuit.barrier`, which re-exposes
+    :external:meth:`~qiskit.circuit.QuantumCircuit.barrier` on the fermionic layer::
+
+        circuit.barrier()                                        # every mode
+        circuit.barrier(circuit.register[1], circuit.register[2])
+
+    The optimization passes do not fuse gates across a barrier, so this is how you keep
+    :class:`.MergeOrbitalRotations` from merging consecutive :class:`.OrbitalRotation` gates, or
+    :class:`.MergeSlaterDeterminantPreparation` from folding an :class:`.InitializeModes` into the
+    :class:`.OrbitalRotation` that follows it.
+
+    The fermion-to-qubit synthesis stage maps a barrier onto every qubit of each register it touched,
+    so it constrains the subsequent qubit-level transpilation too. Because a
+    :type:`~qiskit_fermions.transpiler.F2QLayout` relates whole registers, whose two sides can even
+    differ in size, a barrier is deliberately not narrowed to the qubits encoding the modes it was
+    placed on.

@@ -61,10 +61,14 @@ class MergeOrbitalRotations(FermionicDAGCircuitPass):
         ``rotation_unitary`` is the run's rotations multiplied in circuit order. Runs of a single
         rotation (and all other nodes) are left untouched. The input DAG is modified in place.
 
+        A :class:`~qiskit.circuit.library.Barrier` interrupts a run, so the rotations on either side
+        of one are not merged. Place a barrier between two rotations to keep them apart.
+
         Args:
             dag: the input circuit with fermion-based instructions. Only
                 :class:`~qiskit.dagcircuit.DAGOpNode` with :class:`.FermionicGate` instances as their
-                :attr:`~qiskit.dagcircuit.DAGOpNode.op` are supported.
+                :attr:`~qiskit.dagcircuit.DAGOpNode.op` are supported, plus
+                :class:`~qiskit.circuit.library.Barrier`, which is carried through untouched.
 
         Returns:
             The output circuit which is still acting on a fermionic register.

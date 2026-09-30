@@ -152,6 +152,25 @@ def test_no_merge_when_not_adjacent():
     ]
 
 
+def test_no_merge_across_barrier():
+    """A barrier between two rotations blocks the merge.
+
+    This is the documented way to keep two rotations apart, so it is locked in here: the run-collection
+    is name-based, and a barrier interrupting the run is what makes ``FermionicCircuit.barrier`` useful
+    as an optimization boundary.
+    """
+    circ = FermionicCircuit(2)
+    circ.append(OrbitalRotation(random_unitary(2, seed=1)), circ.modes)
+    circ.barrier()
+    circ.append(OrbitalRotation(random_unitary(2, seed=2)), circ.modes)
+
+    assert _nodes(_merge(circ)) == [
+        ("OrbitalRotation", [0, 1]),
+        ("barrier", [0, 1]),
+        ("OrbitalRotation", [0, 1]),
+    ]
+
+
 def test_no_merge_across_different_mode_sets():
     """Rotations on different mode sets do not merge into each other."""
     circ = FermionicCircuit(3)

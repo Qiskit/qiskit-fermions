@@ -154,6 +154,25 @@ def test_no_merge_when_not_adjacent():
     ]
 
 
+def test_no_merge_across_barrier():
+    """A barrier between the init and the rotation blocks the fusion.
+
+    This is the documented way to keep an initialization and the rotation following it as separate
+    gates, so it is locked in here: the pattern requires the rotation to immediately follow the init,
+    and a barrier is an intervening op node that breaks that adjacency.
+    """
+    circ = FermionicCircuit(2)
+    circ.append(InitializeModes([1, 0]), circ.modes)
+    circ.barrier()
+    circ.append(OrbitalRotation(random_unitary(2, seed=1)), circ.modes)
+
+    assert _merge(circ) == [
+        ("InitializeModes", [0, 1]),
+        ("barrier", [0, 1]),
+        ("OrbitalRotation", [0, 1]),
+    ]
+
+
 def test_no_merge_when_rotation_is_not_a_spin_half():
     """A single rotation on a partial sub-range that is not a contiguous spin half does not fuse."""
     circ = FermionicCircuit(4)  # norb = 2: the only valid halves are [0, 1] and [2, 3]

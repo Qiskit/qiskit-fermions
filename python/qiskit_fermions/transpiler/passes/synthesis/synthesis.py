@@ -17,6 +17,7 @@ from __future__ import annotations
 from collections.abc import Mapping, Sequence
 from typing import Any, TypeAlias, cast
 
+from qiskit.circuit import Barrier
 from qiskit.dagcircuit import DAGCircuit
 from qiskit.passmanager import GenericPass
 
@@ -144,14 +145,17 @@ class F2QSynthesis(GenericPass[FermionicDAGCircuit, DAGCircuit]):
         Args:
             dag: the input circuit with fermion-based instructions. Only
                 :class:`~qiskit.dagcircuit.DAGOpNode` with :class:`.FermionicGate` instances as their
-                :attr:`~qiskit.dagcircuit.DAGOpNode.op` are supported.
+                :attr:`~qiskit.dagcircuit.DAGOpNode.op` are supported, plus
+                :class:`~qiskit.circuit.library.Barrier`, which is mapped onto every qubit of each
+                register it touched.
 
         Returns:
             The output circuit with qubit-based instructions.
 
         Raises:
             ValueError: when a :class:`~qiskit.dagcircuit.DAGOpNode` is encountered whose
-                :attr:`~qiskit.dagcircuit.DAGOpNode.op` is not of type :class:`.FermionicGate`.
+                :attr:`~qiskit.dagcircuit.DAGOpNode.op` is neither of type :class:`.FermionicGate`
+                nor a :class:`~qiskit.circuit.library.Barrier`.
             TypeError: when a :class:`.FermionicGate` type is encountered for which no translation
                 plugin is present in :attr:`methods`.
         """
@@ -173,6 +177,23 @@ class F2QSynthesis(GenericPass[FermionicDAGCircuit, DAGCircuit]):
 
         for node in dag.op_nodes():
             op_type = type(node.op)
+
+            # A barrier is not a FermionicGate but is supported: it carries no fermionic content, so it
+            # needs no synthesis plugin, only a placement on the mapped qubits. Because an F2QLayout
+            # relates whole registers (whose two sides can even differ in size), the modes a fermionic
+            # barrier covers have no per-qubit image in general, so span every qubit of each mapped
+            # register it touched. That is correct under any layout, and a barrier can span several
+            # registers, which is why this does not go through `map_node_single_register`.
+            if isinstance(node.op, Barrier):
+                qargs = [
+                    qubit
+                    for freg, qreg in f2q_layout.items()
+                    if any(mode in freg for mode in node.qargs)
+                    for qubit in qreg
+                ]
+                out_dag.apply_operation_back(Barrier(len(qargs), label=node.op.label), qargs=qargs)
+                continue
+
             if not isinstance(node.op, FermionicGate):
                 raise ValueError("Encountered an unsupported circuit instruction type: {}", op_type)
 

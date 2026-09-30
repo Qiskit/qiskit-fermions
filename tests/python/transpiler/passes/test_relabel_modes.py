@@ -199,6 +199,30 @@ def _single_evolution_dag(operator, num_modes=4, time=1.5):
     return FermionicCircuitToDAG().run(circ)
 
 
+def test_relabel_modes_relabels_barrier():
+    """A barrier is carried onto the relabeled register along with the gates.
+
+    The pass rebuilds the register as ``[orig[p] for p in permutation]`` and re-emits each node on the
+    same *positions* of that new register, so a barrier on positions 0 and 1 stays on positions 0 and 1
+    while the modes sitting underneath them change. The permutation is asymmetric, so a barrier that
+    was dropped, or placed on the wrong indices, would not match either assertion.
+    """
+    num_modes = 4
+    circ = FermionicCircuit(num_modes)
+    circ.barrier(circ.register[0], circ.register[1])
+
+    dag = FermionicCircuitToDAG().run(circ)
+    out_dag = RelabelModes([2, 0, 3, 1]).run(dag)
+
+    nodes = list(out_dag.topological_op_nodes())
+    assert [node.op.name for node in nodes] == ["barrier"]
+
+    (relabeled_register,) = out_dag.qregs.values()
+    assert sorted(relabeled_register.index(qubit) for qubit in nodes[0].qargs) == [0, 1]
+    # those two positions now hold the modes originally at indices 2 and 0
+    assert sorted(circ.register.index(qubit) for qubit in nodes[0].qargs) == [0, 2]
+
+
 def test_run_rejects_multiple_registers():
     """``run`` only supports a single fermionic register."""
     dag = DAGCircuit()
