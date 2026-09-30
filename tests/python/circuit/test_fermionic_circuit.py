@@ -17,7 +17,8 @@ from __future__ import annotations
 import pickle
 
 import pytest
-from qiskit.circuit import Barrier, CircuitInstruction
+from qiskit.circuit import Barrier, CircuitInstruction, QuantumCircuit
+from qiskit.circuit.exceptions import CircuitError
 from qiskit.circuit.library import XGate
 from qiskit_fermions.circuit import FermionicCircuit
 from qiskit_fermions.circuit.library import Evolution
@@ -114,3 +115,89 @@ def test_pickle_dag():
     original_op = original_nodes[0].op.operator
     reconstructed_op = reconstructed_nodes[0].op.operator
     assert original_op.equiv(reconstructed_op)
+
+
+def _two_gate_circuit() -> FermionicCircuit:
+    """Builds a 4-mode circuit with two distinguishable gates on *different* mode subsets.
+
+    The disjoint placements make both the instruction order and the mode mapping observable after a
+    ``compose`` or ``repeat``, which a single full-width gate could not.
+    """
+    hamil = FermionOperator.from_dict({(cre(0), ann(1)): 1.0, (cre(1), ann(0)): 1.0})
+    circ = FermionicCircuit(4)
+    circ.append(Evolution(2, hamil, time=0.25), [circ.modes[0], circ.modes[1]])
+    circ.append(Evolution(2, hamil, time=0.75), [circ.modes[2], circ.modes[3]])
+    return circ
+
+
+def _times_and_modes(circuit: FermionicCircuit) -> list[tuple[float, list[int]]]:
+    """Returns each gate's evolution time and absolute mode indices, in circuit order.
+
+    Barriers are skipped: they carry no evolution time, so they have no entry here. Use
+    ``count_ops`` when the barriers themselves are what a test is about.
+    """
+    return [
+        (
+            instruction.operation.params[0],
+            [circuit._inner.find_bit(mode).index for mode in instruction.qubits],
+        )
+        for instruction in circuit._inner.data
+        if not isinstance(instruction.operation, Barrier)
+    ]
+
+
+def test_compose():
+    circ = _evolution_circuit()
+    other = _evolution_circuit()
+
+    composed = circ.compose(other)
+
+    assert composed.count_ops() == {"Evolution": 2, "barrier": 2}
+    # the operands are left untouched by the out-of-place form
+    assert circ.count_ops() == other.count_ops() == {"Evolution": 1, "barrier": 1}
+    # `QuantumCircuit.compose` hands back a circuit with a fresh register, so the wrapper has to
+    # re-sync it; otherwise the returned circuit's modes would not be this circuit's modes
+    assert composed.register is circ.register
+    assert composed.modes == circ.modes
+
+
+def test_compose_front():
+    circ = _two_gate_circuit()
+    other = _evolution_circuit()
+
+    assert _times_and_modes(circ.compose(other, front=True))[0] == (1.5, [0, 1, 2, 3])
+    assert _times_and_modes(circ.compose(other))[-1] == (1.5, [0, 1, 2, 3])
+
+
+def test_compose_inplace():
+    circ = _evolution_circuit()
+
+    assert circ.compose(_evolution_circuit(), inplace=True) is None
+    assert circ.count_ops() == {"Evolution": 2, "barrier": 2}
+
+
+def test_compose_fargs():
+    circ = FermionicCircuit(4)
+    hamil = FermionOperator.from_dict({(cre(0), ann(1)): 1.0, (cre(1), ann(0)): 1.0})
+    narrow = FermionicCircuit(2)
+    narrow.append(Evolution(2, hamil, time=0.5), narrow.modes)
+
+    composed = circ.compose(narrow, [circ.modes[1], circ.modes[3]])
+
+    assert _times_and_modes(composed) == [(0.5, [1, 3])]
+
+
+def test_compose_invalid_type():
+    circ = _evolution_circuit()
+
+    # a raw `QuantumCircuit` would let `QuantumCircuit.compose` inline qubit-based instructions,
+    # bypassing the `FermionicGate` guard that `append` enforces
+    with pytest.raises(ValueError):
+        circ.compose(QuantumCircuit(4))
+
+
+def test_compose_too_wide():
+    circ = _evolution_circuit()
+
+    with pytest.raises(CircuitError):
+        circ.compose(FermionicCircuit(8))

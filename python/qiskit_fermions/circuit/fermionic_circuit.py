@@ -107,6 +107,59 @@ class FermionicCircuit:
         """
         self._inner.barrier(*fargs, label=label)
 
+    def compose(
+        self,
+        other: FermionicCircuit,
+        fargs: FermionicSpecifier | None = None,
+        *,
+        front: bool = False,
+        inplace: bool = False,
+    ) -> FermionicCircuit | None:
+        """Composes another :class:`.FermionicCircuit` onto this one.
+
+        The instructions of ``other`` are inlined into this circuit, rather than wrapped into a single
+        gate. This mirrors :external:meth:`~qiskit.circuit.QuantumCircuit.compose` with its default
+        ``wrap=False``. The ``wrap=True`` counterpart is deliberately not offered: a dedicated
+        encapsulation mechanism is planned instead, so adding a second way to box up a block of
+        instructions here would leave two patterns solving the same problem.
+
+        Args:
+            other: the circuit to compose onto this one. It may act on fewer modes than this circuit,
+                in which case ``fargs`` selects the modes it is placed on.
+            fargs: the fermionic modes of this circuit onto which ``other`` is placed. Defaults to all
+                of this circuit's modes, in order.
+            front: whether to compose ``other`` before rather than after this circuit's instructions.
+            inplace: whether to modify this circuit rather than return a new one.
+
+        Returns:
+            The composed circuit, or ``None`` if ``inplace`` is set.
+
+        Raises:
+            ValueError: if ``other`` is not an instance of :class:`.FermionicCircuit`. Only fermionic
+                circuits are accepted because the plain
+                :external:meth:`~qiskit.circuit.QuantumCircuit.compose` would happily inline
+                qubit-based instructions, bypassing the type guard that :meth:`append` enforces.
+            CircuitError: if ``other`` acts on more modes than this circuit, or ``fargs`` does not
+                match its width.
+        """
+        if not isinstance(other, FermionicCircuit):
+            raise ValueError(f"Unsupported circuit type: {type(other)}")
+
+        # Every `FermionicCircuit` is populated through the guarded `append`, so the instructions of
+        # `other` are already known to be `FermionicGate`s; the operand type check above is all that is
+        # needed and keeps this O(1) rather than re-walking the instructions.
+        if inplace:
+            self._inner.compose(other._inner, fargs, front=front, inplace=True)
+            return None
+
+        inner_composed = self._inner.compose(other._inner, fargs, front=front, inplace=False)
+        out = FermionicCircuit(len(self.register))
+        # `QuantumCircuit.compose` returns a circuit carrying a *new* register object, so re-sync it
+        # with ours (as `decompose` does) to keep the mode identities valid.
+        out.register = self.register
+        out._inner = inner_composed
+        return out
+
     def count_ops(self) -> OrderedDict[str, int]:
         """Re-exposes :external:meth:`~qiskit.circuit.QuantumCircuit.count_ops`."""
         return cast(OrderedDict[str, int], self._inner.count_ops())
