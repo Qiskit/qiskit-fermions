@@ -1,0 +1,6 @@
+﻿map\_transfer\_vertex\_generators
+=================================
+
+.. currentmodule:: qiskit_fermions.mappers
+
+.. autofunction:: map_transfer_vertex_generators

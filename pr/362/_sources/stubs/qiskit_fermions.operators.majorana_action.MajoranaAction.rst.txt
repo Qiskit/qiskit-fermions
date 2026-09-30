@@ -1,0 +1,6 @@
+﻿MajoranaAction
+==============
+
+.. currentmodule:: qiskit_fermions.operators.majorana_action
+
+.. autodata:: MajoranaAction

@@ -1,0 +1,6 @@
+﻿F2QLayout
+=========
+
+.. currentmodule:: qiskit_fermions.transpiler
+
+.. autodata:: F2QLayout

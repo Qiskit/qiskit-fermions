@@ -1,0 +1,92 @@
+﻿GivensDecompositionSlaterDeterminantSynthesis
+=============================================
+
+.. currentmodule:: qiskit_fermions.transpiler.passes.synthesis
+
+.. autoclass:: GivensDecompositionSlaterDeterminantSynthesis
+   :show-inheritance:
+   :no-members:
+   :no-inherited-members:
+   :special-members:
+
+
+  
+  
+   .. rubric:: Attributes
+    
+   .. autoattribute:: minimize_2q_gate_count
+  
+  
+  
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+  
+  
+   .. rubric:: Methods
+    
+   .. automethod:: run
+  
+  
+  
+  
+  
+  
+  
