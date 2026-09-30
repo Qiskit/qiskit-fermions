@@ -21,7 +21,7 @@ from qiskit.circuit import Barrier
 from qiskit.dagcircuit import DAGCircuit
 from qiskit.passmanager import GenericPass
 
-from qiskit_fermions.circuit import FermionicDAGCircuit, FermionicGate
+from qiskit_fermions.circuit import FermionicDAGCircuit, FermionicInstruction
 
 from ... import F2QLayout
 from .plugin import F2QSynthesisPlugin, F2QSynthesisPluginManager
@@ -31,7 +31,7 @@ F2QSynthesisConfig: TypeAlias = dict[
 ]
 """The dictionary type used to configure the :attr:`.F2QSynthesis.methods`.
 
-The keys of this dictionary must be names of :class:`.FermionicGate` circuit instructions.
+The keys of this dictionary must be names of :class:`.FermionicInstruction` circuit instructions.
 The values can be one of three types:
 
 1. ``str``: the simplest scenario simply specifies the name of the plugin method to use for the
@@ -73,6 +73,7 @@ class F2QSynthesis(GenericPass[FermionicDAGCircuit, DAGCircuit]):
           >>>
           >>> config = {
           ...     "Evolution": ("MapperFn", (jordan_wigner,)),
+          ...     "FermionicMeasure": "TrivialOccupation",
           ...     "InitializeModes": "TrivialOccupation",
           ...     "OrbitalRotation": "GivensDecomposition",
           ... }
@@ -87,6 +88,7 @@ class F2QSynthesis(GenericPass[FermionicDAGCircuit, DAGCircuit]):
           >>>
           >>> synth = passes.F2QSynthesis()
           >>> synth.methods["Evolution"] = passes.MapperFnEvolutionSynthesis(jordan_wigner)
+          >>> synth.methods["FermionicMeasure"] = passes.TrivialOccupationFermionicMeasureSynthesis()
           >>> synth.methods["InitializeModes"] = passes.TrivialOccupationInitializeModesSynthesis()
           >>> synth.methods["OrbitalRotation"] = passes.GivensDecompositionOrbitalRotationSynthesis()
 
@@ -144,8 +146,9 @@ class F2QSynthesis(GenericPass[FermionicDAGCircuit, DAGCircuit]):
 
         Args:
             dag: the input circuit with fermion-based instructions. Only
-                :class:`~qiskit.dagcircuit.DAGOpNode` with :class:`.FermionicGate` instances as their
-                :attr:`~qiskit.dagcircuit.DAGOpNode.op` are supported, plus
+                :class:`~qiskit.dagcircuit.DAGOpNode` with :class:`.FermionicInstruction` instances
+                as their :attr:`~qiskit.dagcircuit.DAGOpNode.op` are supported (that is every
+                :class:`.FermionicGate` as well as :class:`.FermionicMeasure`), plus
                 :class:`~qiskit.circuit.library.Barrier`, which is mapped onto every qubit of each
                 register it touched.
 
@@ -154,10 +157,10 @@ class F2QSynthesis(GenericPass[FermionicDAGCircuit, DAGCircuit]):
 
         Raises:
             ValueError: when a :class:`~qiskit.dagcircuit.DAGOpNode` is encountered whose
-                :attr:`~qiskit.dagcircuit.DAGOpNode.op` is neither of type :class:`.FermionicGate`
-                nor a :class:`~qiskit.circuit.library.Barrier`.
-            TypeError: when a :class:`.FermionicGate` type is encountered for which no translation
-                plugin is present in :attr:`methods`.
+                :attr:`~qiskit.dagcircuit.DAGOpNode.op` is neither of type
+                :class:`.FermionicInstruction` nor a :class:`~qiskit.circuit.library.Barrier`.
+            TypeError: when a :class:`.FermionicInstruction` type is encountered for which no
+                translation plugin is present in :attr:`methods`.
         """
         f2q_layout = cast(F2QLayout, self.property_set["f2q_layout"])
 
@@ -189,12 +192,12 @@ class F2QSynthesis(GenericPass[FermionicDAGCircuit, DAGCircuit]):
             # non-singleton instruction, so this is the right key in both cases.
             op_type = node.op.base_class
 
-            # A barrier is not a FermionicGate but is supported: it carries no fermionic content, so it
-            # needs no synthesis plugin, only a placement on the mapped qubits. Because an F2QLayout
-            # relates whole registers (whose two sides can even differ in size), the modes a fermionic
-            # barrier covers have no per-qubit image in general, so span every qubit of each mapped
-            # register it touched. That is correct under any layout, and a barrier can span several
-            # registers, which is why this does not go through `map_node_single_register`.
+            # A barrier is not a FermionicInstruction but is supported: it carries no fermionic
+            # content, so it needs no synthesis plugin, only a placement on the mapped qubits. Because
+            # an F2QLayout relates whole registers (whose two sides can even differ in size), the modes
+            # a fermionic barrier covers have no per-qubit image in general, so span every qubit of
+            # each mapped register it touched. That is correct under any layout, and a barrier can span
+            # several registers, which is why this does not go through `map_node_single_register`.
             if isinstance(node.op, Barrier):
                 qargs = [
                     qubit
@@ -205,14 +208,13 @@ class F2QSynthesis(GenericPass[FermionicDAGCircuit, DAGCircuit]):
                 out_dag.apply_operation_back(Barrier(len(qargs), label=node.op.label), qargs=qargs)
                 continue
 
-            if not isinstance(node.op, FermionicGate):
-                raise ValueError("Encountered an unsupported circuit instruction type: {}", op_type)
+            if not isinstance(node.op, FermionicInstruction):
+                raise ValueError(f"Encountered an unsupported circuit instruction type: {op_type}")
 
             plugin = self.methods.get(op_type.__name__, None)
             if plugin is None:
                 raise TypeError(
-                    "No plugin registered for transpiling a circuit instruction of type: {}",
-                    op_type,
+                    f"No plugin registered for transpiling a circuit instruction of type: {op_type}"
                 )
 
             plugin.run(node, out_dag, f2q_layout=f2q_layout)
