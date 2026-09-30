@@ -401,7 +401,10 @@ class QDriftTrotterization(FermionicDAGCircuitPass):
                 unoccupied |= all_modes
 
             if not isinstance(node.op, Evolution):
-                out_dag.apply_operation_back(node.op, qargs=node.qargs)
+                # Forward ``cargs``: a non-``Evolution`` node is copied through as-is and may carry
+                # classical bits (e.g. a ``FermionicMeasure``); ``apply_operation_back`` silently
+                # defaults to none, which would drop them.
+                out_dag.apply_operation_back(node.op, qargs=node.qargs, cargs=node.cargs)
                 continue
 
             hamil = node.op.operator

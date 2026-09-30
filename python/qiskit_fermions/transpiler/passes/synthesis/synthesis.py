@@ -172,6 +172,12 @@ class F2QSynthesis(GenericPass[FermionicDAGCircuit, DAGCircuit]):
         out_dag.metadata = dag.metadata
         for qreg in f2q_layout.values():
             out_dag.add_qreg(qreg)
+        # Copy the clbits *before* the registers: this DAG is built from scratch, so anything not
+        # copied explicitly is absent, and a clbit outside any register would otherwise be dropped --
+        # emitting an operation onto it then fails with an opaque "not present" KeyError. Adding them
+        # in the input's own order also pins the clbit indices, which are what the positions of a
+        # sampled bitstring mean.
+        out_dag.add_clbits(dag.clbits)
         for creg in dag.cregs.values():
             out_dag.add_creg(creg)
 

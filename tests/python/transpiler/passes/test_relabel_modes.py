@@ -17,7 +17,7 @@ from __future__ import annotations
 import pickle
 
 import pytest
-from qiskit import QuantumRegister
+from qiskit import ClassicalRegister, QuantumRegister
 from qiskit.circuit.library import PauliEvolutionGate
 from qiskit.dagcircuit import DAGCircuit
 from qiskit.passmanager import MultiStagePassManager
@@ -221,6 +221,40 @@ def test_relabel_modes_relabels_barrier():
     assert sorted(relabeled_register.index(qubit) for qubit in nodes[0].qargs) == [0, 1]
     # those two positions now hold the modes originally at indices 2 and 0
     assert sorted(circ.register.index(qubit) for qubit in nodes[0].qargs) == [0, 2]
+
+
+def test_relabel_modes_keeps_classical_bits():
+    """The relabeling permutes modes only, so a measurement keeps the bit it writes into.
+
+    ``apply_operation_back`` silently defaults ``cargs`` to empty, so forwarding only ``qargs`` would
+    turn every measurement into a zero-clbit one without raising. That would be invisible until a
+    backend refused the circuit, hence the explicit check on the (mode, clbit) pairing.
+    """
+    num_modes = 4
+    circ = FermionicCircuit(num_modes)
+    creg = ClassicalRegister(num_modes, "meas")
+    circ._inner.add_register(creg)
+    for mode, clbit in zip(circ.modes, creg, strict=True):
+        circ._inner.measure(mode, clbit)
+
+    out_dag = RelabelModes([2, 0, 3, 1]).run(FermionicCircuitToDAG().run(circ))
+
+    nodes = list(out_dag.topological_op_nodes())
+    assert [node.op.name for node in nodes] == ["measure"] * num_modes
+
+    # Every measurement still carries exactly one classical bit, and the set of bits is intact.
+    assert all(len(node.cargs) == 1 for node in nodes)
+    assert sorted(out_dag.find_bit(node.cargs[0]).index for node in nodes) == list(range(num_modes))
+
+    # The pass re-emits each node on the same *position* of the relabeled register, so a clbit stays
+    # paired with the position it was measured at -- while the mode sitting at that position changes.
+    # This is what makes the mode-to-clbit map of the relabeled circuit differ from the permutation,
+    # and is why a sampled bitstring still needs post-processing (see the class docstring).
+    (relabeled_register,) = out_dag.qregs.values()
+    assert sorted(
+        (relabeled_register.index(node.qargs[0]), out_dag.find_bit(node.cargs[0]).index)
+        for node in nodes
+    ) == [(idx, idx) for idx in range(num_modes)]
 
 
 def test_run_rejects_multiple_registers():

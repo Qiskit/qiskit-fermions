@@ -332,8 +332,11 @@ class RelabelModes(FermionicDAGCircuitPass):
 
         for node in dag.op_nodes():
             orig_indices = [orig_register.index(mode) for mode in node.qargs]
+            # Forward ``cargs``: the relabeling permutes modes only, so a node's classical bits
+            # (e.g. the bit a ``FermionicMeasure`` writes into) must be carried over untouched.
+            # ``apply_operation_back`` silently defaults to none, which would drop them.
             out_dag.apply_operation_back(
-                node.op, qargs=[relabeled_register[idx] for idx in orig_indices]
+                node.op, qargs=[relabeled_register[idx] for idx in orig_indices], cargs=node.cargs
             )
 
         return out_dag

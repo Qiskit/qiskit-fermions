@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import pytest
 from qiskit import ClassicalRegister
-from qiskit.circuit import Barrier, QuantumRegister
+from qiskit.circuit import Barrier, Clbit, QuantumRegister
 from qiskit.circuit.library import XGate
 from qiskit.passmanager import MultiStagePassManager
 from qiskit_fermions.circuit import FermionicCircuit
@@ -181,3 +181,38 @@ def test_classical_registers_are_preserved():
 
     qu_circ = pm.run(circ)
     assert any(reg.name == "c" and len(reg) == 2 for reg in qu_circ.cregs)
+
+
+def test_loose_clbits_are_preserved():
+    """A classical bit outside any register survives the synthesis stage.
+
+    ``F2QSynthesis`` builds its output DAG from scratch, so anything it does not copy explicitly is
+    absent. Copying only the registers drops a loose bit, and emitting an operation onto it then fails
+    with an opaque ``KeyError`` naming an anonymous bit -- so both the bit and the *order* of the
+    clbits are pinned here, the latter because a clbit's index is what a sampled bitstring's position
+    means.
+    """
+    hamil = FermionOperator.from_dict({((True, 0), (False, 1)): 1.0, ((True, 1), (False, 0)): 1.0})
+    num_modes = 2
+    circ = FermionicCircuit(num_modes)
+    circ.append(Evolution(num_modes, hamil, time=0.5), circ.modes)
+    creg = ClassicalRegister(2, "c")
+    circ._inner.add_register(creg)
+    # there is deliberately no public route to a loose clbit, hence reaching through ``_inner``
+    loose = Clbit()
+    circ._inner.add_bits([loose])
+
+    synth = F2QSynthesis()
+    synth.methods["Evolution"] = MapperFnEvolutionSynthesis(jordan_wigner)
+
+    pm = MultiStagePassManager(
+        input=FermionicCircuitToDAG(),
+        layout=TrivialF2QLayout(),
+        synthesis=synth,
+        output=QuantumDAGToCircuit(),
+    )
+
+    qu_circ = pm.run(circ)
+    assert qu_circ.num_clbits == 3
+    assert any(reg.name == "c" and len(reg) == 2 for reg in qu_circ.cregs)
+    assert qu_circ.find_bit(loose).index == 2

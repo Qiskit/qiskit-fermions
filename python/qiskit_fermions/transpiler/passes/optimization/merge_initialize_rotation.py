@@ -148,7 +148,10 @@ class MergeSlaterDeterminantPreparation(FermionicDAGCircuitPass):
                 for gate, modes in replacements[node]:
                     out_dag.apply_operation_back(gate, qargs=[register[m] for m in modes])
                 continue
-            out_dag.apply_operation_back(node.op, qargs=node.qargs)
+            # Forward ``cargs``: a copied-through node may carry classical bits (a
+            # ``FermionicMeasure`` carries the bit it writes into), and ``apply_operation_back``
+            # silently defaults to none, which would drop the measurement's target.
+            out_dag.apply_operation_back(node.op, qargs=node.qargs, cargs=node.cargs)
 
         return out_dag
 

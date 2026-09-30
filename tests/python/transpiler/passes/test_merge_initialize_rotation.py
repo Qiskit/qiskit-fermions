@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
-from qiskit import QuantumRegister
+from qiskit import ClassicalRegister, QuantumRegister
 from qiskit.dagcircuit import DAGCircuit
 from qiskit.passmanager import MultiStagePassManager
 from qiskit.quantum_info import Statevector
@@ -169,6 +169,50 @@ def test_no_merge_across_barrier():
     assert _merge(circ) == [
         ("InitializeModes", [0, 1]),
         ("barrier", [0, 1]),
+        ("OrbitalRotation", [0, 1]),
+    ]
+
+
+def test_copied_node_keeps_its_classical_bits():
+    """A node copied through the pass keeps the classical bits it acts on.
+
+    ``DAGCircuit.apply_operation_back`` defaults ``cargs`` to an empty tuple and does *not* complain
+    when it is omitted, so a pass that forwards only ``qargs`` silently turns a measurement into a
+    zero-clbit one. That corrupts the circuit rather than failing, hence the explicit regression.
+    """
+    circ = FermionicCircuit(2)
+    circ.append(InitializeModes([1, 0]), circ.modes)
+    creg = ClassicalRegister(2, "meas")
+    circ._inner.add_register(creg)
+    for mode, clbit in zip(circ.modes, creg, strict=True):
+        circ._inner.measure(mode, clbit)
+
+    out = MergeSlaterDeterminantPreparation().run(FermionicCircuitToDAG().run(circ))
+
+    measures = [node for node in out.topological_op_nodes() if node.op.name == "measure"]
+    assert len(measures) == 2
+    assert [
+        (out.find_bit(node.qargs[0]).index, out.find_bit(node.cargs[0]).index) for node in measures
+    ] == [(0, 0), (1, 1)]
+
+
+def test_no_merge_across_measurement():
+    """A measurement between the init and the rotation blocks the fusion.
+
+    The fusion requires the rotation to *immediately* follow the initialization. A measurement is an
+    intervening op node, so it breaks that adjacency exactly as a barrier does -- which matters
+    because fusing across a readout would change what the circuit measures.
+    """
+    circ = FermionicCircuit(2)
+    circ.append(InitializeModes([1, 0]), circ.modes)
+    creg = ClassicalRegister(1, "c")
+    circ._inner.add_register(creg)
+    circ._inner.measure(circ.modes[0], creg[0])
+    circ.append(OrbitalRotation(random_unitary(2, seed=1)), circ.modes)
+
+    assert _merge(circ) == [
+        ("InitializeModes", [0, 1]),
+        ("measure", [0]),
         ("OrbitalRotation", [0, 1]),
     ]
 
