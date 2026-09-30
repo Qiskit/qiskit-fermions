@@ -182,6 +182,63 @@ class FermionicCircuit:
         """Directly exposes the inner circuit's :meth:`~qiskit.circuit.QuantumCircuit.draw` method."""
         return self._inner.draw(*args, **kwargs)
 
+    def repeat(self, reps: int, *, insert_barriers: bool = False) -> FermionicCircuit:
+        """Repeats this circuit ``reps`` times.
+
+        The repetitions are `flattened`: the returned circuit holds this circuit's instructions
+        ``reps`` times in sequence, rather than one gate wrapping the circuit as
+        :external:meth:`~qiskit.circuit.QuantumCircuit.repeat` produces. As a consequence
+        :meth:`count_ops` scales with ``reps``, and :meth:`decompose` decomposes the repeated body
+        rather than peeling off a repetition.
+
+        Flattening also leaves the gates that meet at a repetition boundary adjacent, so the
+        optimization passes can fuse them. Set ``insert_barriers`` to keep the repetitions apart
+        instead, which places a :meth:`barrier` that those passes do not fuse across.
+
+        .. note::
+           This is unrelated to the ``reps`` argument of :class:`.FermionicSuzukiTrotter`, which
+           subdivides a `single` :class:`.Evolution` into more, shorter factors. Repeating a circuit
+           holding one :class:`.Evolution` merely multiplies its total evolution time.
+
+        .. seealso::
+           :ref:`fermionic_circuit_explanation` works through a repeated Trotter step, including the
+           boundary fusion and how to prevent it.
+
+        Args:
+            reps: how often this circuit should be repeated. Repeating it zero times yields an empty
+                circuit, which is the identity.
+            insert_barriers: whether to place a :meth:`barrier` between consecutive repetitions. No
+                barrier is placed after the final repetition, so the returned circuit ends on the same
+                instruction it would without this argument.
+
+        Returns:
+            A new circuit containing ``reps`` repetitions of this circuit.
+
+        Raises:
+            ValueError: if ``reps`` is negative.
+        """
+        if reps < 0:
+            raise ValueError(f"The number of repetitions must be non-negative, but got {reps}.")
+
+        out = FermionicCircuit(len(self.register))
+        out.register = self.register
+        # `copy_empty_like` keeps the register, mode objects, name and metadata of this circuit, so the
+        # repeated circuit differs from it only in the instructions composed in below.
+        out._inner = self._inner.copy_empty_like()
+
+        # NOTE: the repetitions share this circuit's gate instances rather than copying them per
+        # repetition. `QuantumCircuit.compose` only copies operations carrying a
+        # `ParameterExpression`, and no fermionic gate is parameterized in that sense. Sharing is safe
+        # here: the gates expose their configuration read-only (e.g. `Evolution.synthesis`), the
+        # transpiler substitutes nodes instead of mutating operations in place, and a gate's cached
+        # definition is a deterministic function of that configuration.
+        for rep in range(reps):
+            out.compose(self, inplace=True)
+            if insert_barriers and rep != reps - 1:
+                out.barrier()
+
+        return out
+
     def _apply_unitary_(
         self, vec: np.ndarray, norb: int, nelec: int | tuple[int, int], copy: bool
     ) -> np.ndarray:

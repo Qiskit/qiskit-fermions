@@ -21,9 +21,11 @@ from qiskit.circuit import Barrier, CircuitInstruction, QuantumCircuit
 from qiskit.circuit.exceptions import CircuitError
 from qiskit.circuit.library import XGate
 from qiskit_fermions.circuit import FermionicCircuit
-from qiskit_fermions.circuit.library import Evolution
+from qiskit_fermions.circuit.library import Evolution, OrbitalRotation
 from qiskit_fermions.operators import FermionOperator, ann, cre
 from qiskit_fermions.transpiler import FermionicCircuitToDAG
+
+from ..utils import random_unitary
 
 
 def test_invalid_gate():
@@ -201,3 +203,118 @@ def test_compose_too_wide():
 
     with pytest.raises(CircuitError):
         circ.compose(FermionicCircuit(8))
+
+
+def test_repeat():
+    circ = _evolution_circuit()
+
+    repeated = circ.repeat(3)
+
+    assert repeated.count_ops() == {"Evolution": 3, "barrier": 3}
+    assert circ.count_ops() == {"Evolution": 1, "barrier": 1}
+    assert repeated.register is circ.register
+    assert repeated.modes == circ.modes
+
+
+def test_repeat_once():
+    circ = _evolution_circuit()
+
+    repeated = circ.repeat(1)
+
+    assert repeated is not circ
+    assert repeated.count_ops() == circ.count_ops() == {"Evolution": 1, "barrier": 1}
+    assert _times_and_modes(repeated) == _times_and_modes(circ)
+
+
+def test_repeat_zero():
+    """Repeating zero times yields an empty circuit, which is the identity."""
+    circ = _evolution_circuit()
+
+    repeated = circ.repeat(0)
+
+    assert repeated.count_ops() == {}
+    assert repeated.modes == circ.modes
+
+
+def test_repeat_negative():
+    """A negative count is a caller error, rather than silently yielding the identity."""
+    circ = _evolution_circuit()
+
+    with pytest.raises(ValueError):
+        circ.repeat(-1)
+
+
+def test_repeat_empty_circuit():
+    circ = FermionicCircuit(4)
+
+    repeated = circ.repeat(3)
+
+    assert repeated.count_ops() == {}
+    assert len(repeated.register) == 4
+
+
+def test_repeat_preserves_order_and_modes():
+    """Each repetition must replay the instructions in order, on their original modes."""
+    circ = _two_gate_circuit()
+
+    repeated = circ.repeat(3)
+
+    assert _times_and_modes(repeated) == [(0.25, [0, 1]), (0.75, [2, 3])] * 3
+
+
+def test_repeat_preserves_metadata():
+    circ = _evolution_circuit()
+    circ.metadata = {"answer": 42}
+
+    assert circ.repeat(2).metadata == {"answer": 42}
+
+
+def test_repeat_insert_barriers():
+    """Barriers go between repetitions, never after the last one."""
+    circ = _two_gate_circuit()
+
+    repeated = circ.repeat(3, insert_barriers=True)
+
+    assert repeated.count_ops()["barrier"] == 2
+    assert not isinstance(repeated._inner.data[-1].operation, Barrier)
+    # the gates themselves are untouched by the barriers
+    assert _times_and_modes(repeated) == [(0.25, [0, 1]), (0.75, [2, 3])] * 3
+
+
+def test_repeat_insert_barriers_single_repetition():
+    """A single repetition has no interior boundary, so it gets no barrier."""
+    circ = _two_gate_circuit()
+
+    assert "barrier" not in circ.repeat(1, insert_barriers=True).count_ops()
+
+
+def test_repeat_transpiles_through_the_preset_pipeline():
+    """A repeated circuit reaches the fermion-to-qubit stage without extra configuration.
+
+    ``F2QSynthesis`` dispatches on gate name against a fixed plugin set and does not recurse into
+    definitions, so a per-repetition wrapper gate would need its own registered plugin. Flattening
+    keeps the repeated circuit made of gates the preset pipeline already knows.
+    """
+    from qiskit_fermions.transpiler.presets import generate_preset_jw_pass_manager
+
+    # An `OrbitalRotation` is lowered by the Givens decomposition, whose emitted basis gates do not
+    # depend on how Qiskit synthesizes a `PauliEvolutionGate`. An `Evolution` would make this test
+    # track that synthesis choice instead of the scaling it is about.
+    circ = FermionicCircuit(4)
+    circ.append(OrbitalRotation(random_unitary(2, seed=3)), [circ.modes[0], circ.modes[1]])
+
+    # the barriers keep `MergeOrbitalRotations` from fusing the repetitions back into one rotation,
+    # which is what leaves the scaling observable at the qubit level
+    single = generate_preset_jw_pass_manager().run(circ.repeat(1, insert_barriers=True)).count_ops()
+    doubled = (
+        generate_preset_jw_pass_manager().run(circ.repeat(2, insert_barriers=True)).count_ops()
+    )
+
+    # compare the gates the rotation lowers to, without naming them: a barrier is bookkeeping rather
+    # than a lowered gate, and only the repeated circuit carries one
+    single.pop("barrier", None)
+    doubled.pop("barrier", None)
+
+    assert set(single) == set(doubled)
+    for gate, count in single.items():
+        assert doubled[gate] == 2 * count

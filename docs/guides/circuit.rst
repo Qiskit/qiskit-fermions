@@ -69,43 +69,31 @@ assigning group indices to the Hamiltonian terms, you preserve structural
 information that optimization passes can exploit throughout the transpilation
 stack.
 
-.. tab-set::
+.. plot::
+   :context:
+   :nofigs:
+   :include-source:
 
-   .. tab-item:: Python
-      :sync: python
-
-      .. plot::
-         :context:
-         :nofigs:
-         :include-source:
-
-         >>> from qiskit_fermions.circuit import FermionicCircuit
-         >>> from qiskit_fermions.circuit.library import Evolution
-         >>> from qiskit_fermions.operators import FermionOperator, cre, ann
-         >>>
-         >>> # Create a circuit with 4 fermionic modes
-         >>> circuit = FermionicCircuit(4)
-         >>>
-         >>> # Define a simple fermionic Hamiltonian
-         >>> hamiltonian = FermionOperator.from_terms([
-         ...     ([cre(0), ann(2)], 0.5),
-         ...     ([cre(2), ann(0)], 0.5),
-         ...     ([cre(1), ann(3)], 0.5),
-         ...     ([cre(3), ann(1)], 0.5),
-         ... ])
-         >>> # Add some problem structure by grouping our Hamiltonian terms
-         >>> hamiltonian.groups = [0, 0, 1, 1]
-         >>>
-         >>> # Add an evolution gate to implement exp(-i * t * H)
-         >>> evolution = Evolution(4, hamiltonian, time=1.0)
-         >>> circuit.append(evolution, circuit.register)
-
-   .. tab-item:: C
-      :sync: c
-
-      .. code-block:: c
-
-         // The C API for FermionicCircuit is not available yet.
+   >>> from qiskit_fermions.circuit import FermionicCircuit
+   >>> from qiskit_fermions.circuit.library import Evolution
+   >>> from qiskit_fermions.operators import FermionOperator, cre, ann
+   >>>
+   >>> # Create a circuit with 4 fermionic modes
+   >>> circuit = FermionicCircuit(4)
+   >>>
+   >>> # Define a simple fermionic Hamiltonian
+   >>> hamiltonian = FermionOperator.from_terms([
+   ...     ([cre(0), ann(2)], 0.5),
+   ...     ([cre(2), ann(0)], 0.5),
+   ...     ([cre(1), ann(3)], 0.5),
+   ...     ([cre(3), ann(1)], 0.5),
+   ... ])
+   >>> # Add some problem structure by grouping our Hamiltonian terms
+   >>> hamiltonian.groups = [0, 0, 1, 1]
+   >>>
+   >>> # Add an evolution gate to implement exp(-i * t * H)
+   >>> evolution = Evolution(4, hamiltonian, time=1.0)
+   >>> circuit.append(evolution, circuit.register)
 
 .. plot::
    :alt: A simple `FermionicCircuit` with a single time evolution gate.
@@ -164,6 +152,129 @@ Barriers survive the fermion-to-qubit transpilation, so they also constrain the
 qubit-level optimization that follows. The
 :ref:`Transpile fermionic circuits <transpilation_explanation>` guide covers
 that stage.
+
+Repeat a circuit
+----------------
+
+Many algorithms apply the same block of gates many times over. Time evolution is
+the common case: a Trotter step is built once, then repeated to reach the target
+time. Use :meth:`~.FermionicCircuit.repeat` to build the repeated circuit, and
+:meth:`~.FermionicCircuit.compose` to join it to a state preparation prefix.
+
+The example below builds a second-order Trotter step for a Fermi-Hubbard model.
+The step is symmetric: it splits the hopping term into two half-duration
+:class:`.OrbitalRotation` gates surrounding the on-site interaction.
+
+.. plot::
+   :context: close-figs
+   :nofigs:
+   :include-source:
+
+   >>> import scipy.linalg
+   >>> from qiskit_fermions.circuit.library import InitializeModes, OrbitalRotation
+   >>>
+   >>> norb, reps, time = 2, 3, 1.0
+   >>> num_modes = 2 * norb
+   >>> dt = time / reps
+   >>>
+   >>> hopping = np.zeros((norb, norb))
+   >>> hopping[0, 1] = hopping[1, 0] = -1.0
+   >>> interaction = FermionOperator.from_dict(
+   ...     {(cre(p), ann(p), cre(p + norb), ann(p + norb)): 2.0 for p in range(norb)}
+   ... )
+   >>>
+   >>> def rotation(duration):
+   ...     propagator = scipy.linalg.expm(-1j * duration * hopping)
+   ...     # the same rotation acts on the alpha and beta halves of the register
+   ...     return scipy.linalg.block_diag(propagator, propagator)
+   >>>
+   >>> trotter_step = FermionicCircuit(num_modes)
+   >>> trotter_step.append(OrbitalRotation(rotation(dt / 2)), trotter_step.modes)
+   >>> trotter_step.append(
+   ...     Evolution(num_modes, interaction, dt, atomic=True), trotter_step.modes
+   ... )
+   >>> trotter_step.append(OrbitalRotation(rotation(dt / 2)), trotter_step.modes)
+
+Repeating the step and composing it onto a Hartree-Fock reference gives the full
+evolution:
+
+.. plot::
+   :context: close-figs
+   :nofigs:
+   :include-source:
+
+   >>> evolution = FermionicCircuit(num_modes)
+   >>> evolution.append(InitializeModes([True, False, True, False]), evolution.modes)
+   >>> evolution.compose(trotter_step.repeat(reps), inplace=True)
+   >>> evolution.count_ops()["OrbitalRotation"]
+   6
+
+.. plot::
+   :alt: A `FermionicCircuit` with repeated steps.
+   :context: close-figs
+
+   >>> evolution.draw("mpl", fold=-1)
+   <Figure size ... with 1 Axes>
+
+The repetitions are flattened into the returned circuit rather than wrapped in a
+single gate, so :meth:`~.FermionicCircuit.count_ops` counts two rotations per
+step. That flattening is what makes the redundancy at the step boundaries
+visible to the transpiler: the trailing half-duration rotation of one step and
+the leading one of the next are adjacent, so
+:class:`.MergeOrbitalRotations` combines them into a single rotation.
+
+.. plot::
+   :context: close-figs
+   :nofigs:
+   :include-source:
+
+   >>> from qiskit_fermions.transpiler import FermionicPassManager
+   >>> from qiskit_fermions.transpiler.passes import MergeOrbitalRotations
+   >>>
+   >>> merged = FermionicPassManager([MergeOrbitalRotations()]).run(evolution)
+   >>> merged.count_ops()["OrbitalRotation"]
+   4
+
+.. plot::
+   :alt: A `FermionicCircuit` with repeated steps and merged orbital rotations.
+   :context: close-figs
+
+   >>> merged.draw("mpl", fold=-1)
+   <Figure size ... with 1 Axes>
+
+The result costs one rotation per step plus one, which is what you get by fusing
+those half-steps by hand. Writing the step in its natural symmetric form and
+repeating it produces the same circuit, so the fusion is left to the
+optimization stage.
+
+When you need the repetitions kept apart, pass ``insert_barriers=True`` to place
+a :meth:`~.FermionicCircuit.barrier` between them. The optimization passes do
+not fuse gates across a barrier, so every rotation survives:
+
+.. plot::
+   :context: close-figs
+   :nofigs:
+   :include-source:
+
+   >>> separated = trotter_step.repeat(reps, insert_barriers=True)
+   >>> FermionicPassManager([MergeOrbitalRotations()]).run(separated).count_ops()[
+   ...     "OrbitalRotation"
+   ... ]
+   6
+
+.. plot::
+   :alt: A `FermionicCircuit` with repeated steps separated by barriers.
+   :context: close-figs
+
+   >>> separated.draw("mpl", fold=-1)
+   <Figure size ... with 1 Axes>
+
+.. note::
+   The ``reps`` argument of :class:`.FermionicSuzukiTrotter` is a different
+   concept. It subdivides a `single` :class:`.Evolution` gate into more, shorter
+   factors, whereas :meth:`~.FermionicCircuit.repeat` duplicates whole circuits.
+   Repeating a circuit that holds one :class:`.Evolution` only multiplies its
+   total evolution time.
 
 Transpile fermionic circuits
 ----------------------------

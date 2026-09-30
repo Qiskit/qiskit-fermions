@@ -1,0 +1,20 @@
+---
+features:
+  - |
+    Added :meth:`.FermionicCircuit.repeat`, which returns a new circuit holding a given number of
+    repetitions of an existing one::
+
+        trotterized = trotter_step.repeat(reps)
+
+    The repetitions are flattened rather than wrapped into a single gate, so
+    :meth:`~.FermionicCircuit.count_ops` scales with the number of repetitions and
+    :meth:`~.FermionicCircuit.decompose` decomposes the repeated body rather than peeling off one
+    repetition. This is what lets the optimization stage act across the repetition boundary: a
+    symmetric Trotter step that ends and begins with half-duration orbital rotations leaves two
+    rotations per step once repeated, which :class:`.MergeOrbitalRotations` then fuses into one per
+    step plus one. Writing the step naively and repeating it therefore gives the same circuit as
+    fusing those boundaries by hand.
+
+    Pass ``insert_barriers=True`` to place a :meth:`~.FermionicCircuit.barrier` between consecutive
+    repetitions, which keeps that fusion from happening. No barrier is placed after the final
+    repetition.
