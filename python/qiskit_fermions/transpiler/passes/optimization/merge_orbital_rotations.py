@@ -68,7 +68,8 @@ class MergeOrbitalRotations(FermionicDAGCircuitPass):
             dag: the input circuit with fermion-based instructions. Only
                 :class:`~qiskit.dagcircuit.DAGOpNode` with :class:`.FermionicGate` instances as their
                 :attr:`~qiskit.dagcircuit.DAGOpNode.op` are supported, plus
-                :class:`~qiskit.circuit.library.Barrier`, which is carried through untouched.
+                :class:`~qiskit.circuit.library.Barrier` and :class:`.FermionicMeasure`, which are
+                carried through untouched (a measurement keeps the classical bit it writes into).
 
         Returns:
             The output circuit which is still acting on a fermionic register.

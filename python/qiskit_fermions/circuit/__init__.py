@@ -73,7 +73,8 @@ FermionicDAGCircuit: TypeAlias = DAGCircuit
 
 Although this does not really give us any functional guarantees, it serves to better document the
 API contract that instances of this type only contain circuit instructions of type
-:class:`.FermionicGate` or :class:`~qiskit.circuit.library.Barrier`.
+:class:`.FermionicInstruction` (i.e. any :class:`.FermionicGate` or a :class:`.FermionicMeasure`) or
+:class:`~qiskit.circuit.library.Barrier`.
 """
 
 # NOTE: we must explicitly define the type aliases _before_ the following imports to ensure that
