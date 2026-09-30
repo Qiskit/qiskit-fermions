@@ -39,6 +39,7 @@ the :mod:`~qiskit_fermions.circuit.library` of :class:`.FermionicGate` implement
    :toctree: ../stubs/
 
    FermionicCircuit
+   FermionicInstruction
    FermionicGate
 """
 
@@ -80,11 +81,13 @@ API contract that instances of this type only contain circuit instructions of ty
 # ruff: noqa: E402
 from .fermionic_circuit import FermionicCircuit
 from .fermionic_gate import FermionicGate
+from .fermionic_instruction import FermionicInstruction
 
 __all__ = [
     "FermionicCircuit",
     "FermionicDAGCircuit",
     "FermionicGate",
+    "FermionicInstruction",
     "FermionicMode",
     "FermionicRegister",
     "FermionicSpecifier",

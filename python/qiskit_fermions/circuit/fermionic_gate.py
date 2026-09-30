@@ -14,20 +14,24 @@
 
 from __future__ import annotations
 
-import numbers
 from typing import TYPE_CHECKING, cast
 
 from qiskit.circuit import Gate
+
+from .fermionic_instruction import FermionicInstruction
 
 if TYPE_CHECKING:
     import numpy as np
 
 
-class FermionicGate(Gate):
+class FermionicGate(FermionicInstruction, Gate):
     """The base class for all fermionic gates.
 
-    To ensure consistency only subclasses of this gate class can be added to instances of
-    :class:`.FermionicCircuit`. As such, this class (mostly) serves as a type (for the time being).
+    This is the `unitary` fermionic instruction: it adds the :class:`~qiskit.circuit.Gate` interface
+    on top of :class:`.FermionicInstruction`, from which it inherits :attr:`~.num_modes`. Almost every
+    fermionic operation belongs here; subclass :class:`.FermionicInstruction` directly only for one
+    that cannot be a gate, such as a measurement. As such, this class (mostly) serves as a type (for
+    the time being).
 
     .. caution::
        Since this is a subclass of :class:`~qiskit.circuit.Gate` the documentation of its methods
@@ -50,27 +54,6 @@ class FermionicGate(Gate):
         if params is None:
             params = []
         super().__init__(name, num_modes, params, label)
-
-    @property
-    def num_modes(self) -> int:
-        """The number of fermionic modes that this gate acts upon."""
-        return cast(int, self._num_qubits)
-
-    @staticmethod
-    def _normalize_nelec(nelec: int | tuple[int, int]) -> int | tuple[int, int]:
-        """Normalizes an integral ``nelec`` to a plain :class:`int`.
-
-        ffsim (and the native FCI kernels) classify the spinless vs. spinful sector with
-        ``isinstance(nelec, int)``, which a numpy integer (e.g. ``np.int64``) fails -- it would be
-        misrouted to the spinful path and crash deeper in. Coercing integral values to ``int`` at the
-        entry points keeps the classification correct; a ``(n_alpha, n_beta)`` tuple is passed through
-        unchanged. Applied at both apply-unitary entry points (this method and
-        :meth:`.FermionicCircuit._apply_unitary_placed_`) since the DAG walk bypasses
-        :meth:`_apply_unitary_`.
-        """
-        if isinstance(nelec, numbers.Integral):
-            return int(nelec)
-        return nelec
 
     def _apply_unitary_(
         self, vec: np.ndarray | None, norb: int, nelec: int | tuple[int, int], copy: bool
