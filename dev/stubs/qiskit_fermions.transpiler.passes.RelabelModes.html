@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>RelabelModes - Qiskit Fermions 0.3.0.dev0+0ce2c1d</title>
+        <title>RelabelModes - Qiskit Fermions 0.3.0.dev0+00031fc</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.3.0.dev0+0ce2c1d</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.3.0.dev0+00031fc</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.3.0.dev0+0ce2c1d</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.3.0.dev0+00031fc</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -280,10 +280,60 @@ mode <code class="docutils literal notranslate"><span class="pre">2</span></code
 once.</p>
 <p class="rubric">Post-processing</p>
 <p>The relabeling reorders the fermionic modes, which in turn influences the fermion-to-qubit
-mapping chosen by a later synthesis stage (and thus the achievable circuit depth). Because the
-mode order changes, any bitstring sampled from the final circuit is expressed in the <em>new</em> mode
-order and must be mapped back to the <em>original</em> order before it can be interpreted. The relabeling that was actually applied is recorded in a
-<code class="docutils literal notranslate"><span class="pre">permutation</span></code> field of the returned <a class="reference internal" href="qiskit_fermions.circuit.FermionicDAGCircuit.html#qiskit_fermions.circuit.FermionicDAGCircuit" title="qiskit_fermions.circuit.FermionicDAGCircuit"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicDAGCircuit</span></code></a>’s
+mapping chosen by a later synthesis stage (and thus the achievable circuit depth). How much work
+that costs you when interpreting sampled bitstrings depends on <em>where</em> you add the measurements.</p>
+<p>The simplest option is to measure on the <a class="reference internal" href="qiskit_fermions.circuit.FermionicCircuit.html#qiskit_fermions.circuit.FermionicCircuit" title="qiskit_fermions.circuit.FermionicCircuit"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicCircuit</span></code></a>, with
+<a class="reference internal" href="qiskit_fermions.circuit.FermionicCircuit.html#qiskit_fermions.circuit.FermionicCircuit.measure_all" title="qiskit_fermions.circuit.FermionicCircuit.measure_all"><code class="xref py py-meth docutils literal notranslate"><span class="pre">FermionicCircuit.measure_all()</span></code></a>, before transpiling. Each measurement then names the mode it
+reads and the classical bit it writes into, and both travel through this pass together: the mode is
+relabeled, the classical bit is not. The sampled bitstring is therefore indexed by the <em>original</em>
+mode and needs <strong>no post-processing at all</strong>:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit.passmanager</span><span class="w"> </span><span class="kn">import</span> <span class="n">MultiStagePassManager</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit.providers.basic_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">BasicSimulator</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.circuit</span><span class="w"> </span><span class="kn">import</span> <span class="n">FermionicCircuit</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.circuit.library</span><span class="w"> </span><span class="kn">import</span> <span class="n">InitializeModes</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.transpiler</span><span class="w"> </span><span class="kn">import</span> <span class="n">FermionicCircuitToDAG</span><span class="p">,</span> <span class="n">QuantumDAGToCircuit</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.transpiler.passes</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+<span class="gp">... </span>    <span class="n">F2QSynthesis</span><span class="p">,</span> <span class="n">F2QSynthesisPluginManager</span><span class="p">,</span> <span class="n">RelabelModes</span><span class="p">,</span> <span class="n">TrivialF2QLayout</span><span class="p">,</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># blocked occupation: spin-up orbitals 0 and 1 and spin-down orbital 0 are occupied</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">circ</span> <span class="o">=</span> <span class="n">FermionicCircuit</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">circ</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">InitializeModes</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]),</span> <span class="n">circ</span><span class="o">.</span><span class="n">modes</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">circ</span><span class="o">.</span><span class="n">barrier</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">circ</span><span class="o">.</span><span class="n">measure_all</span><span class="p">()</span>  <span class="c1"># measure the *fermionic* circuit</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">synth_plugins</span> <span class="o">=</span> <span class="n">F2QSynthesisPluginManager</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">synth</span> <span class="o">=</span> <span class="n">F2QSynthesis</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">synth</span><span class="o">.</span><span class="n">methods</span><span class="p">[</span><span class="s2">"InitializeModes"</span><span class="p">]</span> <span class="o">=</span> <span class="n">synth_plugins</span><span class="o">.</span><span class="n">method</span><span class="p">(</span><span class="s2">"InitializeModes"</span><span class="p">,</span> <span class="s2">"TrivialOccupation"</span><span class="p">)()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">synth</span><span class="o">.</span><span class="n">methods</span><span class="p">[</span><span class="s2">"FermionicMeasure"</span><span class="p">]</span> <span class="o">=</span> <span class="n">synth_plugins</span><span class="o">.</span><span class="n">method</span><span class="p">(</span><span class="s2">"FermionicMeasure"</span><span class="p">,</span> <span class="s2">"TrivialOccupation"</span><span class="p">)()</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pm</span> <span class="o">=</span> <span class="n">MultiStagePassManager</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">init</span><span class="o">=</span><span class="n">FermionicCircuitToDAG</span><span class="p">(),</span>
+<span class="gp">... </span>    <span class="n">optimization</span><span class="o">=</span><span class="n">RelabelModes</span><span class="p">(</span><span class="n">permutation</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">]),</span>
+<span class="gp">... </span>    <span class="n">layout</span><span class="o">=</span><span class="n">TrivialF2QLayout</span><span class="p">(),</span>
+<span class="gp">... </span>    <span class="n">synthesis</span><span class="o">=</span><span class="n">synth</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">output</span><span class="o">=</span><span class="n">QuantumDAGToCircuit</span><span class="p">(),</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">qcirc</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">circ</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">counts</span> <span class="o">=</span> <span class="n">BasicSimulator</span><span class="p">()</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">qcirc</span><span class="p">,</span> <span class="n">shots</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">result</span><span class="p">()</span><span class="o">.</span><span class="n">get_counts</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">counts</span><span class="p">)</span>  <span class="c1"># already in the original blocked ordering</span>
+<span class="go">{'001011': 1}</span>
+</pre></div>
+</div>
+<p>Drawing the two circuits side by side shows what travelled and what did not. The fermionic
+measurements read modes <code class="docutils literal notranslate"><span class="pre">0..5</span></code> in order; after synthesis they sit on permuted qubits, yet each one
+still writes into the classical bit of the mode it measures, so the <code class="docutils literal notranslate"><span class="pre">meas</span></code> labels remain in the
+original order:</p>
+<p>(<a class="reference download internal" download="" href="../_downloads/6a777d4d26ed5ea702e95cd1ec6867ec/qiskit_fermions-transpiler-passes-RelabelModes-2.png"><code class="xref download docutils literal notranslate"><span class="pre">png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/323241f5780652efc6fb87732434a372/qiskit_fermions-transpiler-passes-RelabelModes-2.hires.png"><code class="xref download docutils literal notranslate"><span class="pre">hires.png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/ef09c6e08acf55c7448b3bce04172aff/qiskit_fermions-transpiler-passes-RelabelModes-2.pdf"><code class="xref download docutils literal notranslate"><span class="pre">pdf</span></code></a>)</p>
+<figure class="align-default">
+<img alt="The fermionic circuit and its transpiled form, whose measurements sit on permuted qubits while writing into classical bits that remain in the original mode order." class="plot-directive" src="../_images/qiskit_fermions-transpiler-passes-RelabelModes-2.png" />
+</figure>
+<p>Measuring the transpiled <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumCircuit</span></code></a> instead leaves you to undo the
+relabeling yourself, because those measurements were never part of the fermionic circuit and so
+know nothing about it. The relabeling that was actually applied is recorded in a <code class="docutils literal notranslate"><span class="pre">permutation</span></code>
+field of the returned <a class="reference internal" href="qiskit_fermions.circuit.FermionicDAGCircuit.html#qiskit_fermions.circuit.FermionicDAGCircuit" title="qiskit_fermions.circuit.FermionicDAGCircuit"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicDAGCircuit</span></code></a>’s
 <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.dagcircuit.DAGCircuit#metadata" title="(in Qiskit v2.5)"><code class="xref py py-attr docutils literal notranslate"><span class="pre">metadata</span></code></a>.</p>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
@@ -302,9 +352,10 @@ measured for new mode <code class="docutils literal notranslate"><span class="pr
 <a class="reference internal" href="qiskit_fermions.circuit.FermionicRegister.html#qiskit_fermions.circuit.FermionicRegister" title="qiskit_fermions.circuit.FermionicRegister"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicRegister</span></code></a> modes and Qiskit’s classical bits run in opposite (little-endian)
 order, so the mode-space gather turns into an index negation (<code class="docutils literal notranslate"><span class="pre">~idx</span></code>) followed by a final
 reversal (<code class="docutils literal notranslate"><span class="pre">[::-1]</span></code>) on the counts bitstrings.</p>
-<p>The example below relabels a six-mode system from a blocked spin ordering
-(<code class="docutils literal notranslate"><span class="pre">[u0,</span> <span class="pre">u1,</span> <span class="pre">u2,</span> <span class="pre">d0,</span> <span class="pre">d1,</span> <span class="pre">d2]</span></code>) to an interleaved one (<code class="docutils literal notranslate"><span class="pre">[u0,</span> <span class="pre">d0,</span> <span class="pre">u1,</span> <span class="pre">d1,</span> <span class="pre">u2,</span> <span class="pre">d2]</span></code>), a common
-trick to reduce the implementation depth, and then undoes the relabeling on the sampled counts:</p>
+<p>The example below repeats the six-mode relabeling above, from a blocked spin ordering
+(<code class="docutils literal notranslate"><span class="pre">[u0,</span> <span class="pre">u1,</span> <span class="pre">u2,</span> <span class="pre">d0,</span> <span class="pre">d1,</span> <span class="pre">d2]</span></code>) to an interleaved one (<code class="docutils literal notranslate"><span class="pre">[u0,</span> <span class="pre">d0,</span> <span class="pre">u1,</span> <span class="pre">d1,</span> <span class="pre">u2,</span> <span class="pre">d2]</span></code>) as a common
+trick to reduce the implementation depth, but measures after transpilation, and so has to undo
+the relabeling on the sampled counts:</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit.passmanager</span><span class="w"> </span><span class="kn">import</span> <span class="n">MultiStagePassManager</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit.providers.basic_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">BasicSimulator</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.circuit</span><span class="w"> </span><span class="kn">import</span> <span class="n">FermionicCircuit</span>
@@ -448,7 +499,8 @@ was constructed.</p></li>
 <dd class="field-odd"><p><strong>dag</strong> (<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.dagcircuit.DAGCircuit" title="(in Qiskit v2.5)"><em>DAGCircuit</em></a>) – the input circuit with fermion-based instructions. Only
 <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.dagcircuit.DAGOpNode" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DAGOpNode</span></code></a> with <a class="reference internal" href="qiskit_fermions.circuit.FermionicGate.html#qiskit_fermions.circuit.FermionicGate" title="qiskit_fermions.circuit.FermionicGate"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicGate</span></code></a> instances as their
 <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.dagcircuit.DAGOpNode#op" title="(in Qiskit v2.5)"><code class="xref py py-attr docutils literal notranslate"><span class="pre">op</span></code></a> are supported, plus
-<code class="xref py py-class docutils literal notranslate"><span class="pre">Barrier</span></code>, which is carried through untouched.</p>
+<code class="xref py py-class docutils literal notranslate"><span class="pre">Barrier</span></code> and <a class="reference internal" href="qiskit_fermions.circuit.library.FermionicMeasure.html#qiskit_fermions.circuit.library.FermionicMeasure" title="qiskit_fermions.circuit.library.FermionicMeasure"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicMeasure</span></code></a>, which are
+carried through untouched (a measurement keeps the classical bit it writes into).</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>The output circuit which is still acting on a fermionic register.</p>
@@ -579,7 +631,7 @@ was constructed.</p></li>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=b38faa93"></script>
+</div><script src="../_static/documentation_options.js?v=cacbc11c"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

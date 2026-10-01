@@ -522,10 +522,18 @@ pass:
    optional dependency managed by :data:`.HAS_PYOMO`.
 
 .. important::
-   In order to perform the correct subspace diagonalization, the bitstrings
-   sampled from circuits that were transpiled with the :class:`.RelabelModes`
-   optimization pass must be post-processed based on the ``permutation``
-   information contained in the circuits' metadata!
+   The relabeling changes which mode a given qubit carries, so the subspace
+   diagonalization only gets the right bitstrings if that is accounted for.
+   Where the accounting happens depends on where you measure.
+
+   Add the measurements to the :class:`.FermionicCircuit` with
+   :meth:`.FermionicCircuit.measure_all` before transpiling, and there is nothing
+   to do: each measurement names the mode it reads, so the relabeling carries it
+   along and the sampled bitstrings are indexed by the original mode.
+
+   Measure the transpiled :class:`~qiskit.circuit.QuantumCircuit` instead, and the
+   bitstrings must be post-processed using the ``permutation`` recorded in the
+   circuit's metadata. See the :class:`.RelabelModes` documentation for the recipe.
 
 Next steps
 ^^^^^^^^^^

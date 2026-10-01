@@ -12,10 +12,6 @@
 
   
   
-   .. rubric:: Attributes
-    
-   .. autoattribute:: num_modes
-  
   
   
    .. rubric:: Inherited Attributes
@@ -27,6 +23,7 @@
    .. autoattribute:: mutable
    .. autoattribute:: name
    .. autoattribute:: num_clbits
+   .. autoattribute:: num_modes
    .. autoattribute:: num_qubits
    .. autoattribute:: params
   

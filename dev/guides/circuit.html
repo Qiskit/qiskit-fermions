@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Work with fermionic circuits - Qiskit Fermions 0.3.0.dev0+0ce2c1d</title>
+        <title>Work with fermionic circuits - Qiskit Fermions 0.3.0.dev0+00031fc</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.3.0.dev0+0ce2c1d</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.3.0.dev0+00031fc</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.3.0.dev0+0ce2c1d</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.3.0.dev0+00031fc</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -483,6 +483,38 @@ Repeating a circuit that holds one <a class="reference internal" href="../stubs/
 total evolution time.</p>
 </div>
 </section>
+<section id="measure-fermionic-modes">
+<h2>Measure fermionic modes<a class="headerlink" href="#measure-fermionic-modes" title="Link to this heading">¶</a></h2>
+<p><a class="reference internal" href="../stubs/qiskit_fermions.circuit.FermionicCircuit.html#qiskit_fermions.circuit.FermionicCircuit.measure_all" title="qiskit_fermions.circuit.FermionicCircuit.measure_all"><code class="xref py py-meth docutils literal notranslate"><span class="pre">measure_all()</span></code></a> reads every mode out into a classical bit
+of its own, pairing mode <code class="docutils literal notranslate"><span class="pre">i</span></code> with bit <code class="docutils literal notranslate"><span class="pre">i</span></code>. Use
+<a class="reference internal" href="../stubs/qiskit_fermions.circuit.FermionicCircuit.html#qiskit_fermions.circuit.FermionicCircuit.measure" title="qiskit_fermions.circuit.FermionicCircuit.measure"><code class="xref py py-meth docutils literal notranslate"><span class="pre">measure()</span></code></a> with your own
+<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.ClassicalRegister" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ClassicalRegister</span></code></a> to read out only some of them.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">measured</span> <span class="o">=</span> <span class="n">trotter_step</span><span class="o">.</span><span class="n">measure_all</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">measured</span><span class="o">.</span><span class="n">count_ops</span><span class="p">()[</span><span class="s2">"measure"</span><span class="p">]</span>
+<span class="go">4</span>
+</pre></div>
+</div>
+<p>Passing <code class="docutils literal notranslate"><span class="pre">inplace=False</span></code> returns a measured copy and leaves the original alone,
+which matters because a measurement is not unitary: a circuit carrying one can no
+longer be applied to a state vector, so keep an unmeasured circuit around if you
+also want to simulate it.</p>
+<p>Measuring here, rather than on the transpiled
+<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumCircuit</span></code></a>, is what keeps the sampled bitstrings easy
+to read. A fermionic measurement names the mode it reads, so every stage that
+moves modes around (<a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.RelabelModes.html#qiskit_fermions.transpiler.passes.RelabelModes" title="qiskit_fermions.transpiler.passes.RelabelModes"><code class="xref py py-class docutils literal notranslate"><span class="pre">RelabelModes</span></code></a> at the fermionic level, layout and
+routing at the qubit level) carries the measurement along with it, and the
+bitstring stays indexed by the mode you asked about.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Unlike <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit#measure_all" title="(in Qiskit v2.5)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">measure_all()</span></code></a>, no
+<a class="reference internal" href="../stubs/qiskit_fermions.circuit.FermionicCircuit.html#qiskit_fermions.circuit.FermionicCircuit.barrier" title="qiskit_fermions.circuit.FermionicCircuit.barrier"><code class="xref py py-meth docutils literal notranslate"><span class="pre">barrier()</span></code></a> is inserted before the measurements. Call
+<a class="reference internal" href="../stubs/qiskit_fermions.circuit.FermionicCircuit.html#qiskit_fermions.circuit.FermionicCircuit.barrier" title="qiskit_fermions.circuit.FermionicCircuit.barrier"><code class="xref py py-meth docutils literal notranslate"><span class="pre">barrier()</span></code></a> yourself first if you want one there.</p>
+<p>Whether a measured bit means what you expect depends on the fermion-to-qubit
+encoding, which is chosen during transpilation rather than here. Under an
+occupation-basis encoding such as Jordan-Wigner each mode is carried by one
+qubit and the bit is that mode’s occupation; see <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.FermionicMeasure.html#qiskit_fermions.circuit.library.FermionicMeasure" title="qiskit_fermions.circuit.library.FermionicMeasure"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicMeasure</span></code></a>.</p>
+</div>
+</section>
 <section id="transpile-fermionic-circuits">
 <h2>Transpile fermionic circuits<a class="headerlink" href="#transpile-fermionic-circuits" title="Link to this heading">¶</a></h2>
 <p>To implement the quantum algorithm represented by your
@@ -568,6 +600,7 @@ spin semantics only at simulation time.</p></li>
 <li><a class="reference internal" href="#build-a-fermionic-circuit">Build a fermionic circuit</a></li>
 <li><a class="reference internal" href="#keep-gates-apart-with-a-barrier">Keep gates apart with a barrier</a></li>
 <li><a class="reference internal" href="#repeat-a-circuit">Repeat a circuit</a></li>
+<li><a class="reference internal" href="#measure-fermionic-modes">Measure fermionic modes</a></li>
 <li><a class="reference internal" href="#transpile-fermionic-circuits">Transpile fermionic circuits</a></li>
 <li><a class="reference internal" href="#next-steps">Next steps</a></li>
 </ul>
@@ -581,7 +614,7 @@ spin semantics only at simulation time.</p></li>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=b38faa93"></script>
+</div><script src="../_static/documentation_options.js?v=cacbc11c"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

@@ -102,18 +102,27 @@
 
   
 
+  
+
+  
+
+  
+
 
 
   
   
    .. rubric:: Methods
     
+   .. automethod:: add_register
    .. automethod:: append
    .. automethod:: barrier
    .. automethod:: compose
    .. automethod:: count_ops
    .. automethod:: decompose
    .. automethod:: draw
+   .. automethod:: measure
+   .. automethod:: measure_all
    .. automethod:: repeat
   
   
