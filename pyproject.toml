@@ -133,6 +133,7 @@ dev = [
 
 [project.entry-points."qiskit_fermions.transpiler.synthesis"]
 "Evolution.MapperFn" = "qiskit_fermions.transpiler.passes.synthesis:MapperFnEvolutionSynthesis"
+"FermionicMeasure.TrivialOccupation" = "qiskit_fermions.transpiler.passes.synthesis:TrivialOccupationFermionicMeasureSynthesis"
 "InitializeModes.TrivialOccupation" = "qiskit_fermions.transpiler.passes.synthesis:TrivialOccupationInitializeModesSynthesis"
 "OrbitalRotation.GivensDecomposition" = "qiskit_fermions.transpiler.passes.synthesis:GivensDecompositionOrbitalRotationSynthesis"
 "PrepareSlaterDeterminant.GivensDecompositionSlater" = "qiskit_fermions.transpiler.passes.synthesis:GivensDecompositionSlaterDeterminantSynthesis"

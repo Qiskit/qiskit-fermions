@@ -100,15 +100,18 @@ class MergeSlaterDeterminantPreparation(FermionicDAGCircuitPass):
         :class:`.InitializeModes`-then-:class:`.OrbitalRotation` pattern into
         :class:`.PrepareSlaterDeterminant` gate(s) and copying every other node through unchanged.
 
-        The pattern requires the rotation to immediately follow the initialization, so a
-        :class:`~qiskit.circuit.library.Barrier` between the two prevents the fusion. Place a barrier
-        there to keep the initialization and the rotation as separate gates.
+        The pattern requires the rotation to immediately follow the initialization, so any node
+        between the two prevents the fusion. That is a :class:`~qiskit.circuit.library.Barrier`, which
+        is the way to keep the initialization and the rotation as separate gates on purpose, but
+        equally a :class:`.FermionicMeasure`, which must not be fused across since that would change
+        what the circuit reads out.
 
         Args:
             dag: the input circuit with fermion-based instructions. Only
                 :class:`~qiskit.dagcircuit.DAGOpNode` with :class:`.FermionicGate` instances as their
                 :attr:`~qiskit.dagcircuit.DAGOpNode.op` are supported, plus
-                :class:`~qiskit.circuit.library.Barrier`, which is carried through untouched.
+                :class:`~qiskit.circuit.library.Barrier` and :class:`.FermionicMeasure`, which are
+                carried through untouched (a measurement keeps the classical bit it writes into).
 
         Returns:
             The output circuit which is still acting on a fermionic register.
@@ -148,7 +151,10 @@ class MergeSlaterDeterminantPreparation(FermionicDAGCircuitPass):
                 for gate, modes in replacements[node]:
                     out_dag.apply_operation_back(gate, qargs=[register[m] for m in modes])
                 continue
-            out_dag.apply_operation_back(node.op, qargs=node.qargs)
+            # Forward ``cargs``: a copied-through node may carry classical bits (a
+            # ``FermionicMeasure`` carries the bit it writes into), and ``apply_operation_back``
+            # silently defaults to none, which would drop the measurement's target.
+            out_dag.apply_operation_back(node.op, qargs=node.qargs, cargs=node.cargs)
 
         return out_dag
 

@@ -13,6 +13,7 @@
 """Synthesis passes."""
 
 from .evolution import MapperFnEvolutionSynthesis, group_wise, simplify
+from .fermionic_measure import TrivialOccupationFermionicMeasureSynthesis
 from .initialize_modes import TrivialOccupationInitializeModesSynthesis
 from .orbital_rotation import GivensDecompositionOrbitalRotationSynthesis
 from .plugin import F2QSynthesisPlugin, F2QSynthesisPluginManager
@@ -27,6 +28,7 @@ __all__ = [
     "GivensDecompositionOrbitalRotationSynthesis",
     "GivensDecompositionSlaterDeterminantSynthesis",
     "MapperFnEvolutionSynthesis",
+    "TrivialOccupationFermionicMeasureSynthesis",
     "TrivialOccupationInitializeModesSynthesis",
     "group_wise",
     "simplify",

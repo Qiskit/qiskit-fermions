@@ -393,10 +393,16 @@ state only) to :math:`D - 1`.
    ...     return circuit
 
 .. note::
-   The fermionic circuit carries no measurements. Measurement is a qubit-level concept, so add it
-   after transpilation, once the fermionic gates have been synthesized onto qubits. Convenience
-   ``measure`` instructions on :class:`.FermionicCircuit` might be introduced in the
-   `future <https://github.com/Qiskit/qiskit-fermions/issues/219>`_.
+   The circuits built here carry no measurements yet, because the same fermionic circuits also drive
+   the exact simulation in step 6, and a measurement is not a unitary operation. Step 5 adds them with
+   :meth:`.FermionicCircuit.measure_all`, which reads mode ``i`` into classical bit ``i``.
+
+   Prefer measuring the *fermionic* circuit over the transpiled one. A fermionic measurement names the
+   mode it reads, so layout and routing carry it along with the qubit that mode ended up on, and the
+   sampled bitstring is indexed by mode. Measuring the transpiled circuit instead leaves you to undo
+   :meth:`~qiskit.transpiler.TranspileLayout.final_index_layout` yourself, and silently returns
+   permuted results if you forget. This relies on the occupation-basis Jordan-Wigner encoding the
+   preset uses, where each mode is carried by one qubit.
 
 5. Transpile to qubit circuits
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -412,7 +418,8 @@ keyword arguments are forwarded to the qubit stage; pass ``optimization_level=0`
 unoptimized picture of the synthesized depth. Generating the full family of Krylov circuits is then
 a loop over the Krylov dimension. Keep the untranspiled :class:`.FermionicCircuit`\ s alongside
 the transpiled qubit circuits. The fermionic ones drive the exact (statevector) simulation in step
-6, while the transpiled ones (with measurements added) are what a backend would execute.
+6, so they must stay measurement-free; ``measure_all(inplace=False)`` returns a measured copy to
+transpile and leaves the original untouched, and that copy is what a backend would execute.
 
 .. plot::
    :context:
@@ -428,9 +435,8 @@ the transpiled qubit circuits. The fermionic ones drive the exact (statevector) 
    ...     for dim in range(krylov_dim):
    ...         fermionic_circuit = krylov_circuit(dim)
    ...         fermionic_circuits.append(fermionic_circuit)
-   ...         circuit = pass_manager.run(fermionic_circuit)
-   ...         circuit.measure_all()
-   ...         circuits.append(circuit)
+   ...         measured = fermionic_circuit.measure_all(inplace=False)
+   ...         circuits.append(pass_manager.run(measured))
    ...     return fermionic_circuits, circuits
    ...
    >>> krylov_dim = 5

@@ -1,0 +1,37 @@
+---
+features:
+  - |
+    Added measurement support to :class:`.FermionicCircuit`. Use
+    :meth:`~.FermionicCircuit.measure_all` to read every mode into a classical bit of its own (mode
+    ``i`` into bit ``i``), or :meth:`~.FermionicCircuit.measure` together with the new
+    :meth:`~.FermionicCircuit.add_register` to read out only some of them::
+
+        circuit.measure_all()                       # adds a "meas" register
+        measured = circuit.measure_all(inplace=False)  # or leave the original alone
+
+        creg = ClassicalRegister(2, "c")            # or choose the bits yourself
+        circuit.add_register(creg)
+        circuit.measure([0, 2], creg)
+
+    Measure the :class:`.FermionicCircuit` rather than the transpiled
+    :class:`~qiskit.circuit.QuantumCircuit`: a fermionic measurement names the mode it reads, so every
+    stage that moves modes around (:class:`.RelabelModes`, and the qubit stage's layout and routing)
+    carries the measurement with it, and the sampled bitstrings stay indexed by the original mode.
+    Measuring after transpilation instead requires undoing
+    :meth:`~qiskit.transpiler.TranspileLayout.final_index_layout`, and the ``permutation`` metadata if
+    :class:`.RelabelModes` ran, by hand.
+
+    .. note::
+       Unlike :external:meth:`~qiskit.circuit.QuantumCircuit.measure_all`, no barrier is inserted
+       before the measurements. Call :meth:`~.FermionicCircuit.barrier` first if you want one.
+
+    A measured circuit can no longer be applied to a state vector, since a measurement is not unitary,
+    so keep an unmeasured circuit (or use ``inplace=False``) if you also want to simulate it.
+  - |
+    Added :class:`.FermionicMeasure`, the instruction :meth:`.FermionicCircuit.measure` appends, and
+    :class:`.TrivialOccupationFermionicMeasureSynthesis`, which lowers it to a qubit measurement. The
+    plugin is registered under the ``FermionicMeasure.TrivialOccupation`` entry point and is part of
+    :func:`.generate_preset_jw_pass_manager`. Like
+    :class:`.TrivialOccupationInitializeModesSynthesis`, it assumes an occupation-basis encoding with a
+    1-to-1 mapping of modes to qubits; another encoding needs its own plugin registered under
+    ``FermionicMeasure``.

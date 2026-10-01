@@ -19,6 +19,7 @@ from pathlib import Path
 
 import numpy as np
 import pytest
+from qiskit import ClassicalRegister
 from qiskit.quantum_info import SparsePauliOp
 from qiskit_fermions.circuit import FermionicCircuit
 from qiskit_fermions.circuit.library import (
@@ -29,7 +30,7 @@ from qiskit_fermions.circuit.library import (
 )
 from qiskit_fermions.circuit.library.synthesis import FermionicSuzukiTrotter
 from qiskit_fermions.mappers.library import jordan_wigner
-from qiskit_fermions.operators import FermionOperator
+from qiskit_fermions.operators import FermionOperator, ann, cre
 from qiskit_fermions.operators.library import FCIDump
 from qiskit_fermions.operators.terms.filtering import filter_diagonal_terms
 from qiskit_fermions.operators.terms.grouping import group_terms_by_electronic_structure
@@ -233,6 +234,35 @@ def test_qdrift_preserves_non_evolution_gates():
 
     qdrift_circ = pm.run(circ)
     assert qdrift_circ.count_ops() == {"InitializeModes": 1, "Evolution": num_terms}
+
+
+def test_qdrift_preserves_classical_bits_of_copied_gates():
+    """A non-``Evolution`` node is copied through, and must keep the classical bits it acts on.
+
+    ``DAGCircuit.apply_operation_back`` defaults ``cargs`` to empty without complaining, so forwarding
+    only ``qargs`` would silently strip a measurement's target rather than fail.
+    """
+    num_modes = 2
+    hamil = FermionOperator.from_dict({(cre(0), ann(1)): 1.0, (cre(1), ann(0)): 1.0})
+    hamil.groups = None
+    circ = FermionicCircuit(num_modes)
+    circ.append(Evolution(num_modes, hamil, time=1.5), circ.modes)
+    creg = ClassicalRegister(num_modes, "meas")
+    circ._inner.add_register(creg)
+    for mode, clbit in zip(circ.modes, creg, strict=True):
+        circ._inner.measure(mode, clbit)
+
+    qdrift_circ = FermionicPassManager(QDriftTrotterization(2, rng=7)).run(circ)
+
+    measures = [instr for instr in qdrift_circ._inner.data if instr.operation.name == "measure"]
+    assert len(measures) == num_modes
+    assert [
+        (
+            qdrift_circ._inner.find_bit(instr.qubits[0]).index,
+            qdrift_circ._inner.find_bit(instr.clbits[0]).index,
+        )
+        for instr in measures
+    ] == [(0, 0), (1, 1)]
 
 
 def test_qdrift_filter_trivial_only_emits_coupling_terms():

@@ -276,6 +276,45 @@ not fuse gates across a barrier, so every rotation survives:
    Repeating a circuit that holds one :class:`.Evolution` only multiplies its
    total evolution time.
 
+Measure fermionic modes
+-----------------------
+
+:meth:`~.FermionicCircuit.measure_all` reads every mode out into a classical bit
+of its own, pairing mode ``i`` with bit ``i``. Use
+:meth:`~.FermionicCircuit.measure` with your own
+:class:`~qiskit.circuit.ClassicalRegister` to read out only some of them.
+
+.. plot::
+   :context: close-figs
+   :nofigs:
+   :include-source:
+
+   >>> measured = trotter_step.measure_all(inplace=False)
+   >>> measured.count_ops()["measure"]
+   4
+
+Passing ``inplace=False`` returns a measured copy and leaves the original alone,
+which matters because a measurement is not unitary: a circuit carrying one can no
+longer be applied to a state vector, so keep an unmeasured circuit around if you
+also want to simulate it.
+
+Measuring here, rather than on the transpiled
+:class:`~qiskit.circuit.QuantumCircuit`, is what keeps the sampled bitstrings easy
+to read. A fermionic measurement names the mode it reads, so every stage that
+moves modes around (:class:`.RelabelModes` at the fermionic level, layout and
+routing at the qubit level) carries the measurement along with it, and the
+bitstring stays indexed by the mode you asked about.
+
+.. note::
+   Unlike :external:meth:`~qiskit.circuit.QuantumCircuit.measure_all`, no
+   :meth:`~.FermionicCircuit.barrier` is inserted before the measurements. Call
+   :meth:`~.FermionicCircuit.barrier` yourself first if you want one there.
+
+   Whether a measured bit means what you expect depends on the fermion-to-qubit
+   encoding, which is chosen during transpilation rather than here. Under an
+   occupation-basis encoding such as Jordan-Wigner each mode is carried by one
+   qubit and the bit is that mode's occupation; see :class:`.FermionicMeasure`.
+
 Transpile fermionic circuits
 ----------------------------
 

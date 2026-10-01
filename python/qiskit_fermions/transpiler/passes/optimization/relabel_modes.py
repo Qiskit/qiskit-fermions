@@ -62,10 +62,93 @@ class RelabelModes(FermionicDAGCircuitPass):
     .. rubric:: Post-processing
 
     The relabeling reorders the fermionic modes, which in turn influences the fermion-to-qubit
-    mapping chosen by a later synthesis stage (and thus the achievable circuit depth). Because the
-    mode order changes, any bitstring sampled from the final circuit is expressed in the *new* mode
-    order and must be mapped back to the *original* order before it can be interpreted. The relabeling that was actually applied is recorded in a
-    ``permutation`` field of the returned :class:`.FermionicDAGCircuit`'s
+    mapping chosen by a later synthesis stage (and thus the achievable circuit depth). How much work
+    that costs you when interpreting sampled bitstrings depends on *where* you add the measurements.
+
+    The simplest option is to measure on the :class:`.FermionicCircuit`, with
+    :meth:`.FermionicCircuit.measure_all`, before transpiling. Each measurement then names the mode it
+    reads and the classical bit it writes into, and both travel through this pass together: the mode is
+    relabeled, the classical bit is not. The sampled bitstring is therefore indexed by the *original*
+    mode and needs **no post-processing at all**:
+
+    .. plot::
+       :context:
+       :nofigs:
+       :include-source:
+
+       >>> from qiskit.passmanager import MultiStagePassManager
+       >>> from qiskit.providers.basic_provider import BasicSimulator
+       >>> from qiskit_fermions.circuit import FermionicCircuit
+       >>> from qiskit_fermions.circuit.library import InitializeModes
+       >>> from qiskit_fermions.transpiler import FermionicCircuitToDAG, QuantumDAGToCircuit
+       >>> from qiskit_fermions.transpiler.passes import (
+       ...     F2QSynthesis, F2QSynthesisPluginManager, RelabelModes, TrivialF2QLayout,
+       ... )
+       >>>
+       >>> # blocked occupation: spin-up orbitals 0 and 1 and spin-down orbital 0 are occupied
+       >>> circ = FermionicCircuit(6)
+       >>> circ.append(InitializeModes([1, 1, 0, 1, 0, 0]), circ.modes)
+       >>> circ.barrier()
+       >>> circ.measure_all()  # measure the *fermionic* circuit
+       >>>
+       >>> synth_plugins = F2QSynthesisPluginManager()
+       >>> synth = F2QSynthesis()
+       >>> synth.methods["InitializeModes"] = synth_plugins.method("InitializeModes", "TrivialOccupation")()
+       >>> synth.methods["FermionicMeasure"] = synth_plugins.method("FermionicMeasure", "TrivialOccupation")()
+       >>>
+       >>> pm = MultiStagePassManager(
+       ...     init=FermionicCircuitToDAG(),
+       ...     optimization=RelabelModes(permutation=[0, 2, 4, 1, 3, 5]),
+       ...     layout=TrivialF2QLayout(),
+       ...     synthesis=synth,
+       ...     output=QuantumDAGToCircuit(),
+       ... )
+       >>>
+       >>> qcirc = pm.run(circ)
+       >>>
+       >>> counts = BasicSimulator().run(qcirc, shots=1).result().get_counts()
+       >>> print(counts)  # already in the original blocked ordering
+       {'001011': 1}
+
+    Drawing the two circuits side by side shows what travelled and what did not. The fermionic
+    measurements read modes ``0..5`` in order; after synthesis they sit on permuted qubits, yet each one
+    still writes into the classical bit of the mode it measures, so the ``meas`` labels remain in the
+    original order:
+
+    .. plot::
+       :context:
+       :alt: The fermionic circuit and its transpiled form, whose measurements sit on permuted qubits
+             while writing into classical bits that remain in the original mode order.
+
+       >>> from matplotlib import pyplot as plt
+       >>>
+       >>> def natural_size(circuit):
+       ...     # the figure size Qiskit picks for a circuit on its own (discard the probe figure)
+       ...     probe = circuit.draw("mpl", fold=-1)
+       ...     size = probe.get_size_inches()
+       ...     plt.close(probe)
+       ...     return size
+       >>>
+       >>> # The drawer keeps an equal data aspect on the axes it is given, which is what keeps the
+       >>> # gates square and the glyphs legible. An axes box whose proportions differ from the
+       >>> # circuit's therefore letterboxes the drawing, and that whitespace sits *inside* the axes
+       >>> # where `tight_layout` cannot reclaim it -- so size each half naturally instead.
+       >>> (fw, fh), (qw, qh) = natural_size(circ), natural_size(qcirc)
+       >>> fig, (fermionic, transpiled) = plt.subplots(1, 2, figsize=(fw + qw, max(fh, qh)))
+       >>> circ.draw("mpl", fold=-1, ax=fermionic)
+       >>> qcirc.draw("mpl", fold=-1, ax=transpiled)
+       >>> fermionic.set_title("fermionic")
+       Text(...)
+       >>> transpiled.set_title("transpiled")
+       Text(...)
+       >>> fig.tight_layout()  # trims the padding *around* the axes; the figsize fixed what is inside
+       >>> fig
+       <Figure size ... with 2 Axes>
+
+    Measuring the transpiled :class:`~qiskit.circuit.QuantumCircuit` instead leaves you to undo the
+    relabeling yourself, because those measurements were never part of the fermionic circuit and so
+    know nothing about it. The relabeling that was actually applied is recorded in a ``permutation``
+    field of the returned :class:`.FermionicDAGCircuit`'s
     :attr:`~qiskit.dagcircuit.DAGCircuit.metadata`.
 
     .. important::
@@ -86,9 +169,10 @@ class RelabelModes(FermionicDAGCircuitPass):
     order, so the mode-space gather turns into an index negation (``~idx``) followed by a final
     reversal (``[::-1]``) on the counts bitstrings.
 
-    The example below relabels a six-mode system from a blocked spin ordering
-    (``[u0, u1, u2, d0, d1, d2]``) to an interleaved one (``[u0, d0, u1, d1, u2, d2]``), a common
-    trick to reduce the implementation depth, and then undoes the relabeling on the sampled counts:
+    The example below repeats the six-mode relabeling above, from a blocked spin ordering
+    (``[u0, u1, u2, d0, d1, d2]``) to an interleaved one (``[u0, d0, u1, d1, u2, d2]``) as a common
+    trick to reduce the implementation depth, but measures after transpilation, and so has to undo
+    the relabeling on the sampled counts:
 
     .. doctest::
 
@@ -297,7 +381,8 @@ class RelabelModes(FermionicDAGCircuitPass):
             dag: the input circuit with fermion-based instructions. Only
                 :class:`~qiskit.dagcircuit.DAGOpNode` with :class:`.FermionicGate` instances as their
                 :attr:`~qiskit.dagcircuit.DAGOpNode.op` are supported, plus
-                :class:`~qiskit.circuit.library.Barrier`, which is carried through untouched.
+                :class:`~qiskit.circuit.library.Barrier` and :class:`.FermionicMeasure`, which are
+                carried through untouched (a measurement keeps the classical bit it writes into).
 
         Returns:
             The output circuit which is still acting on a fermionic register.
@@ -332,8 +417,11 @@ class RelabelModes(FermionicDAGCircuitPass):
 
         for node in dag.op_nodes():
             orig_indices = [orig_register.index(mode) for mode in node.qargs]
+            # Forward ``cargs``: the relabeling permutes modes only, so a node's classical bits
+            # (e.g. the bit a ``FermionicMeasure`` writes into) must be carried over untouched.
+            # ``apply_operation_back`` silently defaults to none, which would drop them.
             out_dag.apply_operation_back(
-                node.op, qargs=[relabeled_register[idx] for idx in orig_indices]
+                node.op, qargs=[relabeled_register[idx] for idx in orig_indices], cargs=node.cargs
             )
 
         return out_dag

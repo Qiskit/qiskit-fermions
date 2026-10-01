@@ -52,6 +52,7 @@ def generate_preset_jw_pass_manager(**kwargs) -> MultiStagePassManager:
 
     config: F2QSynthesisConfig = {
         "Evolution": ("MapperFn", (jordan_wigner,)),
+        "FermionicMeasure": "TrivialOccupation",
         "InitializeModes": "TrivialOccupation",
         "OrbitalRotation": "GivensDecomposition",
         "PrepareSlaterDeterminant": "GivensDecompositionSlater",

@@ -19,12 +19,22 @@ from collections.abc import Sequence
 from typing import TYPE_CHECKING, Any, cast
 
 import numpy as np
-from qiskit.circuit import Barrier, Instruction, QuantumCircuit, QuantumRegister
+from qiskit.circuit import (
+    Barrier,
+    ClassicalRegister,
+    Instruction,
+    QuantumCircuit,
+    QuantumRegister,
+)
 
 from . import FermionicMode, FermionicSpecifier
 from .fermionic_gate import FermionicGate
+from .fermionic_instruction import FermionicInstruction
 
 if TYPE_CHECKING:
+    from qiskit.circuit import Clbit
+    from qiskit.circuit.quantumcircuit import ClbitSpecifier
+
     from . import FermionicRegister
 
 
@@ -39,6 +49,12 @@ class FermionicCircuit:
     :meth:`barrier` is re-exposed because it is an exception to that rule: a barrier acts on modes
     without interpreting them and carries no unitary content, so it is as well-defined on a fermionic
     register as it is on a qubit one.
+
+    Measurements are likewise available, via :meth:`measure` and :meth:`measure_all`. They are the one
+    non-unitary operation this circuit carries, so they are reached through those methods rather than
+    through :meth:`append`, which stays restricted to unitary gates. Whether the
+    resulting bit is meaningful depends on the fermion-to-qubit encoding chosen later, during
+    transpilation, rather than on this circuit (see :class:`.FermionicMeasure`).
     """
 
     def __init__(self, num_modes: int) -> None:
@@ -65,6 +81,24 @@ class FermionicCircuit:
         """The fermionic mode ``bits`` that this circuit acts upon."""
         return cast(list[FermionicMode], self._inner.qubits)
 
+    def add_register(self, *cregs: ClassicalRegister) -> None:
+        """Adds classical registers to this circuit.
+
+        Only `classical` registers can be added: the fermionic mode register is fixed at construction
+        and is available as :attr:`register`.
+
+        Args:
+            cregs: the classical registers to add.
+
+        Raises:
+            ValueError: if any of the provided registers is not a
+                :class:`~qiskit.circuit.ClassicalRegister`.
+        """
+        for creg in cregs:
+            if not isinstance(creg, ClassicalRegister):
+                raise ValueError(f"Unsupported register type: {type(creg)}")
+        self._inner.add_register(*cregs)
+
     def append(
         self,
         gate: FermionicGate,
@@ -81,7 +115,9 @@ class FermionicCircuit:
             cargs: the classical bits on which this gate acts.
 
               .. warning::
-                 No gates of this kind are currently supported.
+                 No gates of this kind are currently supported. A :class:`.FermionicGate` is unitary
+                 and so takes no classical bits; use :meth:`measure` to add the one instruction that
+                 does.
 
             copy: forwarded to :meth:`~qiskit.circuit.QuantumCircuit.append`.
 
@@ -89,7 +125,7 @@ class FermionicCircuit:
             ValueError: if the provided ``gate`` is not an instance of :class:`.FermionicGate`.
         """
         if not isinstance(gate, FermionicGate):
-            raise ValueError("Unsupported instruction type: %s", type(gate))
+            raise ValueError(f"Unsupported instruction type: {type(gate)}")
         self._inner.append(gate, fargs, cargs, copy=copy)
 
     def barrier(self, *fargs: FermionicSpecifier, label: str | None = None) -> None:
@@ -145,9 +181,9 @@ class FermionicCircuit:
         if not isinstance(other, FermionicCircuit):
             raise ValueError(f"Unsupported circuit type: {type(other)}")
 
-        # Every `FermionicCircuit` is populated through the guarded `append`, so the instructions of
-        # `other` are already known to be `FermionicGate`s; the operand type check above is all that is
-        # needed and keeps this O(1) rather than re-walking the instructions.
+        # Every `FermionicCircuit` is populated through the guarded `append` or through `measure`, so
+        # the instructions of `other` are already known to be `FermionicInstruction`s; the operand type
+        # check above is all that is needed and keeps this O(1) rather than re-walking the instructions.
         if inplace:
             self._inner.compose(other._inner, fargs, front=front, inplace=True)
             return None
@@ -181,6 +217,95 @@ class FermionicCircuit:
     def draw(self, *args, **kwargs) -> Any:
         """Directly exposes the inner circuit's :meth:`~qiskit.circuit.QuantumCircuit.draw` method."""
         return self._inner.draw(*args, **kwargs)
+
+    def measure(self, fargs: FermionicSpecifier, cargs: ClbitSpecifier) -> None:
+        """Measures the given fermionic modes into the given classical bits.
+
+        This appends one :class:`.FermionicMeasure` per mode. The classical bits must already exist;
+        add them with :meth:`add_register`, or use :meth:`measure_all`, which creates a register for
+        you.
+
+        The pairing of modes to classical bits is `yours`, and it is preserved through transpilation:
+        the mode a measurement acts on is permuted by a pass such as :class:`.RelabelModes`, but the
+        classical bit it writes into is not.
+
+        Args:
+            fargs: the fermionic modes to measure.
+            cargs: the classical bits to write the outcomes into.
+
+        Raises:
+            CircuitError: if the number of modes and classical bits differ, or if a specifier does not
+                resolve against this circuit.
+        """
+        # Deliberately not `self._inner.measure(...)`: that would append Qiskit's qubit-level
+        # `Measure`, which is not a `FermionicInstruction` and would be rejected by the synthesis
+        # stage. Let Qiskit resolve the specifiers (which may be registers, slices, indices or
+        # bits) by recording the measurements on a throwaway copy of the (empty) wire structure, then
+        # re-emit each resolved (mode, clbit) pair as a `FermionicMeasure`.
+        from .library import FermionicMeasure
+
+        resolver = self._inner.copy_empty_like()
+        resolver.measure(fargs, cargs)
+        for instruction in resolver.data:
+            # `append` deliberately accepts only unitary `FermionicGate`s, so go through the inner
+            # circuit directly: this method is the sanctioned way to add the one non-unitary
+            # instruction, and it constructs that instruction itself.
+            self._inner.append(FermionicMeasure(), instruction.qubits, instruction.clbits)
+
+    def measure_all(
+        self, *, add_bits: bool = True, inplace: bool = True
+    ) -> FermionicCircuit | None:
+        """Measures every mode of this circuit, in order, into one classical bit each.
+
+        Mode ``i`` is measured into classical bit ``i``, so a sampled bitstring is indexed by mode.
+
+        .. note::
+           Unlike :external:meth:`~qiskit.circuit.QuantumCircuit.measure_all`, this inserts no
+           :meth:`barrier` before the measurements. Call :meth:`barrier` yourself beforehand if you
+           want one there.
+
+        Args:
+            add_bits: whether to add a new ``meas`` :class:`~qiskit.circuit.ClassicalRegister` sized to
+                this circuit's modes. When this is ``False``, the existing classical bits are used
+                instead, and calling this method again simply measures into them a second time.
+            inplace: whether to modify this circuit rather than return a new one.
+
+        Returns:
+            The measured circuit, or ``None`` if ``inplace`` is set.
+
+        Raises:
+            CircuitError: if ``add_bits`` is set and this circuit already carries a register named
+                ``meas`` (which is what a second ``measure_all()`` call runs into). Pass
+                ``add_bits=False`` to measure into the existing bits instead.
+            ValueError: if ``add_bits`` is not set and this circuit has fewer classical bits than
+                modes.
+        """
+        if inplace:
+            circuit = self
+        else:
+            # Same construction as `decompose` and `compose`: a fresh instance whose register is
+            # re-synced with ours, because `QuantumCircuit.copy` carries a new register object.
+            circuit = FermionicCircuit(len(self.register))
+            circuit.register = self.register
+            circuit._inner = self._inner.copy()
+
+        num_modes = len(circuit.register)
+        if add_bits:
+            creg = ClassicalRegister(num_modes, "meas")
+            circuit.add_register(creg)
+            cargs: Sequence[Clbit] = list(creg)
+        else:
+            num_clbits = circuit._inner.num_clbits
+            if num_clbits < num_modes:
+                raise ValueError(
+                    f"Measuring all {num_modes} modes requires at least as many classical bits, but "
+                    f"this circuit has {num_clbits}. Pass 'add_bits=True' to add a register."
+                )
+            cargs = circuit._inner.clbits[:num_modes]
+
+        circuit.measure(circuit.modes, cargs)
+
+        return None if inplace else circuit
 
     def repeat(self, reps: int, *, insert_barriers: bool = False) -> FermionicCircuit:
         """Repeats this circuit ``reps`` times.
@@ -326,6 +451,9 @@ class FermionicCircuit:
         """
         from qiskit_fermions.transpiler.converters import FermionicCircuitToDAG
 
+        # deferred: `circuit.library` imports from this package, so a module-level import is circular
+        from .library import FermionicMeasure
+
         # PERF: the DAG depends only on the circuit structure (``self``), not on ``vec``/``norb``/
         # ``nelec``, yet it is rebuilt on every call. This is fine for a single ``apply_unitary``, but
         # repeated evolutions of the same circuit (parameter sweeps, time-stepping) redo identical
@@ -337,7 +465,7 @@ class FermionicCircuit:
         # instruction's ``_apply_unitary_placed_`` directly, bypassing ``FermionicGate._apply_unitary_``
         # (the other choke-point that normalizes), so without this a ``np.int64`` would reach the
         # instructions un-normalized and be misclassified as spinful.
-        nelec = FermionicGate._normalize_nelec(nelec)
+        nelec = FermionicInstruction._normalize_nelec(nelec)
 
         # The gate-to-gate loop below threads whatever each instruction returns into the next; only
         # copy the incoming array once up front so the caller's vector is left untouched.
@@ -352,6 +480,18 @@ class FermionicCircuit:
             # does not implement, and would therefore be rejected below).
             if isinstance(instr, Barrier):
                 continue
+
+            # A measurement, by contrast, is not unitary at all, so it cannot be skipped the way a
+            # barrier can, since doing so would silently simulate a different circuit. Reject it
+            # with a
+            # message naming the cause, rather than letting it fall through to the generic
+            # "does not implement the protocol" error below.
+            if isinstance(instr, FermionicMeasure):
+                raise TypeError(
+                    "A FermionicCircuit holding measurements cannot be applied to a state vector: a "
+                    "measurement is not a unitary operation. Simulate the circuit without its "
+                    "measurements, or transpile it to a QuantumCircuit and sample it on a backend."
+                )
 
             # each instruction's circuit-local modes, mapped through this circuit's own placement:
             # local mode ``m`` of this circuit sits at global mode ``freg_indices[m]``

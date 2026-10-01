@@ -327,7 +327,8 @@ class QDriftTrotterization(FermionicDAGCircuitPass):
             dag: the input circuit with fermion-based instructions. Only
                 :class:`~qiskit.dagcircuit.DAGOpNode` with :class:`.FermionicGate` instances as their
                 :attr:`~qiskit.dagcircuit.DAGOpNode.op` are supported, plus
-                :class:`~qiskit.circuit.library.Barrier`, which is carried through untouched.
+                :class:`~qiskit.circuit.library.Barrier` and :class:`.FermionicMeasure`, which are
+                carried through untouched (a measurement keeps the classical bit it writes into).
 
         Returns:
             The output circuit which is still acting on a fermionic register. When filtering
@@ -401,7 +402,10 @@ class QDriftTrotterization(FermionicDAGCircuitPass):
                 unoccupied |= all_modes
 
             if not isinstance(node.op, Evolution):
-                out_dag.apply_operation_back(node.op, qargs=node.qargs)
+                # Forward ``cargs``: a non-``Evolution`` node is copied through as-is and may carry
+                # classical bits (e.g. a ``FermionicMeasure``); ``apply_operation_back`` silently
+                # defaults to none, which would drop them.
+                out_dag.apply_operation_back(node.op, qargs=node.qargs, cargs=node.cargs)
                 continue
 
             hamil = node.op.operator

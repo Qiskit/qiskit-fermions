@@ -39,6 +39,7 @@ the :mod:`~qiskit_fermions.circuit.library` of :class:`.FermionicGate` implement
    :toctree: ../stubs/
 
    FermionicCircuit
+   FermionicInstruction
    FermionicGate
 """
 
@@ -72,7 +73,8 @@ FermionicDAGCircuit: TypeAlias = DAGCircuit
 
 Although this does not really give us any functional guarantees, it serves to better document the
 API contract that instances of this type only contain circuit instructions of type
-:class:`.FermionicGate` or :class:`~qiskit.circuit.library.Barrier`.
+:class:`.FermionicInstruction` (i.e. any :class:`.FermionicGate` or a :class:`.FermionicMeasure`) or
+:class:`~qiskit.circuit.library.Barrier`.
 """
 
 # NOTE: we must explicitly define the type aliases _before_ the following imports to ensure that
@@ -80,11 +82,13 @@ API contract that instances of this type only contain circuit instructions of ty
 # ruff: noqa: E402
 from .fermionic_circuit import FermionicCircuit
 from .fermionic_gate import FermionicGate
+from .fermionic_instruction import FermionicInstruction
 
 __all__ = [
     "FermionicCircuit",
     "FermionicDAGCircuit",
     "FermionicGate",
+    "FermionicInstruction",
     "FermionicMode",
     "FermionicRegister",
     "FermionicSpecifier",
