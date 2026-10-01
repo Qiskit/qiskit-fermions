@@ -107,6 +107,59 @@ class FermionicCircuit:
         """
         self._inner.barrier(*fargs, label=label)
 
+    def compose(
+        self,
+        other: FermionicCircuit,
+        fargs: FermionicSpecifier | None = None,
+        *,
+        front: bool = False,
+        inplace: bool = False,
+    ) -> FermionicCircuit | None:
+        """Composes another :class:`.FermionicCircuit` onto this one.
+
+        The instructions of ``other`` are inlined into this circuit, rather than wrapped into a single
+        gate. This mirrors :external:meth:`~qiskit.circuit.QuantumCircuit.compose` with its default
+        ``wrap=False``. The ``wrap=True`` counterpart is deliberately not offered: a dedicated
+        encapsulation mechanism is planned instead, so adding a second way to box up a block of
+        instructions here would leave two patterns solving the same problem.
+
+        Args:
+            other: the circuit to compose onto this one. It may act on fewer modes than this circuit,
+                in which case ``fargs`` selects the modes it is placed on.
+            fargs: the fermionic modes of this circuit onto which ``other`` is placed. Defaults to all
+                of this circuit's modes, in order.
+            front: whether to compose ``other`` before rather than after this circuit's instructions.
+            inplace: whether to modify this circuit rather than return a new one.
+
+        Returns:
+            The composed circuit, or ``None`` if ``inplace`` is set.
+
+        Raises:
+            ValueError: if ``other`` is not an instance of :class:`.FermionicCircuit`. Only fermionic
+                circuits are accepted because the plain
+                :external:meth:`~qiskit.circuit.QuantumCircuit.compose` would happily inline
+                qubit-based instructions, bypassing the type guard that :meth:`append` enforces.
+            CircuitError: if ``other`` acts on more modes than this circuit, or ``fargs`` does not
+                match its width.
+        """
+        if not isinstance(other, FermionicCircuit):
+            raise ValueError(f"Unsupported circuit type: {type(other)}")
+
+        # Every `FermionicCircuit` is populated through the guarded `append`, so the instructions of
+        # `other` are already known to be `FermionicGate`s; the operand type check above is all that is
+        # needed and keeps this O(1) rather than re-walking the instructions.
+        if inplace:
+            self._inner.compose(other._inner, fargs, front=front, inplace=True)
+            return None
+
+        inner_composed = self._inner.compose(other._inner, fargs, front=front, inplace=False)
+        out = FermionicCircuit(len(self.register))
+        # `QuantumCircuit.compose` returns a circuit carrying a *new* register object, so re-sync it
+        # with ours (as `decompose` does) to keep the mode identities valid.
+        out.register = self.register
+        out._inner = inner_composed
+        return out
+
     def count_ops(self) -> OrderedDict[str, int]:
         """Re-exposes :external:meth:`~qiskit.circuit.QuantumCircuit.count_ops`."""
         return cast(OrderedDict[str, int], self._inner.count_ops())
@@ -128,6 +181,63 @@ class FermionicCircuit:
     def draw(self, *args, **kwargs) -> Any:
         """Directly exposes the inner circuit's :meth:`~qiskit.circuit.QuantumCircuit.draw` method."""
         return self._inner.draw(*args, **kwargs)
+
+    def repeat(self, reps: int, *, insert_barriers: bool = False) -> FermionicCircuit:
+        """Repeats this circuit ``reps`` times.
+
+        The repetitions are `flattened`: the returned circuit holds this circuit's instructions
+        ``reps`` times in sequence, rather than one gate wrapping the circuit as
+        :external:meth:`~qiskit.circuit.QuantumCircuit.repeat` produces. As a consequence
+        :meth:`count_ops` scales with ``reps``, and :meth:`decompose` decomposes the repeated body
+        rather than peeling off a repetition.
+
+        Flattening also leaves the gates that meet at a repetition boundary adjacent, so the
+        optimization passes can fuse them. Set ``insert_barriers`` to keep the repetitions apart
+        instead, which places a :meth:`barrier` that those passes do not fuse across.
+
+        .. note::
+           This is unrelated to the ``reps`` argument of :class:`.FermionicSuzukiTrotter`, which
+           subdivides a `single` :class:`.Evolution` into more, shorter factors. Repeating a circuit
+           holding one :class:`.Evolution` merely multiplies its total evolution time.
+
+        .. seealso::
+           :ref:`fermionic_circuit_explanation` works through a repeated Trotter step, including the
+           boundary fusion and how to prevent it.
+
+        Args:
+            reps: how often this circuit should be repeated. Repeating it zero times yields an empty
+                circuit, which is the identity.
+            insert_barriers: whether to place a :meth:`barrier` between consecutive repetitions. No
+                barrier is placed after the final repetition, so the returned circuit ends on the same
+                instruction it would without this argument.
+
+        Returns:
+            A new circuit containing ``reps`` repetitions of this circuit.
+
+        Raises:
+            ValueError: if ``reps`` is negative.
+        """
+        if reps < 0:
+            raise ValueError(f"The number of repetitions must be non-negative, but got {reps}.")
+
+        out = FermionicCircuit(len(self.register))
+        out.register = self.register
+        # `copy_empty_like` keeps the register, mode objects, name and metadata of this circuit, so the
+        # repeated circuit differs from it only in the instructions composed in below.
+        out._inner = self._inner.copy_empty_like()
+
+        # NOTE: the repetitions share this circuit's gate instances rather than copying them per
+        # repetition. `QuantumCircuit.compose` only copies operations carrying a
+        # `ParameterExpression`, and no fermionic gate is parameterized in that sense. Sharing is safe
+        # here: the gates expose their configuration read-only (e.g. `Evolution.synthesis`), the
+        # transpiler substitutes nodes instead of mutating operations in place, and a gate's cached
+        # definition is a deterministic function of that configuration.
+        for rep in range(reps):
+            out.compose(self, inplace=True)
+            if insert_barriers and rep != reps - 1:
+                out.barrier()
+
+        return out
 
     def _apply_unitary_(
         self, vec: np.ndarray, norb: int, nelec: int | tuple[int, int], copy: bool

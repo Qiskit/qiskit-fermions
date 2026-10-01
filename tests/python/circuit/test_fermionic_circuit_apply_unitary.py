@@ -250,3 +250,142 @@ def test_public_ffsim_apply_unitary_drives_a_fermionic_circuit():
 
     expected = ffsim.apply_orbital_rotation(vec0, (rot, None), norb=norb, nelec=nelec)
     np.testing.assert_allclose(result, expected, atol=1e-10)
+
+
+def test_repeat_apply_unitary_matches_applying_twice():
+    """A repeated circuit simulates as applying the original that many times.
+
+    This is the regression lock on the flattening decision: ``repeat`` reuses the gates it already
+    holds, so the ffsim path keeps working with no extra protocol code. A wrapping implementation
+    would need its own ``_apply_unitary_placed_`` or raise here.
+    """
+    norb = 3
+    nelec = (2, 1)
+    rot = random_unitary(norb, seed=11)
+
+    circ = FermionicCircuit(2 * norb)
+    circ.append(OrbitalRotation(rot), [circ.modes[i] for i in range(norb)])
+
+    vec0 = ffsim.slater_determinant(norb, ([0, 1], [0]))
+
+    once = circ._apply_unitary_(vec0, norb, nelec, True)
+    twice = circ._apply_unitary_(once, norb, nelec, True)
+    repeated = circ.repeat(2)._apply_unitary_(vec0, norb, nelec, True)
+
+    np.testing.assert_allclose(repeated, twice, atol=1e-10)
+
+
+def test_repeat_merges_trotter_step_boundaries():
+    """The motivating use case: a naive symmetric step plus ``repeat`` equals hand-fused boundaries.
+
+    A second-order Trotter step ends and begins with half-duration orbital rotations. Writing the step
+    naively and repeating it leaves two rotations per step; ``MergeOrbitalRotations`` then fuses each
+    interior pair, giving ``reps + 1`` rotations: exactly what fusing the boundaries by hand
+    produces, and the same state vector. This only works because ``repeat`` flattens: the pass cannot
+    see across an opaque per-repetition container.
+    """
+    import scipy.linalg
+    from qiskit_fermions.circuit.library import Evolution
+    from qiskit_fermions.operators import FermionOperator, ann, cre
+    from qiskit_fermions.transpiler import FermionicPassManager
+    from qiskit_fermions.transpiler.passes import MergeOrbitalRotations
+
+    norb = 2
+    nelec = (1, 1)
+    num_modes = 2 * norb
+    occupation = [True, False, True, False]
+    reps = 3
+    time = 1.0
+    dt = time / reps
+
+    hopping = np.zeros((norb, norb))
+    hopping[0, 1] = hopping[1, 0] = -1.0
+    onsite = FermionOperator.from_dict(
+        {(cre(p), ann(p), cre(p + norb), ann(p + norb)): 2.0 for p in range(norb)}
+    )
+
+    def rotation(duration):
+        propagator = scipy.linalg.expm(-1j * duration * hopping)
+        return scipy.linalg.block_diag(propagator, propagator)
+
+    # the manual construction this feature replaces: the trailing half-step of one repetition is
+    # folded into the leading half-step of the next by hand
+    manual = FermionicCircuit(num_modes)
+    manual.append(InitializeModes(occupation), manual.modes)
+    manual.append(OrbitalRotation(rotation(dt / 2)), manual.modes)
+    for step in range(reps):
+        manual.append(Evolution(num_modes, onsite, dt, atomic=True), manual.modes)
+        manual.append(OrbitalRotation(rotation(dt if step < reps - 1 else dt / 2)), manual.modes)
+
+    # the same circuit, written naively and repeated
+    trotter_step = FermionicCircuit(num_modes)
+    trotter_step.append(OrbitalRotation(rotation(dt / 2)), trotter_step.modes)
+    trotter_step.append(Evolution(num_modes, onsite, dt, atomic=True), trotter_step.modes)
+    trotter_step.append(OrbitalRotation(rotation(dt / 2)), trotter_step.modes)
+
+    circuit = FermionicCircuit(num_modes)
+    circuit.append(InitializeModes(occupation), circuit.modes)
+    circuit.compose(trotter_step.repeat(reps), inplace=True)
+
+    # two rotations per repetition before the merge, one per repetition plus one after it
+    assert circuit.count_ops()["OrbitalRotation"] == 2 * reps
+    merged = FermionicPassManager([MergeOrbitalRotations()]).run(circuit)
+    assert merged.count_ops()["OrbitalRotation"] == reps + 1
+    assert merged.count_ops() == manual.count_ops()
+
+    vec0 = ffsim.hartree_fock_state(norb, nelec)
+    np.testing.assert_allclose(
+        merged._apply_unitary_(vec0, norb, nelec, True),
+        manual._apply_unitary_(vec0, norb, nelec, True),
+        atol=1e-10,
+    )
+
+
+def test_repeat_insert_barriers_blocks_the_merge():
+    """``insert_barriers`` is the escape hatch from the boundary fusion ``repeat`` otherwise invites.
+
+    Complements :func:`test_repeat_merges_trotter_step_boundaries`: the same repeated step keeps all
+    of its rotations when the repetitions are separated by barriers, since
+    :class:`.MergeOrbitalRotations` does not fuse across one. The state vector is unchanged either
+    way, because a barrier carries no unitary effect and the fusion it blocks is exact.
+    """
+    import scipy.linalg
+    from qiskit_fermions.circuit.library import Evolution
+    from qiskit_fermions.operators import FermionOperator, ann, cre
+    from qiskit_fermions.transpiler import FermionicPassManager
+    from qiskit_fermions.transpiler.passes import MergeOrbitalRotations
+
+    norb = 2
+    nelec = (1, 1)
+    num_modes = 2 * norb
+    reps = 3
+    dt = 1.0 / reps
+
+    hopping = np.zeros((norb, norb))
+    hopping[0, 1] = hopping[1, 0] = -1.0
+    interaction = FermionOperator.from_dict(
+        {(cre(p), ann(p), cre(p + norb), ann(p + norb)): 2.0 for p in range(norb)}
+    )
+
+    def rotation(duration):
+        propagator = scipy.linalg.expm(-1j * duration * hopping)
+        return scipy.linalg.block_diag(propagator, propagator)
+
+    step = FermionicCircuit(num_modes)
+    step.append(OrbitalRotation(rotation(dt / 2)), step.modes)
+    step.append(Evolution(num_modes, interaction, dt, atomic=True), step.modes)
+    step.append(OrbitalRotation(rotation(dt / 2)), step.modes)
+
+    pass_manager = FermionicPassManager([MergeOrbitalRotations()])
+    fused = pass_manager.run(step.repeat(reps))
+    kept = pass_manager.run(step.repeat(reps, insert_barriers=True))
+
+    assert fused.count_ops()["OrbitalRotation"] == reps + 1
+    assert kept.count_ops()["OrbitalRotation"] == 2 * reps
+
+    vec0 = ffsim.hartree_fock_state(norb, nelec)
+    np.testing.assert_allclose(
+        kept._apply_unitary_(vec0, norb, nelec, True),
+        fused._apply_unitary_(vec0, norb, nelec, True),
+        atol=1e-10,
+    )

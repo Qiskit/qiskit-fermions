@@ -1,0 +1,12 @@
+---
+features:
+  - |
+    Added :meth:`.FermionicCircuit.compose`, which composes another :class:`.FermionicCircuit` onto an
+    existing one::
+
+        circuit.compose(other, inplace=True)
+
+    The operand's instructions are inlined rather than wrapped into a single gate. An optional
+    ``fargs`` argument places a narrower circuit onto a subset of this circuit's modes, mirroring
+    :meth:`~.FermionicCircuit.append`, while ``front`` composes before rather than after the existing
+    instructions and ``inplace`` modifies the circuit instead of returning a new one.
