@@ -170,6 +170,44 @@ def test_apply_unitary_parallel_seed_then_rotate():
     np.testing.assert_allclose(result, expected, atol=1e-10)
 
 
+def test_apply_unitary_skips_barrier():
+    """A barrier is unitarily the identity, so it must not change the resulting state vector.
+
+    Barriers carry no unitary content and are skipped by the DAG walk rather than dispatched through
+    ffsim's protocol (which they do not implement). Comparing against the same circuit without any
+    barriers proves both that the walk does not reject them and that it does not apply them as
+    something other than the identity.
+    """
+    norb = 3
+    nelec = (2, 1)
+    rot = random_unitary(norb, seed=11)
+    vec0 = ffsim.slater_determinant(norb, ([0, 1], [0]))
+
+    def build(with_barriers: bool) -> FermionicCircuit:
+        circ = FermionicCircuit(2 * norb)
+        alpha = [circ.modes[i] for i in range(norb)]
+        if with_barriers:
+            circ.barrier()
+        circ.append(InitializeModes([True, True, False]), alpha)
+        circ.append(
+            InitializeModes([True, False, False]), [circ.modes[norb + i] for i in range(norb)]
+        )
+        if with_barriers:
+            # both a full-width and a partial barrier, since they take different qargs paths
+            circ.barrier()
+            circ.barrier(circ.register[0], circ.register[1])
+        circ.append(OrbitalRotation(rot), alpha)
+        if with_barriers:
+            circ.barrier()
+        return circ
+
+    assert build(True).count_ops()["barrier"] == 4
+
+    result = build(True)._apply_unitary_(vec0, norb, nelec, copy=True)
+    expected = build(False)._apply_unitary_(vec0, norb, nelec, copy=True)
+    np.testing.assert_allclose(result, expected, atol=1e-10)
+
+
 def test_apply_unitary_accepts_plain_protocol_gate_on_identity_placement():
     """A plain-``_apply_unitary_`` gate on the identity placement ``[0, 1, ...]`` is applied as-is.
 

@@ -17,6 +17,7 @@ from __future__ import annotations
 import pickle
 
 import pytest
+from qiskit.circuit import Barrier, CircuitInstruction
 from qiskit.circuit.library import XGate
 from qiskit_fermions.circuit import FermionicCircuit
 from qiskit_fermions.circuit.library import Evolution
@@ -38,7 +39,51 @@ def _evolution_circuit() -> FermionicCircuit:
     )
     circ = FermionicCircuit(num_modes)
     circ.append(Evolution(num_modes, hamil, time=1.5), circ.modes)
+    circ.barrier()
     return circ
+
+
+def _barrier_nodes(circ: FermionicCircuit) -> list[CircuitInstruction]:
+    """Returns every barrier instruction held by ``circ``."""
+    return [instr for instr in circ._inner.data if isinstance(instr.operation, Barrier)]
+
+
+def test_barrier_all_modes():
+    """A barrier without arguments spans every mode of the circuit."""
+    circ = FermionicCircuit(4)
+    circ.barrier()
+
+    assert circ.count_ops() == {"barrier": 1}
+    (barrier,) = _barrier_nodes(circ)
+    assert list(barrier.qubits) == circ.modes
+
+
+def test_barrier_subset_of_modes():
+    """A barrier can be restricted to a subset of the modes."""
+    circ = FermionicCircuit(4)
+    circ.barrier(circ.register[1], circ.register[2])
+
+    (barrier,) = _barrier_nodes(circ)
+    assert list(barrier.qubits) == [circ.register[1], circ.register[2]]
+    assert barrier.operation.num_qubits == 2
+
+
+def test_barrier_label():
+    """A barrier carries the label it was given."""
+    circ = FermionicCircuit(2)
+    circ.barrier(label="sync")
+
+    (barrier,) = _barrier_nodes(circ)
+    assert barrier.operation.label == "sync"
+
+
+def test_barrier_survives_decompose():
+    """Decomposing a circuit leaves its barriers in place."""
+    circ = _evolution_circuit()
+    decomposed = circ.decompose()
+
+    assert circ.count_ops()["barrier"] == 1
+    assert decomposed.count_ops()["barrier"] == 1
 
 
 def test_pickle():
@@ -52,7 +97,7 @@ def test_pickle():
     reconstructed = pickle.loads(pickle.dumps(circ))
 
     assert reconstructed.modes == circ.modes
-    assert reconstructed.count_ops() == circ.count_ops() == {"Evolution": 1}
+    assert reconstructed.count_ops() == circ.count_ops() == {"Evolution": 1, "barrier": 1}
 
 
 def test_pickle_dag():
@@ -60,9 +105,11 @@ def test_pickle_dag():
     dag = FermionicCircuitToDAG().run(_evolution_circuit())
     reconstructed = pickle.loads(pickle.dumps(dag))
 
-    original_nodes = list(dag.op_nodes())
-    reconstructed_nodes = list(reconstructed.op_nodes())
+    original_nodes = dag.named_nodes("Evolution")
+    reconstructed_nodes = reconstructed.named_nodes("Evolution")
     assert len(original_nodes) == len(reconstructed_nodes) == 1
+    # the barrier the circuit also carries has to survive the round trip alongside the gate
+    assert len(dag.op_nodes()) == len(reconstructed.op_nodes()) == 2
 
     original_op = original_nodes[0].op.operator
     reconstructed_op = reconstructed_nodes[0].op.operator

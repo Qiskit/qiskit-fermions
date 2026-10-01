@@ -19,7 +19,7 @@ from collections.abc import Sequence
 from typing import TYPE_CHECKING, Any, cast
 
 import numpy as np
-from qiskit.circuit import Instruction, QuantumCircuit, QuantumRegister
+from qiskit.circuit import Barrier, Instruction, QuantumCircuit, QuantumRegister
 
 from . import FermionicMode, FermionicSpecifier
 from .fermionic_gate import FermionicGate
@@ -35,6 +35,10 @@ class FermionicCircuit:
     :class:`~qiskit.circuit.QuantumCircuit`. This is done to avoid exposing (amongst other methods)
     the ability to apply qubit-based gates onto a fermionic circuit, which would not be a
     well-defined operation in the general case.
+
+    :meth:`barrier` is re-exposed because it is an exception to that rule: a barrier acts on modes
+    without interpreting them and carries no unitary content, so it is as well-defined on a fermionic
+    register as it is on a qubit one.
     """
 
     def __init__(self, num_modes: int) -> None:
@@ -88,6 +92,21 @@ class FermionicCircuit:
             raise ValueError("Unsupported instruction type: %s", type(gate))
         self._inner.append(gate, fargs, cargs, copy=copy)
 
+    def barrier(self, *fargs: FermionicSpecifier, label: str | None = None) -> None:
+        """Re-exposes :external:meth:`~qiskit.circuit.QuantumCircuit.barrier`.
+
+        A barrier carries no unitary effect. It marks a synchronization point that the optimization
+        passes will not fuse gates across, which is how you keep a pass such as
+        :class:`.MergeOrbitalRotations` or :class:`.MergeSlaterDeterminantPreparation` from combining
+        the gates on either side of it.
+
+        Args:
+            fargs: the fermionic modes on which to place the barrier. When omitted, the barrier spans
+                every mode of this circuit.
+            label: the string label of the barrier.
+        """
+        self._inner.barrier(*fargs, label=label)
+
     def count_ops(self) -> OrderedDict[str, int]:
         """Re-exposes :external:meth:`~qiskit.circuit.QuantumCircuit.count_ops`."""
         return cast(OrderedDict[str, int], self._inner.count_ops())
@@ -134,7 +153,8 @@ class FermionicCircuit:
             The transformed vector.
 
         Raises:
-            TypeError: if a circuit instruction does not implement ffsim's
+            TypeError: if a circuit instruction other than a
+                :class:`~qiskit.circuit.library.Barrier` does not implement ffsim's
                 :class:`ffsim.SupportsApplyUnitary` protocol.
             ValueError: if a circuit instruction declines to apply its unitary for the given
                 ``norb`` and ``nelec``; or if an instruction implementing only the plain
@@ -172,6 +192,9 @@ class FermionicCircuit:
         cannot be expressed and the instruction is rejected rather than silently applied on the wrong
         modes.
 
+        A :class:`~qiskit.circuit.library.Barrier` is skipped: it carries no unitary effect, so it
+        constrains transpilation without contributing to the state vector.
+
         Args:
             vec: the state vector to apply this circuit to. An empty circuit returns it unchanged.
             norb: the number of spatial orbitals of the *global* state vector.
@@ -184,7 +207,8 @@ class FermionicCircuit:
             The transformed vector.
 
         Raises:
-            TypeError: if a circuit instruction does not implement ffsim's
+            TypeError: if a circuit instruction other than a
+                :class:`~qiskit.circuit.library.Barrier` does not implement ffsim's
                 :class:`ffsim.SupportsApplyUnitary` protocol.
             ValueError: if a circuit instruction declines to apply its unitary for the given
                 ``norb`` and ``nelec``; or if an instruction implementing only the plain
@@ -212,6 +236,12 @@ class FermionicCircuit:
 
         for node in dag.topological_op_nodes():
             instr = node.op
+
+            # A barrier is unitarily the identity: it constrains transpilation only and has no effect
+            # on the state vector, so skip it rather than dispatch it through the protocol (which it
+            # does not implement, and would therefore be rejected below).
+            if isinstance(instr, Barrier):
+                continue
 
             # each instruction's circuit-local modes, mapped through this circuit's own placement:
             # local mode ``m`` of this circuit sits at global mode ``freg_indices[m]``

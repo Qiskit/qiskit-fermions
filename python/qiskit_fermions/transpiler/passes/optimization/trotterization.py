@@ -127,7 +127,8 @@ class FermionicTrotterization(FermionicDAGCircuitPass):
         Args:
             dag: the input circuit with fermion-based instructions. Only
                 :class:`~qiskit.dagcircuit.DAGOpNode` with :class:`.FermionicGate` instances as their
-                :attr:`~qiskit.dagcircuit.DAGOpNode.op` are supported.
+                :attr:`~qiskit.dagcircuit.DAGOpNode.op` are supported, plus
+                :class:`~qiskit.circuit.library.Barrier`, which is carried through untouched.
 
         Returns:
             The output circuit which is still acting on a fermionic register.
