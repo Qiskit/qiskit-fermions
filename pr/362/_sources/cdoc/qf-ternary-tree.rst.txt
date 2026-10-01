@@ -15,14 +15,14 @@ particular shapes:
 
 .. table::
 
-  ==================== ================================================== ==================================
+  ==================== ================================================== =====================================
   Encoding             Construction                                       Pauli weight
-  ==================== ================================================== ==================================
+  ==================== ================================================== =====================================
   Jordan-Wigner        ``qf_ternary_tree_chain(n, QfPauliLabel_Z, ...)``   :math:`n`
   Parity               ``qf_ternary_tree_chain(n, QfPauliLabel_X, ...)``   :math:`n`
   Balanced             ``qf_ternary_tree_breadth_first(n, 3, ...)``        :math:`\lceil \log_3(2n+1) \rceil`
-  Bravyi-Kitaev-like   ``qf_ternary_tree_breadth_first(n, 2, ...)``        :math:`O(\log n)`
-  ==================== ================================================== ==================================
+  Binary-branching     ``qf_ternary_tree_breadth_first(n, 2, ...)``        :math:`\lfloor \log_2 n \rfloor + 1`
+  ==================== ================================================== =====================================
 
 The balanced tree's weight is optimal over *all* fermion-to-qubit mappings, so the reduction from
 :math:`n` to :math:`\lceil \log_3(2n+1) \rceil` is the reason to reach for one. Both trees use exactly
@@ -32,6 +32,10 @@ These two constructors cover only the uniform families. The general interface is
 :c:func:`qf_ternary_tree_new`, which takes one :c:struct:`QfTernaryTreeNode` per node: the trees worth
 searching for are usually neither a chain nor uniform, since an algorithm such as Bonsai grows a
 spanning tree of a device's coupling graph and its branching therefore follows that connectivity.
+
+Not every encoding in the family has a convenience constructor. Bravyi-Kitaev, for instance, is a tree
+that is not uniform, so it is built by computing its specification: the binary-branching tree above
+matches its Pauli weight but is a different tree, except when :math:`n` is a power of two.
 
 Once built, a tree is compiled into a :c:struct:`QfTernaryTreeEncoding` with
 :c:func:`qf_ternary_tree_encoding_new`, which pairs its legs into Majorana operators and builds their

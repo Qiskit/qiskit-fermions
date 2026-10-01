@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Map operator representations - Qiskit Fermions 0.3.0.dev0+92de644</title>
+        <title>Map operator representations - Qiskit Fermions 0.3.0.dev0+662737e</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.3.0.dev0+92de644</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.3.0.dev0+662737e</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.3.0.dev0+92de644</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.3.0.dev0+662737e</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -599,55 +599,6 @@ generate fewer Pauli strings – its unused links are legs, and a leg spells a s
 descendants do. Of those <span class="math">\(2n+1\)</span> strings, <span class="math">\(2n\)</span> pair into the Majorana operators of the
 <span class="math">\(n\)</span> modes, and exactly one is left over.</p>
 </section>
-<section id="worked-example-a-bravyi-kitaev-tree">
-<span id="bravyi-kitaev-by-hand"></span><h3>Worked example: a Bravyi-Kitaev tree<a class="headerlink" href="#worked-example-a-bravyi-kitaev-tree" title="Link to this heading">¶</a></h3>
-<p>Specifications are more often computed than typed out, since the tree for a real encoding is rarely small
-enough to write by hand. Bravyi-Kitaev is a good example: it belongs to this family, but its tree is not
-uniform, so no convenience constructor covers it.</p>
-<p>Its tree is built by a recursive split over the nodes, one per mode. Within a range of nodes
-<span class="math">\([l, r]\)</span>, let <span class="math">\(h\)</span> be the largest power of two that fits; the node placed for that range is
-<span class="math">\(l + h - 1\)</span>, the last one in that block. Its <code class="docutils literal notranslate"><span class="pre">X</span></code> link descends to the tree built from the block
-before it and its <code class="docutils literal notranslate"><span class="pre">Z</span></code> link to the tree built from the remainder after it, leaving its <code class="docutils literal notranslate"><span class="pre">Y</span></code> link as a
-leg:</p>
-<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">bravyi_kitaev_tree</span><span class="p">(</span><span class="n">num_modes</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TernaryTree</span><span class="p">:</span>
-<span class="gp">... </span><span class="w">    </span><span class="sd">"""Builds the ternary tree of the Bravyi-Kitaev encoding on ``num_modes`` modes."""</span>
-<span class="gp">... </span>    <span class="n">spec</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">num_modes</span>
-<span class="gp">... </span>    <span class="k">def</span><span class="w"> </span><span class="nf">build</span><span class="p">(</span><span class="n">left</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">right</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
-<span class="gp">... </span>        <span class="k">if</span> <span class="n">left</span> <span class="o">&gt;</span> <span class="n">right</span><span class="p">:</span>
-<span class="gp">... </span>            <span class="k">return</span> <span class="kc">None</span>  <span class="c1"># an empty range: the parent's link stays a leg</span>
-<span class="gp">... </span>        <span class="n">block</span> <span class="o">=</span> <span class="mi">1</span>
-<span class="gp">... </span>        <span class="k">while</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">block</span> <span class="o">&lt;=</span> <span class="n">right</span> <span class="o">-</span> <span class="n">left</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span>
-<span class="gp">... </span>            <span class="n">block</span> <span class="o">*=</span> <span class="mi">2</span>
-<span class="gp">... </span>        <span class="n">node</span> <span class="o">=</span> <span class="n">left</span> <span class="o">+</span> <span class="n">block</span> <span class="o">-</span> <span class="mi">1</span>
-<span class="gp">... </span>        <span class="k">for</span> <span class="n">child</span><span class="p">,</span> <span class="n">label</span> <span class="ow">in</span> <span class="p">(</span>
-<span class="gp">... </span>            <span class="p">(</span><span class="n">build</span><span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">node</span> <span class="o">-</span> <span class="mi">1</span><span class="p">),</span> <span class="s2">"X"</span><span class="p">),</span>   <span class="c1"># the block before this node</span>
-<span class="gp">... </span>            <span class="p">(</span><span class="n">build</span><span class="p">(</span><span class="n">node</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">right</span><span class="p">),</span> <span class="s2">"Z"</span><span class="p">),</span>  <span class="c1"># the remainder after it</span>
-<span class="gp">... </span>        <span class="p">):</span>
-<span class="gp">... </span>            <span class="k">if</span> <span class="n">child</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-<span class="gp">... </span>                <span class="n">spec</span><span class="p">[</span><span class="n">child</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">label</span><span class="p">)</span>
-<span class="gp">... </span>        <span class="k">return</span> <span class="n">node</span>
-<span class="gp">... </span>    <span class="n">build</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">num_modes</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
-<span class="gp">... </span>    <span class="k">return</span> <span class="n">TernaryTree</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span>
-</pre></div>
-</div>
-<p>At four modes the whole range is a single block, so the node placed first is 3, with <span class="math">\([0, 2]\)</span>
-before it and nothing after; that sub-range gives node 1 over the single nodes 0 and 2. Compiling the tree
-confirms the encoding is Bravyi-Kitaev and not merely a tree of the same shape class – its first Majorana
-image is <span class="math">\(X_0 X_1 X_3\)</span>:</p>
-<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">tree</span> <span class="o">=</span> <span class="n">bravyi_kitaev_tree</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">dict</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">children</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
-<span class="go">{'X': 0, 'Z': 2}</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">TernaryTreeEncoding</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span><span class="o">.</span><span class="n">majorana_image</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-<span class="go">[(0, 'X'), (1, 'X'), (3, 'X')]</span>
-</pre></div>
-</div>
-<p>Scaling up needs nothing but a larger argument. Because no node ever spends its <code class="docutils literal notranslate"><span class="pre">Y</span></code> link on an edge,
-each branches at most two ways, so the Pauli weight grows logarithmically rather than linearly:</p>
-<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="p">[</span><span class="n">bravyi_kitaev_tree</span><span class="p">(</span><span class="n">n</span><span class="p">)</span><span class="o">.</span><span class="n">max_weight</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">64</span><span class="p">)]</span>
-<span class="go">[3, 4, 5, 6, 7]</span>
-</pre></div>
-</div>
-</section>
 <section id="total-parity">
 <h3>Total parity<a class="headerlink" href="#total-parity" title="Link to this heading">¶</a></h3>
 <p>That leftover leg is the total fermionic parity <span class="math">\(\prod_j (1 - 2 n_j)\)</span>. It is a property of the
@@ -697,6 +648,63 @@ subspace is what makes the encoding faithful. Ternary trees add no such qubits a
 subspace.</p>
 </div>
 </section>
+<section id="worked-example-a-bravyi-kitaev-tree">
+<span id="bravyi-kitaev-by-hand"></span><h3>Worked example: a Bravyi-Kitaev tree<a class="headerlink" href="#worked-example-a-bravyi-kitaev-tree" title="Link to this heading">¶</a></h3>
+<p>Specifications are more often computed than typed out, since the tree for a real encoding is rarely small
+enough to write by hand. Bravyi-Kitaev is a good example: it belongs to this family, but its tree is not
+uniform, so no convenience constructor covers it.</p>
+<p>Its tree is built by a recursive split over the nodes, one per mode. Within a range of nodes
+<span class="math">\([l, r]\)</span>, let <span class="math">\(h\)</span> be the largest power of two that fits; the node placed for that range is
+<span class="math">\(l + h - 1\)</span>, the last one in that block. Its <code class="docutils literal notranslate"><span class="pre">X</span></code> link descends to the tree built from the block
+before it and its <code class="docutils literal notranslate"><span class="pre">Z</span></code> link to the tree built from the remainder after it, leaving its <code class="docutils literal notranslate"><span class="pre">Y</span></code> link as a
+leg:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">bravyi_kitaev_tree</span><span class="p">(</span><span class="n">num_modes</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TernaryTree</span><span class="p">:</span>
+<span class="gp">... </span><span class="w">    </span><span class="sd">"""Builds the ternary tree of the Bravyi-Kitaev encoding on ``num_modes`` modes."""</span>
+<span class="gp">... </span>    <span class="n">spec</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">num_modes</span>
+<span class="gp">... </span>    <span class="k">def</span><span class="w"> </span><span class="nf">build</span><span class="p">(</span><span class="n">left</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">right</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="gp">... </span>        <span class="k">if</span> <span class="n">left</span> <span class="o">&gt;</span> <span class="n">right</span><span class="p">:</span>
+<span class="gp">... </span>            <span class="k">return</span> <span class="kc">None</span>  <span class="c1"># an empty range: the parent's link stays a leg</span>
+<span class="gp">... </span>        <span class="n">block</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="gp">... </span>        <span class="k">while</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">block</span> <span class="o">&lt;=</span> <span class="n">right</span> <span class="o">-</span> <span class="n">left</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span>
+<span class="gp">... </span>            <span class="n">block</span> <span class="o">*=</span> <span class="mi">2</span>
+<span class="gp">... </span>        <span class="n">node</span> <span class="o">=</span> <span class="n">left</span> <span class="o">+</span> <span class="n">block</span> <span class="o">-</span> <span class="mi">1</span>
+<span class="gp">... </span>        <span class="k">for</span> <span class="n">child</span><span class="p">,</span> <span class="n">label</span> <span class="ow">in</span> <span class="p">(</span>
+<span class="gp">... </span>            <span class="p">(</span><span class="n">build</span><span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">node</span> <span class="o">-</span> <span class="mi">1</span><span class="p">),</span> <span class="s2">"X"</span><span class="p">),</span>   <span class="c1"># the block before this node</span>
+<span class="gp">... </span>            <span class="p">(</span><span class="n">build</span><span class="p">(</span><span class="n">node</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">right</span><span class="p">),</span> <span class="s2">"Z"</span><span class="p">),</span>  <span class="c1"># the remainder after it</span>
+<span class="gp">... </span>        <span class="p">):</span>
+<span class="gp">... </span>            <span class="k">if</span> <span class="n">child</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+<span class="gp">... </span>                <span class="n">spec</span><span class="p">[</span><span class="n">child</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">label</span><span class="p">)</span>
+<span class="gp">... </span>        <span class="k">return</span> <span class="n">node</span>
+<span class="gp">... </span>    <span class="n">build</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">num_modes</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="k">return</span> <span class="n">TernaryTree</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>At four modes the whole range is a single block, so the node placed first is 3, with <span class="math">\([0, 2]\)</span>
+before it and nothing after; that sub-range gives node 1 over the single nodes 0 and 2. Compiling the tree
+confirms the encoding is Bravyi-Kitaev and not merely a tree of the same shape class – its first Majorana
+image is <span class="math">\(X_0 X_1 X_3\)</span>:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">tree</span> <span class="o">=</span> <span class="n">bravyi_kitaev_tree</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">dict</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">children</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+<span class="go">{'X': 0, 'Z': 2}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">encoding</span> <span class="o">=</span> <span class="n">TernaryTreeEncoding</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">encoding</span><span class="o">.</span><span class="n">majorana_image</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="go">[(0, 'X'), (1, 'X'), (3, 'X')]</span>
+</pre></div>
+</div>
+<p>Its total parity makes the point of the previous section concrete: the leftover leg is the one reached
+by the all-<span class="math">\(Z\)</span> path, and here that path stops at the root, so the observable is the single-qubit
+<span class="math">\(Z_3\)</span> rather than a string over all four qubits:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">encoding</span><span class="o">.</span><span class="n">total_parity</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+<span class="go">&lt;SparseObservable with 1 term on 4 qubits: (1+0j)(Z_3)&gt;</span>
+</pre></div>
+</div>
+<p>Scaling up needs nothing but a larger argument. Because no node ever spends its <code class="docutils literal notranslate"><span class="pre">Y</span></code> link on an edge,
+each branches at most two ways, so the Pauli weight grows logarithmically rather than linearly:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="p">[</span><span class="n">bravyi_kitaev_tree</span><span class="p">(</span><span class="n">n</span><span class="p">)</span><span class="o">.</span><span class="n">max_weight</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">64</span><span class="p">)]</span>
+<span class="go">[3, 4, 5, 6, 7]</span>
+</pre></div>
+</div>
+</section>
 </section>
 </section>
 
@@ -735,7 +743,7 @@ subspace.</p>
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on 2026/09/30</div>
+              Last updated on 2026/10/01</div>
           </div>
           <div class="right-details">
             
@@ -761,8 +769,8 @@ subspace.</p>
 <li><a class="reference internal" href="#library-implementations">Library implementations</a></li>
 <li><a class="reference internal" href="#choose-an-encoding-with-ternary-trees">Choose an encoding with ternary trees</a><ul>
 <li><a class="reference internal" href="#build-an-arbitrary-tree">Build an arbitrary tree</a></li>
-<li><a class="reference internal" href="#worked-example-a-bravyi-kitaev-tree">Worked example: a Bravyi-Kitaev tree</a></li>
 <li><a class="reference internal" href="#total-parity">Total parity</a></li>
+<li><a class="reference internal" href="#worked-example-a-bravyi-kitaev-tree">Worked example: a Bravyi-Kitaev tree</a></li>
 </ul>
 </li>
 </ul>
@@ -776,7 +784,7 @@ subspace.</p>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=9aa433c6"></script>
+</div><script src="../_static/documentation_options.js?v=79af8772"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

@@ -325,6 +325,52 @@ generate fewer Pauli strings -- its unused links are legs, and a leg spells a st
 descendants do. Of those :math:`2n+1` strings, :math:`2n` pair into the Majorana operators of the
 :math:`n` modes, and exactly one is left over.
 
+Total parity
+~~~~~~~~~~~~
+
+That leftover leg is the total fermionic parity :math:`\prod_j (1 - 2 n_j)`. It is a property of the
+encoding rather than a mapping of any operator, so it is a method on the encoding itself:
+
+.. tab-set-code::
+
+    .. code-block:: python
+
+       >>> TernaryTreeEncoding(TernaryTree.chain(4, "Z")).total_parity(4)
+       <SparseObservable with 1 term on 4 qubits: (1+0j)(Z_3 Z_2 Z_1 Z_0)>
+       >>> TernaryTreeEncoding(TernaryTree.breadth_first(4, 3)).total_parity(4)
+       <SparseObservable with 1 term on 4 qubits: (1+0j)(Z_3 Z_0)>
+
+    .. code-block:: c
+
+       QfTernaryTree *tree;
+       qf_ternary_tree_chain(4, QfPauliLabel_Z, &tree);
+
+       QfTernaryTreeEncoding *encoding;
+       qf_ternary_tree_encoding_new(tree, NULL, &encoding);
+
+       // On the chain this is the full Z string; on the balanced tree it is not.
+       QkObs *parity = qf_ternary_tree_encoding_total_parity(encoding, 4);
+
+       qf_ternary_tree_encoding_free(encoding);
+       qf_ternary_tree_free(tree);
+       qk_obs_free(parity);
+
+As the balanced case shows, this is *not* in general the all-:math:`Z` string: it is the leg reached by
+the all-:math:`Z` *path*, which acts as the identity on every node not on that path.
+
+.. important::
+   Total parity here is an **observable to measure, not a constraint to impose**. Both of its
+   eigenvalues are physical, so do not project a state onto the :math:`+1` sector: a ternary-tree
+   encoding spends one qubit per mode and is onto the full :math:`2^n`-dimensional space, leaving no
+   unphysical subspace to project away.
+
+   Local encodings that add ancilla qubits, such as the flow sets in
+   :ref:`1D <1d_fermi_hubbard>` and :ref:`2D <2d_fermi_hubbard>`, do work that way: there
+   :math:`n_\text{qubits} > n_\text{modes}`, the extra dimensions are unphysical, and a stabilizer
+   subspace is what makes the encoding faithful. Ternary trees add no such qubits and have no such
+   subspace.
+
+
 .. _bravyi_kitaev_by_hand:
 
 Worked example: a Bravyi-Kitaev tree
@@ -372,8 +418,18 @@ image is :math:`X_0 X_1 X_3`:
     >>> tree = bravyi_kitaev_tree(4)
     >>> dict(tree.children(1))
     {'X': 0, 'Z': 2}
-    >>> TernaryTreeEncoding(tree).majorana_image(0)
+    >>> encoding = TernaryTreeEncoding(tree)
+    >>> encoding.majorana_image(0)
     [(0, 'X'), (1, 'X'), (3, 'X')]
+
+Its total parity makes the point of the previous section concrete: the leftover leg is the one reached
+by the all-:math:`Z` path, and here that path stops at the root, so the observable is the single-qubit
+:math:`Z_3` rather than a string over all four qubits:
+
+.. doctest::
+
+    >>> encoding.total_parity(4)
+    <SparseObservable with 1 term on 4 qubits: (1+0j)(Z_3)>
 
 Scaling up needs nothing but a larger argument. Because no node ever spends its ``Y`` link on an edge,
 each branches at most two ways, so the Pauli weight grows logarithmically rather than linearly:
@@ -382,48 +438,3 @@ each branches at most two ways, so the Pauli weight grows logarithmically rather
 
     >>> [bravyi_kitaev_tree(n).max_weight for n in (4, 8, 16, 32, 64)]
     [3, 4, 5, 6, 7]
-
-Total parity
-~~~~~~~~~~~~
-
-That leftover leg is the total fermionic parity :math:`\prod_j (1 - 2 n_j)`. It is a property of the
-encoding rather than a mapping of any operator, so it is a method on the encoding itself:
-
-.. tab-set-code::
-
-    .. code-block:: python
-
-       >>> TernaryTreeEncoding(TernaryTree.chain(4, "Z")).total_parity(4)
-       <SparseObservable with 1 term on 4 qubits: (1+0j)(Z_3 Z_2 Z_1 Z_0)>
-       >>> TernaryTreeEncoding(TernaryTree.breadth_first(4, 3)).total_parity(4)
-       <SparseObservable with 1 term on 4 qubits: (1+0j)(Z_3 Z_0)>
-
-    .. code-block:: c
-
-       QfTernaryTree *tree;
-       qf_ternary_tree_chain(4, QfPauliLabel_Z, &tree);
-
-       QfTernaryTreeEncoding *encoding;
-       qf_ternary_tree_encoding_new(tree, NULL, &encoding);
-
-       // On the chain this is the full Z string; on the balanced tree it is not.
-       QkObs *parity = qf_ternary_tree_encoding_total_parity(encoding, 4);
-
-       qf_ternary_tree_encoding_free(encoding);
-       qf_ternary_tree_free(tree);
-       qk_obs_free(parity);
-
-As the balanced case shows, this is *not* in general the all-:math:`Z` string: it is the leg reached by
-the all-:math:`Z` *path*, which acts as the identity on every node not on that path.
-
-.. important::
-   Total parity here is an **observable to measure, not a constraint to impose**. Both of its
-   eigenvalues are physical, so do not project a state onto the :math:`+1` sector: a ternary-tree
-   encoding spends one qubit per mode and is onto the full :math:`2^n`-dimensional space, leaving no
-   unphysical subspace to project away.
-
-   Local encodings that add ancilla qubits, such as the flow sets in
-   :ref:`1D <1d_fermi_hubbard>` and :ref:`2D <2d_fermi_hubbard>`, do work that way: there
-   :math:`n_\text{qubits} > n_\text{modes}`, the extra dimensions are unphysical, and a stabilizer
-   subspace is what makes the encoding faithful. Ternary trees add no such qubits and have no such
-   subspace.

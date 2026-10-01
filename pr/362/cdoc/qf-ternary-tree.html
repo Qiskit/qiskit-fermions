@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Ternary Trees - Qiskit Fermions 0.3.0.dev0+92de644</title>
+        <title>Ternary Trees - Qiskit Fermions 0.3.0.dev0+662737e</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.3.0.dev0+92de644</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.3.0.dev0+662737e</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.3.0.dev0+92de644</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.3.0.dev0+662737e</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -295,9 +295,9 @@ particular shapes:</p>
 <td><p><code class="docutils literal notranslate"><span class="pre">qf_ternary_tree_breadth_first(n,</span> <span class="pre">3,</span> <span class="pre">...)</span></code></p></td>
 <td><p><span class="math">\(\lceil \log_3(2n+1) \rceil\)</span></p></td>
 </tr>
-<tr class="row-odd"><td><p>Bravyi-Kitaev-like</p></td>
+<tr class="row-odd"><td><p>Binary-branching</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">qf_ternary_tree_breadth_first(n,</span> <span class="pre">2,</span> <span class="pre">...)</span></code></p></td>
-<td><p><span class="math">\(O(\log n)\)</span></p></td>
+<td><p><span class="math">\(\lfloor \log_2 n \rfloor + 1\)</span></p></td>
 </tr>
 </tbody>
 </table>
@@ -309,6 +309,9 @@ particular shapes:</p>
 <a class="reference internal" href="#c.qf_ternary_tree_new" title="qf_ternary_tree_new"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_ternary_tree_new()</span></code></a>, which takes one <code class="xref c c-struct docutils literal notranslate"><span class="pre">QfTernaryTreeNode</span></code> per node: the trees worth
 searching for are usually neither a chain nor uniform, since an algorithm such as Bonsai grows a
 spanning tree of a device’s coupling graph and its branching therefore follows that connectivity.</p>
+<p>Not every encoding in the family has a convenience constructor. Bravyi-Kitaev, for instance, is a tree
+that is not uniform, so it is built by computing its specification: the binary-branching tree above
+matches its Pauli weight but is a different tree, except when <span class="math">\(n\)</span> is a power of two.</p>
 <p>Once built, a tree is compiled into a <code class="xref c c-struct docutils literal notranslate"><span class="pre">QfTernaryTreeEncoding</span></code> with
 <a class="reference internal" href="#c.qf_ternary_tree_encoding_new" title="qf_ternary_tree_encoding_new"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_ternary_tree_encoding_new()</span></code></a>, which pairs its legs into Majorana operators and builds their
 Pauli strings once. That encoding is then passed to the mappers in <a class="reference internal" href="qf-mappers-library.html#qf-mapper-library"><span class="std std-ref">Mapper Library</span></a>, and should
@@ -464,8 +467,10 @@ Both have Pauli weight <code class="docutils literal notranslate"><span class="p
 <dd><p>Constructs a tree by attaching up to <code class="docutils literal notranslate"><span class="pre">branching</span></code> children to each node in turn. </p>
 <p><p>A <code class="docutils literal notranslate"><span class="pre">branching</span></code> of 3 gives the balanced tree, whose Pauli weight
 <span class="math">\(\lceil \log_3(2N+1) \rceil\)</span> is optimal over <em>all</em> fermion-to-qubit mappings. A <code class="docutils literal notranslate"><span class="pre">branching</span></code>
-of 2 gives a tree of the same branching rate as the Bravyi-Kitaev encoding, and hence the same
-<span class="math">\(O(\log N)\)</span> weight – though it is not bit-for-bit that encoding.</p>
+of 2 gives a binary-branching tree of weight <span class="math">\(\lfloor \log_2 N \rfloor + 1\)</span>. That matches the
+Bravyi-Kitaev weight but is <em>not</em> that encoding, except when <code class="docutils literal notranslate"><span class="pre">num_nodes</span></code> is a power of two:
+Bravyi-Kitaev’s tree is the irregular partial-sum shape, built through
+<a class="reference internal" href="#c.qf_ternary_tree_new" title="qf_ternary_tree_new"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_ternary_tree_new()</span></code></a>.</p>
 <p><code class="docutils literal notranslate"><span class="pre">order</span></code> is part of the encoding’s definition: it changes which Pauli strings are produced, though
 not their weight.</p>
 <p>The tree must be freed with <a class="reference internal" href="#c.qf_ternary_tree_free" title="qf_ternary_tree_free"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_ternary_tree_free()</span></code></a>.</p>
@@ -772,7 +777,7 @@ parity leg.</p>
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on 2026/09/30</div>
+              Last updated on 2026/10/01</div>
           </div>
           <div class="right-details">
             
@@ -817,7 +822,7 @@ parity leg.</p>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=9aa433c6"></script>
+</div><script src="../_static/documentation_options.js?v=79af8772"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
