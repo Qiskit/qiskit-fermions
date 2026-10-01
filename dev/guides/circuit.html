@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Work with fermionic circuits - Qiskit Fermions 0.3.0.dev0+280da2d</title>
+        <title>Work with fermionic circuits - Qiskit Fermions 0.3.0.dev0+0ce2c1d</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.3.0.dev0+280da2d</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.3.0.dev0+0ce2c1d</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.3.0.dev0+280da2d</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.3.0.dev0+0ce2c1d</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -326,10 +326,6 @@ operator by using <a class="reference internal" href="grouping.html#grouping-exp
 assigning group indices to the Hamiltonian terms, you preserve structural
 information that optimization passes can exploit throughout the transpilation
 stack.</p>
-<div class="sd-tab-set docutils">
-<input checked="checked" id="sd-tab-item-0" name="sd-tab-set-0" type="radio">
-<label class="sd-tab-label" data-sync-group="tab" data-sync-id="python" for="sd-tab-item-0">
-Python</label><div class="sd-tab-content docutils">
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.circuit</span><span class="w"> </span><span class="kn">import</span> <span class="n">FermionicCircuit</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.circuit.library</span><span class="w"> </span><span class="kn">import</span> <span class="n">Evolution</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.operators</span><span class="w"> </span><span class="kn">import</span> <span class="n">FermionOperator</span><span class="p">,</span> <span class="n">cre</span><span class="p">,</span> <span class="n">ann</span>
@@ -351,15 +347,6 @@ Python</label><div class="sd-tab-content docutils">
 <span class="gp">&gt;&gt;&gt; </span><span class="n">evolution</span> <span class="o">=</span> <span class="n">Evolution</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">hamiltonian</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">circuit</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">evolution</span><span class="p">,</span> <span class="n">circuit</span><span class="o">.</span><span class="n">register</span><span class="p">)</span>
 </pre></div>
-</div>
-</div>
-<input id="sd-tab-item-1" name="sd-tab-set-0" type="radio">
-<label class="sd-tab-label" data-sync-group="tab" data-sync-id="c" for="sd-tab-item-1">
-C</label><div class="sd-tab-content docutils">
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="c1">// The C API for FermionicCircuit is not available yet.</span>
-</pre></div>
-</div>
-</div>
 </div>
 <p>(<a class="reference download internal" download="" href="../_downloads/008ac416f05dfdde5f2a0fd60c59361d/circuit-2.png"><code class="xref download docutils literal notranslate"><span class="pre">png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/9d33959bfab0db79bf22709d9f85bbc0/circuit-2.hires.png"><code class="xref download docutils literal notranslate"><span class="pre">hires.png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/7f6f501d6de6d3208fbba283bc726fc1/circuit-2.pdf"><code class="xref download docutils literal notranslate"><span class="pre">pdf</span></code></a>)</p>
 <figure class="align-default">
@@ -402,6 +389,99 @@ without arguments to span every mode, or pass the modes to restrict it to:</p>
 qubit-level optimization that follows. The
 <a class="reference internal" href="transpilation.html#transpilation-explanation"><span class="std std-ref">Transpile fermionic circuits</span></a> guide covers
 that stage.</p>
+</section>
+<section id="repeat-a-circuit">
+<h2>Repeat a circuit<a class="headerlink" href="#repeat-a-circuit" title="Link to this heading">¶</a></h2>
+<p>Many algorithms apply the same block of gates many times over. Time evolution is
+the common case: a Trotter step is built once, then repeated to reach the target
+time. Use <a class="reference internal" href="../stubs/qiskit_fermions.circuit.FermionicCircuit.html#qiskit_fermions.circuit.FermionicCircuit.repeat" title="qiskit_fermions.circuit.FermionicCircuit.repeat"><code class="xref py py-meth docutils literal notranslate"><span class="pre">repeat()</span></code></a> to build the repeated circuit, and
+<a class="reference internal" href="../stubs/qiskit_fermions.circuit.FermionicCircuit.html#qiskit_fermions.circuit.FermionicCircuit.compose" title="qiskit_fermions.circuit.FermionicCircuit.compose"><code class="xref py py-meth docutils literal notranslate"><span class="pre">compose()</span></code></a> to join it to a state preparation prefix.</p>
+<p>The example below builds a second-order Trotter step for a Fermi-Hubbard model.
+The step is symmetric: it splits the hopping term into two half-duration
+<a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.OrbitalRotation.html#qiskit_fermions.circuit.library.OrbitalRotation" title="qiskit_fermions.circuit.library.OrbitalRotation"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrbitalRotation</span></code></a> gates surrounding the on-site interaction.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">scipy.linalg</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.circuit.library</span><span class="w"> </span><span class="kn">import</span> <span class="n">InitializeModes</span><span class="p">,</span> <span class="n">OrbitalRotation</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">norb</span><span class="p">,</span> <span class="n">reps</span><span class="p">,</span> <span class="n">time</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mf">1.0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">num_modes</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">norb</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dt</span> <span class="o">=</span> <span class="n">time</span> <span class="o">/</span> <span class="n">reps</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">hopping</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">norb</span><span class="p">,</span> <span class="n">norb</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">hopping</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">hopping</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">interaction</span> <span class="o">=</span> <span class="n">FermionOperator</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="p">{(</span><span class="n">cre</span><span class="p">(</span><span class="n">p</span><span class="p">),</span> <span class="n">ann</span><span class="p">(</span><span class="n">p</span><span class="p">),</span> <span class="n">cre</span><span class="p">(</span><span class="n">p</span> <span class="o">+</span> <span class="n">norb</span><span class="p">),</span> <span class="n">ann</span><span class="p">(</span><span class="n">p</span> <span class="o">+</span> <span class="n">norb</span><span class="p">)):</span> <span class="mf">2.0</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">norb</span><span class="p">)}</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">rotation</span><span class="p">(</span><span class="n">duration</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="n">propagator</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">expm</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">duration</span> <span class="o">*</span> <span class="n">hopping</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="c1"># the same rotation acts on the alpha and beta halves of the register</span>
+<span class="gp">... </span>    <span class="k">return</span> <span class="n">scipy</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">block_diag</span><span class="p">(</span><span class="n">propagator</span><span class="p">,</span> <span class="n">propagator</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">trotter_step</span> <span class="o">=</span> <span class="n">FermionicCircuit</span><span class="p">(</span><span class="n">num_modes</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">trotter_step</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">OrbitalRotation</span><span class="p">(</span><span class="n">rotation</span><span class="p">(</span><span class="n">dt</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)),</span> <span class="n">trotter_step</span><span class="o">.</span><span class="n">modes</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">trotter_step</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">Evolution</span><span class="p">(</span><span class="n">num_modes</span><span class="p">,</span> <span class="n">interaction</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">atomic</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">trotter_step</span><span class="o">.</span><span class="n">modes</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">trotter_step</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">OrbitalRotation</span><span class="p">(</span><span class="n">rotation</span><span class="p">(</span><span class="n">dt</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)),</span> <span class="n">trotter_step</span><span class="o">.</span><span class="n">modes</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Repeating the step and composing it onto a Hartree-Fock reference gives the full
+evolution:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">evolution</span> <span class="o">=</span> <span class="n">FermionicCircuit</span><span class="p">(</span><span class="n">num_modes</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">evolution</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">InitializeModes</span><span class="p">([</span><span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">]),</span> <span class="n">evolution</span><span class="o">.</span><span class="n">modes</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">evolution</span><span class="o">.</span><span class="n">compose</span><span class="p">(</span><span class="n">trotter_step</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">reps</span><span class="p">),</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">evolution</span><span class="o">.</span><span class="n">count_ops</span><span class="p">()[</span><span class="s2">"OrbitalRotation"</span><span class="p">]</span>
+<span class="go">6</span>
+</pre></div>
+</div>
+<p>(<a class="reference download internal" download="" href="../_downloads/8e6fb1e3432e550b2f261f2a0d1b0562/circuit-8.png"><code class="xref download docutils literal notranslate"><span class="pre">png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/620f1bc239d32830a5abe285db1a4cc6/circuit-8.hires.png"><code class="xref download docutils literal notranslate"><span class="pre">hires.png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/f11934d8c102ec1d6a9741c9cd5a1721/circuit-8.pdf"><code class="xref download docutils literal notranslate"><span class="pre">pdf</span></code></a>)</p>
+<figure class="align-default">
+<img alt="A `FermionicCircuit` with repeated steps." class="plot-directive" src="../_images/circuit-8.png" />
+</figure>
+<p>The repetitions are flattened into the returned circuit rather than wrapped in a
+single gate, so <a class="reference internal" href="../stubs/qiskit_fermions.circuit.FermionicCircuit.html#qiskit_fermions.circuit.FermionicCircuit.count_ops" title="qiskit_fermions.circuit.FermionicCircuit.count_ops"><code class="xref py py-meth docutils literal notranslate"><span class="pre">count_ops()</span></code></a> counts two rotations per
+step. That flattening is what makes the redundancy at the step boundaries
+visible to the transpiler: the trailing half-duration rotation of one step and
+the leading one of the next are adjacent, so
+<a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.MergeOrbitalRotations.html#qiskit_fermions.transpiler.passes.MergeOrbitalRotations" title="qiskit_fermions.transpiler.passes.MergeOrbitalRotations"><code class="xref py py-class docutils literal notranslate"><span class="pre">MergeOrbitalRotations</span></code></a> combines them into a single rotation.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.transpiler</span><span class="w"> </span><span class="kn">import</span> <span class="n">FermionicPassManager</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.transpiler.passes</span><span class="w"> </span><span class="kn">import</span> <span class="n">MergeOrbitalRotations</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">merged</span> <span class="o">=</span> <span class="n">FermionicPassManager</span><span class="p">([</span><span class="n">MergeOrbitalRotations</span><span class="p">()])</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">evolution</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">merged</span><span class="o">.</span><span class="n">count_ops</span><span class="p">()[</span><span class="s2">"OrbitalRotation"</span><span class="p">]</span>
+<span class="go">4</span>
+</pre></div>
+</div>
+<p>(<a class="reference download internal" download="" href="../_downloads/704734f4fd09bdb49914c01b4f6ee7c9/circuit-10.png"><code class="xref download docutils literal notranslate"><span class="pre">png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/1270ff5c8eadc4d73884e369668252d6/circuit-10.hires.png"><code class="xref download docutils literal notranslate"><span class="pre">hires.png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/0432b67ca1092f8a26f338faab57bbe0/circuit-10.pdf"><code class="xref download docutils literal notranslate"><span class="pre">pdf</span></code></a>)</p>
+<figure class="align-default">
+<img alt="A `FermionicCircuit` with repeated steps and merged orbital rotations." class="plot-directive" src="../_images/circuit-10.png" />
+</figure>
+<p>The result costs one rotation per step plus one, which is what you get by fusing
+those half-steps by hand. Writing the step in its natural symmetric form and
+repeating it produces the same circuit, so the fusion is left to the
+optimization stage.</p>
+<p>When you need the repetitions kept apart, pass <code class="docutils literal notranslate"><span class="pre">insert_barriers=True</span></code> to place
+a <a class="reference internal" href="../stubs/qiskit_fermions.circuit.FermionicCircuit.html#qiskit_fermions.circuit.FermionicCircuit.barrier" title="qiskit_fermions.circuit.FermionicCircuit.barrier"><code class="xref py py-meth docutils literal notranslate"><span class="pre">barrier()</span></code></a> between them. The optimization passes do
+not fuse gates across a barrier, so every rotation survives:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">separated</span> <span class="o">=</span> <span class="n">trotter_step</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">reps</span><span class="p">,</span> <span class="n">insert_barriers</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">FermionicPassManager</span><span class="p">([</span><span class="n">MergeOrbitalRotations</span><span class="p">()])</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">separated</span><span class="p">)</span><span class="o">.</span><span class="n">count_ops</span><span class="p">()[</span>
+<span class="gp">... </span>    <span class="s2">"OrbitalRotation"</span>
+<span class="gp">... </span><span class="p">]</span>
+<span class="go">6</span>
+</pre></div>
+</div>
+<p>(<a class="reference download internal" download="" href="../_downloads/b81e874710256ab1c70c40bd489e6b57/circuit-12.png"><code class="xref download docutils literal notranslate"><span class="pre">png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/8541657c26e73af19f3678385e8e74fa/circuit-12.hires.png"><code class="xref download docutils literal notranslate"><span class="pre">hires.png</span></code></a>, <a class="reference download internal" download="" href="../_downloads/5e9d5591a422608ef0cf9294bba9d71a/circuit-12.pdf"><code class="xref download docutils literal notranslate"><span class="pre">pdf</span></code></a>)</p>
+<figure class="align-default">
+<img alt="A `FermionicCircuit` with repeated steps separated by barriers." class="plot-directive" src="../_images/circuit-12.png" />
+</figure>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">reps</span></code> argument of <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter.html#qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter" title="qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicSuzukiTrotter</span></code></a> is a different
+concept. It subdivides a <cite>single</cite> <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate into more, shorter
+factors, whereas <a class="reference internal" href="../stubs/qiskit_fermions.circuit.FermionicCircuit.html#qiskit_fermions.circuit.FermionicCircuit.repeat" title="qiskit_fermions.circuit.FermionicCircuit.repeat"><code class="xref py py-meth docutils literal notranslate"><span class="pre">repeat()</span></code></a> duplicates whole circuits.
+Repeating a circuit that holds one <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> only multiplies its
+total evolution time.</p>
+</div>
 </section>
 <section id="transpile-fermionic-circuits">
 <h2>Transpile fermionic circuits<a class="headerlink" href="#transpile-fermionic-circuits" title="Link to this heading">¶</a></h2>
@@ -487,6 +567,7 @@ spin semantics only at simulation time.</p></li>
 <li><a class="reference internal" href="#generic-mode-indexing">Generic mode indexing</a></li>
 <li><a class="reference internal" href="#build-a-fermionic-circuit">Build a fermionic circuit</a></li>
 <li><a class="reference internal" href="#keep-gates-apart-with-a-barrier">Keep gates apart with a barrier</a></li>
+<li><a class="reference internal" href="#repeat-a-circuit">Repeat a circuit</a></li>
 <li><a class="reference internal" href="#transpile-fermionic-circuits">Transpile fermionic circuits</a></li>
 <li><a class="reference internal" href="#next-steps">Next steps</a></li>
 </ul>
@@ -500,7 +581,7 @@ spin semantics only at simulation time.</p></li>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=657485fd"></script>
+</div><script src="../_static/documentation_options.js?v=b38faa93"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

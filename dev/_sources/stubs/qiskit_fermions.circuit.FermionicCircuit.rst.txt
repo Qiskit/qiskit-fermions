@@ -98,6 +98,10 @@
 
   
 
+  
+
+  
+
 
 
   
@@ -106,9 +110,11 @@
     
    .. automethod:: append
    .. automethod:: barrier
+   .. automethod:: compose
    .. automethod:: count_ops
    .. automethod:: decompose
    .. automethod:: draw
+   .. automethod:: repeat
   
   
   
