@@ -96,6 +96,8 @@
 
   
 
+  
+
 
 
   
@@ -103,6 +105,7 @@
    .. rubric:: Methods
     
    .. automethod:: append
+   .. automethod:: barrier
    .. automethod:: count_ops
    .. automethod:: decompose
    .. automethod:: draw

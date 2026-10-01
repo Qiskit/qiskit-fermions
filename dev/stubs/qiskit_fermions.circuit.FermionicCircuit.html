@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>FermionicCircuit - Qiskit Fermions 0.3.0.dev0+e13eb0e</title>
+        <title>FermionicCircuit - Qiskit Fermions 0.3.0.dev0+280da2d</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.3.0.dev0+e13eb0e</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.3.0.dev0+280da2d</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.3.0.dev0+e13eb0e</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.3.0.dev0+280da2d</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -276,6 +276,9 @@
 <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumCircuit</span></code></a>. This is done to avoid exposing (amongst other methods)
 the ability to apply qubit-based gates onto a fermionic circuit, which would not be a
 well-defined operation in the general case.</p>
+<p><a class="reference internal" href="#qiskit_fermions.circuit.FermionicCircuit.barrier" title="qiskit_fermions.circuit.FermionicCircuit.barrier"><code class="xref py py-meth docutils literal notranslate"><span class="pre">barrier()</span></code></a> is re-exposed because it is an exception to that rule: a barrier acts on modes
+without interpreting them and carries no unitary content, so it is as well-defined on a fermionic
+register as it is on a qubit one.</p>
 <p>Initializing a circuit instance can be done with the arguments listed below.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -325,6 +328,28 @@ well-defined operation in the general case.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qiskit_fermions.circuit.FermionicCircuit.barrier">
+<span class="sig-name descname"><span class="pre">barrier</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">fargs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qiskit_fermions.circuit.FermionicCircuit.barrier" title="Link to this definition">¶</a></dt>
+<dd><p>Re-exposes <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit#barrier" title="(in Qiskit v2.5)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">barrier()</span></code></a>.</p>
+<p>A barrier carries no unitary effect. It marks a synchronization point that the optimization
+passes will not fuse gates across, which is how you keep a pass such as
+<a class="reference internal" href="qiskit_fermions.transpiler.passes.MergeOrbitalRotations.html#qiskit_fermions.transpiler.passes.MergeOrbitalRotations" title="qiskit_fermions.transpiler.passes.MergeOrbitalRotations"><code class="xref py py-class docutils literal notranslate"><span class="pre">MergeOrbitalRotations</span></code></a> or <a class="reference internal" href="qiskit_fermions.transpiler.passes.MergeSlaterDeterminantPreparation.html#qiskit_fermions.transpiler.passes.MergeSlaterDeterminantPreparation" title="qiskit_fermions.transpiler.passes.MergeSlaterDeterminantPreparation"><code class="xref py py-class docutils literal notranslate"><span class="pre">MergeSlaterDeterminantPreparation</span></code></a> from combining
+the gates on either side of it.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fargs</strong> (<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.Qubit" title="(in Qiskit v2.5)"><em>Qubit</em></a><em> | </em><a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.QuantumRegister" title="(in Qiskit v2.5)"><em>QuantumRegister</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#slice" title="(in Python v3.14)"><em>slice</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Sequence" title="(in Python v3.14)"><em>Sequence</em></a><em>[</em><a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.Qubit" title="(in Qiskit v2.5)"><em>Qubit</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>]</em>) – the fermionic modes on which to place the barrier. When omitted, the barrier spans
+every mode of this circuit.</p></li>
+<li><p><strong>label</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> | </em><em>None</em>) – the string label of the barrier.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
 </dd>
 </dl>
 </dd></dl>
@@ -394,7 +419,8 @@ or a pair of integers storing the numbers of spin alpha and spin beta fermions.<
 </dd>
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#TypeError" title="(in Python v3.14)"><strong>TypeError</strong></a> – if a circuit instruction does not implement ffsim’s
+<li><p><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#TypeError" title="(in Python v3.14)"><strong>TypeError</strong></a> – if a circuit instruction other than a
+    <code class="xref py py-class docutils literal notranslate"><span class="pre">Barrier</span></code> does not implement ffsim’s
     <a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.SupportsApplyUnitary.html#ffsim.SupportsApplyUnitary" title="(in ffsim)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ffsim.SupportsApplyUnitary</span></code></a> protocol.</p></li>
 <li><p><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – if a circuit instruction declines to apply its unitary for the given
     <code class="docutils literal notranslate"><span class="pre">norb</span></code> and <code class="docutils literal notranslate"><span class="pre">nelec</span></code>; or if an instruction implementing only the plain
@@ -429,6 +455,8 @@ has no mode argument and therefore acts on modes <code class="docutils literal n
 when its placement is the identity <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">1,</span> <span class="pre">...,</span> <span class="pre">k-1]</span></code>; on any other subset the placement
 cannot be expressed and the instruction is rejected rather than silently applied on the wrong
 modes.</p>
+<p>A <code class="xref py py-class docutils literal notranslate"><span class="pre">Barrier</span></code> is skipped: it carries no unitary effect, so it
+constrains transpilation without contributing to the state vector.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -445,7 +473,8 @@ or a pair of integers storing the numbers of spin alpha and spin beta fermions.<
 </dd>
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#TypeError" title="(in Python v3.14)"><strong>TypeError</strong></a> – if a circuit instruction does not implement ffsim’s
+<li><p><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#TypeError" title="(in Python v3.14)"><strong>TypeError</strong></a> – if a circuit instruction other than a
+    <code class="xref py py-class docutils literal notranslate"><span class="pre">Barrier</span></code> does not implement ffsim’s
     <a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.SupportsApplyUnitary.html#ffsim.SupportsApplyUnitary" title="(in ffsim)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ffsim.SupportsApplyUnitary</span></code></a> protocol.</p></li>
 <li><p><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – if a circuit instruction declines to apply its unitary for the given
     <code class="docutils literal notranslate"><span class="pre">norb</span></code> and <code class="docutils literal notranslate"><span class="pre">nelec</span></code>; or if an instruction implementing only the plain
@@ -479,7 +508,7 @@ or a pair of integers storing the numbers of spin alpha and spin beta fermions.<
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on 2026/09/29</div>
+              Last updated on 2026/10/01</div>
           </div>
           <div class="right-details">
             
@@ -506,6 +535,7 @@ or a pair of integers storing the numbers of spin alpha and spin beta fermions.<
 <li><a class="reference internal" href="#qiskit_fermions.circuit.FermionicCircuit.modes"><code class="docutils literal notranslate"><span class="pre">FermionicCircuit.modes</span></code></a></li>
 <li><a class="reference internal" href="#qiskit_fermions.circuit.FermionicCircuit.register"><code class="docutils literal notranslate"><span class="pre">FermionicCircuit.register</span></code></a></li>
 <li><a class="reference internal" href="#qiskit_fermions.circuit.FermionicCircuit.append"><code class="docutils literal notranslate"><span class="pre">FermionicCircuit.append()</span></code></a></li>
+<li><a class="reference internal" href="#qiskit_fermions.circuit.FermionicCircuit.barrier"><code class="docutils literal notranslate"><span class="pre">FermionicCircuit.barrier()</span></code></a></li>
 <li><a class="reference internal" href="#qiskit_fermions.circuit.FermionicCircuit.count_ops"><code class="docutils literal notranslate"><span class="pre">FermionicCircuit.count_ops()</span></code></a></li>
 <li><a class="reference internal" href="#qiskit_fermions.circuit.FermionicCircuit.decompose"><code class="docutils literal notranslate"><span class="pre">FermionicCircuit.decompose()</span></code></a></li>
 <li><a class="reference internal" href="#qiskit_fermions.circuit.FermionicCircuit.draw"><code class="docutils literal notranslate"><span class="pre">FermionicCircuit.draw()</span></code></a></li>
@@ -524,7 +554,7 @@ or a pair of integers storing the numbers of spin alpha and spin beta fermions.<
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=8e2a2717"></script>
+</div><script src="../_static/documentation_options.js?v=657485fd"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

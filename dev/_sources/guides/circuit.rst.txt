@@ -126,6 +126,45 @@ like decomposition. This demonstrates how structural information flows through t
 stack. To understand the full transpilation to
 qubits, refer to the :ref:`Transpiling fermionic circuits <transpilation_explanation>` guide.
 
+Keep gates apart with a barrier
+-------------------------------
+
+The optimization passes fuse neighboring gates where they can. For example,
+:class:`.MergeOrbitalRotations` combines a run of consecutive
+:class:`.OrbitalRotation` gates into one, and
+:class:`.MergeSlaterDeterminantPreparation` folds an :class:`.InitializeModes`
+into the rotation that follows it.
+
+Use :meth:`.FermionicCircuit.barrier` when you want to prevent that. A barrier
+carries no unitary effect, so it does not change the state your circuit
+prepares; it only marks a point that the passes do not fuse across. Call it
+without arguments to span every mode, or pass the modes to restrict it to:
+
+.. plot::
+   :context:
+   :nofigs:
+   :include-source:
+
+   >>> from qiskit_fermions.circuit.library import OrbitalRotation
+   >>> import numpy as np
+   >>>
+   >>> rotations = FermionicCircuit(4)
+   >>> rotations.append(OrbitalRotation(np.eye(4, dtype=complex)), rotations.register)
+   >>> rotations.barrier()
+   >>> rotations.append(OrbitalRotation(np.eye(4, dtype=complex)), rotations.register)
+
+.. plot::
+   :alt: A `FermionicCircuit` with a barrier separating two orbital rotations.
+   :context: close-figs
+
+   >>> rotations.draw("mpl", fold=-1)
+   <Figure size ... with 1 Axes>
+
+Barriers survive the fermion-to-qubit transpilation, so they also constrain the
+qubit-level optimization that follows. The
+:ref:`Transpile fermionic circuits <transpilation_explanation>` guide covers
+that stage.
+
 Transpile fermionic circuits
 ----------------------------
 

@@ -8,7 +8,7 @@
         <link rel="prefetch" href="_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Release Notes - Qiskit Fermions 0.3.0.dev0+e13eb0e</title>
+        <title>Release Notes - Qiskit Fermions 0.3.0.dev0+280da2d</title>
       <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="_static/styles/qiskit-sphinx-theme.css?v=8ff9dcb6" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="index.html"><div class="brand">Qiskit Fermions 0.3.0.dev0+e13eb0e</div></a>
+      <a href="index.html"><div class="brand">Qiskit Fermions 0.3.0.dev0+280da2d</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.3.0.dev0+e13eb0e</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.3.0.dev0+280da2d</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="search.html" role="search">
@@ -267,6 +267,30 @@
         <article role="main" id="furo-main-content">
           <section id="release-notes">
 <span id="id1"></span><h1>Release Notes<a class="headerlink" href="#release-notes" title="Link to this heading">¶</a></h1>
+<section id="upcoming-release-main">
+<span id="release-notes-upcoming-release-main"></span><h2>Upcoming release (<code class="docutils literal notranslate"><span class="pre">main</span></code>)<a class="headerlink" href="#upcoming-release-main" title="Link to this heading">¶</a></h2>
+<section id="python-api-features">
+<span id="release-notes-upcoming-release-main-python-api-features"></span><h3>Python API Features<a class="headerlink" href="#python-api-features" title="Link to this heading">¶</a></h3>
+<ul>
+<li><p>Added <a class="reference internal" href="stubs/qiskit_fermions.circuit.FermionicCircuit.html#qiskit_fermions.circuit.FermionicCircuit.barrier" title="qiskit_fermions.circuit.FermionicCircuit.barrier"><code class="xref py py-meth docutils literal notranslate"><span class="pre">FermionicCircuit.barrier()</span></code></a>, which re-exposes
+<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit#barrier" title="(in Qiskit v2.5)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">barrier()</span></code></a> on the fermionic layer:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">circuit</span><span class="o">.</span><span class="n">barrier</span><span class="p">()</span>                                        <span class="c1"># every mode</span>
+<span class="n">circuit</span><span class="o">.</span><span class="n">barrier</span><span class="p">(</span><span class="n">circuit</span><span class="o">.</span><span class="n">register</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">circuit</span><span class="o">.</span><span class="n">register</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>The optimization passes do not fuse gates across a barrier, so this is how you keep
+<a class="reference internal" href="stubs/qiskit_fermions.transpiler.passes.MergeOrbitalRotations.html#qiskit_fermions.transpiler.passes.MergeOrbitalRotations" title="qiskit_fermions.transpiler.passes.MergeOrbitalRotations"><code class="xref py py-class docutils literal notranslate"><span class="pre">MergeOrbitalRotations</span></code></a> from merging consecutive <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.OrbitalRotation.html#qiskit_fermions.circuit.library.OrbitalRotation" title="qiskit_fermions.circuit.library.OrbitalRotation"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrbitalRotation</span></code></a> gates, or
+<a class="reference internal" href="stubs/qiskit_fermions.transpiler.passes.MergeSlaterDeterminantPreparation.html#qiskit_fermions.transpiler.passes.MergeSlaterDeterminantPreparation" title="qiskit_fermions.transpiler.passes.MergeSlaterDeterminantPreparation"><code class="xref py py-class docutils literal notranslate"><span class="pre">MergeSlaterDeterminantPreparation</span></code></a> from folding an <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.InitializeModes.html#qiskit_fermions.circuit.library.InitializeModes" title="qiskit_fermions.circuit.library.InitializeModes"><code class="xref py py-class docutils literal notranslate"><span class="pre">InitializeModes</span></code></a> into the
+<a class="reference internal" href="stubs/qiskit_fermions.circuit.library.OrbitalRotation.html#qiskit_fermions.circuit.library.OrbitalRotation" title="qiskit_fermions.circuit.library.OrbitalRotation"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrbitalRotation</span></code></a> that follows it.</p>
+<p>The fermion-to-qubit synthesis stage maps a barrier onto every qubit of each register it touched,
+so it constrains the subsequent qubit-level transpilation too. Because a
+<a class="reference internal" href="stubs/qiskit_fermions.transpiler.F2QLayout.html#qiskit_fermions.transpiler.F2QLayout" title="qiskit_fermions.transpiler.F2QLayout"><code class="xref py py-type docutils literal notranslate"><span class="pre">F2QLayout</span></code></a> relates whole registers, whose two sides can even
+differ in size, a barrier is deliberately not narrowed to the qubits encoding the modes it was
+placed on.</p>
+</li>
+</ul>
+</section>
+</section>
 <section id="release-notes-0-2-0">
 <span id="id2"></span><h2>0.2.0<a class="headerlink" href="#release-notes-0-2-0" title="Link to this heading">¶</a></h2>
 <section id="prelude">
@@ -275,8 +299,8 @@
 The C API caught up considerably. The edge-vertex and transfer-vertex representations, their mappers and their algebra are now reachable from C, as are the operator support, sector conservation, in-place and scaled arithmetic, and group ordering. Both APIs also gained access to the electronic integrals parsed by an FCIDump, which previously could only be reached by converting the whole data structure into an operator.
 Additionally, this release draws a sharper boundary around what this package is for: fermionic operators, the mappers that convert them, and the mapper-agnostic circuit and its transpilation. Simulation is <a class="reference external" href="https://github.com/qiskit-community/ffsim">ffsim</a>’s concern, so the native FCI kernel and the linear-algebra utilities that duplicated it have been removed in favor of delegating to ffsim, and the <code class="docutils literal notranslate"><span class="pre">UCC</span></code> and <code class="docutils literal notranslate"><span class="pre">UCJ</span></code> gates now wrap ffsim’s operators instead of reimplementing their parameterizations. Simulation consequently requires the <code class="docutils literal notranslate"><span class="pre">ffsim</span></code> extra and, through ffsim’s dependency on PySCF, is unavailable on Windows; building operators, mapping them and transpiling the resulting circuits remain supported everywhere. Since this is still a pre-1.0 release, all of this was done by removal rather than deprecation: the upgrade notes below pair every removed API with its replacement, and are worth reading in full before upgrading.</p>
 </section>
-<section id="python-api-features">
-<span id="release-notes-0-2-0-python-api-features"></span><h3>Python API Features<a class="headerlink" href="#python-api-features" title="Link to this heading">¶</a></h3>
+<section id="release-notes-0-2-0-python-api-features">
+<span id="id3"></span><h3>Python API Features<a class="headerlink" href="#release-notes-0-2-0-python-api-features" title="Link to this heading">¶</a></h3>
 <ul>
 <li><p>How an <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate gets decomposed in fermionic space is now configurable through its
 new keyword-only <code class="docutils literal notranslate"><span class="pre">synthesis</span></code> argument, mirroring the <code class="docutils literal notranslate"><span class="pre">synthesis</span></code> argument of Qiskit’s
@@ -967,9 +991,9 @@ the input <a class="reference internal" href="stubs/qiskit_fermions.operators.Fe
 </section>
 </section>
 <section id="release-notes-0-1-0">
-<span id="id3"></span><h2>0.1.0<a class="headerlink" href="#release-notes-0-1-0" title="Link to this heading">¶</a></h2>
+<span id="id4"></span><h2>0.1.0<a class="headerlink" href="#release-notes-0-1-0" title="Link to this heading">¶</a></h2>
 <section id="release-notes-0-1-0-prelude">
-<span id="id4"></span><h3>Prelude<a class="headerlink" href="#release-notes-0-1-0-prelude" title="Link to this heading">¶</a></h3>
+<span id="id5"></span><h3>Prelude<a class="headerlink" href="#release-notes-0-1-0-prelude" title="Link to this heading">¶</a></h3>
 <p>This is the first release of Qiskit Fermions, an extension of Qiskit with tools for fermionic systems.  It provides operator data structures, a framework and library for converting those operators to qubit form (mappers), and a framework and library for synthesizing the corresponding quantum circuits.
 Following Qiskit’s design philosophy, the core of this package is written in Rust and exposed through first-party bindings for both Python and C.</p>
 </section>
@@ -1003,7 +1027,7 @@ Following Qiskit’s design philosophy, the core of this package is written in R
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on 2026/09/29</div>
+              Last updated on 2026/10/01</div>
           </div>
           <div class="right-details">
             
@@ -1025,9 +1049,13 @@ Following Qiskit’s design philosophy, the core of this package is written in R
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">Release Notes</a><ul>
+<li><a class="reference internal" href="#upcoming-release-main">Upcoming release (<code class="docutils literal notranslate"><span class="pre">main</span></code>)</a><ul>
+<li><a class="reference internal" href="#python-api-features">Python API Features</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#release-notes-0-2-0">0.2.0</a><ul>
 <li><a class="reference internal" href="#prelude">Prelude</a></li>
-<li><a class="reference internal" href="#python-api-features">Python API Features</a></li>
+<li><a class="reference internal" href="#release-notes-0-2-0-python-api-features">Python API Features</a></li>
 <li><a class="reference internal" href="#c-api-features">C API Features</a></li>
 <li><a class="reference internal" href="#python-api-upgrade-notes">Python API Upgrade Notes</a></li>
 <li><a class="reference internal" href="#c-api-upgrade-notes">C API Upgrade Notes</a></li>
@@ -1051,7 +1079,7 @@ Following Qiskit’s design philosophy, the core of this package is written in R
       
     </aside>
   </div>
-</div><script src="_static/documentation_options.js?v=8e2a2717"></script>
+</div><script src="_static/documentation_options.js?v=657485fd"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/scripts/furo.js?v=46bd48cc"></script>
