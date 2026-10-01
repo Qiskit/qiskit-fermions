@@ -55,7 +55,7 @@ pub fn group_terms_by_electronic_structure(
     two_body_physicist_order: bool,
 ) -> Result<(), GroupingError> {
     let mut groups = HashMap::new();
-    let mut group_indices: Vec<u32> = Vec::with_capacity(op.coeffs.len());
+    let mut group_indices: Vec<u32> = Vec::with_capacity(op.num_terms());
     for term in op.iter() {
         let key = _hash_electronic_structure_term(term, num_modes, two_body_physicist_order)?;
         let num_groups = groups.len();

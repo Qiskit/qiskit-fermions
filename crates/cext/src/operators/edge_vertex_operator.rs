@@ -922,7 +922,7 @@ pub unsafe extern "C" fn qf_edge_op_add(
 ///     QfEdgeVertexOperator *result = qf_edge_op_scaled_add(one, other, &factor);
 ///
 ///     QfEdgeVertexOperator *simplified = qf_edge_op_simplify(result, 1e-10);
-///     assert(qf_edge_op_len(simplified) == 0);
+///     assert(qf_edge_op_num_terms(simplified) == 0);
 ///
 /// @endrst
 #[unsafe(no_mangle)]
@@ -966,7 +966,7 @@ pub unsafe extern "C" fn qf_edge_op_scaled_add(
 ///
 ///     qf_edge_op_add_inplace(left, right);
 ///
-///     assert(qf_edge_op_len(left) == 2);
+///     assert(qf_edge_op_num_terms(left) == 2);
 ///
 /// @endrst
 #[unsafe(no_mangle)]
@@ -1011,7 +1011,7 @@ pub unsafe extern "C" fn qf_edge_op_add_inplace(
 ///     qf_edge_op_scaled_add_inplace(left, right, &factor);
 ///
 ///     QfEdgeVertexOperator *simplified = qf_edge_op_simplify(left, 1e-10);
-///     assert(qf_edge_op_len(simplified) == 0);
+///     assert(qf_edge_op_num_terms(simplified) == 0);
 ///
 /// @endrst
 #[unsafe(no_mangle)]
@@ -1278,7 +1278,7 @@ pub unsafe extern "C" fn qf_edge_op_ichop(op: *mut EdgeVertexOperator, atol: f64
 ///
 ///     QfEdgeVertexOperator *canon = qf_edge_op_simplify(op, 1e-4);
 ///
-///     assert(qf_edge_op_len(canon) == 1);
+///     assert(qf_edge_op_num_terms(canon) == 1);
 ///
 /// @endrst
 #[unsafe(no_mangle)]
@@ -1503,15 +1503,15 @@ pub unsafe extern "C" fn qf_edge_op_equiv(
 ///     QkComplex64 coeff = {1.0, 0.0};
 ///     qf_edge_op_add_term(op, 2, left, right, &coeff);
 ///
-///     assert(qf_edge_op_len(op) == 1);
+///     assert(qf_edge_op_num_terms(op) == 1);
 ///
 /// @endrst
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn qf_edge_op_len(op: *const EdgeVertexOperator) -> usize {
+pub unsafe extern "C" fn qf_edge_op_num_terms(op: *const EdgeVertexOperator) -> usize {
     // SAFETY: Per documentation, the pointers are non-null and aligned.
     let op = unsafe { const_ptr_as_ref(op) };
 
-    op.boundaries.len() - 1
+    OperatorTrait::num_terms(op)
 }
 
 /// @ingroup qf_edge_op

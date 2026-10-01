@@ -842,7 +842,7 @@ pub unsafe extern "C" fn qf_maj_op_add(
 ///     QfMajoranaOperator *result = qf_maj_op_scaled_add(one, other, &factor);
 ///
 ///     QfMajoranaOperator *simplified = qf_maj_op_simplify(result, 1e-10);
-///     assert(qf_maj_op_len(simplified) == 0);
+///     assert(qf_maj_op_num_terms(simplified) == 0);
 ///
 /// @endrst
 #[unsafe(no_mangle)]
@@ -886,7 +886,7 @@ pub unsafe extern "C" fn qf_maj_op_scaled_add(
 ///
 ///     qf_maj_op_add_inplace(left, right);
 ///
-///     assert(qf_maj_op_len(left) == 2);
+///     assert(qf_maj_op_num_terms(left) == 2);
 ///
 /// @endrst
 #[unsafe(no_mangle)]
@@ -931,7 +931,7 @@ pub unsafe extern "C" fn qf_maj_op_add_inplace(
 ///     qf_maj_op_scaled_add_inplace(left, right, &factor);
 ///
 ///     QfMajoranaOperator *simplified = qf_maj_op_simplify(left, 1e-10);
-///     assert(qf_maj_op_len(simplified) == 0);
+///     assert(qf_maj_op_num_terms(simplified) == 0);
 ///
 /// @endrst
 #[unsafe(no_mangle)]
@@ -1489,15 +1489,15 @@ pub unsafe extern "C" fn qf_maj_op_equiv(
 ///     QkComplex64 coeff = {1.0, 0.0};
 ///     qf_maj_op_add_term(op, 4, modes, &coeff);
 ///
-///     assert(qf_maj_op_len(op) == 1);
+///     assert(qf_maj_op_num_terms(op) == 1);
 ///
 /// @endrst
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn qf_maj_op_len(op: *const MajoranaOperator) -> usize {
+pub unsafe extern "C" fn qf_maj_op_num_terms(op: *const MajoranaOperator) -> usize {
     // SAFETY: Per documentation, the pointers are non-null and aligned.
     let op = unsafe { const_ptr_as_ref(op) };
 
-    op.boundaries.len() - 1
+    OperatorTrait::num_terms(op)
 }
 
 /// @ingroup qf_maj_op

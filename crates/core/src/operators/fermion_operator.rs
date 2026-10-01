@@ -379,8 +379,8 @@ fn _compose(
     // The output size is known exactly: one term per (left, right) pair, each holding the factors
     // of both inputs. Reserving up front turns the inner loop's repeated `extend_from_slice` into
     // plain memcpy without the reallocation-and-copy rounds an unreserved vector would incur.
-    let num_terms = a.coeffs.len() * b.coeffs.len();
-    let num_factors = a.modes.len() * b.coeffs.len() + b.modes.len() * a.coeffs.len();
+    let num_terms = a.num_terms() * b.num_terms();
+    let num_factors = a.modes.len() * b.num_terms() + b.modes.len() * a.num_terms();
     let mut coeffs = Vec::with_capacity(num_terms);
     let mut actions = Vec::with_capacity(num_factors);
     let mut modes = Vec::with_capacity(num_factors);

@@ -1,0 +1,19 @@
+---
+upgrade_c:
+  - |
+    The functions ``qf_ferm_op_len``, ``qf_maj_op_len``, ``qf_edge_op_len`` and
+    ``qf_transfer_op_len`` have been renamed to :c:func:`qf_ferm_op_num_terms`,
+    :c:func:`qf_maj_op_num_terms`, :c:func:`qf_edge_op_num_terms` and
+    :c:func:`qf_transfer_op_num_terms`, respectively. Their behavior is unchanged; update any call
+    sites to the new names:
+
+    .. code-block:: c
+
+        // before
+        size_t num = qf_maj_op_len(op);
+        // after
+        size_t num = qf_maj_op_num_terms(op);
+
+    The ``_len`` names are now reserved, since Qiskit's C API uses ``qk_obs_len`` for the total number
+    of non-identity factors rather than the number of terms. Naming these ``_num_terms`` keeps the two
+    APIs from disagreeing about what ``len`` counts.

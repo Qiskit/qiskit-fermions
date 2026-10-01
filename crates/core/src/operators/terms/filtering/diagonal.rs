@@ -152,7 +152,7 @@ mod tests {
         let mut op = FermionOperator::from(&fcidump)
             .normal_ordered(None)
             .simplify(1e-16);
-        let num_terms_before = op.coeffs.len();
+        let num_terms_before = op.num_terms();
 
         filter_diagonal_terms(&mut op);
 
@@ -162,7 +162,7 @@ mod tests {
         }
         // the constant offset and the number operators must have been removed
         assert!(
-            op.coeffs.len() < num_terms_before,
+            op.num_terms() < num_terms_before,
             "filtering should have removed at least the constant and number-operator terms"
         );
     }

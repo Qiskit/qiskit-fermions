@@ -401,8 +401,8 @@ fn _compose(
     // The output size is known exactly: one term per (left, right) pair, each holding the factors
     // of both inputs. Reserving up front turns the inner loop's repeated `extend_from_slice` into
     // plain memcpy without the reallocation-and-copy rounds an unreserved vector would incur.
-    let num_terms = a.coeffs.len() * b.coeffs.len();
-    let num_factors = a.left_indices.len() * b.coeffs.len() + b.left_indices.len() * a.coeffs.len();
+    let num_terms = a.num_terms() * b.num_terms();
+    let num_factors = a.left_indices.len() * b.num_terms() + b.left_indices.len() * a.num_terms();
     let mut coeffs = Vec::with_capacity(num_terms);
     let mut left_indices = Vec::with_capacity(num_factors);
     let mut right_indices = Vec::with_capacity(num_factors);
@@ -492,7 +492,7 @@ impl OperatorTrait for TransferVertexOperator {
     }
 
     fn adjoint(&self) -> Self {
-        let mut coeffs = Vec::with_capacity(self.coeffs.len());
+        let mut coeffs = Vec::with_capacity(self.num_terms());
         let mut left_indices = Vec::with_capacity(self.left_indices.len());
         let mut right_indices = Vec::with_capacity(self.right_indices.len());
 

@@ -926,7 +926,7 @@ pub unsafe extern "C" fn qf_transfer_op_add(
 ///     QfTransferVertexOperator *result = qf_transfer_op_scaled_add(one, other, &factor);
 ///
 ///     QfTransferVertexOperator *simplified = qf_transfer_op_simplify(result, 1e-10);
-///     assert(qf_transfer_op_len(simplified) == 0);
+///     assert(qf_transfer_op_num_terms(simplified) == 0);
 ///
 /// @endrst
 #[unsafe(no_mangle)]
@@ -970,7 +970,7 @@ pub unsafe extern "C" fn qf_transfer_op_scaled_add(
 ///
 ///     qf_transfer_op_add_inplace(left, right);
 ///
-///     assert(qf_transfer_op_len(left) == 2);
+///     assert(qf_transfer_op_num_terms(left) == 2);
 ///
 /// @endrst
 #[unsafe(no_mangle)]
@@ -1015,7 +1015,7 @@ pub unsafe extern "C" fn qf_transfer_op_add_inplace(
 ///     qf_transfer_op_scaled_add_inplace(left, right, &factor);
 ///
 ///     QfTransferVertexOperator *simplified = qf_transfer_op_simplify(left, 1e-10);
-///     assert(qf_transfer_op_len(simplified) == 0);
+///     assert(qf_transfer_op_num_terms(simplified) == 0);
 ///
 /// @endrst
 #[unsafe(no_mangle)]
@@ -1281,7 +1281,7 @@ pub unsafe extern "C" fn qf_transfer_op_ichop(op: *mut TransferVertexOperator, a
 ///
 ///     QfTransferVertexOperator *canon = qf_transfer_op_simplify(op, 1e-4);
 ///
-///     assert(qf_transfer_op_len(canon) == 1);
+///     assert(qf_transfer_op_num_terms(canon) == 1);
 ///
 /// @endrst
 #[unsafe(no_mangle)]
@@ -1506,15 +1506,15 @@ pub unsafe extern "C" fn qf_transfer_op_equiv(
 ///     QkComplex64 coeff = {1.0, 0.0};
 ///     qf_transfer_op_add_term(op, 2, left, right, &coeff);
 ///
-///     assert(qf_transfer_op_len(op) == 1);
+///     assert(qf_transfer_op_num_terms(op) == 1);
 ///
 /// @endrst
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn qf_transfer_op_len(op: *const TransferVertexOperator) -> usize {
+pub unsafe extern "C" fn qf_transfer_op_num_terms(op: *const TransferVertexOperator) -> usize {
     // SAFETY: Per documentation, the pointers are non-null and aligned.
     let op = unsafe { const_ptr_as_ref(op) };
 
-    op.boundaries.len() - 1
+    OperatorTrait::num_terms(op)
 }
 
 /// @ingroup qf_transfer_op

@@ -910,7 +910,7 @@ pub unsafe extern "C" fn qf_ferm_op_add(
 ///     QfFermionOperator *result = qf_ferm_op_scaled_add(one, other, &factor);
 ///
 ///     QfFermionOperator *simplified = qf_ferm_op_simplify(result, 1e-10);
-///     assert(qf_ferm_op_len(simplified) == 0);
+///     assert(qf_ferm_op_num_terms(simplified) == 0);
 ///
 /// @endrst
 #[unsafe(no_mangle)]
@@ -954,7 +954,7 @@ pub unsafe extern "C" fn qf_ferm_op_scaled_add(
 ///
 ///     qf_ferm_op_add_inplace(left, right);
 ///
-///     assert(qf_ferm_op_len(left) == 2);
+///     assert(qf_ferm_op_num_terms(left) == 2);
 ///
 /// @endrst
 #[unsafe(no_mangle)]
@@ -999,7 +999,7 @@ pub unsafe extern "C" fn qf_ferm_op_add_inplace(
 ///     qf_ferm_op_scaled_add_inplace(left, right, &factor);
 ///
 ///     QfFermionOperator *simplified = qf_ferm_op_simplify(left, 1e-10);
-///     assert(qf_ferm_op_len(simplified) == 0);
+///     assert(qf_ferm_op_num_terms(simplified) == 0);
 ///
 /// @endrst
 #[unsafe(no_mangle)]
@@ -1667,15 +1667,15 @@ pub unsafe extern "C" fn qf_ferm_op_equiv(
 ///     QkComplex64 coeff = {1.0, 0.0};
 ///     qf_ferm_op_add_term(op, 4, actions, modes, &coeff);
 ///
-///     assert(qf_ferm_op_len(op) == 1);
+///     assert(qf_ferm_op_num_terms(op) == 1);
 ///
 /// @endrst
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn qf_ferm_op_len(op: *const FermionOperator) -> usize {
+pub unsafe extern "C" fn qf_ferm_op_num_terms(op: *const FermionOperator) -> usize {
     // SAFETY: Per documentation, the pointers are non-null and aligned.
     let op = unsafe { const_ptr_as_ref(op) };
 
-    op.boundaries.len() - 1
+    OperatorTrait::num_terms(op)
 }
 
 /// @ingroup qf_ferm_op

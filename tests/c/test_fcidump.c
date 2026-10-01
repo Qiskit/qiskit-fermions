@@ -36,7 +36,7 @@ static int test_from_file(void) {
     // A spin-symmetric H2 FCIDump carries no beta blocks, so the operator is the one-plus-two-body
     // sum over the alpha integrals only. The leading term is the nuclear-repulsion constant, which
     // the file does carry and which occupies a group of its own: 1 + 40 terms in 1 + 22 groups.
-    is_correct = is_correct && (qf_ferm_op_len(op) == 41);
+    is_correct = is_correct && (qf_ferm_op_num_terms(op) == 41);
     is_correct = is_correct && qf_ferm_op_has_groups(op) && (qf_ferm_op_num_groups(op) == 23);
     // A real Hamiltonian is Hermitian, conserves particle number, and is at most two-body.
     is_correct = is_correct && qf_ferm_op_is_hermitian(op, 1e-10);
@@ -65,7 +65,7 @@ static int test_from_file_beta(void) {
     // The HeH fixture is spin-polarized, so it carries explicit beta blocks: the operator gains the
     // separate alpha/beta one- and two-body terms, giving 1 + 72 terms across 1 + 36 groups (again
     // counting the constant).
-    is_correct = is_correct && (qf_ferm_op_len(op) == 73);
+    is_correct = is_correct && (qf_ferm_op_num_terms(op) == 73);
     is_correct = is_correct && qf_ferm_op_has_groups(op) && (qf_ferm_op_num_groups(op) == 37);
     is_correct = is_correct && qf_ferm_op_is_hermitian(op, 1e-10);
     is_correct = is_correct && qf_ferm_op_conserves_particle_number(op);
