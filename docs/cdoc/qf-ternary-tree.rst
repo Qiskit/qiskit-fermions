@@ -1,0 +1,76 @@
+.. _qf_ternary_tree:
+
+=============
+Ternary Trees
+=============
+
+A ternary tree on :math:`N` nodes defines a fermion-to-qubit encoding of :math:`N` fermionic modes onto
+:math:`N` qubits. Each node is a qubit carrying three downward **links**, labelled ``X``, ``Y`` and
+``Z``. A link either descends to a child node (an *edge*) or terminates (a *leg*), and each leg's path
+back to the root spells a Pauli string: crossing the link labelled :math:`P` that descends *from* node
+:math:`u` contributes :math:`P` on qubit :math:`u`, with the identity everywhere else.
+
+Every tree of this shape yields a valid encoding, and the encodings named in the literature are simply
+particular shapes:
+
+.. table::
+
+  ==================== ================================================== =====================================
+  Encoding             Construction                                       Pauli weight
+  ==================== ================================================== =====================================
+  Jordan-Wigner        ``qf_ternary_tree_chain(n, QfPauliLabel_Z, ...)``   :math:`n`
+  Parity               ``qf_ternary_tree_chain(n, QfPauliLabel_X, ...)``   :math:`n`
+  Balanced             ``qf_ternary_tree_breadth_first(n, 3, ...)``        :math:`\lceil \log_3(2n+1) \rceil`
+  Binary-branching     ``qf_ternary_tree_breadth_first(n, 2, ...)``        :math:`\lfloor \log_2 n \rfloor + 1`
+  ==================== ================================================== =====================================
+
+The balanced tree's weight is optimal over *all* fermion-to-qubit mappings, so the reduction from
+:math:`n` to :math:`\lceil \log_3(2n+1) \rceil` is the reason to reach for one. Both trees use exactly
+:math:`n` qubits, so the saving is in Pauli weight rather than qubit count.
+
+These two constructors cover only the uniform families. The general interface is
+:c:func:`qf_ternary_tree_new`, which takes one :c:struct:`QfTernaryTreeNode` per node: the trees worth
+searching for are usually neither a chain nor uniform, since an algorithm such as Bonsai grows a
+spanning tree of a device's coupling graph and its branching therefore follows that connectivity.
+
+Not every encoding in the family has a convenience constructor. Bravyi-Kitaev, for instance, is a tree
+that is not uniform, so it is built by computing its specification: the binary-branching tree above
+matches its Pauli weight but is a different tree, except when :math:`n` is a power of two.
+
+Once built, a tree is compiled into a :c:struct:`QfTernaryTreeEncoding` with
+:c:func:`qf_ternary_tree_encoding_new`, which pairs its legs into Majorana operators and builds their
+Pauli strings once. That encoding is then passed to the mappers in :ref:`qf_mapper_library`, and should
+be reused across every operator mapped through it.
+
+.. note::
+   Some identities that hold under Jordan-Wigner are properties of the *chain* rather than of ternary
+   trees. A vertex operator is the weight-1 Pauli :math:`Z_l` only there, where the two Majorana
+   strings' :math:`Z` chains cancel; on the balanced tree at four modes it has weight 3.
+
+.. table::
+
+  ==================================================== ================================================
+  :c:func:`qf_ternary_tree_new`                        Construct a tree from a parent-and-label
+                                                       specification.
+  :c:func:`qf_ternary_tree_chain`                      Construct a linear chain descending along one
+                                                       label.
+  :c:func:`qf_ternary_tree_breadth_first`              Construct a tree by breadth-first filling.
+  :c:func:`qf_ternary_tree_num_nodes`                  The number of nodes, i.e. modes and qubits.
+  :c:func:`qf_ternary_tree_num_legs`                   The number of legs, always ``2 * num_nodes + 1``.
+  :c:func:`qf_ternary_tree_max_weight`                 The largest Pauli weight of any single Majorana
+                                                       operator.
+  :c:func:`qf_ternary_tree_free`                       Free a tree.
+  :c:func:`qf_ternary_tree_encoding_new`               Compile a tree into the Pauli images of its
+                                                       Majorana operators.
+  :c:func:`qf_ternary_tree_encoding_num_modes`         The number of modes the encoding covers.
+  :c:func:`qf_ternary_tree_encoding_max_weight`        The largest Pauli weight of any single Majorana
+                                                       operator of the encoding.
+  :c:func:`qf_ternary_tree_encoding_total_parity`      Build the total fermionic parity observable of
+                                                       the encoding.
+  :c:func:`qf_ternary_tree_encoding_free`              Free a compiled encoding.
+  ==================================================== ================================================
+
+----
+
+.. doxygengroup:: qf_ternary_tree
+   :content-only:

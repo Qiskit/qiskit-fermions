@@ -11,11 +11,29 @@
 // that they have been altered from the originals.
 
 use pyo3::prelude::*;
+use qiskit_pyo3_ffi as ffi;
 
 pub mod edge_vertex;
 pub mod jordan_wigner;
 pub mod majorana_fermion;
+pub mod ternary_tree;
 pub mod transfer_vertex;
+
+/// Converts a mapped `QkObs` into the Python `SparseObservable` that owns it.
+///
+/// Shared by every mapper in this module tree: each one ends by handing its `QkObs` to Python, and
+/// that hand-off is the same regardless of the encoding.
+///
+/// # Safety
+///
+/// `obs` must be a valid, uniquely-owned `QkObs` pointer; ownership transfers to Python.
+pub(crate) unsafe fn into_py_obs(obs: *mut ffi::QkObs) -> Py<PyAny> {
+    unsafe {
+        let py = Python::assume_attached();
+        let py_obs = ffi::qk_obs_to_python(obs);
+        Bound::from_owned_ptr(py, py_obs).into()
+    }
+}
 
 #[pymodule]
 pub mod mappers_library {
@@ -30,4 +48,7 @@ pub mod mappers_library {
 
     #[pymodule_export]
     use super::majorana_fermion::majorana_fermion;
+
+    #[pymodule_export]
+    use super::ternary_tree::ternary_tree;
 }
