@@ -2,6 +2,12 @@
 Overview
 ########
 
+.. toctree::
+   :hidden:
+   :caption: Overview
+
+   self
+
 This page summarizes the guides that are available in addition to the extensive API documentation of
 this package.
 
@@ -9,6 +15,17 @@ this package.
    These guides might refer to specific Python modules when explaining core concepts.
    Unless otherwise stated, the C API provides matching functionality, although it is not structured
    into modules. However, the function names correspond naturally and should be easy to navigate.
+
+To get started with the breadth of features this package supports, check out
+these end-to-end guides:
+
+- :ref:`1d_fermi_hubbard`
+- :ref:`2d_fermi_hubbard`
+
+
+The following sections outline additional guides that dive into more specific
+topics in detail.
+
 
 Operators and their structure
 =============================
