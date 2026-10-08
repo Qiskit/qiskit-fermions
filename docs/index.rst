@@ -179,8 +179,7 @@ References
    :hidden:
    :caption: Tutorials
 
-..
-  _Link to any tutorials from the IQP that relate to qiskit-fermions here!
+   SqDRIFT algorithm for ground state estimation <https://quantum.cloud.ibm.com/docs/tutorials/sqdrift>
 
 .. toctree::
    :hidden:
