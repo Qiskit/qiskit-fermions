@@ -98,7 +98,7 @@ jobs:
       - config
       - docs
     # A fork's `GITHUB_TOKEN` is read-only, so this could not push even if it ran; skip rather than fail
-    # for a contributor who cannot act on it.  Fork authors use `make docs-local` instead.  The
+    # for a contributor who cannot act on it.  Fork authors use `make docs` instead.  The
     # `pull_request` guard also covers `merge_group` runs, whose payload has no pull request at all.
     if: >-
       github.event_name == 'pull_request' &&
