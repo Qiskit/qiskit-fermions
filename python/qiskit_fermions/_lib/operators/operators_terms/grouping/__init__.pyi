@@ -2,9 +2,11 @@
 # ruff: noqa: E501, F401, F403, F405
 
 from . import analysis
+from . import clash
 from . import electronic_structure
 __all__ = [
     "analysis",
+    "clash",
     "electronic_structure",
 ]
 

@@ -1,0 +1,39 @@
+---
+features:
+  - |
+    Added a ``non_commutation_edges`` method to :class:`.FermionOperator`, :class:`.MajoranaOperator`,
+    :class:`.EdgeVertexOperator` and :class:`.TransferVertexOperator`. It reports the pairs of terms
+    that do **not** commute, i.e. the operator's *clash graph*, as index pairs that any graph library
+    can consume:
+
+    .. code-block:: python
+
+        import rustworkx as rx
+        from qiskit_fermions.operators import MajoranaOperator
+
+        op = MajoranaOperator([1.0, 1.0, 1.0], [0, 1, 1, 2, 3, 4], [0, 2, 4, 6])
+
+        graph = rx.PyGraph()
+        graph.add_nodes_from(range(len(op)))
+        graph.add_edges_from_no_data(op.non_commutation_edges())
+
+    This is the fermionic counterpart of
+    :meth:`~qiskit.quantum_info.PauliList.noncommutation_graph`. Indices refer to the operator's
+    current term order, so build the operator from its sparse arrays (or apply
+    :func:`~qiskit_fermions.operators.terms.canonical_order` first) when the result has to be
+    reproducible.
+  - |
+    Added :func:`~qiskit_fermions.operators.terms.group_terms_by_non_commutation`, which colors the
+    clash graph to assign group indices in place, so that the terms sharing a group index mutually
+    commute:
+
+    .. code-block:: python
+
+        from qiskit_fermions.operators import MajoranaOperator
+        from qiskit_fermions.operators.terms.grouping import group_terms_by_non_commutation
+
+        op = MajoranaOperator([1.0, 1.0, 1.0], [0, 1, 1, 2, 3, 4], [0, 2, 4, 6])
+        group_terms_by_non_commutation(op)
+
+    The coloring is a greedy heuristic, so the resulting number of groups is an upper bound on the
+    smallest achievable rather than a minimum.

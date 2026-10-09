@@ -169,6 +169,9 @@ class OperatorTrait(Protocol):
     def num_groups(self) -> int | None:
         """Returns the number of groups."""
 
+    def non_commutation_edges(self) -> list[tuple[int, int]]:
+        """Returns the pairs of terms that do not commute, i.e. this operator's clash graph."""
+
     def split_out_groups(self, group_indices: Sequence[int] | None = None) -> list[Self]:
         """Splits this operator into an optional list of new operators based on its :attr:`.groups`.
 
