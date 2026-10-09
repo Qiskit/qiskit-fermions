@@ -10,7 +10,11 @@
 // copyright notice, and modified files need to carry a notice indicating
 // that they have been altered from the originals.
 
+use crate::operators::terms::grouping::clash::{ClashError, Edge};
 use crate::operators::terms::grouping::group_term_range;
+use crate::operators::terms::majorana_expansion::{
+    MajoranaExpansion, Monomial, product_support, single_monomial,
+};
 use crate::operators::{
     CoherenceError, GroupedTerm, OperatorMacro, OperatorTrait, ScaledTerm, TermSortKey,
 };
@@ -198,6 +202,19 @@ impl MajoranaOperator {
                 )
             }
         }
+    }
+
+    /// Returns the pairs of terms that do **not** commute, i.e. this operator's *clash graph*.
+    ///
+    /// Each pair is reported once as `(i, j)` with `i < j`, in ascending order, indexing into this
+    /// operator's current term order. Pass the edges to a graph library to color or draw them.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`ClashError::TooManyTerms`] if the operator has more terms than `u32` indices can
+    /// address.
+    pub fn non_commutation_edges(&self) -> Result<Vec<Edge>, ClashError> {
+        crate::operators::terms::grouping::clash::non_commutation_edges(self)
     }
 
     pub fn normal_ordered(&self, ascending: bool, reduce: bool) -> Self {
@@ -605,6 +622,17 @@ impl OperatorTrait for MajoranaOperator {
             // preserves `groups` rather than dropping it.
             groups: self.groups.clone(),
         })
+    }
+}
+
+impl MajoranaExpansion for MajoranaOperator {
+    fn majorana_monomials_into(&self, index: usize, out: &mut Vec<Monomial>) {
+        // The stored mode indices already *are* Majorana generator indices.
+        let generators = self.modes[self.boundaries[index]..self.boundaries[index + 1]]
+            .iter()
+            .map(|&generator| u64::from(generator))
+            .collect();
+        single_monomial(product_support(generators), out);
     }
 }
 

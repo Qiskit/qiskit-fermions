@@ -21,6 +21,7 @@ pub enum GroupingError {
 }
 
 pub mod analysis;
+pub mod clash;
 pub mod electronic_structure;
 
 /// Returns the half-open range of term indices carrying `group`, or `None` if no term does.

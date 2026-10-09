@@ -10,7 +10,11 @@
 // copyright notice, and modified files need to carry a notice indicating
 // that they have been altered from the originals.
 
+use crate::operators::terms::grouping::clash::{ClashError, Edge};
 use crate::operators::terms::grouping::group_term_range;
+use crate::operators::terms::majorana_expansion::{
+    GENERATORS_PER_MODE, MajoranaExpansion, Monomial, expand_vertex_term,
+};
 use crate::operators::{
     CoherenceError, GroupedTerm, OperatorMacro, OperatorTrait, ScaledTerm, TermSortKey,
 };
@@ -224,6 +228,19 @@ impl TransferVertexOperator {
                 )
             }
         }
+    }
+
+    /// Returns the pairs of terms that do **not** commute, i.e. this operator's *clash graph*.
+    ///
+    /// Each pair is reported once as `(i, j)` with `i < j`, in ascending order, indexing into this
+    /// operator's current term order. Pass the edges to a graph library to color or draw them.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`ClashError::TooManyTerms`] if the operator has more terms than `u32` indices can
+    /// address.
+    pub fn non_commutation_edges(&self) -> Result<Vec<Edge>, ClashError> {
+        crate::operators::terms::grouping::clash::non_commutation_edges(self)
     }
 
     /// Returns an equivalent operator with normal-ordered terms.
@@ -718,6 +735,30 @@ impl OperatorTrait for TransferVertexOperator {
             // preserves `groups` rather than dropping it.
             groups: self.groups.clone(),
         })
+    }
+}
+
+impl MajoranaExpansion for TransferVertexOperator {
+    fn majorana_monomials_into(&self, index: usize, out: &mut Vec<Monomial>) {
+        let range = self.boundaries[index]..self.boundaries[index + 1];
+        expand_vertex_term(
+            &self.left_indices[range.clone()],
+            &self.right_indices[range],
+            out,
+            // `V_j = -i gamma_{2j} gamma_{2j+1}`, `T_jk = (i/2) gamma_{2j+1} gamma_{2k}` for `j < k`,
+            // and `T_kj = -(i/2) gamma_{2j} gamma_{2k+1}`. Unlike the edge operator, the two
+            // orientations of a bond have *different* supports, which is what distinguishes one
+            // direction of a transfer from the other.
+            |left, right| {
+                if left == right {
+                    (GENERATORS_PER_MODE * left, GENERATORS_PER_MODE * left + 1)
+                } else if left < right {
+                    (GENERATORS_PER_MODE * left + 1, GENERATORS_PER_MODE * right)
+                } else {
+                    (GENERATORS_PER_MODE * right, GENERATORS_PER_MODE * left + 1)
+                }
+            },
+        );
     }
 }
 
