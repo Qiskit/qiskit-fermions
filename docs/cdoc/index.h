@@ -15,6 +15,10 @@
  */
 
 /**
+ * @defgroup qf_operators qf_operators
+ */
+
+/**
  * @defgroup qf_ferm_op qf_ferm_op
  */
 

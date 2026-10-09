@@ -16,11 +16,93 @@ Rather than always relying on the user to provide the group indices themselves,
 the C API provides a collection of functions which determine the grouping
 information automatically.
 
+Unlike the analysis routines below, these are provided per operator
+representation only where the grouping makes sense for it: the
+electronic-structure grouping is specific to :c:struct:`QfFermionOperator`, while
+the commuting grouping exists for every representation.
+
 .. table::
 
-  ======================================================== ==============================================================
-  :c:func:`qf_ferm_op_group_terms_by_electronic_structure` Groups the terms of an operator by their electronic structure.
-  ======================================================== ==============================================================
+  ========================================================= ==============================================================
+  :c:func:`qf_ferm_op_group_terms_by_electronic_structure`  Groups the terms of an operator by their electronic structure.
+  :c:func:`qf_op_type_group_terms_by_non_commutation`       Groups the terms of an operator into mutually commuting sets.
+  ========================================================= ==============================================================
+
+Commuting groups
+................
+
+.. c:function:: QfExitCode qf_op_type_group_terms_by_non_commutation(OpType *op)
+
+    .. caution::
+       The function signature here is **generic**! A real one will replace
+       ``OpType`` with an actual :ref:`operator representation <qf_operators>`
+       and ``op_type`` with its matching prefix (for example, ``ferm_op`` for
+       :c:struct:`QfFermionOperator`).
+
+    Populates the ``groups`` attribute such that any two terms which do **not**
+    commute receive different group indices, replacing any grouping the operator
+    already carried.
+
+    It does so by coloring the operator's *clash graph* - one node per term, one
+    edge per non-commuting pair. That graph is available in its own right through
+    the per-representation accessors, documented alongside their operators:
+    :c:func:`qf_ferm_op_non_commutation_edges`,
+    :c:func:`qf_maj_op_non_commutation_edges`,
+    :c:func:`qf_edge_op_non_commutation_edges` and
+    :c:func:`qf_transfer_op_non_commutation_edges`.
+
+    A term with an exactly zero coefficient clashes with nothing, while every
+    other term counts as written. Simplify the operator first (with
+    ``qf_op_type_simplify``) to remove near-zero and duplicate terms, which would
+    otherwise inflate the number of groups.
+
+    .. note::
+       The coloring is the greedy *largest-first* heuristic (terms with the most
+       clashes are placed first), so the resulting number of groups is an upper
+       bound on the smallest achievable rather than a minimum. The graph itself is
+       never built: memory grows linearly with the number of terms, where the edge
+       array of ``qf_op_type_non_commutation_edges`` grows quadratically.
+
+    .. important::
+       Whether these commuting groups agree with the line flow sets used to
+       compile the time evolution of lattice Hamiltonians depends on the operator
+       representation, not on the lattice. A flow set forbids two arrows that
+       share a source or a target while permitting a head-to-tail chain. A
+       transfer :math:`T_{jk}` acts on the odd generator of its source and the
+       even generator of its target, so for the hopping terms of a
+       :c:struct:`QfTransferVertexOperator` the clash relation *is* that rule.
+       Majorana and edge-vertex bilinears instead act on the same generator of a
+       shared mode however they meet, so there a head-to-tail chain does **not**
+       commute and the two partitions diverge.
+
+    .. note::
+       For simplicity, the example below shows only the
+       :c:struct:`QfMajoranaOperator` variant. The other operator representations
+       follow the same pattern.
+
+    .. code-block:: c
+       :linenos:
+
+       uint64_t num_terms = 3;
+       uint64_t num_modes = 6;
+       uint32_t modes[6] = {0, 1, 1, 2, 3, 4};
+       QkComplex64 coeffs[3] = {{1.0, 0.0}, {1.0, 0.0}, {1.0, 0.0}};
+       uint32_t boundaries[4] = {0, 2, 4, 6};
+       QfMajoranaOperator *op = qf_maj_op_new(num_terms, num_modes, coeffs, modes, boundaries);
+
+       // Terms 0 and 1 share Majorana mode 1, so they land in different groups.
+       QfExitCode exit = qf_maj_op_group_terms_by_non_commutation(op);
+       assert(exit == QfExitCode_Success);
+       assert(qf_maj_op_num_groups(op) == 2);
+
+       qf_maj_op_free(op);
+
+    :param op: A pointer to the operator whose terms to group.
+    :return: An exit code. ``QfExitCode_ValueError`` is returned exactly when
+        ``qf_op_type_non_commutation_edges`` returns it: if ``op`` has more than
+        :math:`2^{32}` terms, or is a :c:struct:`QfFermionOperator` with a term of
+        degree above 20 and a non-zero coefficient. The operator's groups are then
+        left untouched.
 
 Analysis
 ^^^^^^^^

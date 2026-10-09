@@ -201,6 +201,119 @@ static int test_groups_have_uniform_coeffs(void) {
     return Ok;
 }
 
+/**
+ * Groups the terms of a Majorana operator so that each group mutually commutes.
+ *
+ * Terms 0 and 1 share Majorana mode 1, so they must be separated; term 2 is disjoint from both and
+ * may rejoin the first group.
+ */
+static int test_group_terms_by_non_commutation(void) {
+    uint64_t num_terms = 3;
+    uint64_t num_modes = 6;
+    uint32_t modes[6] = {0, 1, 1, 2, 3, 4};
+    QkComplex64 coeffs[3] = {{1.0, 0.0}, {1.0, 0.0}, {1.0, 0.0}};
+    uint32_t boundaries[4] = {0, 2, 4, 6};
+    QfMajoranaOperator *op = qf_maj_op_new(num_terms, num_modes, coeffs, modes, boundaries);
+
+    bool passed = qf_maj_op_group_terms_by_non_commutation(op) == QfExitCode_Success &&
+                  qf_maj_op_has_groups(op);
+    if (passed) {
+        uint32_t *groups_out;
+        uint64_t groups_len;
+        qf_maj_op_get_groups(op, &groups_out, &groups_len);
+        // The clashing pair must differ, while the disjoint term joins one of their two groups.
+        passed = groups_len == num_terms && groups_out[0] != groups_out[1] &&
+                 qf_maj_op_num_groups(op) == 2;
+    }
+
+    qf_maj_op_free(op);
+
+    if (!passed) {
+        return EqualityError;
+    }
+    return Ok;
+}
+
+/**
+ * Reads the clash graph as a flat edge array, then releases it.
+ *
+ * Terms 0 and 1 share Majorana mode 1 and so clash; term 2 is disjoint from both.
+ */
+static int test_non_commutation_edges(void) {
+    uint64_t num_terms = 3;
+    uint64_t num_modes = 6;
+    uint32_t modes[6] = {0, 1, 1, 2, 3, 4};
+    QkComplex64 coeffs[3] = {{1.0, 0.0}, {1.0, 0.0}, {1.0, 0.0}};
+    uint32_t boundaries[4] = {0, 2, 4, 6};
+    QfMajoranaOperator *op = qf_maj_op_new(num_terms, num_modes, coeffs, modes, boundaries);
+
+    uint32_t *edges = NULL;
+    uint64_t num_edges = 0;
+    QfExitCode exit = qf_maj_op_non_commutation_edges(op, &edges, &num_edges);
+
+    bool passed = exit == QfExitCode_Success && num_edges == 1 && edges != NULL;
+    if (passed) {
+        // Each edge occupies two consecutive entries, reported with left < right.
+        passed = edges[0] == 0 && edges[1] == 1;
+    }
+
+    qf_edges_free(edges, num_edges);
+
+    // A fully commuting operator yields no edges at all.
+    uint32_t disjoint_modes[6] = {0, 1, 2, 3, 4, 5};
+    QfMajoranaOperator *disjoint =
+        qf_maj_op_new(num_terms, num_modes, coeffs, disjoint_modes, boundaries);
+    uint32_t *no_edges = NULL;
+    uint64_t no_num_edges = 1;
+    exit = qf_maj_op_non_commutation_edges(disjoint, &no_edges, &no_num_edges);
+    passed = passed && exit == QfExitCode_Success && no_num_edges == 0;
+    qf_edges_free(no_edges, no_num_edges);
+
+    qf_maj_op_free(disjoint);
+    qf_maj_op_free(op);
+
+    if (!passed) {
+        return EqualityError;
+    }
+    return Ok;
+}
+
+/**
+ * A fermionic term above the supported degree is refused rather than expanded.
+ *
+ * The single term is a product of 21 creation operators, one past the bound of 20.
+ */
+static int test_non_commutation_degree_error(void) {
+    uint64_t num_terms = 1;
+    uint64_t num_actions = 21;
+    bool actions[21];
+    uint32_t modes[21];
+    for (uint32_t i = 0; i < 21; i++) {
+        actions[i] = true;
+        modes[i] = i;
+    }
+    QkComplex64 coeffs[1] = {{1.0, 0.0}};
+    uint32_t boundaries[2] = {0, 21};
+    QfFermionOperator *op =
+        qf_ferm_op_new(num_terms, num_actions, coeffs, actions, modes, boundaries);
+
+    uint32_t *edges = NULL;
+    uint64_t num_edges = 7;
+    QfExitCode edges_exit = qf_ferm_op_non_commutation_edges(op, &edges, &num_edges);
+    QfExitCode group_exit = qf_ferm_op_group_terms_by_non_commutation(op);
+
+    // Nothing is allocated on failure, and the operator keeps its (absent) groups.
+    bool passed = edges_exit == QfExitCode_ValueError && group_exit == QfExitCode_ValueError &&
+                  edges == NULL && num_edges == 7 && !qf_ferm_op_has_groups(op);
+
+    qf_ferm_op_free(op);
+
+    if (!passed) {
+        return EqualityError;
+    }
+    return Ok;
+}
+
 int test_grouping(void) {
     int num_failed = 0;
     num_failed += RUN_TEST(test_grouping_error);
@@ -209,6 +322,9 @@ int test_grouping(void) {
     num_failed += RUN_TEST(test_set_groups_err);
     num_failed += RUN_TEST(test_groups_are_hermitian);
     num_failed += RUN_TEST(test_groups_have_uniform_coeffs);
+    num_failed += RUN_TEST(test_group_terms_by_non_commutation);
+    num_failed += RUN_TEST(test_non_commutation_edges);
+    num_failed += RUN_TEST(test_non_commutation_degree_error);
 
     fflush(stderr);
     fprintf(stderr, "=== Number of failed subtests: %i\n", num_failed);

@@ -139,13 +139,14 @@ The following functions exist to check certain properties of an operator.
 
 .. table::
 
-  ==================================== =======================================================
-  :c:func:`qf_maj_op_is_hermitian`     Returns whether an operator is Hermitian.
-  :c:func:`qf_maj_op_max_rank`         Returns the maximum rank of the terms in this operator.
-  :c:func:`qf_maj_op_min_num_modes`    Returns the minimum number of modes of this operator.
-  :c:func:`qf_maj_op_is_even`          Returns whether an operator is even.
-  :c:func:`qf_maj_op_num_terms`        Returns the number of terms in this operator.
-  ==================================== =======================================================
+  ========================================= =======================================================
+  :c:func:`qf_maj_op_is_hermitian`          Returns whether an operator is Hermitian.
+  :c:func:`qf_maj_op_max_rank`              Returns the maximum rank of the terms in this operator.
+  :c:func:`qf_maj_op_min_num_modes`         Returns the minimum number of modes of this operator.
+  :c:func:`qf_maj_op_is_even`               Returns whether an operator is even.
+  :c:func:`qf_maj_op_num_terms`             Returns the number of terms in this operator.
+  :c:func:`qf_maj_op_non_commutation_edges` Gets the pairs of terms that do not commute.
+  ========================================= =======================================================
 
 ----
 

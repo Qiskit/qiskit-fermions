@@ -11,6 +11,7 @@
 // that they have been altered from the originals.
 
 use crate::exit_codes::ExitCode;
+use crate::operators::leak_edges;
 use crate::pointers::{const_ptr_as_ref, mut_ptr_as_ref, slice_from_ptr};
 
 use num_complex::Complex64;
@@ -1734,5 +1735,79 @@ pub unsafe extern "C" fn qf_ferm_op_relabel_modes(
     };
 
     *op = relabeled_op;
+    ExitCode::Success
+}
+
+/// @ingroup qf_ferm_op
+///
+/// @brief Gets the pairs of terms of an operator that do not commute.
+///
+/// @param op A pointer to the operator whose terms to relate.
+/// @param edges_out A pointer to the array pointer into which to write the edges. The array is
+///     allocated by this function and must be released with :c:func:`qf_edges_free`.
+/// @param num_edges_out A pointer to the integer into which to write the number of edges.
+///
+/// @return An exit code. ``QfExitCode_ValueError`` is returned if a term with a non-zero coefficient
+///     has a degree above 20, or if the operator has more than :math:`2^{32}` terms, which the
+///     ``uint32_t`` indices cannot address. Nothing is then allocated and the out-pointers are left
+///     untouched.
+///
+/// @rst
+///
+/// This is the operator's *clash graph*: one node per term, and an edge between every pair of terms
+/// that do **not** commute. Each pair is reported once as ``(i, j)`` with ``i < j``, in ascending
+/// order, flattened into ``2 * num_edges_out`` indices. The indices refer to the operator's current
+/// term order.
+///
+/// A term whose coefficient is exactly zero commutes with every other term, so it never has an edge.
+/// Every other term counts as written, so call :c:func:`qf_ferm_op_simplify` first: it removes
+/// near-zero terms and merges duplicates, either of which would otherwise inflate the graph. It can
+/// also reorder the terms, so compute the edges on its result.
+///
+/// The array holds one pair per clash, so it grows quadratically with the number of terms. To group a
+/// large operator, use :c:func:`qf_ferm_op_group_terms_by_non_commutation`, which never builds it.
+///
+/// Each :math:`a` or :math:`a^\dagger` is itself a sum of two Majorana generators, so a term of this
+/// operator class expands into a sum of Majorana monomials whose contributions to a commutator can
+/// cancel. That cancellation is accounted for exactly: two terms are reported only if their
+/// commutator is genuinely non-zero. Since a term of degree :math:`d` expands into :math:`2^d`
+/// monomials, terms above degree 20 are refused before any expansion is built, unless their
+/// coefficient is exactly zero. The bound is per term. Comparing two overlapping terms costs the
+/// product of their expansions, so two such terms of high degree stop being practical, and can still
+/// exhaust memory, well within it.
+///
+/// Unlike the ``qf_ferm_op_num_*``/``qf_ferm_op_get_*`` pairs elsewhere in this API, the edge count is not
+/// available separately: it is only known once the graph has been built, and building it is the
+/// quadratic part. Allocating here therefore pays that cost once rather than twice.
+///
+/// .. code-block:: c
+///     :linenos:
+///
+///     uint32_t *edges = NULL;
+///     uint64_t num_edges = 0;
+///     QfExitCode exit = qf_ferm_op_non_commutation_edges(op, &edges, &num_edges);
+///
+///     for (uint64_t i = 0; i < num_edges; i++) {
+///         uint32_t left = edges[2 * i];
+///         uint32_t right = edges[2 * i + 1];
+///     }
+///
+///     qf_edges_free(edges, num_edges);
+///
+/// @endrst
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn qf_ferm_op_non_commutation_edges(
+    op: *const FermionOperator,
+    edges_out: *mut *mut u32,
+    num_edges_out: *mut u64,
+) -> ExitCode {
+    // SAFETY: Per documentation, the pointer is non-null and aligned.
+    let op = unsafe { const_ptr_as_ref(op) };
+
+    let Ok(edges) = op.non_commutation_edges() else {
+        return ExitCode::ValueError;
+    };
+    // SAFETY: Per documentation, both out-pointers are non-null and aligned.
+    unsafe { leak_edges(edges, edges_out, num_edges_out) };
     ExitCode::Success
 }

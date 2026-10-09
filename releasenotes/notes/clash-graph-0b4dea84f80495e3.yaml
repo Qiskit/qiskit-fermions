@@ -37,3 +37,10 @@ features:
 
     The coloring is a greedy heuristic, so the resulting number of groups is an upper bound on the
     smallest achievable rather than a minimum.
+features_c:
+  - |
+    Added ``qf_<prefix>_non_commutation_edges`` and ``qf_<prefix>_group_terms_by_non_commutation`` for
+    each of the four operator representations. The first reports the pairs of terms that do **not**
+    commute, i.e. the operator's *clash graph*, as a flat array of term indices that the caller
+    releases with :c:func:`qf_edges_free`. The second colors that graph to assign group indices in
+    place, so that the terms sharing a group index mutually commute.
