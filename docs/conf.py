@@ -161,6 +161,9 @@ _inlined_apis = []
 
 redirects = {
     "pydoc/qiskit_fermions": "./index.html",
+    # The guides overview cannot be named `index` (Sphinx/IQP requires a distinct page name), so
+    # send anyone landing on the directory URL to it explicitly.
+    "guides/index": "overview.html",
     **{
         f"stubs/{module}.{name}": f"../rydoc/{module}.html#{module}.{name}"
         for module, name in _inlined_apis
