@@ -15,9 +15,9 @@ name: Sphinx
 # `git push`, which any later run can perform given the artifact -- which in turn is what allows a pull
 # request to be previewed without building its documentation a second time.
 #
-# Note the artifact deliberately keeps the absolute IBM Quantum Platform links in its API-reference
-# entries: it is also what the platform's documentation ingestion pulls.  Rewriting them for
-# self-contained browsing is the publishing action's job, on its own copy.
+# Note the same artifact is also what the IBM Quantum Platform's documentation ingestion pulls.  Its
+# API-reference entries are therefore relative links into the tree: the ingestion maps them onto the
+# platform's own API pages, so neither consumer needs the tree rewritten.
 
 on:
   workflow_call:
