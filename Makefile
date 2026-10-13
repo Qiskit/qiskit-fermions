@@ -28,21 +28,13 @@ style:
 # ==============================================================================
 # Recipes for Docs
 # ==============================================================================
-.PHONY: doxygen docs docs-local docsclean
+.PHONY: doxygen docs docsclean
 
 doxygen: cheader
 	doxygen docs/Doxyfile
 
 docs: doxygen
 	sphinx-build -W -j auto -T -E --keep-going -b html docs/ docs/_build/html
-
-# Build the documentation for browsing offline.  The API-reference entries in the sidebar normally
-# point at the absolute IBM Quantum Platform URLs, which is what the artifact ingested by the platform
-# needs but means a local build links away from itself; this rewrites them to the pages in the same
-# tree.  Note that this MUTATES `docs/_build/html`, so use plain `make docs` when you need a tree
-# suitable for ingestion.
-docs-local: docs
-	python tools/rewrite_docs_links.py docs/_build/html
 
 docsclean:
 	rm -rf docs/stubs/ docs/_build docs/xml

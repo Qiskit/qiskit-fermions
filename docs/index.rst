@@ -146,8 +146,7 @@ This package follows `semantic versioning <https://semver.org/>`_. Breaking chan
 are made only occasionally, to improve the user experience. When possible, old
 interfaces are kept and marked as deprecated for as long as they can co-exist
 with the new ones. Each substantial improvement, breaking change, or deprecation
-is documented in the `release notes
-<https://quantum.cloud.ibm.com/docs/api/qiskit-fermions/release-notes>`_.
+is documented in the :ref:`release notes`.
 
 References
 ----------
@@ -179,14 +178,13 @@ References
    :hidden:
    :caption: Tutorials
 
-..
-  _Link to any tutorials from the IQP that relate to qiskit-fermions here!
+   SqDRIFT algorithm for ground state estimation <https://quantum.cloud.ibm.com/docs/tutorials/sqdrift>
 
 .. toctree::
    :hidden:
    :caption: API reference
 
-   Python API reference <https://quantum.cloud.ibm.com/docs/api/qiskit-fermions>
-   C API reference <https://quantum.cloud.ibm.com/docs/api/qiskit-fermions-c>
+   Python API reference <pydoc/index>
+   C API reference <cdoc/index>
    Release notes <release-notes>
    GitHub <https://github.com/Qiskit/qiskit-fermions>

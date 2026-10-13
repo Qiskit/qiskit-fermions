@@ -45,14 +45,6 @@ inputs:
       title is missing is simply rendered without one.
     required: false
     default: ''
-  rewrite-links:
-    description: >
-      Rewrite the absolute IBM Quantum Platform API-reference links to point inside the published tree.
-      Wanted for every Pages publication -- a preview whose sidebar navigates to the hosted
-      documentation is not much of a preview -- and offered as an input only so that the behaviour is
-      visible at the call site rather than implied.
-    required: false
-    default: 'true'
   github-token:
     description: >
       Token used to download the artifact and push the branch.  Needs `contents: write`, plus
@@ -127,17 +119,6 @@ runs:
         fi
         echo "Documentation tree: $tree"
         echo "path=$tree" >> "$GITHUB_OUTPUT"
-
-    # Deliberately run from the checked-out repository rather than from anything in the artifact: the
-    # artifact is data to be published, never code to be executed.
-    - name: Rewrite platform links
-      if: inputs.rewrite-links == 'true'
-      shell: bash
-      env:
-        TREE: ${{ steps.tree.outputs.path }}
-      run: |
-        set -euo pipefail
-        python tools/rewrite_docs_links.py "$TREE"
 
     - name: Stage the documentation
       shell: bash
