@@ -2,11 +2,10 @@
 Overview
 ########
 
-.. toctree::
-   :hidden:
-   :caption: Overview
-
-   self
+..
+    _This page may *NOT* use any `.. toctree::` directives! Instead, the guides'
+    toctree lives in the `docs/guides/index.rst` page. Here, all guides should
+    be categorized into a section using a :ref: reference.
 
 This page summarizes the guides that are available in addition to the extensive API documentation of
 this package.
@@ -33,13 +32,9 @@ Operators and their structure
 Fermionic operators can be represented in different forms and you can map between these forms as well
 as qubit operators using different `mappers`. Start here if you are building a Hamiltonian.
 
-.. toctree::
-   :maxdepth: 1
-   :glob:
-
-   operators
-   grouping
-   mappers
+- :ref:`operators_explanation`
+- :ref:`grouping_explanation`
+- :ref:`mappers_explanation`
 
 
 Fermionic circuits
@@ -47,11 +42,7 @@ Fermionic circuits
 
 You can express circuits directly on the fermionic level rather than mapping to qubits first.
 
-.. toctree::
-   :maxdepth: 1
-   :glob:
-
-   circuit
+- :ref:`fermionic_circuit_explanation`
 
 Circuit examples
 ----------------
@@ -61,20 +52,12 @@ These guides provide you with concrete examples for different specific use cases
 Chemistry
 ^^^^^^^^^
 
-.. toctree::
-   :maxdepth: 1
-   :glob:
-
-   sqdrift
+- :ref:`sqdrift_getting_started`
 
 Lattice models
 ^^^^^^^^^^^^^^
 
-.. toctree::
-   :maxdepth: 1
-   :glob:
-
-   skqd
+- :ref:`skqd_getting_started`
 
 
 Transpiling fermionic circuits
@@ -82,14 +65,10 @@ Transpiling fermionic circuits
 
 Guides explaining how a :class:`.FermionicCircuit` becomes a :class:`~qiskit.circuit.QuantumCircuit`.
 
-.. toctree::
-   :maxdepth: 1
-   :glob:
-
-   transpilation
-   fermionic_synthesis
-   merge_slater_determinant
-   lucj
+- :ref:`transpilation_explanation`
+- :ref:`fermionic_synthesis_explanation`
+- :ref:`merge_slater_determinant_explanation`
+- :ref:`lucj_transpilation`
 
 
 Relationship to other packages
@@ -97,8 +76,4 @@ Relationship to other packages
 
 How ``qiskit-fermions`` divides the work with the other tools of the ecosystem.
 
-.. toctree::
-   :maxdepth: 1
-   :glob:
-
-   ffsim
+- :ref:`ffsim_relationship_explanation`
