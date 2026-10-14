@@ -1,6 +1,0 @@
-﻿FermionicRegister
-=================
-
-.. currentmodule:: qiskit_fermions.circuit
-
-.. autodata:: FermionicRegister
