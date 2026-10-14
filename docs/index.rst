@@ -170,9 +170,10 @@ References
    :hidden:
    :caption: Guides
 
+   Overview <guides/overview>
    Simulate 1D Fermi-Hubbard dynamics with flow sets <guides/1d_fermi_hubbard>
    Simulate 2D Fermi-Hubbard dynamics with flow sets <guides/2d_fermi_hubbard>
-   More guides <guides/overview>
+   More guides <guides/index>
 
 .. toctree::
    :hidden:
