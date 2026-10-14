@@ -1,0 +1,6 @@
+﻿majorana\_operator
+==================
+
+.. currentmodule:: qiskit_fermions.mappers.library
+
+.. autofunction:: majorana_operator

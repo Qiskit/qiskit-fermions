@@ -1,0 +1,88 @@
+﻿GivensDecompositionOrbitalRotationSynthesis
+===========================================
+
+.. currentmodule:: qiskit_fermions.transpiler.passes.synthesis
+
+.. autoclass:: GivensDecompositionOrbitalRotationSynthesis
+   :show-inheritance:
+   :no-members:
+   :no-inherited-members:
+   :special-members:
+
+
+  
+  
+  
+  
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+  
+  
+   .. rubric:: Methods
+    
+   .. automethod:: run
+  
+  
+  
+  
+  
+  
+  

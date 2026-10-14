@@ -1,0 +1,101 @@
+﻿FermionicSuzukiTrotter
+======================
+
+.. currentmodule:: qiskit_fermions.circuit.library.synthesis
+
+.. autoclass:: FermionicSuzukiTrotter
+   :show-inheritance:
+   :no-members:
+   :no-inherited-members:
+   :special-members:
+
+
+  
+  
+   .. rubric:: Attributes
+    
+   .. autoattribute:: order
+   .. autoattribute:: reps
+  
+  
+  
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+  
+  
+   .. rubric:: Methods
+    
+   .. automethod:: synthesize
+  
+  
+  
+  
+  
+  
+  
