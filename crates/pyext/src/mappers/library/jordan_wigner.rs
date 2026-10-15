@@ -15,25 +15,13 @@ use crate::operators::fermion_operator::PyFermionOperator;
 use crate::operators::majorana_operator::PyMajoranaOperator;
 use crate::operators::transfer_vertex_operator::PyTransferVertexOperator;
 use pyo3::prelude::*;
+
+use super::into_py_obs;
 use pyo3_stub_gen::derive::*;
 use qiskit_fermions_core::mappers::library::jordan_wigner::{
     edge_vertex_jordan_wigner, fermion_jordan_wigner, majorana_jordan_wigner,
     transfer_vertex_jordan_wigner,
 };
-use qiskit_pyo3_ffi as ffi;
-
-/// Converts a mapped `QkObs` into the Python `SparseObservable` that owns it.
-///
-/// # Safety
-///
-/// `obs` must be a valid, uniquely-owned `QkObs` pointer; ownership transfers to Python.
-unsafe fn into_py_obs(obs: *mut qiskit_pyo3_ffi::QkObs) -> Py<PyAny> {
-    unsafe {
-        let py = Python::assume_attached();
-        let py_obs = ffi::qk_obs_to_python(obs);
-        Bound::from_owned_ptr(py, py_obs).into()
-    }
-}
 
 /// Map a :class:`.FermionOperator` to a :class:`~qiskit.quantum_info.SparseObservable` under the
 /// Jordan-Wigner transformation. [1]_

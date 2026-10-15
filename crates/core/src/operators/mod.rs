@@ -27,6 +27,16 @@ pub enum CoherenceError {
         "num_qubits ({num_qubits}) is too small for an operator acting on mode index {max_mode}"
     )]
     NumQubitsTooSmall { num_qubits: u32, max_mode: u32 },
+    /// The register is too small for the encoding itself, whatever operator is mapped through it.
+    ///
+    /// Distinct from [`Self::NumQubitsTooSmall`], which is about the modes an operator acts on. An
+    /// encoding may spread a single mode's image over several qubits, so the register must cover the
+    /// encoding's whole extent even when the operator touches only low modes.
+    #[error(
+        "num_qubits ({num_qubits}) is too small for an encoding of {num_modes} modes, which needs \
+         one qubit per mode"
+    )]
+    NumQubitsTooSmallForEncoding { num_qubits: u32, num_modes: u32 },
     #[error("expected one group index per term, but got {num_groups} for {num_terms} terms")]
     GroupLengthMismatch { num_groups: usize, num_terms: usize },
 }
