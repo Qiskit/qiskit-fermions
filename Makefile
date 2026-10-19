@@ -270,7 +270,10 @@ coveragecombine:
 	cp tests/c/build/*.profraw .
 	grcov . --binary-path target/debug/ --source-dir . --output-type lcov --output-path rust.info --llvm --branch --parallel --keep-only 'crates/*'
 	coverage lcov -o python.info
-	lcov --add-tracefile python.info --add-tracefile rust.info --output-file coveralls.info
+	# `coverage lcov` emits one function record per definition, so a property's getter
+	# and setter yield two records with the same name. lcov >= 2.4 rejects that as
+	# inconsistent; downgrade it to a warning (the duplicates get merged into one).
+	lcov --ignore-errors inconsistent --add-tracefile python.info --add-tracefile rust.info --output-file coveralls.info
 
 .PHONY: coveragereport
 coveragereport: coveragecombine
