@@ -547,12 +547,14 @@ there is nothing to repair on that front.
 .. skip: start if(not (HAS_FFSIM and HAS_QISKIT_ADDON_SQD))
 
 The solver consumes the sampled counts as a :external:class:`~qiskit.primitives.BitArray`, built
-directly from the pooled ``counts`` of step 6. It diagonalizes in the same momentum basis the
-rest of the construction uses, so it takes the ``h1e_momentum`` and ``h2e_momentum`` integrals from
-step 2 directly, with no repacking. The recovered energy matches the exact reference to well under a
-milli-Hartree, from only a few hundred sampled configurations. Because the SQD energy is a variational
-upper bound on the true ground state, it always sits at or above ``reference_energy`` (still in scope
-from step 2):
+directly from the pooled ``counts`` of step 6. Pass ``num_bits`` explicitly: without it, the width
+is inferred from the widest sampled bitstring, which is narrower than ``2 * norb`` whenever no
+sample occupies the last mode, and the solver then rejects the array. The solver diagonalizes in
+the same momentum basis the rest of the construction uses, so it takes the ``h1e_momentum`` and
+``h2e_momentum`` integrals from step 2 directly, with no repacking. The recovered energy matches the
+exact reference to well under a milli-Hartree, from only a few hundred sampled configurations.
+Because the SQD energy is a variational upper bound on the true ground state, it always sits at or
+above ``reference_energy`` (still in scope from step 2):
 
 .. plot::
    :context:
@@ -562,7 +564,7 @@ from step 2):
    >>> from qiskit.primitives import BitArray
    >>> from qiskit_addon_sqd.fermion import diagonalize_fermionic_hamiltonian
    >>>
-   >>> bit_array = BitArray.from_counts(dict(counts))
+   >>> bit_array = BitArray.from_counts(dict(counts), num_bits=2 * norb)
    >>>
    >>> # record each iteration's batch results so we can watch the energy converge
    >>> result_history = []
