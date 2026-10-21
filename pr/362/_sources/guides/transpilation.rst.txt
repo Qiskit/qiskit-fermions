@@ -38,7 +38,9 @@ this project split the transpilation into the following stages:
 **Synthesis**
    Converts fermionic gates to qubit operations by using the chosen fermion-to-qubit
    mapping. :class:`.FermionicGate` instances are transformed into sequences of
-   standard quantum gates.
+   standard quantum gates. A barrier is carried through onto every qubit of each
+   register it touched, so it continues to separate the gates on either side of it
+   during the qubit stage.
 
 **Qubit**
    Transpiles the resulting qubit circuit by using standard Qiskit methods, including

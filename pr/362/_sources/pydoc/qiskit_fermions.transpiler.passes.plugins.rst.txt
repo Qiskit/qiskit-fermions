@@ -38,6 +38,8 @@ they act upon:
    +====================================+===============================+========================================================+
    | :class:`.Evolution`                | ``MapperFn``                  | :class:`MapperFnEvolutionSynthesis`                    |
    +------------------------------------+-------------------------------+--------------------------------------------------------+
+   | :class:`.FermionicMeasure`         | ``TrivialOccupation``         | :class:`TrivialOccupationFermionicMeasureSynthesis`    |
+   +------------------------------------+-------------------------------+--------------------------------------------------------+
    | :class:`.InitializeModes`          | ``TrivialOccupation``         | :class:`TrivialOccupationInitializeModesSynthesis`     |
    +------------------------------------+-------------------------------+--------------------------------------------------------+
    | :class:`.OrbitalRotation`          | ``GivensDecomposition``       | :class:`GivensDecompositionOrbitalRotationSynthesis`   |
@@ -52,6 +54,7 @@ they act upon:
    GivensDecompositionOrbitalRotationSynthesis
    GivensDecompositionSlaterDeterminantSynthesis
    MapperFnEvolutionSynthesis
+   TrivialOccupationFermionicMeasureSynthesis
    TrivialOccupationInitializeModesSynthesis
 
 

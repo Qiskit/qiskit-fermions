@@ -29,13 +29,14 @@ The balanced tree's weight is optimal over *all* fermion-to-qubit mappings, so t
 :math:`n` qubits, so the saving is in Pauli weight rather than qubit count.
 
 These two constructors cover only the uniform families. The general interface is
-:c:func:`qf_ternary_tree_new`, which takes one :c:struct:`QfTernaryTreeNode` per node: the trees worth
-searching for are usually neither a chain nor uniform, since an algorithm such as Bonsai grows a
-spanning tree of a device's coupling graph and its branching therefore follows that connectivity.
+:c:func:`qf_ternary_tree_new`, which takes the root and, per node, its parent and the label of the link
+from that parent: the trees worth searching for are usually neither a chain nor uniform, since an
+algorithm such as Bonsai grows a spanning tree of a device's coupling graph and its branching
+therefore follows that connectivity.
 
 Not every encoding in the family has a convenience constructor. Bravyi-Kitaev, for instance, is a tree
 that is not uniform, so it is built by computing its specification: the binary-branching tree above
-matches its Pauli weight but is a different tree, except when :math:`n` is a power of two.
+matches its Pauli weight but is a different tree, whatever its label order.
 
 Once built, a tree is compiled into a :c:struct:`QfTernaryTreeEncoding` with
 :c:func:`qf_ternary_tree_encoding_new`, which pairs its legs into Majorana operators and builds their

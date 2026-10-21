@@ -168,7 +168,8 @@ downward links labelled ``X``, ``Y`` and ``Z``; a link either descends to a chil
 terminates (a *leg*). Each leg's path back to the root spells a Pauli string: crossing the link
 labelled :math:`P` that descends *from* node :math:`u` contributes :math:`P` on qubit :math:`u`. Every
 such tree yields a valid encoding, and the familiar ones are simply particular shapes -- a chain along
-``Z`` is Jordan-Wigner, while a tree of branching rate 3 is balanced.
+``Z`` is Jordan-Wigner, while a tree in which every node has three children, as far as the node count
+allows, is balanced.
 
 .. tab-set-code::
 
@@ -200,9 +201,11 @@ such tree yields a valid encoding, and the familiar ones are simply particular s
        qf_ternary_tree_free(chain);
        qf_ternary_tree_free(balanced);
 
-That weight is optimal: no fermion-to-qubit mapping of :math:`n` modes can do better than
-:math:`\lceil \log_3(2n+1) \rceil` on average. Both trees use exactly :math:`n` qubits, so the saving
-is in Pauli weight, not qubit count.
+That maximum weight is optimal. `Jiang et al. <https://arxiv.org/abs/1910.10746>`__ prove that the
+Majorana operators of *any* fermion-to-qubit mapping of :math:`n` modes have an average Pauli weight of
+at least :math:`\log_3(2n)`, so no mapping can bring the largest of them below
+:math:`\lceil \log_3(2n+1) \rceil`. Both trees use exactly :math:`n` qubits, so the saving is in
+Pauli weight, not qubit count.
 
 To map an operator, compile a tree into an encoding and hand that to a mapper along with the qubit
 count for the result. Compiling pairs the tree's legs into Majorana operators and builds their Pauli
@@ -278,17 +281,48 @@ that picks the right one for the operator it is given, just as :func:`.jordan_wi
 
 .. note::
    Some identities that hold under Jordan-Wigner are properties of the *chain* rather than of ternary
-   trees. The number operator is :math:`n_j = (1 - Z_j)/2` only there; on another tree it is a signed
-   :math:`Z` string over a set of qubits. Likewise a vertex operator :math:`V_j` is the weight-1 Pauli
-   :math:`Z_j` only on the chain, where the two Majorana strings' :math:`Z` chains cancel.
+   trees. The number operator is :math:`n_j = (1 - Z_j)/2` only on the chain; on another tree the
+   :math:`Z_j` becomes a :math:`Z` string over a set of qubits. Likewise a vertex operator :math:`V_j`
+   is the weight-1 Pauli :math:`Z_j` only on the chain, where the two Majorana strings' :math:`Z`
+   chains cancel.
+
+Because every number operator still maps to a single :math:`Z` string, a Fock state is still a
+computational basis state under any ternary tree, but bit :math:`q` no longer reads occupation
+:math:`q`. Occupation :math:`j` is instead the parity of the measured bits on the support of
+:math:`n_j`'s image. Read those supports off the mapper rather than deriving them from the tree, so
+the decoding stays correct for any shape or mode permutation:
+
+.. doctest::
+
+    >>> for mode in range(4):
+    ...     number = FermionOperator.from_dict({((True, mode), (False, mode)): 1.0})
+    ...     print(mode, ternary_tree(number, encoding, 4).simplify())
+    0 <SparseObservable with 2 terms on 4 qubits: (0.5+0j)() + (-0.5+0j)(Z_2 Z_1 Z_0)>
+    1 <SparseObservable with 2 terms on 4 qubits: (0.5+0j)() + (-0.5+0j)(Z_1)>
+    2 <SparseObservable with 2 terms on 4 qubits: (0.5+0j)() + (-0.5+0j)(Z_2)>
+    3 <SparseObservable with 2 terms on 4 qubits: (0.5+0j)() + (-0.5+0j)(Z_3)>
+
+On this balanced tree, mode 0 is occupied when qubits 0, 1, and 2 hold an odd number of ones, so
+preparing it means flipping qubit 0 alone, while decoding a measured bitstring takes the parity over
+all three. A single bit-flip error on qubit 1 then corrupts the occupations of both mode 0 and mode
+1, which matters for any workflow that reads occupations from noisy samples.
+
+When an :class:`.Evolution` is lowered through such a mapper, wrap the mapper in :func:`.group_wise`
+(see :ref:`fermionic_synthesis_explanation`). A hopping term maps to two commuting Pauli strings,
+neither of which conserves particle number on its own; only their product in the evolution does.
+Under Jordan-Wigner both strings act on the same qubits, so a simplified term order keeps them
+adjacent. Under other trees their supports differ (as in ``Y_3 Z_1 Y_0`` and ``X_3 Z_2 X_0``
+earlier), the raw and the simplified orders both interleave them with the images of other terms,
+and a qubit-side product formula then leaks particle number.
 
 Build an arbitrary tree
 ~~~~~~~~~~~~~~~~~~~~~~~
 
 The chain and breadth-first constructors cover the uniform families, but the general interface takes
-one ``(parent, label)`` pair per node, with ``None`` for the root. This matters because the trees worth
-searching for are usually neither a chain nor uniform -- the Bonsai algorithm, for instance, grows a
-spanning tree of a device's coupling graph, so its branching follows that connectivity.
+one ``(parent, label)`` pair per node, with ``None`` for the root (the C API takes the root's index
+instead). This matters because the trees worth searching for are usually neither a chain nor
+uniform -- the Bonsai algorithm, for instance, grows a spanning tree of a device's coupling graph, so
+its branching follows that connectivity.
 
 .. tab-set-code::
 
@@ -298,20 +332,23 @@ spanning tree of a device's coupling graph, so its branching follows that connec
        >>> tree = TernaryTree([None, (0, "X"), (0, "Y"), (0, "Z"), (1, "X"), (1, "Z"), (4, "Y")])
        >>> tree.num_nodes, tree.num_legs, tree.max_weight
        (7, 15, 4)
-       >>> dict(tree.children(0))
+       >>> tree.children(0)
        {'X': 1, 'Y': 2, 'Z': 3}
 
     .. code-block:: c
 
-       // Node 0 branches three ways, node 1 twice, and node 4 carries a single child.
-       QfTernaryTreeNode spec[7] = {
-           {0, QfPauliLabel_Z, true},  // the root; parent and label are ignored
-           {0, QfPauliLabel_X, false}, {0, QfPauliLabel_Y, false}, {0, QfPauliLabel_Z, false},
-           {1, QfPauliLabel_X, false}, {1, QfPauliLabel_Z, false}, {4, QfPauliLabel_Y, false},
+       // Node 0, the root, branches three ways, node 1 twice, and node 4 carries a single child.
+       // The root has no parent and no incoming link, so its entries are never read: any value works.
+       #define IGNORED 0
+
+       uint32_t parents[7] = {IGNORED, 0, 0, 0, 1, 1, 4};
+       QfPauliLabel labels[7] = {
+           IGNORED,        QfPauliLabel_X, QfPauliLabel_Y, QfPauliLabel_Z,
+           QfPauliLabel_X, QfPauliLabel_Z, QfPauliLabel_Y,
        };
 
        QfTernaryTree *tree;
-       QfExitCode exit = qf_ternary_tree_new(7, spec, &tree);
+       QfExitCode exit = qf_ternary_tree_new(7, 0, parents, labels, &tree);
        assert(exit == QfExitCode_Success);
 
        assert(qf_ternary_tree_num_nodes(tree) == 7);
@@ -349,7 +386,8 @@ encoding rather than a mapping of any operator, so it is a method on the encodin
        qf_ternary_tree_encoding_new(tree, NULL, &encoding);
 
        // On the chain this is the full Z string; on the balanced tree it is not.
-       QkObs *parity = qf_ternary_tree_encoding_total_parity(encoding, 4);
+       QkObs *parity;
+       qf_ternary_tree_encoding_total_parity(encoding, 4, &parity);
 
        qf_ternary_tree_encoding_free(encoding);
        qf_ternary_tree_free(tree);
@@ -363,13 +401,6 @@ the all-:math:`Z` *path*, which acts as the identity on every node not on that p
    eigenvalues are physical, so do not project a state onto the :math:`+1` sector: a ternary-tree
    encoding spends one qubit per mode and is onto the full :math:`2^n`-dimensional space, leaving no
    unphysical subspace to project away.
-
-   Local encodings that add ancilla qubits, such as the flow sets in
-   :ref:`1D <1d_fermi_hubbard>` and :ref:`2D <2d_fermi_hubbard>`, do work that way: there
-   :math:`n_\text{qubits} > n_\text{modes}`, the extra dimensions are unphysical, and a stabilizer
-   subspace is what makes the encoding faithful. Ternary trees add no such qubits and have no such
-   subspace.
-
 
 .. _bravyi_kitaev_by_hand:
 
@@ -409,14 +440,14 @@ leg:
     ...     return TernaryTree(spec)
 
 At four modes the whole range is a single block, so the node placed first is 3, with :math:`[0, 2]`
-before it and nothing after; that sub-range gives node 1 over the single nodes 0 and 2. Compiling the tree
-confirms the encoding is Bravyi-Kitaev and not merely a tree of the same shape class -- its first Majorana
-image is :math:`X_0 X_1 X_3`:
+before it and nothing after; that sub-range gives node 1 over the single nodes 0 and 2. Compiling the
+tree confirms the encoding is Bravyi-Kitaev and not merely a tree of the same shape class -- its first
+Majorana image is :math:`X_0 X_1 X_3`:
 
 .. doctest::
 
     >>> tree = bravyi_kitaev_tree(4)
-    >>> dict(tree.children(1))
+    >>> tree.children(1)
     {'X': 0, 'Z': 2}
     >>> encoding = TernaryTreeEncoding(tree)
     >>> encoding.majorana_image(0)
