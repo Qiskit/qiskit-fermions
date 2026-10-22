@@ -14,14 +14,8 @@
 
 from __future__ import annotations
 
-import sys
 from collections.abc import Iterable, Iterator, Sequence
-from typing import Protocol
-
-if sys.version_info >= (3, 11):
-    from typing import Self
-else:
-    from typing_extensions import Self
+from typing import Protocol, Self
 
 
 class OperatorTrait(Protocol):

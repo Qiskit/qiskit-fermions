@@ -1,0 +1,3 @@
+---
+upgrade:
+  - We dropped support for Python 3.10 which has reached end-of-life.
