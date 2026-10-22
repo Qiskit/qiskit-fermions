@@ -1,6 +1,0 @@
-﻿majorana\_jordan\_wigner
-========================
-
-.. currentmodule:: qiskit_fermions.mappers.library
-
-.. autofunction:: majorana_jordan_wigner

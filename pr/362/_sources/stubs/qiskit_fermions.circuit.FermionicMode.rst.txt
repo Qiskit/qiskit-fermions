@@ -1,6 +1,0 @@
-﻿FermionicMode
-=============
-
-.. currentmodule:: qiskit_fermions.circuit
-
-.. autodata:: FermionicMode

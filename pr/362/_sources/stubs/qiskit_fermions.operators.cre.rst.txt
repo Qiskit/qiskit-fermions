@@ -1,6 +1,0 @@
-﻿cre
-===
-
-.. currentmodule:: qiskit_fermions.operators
-
-.. autofunction:: cre

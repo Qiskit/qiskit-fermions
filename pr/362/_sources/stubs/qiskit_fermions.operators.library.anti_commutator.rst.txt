@@ -1,6 +1,0 @@
-﻿anti\_commutator
-================
-
-.. currentmodule:: qiskit_fermions.operators.library
-
-.. autofunction:: anti_commutator
