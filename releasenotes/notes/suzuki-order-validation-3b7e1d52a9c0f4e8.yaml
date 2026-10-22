@@ -1,0 +1,7 @@
+---
+fixes:
+  - |
+    :class:`~qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter` now raises a
+    ``ValueError`` on construction when ``order`` is ``< 1``. Previously these values were
+    accepted and synthesis then failed with a ``RecursionError``, unless the evolved operator
+    had a single factor.
