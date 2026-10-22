@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>FermionicSuzukiTrotter - Qiskit Fermions 0.3.0+6899120</title>
+        <title>FermionicSuzukiTrotter - Qiskit Fermions 0.3.0+b4212f5</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=fc6d6d93" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.3.0+6899120</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.3.0+b4212f5</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.3.0+6899120</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.3.0+b4212f5</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -513,13 +513,14 @@ still being wrong.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>order</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><em>int</em></a>) – the order of the product formula. Must be <code class="docutils literal notranslate"><span class="pre">1</span></code> (which reduces to
-<a class="reference internal" href="qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter.html#qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter" title="qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicLieTrotter</span></code></a>) or even, since the Suzuki formulas are symmetric.</p></li>
+<a class="reference internal" href="qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter.html#qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter" title="qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicLieTrotter</span></code></a>) or a positive even integer, since the Suzuki formulas
+are symmetric.</p></li>
 <li><p><strong>reps</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><em>int</em></a>) – the number of times to repeat the formula, each repetition evolving for
 <code class="docutils literal notranslate"><span class="pre">time</span> <span class="pre">/</span> <span class="pre">reps</span></code>.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.15)"><strong>ValueError</strong></a> – if <code class="docutils literal notranslate"><span class="pre">order</span></code> is neither <code class="docutils literal notranslate"><span class="pre">1</span></code> nor even, or if <code class="docutils literal notranslate"><span class="pre">reps</span></code> is not positive.</p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.15)"><strong>ValueError</strong></a> – if <code class="docutils literal notranslate"><span class="pre">order</span></code> is neither <code class="docutils literal notranslate"><span class="pre">1</span></code> nor a positive even integer, or if <code class="docutils literal notranslate"><span class="pre">reps</span></code> is not positive.</p>
 </dd>
 </dl>
 <p class="rubric">Attributes</p>
@@ -633,7 +634,7 @@ the formula. A factor may appear more than once, at different evolution times.</
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=0f32bbc6"></script>
+</div><script src="../_static/documentation_options.js?v=81e0255c"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
