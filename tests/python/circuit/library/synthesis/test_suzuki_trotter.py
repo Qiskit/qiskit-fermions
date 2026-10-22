@@ -103,8 +103,15 @@ def test_single_factor_schedule_collapses_to_one_gate(subtests):
 # the synthesis method
 # ----------------------------------------------------------------------------------------------
 def test_rejects_odd_orders_above_one():
-    with pytest.raises(ValueError, match="order of 1 or an even order"):
+    with pytest.raises(ValueError, match="order of 1 or a positive even order"):
         FermionicSuzukiTrotter(order=3)
+
+
+@pytest.mark.parametrize("order", [0, -1, -2, -4])
+def test_rejects_orders_below_one(order):
+    """Non-positive even orders used to pass validation and then recurse without end."""
+    with pytest.raises(ValueError, match="order of 1 or a positive even order"):
+        FermionicSuzukiTrotter(order=order)
 
 
 def test_rejects_non_positive_reps():
