@@ -1,6 +1,0 @@
-﻿ann
-===
-
-.. currentmodule:: qiskit_fermions.operators
-
-.. autofunction:: ann

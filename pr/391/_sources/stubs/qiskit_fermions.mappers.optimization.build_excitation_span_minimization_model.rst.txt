@@ -1,6 +1,0 @@
-﻿build\_excitation\_span\_minimization\_model
-============================================
-
-.. currentmodule:: qiskit_fermions.mappers.optimization
-
-.. autofunction:: build_excitation_span_minimization_model

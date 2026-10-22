@@ -1,6 +1,0 @@
-﻿map\_majorana\_action\_generators
-=================================
-
-.. currentmodule:: qiskit_fermions.mappers
-
-.. autofunction:: map_majorana_action_generators
