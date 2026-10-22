@@ -1,0 +1,6 @@
+﻿ternary\_tree
+=============
+
+.. currentmodule:: qiskit_fermions.mappers.library
+
+.. autofunction:: ternary_tree

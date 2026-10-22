@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Map operator representations - Qiskit Fermions 0.3.0.dev0+feff0bd</title>
+        <title>Map operator representations - Qiskit Fermions 0.3.0.dev0+4d76507</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=fc6d6d93" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.3.0.dev0+feff0bd</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.3.0.dev0+4d76507</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.3.0.dev0+feff0bd</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.3.0.dev0+4d76507</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -269,12 +269,15 @@
 <li class="toctree-l3"><a class="reference internal" href="../stubs/qiskit_fermions.mappers.map_majorana_action_generators.html">map_majorana_action_generators</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../stubs/qiskit_fermions.mappers.map_edge_vertex_generators.html">map_edge_vertex_generators</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../stubs/qiskit_fermions.mappers.map_transfer_vertex_generators.html">map_transfer_vertex_generators</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../stubs/qiskit_fermions.mappers.TernaryTree.html">TernaryTree</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../stubs/qiskit_fermions.mappers.TernaryTreeEncoding.html">TernaryTreeEncoding</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../pydoc/qiskit_fermions.mappers.library.html">Mapper Library</a><input aria-label="Toggle navigation of Mapper Library" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../stubs/qiskit_fermions.mappers.library.fermion_operator.html">fermion_operator</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../stubs/qiskit_fermions.mappers.library.jordan_wigner.html">jordan_wigner</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../stubs/qiskit_fermions.mappers.library.majorana_operator.html">majorana_operator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../stubs/qiskit_fermions.mappers.library.ternary_tree.html">ternary_tree</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../stubs/qiskit_fermions.mappers.library.fermion_jordan_wigner.html">fermion_jordan_wigner</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../stubs/qiskit_fermions.mappers.library.majorana_jordan_wigner.html">majorana_jordan_wigner</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../stubs/qiskit_fermions.mappers.library.edge_vertex_jordan_wigner.html">edge_vertex_jordan_wigner</a></li>
@@ -286,6 +289,10 @@
 <li class="toctree-l3"><a class="reference internal" href="../stubs/qiskit_fermions.mappers.library.transfer_vertex_to_fermion.html">transfer_vertex_to_fermion</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../stubs/qiskit_fermions.mappers.library.transfer_vertex_to_majorana.html">transfer_vertex_to_majorana</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../stubs/qiskit_fermions.mappers.library.transfer_vertex_to_edge_vertex.html">transfer_vertex_to_edge_vertex</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../stubs/qiskit_fermions.mappers.library.fermion_ternary_tree.html">fermion_ternary_tree</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../stubs/qiskit_fermions.mappers.library.majorana_ternary_tree.html">majorana_ternary_tree</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../stubs/qiskit_fermions.mappers.library.edge_vertex_ternary_tree.html">edge_vertex_ternary_tree</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../stubs/qiskit_fermions.mappers.library.transfer_vertex_ternary_tree.html">transfer_vertex_ternary_tree</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../pydoc/qiskit_fermions.mappers.optimization.html">Mapper Optimizations</a><input aria-label="Toggle navigation of Mapper Optimizations" class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -394,6 +401,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../cdoc/qf-mappers-library.html">Mapper Library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../cdoc/qf-ternary-tree.html">Ternary Trees</a></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../cdoc/qf-various.html">Various</a><input aria-label="Toggle navigation of Various" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../cdoc/qf-exit-code.html">QfExitCode</a></li>
 </ul>
@@ -590,9 +598,323 @@ convenience mappers. <a class="reference internal" href="../stubs/qiskit_fermion
 <a class="reference internal" href="../stubs/qiskit_fermions.mappers.library.majorana_to_fermion.html#qiskit_fermions.mappers.library.majorana_to_fermion" title="qiskit_fermions.mappers.library.majorana_to_fermion"><code class="xref py py-func docutils literal notranslate"><span class="pre">majorana_to_fermion()</span></code></a> and <a class="reference internal" href="../stubs/qiskit_fermions.mappers.library.fermion_to_majorana.html#qiskit_fermions.mappers.library.fermion_to_majorana" title="qiskit_fermions.mappers.library.fermion_to_majorana"><code class="xref py py-func docutils literal notranslate"><span class="pre">fermion_to_majorana()</span></code></a> (among others), delegating to the
 appropriate library implementation internally based on the type of object they are given,
 rather than requiring you to pick the right function yourself. The same applies to
-<a class="reference internal" href="../stubs/qiskit_fermions.mappers.library.jordan_wigner.html#qiskit_fermions.mappers.library.jordan_wigner" title="qiskit_fermions.mappers.library.jordan_wigner"><code class="xref py py-func docutils literal notranslate"><span class="pre">jordan_wigner()</span></code></a>, which dispatches to whichever of the four direct implementations matches the
-operator it is given. See <a class="reference internal" href="../pydoc/qiskit_fermions.protocols.html#module-qiskit_fermions.protocols" title="qiskit_fermions.protocols"><code class="xref py py-mod docutils literal notranslate"><span class="pre">qiskit_fermions.protocols</span></code></a> for how this dispatch is implemented
-internally.</p>
+<a class="reference internal" href="../stubs/qiskit_fermions.mappers.library.jordan_wigner.html#qiskit_fermions.mappers.library.jordan_wigner" title="qiskit_fermions.mappers.library.jordan_wigner"><code class="xref py py-func docutils literal notranslate"><span class="pre">jordan_wigner()</span></code></a> and to <a class="reference internal" href="../stubs/qiskit_fermions.mappers.library.ternary_tree.html#qiskit_fermions.mappers.library.ternary_tree" title="qiskit_fermions.mappers.library.ternary_tree"><code class="xref py py-func docutils literal notranslate"><span class="pre">ternary_tree()</span></code></a> (introduced below), each of which dispatches to
+whichever direct implementation matches the operator it is given. See
+<a class="reference internal" href="../pydoc/qiskit_fermions.protocols.html#module-qiskit_fermions.protocols" title="qiskit_fermions.protocols"><code class="xref py py-mod docutils literal notranslate"><span class="pre">qiskit_fermions.protocols</span></code></a> for how this dispatch is implemented internally.</p>
+</section>
+<section id="choose-an-encoding-with-ternary-trees">
+<h2>Choose an encoding with ternary trees<a class="headerlink" href="#choose-an-encoding-with-ternary-trees" title="Link to this heading">¶</a></h2>
+<p>Jordan-Wigner is not the only fermion-to-qubit encoding, and it is not the cheapest. Its
+<span class="math">\(Z\)</span> strings grow with the mode index, so a Majorana operator on the last of <span class="math">\(n\)</span> modes maps
+onto a Pauli string of weight <span class="math">\(n\)</span>. Encodings that spread the parity information across a tree
+instead of a chain do asymptotically better.</p>
+<p>A <strong>ternary tree</strong> on <span class="math">\(n\)</span> nodes captures this whole family. Each node is a qubit carrying three
+downward links labelled <code class="docutils literal notranslate"><span class="pre">X</span></code>, <code class="docutils literal notranslate"><span class="pre">Y</span></code> and <code class="docutils literal notranslate"><span class="pre">Z</span></code>; a link either descends to a child node (an <em>edge</em>) or
+terminates (a <em>leg</em>). Each leg’s path back to the root spells a Pauli string: crossing the link
+labelled <span class="math">\(P\)</span> that descends <em>from</em> node <span class="math">\(u\)</span> contributes <span class="math">\(P\)</span> on qubit <span class="math">\(u\)</span>. Every
+such tree yields a valid encoding, and the familiar ones are simply particular shapes – a chain along
+<code class="docutils literal notranslate"><span class="pre">Z</span></code> is Jordan-Wigner, while a tree in which every node has three children, as far as the node count
+allows, is balanced.</p>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-4" name="sd-tab-set-2" type="radio">
+<label class="sd-tab-label" data-sync-group="code" data-sync-id="python" for="sd-tab-item-4">
+PYTHON</label><div class="sd-tab-content docutils">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.mappers</span><span class="w"> </span><span class="kn">import</span> <span class="n">TernaryTree</span><span class="p">,</span> <span class="n">TernaryTreeEncoding</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Jordan-Wigner is a chain descending along Z, with X and Y as legs at every node.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">TernaryTree</span><span class="o">.</span><span class="n">chain</span><span class="p">(</span><span class="mi">13</span><span class="p">,</span> <span class="s2">"Z"</span><span class="p">)</span><span class="o">.</span><span class="n">max_weight</span>
+<span class="go">13</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># The balanced tree spreads the same information over depth log_3(2n+1).</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">TernaryTree</span><span class="o">.</span><span class="n">breadth_first</span><span class="p">(</span><span class="mi">13</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">max_weight</span>
+<span class="go">3</span>
+</pre></div>
+</div>
+</div>
+<input id="sd-tab-item-5" name="sd-tab-set-2" type="radio">
+<label class="sd-tab-label" data-sync-group="code" data-sync-id="c" for="sd-tab-item-5">
+C</label><div class="sd-tab-content docutils">
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;qiskit_fermions.h&gt;</span>
+
+<span class="n">QfTernaryTree</span><span class="w"> </span><span class="o">*</span><span class="n">chain</span><span class="p">;</span>
+<span class="n">qf_ternary_tree_chain</span><span class="p">(</span><span class="mi">13</span><span class="p">,</span><span class="w"> </span><span class="n">QfPauliLabel_Z</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">chain</span><span class="p">);</span>
+
+<span class="n">QfPauliLabel</span><span class="w"> </span><span class="n">order</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="n">QfPauliLabel_X</span><span class="p">,</span><span class="w"> </span><span class="n">QfPauliLabel_Y</span><span class="p">,</span><span class="w"> </span><span class="n">QfPauliLabel_Z</span><span class="p">};</span>
+<span class="n">QfTernaryTree</span><span class="w"> </span><span class="o">*</span><span class="n">balanced</span><span class="p">;</span>
+<span class="n">qf_ternary_tree_breadth_first</span><span class="p">(</span><span class="mi">13</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="n">order</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">balanced</span><span class="p">);</span>
+
+<span class="n">assert</span><span class="p">(</span><span class="n">qf_ternary_tree_max_weight</span><span class="p">(</span><span class="n">chain</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">13</span><span class="p">);</span>
+<span class="n">assert</span><span class="p">(</span><span class="n">qf_ternary_tree_max_weight</span><span class="p">(</span><span class="n">balanced</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">3</span><span class="p">);</span>
+
+<span class="n">qf_ternary_tree_free</span><span class="p">(</span><span class="n">chain</span><span class="p">);</span>
+<span class="n">qf_ternary_tree_free</span><span class="p">(</span><span class="n">balanced</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>That maximum weight is optimal. <a class="reference external" href="https://arxiv.org/abs/1910.10746">Jiang et al.</a> prove that the
+Majorana operators of <em>any</em> fermion-to-qubit mapping of <span class="math">\(n\)</span> modes have an average Pauli weight of
+at least <span class="math">\(\log_3(2n)\)</span>, so no mapping can bring the largest of them below
+<span class="math">\(\lceil \log_3(2n+1) \rceil\)</span>. Both trees use exactly <span class="math">\(n\)</span> qubits, so the saving is in
+Pauli weight, not qubit count.</p>
+<p>To map an operator, compile a tree into an encoding and hand that to a mapper along with the qubit
+count for the result. Compiling pairs the tree’s legs into Majorana operators and builds their Pauli
+strings once, so the same encoding should be reused across many operators. The qubit count stays with
+the mapping call rather than the encoding, so one encoding can serve registers of different widths; a
+count above the tree’s node count pads with the identity.</p>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-6" name="sd-tab-set-3" type="radio">
+<label class="sd-tab-label" data-sync-group="code" data-sync-id="python" for="sd-tab-item-6">
+PYTHON</label><div class="sd-tab-content docutils">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.mappers.library</span><span class="w"> </span><span class="kn">import</span> <span class="n">fermion_ternary_tree</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.operators</span><span class="w"> </span><span class="kn">import</span> <span class="n">FermionOperator</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">hamiltonian</span> <span class="o">=</span> <span class="n">FermionOperator</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="p">{((</span><span class="kc">True</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="mi">3</span><span class="p">)):</span> <span class="mf">1.0</span><span class="p">,</span> <span class="p">((</span><span class="kc">True</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="mi">0</span><span class="p">)):</span> <span class="mf">1.0</span><span class="p">}</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">encoding</span> <span class="o">=</span> <span class="n">TernaryTreeEncoding</span><span class="p">(</span><span class="n">TernaryTree</span><span class="o">.</span><span class="n">breadth_first</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fermion_ternary_tree</span><span class="p">(</span><span class="n">hamiltonian</span><span class="p">,</span> <span class="n">encoding</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span>
+<span class="go">&lt;SparseObservable with 2 terms on 4 qubits: (0.5+0j)(Y_3 Z_1 Y_0) + (0.5+0j)(X_3 Z_2 X_0)&gt;</span>
+</pre></div>
+</div>
+</div>
+<input id="sd-tab-item-7" name="sd-tab-set-3" type="radio">
+<label class="sd-tab-label" data-sync-group="code" data-sync-id="c" for="sd-tab-item-7">
+C</label><div class="sd-tab-content docutils">
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="c1">// Create the hopping Hamiltonian a^dagger_0 a_3 + a^dagger_3 a_0</span>
+<span class="n">QfFermionOperator</span><span class="w"> </span><span class="o">*</span><span class="n">hamiltonian</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_ferm_op_zero</span><span class="p">();</span>
+<span class="n">QkComplex64</span><span class="w"> </span><span class="n">coeffs</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{{</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">}};</span>
+<span class="kt">bool</span><span class="w"> </span><span class="n">actions</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="nb">true</span><span class="p">,</span><span class="w"> </span><span class="nb">false</span><span class="p">,</span><span class="w"> </span><span class="nb">true</span><span class="p">,</span><span class="w"> </span><span class="nb">false</span><span class="p">};</span>
+<span class="kt">uint32_t</span><span class="w"> </span><span class="n">indices</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">};</span>
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">qf_ferm_op_add_term</span><span class="p">(</span><span class="n">hamiltonian</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="n">actions</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">indices</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">coeffs</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+<span class="p">}</span>
+
+<span class="n">QfPauliLabel</span><span class="w"> </span><span class="n">order</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="n">QfPauliLabel_X</span><span class="p">,</span><span class="w"> </span><span class="n">QfPauliLabel_Y</span><span class="p">,</span><span class="w"> </span><span class="n">QfPauliLabel_Z</span><span class="p">};</span>
+<span class="n">QfTernaryTree</span><span class="w"> </span><span class="o">*</span><span class="n">tree</span><span class="p">;</span>
+<span class="n">qf_ternary_tree_breadth_first</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="n">order</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">tree</span><span class="p">);</span>
+
+<span class="c1">// Compile the tree once, then reuse the encoding for every operator mapped through it.</span>
+<span class="n">QfTernaryTreeEncoding</span><span class="w"> </span><span class="o">*</span><span class="n">encoding</span><span class="p">;</span>
+<span class="n">qf_ternary_tree_encoding_new</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">encoding</span><span class="p">);</span>
+
+<span class="n">QkObs</span><span class="w"> </span><span class="o">*</span><span class="n">qubit_op</span><span class="p">;</span>
+<span class="n">QfExitCode</span><span class="w"> </span><span class="n">exit</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_ferm_op_ternary_tree</span><span class="p">(</span><span class="n">hamiltonian</span><span class="p">,</span><span class="w"> </span><span class="n">encoding</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">qubit_op</span><span class="p">);</span>
+<span class="n">assert</span><span class="p">(</span><span class="n">exit</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">QfExitCode_Success</span><span class="p">);</span>
+
+<span class="c1">// Clean up</span>
+<span class="n">qf_ferm_op_free</span><span class="p">(</span><span class="n">hamiltonian</span><span class="p">);</span>
+<span class="n">qf_ternary_tree_encoding_free</span><span class="p">(</span><span class="n">encoding</span><span class="p">);</span>
+<span class="n">qf_ternary_tree_free</span><span class="p">(</span><span class="n">tree</span><span class="p">);</span>
+<span class="n">qk_obs_free</span><span class="p">(</span><span class="n">qubit_op</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Mapping through a chain along <code class="docutils literal notranslate"><span class="pre">Z</span></code> reproduces <a class="reference internal" href="../stubs/qiskit_fermions.mappers.library.fermion_jordan_wigner.html#qiskit_fermions.mappers.library.fermion_jordan_wigner" title="qiskit_fermions.mappers.library.fermion_jordan_wigner"><code class="xref py py-func docutils literal notranslate"><span class="pre">fermion_jordan_wigner()</span></code></a>
+(<a class="reference internal" href="../cdoc/qf-mappers-library.html#c.qf_ferm_op_jordan_wigner" title="qf_ferm_op_jordan_wigner"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_ferm_op_jordan_wigner()</span></code></a> in the C API) exactly, which is the sense in which this generalizes
+it:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.mappers.library</span><span class="w"> </span><span class="kn">import</span> <span class="n">fermion_jordan_wigner</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">chain</span> <span class="o">=</span> <span class="n">TernaryTreeEncoding</span><span class="p">(</span><span class="n">TernaryTree</span><span class="o">.</span><span class="n">chain</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="s2">"Z"</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">direct</span> <span class="o">=</span> <span class="n">fermion_jordan_wigner</span><span class="p">(</span><span class="n">hamiltonian</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">(</span><span class="n">fermion_ternary_tree</span><span class="p">(</span><span class="n">hamiltonian</span><span class="p">,</span> <span class="n">chain</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span> <span class="o">-</span> <span class="n">direct</span><span class="p">)</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span><span class="o">.</span><span class="n">num_terms</span>
+<span class="go">0</span>
+</pre></div>
+</div>
+<p>Every operator representation has a ternary-tree mapper, mirroring the Jordan-Wigner set; see
+<a class="reference internal" href="../pydoc/qiskit_fermions.mappers.library.html#module-qiskit_fermions.mappers.library" title="qiskit_fermions.mappers.library"><code class="xref py py-mod docutils literal notranslate"><span class="pre">qiskit_fermions.mappers.library</span></code></a> for the full list, and <a class="reference internal" href="../cdoc/qf-mappers-library.html#qf-mapper-library"><span class="std std-ref">Mapper Library</span></a> in the C API.
+In the Python API they are also reachable through <a class="reference internal" href="../stubs/qiskit_fermions.mappers.library.ternary_tree.html#qiskit_fermions.mappers.library.ternary_tree" title="qiskit_fermions.mappers.library.ternary_tree"><code class="xref py py-func docutils literal notranslate"><span class="pre">ternary_tree()</span></code></a>, the type-agnostic wrapper
+that picks the right one for the operator it is given, just as <a class="reference internal" href="../stubs/qiskit_fermions.mappers.library.jordan_wigner.html#qiskit_fermions.mappers.library.jordan_wigner" title="qiskit_fermions.mappers.library.jordan_wigner"><code class="xref py py-func docutils literal notranslate"><span class="pre">jordan_wigner()</span></code></a> does:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.mappers.library</span><span class="w"> </span><span class="kn">import</span> <span class="n">ternary_tree</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ternary_tree</span><span class="p">(</span><span class="n">hamiltonian</span><span class="p">,</span> <span class="n">encoding</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span>
+<span class="go">&lt;SparseObservable with 2 terms on 4 qubits: (0.5+0j)(Y_3 Z_1 Y_0) + (0.5+0j)(X_3 Z_2 X_0)&gt;</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Some identities that hold under Jordan-Wigner are properties of the <em>chain</em> rather than of ternary
+trees. The number operator is <span class="math">\(n_j = (1 - Z_j)/2\)</span> only on the chain; on another tree the
+<span class="math">\(Z_j\)</span> becomes a <span class="math">\(Z\)</span> string over a set of qubits. Likewise a vertex operator <span class="math">\(V_j\)</span>
+is the weight-1 Pauli <span class="math">\(Z_j\)</span> only on the chain, where the two Majorana strings’ <span class="math">\(Z\)</span>
+chains cancel.</p>
+</div>
+<p>Because every number operator still maps to a single <span class="math">\(Z\)</span> string, a Fock state is still a
+computational basis state under any ternary tree, but bit <span class="math">\(q\)</span> no longer reads occupation
+<span class="math">\(q\)</span>. Occupation <span class="math">\(j\)</span> is instead the parity of the measured bits on the support of
+<span class="math">\(n_j\)</span>’s image. Read those supports off the mapper rather than deriving them from the tree, so
+the decoding stays correct for any shape or mode permutation:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">mode</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">4</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="n">number</span> <span class="o">=</span> <span class="n">FermionOperator</span><span class="o">.</span><span class="n">from_dict</span><span class="p">({((</span><span class="kc">True</span><span class="p">,</span> <span class="n">mode</span><span class="p">),</span> <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="n">mode</span><span class="p">)):</span> <span class="mf">1.0</span><span class="p">})</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="n">mode</span><span class="p">,</span> <span class="n">ternary_tree</span><span class="p">(</span><span class="n">number</span><span class="p">,</span> <span class="n">encoding</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span><span class="o">.</span><span class="n">simplify</span><span class="p">())</span>
+<span class="go">0 &lt;SparseObservable with 2 terms on 4 qubits: (0.5+0j)() + (-0.5+0j)(Z_2 Z_1 Z_0)&gt;</span>
+<span class="go">1 &lt;SparseObservable with 2 terms on 4 qubits: (0.5+0j)() + (-0.5+0j)(Z_1)&gt;</span>
+<span class="go">2 &lt;SparseObservable with 2 terms on 4 qubits: (0.5+0j)() + (-0.5+0j)(Z_2)&gt;</span>
+<span class="go">3 &lt;SparseObservable with 2 terms on 4 qubits: (0.5+0j)() + (-0.5+0j)(Z_3)&gt;</span>
+</pre></div>
+</div>
+<p>On this balanced tree, mode 0 is occupied when qubits 0, 1, and 2 hold an odd number of ones, so
+preparing it means flipping qubit 0 alone, while decoding a measured bitstring takes the parity over
+all three. A single bit-flip error on qubit 1 then corrupts the occupations of both mode 0 and mode
+1, which matters for any workflow that reads occupations from noisy samples.</p>
+<p>When an <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> is lowered through such a mapper, wrap the mapper in <a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.synthesis.group_wise.html#qiskit_fermions.transpiler.passes.synthesis.group_wise" title="qiskit_fermions.transpiler.passes.synthesis.group_wise"><code class="xref py py-func docutils literal notranslate"><span class="pre">group_wise()</span></code></a>
+(see <a class="reference internal" href="fermionic_synthesis.html#fermionic-synthesis-explanation"><span class="std std-ref">Synthesize an Evolution gate in fermionic space</span></a>). A hopping term maps to two commuting Pauli strings,
+neither of which conserves particle number on its own; only their product in the evolution does.
+Under Jordan-Wigner both strings act on the same qubits, so a simplified term order keeps them
+adjacent. Under other trees their supports differ (as in <code class="docutils literal notranslate"><span class="pre">Y_3</span> <span class="pre">Z_1</span> <span class="pre">Y_0</span></code> and <code class="docutils literal notranslate"><span class="pre">X_3</span> <span class="pre">Z_2</span> <span class="pre">X_0</span></code>
+earlier), the raw and the simplified orders both interleave them with the images of other terms,
+and a qubit-side product formula then leaks particle number.</p>
+<section id="build-an-arbitrary-tree">
+<h3>Build an arbitrary tree<a class="headerlink" href="#build-an-arbitrary-tree" title="Link to this heading">¶</a></h3>
+<p>The chain and breadth-first constructors cover the uniform families, but the general interface takes
+one <code class="docutils literal notranslate"><span class="pre">(parent,</span> <span class="pre">label)</span></code> pair per node, with <code class="docutils literal notranslate"><span class="pre">None</span></code> for the root (the C API takes the root’s index
+instead). This matters because the trees worth searching for are usually neither a chain nor
+uniform – the Bonsai algorithm, for instance, grows a spanning tree of a device’s coupling graph, so
+its branching follows that connectivity.</p>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-8" name="sd-tab-set-4" type="radio">
+<label class="sd-tab-label" data-sync-group="code" data-sync-id="python" for="sd-tab-item-8">
+PYTHON</label><div class="sd-tab-content docutils">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Node 0 branches three ways, node 1 twice, and node 4 carries a single child.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tree</span> <span class="o">=</span> <span class="n">TernaryTree</span><span class="p">([</span><span class="kc">None</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s2">"X"</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s2">"Y"</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s2">"Z"</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">"X"</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">"Z"</span><span class="p">),</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="s2">"Y"</span><span class="p">)])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tree</span><span class="o">.</span><span class="n">num_nodes</span><span class="p">,</span> <span class="n">tree</span><span class="o">.</span><span class="n">num_legs</span><span class="p">,</span> <span class="n">tree</span><span class="o">.</span><span class="n">max_weight</span>
+<span class="go">(7, 15, 4)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tree</span><span class="o">.</span><span class="n">children</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="go">{'X': 1, 'Y': 2, 'Z': 3}</span>
+</pre></div>
+</div>
+</div>
+<input id="sd-tab-item-9" name="sd-tab-set-4" type="radio">
+<label class="sd-tab-label" data-sync-group="code" data-sync-id="c" for="sd-tab-item-9">
+C</label><div class="sd-tab-content docutils">
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="c1">// Node 0, the root, branches three ways, node 1 twice, and node 4 carries a single child.</span>
+<span class="c1">// The root has no parent and no incoming link, so its entries are never read: any value works.</span>
+<span class="cp">#define IGNORED 0</span>
+
+<span class="kt">uint32_t</span><span class="w"> </span><span class="n">parents</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="n">IGNORED</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">};</span>
+<span class="n">QfPauliLabel</span><span class="w"> </span><span class="n">labels</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">IGNORED</span><span class="p">,</span><span class="w">        </span><span class="n">QfPauliLabel_X</span><span class="p">,</span><span class="w"> </span><span class="n">QfPauliLabel_Y</span><span class="p">,</span><span class="w"> </span><span class="n">QfPauliLabel_Z</span><span class="p">,</span>
+<span class="w">    </span><span class="n">QfPauliLabel_X</span><span class="p">,</span><span class="w"> </span><span class="n">QfPauliLabel_Z</span><span class="p">,</span><span class="w"> </span><span class="n">QfPauliLabel_Y</span><span class="p">,</span>
+<span class="p">};</span>
+
+<span class="n">QfTernaryTree</span><span class="w"> </span><span class="o">*</span><span class="n">tree</span><span class="p">;</span>
+<span class="n">QfExitCode</span><span class="w"> </span><span class="n">exit</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_ternary_tree_new</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">parents</span><span class="p">,</span><span class="w"> </span><span class="n">labels</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">tree</span><span class="p">);</span>
+<span class="n">assert</span><span class="p">(</span><span class="n">exit</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">QfExitCode_Success</span><span class="p">);</span>
+
+<span class="n">assert</span><span class="p">(</span><span class="n">qf_ternary_tree_num_nodes</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">7</span><span class="p">);</span>
+<span class="n">assert</span><span class="p">(</span><span class="n">qf_ternary_tree_num_legs</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">15</span><span class="p">);</span>
+<span class="n">assert</span><span class="p">(</span><span class="n">qf_ternary_tree_max_weight</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">4</span><span class="p">);</span>
+
+<span class="n">qf_ternary_tree_free</span><span class="p">(</span><span class="n">tree</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Note the leg count: it is always <span class="math">\(2n+1\)</span>, whatever the shape. A node with fewer children does not
+generate fewer Pauli strings – its unused links are legs, and a leg spells a string just as an edge’s
+descendants do. Of those <span class="math">\(2n+1\)</span> strings, <span class="math">\(2n\)</span> pair into the Majorana operators of the
+<span class="math">\(n\)</span> modes, and exactly one is left over.</p>
+</section>
+<section id="total-parity">
+<h3>Total parity<a class="headerlink" href="#total-parity" title="Link to this heading">¶</a></h3>
+<p>That leftover leg is the total fermionic parity <span class="math">\(\prod_j (1 - 2 n_j)\)</span>. It is a property of the
+encoding rather than a mapping of any operator, so it is a method on the encoding itself:</p>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-10" name="sd-tab-set-5" type="radio">
+<label class="sd-tab-label" data-sync-group="code" data-sync-id="python" for="sd-tab-item-10">
+PYTHON</label><div class="sd-tab-content docutils">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">TernaryTreeEncoding</span><span class="p">(</span><span class="n">TernaryTree</span><span class="o">.</span><span class="n">chain</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="s2">"Z"</span><span class="p">))</span><span class="o">.</span><span class="n">total_parity</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+<span class="go">&lt;SparseObservable with 1 term on 4 qubits: (1+0j)(Z_3 Z_2 Z_1 Z_0)&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">TernaryTreeEncoding</span><span class="p">(</span><span class="n">TernaryTree</span><span class="o">.</span><span class="n">breadth_first</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span><span class="o">.</span><span class="n">total_parity</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+<span class="go">&lt;SparseObservable with 1 term on 4 qubits: (1+0j)(Z_3 Z_0)&gt;</span>
+</pre></div>
+</div>
+</div>
+<input id="sd-tab-item-11" name="sd-tab-set-5" type="radio">
+<label class="sd-tab-label" data-sync-group="code" data-sync-id="c" for="sd-tab-item-11">
+C</label><div class="sd-tab-content docutils">
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">QfTernaryTree</span><span class="w"> </span><span class="o">*</span><span class="n">tree</span><span class="p">;</span>
+<span class="n">qf_ternary_tree_chain</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="n">QfPauliLabel_Z</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">tree</span><span class="p">);</span>
+
+<span class="n">QfTernaryTreeEncoding</span><span class="w"> </span><span class="o">*</span><span class="n">encoding</span><span class="p">;</span>
+<span class="n">qf_ternary_tree_encoding_new</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">encoding</span><span class="p">);</span>
+
+<span class="c1">// On the chain this is the full Z string; on the balanced tree it is not.</span>
+<span class="n">QkObs</span><span class="w"> </span><span class="o">*</span><span class="n">parity</span><span class="p">;</span>
+<span class="n">qf_ternary_tree_encoding_total_parity</span><span class="p">(</span><span class="n">encoding</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">parity</span><span class="p">);</span>
+
+<span class="n">qf_ternary_tree_encoding_free</span><span class="p">(</span><span class="n">encoding</span><span class="p">);</span>
+<span class="n">qf_ternary_tree_free</span><span class="p">(</span><span class="n">tree</span><span class="p">);</span>
+<span class="n">qk_obs_free</span><span class="p">(</span><span class="n">parity</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>As the balanced case shows, this is <em>not</em> in general the all-<span class="math">\(Z\)</span> string: it is the leg reached by
+the all-<span class="math">\(Z\)</span> <em>path</em>, which acts as the identity on every node not on that path.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>Total parity here is an <strong>observable to measure, not a constraint to impose</strong>. Both of its
+eigenvalues are physical, so do not project a state onto the <span class="math">\(+1\)</span> sector: a ternary-tree
+encoding spends one qubit per mode and is onto the full <span class="math">\(2^n\)</span>-dimensional space, leaving no
+unphysical subspace to project away.</p>
+</div>
+</section>
+<section id="worked-example-a-bravyi-kitaev-tree">
+<span id="bravyi-kitaev-by-hand"></span><h3>Worked example: a Bravyi-Kitaev tree<a class="headerlink" href="#worked-example-a-bravyi-kitaev-tree" title="Link to this heading">¶</a></h3>
+<p>Specifications are more often computed than typed out, since the tree for a real encoding is rarely small
+enough to write by hand. Bravyi-Kitaev is a good example: it belongs to this family, but its tree is not
+uniform, so no convenience constructor covers it.</p>
+<p>Its tree is built by a recursive split over the nodes, one per mode. Within a range of nodes
+<span class="math">\([l, r]\)</span>, let <span class="math">\(h\)</span> be the largest power of two that fits; the node placed for that range is
+<span class="math">\(l + h - 1\)</span>, the last one in that block. Its <code class="docutils literal notranslate"><span class="pre">X</span></code> link descends to the tree built from the block
+before it and its <code class="docutils literal notranslate"><span class="pre">Z</span></code> link to the tree built from the remainder after it, leaving its <code class="docutils literal notranslate"><span class="pre">Y</span></code> link as a
+leg:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">bravyi_kitaev_tree</span><span class="p">(</span><span class="n">num_modes</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TernaryTree</span><span class="p">:</span>
+<span class="gp">... </span><span class="w">    </span><span class="sd">"""Builds the ternary tree of the Bravyi-Kitaev encoding on ``num_modes`` modes."""</span>
+<span class="gp">... </span>    <span class="n">spec</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">num_modes</span>
+<span class="gp">... </span>    <span class="k">def</span><span class="w"> </span><span class="nf">build</span><span class="p">(</span><span class="n">left</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">right</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="gp">... </span>        <span class="k">if</span> <span class="n">left</span> <span class="o">&gt;</span> <span class="n">right</span><span class="p">:</span>
+<span class="gp">... </span>            <span class="k">return</span> <span class="kc">None</span>  <span class="c1"># an empty range: the parent's link stays a leg</span>
+<span class="gp">... </span>        <span class="n">block</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="gp">... </span>        <span class="k">while</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">block</span> <span class="o">&lt;=</span> <span class="n">right</span> <span class="o">-</span> <span class="n">left</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span>
+<span class="gp">... </span>            <span class="n">block</span> <span class="o">*=</span> <span class="mi">2</span>
+<span class="gp">... </span>        <span class="n">node</span> <span class="o">=</span> <span class="n">left</span> <span class="o">+</span> <span class="n">block</span> <span class="o">-</span> <span class="mi">1</span>
+<span class="gp">... </span>        <span class="k">for</span> <span class="n">child</span><span class="p">,</span> <span class="n">label</span> <span class="ow">in</span> <span class="p">(</span>
+<span class="gp">... </span>            <span class="p">(</span><span class="n">build</span><span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">node</span> <span class="o">-</span> <span class="mi">1</span><span class="p">),</span> <span class="s2">"X"</span><span class="p">),</span>   <span class="c1"># the block before this node</span>
+<span class="gp">... </span>            <span class="p">(</span><span class="n">build</span><span class="p">(</span><span class="n">node</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">right</span><span class="p">),</span> <span class="s2">"Z"</span><span class="p">),</span>  <span class="c1"># the remainder after it</span>
+<span class="gp">... </span>        <span class="p">):</span>
+<span class="gp">... </span>            <span class="k">if</span> <span class="n">child</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+<span class="gp">... </span>                <span class="n">spec</span><span class="p">[</span><span class="n">child</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">label</span><span class="p">)</span>
+<span class="gp">... </span>        <span class="k">return</span> <span class="n">node</span>
+<span class="gp">... </span>    <span class="n">build</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">num_modes</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="k">return</span> <span class="n">TernaryTree</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>At four modes the whole range is a single block, so the node placed first is 3, with <span class="math">\([0, 2]\)</span>
+before it and nothing after; that sub-range gives node 1 over the single nodes 0 and 2. Compiling the
+tree confirms the encoding is Bravyi-Kitaev and not merely a tree of the same shape class – its first
+Majorana image is <span class="math">\(X_0 X_1 X_3\)</span>:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">tree</span> <span class="o">=</span> <span class="n">bravyi_kitaev_tree</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tree</span><span class="o">.</span><span class="n">children</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="go">{'X': 0, 'Z': 2}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">encoding</span> <span class="o">=</span> <span class="n">TernaryTreeEncoding</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">encoding</span><span class="o">.</span><span class="n">majorana_image</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="go">[(0, 'X'), (1, 'X'), (3, 'X')]</span>
+</pre></div>
+</div>
+<p>Its total parity makes the point of the previous section concrete: the leftover leg is the one reached
+by the all-<span class="math">\(Z\)</span> path, and here that path stops at the root, so the observable is the single-qubit
+<span class="math">\(Z_3\)</span> rather than a string over all four qubits:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">encoding</span><span class="o">.</span><span class="n">total_parity</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+<span class="go">&lt;SparseObservable with 1 term on 4 qubits: (1+0j)(Z_3)&gt;</span>
+</pre></div>
+</div>
+<p>Scaling up needs nothing but a larger argument. Because no node ever spends its <code class="docutils literal notranslate"><span class="pre">Y</span></code> link on an edge,
+each branches at most two ways, so the Pauli weight grows logarithmically rather than linearly:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="p">[</span><span class="n">bravyi_kitaev_tree</span><span class="p">(</span><span class="n">n</span><span class="p">)</span><span class="o">.</span><span class="n">max_weight</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">64</span><span class="p">)]</span>
+<span class="go">[3, 4, 5, 6, 7]</span>
+</pre></div>
+</div>
+</section>
 </section>
 </section>
 
@@ -655,6 +977,12 @@ internally.</p>
 <li><a class="reference internal" href="#">Map operator representations</a><ul>
 <li><a class="reference internal" href="#implement-custom-mappers">Implement custom mappers</a></li>
 <li><a class="reference internal" href="#library-implementations">Library implementations</a></li>
+<li><a class="reference internal" href="#choose-an-encoding-with-ternary-trees">Choose an encoding with ternary trees</a><ul>
+<li><a class="reference internal" href="#build-an-arbitrary-tree">Build an arbitrary tree</a></li>
+<li><a class="reference internal" href="#total-parity">Total parity</a></li>
+<li><a class="reference internal" href="#worked-example-a-bravyi-kitaev-tree">Worked example: a Bravyi-Kitaev tree</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -666,7 +994,7 @@ internally.</p>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=cb721d7b"></script>
+</div><script src="../_static/documentation_options.js?v=891abf5e"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
