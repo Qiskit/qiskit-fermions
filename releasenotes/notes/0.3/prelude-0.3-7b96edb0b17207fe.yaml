@@ -1,0 +1,14 @@
+---
+prelude: >
+    This release adds a framework for ternary-tree fermion-to-qubit encodings. A ternary tree is
+    described once and compiled into an encoding that all four operator mappers accept, which makes
+    every mapping expressible as such a tree available, including the Jordan-Wigner, parity,
+    Bravyi-Kitaev and Jiang-Kalev-Mruczkiewicz-Neven (JKMN) encodings. The framework is available
+    from both the Python and the C API, and with it this package moves beyond Jordan-Wigner as the
+    only mapper it ships.
+
+    The :class:`.FermionicCircuit` also became considerably more complete. It can now be composed with
+    other circuits, repeated, separated by barriers and measured, all at the fermionic level. A
+    measurement names the mode it reads, so the sampled bitstrings stay indexed by the original
+    mode even after the transpiler relabels modes or routes qubits, and the new ``FermionicMeasure``
+    synthesis plugin is part of the preset Jordan-Wigner pass manager.
