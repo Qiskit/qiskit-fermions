@@ -28,7 +28,7 @@ def _recurse(order: int, blocks: list[tuple[int, float]]) -> list[tuple[int, flo
     """Recursively builds the symmetric Suzuki decomposition of one sweep over ``blocks``.
 
     Args:
-        order: the order of the formula. Assumed to be ``1`` or even, as validated by
+        order: the order of the formula. Assumed to be ``1`` or positive and even, as validated by
             :class:`FermionicSuzukiTrotter`.
         blocks: one ``(index, time_scale)`` pair per factor of a single sweep.
 
@@ -138,17 +138,18 @@ class FermionicSuzukiTrotter(FermionicEvolutionSynthesis):
 
         Args:
             order: the order of the product formula. Must be ``1`` (which reduces to
-                :class:`.FermionicLieTrotter`) or even, since the Suzuki formulas are symmetric.
+                :class:`.FermionicLieTrotter`) or a positive even integer, since the Suzuki formulas
+                are symmetric.
             reps: the number of times to repeat the formula, each repetition evolving for
                 ``time / reps``.
 
         Raises:
-            ValueError: if ``order`` is neither ``1`` nor even, or if ``reps`` is not positive.
+            ValueError: if ``order`` is neither ``1`` nor a positive even integer, or if ``reps`` is not positive.
         """
-        if order != 1 and order % 2 != 0:
+        if order != 1 and (order < 2 or order % 2 != 0):
             raise ValueError(
                 "The Suzuki product formulas are symmetric and therefore only defined for an order "
-                f"of 1 or an even order, but got {order}."
+                f"of 1 or a positive even order, but got {order}."
             )
         if reps < 1:
             raise ValueError(f"The number of repetitions must be positive, but got {reps}.")
