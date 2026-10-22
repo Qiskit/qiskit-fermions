@@ -19,8 +19,14 @@ on:
       - closed
 
 concurrency:
-  # Shared with every other workflow that pushes `gh-pages`, since they all contend for the same branch.
-  group: ${{ github.repository }}-gh-pages
+  # Deliberately *not* shared with the workflows that publish to `gh-pages`.  A concurrency group keeps
+  # at most one pending run and cancels an older pending run when a newer one arrives, regardless of
+  # `cancel-in-progress`.  Sharing the group therefore let a deploy queued behind another one displace
+  # this cleanup, which left the preview on the branch for good.  Contention on the branch itself is
+  # already handled by the push-retry loop below, which replays onto the updated tip.
+  #
+  # Keyed on the pull request instead: each closure runs exactly once, so nothing is ever displaced.
+  group: ${{ github.repository }}-gh-pages-cleanup-${{ github.event.pull_request.number }}
   cancel-in-progress: false
 
 permissions: {}

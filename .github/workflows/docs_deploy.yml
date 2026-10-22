@@ -27,11 +27,15 @@ on:
       - 'stable/**'
 
 concurrency:
-  # Shared with every other workflow that pushes `gh-pages`, since they all contend for the same
-  # branch.  Note this is deliberately not keyed on the ref: a `main` push and a `stable/**` push now
-  # queue behind each other rather than running in parallel, which they must, because they write to one
-  # branch.
-  group: ${{ github.repository }}-gh-pages
+  # Keyed on the ref, and deliberately not shared with the other workflows that push `gh-pages`.  A
+  # concurrency group keeps at most one pending run and cancels an older pending run when a newer one
+  # arrives, regardless of `cancel-in-progress`.  A shared group therefore let unrelated runs displace
+  # each other, e.g. a `stable/**` deploy cancelling the pending preview cleanup, or a cleanup
+  # cancelling the pending `main` deploy.  Writes to the branch are serialised by the push-retry loop in
+  # the `publish-docs` action instead, which replays onto the updated tip.
+  #
+  # Per ref, a newer pending run superseding an older one is fine: it builds the newer commit.
+  group: ${{ github.repository }}-gh-pages-deploy-${{ github.ref }}
   # Don't cancel: we may otherwise end up with weird half-uploaded docs.
   cancel-in-progress: false
 
