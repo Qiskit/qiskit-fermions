@@ -6,7 +6,7 @@ Prerequisites
 
 First, create a minimal environment with only Python installed in it.
 Use `Python virtual environments
-<https://docs.python.org/3.10/tutorial/venv.html>`__.
+<https://docs.python.org/3/tutorial/venv.html>`__.
 
 .. code:: sh
 
