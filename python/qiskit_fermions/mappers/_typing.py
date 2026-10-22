@@ -12,13 +12,7 @@
 
 """Private typing helpers shared by the representation mapper generators."""
 
-import sys
-from typing import Protocol, TypeVar, runtime_checkable
-
-if sys.version_info >= (3, 11):
-    from typing import Self
-else:
-    from typing_extensions import Self
+from typing import Protocol, Self, TypeVar, runtime_checkable
 
 
 @runtime_checkable

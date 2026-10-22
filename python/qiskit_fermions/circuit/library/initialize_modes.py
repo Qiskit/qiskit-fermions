@@ -14,20 +14,15 @@
 
 from __future__ import annotations
 
-import sys
 from collections.abc import Sequence
 from math import comb
+from typing import Self
 
 import numpy as np
 
 from qiskit_fermions.utils.optionals import HAS_FFSIM
 
 from .. import FermionicGate
-
-if sys.version_info >= (3, 11):
-    from typing import Self
-else:
-    from typing_extensions import Self
 
 # The absolute tolerance for the subspace-confinement check. There is no project-wide tolerance
 # constant; this is the de-facto convention (numpy's ``allclose`` default, matching the Rust

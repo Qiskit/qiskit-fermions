@@ -8,8 +8,8 @@
 # Every value here is a literal declared directly as a `workflow_call` output, so callers can read
 # them as `needs.config.outputs.<name>` without this workflow needing any real jobs.
 #
-# Note that all values must be quoted: an unquoted `3.10` is the *number* 3.1, which would install
-# Python 3.1 rather than 3.10.
+# Note that all values must be quoted: for example, an unquoted `3.10` is the *number* 3.1, which
+# would install Python 3.1 rather than 3.10.
 
 name: Set CI configuration
 
@@ -18,7 +18,7 @@ on:
     outputs:
       python-old:
         description: Oldest supported version of Python (see `requires-python` in `pyproject.toml`).
-        value: '3.10'
+        value: '3.11'
 
       python-new:
         description: Newest supported version of Python.

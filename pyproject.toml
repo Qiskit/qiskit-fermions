@@ -22,7 +22,6 @@ classifiers = [
     "Operating System :: MacOS",
     "Operating System :: Microsoft :: Windows",
     "Operating System :: POSIX :: Linux",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
@@ -32,7 +31,7 @@ classifiers = [
     "Typing :: Typed",
 ]
 
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 
 dependencies = [
     # Pinned to a single minor: `crates/qiskit-pyo3-ffi` is a pre-generated FFI snapshot tied to
@@ -168,7 +167,7 @@ fail_under = 95
 show_missing = true
 
 [tool.mypy]
-python_version = "3.10"
+python_version = "3.11"
 show_error_codes = true
 warn_return_any = true
 warn_unused_configs = true
@@ -187,7 +186,7 @@ markers = [
 [tool.ruff]
 line-length = 100
 src = ["python/qiskit_fermions", "tests/python"]
-target-version = "py310"
+target-version = "py311"
 # The `_lib/**/*.pyi` stubs are verbatim `pyo3-stub-gen` output (see tests/README.md, "Type
 # stubs"); they are generated, never hand-edited, and follow the generator's own style rather than
 # ours, so we exclude them from both `ruff format` and `ruff check`.
@@ -240,9 +239,9 @@ NDArray = "NDArray"
 [tool.typos.files]
 extend-exclude = ["crates/qiskit-pyo3-ffi"]
 
-# `pyext` is built abi3 (see `crates/pyext/Cargo.toml`'s `pyo3` feature `abi3-py310` and
-# `setup.py`'s `py_limited_api="cp310"`), so cibuildwheel collapses each platform down to a
-# single `cp310-abi3` wheel.
+# `pyext` is built abi3 (see `crates/pyext/Cargo.toml`'s `pyo3` feature `abi3-py311` and
+# `setup.py`'s `py_limited_api="cp311"`), so cibuildwheel collapses each platform down to a
+# single `cp311-abi3` wheel.
 [tool.cibuildwheel]
 manylinux-x86_64-image = "manylinux_2_28"
 manylinux-aarch64-image = "manylinux_2_28"
