@@ -38,6 +38,7 @@ def edge_vertex_jordan_wigner(op: edge_vertex_operator.EdgeVertexOperator, num_q
     Raises:
         ValueError: if ``num_qubits`` is too small to hold the operator's support, i.e. if it is
             not larger than the largest mode index acted upon by ``op``.
+        OverflowError: if ``num_qubits`` is negative or does not fit in 32 bits.
     
     Definition
     ==========
@@ -120,6 +121,7 @@ def fermion_jordan_wigner(op: fermion_operator.FermionOperator, num_qubits: buil
     Raises:
         ValueError: if ``num_qubits`` is too small to hold the operator's support, i.e. if it is
             not larger than the largest mode index acted upon by ``op``.
+        OverflowError: if ``num_qubits`` is negative or does not fit in 32 bits.
     
     Memory usage
     ============
@@ -221,6 +223,7 @@ def majorana_jordan_wigner(op: majorana_operator.MajoranaOperator, num_qubits: b
     Raises:
         ValueError: if ``num_qubits`` is too small to hold the operator's support, i.e. if it is not
             larger than the largest *fermionic* mode acted upon by ``op``.
+        OverflowError: if ``num_qubits`` is negative or does not fit in 32 bits.
     
     Definition
     ==========
@@ -286,6 +289,7 @@ def transfer_vertex_jordan_wigner(op: transfer_vertex_operator.TransferVertexOpe
     Raises:
         ValueError: if ``num_qubits`` is too small to hold the operator's support, i.e. if it is
             not larger than the largest mode index acted upon by ``op``.
+        OverflowError: if ``num_qubits`` is negative or does not fit in 32 bits.
     
     Definition
     ==========

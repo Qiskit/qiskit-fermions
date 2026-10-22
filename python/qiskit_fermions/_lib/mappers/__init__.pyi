@@ -2,7 +2,9 @@
 # ruff: noqa: E501, F401, F403, F405
 
 from . import mappers_library
+from . import ternary_tree_structures
 __all__ = [
     "mappers_library",
+    "ternary_tree_structures",
 ]
 

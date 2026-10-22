@@ -1,0 +1,46 @@
+---
+features:
+  - |
+    Added ternary-tree fermion-to-qubit encodings. A
+    :class:`~qiskit_fermions.mappers.TernaryTree` describes the encoding and is compiled once into a
+    :class:`~qiskit_fermions.mappers.TernaryTreeEncoding`, which the mappers
+    :func:`~qiskit_fermions.mappers.library.fermion_ternary_tree`,
+    :func:`~qiskit_fermions.mappers.library.majorana_ternary_tree`,
+    :func:`~qiskit_fermions.mappers.library.edge_vertex_ternary_tree` and
+    :func:`~qiskit_fermions.mappers.library.transfer_vertex_ternary_tree` map through. In the Python
+    API, :func:`~qiskit_fermions.mappers.library.ternary_tree` dispatches to whichever of the four
+    matches the operator it is given, mirroring
+    :func:`~qiskit_fermions.mappers.library.jordan_wigner`.
+
+    This simplifies the use of every mapping that can be expressed as a ternary tree, including but
+    not limited to the Jordan-Wigner, parity, Bravyi-Kitaev and Jiang-Kalev-Mruczkiewicz-Neven (JKMN)
+    encodings.
+features_c:
+  - |
+    Added the ternary-tree framework to the C API. Trees are built with
+    :c:func:`qf_ternary_tree_new` (from a parent-and-label specification, the general interface),
+    :c:func:`qf_ternary_tree_chain` or :c:func:`qf_ternary_tree_breadth_first`, inspected with
+    :c:func:`qf_ternary_tree_num_nodes`, :c:func:`qf_ternary_tree_num_legs` and
+    :c:func:`qf_ternary_tree_max_weight`, and freed with :c:func:`qf_ternary_tree_free`. A tree is
+    compiled into a :c:struct:`QfTernaryTreeEncoding` with
+    :c:func:`qf_ternary_tree_encoding_new`, inspected with
+    :c:func:`qf_ternary_tree_encoding_num_modes` and
+    :c:func:`qf_ternary_tree_encoding_max_weight`, and then passed to
+    :c:func:`qf_ferm_op_ternary_tree`, :c:func:`qf_maj_op_ternary_tree`,
+    :c:func:`qf_edge_op_ternary_tree`, :c:func:`qf_transfer_op_ternary_tree` or
+    :c:func:`qf_ternary_tree_encoding_total_parity`.
+
+    Like the Jordan-Wigner mappers, the four operator mappers and
+    :c:func:`qf_ternary_tree_encoding_total_parity` write the resulting
+    :external+cqiskit:doc:`QkObs <cdoc/qk-obs>` through an out-parameter and return a
+    ``QfExitCode``. This is ``QfExitCode_ValueError`` when the operator acts on a mode the encoding
+    does not cover, or when the requested qubit count is below the encoding's mode count, whichever
+    modes the operator acts on. A specification that does not describe a single connected tree is
+    rejected earlier, by :c:func:`qf_ternary_tree_new`, which then writes no tree, so check its exit
+    code before compiling the result.
+fixes:
+  - |
+    :c:func:`qf_ferm_op_jordan_wigner`, :c:func:`qf_maj_op_jordan_wigner`,
+    :c:func:`qf_edge_op_jordan_wigner` and :c:func:`qf_transfer_op_jordan_wigner` now return
+    ``QfExitCode_NullPointerError`` when the operator or the output pointer is ``NULL``, instead of
+    aborting the process.

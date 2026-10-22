@@ -13,4 +13,5 @@
 pub mod edge_vertex;
 pub mod jordan_wigner;
 pub mod majorana_fermion;
+pub mod ternary_tree;
 pub mod transfer_vertex;

@@ -238,6 +238,23 @@ def test_jordan_wigner_num_qubits_too_small(mapper, op, num_qubits):
 
 
 @pytest.mark.parametrize(
+    "mapper,op",
+    [
+        (fermion_jordan_wigner, FermionOperator.from_dict({((True, 0), (False, 0)): 1.0})),
+        (majorana_jordan_wigner, MajoranaOperator.from_dict({(0,): 1.0})),
+        (edge_vertex_jordan_wigner, EdgeVertexOperator.from_dict({((0, 0),): 1.0})),
+        (transfer_vertex_jordan_wigner, TransferVertexOperator.from_dict({((0, 0),): 1.0})),
+        (jordan_wigner, FermionOperator.from_dict({((True, 0), (False, 0)): 1.0})),
+    ],
+)
+@pytest.mark.parametrize("num_qubits", [-1, 2**32])
+def test_jordan_wigner_num_qubits_outside_u32(mapper, op, num_qubits):
+    # num_qubits is a 32-bit unsigned integer, so anything outside it is an OverflowError
+    with pytest.raises(OverflowError):
+        mapper(op, num_qubits)
+
+
+@pytest.mark.parametrize(
     "direct,op",
     [
         (majorana_jordan_wigner, MajoranaOperator.from_dict({(0, 3): 1.0, (2, 5, 1): -0.5j})),

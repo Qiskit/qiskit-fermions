@@ -24,6 +24,7 @@ Mappers
    :maxdepth: 1
 
    qf-mappers-library
+   qf-ternary-tree
 
 *************
 Miscellaneous
