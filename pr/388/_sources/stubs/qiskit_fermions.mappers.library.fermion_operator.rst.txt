@@ -1,0 +1,6 @@
+﻿fermion\_operator
+=================
+
+.. currentmodule:: qiskit_fermions.mappers.library
+
+.. autofunction:: fermion_operator

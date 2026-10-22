@@ -1,0 +1,6 @@
+﻿jordan\_wigner
+==============
+
+.. currentmodule:: qiskit_fermions.mappers.library
+
+.. autofunction:: jordan_wigner
