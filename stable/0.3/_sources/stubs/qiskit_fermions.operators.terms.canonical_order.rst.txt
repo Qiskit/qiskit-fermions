@@ -1,0 +1,6 @@
+﻿canonical\_order
+================
+
+.. currentmodule:: qiskit_fermions.operators.terms
+
+.. autofunction:: canonical_order
