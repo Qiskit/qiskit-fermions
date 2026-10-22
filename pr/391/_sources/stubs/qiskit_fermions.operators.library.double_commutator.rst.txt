@@ -1,0 +1,6 @@
+﻿double\_commutator
+==================
+
+.. currentmodule:: qiskit_fermions.operators.library
+
+.. autofunction:: double_commutator
