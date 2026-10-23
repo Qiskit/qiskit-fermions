@@ -184,6 +184,8 @@
 
   
 
+  
+
 
 
   
@@ -206,6 +208,7 @@
    .. automethod:: iter_terms
    .. automethod:: iter_terms_with_groups
    .. automethod:: max_rank
+   .. automethod:: min_num_modes
    .. automethod:: normal_ordered
    .. automethod:: num_groups
    .. automethod:: one
