@@ -12,6 +12,7 @@
 
 """Optimization passes."""
 
+from .merge_evolutions import MergeEvolutions
 from .merge_initialize_rotation import MergeSlaterDeterminantPreparation
 from .merge_orbital_rotations import MergeOrbitalRotations
 from .qdrift import QDriftTrotterization
@@ -20,6 +21,7 @@ from .trotterization import FermionicTrotterization
 
 __all__ = [
     "FermionicTrotterization",
+    "MergeEvolutions",
     "MergeOrbitalRotations",
     "MergeSlaterDeterminantPreparation",
     "QDriftTrotterization",

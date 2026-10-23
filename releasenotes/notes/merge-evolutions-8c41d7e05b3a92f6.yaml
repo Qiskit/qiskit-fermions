@@ -1,0 +1,19 @@
+---
+features:
+  - |
+    Added the :class:`~qiskit_fermions.transpiler.passes.MergeEvolutions` transpiler pass. It fuses
+    consecutive :class:`~qiskit_fermions.circuit.library.Evolution` gates of equivalent operators
+    on the same modes into a single gate with the summed evolution time, which is exact. This
+    removes the repeated factor where, for example, two repetitions of a product formula meet.
+  - |
+    :class:`~qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter` gained a
+    ``merge_adjacent`` argument, which is enabled by default. It fuses neighbouring gates of the
+    same factor, as found at the seams between repetitions and between the sub-sweeps of the
+    higher orders. The product formula is unchanged, but the synthesized circuit has fewer gates.
+    Pass ``merge_adjacent=False`` to obtain the previous gate sequence.
+upgrade:
+  - |
+    :class:`~qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter` now fuses
+    neighbouring gates of the same factor by default, so for ``reps > 1`` or ``order >= 4`` it
+    emits fewer, longer-evolving gates than before. The result is mathematically identical. Pass
+    ``merge_adjacent=False`` to keep the previous gate sequence.
