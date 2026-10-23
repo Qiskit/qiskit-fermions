@@ -152,12 +152,17 @@ Pass a synthesis method to the gate, then decompose it. Each gate it emits comes
    >>> factors(FermionicSuzukiTrotter(order=2))
    5
    >>> factors(FermionicSuzukiTrotter(order=2, reps=4))
+   17
+   >>> factors(FermionicSuzukiTrotter(order=2, reps=4, merge_adjacent=False))
    20
 
 First order emits one factor per group. Order two emits the symmetric palindrome, so the two outer
-groups appear twice at half the time each, giving five. Four repetitions of that give twenty. Every
-order splits the operator the same way; what changes is the ordering of the factors and their
-evolution times, not the partition.
+groups appear twice at half the time each, giving five. Four repetitions of that would give twenty,
+but each repetition ends on the same group the next one begins with. Those neighbouring gates
+evolve under the same operator, so they are fused into one gate with the summed time, which saves
+one gate per seam. Pass ``merge_adjacent=False`` to keep the textbook sequence. Every order splits
+the operator the same way; what changes is the ordering of the factors and their evolution times,
+not the partition.
 
 .. note::
    The factors are marked :attr:`~.Evolution.atomic`, so decomposing again leaves them in place
@@ -187,10 +192,11 @@ instead, so the choice is made once for the pipeline:
    ...     FermionicTrotterization(FermionicSuzukiTrotter(order=2, reps=4))
    ... ).run(circuit)
    >>> expanded.count_ops()["Evolution"]
-   20
+   17
 
-Twenty gates: five factors per order-two sweep, times four repetitions (the same count
-:meth:`~.FermionicCircuit.decompose` gives for that method above). The pass carries the formula out
+This is the same count :meth:`~.FermionicCircuit.decompose` gives for that method above. The
+:class:`.MergeEvolutions` pass applies the same fusion to neighbouring gates that did not come from
+one synthesis, such as the seams between consecutive circuits. The pass carries the formula out
 itself, so no separate expansion step is needed, and running it twice changes nothing, since the
 factors it emits are :attr:`~.Evolution.atomic` and so carry no definition of their own.
 
