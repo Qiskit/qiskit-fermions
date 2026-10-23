@@ -1,0 +1,15 @@
+---
+features:
+  - |
+    Added a ``min_num_modes()`` method to :class:`~qiskit_fermions.operators.FermionOperator`,
+    :class:`~qiskit_fermions.operators.MajoranaOperator`,
+    :class:`~qiskit_fermions.operators.EdgeVertexOperator` and
+    :class:`~qiskit_fermions.operators.TransferVertexOperator`, returning the smallest number of
+    modes that can host the operator (``0`` if it acts on none). For a Majorana operator this
+    counts fermionic modes.
+features_c:
+  - |
+    Added :c:func:`qf_ferm_op_min_num_modes`, :c:func:`qf_maj_op_min_num_modes`,
+    :c:func:`qf_edge_op_min_num_modes` and :c:func:`qf_transfer_op_min_num_modes`, which return the
+    smallest number of modes that can host an operator (``0`` if it acts on none). For a Majorana
+    operator this counts fermionic modes.

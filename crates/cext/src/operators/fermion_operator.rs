@@ -410,6 +410,45 @@ pub unsafe extern "C" fn qf_ferm_op_get_support(op: *const FermionOperator, supp
 
 /// @ingroup qf_ferm_op
 ///
+/// @brief Gets the smallest number of modes that can host an operator.
+///
+/// @param op A pointer to the fermionic operator whose minimum number of modes to get.
+///
+/// @return One more than the largest mode index acted upon by the operator, or 0 if it acts on no
+///     mode.
+///
+/// @rst
+///
+/// This is what determines, for example, the number of qubits a mapping requires. Note that it is
+/// not the number of distinct modes, which :c:func:`qf_ferm_op_num_support` returns.
+///
+/// Example
+/// -------
+///
+/// .. code-block:: c
+///     :linenos:
+///
+///     bool actions[3] = {true, false, true};
+///     uint32_t modes[3] = {2, 0, 2};
+///     QkComplex64 coeffs[2] = {{1.0, 0.0}, {1.0, 0.0}};
+///     uint32_t boundaries[3] = {0, 2, 3};
+///     QfFermionOperator *op = qf_ferm_op_new(2, 3, coeffs, actions, modes, boundaries);
+///
+///     uint32_t min_num_modes = qf_ferm_op_min_num_modes(op);
+///
+///     assert(min_num_modes == 3);
+///
+/// @endrst
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn qf_ferm_op_min_num_modes(op: *const FermionOperator) -> u32 {
+    // SAFETY: Per documentation, the pointer is non-null and aligned.
+    let op = unsafe { const_ptr_as_ref(op) };
+
+    op.min_num_modes()
+}
+
+/// @ingroup qf_ferm_op
+///
 /// @brief Constructs the additive identity operator.
 ///
 /// @return A pointer to the created operator.

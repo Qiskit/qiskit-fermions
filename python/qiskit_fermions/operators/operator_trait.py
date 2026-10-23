@@ -124,6 +124,15 @@ class OperatorTrait(Protocol):
     def get_support(self) -> frozenset[int]:
         """Returns the set of mode indices which this operator acts upon."""
 
+    def min_num_modes(self) -> int:
+        """Returns the smallest number of modes that can host this operator.
+
+        This is one more than the largest mode index which the operator acts upon (for Majorana
+        operators: one more than the largest *fermionic* mode, i.e. ``max_index // 2 + 1``), or
+        ``0`` if the operator acts on no mode. It is not the number of distinct modes in
+        :meth:`get_support`.
+        """
+
     def relabel_modes(self, permutation: list[int]) -> Self:
         """Relabels the modes of the operator."""
 

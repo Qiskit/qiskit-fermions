@@ -74,6 +74,21 @@ class TestFermionOperator(OperatorContractTests):
         )
         assert op.get_support() == {0, 1, 3, 4, 7}
 
+    def test_min_num_modes(self):
+        cls = self.get_class()
+        op = cls.from_dict(
+            {((True, 0), (False, 4)): 1, ((True, 1), (True, 3), (False, 4), (False, 7)): 1}
+        )
+        assert op.min_num_modes() == max(op.get_support()) + 1 == 8
+        assert cls.zero().min_num_modes() == 0
+        assert cls.one().min_num_modes() == 0
+
+    def test_min_num_modes_overflow(self):
+        cls = self.get_class()
+        assert cls.from_dict({((True, 2**32 - 2),): 1}).min_num_modes() == 2**32 - 1
+        with pytest.raises(BaseException, match="cannot exceed"):  # pyo3 PanicException
+            cls.from_dict({((True, 2**32 - 1),): 1}).min_num_modes()
+
     def test_richcmp(self, subtests):
         cls = self.get_class()
 

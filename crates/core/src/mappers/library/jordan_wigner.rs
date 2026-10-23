@@ -12,7 +12,7 @@
 
 use crate::mappers::qk_obs::{
     QK_BIT_TERM_X, QK_BIT_TERM_Y, QK_BIT_TERM_Z, QkComplex64, compose_actions, ffi_backend as ffi,
-    map_operator, max_paired_index, one_pauli_string, qk_coeff,
+    map_operator, one_pauli_string, qk_coeff,
 };
 use crate::operators::edge_vertex_operator::{EdgeAction, EdgeVertexOperator};
 use crate::operators::fermion_operator::{FermionAction, FermionOperator};
@@ -76,7 +76,7 @@ pub fn fermion_jordan_wigner(
     // Each mode index `j` maps onto qubit `j`, so the operator's largest mode index must fit
     // within `num_qubits`. Without this check, the underlying `qk_obs_*` calls receive an
     // out-of-range qubit index and abort the process with a non-unwinding panic.
-    if let Some(&max_mode) = fer_op.modes.iter().max()
+    if let Some(max_mode) = fer_op.max_mode()
         && max_mode >= num_qubits
     {
         return Err(CoherenceError::NumQubitsTooSmall {
@@ -143,15 +143,14 @@ pub fn majorana_jordan_wigner(
     maj_op: &MajoranaOperator,
     num_qubits: u32,
 ) -> Result<*mut ffi::QkObs, CoherenceError> {
-    // Majorana index `m` acts on fermionic mode `m / 2`, so it is that quotient -- not the index
-    // itself -- which has to fit within `num_qubits`. `max_mode` reports the quotient for the same
-    // reason: the error speaks of a "mode index", and `gamma_7` needs 4 qubits, not 8.
-    if let Some(&max_maj) = maj_op.modes.iter().max()
-        && max_maj / 2 >= num_qubits
+    // `max_mode` is the fermionic mode (`gamma_7` needs 4 qubits, not 8), which is also what the
+    // error speaks of.
+    if let Some(max_mode) = maj_op.max_mode()
+        && max_mode >= num_qubits
     {
         return Err(CoherenceError::NumQubitsTooSmall {
             num_qubits,
-            max_mode: max_maj / 2,
+            max_mode,
         });
     }
 
@@ -229,7 +228,7 @@ pub fn edge_vertex_jordan_wigner(
     inter_op: &EdgeVertexOperator,
     num_qubits: u32,
 ) -> Result<*mut ffi::QkObs, CoherenceError> {
-    if let Some(max_mode) = max_paired_index(&inter_op.left_indices, &inter_op.right_indices)
+    if let Some(max_mode) = inter_op.max_mode()
         && max_mode >= num_qubits
     {
         return Err(CoherenceError::NumQubitsTooSmall {
@@ -306,7 +305,7 @@ pub fn transfer_vertex_jordan_wigner(
     inter_op: &TransferVertexOperator,
     num_qubits: u32,
 ) -> Result<*mut ffi::QkObs, CoherenceError> {
-    if let Some(max_mode) = max_paired_index(&inter_op.left_indices, &inter_op.right_indices)
+    if let Some(max_mode) = inter_op.max_mode()
         && max_mode >= num_qubits
     {
         return Err(CoherenceError::NumQubitsTooSmall {

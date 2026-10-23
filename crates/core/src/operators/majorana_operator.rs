@@ -569,6 +569,17 @@ impl OperatorTrait for MajoranaOperator {
         self.modes.iter().copied().collect()
     }
 
+    /// Returns the largest *fermionic mode* the operator acts upon, i.e. `max_index / 2`.
+    ///
+    /// Majorana index `m` belongs to fermionic mode `m / 2`, so this is deliberately **not** the
+    /// largest Majorana index, and thereby differs from the maximum of
+    /// [`get_support`](OperatorTrait::get_support), which reports the Majorana indices themselves.
+    /// It is the quantity the mappers bound-check against the number of qubits, and it cannot
+    /// overflow [`min_num_modes`](OperatorTrait::min_num_modes).
+    fn max_mode(&self) -> Option<u32> {
+        self.modes.iter().copied().max().map(|max_maj| max_maj / 2)
+    }
+
     fn relabel_modes(&self, permutation: Vec<u32>) -> Result<Self, CoherenceError> {
         if permutation.iter().collect::<HashSet<_>>().len() != permutation.len() {
             return Err(CoherenceError::DuplicateIndices);
@@ -1182,6 +1193,25 @@ mod tests {
             }
             .is_even()
         );
+    }
+
+    #[test]
+    fn test_min_num_modes() {
+        let op = |modes: Vec<u32>| MajoranaOperator {
+            coeffs: vec![Complex64::new(1.0, 0.0)],
+            boundaries: vec![0, modes.len()],
+            modes,
+            groups: None,
+        };
+
+        // Majorana indices 6 and 7 both belong to fermionic mode 3
+        assert_eq!(op(vec![6]).min_num_modes(), 4);
+        assert_eq!(op(vec![7]).min_num_modes(), 4);
+        assert_eq!(op(vec![0, 7]).max_mode(), Some(3));
+        assert_eq!(op(vec![0, 7]).min_num_modes(), 4);
+        assert_eq!(MajoranaOperator::zero().max_mode(), None);
+        // halving first means the largest index cannot overflow
+        assert_eq!(op(vec![u32::MAX]).min_num_modes(), 1 << 31);
     }
 
     #[test]

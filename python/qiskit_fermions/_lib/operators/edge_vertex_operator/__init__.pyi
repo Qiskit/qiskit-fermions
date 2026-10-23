@@ -339,6 +339,7 @@ class EdgeVertexOperator:
     .. autosummary::
     
        is_hermitian
+       min_num_modes
     
     .. [1] Gandon et al., `arXiv:2512.11418 <https://arxiv.org/abs/2512.11418v2>`_.
     """
@@ -528,6 +529,31 @@ class EdgeVertexOperator:
         
         Returns:
             The set of mode indices which this operator acts upon.
+        """
+    def min_num_modes(self) -> builtins.int:
+        r"""
+        Returns the smallest number of modes that can host this operator.
+        
+        This is one more than the largest mode index which the operator acts upon, which is what
+        determines, for example, the number of qubits a mapping requires. Note that this is not the
+        number of distinct modes: see :meth:`get_support` for that.
+        
+        .. doctest::
+        
+            >>> from qiskit_fermions.operators import EdgeVertexOperator
+            >>> op = EdgeVertexOperator.from_dict(
+            ...     {
+            ...         ((0, 1), (3, 4)): 1,
+            ...         ((7, 7),): 1,
+            ...     }
+            ... )
+            >>> op.min_num_modes()
+            8
+            >>> EdgeVertexOperator.zero().min_num_modes()
+            0
+        
+        Returns:
+            The smallest number of modes, or ``0`` if the operator acts on no mode.
         """
     def __richcmp__(self, other: EdgeVertexOperator, op: int) -> builtins.bool: ...
     def __repr__(self) -> builtins.str: ...

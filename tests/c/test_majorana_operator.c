@@ -91,6 +91,28 @@ static int test_getters(void) {
     return Ok;
 }
 
+static int test_min_num_modes(void) {
+    // Majorana index 5 belongs to fermionic mode 2, so three modes are needed.
+    uint32_t modes[3] = {2, 0, 5};
+    QkComplex64 coeffs[2] = {{1.0, 0.0}, {1.0, 0.0}};
+    uint32_t boundaries[3] = {0, 2, 3};
+    QfMajoranaOperator *op = qf_maj_op_new(2, 3, coeffs, modes, boundaries);
+
+    bool passed_all = (qf_maj_op_min_num_modes(op) == 3);
+
+    // An operator without modes needs none.
+    QfMajoranaOperator *empty = qf_maj_op_zero();
+    passed_all = passed_all && (qf_maj_op_min_num_modes(empty) == 0);
+
+    qf_maj_op_free(op);
+    qf_maj_op_free(empty);
+
+    if (!passed_all) {
+        return EqualityError;
+    }
+    return Ok;
+}
+
 static int test_get_support(void) {
     // Two terms deliberately share mode 2, and the modes are supplied out of order, so the
     // test covers both de-duplication and the ascending-order guarantee.
@@ -767,6 +789,7 @@ int test_majorana_operator(void) {
     num_failed += RUN_TEST(test_new);
     num_failed += RUN_TEST(test_getters);
     num_failed += RUN_TEST(test_get_support);
+    num_failed += RUN_TEST(test_min_num_modes);
     num_failed += RUN_TEST(test_add);
     num_failed += RUN_TEST(test_scaled_add);
     num_failed += RUN_TEST(test_inplace_arithmetic);

@@ -267,6 +267,33 @@ pub trait OperatorTrait {
         I: IntoIterator<Item = Self::GroupTermView<'a>>;
 
     fn get_support(&self) -> HashSet<u32>;
+
+    /// Returns the largest fermionic mode the operator acts upon, or `None` if it has no such mode.
+    ///
+    /// Computed in a single scan of the index buffers without building the set, which is what the
+    /// bound checks of the mappers need. For every operator type but one this equals the maximum of
+    /// [`get_support`](Self::get_support). The exception is
+    /// [`MajoranaOperator`](majorana_operator::MajoranaOperator), whose indices are Majorana
+    /// indices and which therefore reports the fermionic mode they belong to; see its
+    /// implementation.
+    fn max_mode(&self) -> Option<u32>;
+
+    /// Returns the smallest number of modes that can host the operator, i.e. `max_mode() + 1`, or
+    /// `0` if the operator acts on no mode.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the largest mode is `u32::MAX`, for which the count is not representable. Such an
+    /// operator is absurd, so this is not reported as an error. A Majorana operator can never
+    /// trigger this, as its largest mode is at most `u32::MAX / 2`.
+    fn min_num_modes(&self) -> u32 {
+        self.max_mode().map_or(0, |max_mode| {
+            max_mode
+                .checked_add(1)
+                .expect("the number of modes cannot exceed u32::MAX")
+        })
+    }
+
     fn relabel_modes(&self, permutation: Vec<u32>) -> Result<Self, CoherenceError>
     where
         Self: Sized;
@@ -525,6 +552,28 @@ mod tests {
         assert_is_hermitian_contract::<MajoranaOperator>();
         assert_is_hermitian_contract::<EdgeVertexOperator>();
         assert_is_hermitian_contract::<TransferVertexOperator>();
+    }
+
+    /// Asserts that `max_mode` and `min_num_modes` are reachable through the trait and that an
+    /// operator acting on no mode reports `None` and `0`.
+    ///
+    /// Non-empty operators are covered by the per-type tests, as they need the term vocabulary of
+    /// each type to be built.
+    fn assert_max_mode_contract<T: OperatorTrait + OperatorMacro>() {
+        // neither the identity nor the zero operator acts on any mode
+        assert_eq!(T::one().max_mode(), None);
+        assert_eq!(T::zero().max_mode(), None);
+        assert_eq!(T::one().get_support().iter().max().copied(), None);
+        assert_eq!(T::one().min_num_modes(), 0);
+        assert_eq!(T::zero().min_num_modes(), 0);
+    }
+
+    #[test]
+    fn test_max_mode_through_trait_bound() {
+        assert_max_mode_contract::<FermionOperator>();
+        assert_max_mode_contract::<MajoranaOperator>();
+        assert_max_mode_contract::<EdgeVertexOperator>();
+        assert_max_mode_contract::<TransferVertexOperator>();
     }
 
     /// Asserts that clearing the group indices is reachable through the trait and always succeeds.

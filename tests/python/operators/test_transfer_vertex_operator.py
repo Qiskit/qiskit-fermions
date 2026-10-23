@@ -51,6 +51,15 @@ class TestTransferVertexOperator(OperatorContractTests):
         op = cls.from_dict({((0, 1), (3, 4)): 1, ((7, 7),): 1})
         assert op.get_support() == {0, 1, 3, 4, 7}
 
+    def test_min_num_modes(self):
+        cls = self.get_class()
+        op = cls.from_dict({((0, 1), (3, 4)): 1, ((7, 7),): 1})
+        assert op.min_num_modes() == max(op.get_support()) + 1 == 8
+        # the largest index may appear on the right-hand side only
+        assert cls.from_dict({((0, 9),): 1}).min_num_modes() == 10
+        assert cls.zero().min_num_modes() == 0
+        assert cls.one().min_num_modes() == 0
+
     def test_richcmp(self, subtests):
         cls = self.get_class()
 

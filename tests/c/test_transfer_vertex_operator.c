@@ -100,6 +100,30 @@ static int test_getters(void) {
     return Ok;
 }
 
+static int test_min_num_modes(void) {
+    // The largest index (7) is only ever a right index, so a left-only scan would miss it.
+    uint32_t left_indices[3] = {2, 0, 2};
+    uint32_t right_indices[3] = {2, 1, 7};
+    QkComplex64 coeffs[2] = {{1.0, 0.0}, {1.0, 0.0}};
+    uint32_t boundaries[3] = {0, 2, 3};
+    QfTransferVertexOperator *op =
+        qf_transfer_op_new(2, 3, coeffs, left_indices, right_indices, boundaries);
+
+    bool passed_all = (qf_transfer_op_min_num_modes(op) == 8);
+
+    // An operator without modes needs none.
+    QfTransferVertexOperator *empty = qf_transfer_op_zero();
+    passed_all = passed_all && (qf_transfer_op_min_num_modes(empty) == 0);
+
+    qf_transfer_op_free(op);
+    qf_transfer_op_free(empty);
+
+    if (!passed_all) {
+        return EqualityError;
+    }
+    return Ok;
+}
+
 static int test_get_support(void) {
     // The right indices contribute to the support just as the left ones do, so mode 1 appears
     // even though it is only ever a right index. Mode 2 is shared to cover de-duplication.
@@ -813,6 +837,7 @@ int test_transfer_vertex_operator(void) {
     num_failed += RUN_TEST(test_new);
     num_failed += RUN_TEST(test_getters);
     num_failed += RUN_TEST(test_get_support);
+    num_failed += RUN_TEST(test_min_num_modes);
     num_failed += RUN_TEST(test_add);
     num_failed += RUN_TEST(test_scaled_add);
     num_failed += RUN_TEST(test_inplace_arithmetic);

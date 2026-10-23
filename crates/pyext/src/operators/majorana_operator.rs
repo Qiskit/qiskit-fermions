@@ -315,6 +315,7 @@ crate::declare_operator_iters!(
 ///
 ///    is_hermitian
 ///    max_rank
+///    min_num_modes
 ///    is_even
 ///
 /// .. [1] https://en.wikipedia.org/wiki/Majorana_fermion
@@ -485,6 +486,33 @@ impl PyMajoranaOperator {
     ///     The set of mode indices which this operator acts upon.
     fn get_support(&self) -> HashSet<u32> {
         self.inner.get_support()
+    }
+
+    /// Returns the smallest number of fermionic modes that can host this operator.
+    ///
+    /// Majorana index ``m`` belongs to fermionic mode ``m // 2``, so this is ``max_index // 2 + 1``
+    /// and counts fermionic modes (which is what determines, for example, the number of qubits a
+    /// mapping requires), not Majorana indices. Unlike :meth:`get_support`, it is therefore not
+    /// expressed in the Majorana indices themselves.
+    ///
+    /// .. doctest::
+    ///
+    ///     >>> from qiskit_fermions.operators import MajoranaOperator
+    ///     >>> op = MajoranaOperator.from_dict(
+    ///     ...     {
+    ///     ...         (0, 4): 1,
+    ///     ...         (1, 3, 4, 7): 1,
+    ///     ...     }
+    ///     ... )
+    ///     >>> op.min_num_modes()
+    ///     4
+    ///     >>> MajoranaOperator.zero().min_num_modes()
+    ///     0
+    ///
+    /// Returns:
+    ///     The smallest number of fermionic modes, or ``0`` if the operator acts on no mode.
+    fn min_num_modes(&self) -> u32 {
+        self.inner.min_num_modes()
     }
 
     fn __richcmp__(&self, other: &Self, op: CompareOp, _py: Python<'_>) -> PyResult<bool> {
