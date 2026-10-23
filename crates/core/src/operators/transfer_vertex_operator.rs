@@ -679,6 +679,15 @@ impl OperatorTrait for TransferVertexOperator {
             .collect()
     }
 
+    fn max_mode(&self) -> Option<u32> {
+        // Both endpoints count: the largest index may only ever appear on the right.
+        self.left_indices
+            .iter()
+            .chain(&self.right_indices)
+            .copied()
+            .max()
+    }
+
     fn relabel_modes(&self, permutation: Vec<u32>) -> Result<Self, CoherenceError> {
         if permutation.iter().collect::<HashSet<_>>().len() != permutation.len() {
             return Err(CoherenceError::DuplicateIndices);

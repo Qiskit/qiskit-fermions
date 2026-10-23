@@ -635,6 +635,10 @@ impl OperatorTrait for FermionOperator {
         self.modes.iter().copied().collect()
     }
 
+    fn max_mode(&self) -> Option<u32> {
+        self.modes.iter().copied().max()
+    }
+
     fn relabel_modes(&self, permutation: Vec<u32>) -> Result<Self, CoherenceError> {
         if permutation.iter().collect::<HashSet<_>>().len() != permutation.len() {
             return Err(CoherenceError::DuplicateIndices);

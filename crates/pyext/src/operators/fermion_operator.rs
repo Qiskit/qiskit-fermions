@@ -315,6 +315,7 @@ crate::declare_operator_iters!(
 ///
 ///    is_hermitian
 ///    max_rank
+///    min_num_modes
 ///    conserves_particle_number
 ///
 /// .. [1] https://en.wikipedia.org/wiki/Second_quantization#Fermion_creation_and_annihilation_operators
@@ -516,6 +517,36 @@ impl PyFermionOperator {
     ///     The set of mode indices which this operator acts upon.
     fn get_support(&self) -> HashSet<u32> {
         self.inner.get_support()
+    }
+
+    /// Returns the smallest number of modes that can host this operator.
+    ///
+    /// This is one more than the largest mode index which the operator acts upon, which is what
+    /// determines, for example, the number of qubits a mapping requires. Note that this is not the
+    /// number of distinct modes: see :meth:`get_support` for that.
+    ///
+    /// .. doctest::
+    ///
+    ///     >>> from qiskit_fermions.operators import FermionOperator
+    ///     >>> op = FermionOperator.from_dict(
+    ///     ...     {
+    ///     ...         ((True, 0), (False, 4)): 1,
+    ///     ...         ((True, 1), (True, 3), (False, 4), (False, 7)): 1,
+    ///     ...     }
+    ///     ... )
+    ///     >>> op.min_num_modes()
+    ///     8
+    ///     >>> FermionOperator.zero().min_num_modes()
+    ///     0
+    ///
+    /// Returns:
+    ///     The smallest number of modes, or ``0`` if the operator acts on no mode.
+    ///
+    /// .. note::
+    ///    An operator acting on mode index ``2**32 - 1`` is not supported: the count would not be
+    ///    representable, and the call panics.
+    fn min_num_modes(&self) -> u32 {
+        self.inner.min_num_modes()
     }
 
     fn __richcmp__(&self, other: &Self, op: CompareOp, _py: Python<'_>) -> PyResult<bool> {

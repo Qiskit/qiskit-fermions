@@ -433,6 +433,46 @@ pub unsafe extern "C" fn qf_edge_op_get_support(
 
 /// @ingroup qf_edge_op
 ///
+/// @brief Gets the smallest number of modes that can host an operator.
+///
+/// @param op A pointer to the edge-vertex operator whose minimum number of modes to get.
+///
+/// @return One more than the largest mode index acted upon by the operator, or 0 if it acts on no
+///     mode.
+///
+/// @rst
+///
+/// This is what determines, for example, the number of qubits a mapping requires. Note that it is
+/// not the number of distinct modes, which :c:func:`qf_edge_op_num_support` returns.
+///
+/// Example
+/// -------
+///
+/// .. code-block:: c
+///     :linenos:
+///
+///     uint32_t left_indices[3] = {2, 0, 2};
+///     uint32_t right_indices[3] = {2, 1, 2};
+///     QkComplex64 coeffs[2] = {{1.0, 0.0}, {1.0, 0.0}};
+///     uint32_t boundaries[3] = {0, 2, 3};
+///     QfEdgeVertexOperator *op =
+///         qf_edge_op_new(2, 3, coeffs, left_indices, right_indices, boundaries);
+///
+///     uint32_t min_num_modes = qf_edge_op_min_num_modes(op);
+///
+///     assert(min_num_modes == 3);
+///
+/// @endrst
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn qf_edge_op_min_num_modes(op: *const EdgeVertexOperator) -> u32 {
+    // SAFETY: Per documentation, the pointer is non-null and aligned.
+    let op = unsafe { const_ptr_as_ref(op) };
+
+    op.min_num_modes()
+}
+
+/// @ingroup qf_edge_op
+///
 /// @brief Constructs the additive identity operator.
 ///
 /// @return A pointer to the created operator.

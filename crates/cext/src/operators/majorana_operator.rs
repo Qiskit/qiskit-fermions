@@ -356,6 +356,45 @@ pub unsafe extern "C" fn qf_maj_op_get_support(op: *const MajoranaOperator, supp
 
 /// @ingroup qf_maj_op
 ///
+/// @brief Gets the smallest number of fermionic modes that can host an operator.
+///
+/// @param op A pointer to the Majorana operator whose minimum number of modes to get.
+///
+/// @return One more than the largest fermionic mode acted upon by the operator, or 0 if it acts on
+///     no mode.
+///
+/// @rst
+///
+/// Majorana index ``m`` belongs to fermionic mode ``m / 2``, so this is ``max_index / 2 + 1`` and
+/// counts fermionic modes (which is what determines, for example, the number of qubits a mapping
+/// requires), not Majorana indices.
+///
+/// Example
+/// -------
+///
+/// .. code-block:: c
+///     :linenos:
+///
+///     uint32_t modes[3] = {2, 0, 2};
+///     QkComplex64 coeffs[2] = {{1.0, 0.0}, {1.0, 0.0}};
+///     uint32_t boundaries[3] = {0, 2, 3};
+///     QfMajoranaOperator *op = qf_maj_op_new(2, 3, coeffs, modes, boundaries);
+///
+///     uint32_t min_num_modes = qf_maj_op_min_num_modes(op);
+///
+///     assert(min_num_modes == 2);
+///
+/// @endrst
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn qf_maj_op_min_num_modes(op: *const MajoranaOperator) -> u32 {
+    // SAFETY: Per documentation, the pointer is non-null and aligned.
+    let op = unsafe { const_ptr_as_ref(op) };
+
+    op.min_num_modes()
+}
+
+/// @ingroup qf_maj_op
+///
 /// @brief Constructs the additive identity operator.
 ///
 /// @return A pointer to the created operator.

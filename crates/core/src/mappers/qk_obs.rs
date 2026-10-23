@@ -419,16 +419,6 @@ pub(crate) fn one_pauli_string(
     )
 }
 
-/// Returns the largest fermionic mode index the two index buffers of a vertex-type operator act on.
-///
-/// Shared by every mapper of the edge-vertex and transfer-vertex operators, which must bound-check
-/// a term's modes before any of them reaches a `qk_obs_*` call.
-pub(crate) fn max_paired_index(left_indices: &[u32], right_indices: &[u32]) -> Option<u32> {
-    // Both endpoints must be checked: an operator whose largest index only ever appears on the right
-    // would otherwise pass a left-only check and abort inside the `qk_obs_*` calls.
-    left_indices.iter().chain(right_indices).max().copied()
-}
-
 /// Asserts that two observables represent the same operator, consuming both.
 ///
 /// Compares by canonicalizing the difference against zero rather than structurally, since the

@@ -11,8 +11,8 @@
 // that they have been altered from the originals.
 
 use crate::mappers::qk_obs::{
-    QkComplex64, as_bit_terms, compose_actions, ffi_backend as ffi, map_operator, max_paired_index,
-    one_pauli_string, pauli_sum, qk_coeff,
+    QkComplex64, as_bit_terms, compose_actions, ffi_backend as ffi, map_operator, one_pauli_string,
+    pauli_sum, qk_coeff,
 };
 use crate::mappers::ternary_tree::PauliLabel;
 use crate::mappers::ternary_tree::encoding::{TernaryTreeEncoding, TernaryTreeEncodingError};
@@ -309,7 +309,7 @@ pub fn fermion_ternary_tree(
     enc: &TernaryTreeEncoding,
     num_qubits: u32,
 ) -> Result<*mut ffi::QkObs, TernaryTreeEncodingError> {
-    let max_mode = fer_op.modes.iter().max().copied();
+    let max_mode = fer_op.max_mode();
     map_through_encoding!(fer_op, enc, num_qubits, max_mode, map_fermion_action)
 }
 
@@ -322,8 +322,8 @@ pub fn majorana_ternary_tree(
     enc: &TernaryTreeEncoding,
     num_qubits: u32,
 ) -> Result<*mut ffi::QkObs, TernaryTreeEncodingError> {
-    // Majorana index `m` acts on mode `m / 2`, so it is the quotient that must be covered.
-    let max_mode = maj_op.modes.iter().max().map(|&m| m / 2);
+    // For a Majorana operator, `max_mode` is already the fermionic mode (`m / 2`) to be covered.
+    let max_mode = maj_op.max_mode();
     map_through_encoding!(maj_op, enc, num_qubits, max_mode, map_majorana_action)
 }
 
@@ -333,7 +333,7 @@ pub fn edge_vertex_ternary_tree(
     enc: &TernaryTreeEncoding,
     num_qubits: u32,
 ) -> Result<*mut ffi::QkObs, TernaryTreeEncodingError> {
-    let max_mode = max_paired_index(&inter_op.left_indices, &inter_op.right_indices);
+    let max_mode = inter_op.max_mode();
     map_through_encoding!(inter_op, enc, num_qubits, max_mode, map_edge_action)
 }
 
@@ -343,7 +343,7 @@ pub fn transfer_vertex_ternary_tree(
     enc: &TernaryTreeEncoding,
     num_qubits: u32,
 ) -> Result<*mut ffi::QkObs, TernaryTreeEncodingError> {
-    let max_mode = max_paired_index(&inter_op.left_indices, &inter_op.right_indices);
+    let max_mode = inter_op.max_mode();
     map_through_encoding!(inter_op, enc, num_qubits, max_mode, map_transfer_action)
 }
 

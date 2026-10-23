@@ -71,6 +71,21 @@ class TestMajoranaOperator(OperatorContractTests):
         op = cls.from_dict({(0, 4): 1, (1, 3, 4, 7): 1})
         assert op.get_support() == {0, 1, 3, 4, 7}
 
+    def test_min_num_modes(self):
+        cls = self.get_class()
+        op = cls.from_dict({(0, 4): 1, (1, 3, 4, 7): 1})
+        # Majorana index 7 belongs to fermionic mode 3
+        assert op.min_num_modes() == max(op.get_support()) // 2 + 1 == 4
+        assert cls.from_dict({(6,): 1}).min_num_modes() == 4
+        assert cls.from_dict({(7,): 1}).min_num_modes() == 4
+        assert cls.zero().min_num_modes() == 0
+        assert cls.one().min_num_modes() == 0
+
+    def test_min_num_modes_no_overflow(self):
+        # halving the index first means even the largest index is representable
+        cls = self.get_class()
+        assert cls.from_dict({(2**32 - 1,): 1}).min_num_modes() == 2**31
+
     def test_richcmp(self, subtests):
         cls = self.get_class()
 

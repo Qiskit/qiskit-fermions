@@ -731,6 +731,15 @@ impl OperatorTrait for EdgeVertexOperator {
             .collect()
     }
 
+    fn max_mode(&self) -> Option<u32> {
+        // Both endpoints count: the largest index may only ever appear on the right.
+        self.left_indices
+            .iter()
+            .chain(&self.right_indices)
+            .copied()
+            .max()
+    }
+
     fn relabel_modes(&self, permutation: Vec<u32>) -> Result<Self, CoherenceError> {
         if permutation.iter().collect::<HashSet<_>>().len() != permutation.len() {
             return Err(CoherenceError::DuplicateIndices);
@@ -1896,6 +1905,22 @@ mod tests {
 
         assert_eq!(op1, op1_before);
         assert_eq!(op2, op2_before);
+    }
+
+    #[test]
+    fn test_max_mode_right_only() {
+        // the largest index only ever appears on the right-hand side
+        let op = EdgeVertexOperator {
+            coeffs: vec![Complex64::new(1.0, 0.0)],
+            left_indices: vec![0],
+            right_indices: vec![9],
+            boundaries: vec![0, 1],
+            groups: None,
+        };
+
+        assert_eq!(op.max_mode(), Some(9));
+        assert_eq!(op.min_num_modes(), 10);
+        assert_eq!(op.max_mode(), op.get_support().into_iter().max());
     }
 
     /// The support of both index buffers, where the two only partially overlap.
