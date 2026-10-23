@@ -291,6 +291,7 @@ class MajoranaOperator:
     .. autosummary::
     
        is_hermitian
+       get_support
        max_rank
        min_num_modes
        is_even
@@ -302,7 +303,7 @@ class MajoranaOperator:
         r"""
         An optional vector of `group indices` for each term.
         
-        For more information refer to the :mod:`~qiskit_fermions.operators.terms.grouping` module.
+        For more information refer to the :ref:`grouping_explanation` guide.
         """
     @groups.setter
     def groups(self, value: typing.Optional[typing.Sequence[builtins.int]]) -> None:

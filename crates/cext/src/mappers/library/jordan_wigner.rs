@@ -173,7 +173,7 @@ pub unsafe extern "C" fn qf_ferm_op_jordan_wigner(
 /// Memory usage
 /// ------------
 ///
-/// See :c:func:`qf_ferm_op_jordan_wigner`; the same parallelization and merging behaviour applies.
+/// See :c:func:`qf_ferm_op_jordan_wigner`; the same parallelization and merging behavior applies.
 ///
 /// Example
 /// -------
@@ -276,7 +276,7 @@ pub unsafe extern "C" fn qf_maj_op_jordan_wigner(
 /// Memory usage
 /// ------------
 ///
-/// See :c:func:`qf_ferm_op_jordan_wigner`; the same parallelization and merging behaviour applies.
+/// See :c:func:`qf_ferm_op_jordan_wigner`; the same parallelization and merging behavior applies.
 ///
 /// Example
 /// -------
@@ -375,7 +375,7 @@ pub unsafe extern "C" fn qf_edge_op_jordan_wigner(
 /// Memory usage
 /// ------------
 ///
-/// See :c:func:`qf_ferm_op_jordan_wigner`; the same parallelization and merging behaviour applies.
+/// See :c:func:`qf_ferm_op_jordan_wigner`; the same parallelization and merging behavior applies.
 ///
 /// Example
 /// -------

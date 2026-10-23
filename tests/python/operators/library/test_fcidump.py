@@ -309,7 +309,7 @@ class TestFCIDumpErrors:
     ``panic!``, and a panic crossing PyO3 surfaces as ``PanicException``, which derives from
     ``BaseException`` rather than ``Exception`` and so slips straight through an ordinary
     ``except Exception`` handler. Each test therefore asserts the concrete exception type *and* that
-    it is an ``Exception``, since that is precisely what regressed behaviour would violate.
+    it is an ``Exception``, since that is precisely what regressed behavior would violate.
     """
 
     def test_missing_file_raises_oserror(self):

@@ -47,7 +47,7 @@ pub trait TermSortKey {
 /// Implemented by the `*TermView` structs. Because a view owns its coefficient outright and only
 /// borrows the index data, rescaling one allocates nothing - it is a field update on a `Copy`
 /// struct. This is what lets a weighted sum of operators be built in a single pass through
-/// [`OperatorTrait::from_terms`], instead of materialising a scaled copy of every summand and then
+/// [`OperatorTrait::from_terms`], instead of materializing a scaled copy of every summand and then
 /// concatenating those copies one at a time.
 pub trait ScaledTerm {
     /// Returns this term with its coefficient multiplied by `factor`.

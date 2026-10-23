@@ -10,7 +10,7 @@ name: Deploy documentation
 #
 # The Pages site hosts several builds side by side, so each ref publishes into its own directory:
 # `main` becomes `dev/` and a release branch becomes `stable/<X.Y>/`.  Anything else -- a tag, or a
-# manual dispatch from another ref -- builds without publishing, which matches the previous behaviour
+# manual dispatch from another ref -- builds without publishing, which matches the previous behavior
 # where only `main` was ever deployed.
 #
 # Deploying is deliberately not part of branch protection.  It is a consequence of merging rather than
@@ -30,8 +30,8 @@ concurrency:
   # Keyed on the ref, and deliberately not shared with the other workflows that push `gh-pages`.  A
   # concurrency group keeps at most one pending run and cancels an older pending run when a newer one
   # arrives, regardless of `cancel-in-progress`.  A shared group therefore let unrelated runs displace
-  # each other, e.g. a `stable/**` deploy cancelling the pending preview cleanup, or a cleanup
-  # cancelling the pending `main` deploy.  Writes to the branch are serialised by the push-retry loop in
+  # each other, e.g. a `stable/**` deploy canceling the pending preview cleanup, or a cleanup
+  # canceling the pending `main` deploy.  Writes to the branch are serialized by the push-retry loop in
   # the `publish-docs` action instead, which replays onto the updated tip.
   #
   # Per ref, a newer pending run superseding an older one is fine: it builds the newer commit.

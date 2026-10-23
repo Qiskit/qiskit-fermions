@@ -39,7 +39,7 @@ pub(crate) unsafe fn try_slice_from_ptr<'a, T>(
     if len == 0 {
         Ok(&[])
     } else {
-        // SAFETY: per documentation, pointer is valid for `len` reads of initialised memory at the
+        // SAFETY: per documentation, pointer is valid for `len` reads of initialized memory at the
         // lifetime of the function.
         check_ptr(ptr).map(|_| unsafe { ::std::slice::from_raw_parts(ptr, len) })
     }

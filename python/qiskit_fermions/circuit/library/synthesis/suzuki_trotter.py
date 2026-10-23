@@ -41,7 +41,7 @@ def _recurse(order: int, blocks: list[tuple[int, float]]) -> list[tuple[int, flo
         halves = [(index, scale / 2) for index, scale in blocks[:-1]]
         return [*halves, blocks[-1], *reversed(halves)]
 
-    # Suzuki's recursion: five order-(k-2) sweeps, three at `reduction` and one at `1 - 4 * reduction`
+    # Suzuki's recursion: five order-(k-2) sweeps, four at `reduction` and one at `1 - 4 * reduction`
     reduction = 1 / (4 - 4 ** (1 / (order - 1)))
     outer = _recurse(order - 2, [(index, scale * reduction) for index, scale in blocks])
     inner = _recurse(order - 2, [(index, scale * (1 - 4 * reduction)) for index, scale in blocks])
@@ -58,7 +58,7 @@ def _suzuki_schedule(
         order: the order of the formula.
         num_factors: the number of factors the evolved operator is split into.
         reps: the number of times to repeat the formula.
-        merge_adjacent: whether to fuse neighbouring entries of the same factor.
+        merge_adjacent: whether to fuse neighboring entries of the same factor.
 
     Returns:
         The ordered ``(factor_index, time_scale)`` pairs to emit. Each scale is a fraction of the
@@ -78,7 +78,7 @@ def _suzuki_schedule(
 def _merge_adjacent(schedule: list[tuple[int, float]]) -> list[tuple[int, float]]:
     """Fuses consecutive entries of the same factor into one, summing their time scales.
 
-    Two neighbouring exponentials of the same factor satisfy ``exp(a H) exp(b H) = exp((a + b) H)``,
+    Two neighboring exponentials of the same factor satisfy ``exp(a H) exp(b H) = exp((a + b) H)``,
     so the fusion is exact. It removes the repeated factor at the seams between repetitions
     (``A B A | A B A`` becomes ``A B 2A B A``) as well as those between the sub-sweeps of the
     higher-order recursion.
@@ -87,7 +87,7 @@ def _merge_adjacent(schedule: list[tuple[int, float]]) -> list[tuple[int, float]
         schedule: the ordered ``(index, time_scale)`` pairs.
 
     Returns:
-        The schedule with no two neighbouring entries sharing an index.
+        The schedule with no two neighboring entries sharing an index.
     """
     merged: list[tuple[int, float]] = []
     for index, scale in schedule:
@@ -119,6 +119,11 @@ class FermionicSuzukiTrotter:
     the same way: what a higher order changes is the ordering of the factors and their time scales, not
     the partition.
 
+    Splitting along the groups is something this stage can do and Qiskit's qubit-side
+    :class:`~qiskit.synthesis.SuzukiTrotter` cannot: once the operator has been mapped and handed to
+    a :class:`~qiskit.circuit.library.PauliEvolutionGate`, the grouping is gone, and the formula can
+    only subdivide the terms within the one operator it is given.
+
     .. note::
        A higher order buys accuracy with depth: an order-:math:`k` formula emits roughly
        :math:`5^{(k-2)/2}` times as many factors as an order-2 one. Increasing :attr:`reps` instead
@@ -145,7 +150,8 @@ class FermionicSuzukiTrotter:
        Each factor must be Hermitian for its exponential to be unitary, which does not follow from
        their sum being Hermitian: splitting a Hermitian operator can produce non-Hermitian groups (for
        example, separating :math:`a^\dagger_0 a_1` from its conjugate partner :math:`a^\dagger_1 a_0`).
-       It is the caller's responsibility to group accordingly; this is not verified.
+       It is the caller's responsibility to group accordingly; this is not verified, but
+       :func:`~qiskit_fermions.operators.terms.groups_are_hermitian` checks it.
 
        An operator with no groups is split term by term, which has the same effect, since an
        individual term is generally not Hermitian. The resulting factors are valid fermionic
@@ -167,12 +173,15 @@ class FermionicSuzukiTrotter:
                 are symmetric.
             reps: the number of times to repeat the formula, each repetition evolving for
                 ``time / reps``.
-            merge_adjacent: whether to fuse neighbouring gates of the same factor into one, summing
+            merge_adjacent: whether to fuse neighboring gates of the same factor into one, summing
                 their evolution times. See :attr:`merge_adjacent`.
 
         Raises:
-            ValueError: if ``order`` is neither ``1`` nor a positive even integer, or if ``reps`` is not positive.
+            ValueError: if ``order`` is neither ``1`` nor a positive even integer, or if ``reps`` is
+                not positive.
         """
+        # `order < 1` must be rejected explicitly: zero and negative even integers pass the parity
+        # check, and the recursion would then never reach its base case.
         if order != 1 and (order < 2 or order % 2 != 0):
             raise ValueError(
                 "The Suzuki product formulas are symmetric and therefore only defined for an order "
@@ -188,7 +197,7 @@ class FermionicSuzukiTrotter:
         """The number of times the product formula is repeated."""
 
         self.merge_adjacent = merge_adjacent
-        """Whether neighbouring gates of the same factor are fused into one.
+        """Whether neighboring gates of the same factor are fused into one.
 
         The palindromic structure makes the last factor of one repetition (and of each sub-sweep of
         a higher order) the first of the next. Their exponentials combine exactly, as

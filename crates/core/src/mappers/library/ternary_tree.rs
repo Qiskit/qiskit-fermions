@@ -55,7 +55,7 @@ fn map_majorana_action(
 /// ```
 ///
 /// so the image is a two-term sum of the mode's two Majorana strings. This is the direct
-/// generalisation of the Jordan-Wigner mapper's `map_fermion_action`: on a chain along `Z` the two
+/// generalization of the Jordan-Wigner mapper's `map_fermion_action`: on a chain along `Z` the two
 /// strings are `Z...Z X_j` and `Z...Z Y_j`, and the observable built here is the one that mapper
 /// builds.
 fn map_fermion_action(
@@ -698,9 +698,9 @@ mod tests {
         }
     }
 
-    /// A permuted mode map must agree with relabelling the operator instead.
+    /// A permuted mode map must agree with relabeling the operator instead.
     #[test]
-    fn test_mode_map_agrees_with_relabelling() {
+    fn test_mode_map_agrees_with_relabeling() {
         let op = fermion_op();
         let tree = TernaryTree::breadth_first(4, 3, [PauliLabel::X, PauliLabel::Y, PauliLabel::Z])
             .unwrap();
@@ -710,17 +710,17 @@ mod tests {
             TernaryTreeEncoding::new(&tree, &ModeMap::Permutation(perm.clone())).unwrap();
 
         // `relabel_modes` takes original -> new. Mode `j` must be mapped at the node serving it, so
-        // the relabelling that reproduces `permuted` under the identity map sends `perm[u] -> u`.
+        // the relabeling that reproduces `permuted` under the identity map sends `perm[u] -> u`.
         let mut relabel = vec![0u32; 4];
         for (node, &mode) in perm.iter().enumerate() {
             relabel[mode as usize] = node as u32;
         }
-        let relabelled = op.relabel_modes(relabel).unwrap();
+        let relabeled = op.relabel_modes(relabel).unwrap();
         let identity = TernaryTreeEncoding::new(&tree, &ModeMap::Identity).unwrap();
 
         assert_obs_equal(
             fermion_ternary_tree(&op, &permuted, permuted.num_modes()).unwrap(),
-            fermion_ternary_tree(&relabelled, &identity, identity.num_modes()).unwrap(),
+            fermion_ternary_tree(&relabeled, &identity, identity.num_modes()).unwrap(),
             4,
         );
     }

@@ -68,8 +68,8 @@ def group_wise(mapper_fn: MapperFunction) -> MapperFunction:
 
     Rather than mapping the operator in one go, the wrapped function maps each of its
     :attr:`~qiskit_fermions.operators.OperatorTrait.groups` separately and sums the results (see
-    :ref:`grouping_explanation`). The sum is the same operator either way, but its Pauli terms come out
-    grouped: the terms of one group are adjacent instead of interleaved with everybody else's.
+    :ref:`grouping_explanation`). The sum is the same operator either way, but its Pauli terms come
+    out grouped: the terms of one group are adjacent instead of interleaved with everybody else's.
 
     That matters because a product formula synthesizes the terms in the order it receives them. Where
     the terms of a group act on disjoint qubits, having them adjacent lets them be scheduled in
@@ -141,6 +141,19 @@ class MapperFnEvolutionSynthesis:
        Wrap the mapper in :func:`simplify` to pin a canonical order where that matters::
 
            MapperFnEvolutionSynthesis(simplify(jordan_wigner))
+
+    .. important::
+       :attr:`product_formula` only subdivides the terms **within** the operator of a single
+       :class:`.Evolution` gate. It cannot interleave *separate* gates, so when a grouped operator
+       has already been decomposed into one :class:`.Evolution` per group (see
+       :ref:`grouping_explanation`), raising its repetition count does **not** reduce the outer
+       Trotter error between the groups -- which do not generally commute. The result stays a single
+       outer Trotter step, and its error does not vanish as the repetition count grows.
+
+       To converge the grouped evolution, repeat the whole thing: append ``steps``
+       :class:`.Evolution` gates at ``time / steps`` each. This is the flip side of grouping being
+       decided upstream -- the partition survives into the circuit, and so does responsibility for
+       stepping it.
     """
 
     def __init__(

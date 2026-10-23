@@ -62,7 +62,7 @@ static int test_from_file_beta(void) {
     bool is_correct = (qf_fcidump_norb(fcidump) == 2) && (qf_fcidump_nelec(fcidump) == 3) &&
                       (qf_fcidump_ms2(fcidump) == 1);
 
-    // The HeH fixture is spin-polarised, so it carries explicit beta blocks: the operator gains the
+    // The HeH fixture is spin-polarized, so it carries explicit beta blocks: the operator gains the
     // separate alpha/beta one- and two-body terms, giving 1 + 72 terms across 1 + 36 groups (again
     // counting the constant).
     is_correct = is_correct && (qf_ferm_op_len(op) == 73);

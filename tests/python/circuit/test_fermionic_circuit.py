@@ -529,7 +529,7 @@ def test_measure_renders_as_a_measurement():
 
     drawing = str(circ.draw("text", fold=-1))
     # the measurement box, and the classical wire its outcome drops onto, are both drawn only on the
-    # measurement path -- a generic instruction would be a labelled box with no clbit connection
+    # measurement path -- a generic instruction would be a labeled box with no clbit connection
     assert "┤M├" in drawing
     assert "meas: 2/" in drawing
     assert "╩" in drawing
@@ -567,7 +567,7 @@ def test_repeat_of_a_measured_circuit_reuses_its_clbits():
     """Repetition re-measures into the same bits, so only the last readout is observable.
 
     ``repeat`` flattens, and a classical register cannot hold one readout per repetition. Pinned so the
-    behaviour is a documented consequence rather than a surprise; measure *after* repeating to get a
+    behavior is a documented consequence rather than a surprise; measure *after* repeating to get a
     single well-defined readout.
     """
     circ = FermionicCircuit(2)

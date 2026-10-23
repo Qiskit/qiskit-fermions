@@ -1,5 +1,5 @@
 ---
-prelude: >
+prelude: |
     This release grows the control this package gives over circuit synthesis. An ``Evolution`` gate
     now takes an explicit ``synthesis`` method, a new ``synthesis`` module supplies fermionic product
     formulas of first and higher order, and the ``FermionicTrotterization`` pass selects and applies

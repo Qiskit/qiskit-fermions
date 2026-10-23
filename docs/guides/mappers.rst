@@ -168,9 +168,9 @@ onto a Pauli string of weight :math:`n`. Encodings that spread the parity inform
 instead of a chain do asymptotically better.
 
 A **ternary tree** on :math:`n` nodes captures this whole family. Each node is a qubit carrying three
-downward links labelled ``X``, ``Y`` and ``Z``; a link either descends to a child node (an *edge*) or
+downward links labeled ``X``, ``Y`` and ``Z``; a link either descends to a child node (an *edge*) or
 terminates (a *leg*). Each leg's path back to the root spells a Pauli string: crossing the link
-labelled :math:`P` that descends *from* node :math:`u` contributes :math:`P` on qubit :math:`u`. Every
+labeled :math:`P` that descends *from* node :math:`u` contributes :math:`P` on qubit :math:`u`. Every
 such tree yields a valid encoding, and the familiar ones are simply particular shapes -- a chain along
 ``Z`` is Jordan-Wigner, while a tree in which every node has three children, as far as the node count
 allows, is balanced.

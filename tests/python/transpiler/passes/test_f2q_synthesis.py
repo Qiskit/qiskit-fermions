@@ -170,7 +170,7 @@ def test_run_lowers_barrier_under_non_trivial_layout():
 
 
 def test_run_preserves_barrier_label():
-    """A labelled fermionic barrier keeps its label through the synthesis stage."""
+    """A labeled fermionic barrier keeps its label through the synthesis stage."""
     circ = FermionicCircuit(2)
     circ.barrier(label="sync")
 

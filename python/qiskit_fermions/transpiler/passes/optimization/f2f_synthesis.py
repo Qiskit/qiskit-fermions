@@ -137,11 +137,12 @@ class F2FSynthesis(FermionicDAGCircuitPass):
        restrict the pass to the gates that benefit.
 
        Expanding an operator that carries no :attr:`~qiskit_fermions.operators.OperatorTrait.groups`
-       splits it term by term, and a lone :math:`a^\dagger_i a_j` is not Hermitian, so its
-       exponential is not unitary. Nothing complains until the mapped operator reaches
+       splits it term by term, and a lone hopping term :math:`a^\dagger_i a_j` is not Hermitian, so
+       its exponential is not unitary. Nothing complains until the mapped operator reaches
        :class:`~qiskit.circuit.library.PauliEvolutionGate`, which raises ``ValueError: Operator
        contains complex coefficients, which are not supported``. Assigning conjugate-paired groups
-       is what makes each factor Hermitian.
+       is what makes each factor Hermitian; see
+       :func:`~qiskit_fermions.operators.terms.grouping.groups_are_hermitian`.
     """
 
     def __init__(

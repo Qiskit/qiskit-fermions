@@ -314,6 +314,7 @@ crate::declare_operator_iters!(
 /// .. autosummary::
 ///
 ///    is_hermitian
+///    get_support
 ///    max_rank
 ///    min_num_modes
 ///    is_even
@@ -780,7 +781,7 @@ impl PyMajoranaOperator {
 
     /// An optional vector of `group indices` for each term.
     ///
-    /// For more information refer to the :mod:`~qiskit_fermions.operators.terms.grouping` module.
+    /// For more information refer to the :ref:`grouping_explanation` guide.
     #[getter]
     pub fn get_groups(&self) -> Option<Vec<u32>> {
         self.inner.groups.clone()

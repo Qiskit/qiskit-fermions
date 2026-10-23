@@ -336,6 +336,7 @@ class TransferVertexOperator:
     .. autosummary::
     
        is_hermitian
+       get_support
        min_num_modes
     
     .. [1] Gandon et al., `arXiv:2512.11418 <https://arxiv.org/abs/2512.11418v2>`_.
@@ -345,7 +346,7 @@ class TransferVertexOperator:
         r"""
         An optional vector of `group indices` for each term.
         
-        For more information refer to the :mod:`~qiskit_fermions.operators.terms.grouping` module.
+        For more information refer to the :ref:`grouping_explanation` guide.
         """
     @groups.setter
     def groups(self, value: typing.Optional[typing.Sequence[builtins.int]]) -> None:
@@ -899,7 +900,7 @@ class TransferVertexOperator:
         .. note::
            Fewer contractions are available here than for :class:`.EdgeVertexOperator`. Two edge
            operators sharing a single mode *fuse* into one, but the analogous transfer product does
-           not: writing :math:`T_{jk} = \frac{i}{2} \gamma_{2j} \gamma_{2k-1}`, cancelling the
+           not: writing :math:`T_{jk} = \frac{i}{2} \gamma_{2j} \gamma_{2k-1}`, canceling the
            shared Majorana always leaves an (even, odd) pair drawn from two different modes, which
            is not a single generator. Only ``V(j) V(j)``, ``T(j,k) T(j,k)`` and ``T(j,k) T(k,j)``
            contract.

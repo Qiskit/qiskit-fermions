@@ -69,7 +69,7 @@ impl ExpandedIndices {
 /// `p * (p + 1) / 2 <= index`, i.e. `floor((sqrt(8 * index + 1) - 1) / 2)`. The closed form
 /// replaces a loop that counted `p` up from zero. `f64` has 53 bits of mantissa and `index` is a
 /// `u32`, so `8 * index + 1` is exact and the square root is correct to well under half an integer
-/// step; the neighbours are still checked so a rounding step in either direction cannot slip
+/// step; the neighbors are still checked so a rounding step in either direction cannot slip
 /// through.
 #[inline]
 fn _inflate_index(index: u32) -> (u32, u32) {

@@ -36,7 +36,7 @@ jobs:
           merge-multiple: true
       # We must set `prerelease` explicitly rather than let the action infer it.  Its automatic
       # detection uses SemVer rules, under which every `0.x` version is "unstable" -- so a plain
-      # `0.1.0` would be published as a pre-release.  It also would not recognise our PEP 440
+      # `0.1.0` would be published as a pre-release.  It also would not recognize our PEP 440
       # spelling of a pre-release (`0.1.0rc1`, no hyphen) as unstable in the first place.  So derive
       # the flag from the tag: a trailing non-numeric suffix (`a`/`b`/`rc`, per `tools/set_version.py`)
       # means pre-release, and a bare `X.Y.Z` means stable.

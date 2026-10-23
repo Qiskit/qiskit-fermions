@@ -31,6 +31,11 @@ class TrivialOccupationInitializeModesSynthesis:
        - an occupation-basis encoding (like Jordan-Wigner)
        - a trivial fermion-to-qubit layout (i.e. no change in their register lengths)
        - a 1-to-1 mapping of fermionic mode indices to qubit indices
+       - the qubits start in the all-zero state, and the gate is the first one acting on its modes:
+         the occupied modes are flipped with ``X`` gates, so a second :class:`.InitializeModes` gate
+         on the same modes undoes the first one instead of replacing it
+
+    None of these are verified.
     """
 
     def run(self, in_node: DAGOpNode, out_dag: DAGCircuit, *, f2q_layout: F2QLayout) -> None:

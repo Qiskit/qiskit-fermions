@@ -181,7 +181,7 @@ C_LIBQISKIT_FERMIONS_OUT=$(C_DIR_OUT_LIB)/$(subst _cext,,$(C_LIB_CARGO_FILENAME)
 # `build-clib-dev` instead.
 #
 # These two must keep separate recipes rather than sharing a common prerequisite
-# parameterised by a target-specific variable: a phony target is only built once
+# parameterized by a target-specific variable: a phony target is only built once
 # per `make` invocation, so a shared one would collapse a request for both
 # profiles (`make cext testc`) into whichever was asked for first, leaving the
 # other profile's `target/<profile>/` empty and tripping CMake's

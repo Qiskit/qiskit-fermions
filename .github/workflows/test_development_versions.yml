@@ -6,7 +6,7 @@ name: Development version tests
 # beyond `workflow_call`, and no `concurrency` block: the calling workflow owns both.
 #
 # This builds Qiskit from `main`, so it can be broken by upstream changes with no local cause.  It is
-# still part of branch protection (as it was before this was centralised); admins can bypass the
+# still part of branch protection (as it was before this was centralized); admins can bypass the
 # ruleset on the rare days when upstream is broken.
 
 on:

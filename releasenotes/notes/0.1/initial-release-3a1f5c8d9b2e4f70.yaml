@@ -1,5 +1,5 @@
 ---
-prelude: >
+prelude: |
     This is the first release of Qiskit Fermions, an extension of Qiskit with tools for fermionic
     systems.  It provides operator data structures, a framework and library for converting those
     operators to qubit form (mappers), and a framework and library for synthesizing the

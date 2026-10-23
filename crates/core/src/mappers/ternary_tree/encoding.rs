@@ -609,7 +609,7 @@ mod tests {
         //     gamma_2j  -> Z_0 ... Z_{j-1} X_j
         //     gamma_2j+1 -> Z_0 ... Z_{j-1} Y_j
         // Asserted on the compiled table, before any observable is built, so a mismatch is
-        // localised here rather than in the mapper.
+        // localized here rather than in the mapper.
         let n = 5;
         let enc = compile(&jw(n));
         for mode in 0..n {
@@ -825,7 +825,7 @@ mod tests {
                 );
             }
         }
-        // The parity is a property of the tree, not the mode labelling.
+        // The parity is a property of the tree, not the mode labeling.
         assert_eq!(identity.parity, permuted.parity);
     }
 

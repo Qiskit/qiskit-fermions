@@ -7,7 +7,7 @@ on:
       - synchronize
       - reopened
       # Above are the defaults for the PR trigger, below are our insertions.
-      # Trigger on 'labeled' so we catch the initial manual labelling event.
+      # Trigger on 'labeled' so we catch the initial manual labeling event.
       - labeled
 
 concurrency:

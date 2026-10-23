@@ -83,7 +83,7 @@ def ternary_tree(
         <SparseObservable with 2 terms on 2 qubits: (0.05+0j)() + (-0.05+0j)(Z_1 Z_0)>
 
     A chain along ``Z`` reproduces :func:`.jordan_wigner`, which is what makes the tree a
-    generalisation of it rather than an alternative to it:
+    generalization of it rather than an alternative to it:
 
     .. doctest::
 

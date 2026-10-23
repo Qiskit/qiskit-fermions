@@ -124,7 +124,7 @@ class TestMapperBindings:
         assert (obs - obs).simplify() == SparseObservable.zero(4)
 
     @pytest.mark.parametrize("num_qubits", [4, 6, 9])
-    def test_num_qubits_argument_is_honoured(self, num_qubits):
+    def test_num_qubits_argument_is_honored(self, num_qubits):
         """``num_qubits`` crosses the boundary and widens the result, padding with the identity."""
         enc = TernaryTreeEncoding(TernaryTree.chain(4, "Z"))
         obs = fermion_ternary_tree(fermion_op(), enc, num_qubits)
@@ -359,7 +359,7 @@ class TestErrors:
             TernaryTree([])
 
     def test_rejects_duplicate_label(self):
-        with pytest.raises(ValueError, match="more than one link labelled"):
+        with pytest.raises(ValueError, match="more than one link labeled"):
             TernaryTree([None, (0, "X"), (0, "X")])
 
     def test_rejects_repeated_breadth_first_order(self):

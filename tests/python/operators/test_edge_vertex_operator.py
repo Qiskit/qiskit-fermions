@@ -294,7 +294,7 @@ class TestEdgeVertexOperator(OperatorContractTests):
     def test_normal_ordered(self, subtests):
         cls = self.get_class()
 
-        # These cases pin the pure *reordering* behaviour, so they opt out of the contraction that
+        # These cases pin the pure *reordering* behavior, so they opt out of the contraction that
         # `reduce=True` (the default) would additionally apply. See `test_normal_ordered_reduce`.
         with subtests.test("no change"):
             op = cls.from_dict({((0, 0), (1, 1), (1, 1), (0, 1)): 1})

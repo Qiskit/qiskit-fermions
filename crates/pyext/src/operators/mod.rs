@@ -116,7 +116,7 @@ macro_rules! impl_operator_magic_methods {
 /// runtime — the iterator protocol never surfaces the `None` to Python), but the generator would
 /// mechanically render that as `typing.Optional[...]`, which makes `for term in op.iter_terms()` a
 /// type error for consumers. Overriding the stub to the non-`Optional` element type matches both
-/// typeshed's own `Iterator.__next__ -> T` convention and the actual runtime behaviour. They are
+/// typeshed's own `Iterator.__next__ -> T` convention and the actual runtime behavior. They are
 /// passed as fully-formed literals (rather than `concat!`-ed from an element type) because the
 /// `#[gen_stub(override_return_type(...))]` attribute parser expects a plain string literal.
 #[macro_export]

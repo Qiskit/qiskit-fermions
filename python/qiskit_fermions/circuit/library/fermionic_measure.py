@@ -53,8 +53,8 @@ class FermionicMeasure(FermionicInstruction, Measure):
         Args:
             label: the string label of this instruction.
         """
-        # The name is deliberately Qiskit's own "measure": the drawers pick a gate's colour from
-        # ``displaycolor[op.name]``, so this is what renders a mode measurement in the usual grey
-        # rather than the generic gate colour. The name is free to be shared because the
+        # The name is deliberately Qiskit's own "measure": the drawers pick a gate's color from
+        # ``displaycolor[op.name]``, so this is what renders a mode measurement in the usual gray
+        # rather than the generic gate color. The name is free to be shared because the
         # fermion-to-qubit synthesis stage keys its plugins on ``base_class``, not on the name.
         super().__init__(label=label)

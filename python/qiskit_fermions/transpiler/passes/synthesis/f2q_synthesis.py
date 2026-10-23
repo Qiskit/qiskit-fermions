@@ -219,9 +219,8 @@ class F2QSynthesis(GenericPass[FermionicDAGCircuit, DAGCircuit]):
         # factors of two successive substitutions then interleave, and the operations are appended
         # to the output in the wrong order.
         for node in dag.topological_op_nodes():
-            # Key on `base_class`, not `type(...)`: a singleton instruction (such as
-            # `FermionicMeasure`, which subclasses Qiskit's `Measure` so the drawers render it) is an
-            # instance of a generated `_Singleton...` subclass, whose name no entry point could match.
+            # Key on `base_class`, not `type(...)`: a singleton instruction is an instance of a
+            # generated `_Singleton...` subclass, whose name no entry point could match.
             # `base_class` is the user-facing class, and is identical to `type(...)` for every
             # non-singleton instruction, so this is the right key in both cases.
             op_type = node.op.base_class
