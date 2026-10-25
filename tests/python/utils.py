@@ -42,6 +42,17 @@ def random_two_body_tensor(dim: int, *, rank: int | None = None, seed=None) -> n
     return np.einsum("ipr,iqs->prqs", cholesky_vecs, cholesky_vecs)
 
 
+def antisymmetrized_t2(t2: np.ndarray) -> np.ndarray:
+    """Returns a same-spin ``t2`` block antisymmetrized in the occupied and in the virtual indices.
+
+    Newer ffsim versions validate this when constructing an unrestricted UCCSD operator. It implies
+    the simultaneous-exchange symmetry ``t2[i, j, a, b] == t2[j, i, b, a]`` the cluster operator
+    sees, so the result is valid for older ffsim versions too.
+    """
+    t2 = t2 - t2.transpose(1, 0, 2, 3)
+    return 0.5 * (t2 - t2.transpose(0, 1, 3, 2))
+
+
 def random_t2_amplitudes(norb: int, nocc: int, *, seed=None) -> np.ndarray:
     """Generates random spin-restricted ``t2`` amplitudes.
 
