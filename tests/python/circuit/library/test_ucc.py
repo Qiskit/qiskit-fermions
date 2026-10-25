@@ -25,6 +25,8 @@ import pytest
 from qiskit_fermions.circuit import FermionicCircuit
 from qiskit_fermions.circuit.library import UCC
 
+from ...utils import antisymmetrized_t2
+
 ffsim = pytest.importorskip("ffsim")
 
 
@@ -51,8 +53,8 @@ def _unrestricted_op(nocc_a, nocc_b, nvrt_a, nvrt_b, *, seed):
     t2aa = rng.standard_normal((nocc_a, nocc_a, nvrt_a, nvrt_a)) * 0.05
     t2bb = rng.standard_normal((nocc_b, nocc_b, nvrt_b, nvrt_b)) * 0.05
     t2ab = rng.standard_normal((nocc_a, nocc_b, nvrt_a, nvrt_b)) * 0.05
-    t2aa = 0.5 * (t2aa + t2aa.transpose(1, 0, 3, 2))
-    t2bb = 0.5 * (t2bb + t2bb.transpose(1, 0, 3, 2))
+    t2aa = antisymmetrized_t2(t2aa)
+    t2bb = antisymmetrized_t2(t2bb)
     return ffsim.UCCSDOpUnrestrictedReal(t1=t1, t2=(t2aa, t2ab, t2bb))
 
 
