@@ -368,7 +368,10 @@ class QDriftTrotterization(FermionicDAGCircuitPass):
         discarded_per_gate: list[int] = []
         emitted_per_gate: list[int] = []
 
-        for node in dag.op_nodes():
+        # circuit order, not storage order: the latter is out of sync with the wire dependencies
+        # after a pass substituted a node by a sub-circuit. The output is rebuilt node by node and
+        # the occupation tracking below depends on seeing the gates in the order they act.
+        for node in dag.topological_op_nodes():
             if isinstance(node.op, InitializeModes):
                 modes = _global_modes(dag, node)
                 occupation = node.op.occupation

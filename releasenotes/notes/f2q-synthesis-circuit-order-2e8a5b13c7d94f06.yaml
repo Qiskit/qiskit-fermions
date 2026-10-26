@@ -1,0 +1,12 @@
+---
+fixes:
+  - |
+    :class:`~qiskit_fermions.transpiler.passes.F2QSynthesis`,
+    :class:`~qiskit_fermions.transpiler.passes.RelabelModes` and
+    :class:`~qiskit_fermions.transpiler.passes.QDriftTrotterization` now visit a circuit's
+    instructions in circuit order rather than in the order in which the DAG stores them. The two
+    differ after a pass has replaced a node by a sub-circuit, for example when
+    :class:`~qiskit_fermions.transpiler.passes.FermionicTrotterization` expands several
+    :class:`~qiskit_fermions.circuit.library.Evolution` gates. These passes rebuild their output
+    node by node, so the factors of two successive replacements could be interleaved, producing a
+    well-formed circuit that implements a different unitary.
