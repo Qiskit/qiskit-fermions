@@ -14,6 +14,8 @@
 
 from __future__ import annotations
 
+from itertools import pairwise
+
 import pytest
 from qiskit_fermions.circuit.library import Evolution
 from qiskit_fermions.circuit.library.synthesis import FermionicSuzukiTrotter
@@ -67,14 +69,51 @@ def test_schedule_factor_counts(subtests):
             assert len(_suzuki_schedule(2, num_factors, 1)) == expected
 
 
-def test_schedule_repeats_scale_with_reps():
-    """``reps`` repeats the sweep and divides every scale, leaving the total per factor at one."""
-    single = _suzuki_schedule(2, 3, 1)
+def test_schedule_merges_repetition_boundaries():
+    """The palindromes of neighbouring reps end and begin on the same factor, which is fused."""
     doubled = _suzuki_schedule(2, 3, 2)
+
+    assert [index for index, _ in doubled] == [0, 1, 2, 1, 0, 1, 2, 1, 0]
+    assert [scale for _, scale in doubled] == [0.25, 0.25, 0.5, 0.25, 0.5, 0.25, 0.5, 0.25, 0.25]
+
+
+def test_schedule_repeats_scale_with_reps_unmerged():
+    """Without merging, ``reps`` repeats the sweep and divides every scale."""
+    single = _suzuki_schedule(2, 3, 1, merge_adjacent=False)
+    doubled = _suzuki_schedule(2, 3, 2, merge_adjacent=False)
 
     assert len(doubled) == 2 * len(single)
     assert [index for index, _ in doubled] == [index for index, _ in single] * 2
     assert [scale for _, scale in doubled] == [scale / 2 for _, scale in single] * 2
+
+
+def test_merging_preserves_total_time_per_factor(subtests):
+    """Fusing neighbours redistributes time but never changes what each factor accumulates."""
+    for order in ORDERS:
+        for reps in REPS:
+            with subtests.test(f"order={order} reps={reps}"):
+                merged = _suzuki_schedule(order, 3, reps)
+                unmerged = _suzuki_schedule(order, 3, reps, merge_adjacent=False)
+
+                assert len(merged) <= len(unmerged)
+                for factor in range(3):
+                    total = sum(s for i, s in merged if i == factor)
+                    reference = sum(s for i, s in unmerged if i == factor)
+                    assert total == pytest.approx(reference)
+
+
+def test_merge_adjacent_defaults_to_enabled_and_is_stored():
+    assert FermionicSuzukiTrotter().merge_adjacent is True
+    assert FermionicSuzukiTrotter(merge_adjacent=False).merge_adjacent is False
+
+
+def test_schedule_has_no_adjacent_repeats(subtests):
+    for order in ORDERS:
+        for reps in REPS:
+            with subtests.test(f"order={order} reps={reps}"):
+                indices = [index for index, _ in _suzuki_schedule(order, 3, reps)]
+
+                assert all(a != b for a, b in pairwise(indices))
 
 
 def test_second_order_schedule_is_the_symmetric_sandwich():

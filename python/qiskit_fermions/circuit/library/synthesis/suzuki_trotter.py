@@ -51,13 +51,16 @@ def _recurse(order: int, blocks: list[tuple[int, float]]) -> list[tuple[int, flo
     return 2 * outer + inner + 2 * outer
 
 
-def _suzuki_schedule(order: int, num_factors: int, reps: int) -> list[tuple[int, float]]:
+def _suzuki_schedule(
+    order: int, num_factors: int, reps: int, merge_adjacent: bool = True
+) -> list[tuple[int, float]]:
     """Builds the full evolution schedule of a Suzuki-Trotter formula.
 
     Args:
         order: the order of the formula.
         num_factors: the number of factors the evolved operator is split into.
         reps: the number of times to repeat the formula.
+        merge_adjacent: whether to fuse neighbouring entries of the same factor.
 
     Returns:
         The ordered ``(factor_index, time_scale)`` pairs to emit. Each scale is a fraction of the
@@ -70,7 +73,31 @@ def _suzuki_schedule(order: int, num_factors: int, reps: int) -> list[tuple[int,
         return [(0, 1.0)]
 
     sweep = _recurse(order, [(index, 1.0) for index in range(num_factors)])
-    return reps * [(index, scale / reps) for index, scale in sweep]
+    schedule = reps * [(index, scale / reps) for index, scale in sweep]
+    return _merge_adjacent(schedule) if merge_adjacent else schedule
+
+
+def _merge_adjacent(schedule: list[tuple[int, float]]) -> list[tuple[int, float]]:
+    """Fuses consecutive entries of the same factor into one, summing their time scales.
+
+    Two neighbouring exponentials of the same factor satisfy ``exp(a H) exp(b H) = exp((a + b) H)``,
+    so the fusion is exact. It removes the repeated factor at the seams between repetitions
+    (``A B A | A B A`` becomes ``A B 2A B A``) as well as those between the sub-sweeps of the
+    higher-order recursion.
+
+    Args:
+        schedule: the ordered ``(index, time_scale)`` pairs.
+
+    Returns:
+        The schedule with no two neighbouring entries sharing an index.
+    """
+    merged: list[tuple[int, float]] = []
+    for index, scale in schedule:
+        if merged and merged[-1][0] == index:
+            merged[-1] = (index, merged[-1][1] + scale)
+        else:
+            merged.append((index, scale))
+    return merged
 
 
 class FermionicSuzukiTrotter(FermionicEvolutionSynthesis):
@@ -133,7 +160,7 @@ class FermionicSuzukiTrotter(FermionicEvolutionSynthesis):
        still being wrong.
     """
 
-    def __init__(self, order: int = 2, reps: int = 1) -> None:
+    def __init__(self, order: int = 2, reps: int = 1, *, merge_adjacent: bool = True) -> None:
         """Initializing an instance of this synthesis method can be done with the arguments below.
 
         Args:
@@ -142,6 +169,8 @@ class FermionicSuzukiTrotter(FermionicEvolutionSynthesis):
                 are symmetric.
             reps: the number of times to repeat the formula, each repetition evolving for
                 ``time / reps``.
+            merge_adjacent: whether to fuse neighbouring gates of the same factor into one, summing
+                their evolution times. See :attr:`merge_adjacent`.
 
         Raises:
             ValueError: if ``order`` is neither ``1`` nor a positive even integer, or if ``reps`` is not positive.
@@ -159,6 +188,18 @@ class FermionicSuzukiTrotter(FermionicEvolutionSynthesis):
 
         self.reps = reps
         """The number of times the product formula is repeated."""
+
+        self.merge_adjacent = merge_adjacent
+        """Whether neighbouring gates of the same factor are fused into one.
+
+        The palindromic structure makes the last factor of one repetition (and of each sub-sweep of
+        a higher order) the first of the next. Their exponentials combine exactly, as
+        :math:`e^{-i a H} e^{-i b H} = e^{-i (a + b) H}`, so fusing them shortens the circuit without
+        changing the product formula. Disable this to obtain the textbook gate sequence.
+
+        This only sees the seams created by a single synthesis. Merging across gate boundaries is
+        the job of :class:`.MergeEvolutions`.
+        """
 
     def synthesize(self, gate: Evolution) -> FermionicCircuit:
         """Synthesizes the gate into the ordered factors of the product formula.
@@ -189,7 +230,9 @@ class FermionicSuzukiTrotter(FermionicEvolutionSynthesis):
             ]
 
         time = gate.params[0]
-        for index, scale in _suzuki_schedule(self.order, len(factors), self.reps):
+        for index, scale in _suzuki_schedule(
+            self.order, len(factors), self.reps, self.merge_adjacent
+        ):
             factor = factors[index]
 
             # reduce each operator to act only on the non-idle part of the register
