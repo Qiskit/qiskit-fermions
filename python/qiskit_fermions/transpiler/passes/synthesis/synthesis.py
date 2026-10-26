@@ -184,7 +184,11 @@ class F2QSynthesis(GenericPass[FermionicDAGCircuit, DAGCircuit]):
         for creg in dag.cregs.values():
             out_dag.add_creg(creg)
 
-        for node in dag.op_nodes():
+        # Iterate in circuit order. `op_nodes` returns the nodes in storage order, which a pass that
+        # substitutes a node by a sub-circuit leaves out of sync with the wire dependencies: the
+        # factors of two successive substitutions then interleave, and the operations are appended
+        # to the output in the wrong order.
+        for node in dag.topological_op_nodes():
             # Key on `base_class`, not `type(...)`: a singleton instruction (such as
             # `FermionicMeasure`, which subclasses Qiskit's `Measure` so the drawers render it) is an
             # instance of a generated `_Singleton...` subclass, whose name no entry point could match.
