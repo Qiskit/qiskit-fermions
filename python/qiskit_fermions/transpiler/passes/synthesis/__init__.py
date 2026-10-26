@@ -14,6 +14,7 @@
 
 from .evolution import MapperFnEvolutionSynthesis, group_wise, simplify
 from .fermionic_measure import TrivialOccupationFermionicMeasureSynthesis
+from .hop_evolution import HopEvolutionSynthesis
 from .initialize_modes import TrivialOccupationInitializeModesSynthesis
 from .orbital_rotation import GivensDecompositionOrbitalRotationSynthesis
 from .plugin import F2QSynthesisPlugin, F2QSynthesisPluginManager
@@ -27,6 +28,7 @@ __all__ = [
     "F2QSynthesisPluginManager",
     "GivensDecompositionOrbitalRotationSynthesis",
     "GivensDecompositionSlaterDeterminantSynthesis",
+    "HopEvolutionSynthesis",
     "MapperFnEvolutionSynthesis",
     "TrivialOccupationFermionicMeasureSynthesis",
     "TrivialOccupationInitializeModesSynthesis",
