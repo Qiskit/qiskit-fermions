@@ -415,7 +415,9 @@ class RelabelModes(FermionicDAGCircuitPass):
             )
             out_dag.add_qreg(relabeled_register)
 
-        for node in dag.op_nodes():
+        # circuit order, not storage order: the latter is out of sync with the wire dependencies
+        # after a pass substituted a node by a sub-circuit, and the output is rebuilt node by node
+        for node in dag.topological_op_nodes():
             orig_indices = [orig_register.index(mode) for mode in node.qargs]
             # Forward ``cargs``: the relabeling permutes modes only, so a node's classical bits
             # (e.g. the bit a ``FermionicMeasure`` writes into) must be carried over untouched.
