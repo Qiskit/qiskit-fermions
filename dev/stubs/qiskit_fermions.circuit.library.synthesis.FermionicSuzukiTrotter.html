@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>FermionicSuzukiTrotter - Qiskit Fermions 0.4.0.dev0+d3fb115</title>
+        <title>FermionicSuzukiTrotter - Qiskit Fermions 0.4.0.dev0+e6c81dd</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=fc6d6d93" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.4.0.dev0+d3fb115</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.4.0.dev0+e6c81dd</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.4.0.dev0+d3fb115</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.4.0.dev0+e6c81dd</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -335,6 +335,7 @@
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../pydoc/qiskit_fermions.transpiler.passes.html">Transpiler Passes</a><input aria-label="Toggle navigation of Transpiler Passes" class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" role="switch" type="checkbox"/><label for="toctree-checkbox-14"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="qiskit_fermions.transpiler.passes.FermionicTrotterization.html">FermionicTrotterization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qiskit_fermions.transpiler.passes.MergeEvolutions.html">MergeEvolutions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="qiskit_fermions.transpiler.passes.MergeOrbitalRotations.html">MergeOrbitalRotations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="qiskit_fermions.transpiler.passes.MergeSlaterDeterminantPreparation.html">MergeSlaterDeterminantPreparation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="qiskit_fermions.transpiler.passes.QDriftTrotterization.html">QDriftTrotterization</a></li>
@@ -450,7 +451,7 @@
 <h1>FermionicSuzukiTrotter<a class="headerlink" href="#fermionicsuzukitrotter" title="Link to this heading">¶</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">FermionicSuzukiTrotter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">FermionicSuzukiTrotter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">merge_adjacent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="qiskit_fermions.circuit.library.synthesis.FermionicEvolutionSynthesis.html#qiskit_fermions.circuit.library.synthesis.FermionicEvolutionSynthesis" title="qiskit_fermions.circuit.library.synthesis.evolution_synthesis.FermionicEvolutionSynthesis"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicEvolutionSynthesis</span></code></a></p>
 <p>The higher-order Suzuki-Trotter product formula, applied in fermionic space.</p>
 <p>A product formula composes the factors of an operator symmetrically, so that the leading error
@@ -517,6 +518,8 @@ still being wrong.</p>
 are symmetric.</p></li>
 <li><p><strong>reps</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><em>int</em></a>) – the number of times to repeat the formula, each repetition evolving for
 <code class="docutils literal notranslate"><span class="pre">time</span> <span class="pre">/</span> <span class="pre">reps</span></code>.</p></li>
+<li><p><strong>merge_adjacent</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><em>bool</em></a>) – whether to fuse neighbouring gates of the same factor into one, summing
+their evolution times. See <a class="reference internal" href="#qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter.merge_adjacent" title="qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter.merge_adjacent"><code class="xref py py-attr docutils literal notranslate"><span class="pre">merge_adjacent</span></code></a>.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
@@ -534,6 +537,18 @@ are symmetric.</p></li>
 <dt class="sig sig-object py" id="qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter.reps">
 <span class="sig-name descname"><span class="pre">reps</span></span><a class="headerlink" href="#qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter.reps" title="Link to this definition">¶</a></dt>
 <dd><p>The number of times the product formula is repeated.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter.merge_adjacent">
+<span class="sig-name descname"><span class="pre">merge_adjacent</span></span><a class="headerlink" href="#qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter.merge_adjacent" title="Link to this definition">¶</a></dt>
+<dd><p>Whether neighbouring gates of the same factor are fused into one.</p>
+<p>The palindromic structure makes the last factor of one repetition (and of each sub-sweep of
+a higher order) the first of the next. Their exponentials combine exactly, as
+<span class="math">\(e^{-i a H} e^{-i b H} = e^{-i (a + b) H}\)</span>, so fusing them shortens the circuit without
+changing the product formula. Disable this to obtain the textbook gate sequence.</p>
+<p>This only sees the seams created by a single synthesis. Merging across gate boundaries is
+the job of <a class="reference internal" href="qiskit_fermions.transpiler.passes.MergeEvolutions.html#qiskit_fermions.transpiler.passes.MergeEvolutions" title="qiskit_fermions.transpiler.passes.MergeEvolutions"><code class="xref py py-class docutils literal notranslate"><span class="pre">MergeEvolutions</span></code></a>.</p>
 </dd></dl>
 
 <p class="rubric">Methods</p>
@@ -595,7 +610,7 @@ the formula. A factor may appear more than once, at different evolution times.</
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on 2026/10/25</div>
+              Last updated on 2026/10/26</div>
           </div>
           <div class="right-details">
             
@@ -620,6 +635,7 @@ the formula. A factor may appear more than once, at different evolution times.</
 <li><a class="reference internal" href="#qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter"><code class="docutils literal notranslate"><span class="pre">FermionicSuzukiTrotter</span></code></a><ul>
 <li><a class="reference internal" href="#qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter.order"><code class="docutils literal notranslate"><span class="pre">FermionicSuzukiTrotter.order</span></code></a></li>
 <li><a class="reference internal" href="#qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter.reps"><code class="docutils literal notranslate"><span class="pre">FermionicSuzukiTrotter.reps</span></code></a></li>
+<li><a class="reference internal" href="#qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter.merge_adjacent"><code class="docutils literal notranslate"><span class="pre">FermionicSuzukiTrotter.merge_adjacent</span></code></a></li>
 <li><a class="reference internal" href="#qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter.synthesize"><code class="docutils literal notranslate"><span class="pre">FermionicSuzukiTrotter.synthesize()</span></code></a></li>
 </ul>
 </li>
@@ -634,7 +650,7 @@ the formula. A factor may appear more than once, at different evolution times.</
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=03cf4191"></script>
+</div><script src="../_static/documentation_options.js?v=a1b8a709"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

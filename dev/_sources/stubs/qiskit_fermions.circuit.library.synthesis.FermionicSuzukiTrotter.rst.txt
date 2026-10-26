@@ -16,6 +16,7 @@
     
    .. autoattribute:: order
    .. autoattribute:: reps
+   .. autoattribute:: merge_adjacent
   
   
   
