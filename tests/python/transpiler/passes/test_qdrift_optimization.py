@@ -28,15 +28,28 @@ from qiskit_fermions.circuit.library import (
     OrbitalRotation,
     PrepareSlaterDeterminant,
 )
-from qiskit_fermions.circuit.library.synthesis import FermionicSuzukiTrotter
+from qiskit_fermions.circuit.library.synthesis import FermionicQDrift, FermionicSuzukiTrotter
 from qiskit_fermions.mappers.library import jordan_wigner
 from qiskit_fermions.operators import FermionOperator, ann, cre
 from qiskit_fermions.operators.library import FCIDump
 from qiskit_fermions.operators.terms.filtering import filter_diagonal_terms
 from qiskit_fermions.operators.terms.grouping import group_terms_by_electronic_structure
-from qiskit_fermions.transpiler.passes import QDriftTrotterization
+from qiskit_fermions.transpiler.passes import F2FSynthesis
+from qiskit_fermions.transpiler.passes import QDriftTrotterization as FilteredQDrift
 from qiskit_fermions.transpiler.passmanager import FermionicPassManager
 from scipy.linalg import expm
+
+
+def QDriftTrotterization(num_terms, *, filter_trivial=False, weights=None, rng=None):
+    """The pass that samples with the qDRIFT protocol, as these tests exercise it.
+
+    Without ``filter_trivial`` this is the ``QDrift`` method of the ``F2FSynthesis`` pass, and with
+    it the pass that rejects the draws that cannot move a particle.
+    """
+    qdrift = FermionicQDrift(num_terms, weights=weights, rng=rng)
+    if filter_trivial:
+        return FilteredQDrift(qdrift)
+    return F2FSynthesis({"Evolution": qdrift})
 
 
 def test_qdrift_optimization_no_groups(subtests):
@@ -778,19 +791,24 @@ def test_qdrift_weights_length_must_match_the_operator(subtests):
         assert qdrift_circ.count_ops() == {"Evolution": 4}
 
 
-def test_qdrift_weights_reject_several_evolution_gates():
-    """A weights array describes one specific operator, so a circuit holding several Evolution gates
-    is ambiguous and must be rejected rather than sampled against the wrong operator. Without custom
-    weights the same circuit stays supported, since each gate derives its own."""
+def test_qdrift_weights_are_checked_against_every_gate():
+    """A weights array describes one specific operator. The method is stateless, so it cannot count
+    the gates it was given; it validates the length against each of them instead, which rejects a
+    second gate of another size. Without custom weights several gates are supported, since each
+    derives its own."""
     hamil = _ungrouped_hamiltonian()
+    other = FermionOperator.from_terms([(((True, 0), (False, 1)), 1.0)])
+    circ = FermionicCircuit(4)
+    circ.append(Evolution(4, hamil, time=1.5), circ.modes)
+    circ.append(Evolution(4, other, time=1.5), circ.modes)
+
+    weights = np.abs(np.array(hamil.get_coeffs()))
+    with pytest.raises(ValueError, match="exactly one entry per sampled piece"):
+        FermionicPassManager(QDriftTrotterization(3, rng=42, weights=weights)).run(circ)
+
     circ = FermionicCircuit(4)
     circ.append(Evolution(4, hamil, time=1.5), circ.modes)
     circ.append(Evolution(4, hamil, time=1.5), circ.modes)
-
-    weights = np.abs(np.array(hamil.get_coeffs()))
-    with pytest.raises(ValueError, match="more than one Evolution gate"):
-        FermionicPassManager(QDriftTrotterization(3, rng=42, weights=weights)).run(circ)
-
     qdrift_circ = FermionicPassManager(QDriftTrotterization(3, rng=42)).run(circ)
     assert qdrift_circ.count_ops() == {"Evolution": 6}
 
@@ -824,10 +842,12 @@ def test_qdrift_rejects_invalid_weights(subtests):
 
 def test_qdrift_weights_accepts_a_plain_sequence():
     """A list is as good as an array; it is converted once at construction."""
-    qdrift = QDriftTrotterization(4, rng=42, weights=[0.7, 0.7, 0.4, 0.4])
-    assert isinstance(qdrift.weights, np.ndarray)
+    method = FermionicQDrift(4, rng=42, weights=[0.7, 0.7, 0.4, 0.4])
+    assert isinstance(method.weights, np.ndarray)
 
-    qdrift_circ = FermionicPassManager(qdrift).run(_weights_circuit(_ungrouped_hamiltonian()))
+    qdrift_circ = FermionicPassManager(F2FSynthesis({"Evolution": method})).run(
+        _weights_circuit(_ungrouped_hamiltonian())
+    )
     assert qdrift_circ.count_ops() == {"Evolution": 4}
 
 

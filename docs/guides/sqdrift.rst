@@ -122,7 +122,7 @@ detail in :ref:`this guide <grouping_explanation>`.
           qf_ferm_op_filter_diagonal_terms(canon);
 
    Filtering here, once, is considerably cheaper than filtering repeatedly.
-   :class:`.QDriftTrotterization` runs once per transpiled circuit, so
+   :class:`.FermionicQDrift` runs once per transpiled circuit, so
    filtering the Hamiltonian initially, rather than on every call, avoids
    redoing work for every circuit generated from it.
 
@@ -134,7 +134,7 @@ detail in :ref:`this guide <grouping_explanation>`.
    operator: the grouping applied above assigns indices in order of first
    encounter, which leaves a group's second term far from its first.
 
-   :class:`.QDriftTrotterization` samples whole groups and looks each drawn group
+   :class:`.FermionicQDrift` samples whole groups and looks each drawn group
    up with
    :meth:`~qiskit_fermions.operators.OperatorTrait.split_out_groups`. Finding a
    group among scattered terms means scanning all of them, so that lookup costs
@@ -203,15 +203,16 @@ to be directly transpiled to a :external:class:`~qiskit.circuit.QuantumCircuit`.
 Use the :func:`.jordan_wigner` fermion-to-qubit mapping to
 convert the Hamiltonian expressed in terms of fermions to be expressed in Pauli strings instead. This
 can be done directly as part of the transpilation process by using the
-:class:`.EvolutionSynthesis` transpilation pass plugin. Use
+:class:`.F2QSynthesis` transpilation pass. Use
 :func:`.generate_preset_jw_pass_manager` to build
 :class:`.FermionicStagedPassManager`, which ensures that the
 Jordan-Wigner encoding is used consistently for all circuit instructions.
 
-Crucially, add the :class:`.QDriftTrotterization` transpilation pass to the
-``optimization`` stage of the transpilation pipeline. This ensures that the
-circuit does not use the time evolution of the entire Hamiltonian, whose depth
-would exceed the capabilities of currently available quantum computing hardware.
+Crucially, add the :class:`.F2FSynthesis` transpilation pass, configured with
+the qDRIFT method :class:`.FermionicQDrift`, to the ``optimization`` stage of
+the transpilation pipeline. This ensures that the circuit does not use the time
+evolution of the entire Hamiltonian, whose depth would exceed the capabilities
+of currently available quantum computing hardware.
 
 Instead, it subsamples a fixed number of ``groups`` of Hamiltonian terms for
 each circuit, every time the circuit is transpiled. Through this, you can generate
@@ -232,10 +233,11 @@ circuits to generate:
 
        >>> from qiskit_fermions.transpiler import FermionicPassManager
        >>> from qiskit_fermions.transpiler.presets import generate_preset_jw_pass_manager
-       >>> from qiskit_fermions.transpiler.passes import QDriftTrotterization
+       >>> from qiskit_fermions.circuit.library.synthesis import FermionicQDrift
+       >>> from qiskit_fermions.transpiler.passes import F2FSynthesis, QDriftTrotterization
        >>>
        >>> num_groups = 10
-       >>> qdrift = QDriftTrotterization(num_groups, rng=19)
+       >>> qdrift = F2FSynthesis({"Evolution": FermionicQDrift(num_groups, rng=19)})
        >>>
        >>> pm = generate_preset_jw_pass_manager()
        >>> pm.optimization = FermionicPassManager([qdrift])
@@ -253,7 +255,7 @@ circuits to generate:
 
 .. note::
    The preceding example fixes the ``seed`` for the random number
-   generator used inside of the :class:`.QDriftTrotterization` transpilation
+   generator used inside of the :class:`.FermionicQDrift` synthesis
    pass.
 
 5. Filter drawn excitations by occupation
@@ -263,13 +265,13 @@ Beyond the diagonal terms filtered out in the previous step, a drawn excitation
 can act entirely within a set of modes whose occupation is already fixed (all
 occupied or all unoccupied), where it cannot move a particle from one side to
 the other. Such an excitation tells you nothing about the sampled bitstrings, so
-a slot spent on it is a slot wasted. Setting ``filter_trivial=True`` on the
-:class:`.QDriftTrotterization` pass rejects such excitations as they are drawn
-and draws a replacement, so that each of the ``num_groups`` slots of the
-resulting circuit carries an excitation that couples the two sides.
+a slot spent on it is a slot wasted. The :class:`.QDriftTrotterization` pass,
+which wraps the same :class:`.FermionicQDrift` method, rejects such excitations
+as they are drawn and draws a replacement, so that each of the ``num_groups``
+slots of the resulting circuit carries an excitation that couples the two sides.
 
 .. warning::
-   This filtering is not free, and it is off by default for that reason. What it
+   This filtering is not free, and it is a separate pass for that reason. What it
    conserves is the budget of ``num_groups`` sampled slots, not the circuit
    depth: since that budget is fixed, a rejected excitation is replaced rather
    than dropped, and a cheap one gives way to a coupling excitation that costs
@@ -291,7 +293,7 @@ resulting circuit carries an excitation that couples the two sides.
    earlier accepted excitations have left the state entangled and marked most
    modes "uncertain".
 
-   Use ``filter_trivial=True`` for the bitstring-sampling workflow this guide
+   Use the filtering for the bitstring-sampling workflow this guide
    describes, where the circuits feed SQD post-processing and only the sampled
    bitstrings matter. Do not use it if you intend to estimate an expectation
    value from these circuits, or to rely on the qDRIFT error bound in any other
@@ -302,7 +304,7 @@ requires an :class:`.InitializeModes` gate preceding the :class:`.Evolution`
 gates in the circuit; :meth:`.InitializeModes.from_hartree_fock` is a
 convenient way to construct one. Add one here for the N2 Hartree-Fock
 reference (seven alpha and seven beta electrons in 14 spatial orbitals) and compare the
-sampled excitations with and without ``filter_trivial=True``:
+sampled excitations with and without the filtering:
 
 .. tab-set-code::
 
@@ -317,9 +319,11 @@ sampled excitations with and without ``filter_trivial=True``:
        >>> hf_circ.append(Evolution(num_modes, canon, time), hf_circ.modes)
        >>>
        >>> num_groups = 5
-       >>> qdrift_unfiltered = QDriftTrotterization(num_groups, rng=3480)
+       >>> qdrift_unfiltered = F2FSynthesis(
+       ...     {"Evolution": FermionicQDrift(num_groups, rng=3480)}
+       ... )
        >>> qdrift_trivial = QDriftTrotterization(
-       ...     num_groups, filter_trivial=True, rng=3480
+       ...     FermionicQDrift(num_groups, rng=3480)
        ... )
        >>>
        >>> for instruction in FermionicPassManager(qdrift_unfiltered).run(hf_circ)._inner.data:
@@ -348,7 +352,7 @@ sampled excitations with and without ``filter_trivial=True``:
 
 None of the excitations drawn without filtering touch the occupied set
 (``0-6`` and ``28-34``) at all, so none of them can move a particle between an
-occupied and an unoccupied mode. With ``filter_trivial=True``, all five are
+occupied and an unoccupied mode. With the filtering, all five are
 rejected and replaced by excitations that do couple an occupied mode with an
 unoccupied one. For example, the first accepted excitation ``[0, 1, 6, 7]`` moves a
 particle between occupied modes ``0``, ``1``, and ``6`` and unoccupied mode
@@ -380,7 +384,7 @@ were over-weighted:
 
        >>> # a freshly seeded pass, so the counts do not depend on earlier draws
        >>> qdrift_counted = QDriftTrotterization(
-       ...     num_groups, filter_trivial=True, rng=3480
+       ...     FermionicQDrift(num_groups, rng=3480)
        ... )
        >>> filtered = FermionicPassManager(qdrift_counted).run(hf_circ)
        >>> discarded = filtered.metadata.get("filter_trivial.discarded")
@@ -402,7 +406,7 @@ were over-weighted:
    :class:`.InitializeModes` does, and any :class:`.OrbitalRotation` marks every
    mode it acts on as "uncertain". Without any of them, or when the seeded modes
    all land on one side (every mode occupied, or every mode unoccupied),
-   ``filter_trivial=True`` emits a :class:`UserWarning` and leaves the sampling
+   the pass emits a :class:`UserWarning` and leaves the sampling
    unfiltered for that :class:`.Evolution` gate. On a Hamiltonian whose remaining
    terms can no longer couple the two tracked sets, the pass instead raises
    :class:`RuntimeError` after
@@ -416,7 +420,7 @@ were over-weighted:
 Reach for this only if the transpilation itself is a bottleneck. It changes
 nothing about the circuits you get.
 
-:class:`.QDriftTrotterization` draws each group with a probability proportional to
+:class:`.FermionicQDrift` draws each group with a probability proportional to
 the magnitude of its coefficient, and derives those magnitudes from the
 Hamiltonian on every call: one value per Hamiltonian *term*, reduced down to one
 per group. Because the pass is stateless it repeats that reduction for every
@@ -438,7 +442,9 @@ noticeable as the other is absent, so it is worth applying both together. Since
        >>> from qiskit_fermions.operators.terms.grouping import group_coeff_means
        >>>
        >>> weights = group_coeff_means(canon)  # `canon` is group-ordered, from step 2
-       >>> qdrift_weighted = QDriftTrotterization(num_groups, rng=19, weights=weights)
+       >>> qdrift_weighted = F2FSynthesis(
+       ...     {"Evolution": FermionicQDrift(num_groups, rng=19, weights=weights)}
+       ... )
        >>>
        >>> pm.optimization = FermionicPassManager([qdrift_weighted])
        >>> weighted_circuits = [
@@ -501,7 +507,7 @@ pass:
        >>> solver = SolverFactory("appsi_highs")
        >>> solver.options["time_limit"] = 10
        >>>
-       >>> qdrift = QDriftTrotterization(5, rng=19)
+       >>> qdrift = F2FSynthesis({"Evolution": FermionicQDrift(5, rng=19)})
        >>> relabel = RelabelModes(solver=solver)
        >>>
        >>> pm.optimization = FermionicPassManager([qdrift, relabel])

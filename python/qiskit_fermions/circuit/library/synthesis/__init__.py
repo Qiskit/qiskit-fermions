@@ -66,6 +66,8 @@ upon. These are the entry points of the ``qiskit_fermions.circuit.synthesis`` gr
    +------------------------------------+--------------------+---------------------------------------------+
    | :class:`.Evolution`                | ``SuzukiTrotter``  | :class:`FermionicSuzukiTrotter`             |
    +------------------------------------+--------------------+---------------------------------------------+
+   | :class:`.Evolution`                | ``QDrift``         | :class:`FermionicQDrift`                    |
+   +------------------------------------+--------------------+---------------------------------------------+
    | :class:`.OrbitalRotation`          | ``Givens``         | :class:`FermionicGivensDecomposition`       |
    +------------------------------------+--------------------+---------------------------------------------+
    | :class:`.PrepareSlaterDeterminant` | ``Givens``         | :class:`FermionicSlaterGivensDecomposition` |
@@ -77,13 +79,16 @@ upon. These are the entry points of the ``qiskit_fermions.circuit.synthesis`` gr
 
    FermionicLieTrotter
    FermionicSuzukiTrotter
+   FermionicQDrift
    FermionicGivensDecomposition
    FermionicSlaterGivensDecomposition
+   QDriftSampler
 """
 
 from .givens_decomposition import FermionicGivensDecomposition
 from .lie_trotter import FermionicLieTrotter
 from .plugin import F2FSynthesisPlugin, F2FSynthesisPluginManager
+from .qdrift import FermionicQDrift, QDriftSampler
 from .slater_givens_decomposition import FermionicSlaterGivensDecomposition
 from .suzuki_trotter import FermionicSuzukiTrotter
 
@@ -92,6 +97,8 @@ __all__ = [
     "F2FSynthesisPluginManager",
     "FermionicGivensDecomposition",
     "FermionicLieTrotter",
+    "FermionicQDrift",
     "FermionicSlaterGivensDecomposition",
     "FermionicSuzukiTrotter",
+    "QDriftSampler",
 ]
