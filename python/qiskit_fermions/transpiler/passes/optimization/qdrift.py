@@ -15,6 +15,7 @@
 from __future__ import annotations
 
 import warnings
+from typing import Any
 
 import numpy as np
 from qiskit.dagcircuit import DAGOpNode
@@ -108,6 +109,16 @@ class QDriftTrotterization(FermionicDAGCircuitPass):
     remaining terms cannot bridge the tracked occupied/unoccupied mode sets. That happens when both
     sets remain small and disjoint (few modes have been marked occupied or unoccupied, and none has
     yet become "uncertain") and no remaining term's support touches both."""
+
+    def __new__(cls, *args: Any, **kwargs: Any) -> Any:  # noqa: D102
+        # Backwards compatibility: the former signature started with an `int`, and returns a shim.
+        if cls is QDriftTrotterization and (
+            (args and not isinstance(args[0], FermionicQDrift)) or "num_terms" in kwargs
+        ):
+            from ._deprecated_qdrift import LegacyQDriftTrotterization
+
+            return super().__new__(LegacyQDriftTrotterization)
+        return super().__new__(cls)
 
     def __init__(self, qdrift: FermionicQDrift) -> None:
         """Initializing this transpiler pass can be done with the argument below.
