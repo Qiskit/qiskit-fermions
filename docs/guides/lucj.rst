@@ -169,11 +169,16 @@ For a UCJ ansatz specifically, the synthesis stage has to cover two kinds of gat
   :class:`.MapperFnEvolutionSynthesis` takes a mapper function, so the
   :math:`e^{i \mathcal{J}_k}` layers lower through any encoding you can express as one. The
   :ref:`flow-set guides <1d_fermi_hubbard>` show how to write one.
-- **Everything else.** The plugins for :class:`.OrbitalRotation`, :class:`.InitializeModes` and
+- **The orbital rotations.** An :class:`.OrbitalRotation` is not mapped to qubits as such. The
+  :class:`.F2FSynthesis` pass first breaks it down, in fermionic space, into
+  :class:`.Evolution` gates on one or two modes each, so any encoding that can map an
+  :class:`.Evolution` handles it. Under Jordan-Wigner, the factors between adjacent modes become
+  :class:`~qiskit.circuit.library.XXPlusYYGate`\ objects at the qubit stage.
+- **Everything else.** The plugins for :class:`.InitializeModes` and
   :class:`.PrepareSlaterDeterminant` are not parametrized by an encoding; each documents its
   assumption of an occupation-basis encoding with a 1-to-1 mode-to-qubit mapping, and emits gates
-  directly on that basis. A different encoding needs its own plugin for each of these three, and
-  none ships yet.
+  directly on that basis. A different encoding needs its own plugin for each of these two, and none
+  ships yet.
 
 How to transpile UCJ circuits under a non-Jordan-Wigner encoding is an open research question and
 this package provides the framework within which to develop such a pipeline.
@@ -197,7 +202,6 @@ a plugin for every fermionic gate the circuit contains:
    >>> from qiskit_fermions.mappers.library import jordan_wigner
    >>> from qiskit_fermions.transpiler.passes import F2QSynthesis
    >>> from qiskit_fermions.transpiler.passes.synthesis import (
-   ...     GivensDecompositionOrbitalRotationSynthesis,
    ...     GivensDecompositionSlaterDeterminantSynthesis,
    ...     MapperFnEvolutionSynthesis,
    ...     TrivialOccupationInitializeModesSynthesis,
@@ -206,7 +210,6 @@ a plugin for every fermionic gate the circuit contains:
    >>> synthesis = F2QSynthesis()
    >>> synthesis.methods["Evolution"] = MapperFnEvolutionSynthesis(jordan_wigner)
    >>> synthesis.methods["InitializeModes"] = TrivialOccupationInitializeModesSynthesis()
-   >>> synthesis.methods["OrbitalRotation"] = GivensDecompositionOrbitalRotationSynthesis()
    >>> synthesis.methods["PrepareSlaterDeterminant"] = (
    ...     GivensDecompositionSlaterDeterminantSynthesis()
    ... )
@@ -228,6 +231,7 @@ stages run in a fixed order:
 
    >>> from qiskit.passmanager import MultiStagePassManager
    >>> from qiskit.transpiler import generate_preset_pass_manager
+   >>> from qiskit.transpiler.passes.synthesis.high_level_synthesis import HLSConfig
    >>>
    >>> from qiskit_fermions.transpiler import (
    ...     FermionicCircuitToDAG,
@@ -235,6 +239,8 @@ stages run in a fixed order:
    ...     QuantumDAGToCircuit,
    ... )
    >>> from qiskit_fermions.transpiler.passes import (
+   ...     F2FSynthesis,
+   ...     HopEvolutionSynthesis,
    ...     MergeOrbitalRotations,
    ...     MergeSlaterDeterminantPreparation,
    ...     TrivialF2QLayout,
@@ -243,11 +249,17 @@ stages run in a fixed order:
    >>> pm = MultiStagePassManager(
    ...     input=FermionicCircuitToDAG(),
    ...     optimization=FermionicPassManager(
-   ...         [MergeOrbitalRotations(), MergeSlaterDeterminantPreparation()]
+   ...         [
+   ...             MergeOrbitalRotations(),
+   ...             MergeSlaterDeterminantPreparation(),
+   ...             F2FSynthesis({"OrbitalRotation": "Givens"}),
+   ...         ]
    ...     ),
    ...     layout=FermionicPassManager(TrivialF2QLayout()),
    ...     synthesis=synthesis,
-   ...     qubit=generate_preset_pass_manager(),
+   ...     qubit=generate_preset_pass_manager(
+   ...         hls_config=HLSConfig(PauliEvolution=[HopEvolutionSynthesis(), "default"])
+   ...     ),
    ...     output=QuantumDAGToCircuit(),
    ... )
 
@@ -260,7 +272,9 @@ layer ends with :math:`\mathcal{U}_k` and the next begins with :math:`\mathcal{U
 rotation that follows it into a single :class:`.PrepareSlaterDeterminant`, which synthesis lowers
 through the cheaper reduced Slater decomposition instead of a full square rotation. The order
 matters: merging the rotations first exposes the single rotation immediately after the
-initialization, which the Slater fusion then contracts into it.
+initialization, which the Slater fusion then contracts into it. :class:`.F2FSynthesis`
+comes last, because it breaks up whatever rotation is left, and doing so any earlier would leave the
+two merging passes with nothing to fuse.
 
 The remaining stages are plumbing. ``input`` and ``output`` convert between circuits and DAGs,
 ``layout`` assigns fermionic modes to qubits (:class:`.TrivialF2QLayout` maps mode ``i`` to qubit
@@ -278,7 +292,7 @@ evolutions.
 
    >>> transpiled = pm.run(circuit.decompose())
    >>> print(dict(sorted(transpiled.count_ops().items())))
-   {'p': 14, 'rzz': 12, 'x': 2, 'xx_plus_yy': 28}
+   {'rz': 14, 'rzz': 12, 'x': 2, 'xx_plus_yy': 28}
 
 Without a target device, this maps onto ``2 * norb`` qubits with all-to-all connectivity assumed; the
 orbital rotations synthesize into :class:`~qiskit.circuit.library.XXPlusYYGate`\ objects and the diagonal
@@ -338,8 +352,15 @@ keeping the package's own fermion-to-qubit synthesis:
    >>> pairs_aa = [(p, p + 1) for p in range(norb - 1)]
    >>>
    >>> pm = generate_preset_jw_pass_manager()
+   >>> hls_config = HLSConfig(PauliEvolution=[HopEvolutionSynthesis(), "default"])
    >>> pm.qubit, allowed_pairs_ab = generate_lucj_pass_manager(
-   ...     backend, norb, "heavy-hex", (pairs_aa, None), optimization_level=3, seed_transpiler=0
+   ...     backend,
+   ...     norb,
+   ...     "heavy-hex",
+   ...     (pairs_aa, None),
+   ...     optimization_level=3,
+   ...     seed_transpiler=0,
+   ...     hls_config=hls_config,
    ... )
    >>>
    >>> # the alpha-beta interactions the heavy-hex connectivity can implement
@@ -347,7 +368,11 @@ keeping the package's own fermion-to-qubit synthesis:
    [(0, 0)]
 
 That composition is the point: the ``qubit`` stage is device-aware, while the fermion-to-qubit
-synthesis stage ahead of it stays this package's own, and so stays replaceable.
+synthesis stage ahead of it stays this package's own, and so stays replaceable. Replacing the ``qubit``
+stage does drop what the preset registers there, which is the :class:`.HopEvolutionSynthesis` that
+turns the Givens factors of an orbital rotation into :class:`~qiskit.circuit.library.XXPlusYYGate`\
+objects. Pass it on through the ``hls_config`` as above, or the device's basis has to be reached
+without it.
 
 With ``pm.qubit`` now set to the device-aware pipeline, running the pass manager lays the circuit out
 on the backend's qubits and routes it to the coupling map. For the *unrestricted* ansatz from

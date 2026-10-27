@@ -28,6 +28,7 @@ from qiskit_fermions.circuit.library import (
 from qiskit_fermions.mappers.library import jordan_wigner
 from qiskit_fermions.operators import FermionOperator
 from qiskit_fermions.transpiler import FermionicPassManager
+from qiskit_fermions.transpiler.passes import F2FSynthesis
 from qiskit_fermions.transpiler.presets import generate_preset_jw_pass_manager
 
 from ...utils import random_unitary
@@ -194,7 +195,7 @@ def test_preset_jordan_wigner_merges_initialize_rotation():
     merged = pm.run(circ)
 
     # the reduced decomposition drops the diagonal phase gates the full orbital rotation would emit
-    assert "p" not in merged.count_ops()
+    assert not {"p", "rz"} & set(merged.count_ops())
 
     # equivalent reference lowered without the merge (a bare OrbitalRotation keeps its phases)
     reference = FermionicCircuit(num_modes)
@@ -227,7 +228,7 @@ def test_preset_jordan_wigner_merges_single_per_spin_rotation():
     # carries diagonal phase gates and a denser rotation pattern). This isolates what the fusion into
     # a PrepareSlaterDeterminant buys -- a reference fed back through the merging preset would be
     # fused (and block-split) too, flattening the comparison.
-    pm.optimization = FermionicPassManager()
+    pm.optimization = FermionicPassManager(F2FSynthesis({"OrbitalRotation": "Givens"}))
     unmerged = pm.run(circ)
 
     sv_merged = Statevector(merged).data
@@ -237,8 +238,8 @@ def test_preset_jordan_wigner_merges_single_per_spin_rotation():
     np.testing.assert_allclose(sv_merged, phase * sv_unmerged, atol=1e-10)
 
     # the fusion drops the diagonal phase gates the square rotation would emit ...
-    assert "p" not in merged.count_ops()
-    assert "p" in unmerged.count_ops()
+    assert not {"p", "rz"} & set(merged.count_ops())
+    assert "rz" in unmerged.count_ops()
     # ... and emits strictly fewer two-qubit rotations than the un-fused square decomposition
     assert merged.count_ops().get("xx_plus_yy", 0) < unmerged.count_ops().get("xx_plus_yy", 0)
 
@@ -271,7 +272,7 @@ def test_preset_jordan_wigner_merges_rotation_run_then_slater_prep():
 
     # the run was merged and then contracted into a PrepareSlaterDeterminant, so it lowers with the
     # reduced Slater synthesis, which drops the diagonal phase gates a full orbital rotation emits
-    assert "p" not in merged.count_ops()
+    assert not {"p", "rz"} & set(merged.count_ops())
 
     # equivalent reference: the run pre-composed into a single rotation directly following the init,
     # i.e. exactly the shape the two passes produce -- it fuses into the same PrepareSlaterDeterminant

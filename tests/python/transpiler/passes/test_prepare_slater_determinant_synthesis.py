@@ -30,17 +30,15 @@ from qiskit_fermions.linalg import givens_decomposition_slater
 from qiskit_fermions.transpiler import FermionicCircuitToDAG, QuantumDAGToCircuit
 from qiskit_fermions.transpiler.passes import (
     F2QSynthesis,
-    GivensDecompositionOrbitalRotationSynthesis,
     GivensDecompositionSlaterDeterminantSynthesis,
     TrivialF2QLayout,
-    TrivialOccupationInitializeModesSynthesis,
 )
 from qiskit_fermions.transpiler.passes.synthesis.prepare_slater_determinant import (
     _peel_disjoint_unit_orbitals,
     _split_mixing_blocks,
 )
 
-from ...utils import random_unitary
+from ...utils import random_unitary, reference_pass_manager
 
 
 def _synthesize(circ: FermionicCircuit, synth: F2QSynthesis):
@@ -63,14 +61,6 @@ def _slater_synth() -> F2QSynthesis:
     return synth
 
 
-def _reference_synth() -> F2QSynthesis:
-    """Synthesizes the equivalent InitializeModes + OrbitalRotation via the trusted square path."""
-    synth = F2QSynthesis()
-    synth.methods["InitializeModes"] = TrivialOccupationInitializeModesSynthesis()
-    synth.methods["OrbitalRotation"] = GivensDecompositionOrbitalRotationSynthesis()
-    return synth
-
-
 def _assert_equal_up_to_global_phase(qc_a, qc_b):
     sv_a = Statevector(qc_a).data
     sv_b = Statevector(qc_b).data
@@ -85,7 +75,7 @@ def _reference_circuit(num_modes, occupation, rotation):
     reference = FermionicCircuit(num_modes)
     reference.append(InitializeModes(occupation), reference.modes)
     reference.append(OrbitalRotation(rotation), reference.modes)
-    return _synthesize(reference, _reference_synth())
+    return reference_pass_manager(optimization_level=0).run(reference)
 
 
 def _assert_matches_reference(num_modes, occupation, rotation):
@@ -137,7 +127,7 @@ def test_prepare_slater_determinant_synthesis_reduced_gate_count():
     # at most m(n-m) XXPlusYYGates, m X gates, and crucially no phase gates
     assert ops.get("xx_plus_yy", 0) <= nocc * (num_modes - nocc)
     assert ops.get("x", 0) == nocc
-    assert "p" not in ops
+    assert not {"p", "rz"} & set(ops)
 
     # the full orbital-rotation synthesis of the same rotation uses the n(n-1)/2 brick-wall + phases
     ref_ops = _reference_circuit(num_modes, occupation, rotation).count_ops()
@@ -219,7 +209,7 @@ def test_prepare_slater_determinant_synthesis_permutation_no_two_qubit_gates():
 
     assert ops.get("xx_plus_yy", 0) == 0
     assert ops.get("x", 0) == 2
-    assert "p" not in ops
+    assert not {"p", "rz"} & set(ops)
 
 
 def test_prepare_slater_determinant_synthesis_multiple_disjoint_units():

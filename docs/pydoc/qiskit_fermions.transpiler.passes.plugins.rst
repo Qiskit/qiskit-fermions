@@ -42,8 +42,6 @@ they act upon:
    +------------------------------------+-------------------------------+--------------------------------------------------------+
    | :class:`.InitializeModes`          | ``TrivialOccupation``         | :class:`TrivialOccupationInitializeModesSynthesis`     |
    +------------------------------------+-------------------------------+--------------------------------------------------------+
-   | :class:`.OrbitalRotation`          | ``GivensDecomposition``       | :class:`GivensDecompositionOrbitalRotationSynthesis`   |
-   +------------------------------------+-------------------------------+--------------------------------------------------------+
    | :class:`.PrepareSlaterDeterminant` | ``GivensDecompositionSlater`` | :class:`GivensDecompositionSlaterDeterminantSynthesis` |
    +------------------------------------+-------------------------------+--------------------------------------------------------+
 
@@ -51,7 +49,6 @@ they act upon:
    :toctree: ../stubs/
    :class: sd-d-none
 
-   GivensDecompositionOrbitalRotationSynthesis
    GivensDecompositionSlaterDeterminantSynthesis
    MapperFnEvolutionSynthesis
    TrivialOccupationFermionicMeasureSynthesis

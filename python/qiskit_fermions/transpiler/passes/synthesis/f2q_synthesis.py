@@ -81,7 +81,6 @@ class F2QSynthesis(GenericPass[FermionicDAGCircuit, DAGCircuit]):
           ...     "Evolution": ("MapperFn", (jordan_wigner,)),
           ...     "FermionicMeasure": "TrivialOccupation",
           ...     "InitializeModes": "TrivialOccupation",
-          ...     "OrbitalRotation": "GivensDecomposition",
           ... }
           >>> synth = passes.F2QSynthesis(config)
 
@@ -96,7 +95,6 @@ class F2QSynthesis(GenericPass[FermionicDAGCircuit, DAGCircuit]):
           >>> synth.methods["Evolution"] = passes.MapperFnEvolutionSynthesis(jordan_wigner)
           >>> synth.methods["FermionicMeasure"] = passes.TrivialOccupationFermionicMeasureSynthesis()
           >>> synth.methods["InitializeModes"] = passes.TrivialOccupationInitializeModesSynthesis()
-          >>> synth.methods["OrbitalRotation"] = passes.GivensDecompositionOrbitalRotationSynthesis()
 
        Through this manual approach it is also possible to inject custom
        :class:`.F2QSynthesisPlugin` implementations without requiring them to be registered through

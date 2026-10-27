@@ -22,6 +22,7 @@ from qiskit_fermions.mappers.library import jordan_wigner
 
 from .. import FermionicCircuitToDAG, FermionicPassManager, QuantumDAGToCircuit
 from ..passes import (
+    F2FSynthesis,
     F2QSynthesis,
     F2QSynthesisConfig,
     HopEvolutionSynthesis,
@@ -77,8 +78,17 @@ def generate_preset_jw_pass_manager(**kwargs) -> MultiStagePassManager:
     # synthesis can lower it with the reduced Slater decomposition rather than the full square
     # orbital rotation. The order matters: merging the rotations first exposes the single rotation
     # immediately following the initialization, which the Slater-prep fusion then contracts into it.
+    #
+    # Whatever orbital rotation is left after that is decomposed in fermionic space into Givens
+    # factors. This must come last: decomposing earlier would break the rotations up before the two
+    # merge passes above can fuse them, silently giving up the cheaper Slater decomposition. Only the
+    # gates named here are touched; in particular an `Evolution` is mapped to qubits whole.
     optimization = FermionicPassManager(
-        [MergeOrbitalRotations(), MergeSlaterDeterminantPreparation()]
+        [
+            MergeOrbitalRotations(),
+            MergeSlaterDeterminantPreparation(),
+            F2FSynthesis({"OrbitalRotation": "Givens"}),
+        ]
     )
 
     layout = FermionicPassManager(TrivialF2QLayout())
@@ -87,7 +97,6 @@ def generate_preset_jw_pass_manager(**kwargs) -> MultiStagePassManager:
         "Evolution": ("MapperFn", (jordan_wigner,)),
         "FermionicMeasure": "TrivialOccupation",
         "InitializeModes": "TrivialOccupation",
-        "OrbitalRotation": "GivensDecomposition",
         "PrepareSlaterDeterminant": "GivensDecompositionSlater",
     }
     synth = F2QSynthesis(config)

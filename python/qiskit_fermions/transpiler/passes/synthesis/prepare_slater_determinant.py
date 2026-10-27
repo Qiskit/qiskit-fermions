@@ -176,8 +176,8 @@ class GivensDecompositionSlaterDeterminantSynthesis:
     This plugin exploits the known reference occupation to synthesize the gate with the rectangular
     :func:`~qiskit_fermions.linalg.givens_decomposition_slater`: only the :math:`m` occupied orbitals
     of the rotation need be realized, so at most :math:`m (n - m)` ``XXPlusYYGate`` rotations are
-    emitted (versus the :math:`n (n - 1) / 2` brick-wall plus :math:`n` phase gates that
-    :class:`.GivensDecompositionOrbitalRotationSynthesis` would use for the full
+    emitted (versus the :math:`n (n - 1) / 2` brick-wall plus :math:`n` phase gates that the
+    :class:`.F2FSynthesis` would produce for for the full
     :class:`.OrbitalRotation`). The reduced decomposition carries no diagonal phases -- a global phase
     and any rotation within the occupied space leave the prepared Slater determinant unchanged -- so
     the state is prepared correct up to a global phase.

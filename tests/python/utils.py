@@ -69,3 +69,21 @@ def random_t2_amplitudes(norb: int, nocc: int, *, seed=None) -> np.ndarray:
         t2[i, j, a - nocc, b - nocc] = val
         t2[j, i, b - nocc, a - nocc] = val
     return t2
+
+
+def reference_pass_manager(passes=(), **kwargs):
+    """The Jordan-Wigner preset with its ``optimization`` stage overwritten.
+
+    The stage holds the given ``passes`` followed by the :class:`.F2FSynthesis` of the orbital rotations, which
+    every orbital rotation needs to reach the qubit stage. With no ``passes`` nothing is fused, so an
+    ``InitializeModes`` followed by an ``OrbitalRotation`` stays two gates: the trusted square path
+    to compare a Slater-determinant preparation against. Everything else is the preset's own, so the
+    reference cannot drift away from it.
+    """
+    from qiskit_fermions.transpiler import FermionicPassManager
+    from qiskit_fermions.transpiler.passes import F2FSynthesis
+    from qiskit_fermions.transpiler.presets import generate_preset_jw_pass_manager
+
+    pm = generate_preset_jw_pass_manager(**kwargs)
+    pm.optimization = FermionicPassManager([*passes, F2FSynthesis({"OrbitalRotation": "Givens"})])
+    return pm

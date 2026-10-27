@@ -1,0 +1,16 @@
+---
+features:
+  - |
+    An :class:`~qiskit_fermions.circuit.library.OrbitalRotation` is now decomposed in fermionic
+    space, before any encoding is chosen. The new
+    :class:`~qiskit_fermions.circuit.library.synthesis.FermionicGivensDecomposition`, registered as
+    ``OrbitalRotation.Givens``, factorizes the rotation into atomic
+    :class:`~qiskit_fermions.circuit.library.Evolution` gates on one or two modes each. The gate
+    gained a read-only ``synthesis`` argument that selects the method, as
+    :class:`~qiskit_fermions.circuit.library.Evolution` has, and it now has an ``inverse``, an
+    equality and a hash. Its definition is that decomposition, which implements the same unitary.
+    Simulation with ffsim is unchanged: it still applies the whole unitary.
+  - |
+    :func:`~qiskit_fermions.transpiler.presets.generate_preset_jw_pass_manager` runs
+    :class:`~qiskit_fermions.transpiler.passes.F2FSynthesis` with ``{"OrbitalRotation": "Givens"}``
+    last in its ``optimization`` stage, after the passes that consume orbital rotations as such.

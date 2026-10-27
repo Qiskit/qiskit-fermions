@@ -276,7 +276,7 @@ decomposition, which is deeper and carries diagonal phase gates:
    >>> reference.append(OrbitalRotation(rotation), reference.modes)
    >>> reference_prepared = pm.run(reference)
    >>> print(dict(sorted(reference_prepared.count_ops().items())))
-   {'p': 6, 'xx_plus_yy': 15}
+   {'rz': 6, 'xx_plus_yy': 15}
 
 .. plot::
    :alt: The synthesized bare orbital rotation, with its extra phase gates.

@@ -30,17 +30,12 @@ from qiskit_fermions.circuit.library import (
 )
 from qiskit_fermions.operators import FermionOperator
 from qiskit_fermions.operators.fermion_action import ann, cre
-from qiskit_fermions.transpiler import FermionicCircuitToDAG, QuantumDAGToCircuit
+from qiskit_fermions.transpiler import FermionicCircuitToDAG
 from qiskit_fermions.transpiler.passes import (
-    F2QSynthesis,
-    GivensDecompositionOrbitalRotationSynthesis,
-    GivensDecompositionSlaterDeterminantSynthesis,
     MergeSlaterDeterminantPreparation,
-    TrivialF2QLayout,
-    TrivialOccupationInitializeModesSynthesis,
 )
 
-from ...utils import random_unitary
+from ...utils import random_unitary, reference_pass_manager
 
 
 def _nodes(dag) -> list[tuple[str, list[int]]]:
@@ -303,41 +298,25 @@ def test_merge_single_rotation_identity_pad_preserves_state():
     circ.append(InitializeModes([1, 0, 1, 0]), circ.modes)
     circ.append(OrbitalRotation(random_unitary(2, seed=3)), circ.modes[:2])
 
-    reference = MultiStagePassManager(
-        input=FermionicCircuitToDAG(),
-        layout=TrivialF2QLayout(),
-        synthesis=_reference_synth(),
-        output=QuantumDAGToCircuit(),
-    ).run(circ)
-    merged = MultiStagePassManager(
-        input=FermionicCircuitToDAG(),
-        optimization=MergeSlaterDeterminantPreparation(),
-        layout=TrivialF2QLayout(),
-        synthesis=_merged_synth(),
-        output=QuantumDAGToCircuit(),
-    ).run(circ)
+    reference = _reference_pass_manager().run(circ)
+    merged = _merged_pass_manager().run(circ)
 
     _assert_equal_up_to_global_phase(reference, merged)
     # the identity-padded half adds no gates; the reduced decomposition carries no phase gates
-    assert "p" not in merged.count_ops()
+    assert not {"p", "rz"} & set(merged.count_ops())
 
 
 # --- equivalence + payoff -----------------------------------------------------------------------
 
 
-def _reference_synth() -> F2QSynthesis:
+def _reference_pass_manager() -> MultiStagePassManager:
     """The trusted square path for a separate InitializeModes + OrbitalRotation."""
-    synth = F2QSynthesis()
-    synth.methods["InitializeModes"] = TrivialOccupationInitializeModesSynthesis()
-    synth.methods["OrbitalRotation"] = GivensDecompositionOrbitalRotationSynthesis()
-    return synth
+    return reference_pass_manager(optimization_level=0)
 
 
-def _merged_synth() -> F2QSynthesis:
+def _merged_pass_manager() -> MultiStagePassManager:
     """The reduced Slater path plus the square fallbacks for anything not fused."""
-    synth = _reference_synth()
-    synth.methods["PrepareSlaterDeterminant"] = GivensDecompositionSlaterDeterminantSynthesis()
-    return synth
+    return reference_pass_manager([MergeSlaterDeterminantPreparation()], optimization_level=0)
 
 
 def _assert_equal_up_to_global_phase(qc_a, qc_b):
@@ -354,19 +333,8 @@ def test_merge_preserves_state_and_reduces_gate_count():
     circ.append(InitializeModes([1, 1, 0, 0]), circ.modes)
     circ.append(OrbitalRotation(random_unitary(4, seed=9)), circ.modes)
 
-    reference = MultiStagePassManager(
-        input=FermionicCircuitToDAG(),
-        layout=TrivialF2QLayout(),
-        synthesis=_reference_synth(),
-        output=QuantumDAGToCircuit(),
-    ).run(circ)
-    merged = MultiStagePassManager(
-        input=FermionicCircuitToDAG(),
-        optimization=MergeSlaterDeterminantPreparation(),
-        layout=TrivialF2QLayout(),
-        synthesis=_merged_synth(),
-        output=QuantumDAGToCircuit(),
-    ).run(circ)
+    reference = _reference_pass_manager().run(circ)
+    merged = _merged_pass_manager().run(circ)
 
     _assert_equal_up_to_global_phase(reference, merged)
 
@@ -374,7 +342,7 @@ def test_merge_preserves_state_and_reduces_gate_count():
     merged_ops = merged.count_ops()
     assert merged_ops.get("xx_plus_yy", 0) < ref_ops.get("xx_plus_yy", 0)
     # the reduced decomposition carries no diagonal phase gates
-    assert "p" not in merged_ops
+    assert not {"p", "rz"} & set(merged_ops)
 
 
 def test_merge_ucj_workflow():

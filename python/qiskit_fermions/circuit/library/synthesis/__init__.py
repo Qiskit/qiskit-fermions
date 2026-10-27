@@ -47,6 +47,7 @@ mapped operator, where the grouping is no longer available.
 
    F2FSynthesisPlugin
    F2FSynthesisPluginManager
+   FermionicGivensDecomposition
    FermionicLieTrotter
    FermionicSuzukiTrotter
 
@@ -58,15 +59,18 @@ upon. These are the entry points of the ``qiskit_fermions.circuit.synthesis`` gr
 
 .. table:: An overview of the builtin ``qiskit_fermions.circuit.synthesis`` entry-points.
 
-   +---------------------+-------------------+-----------------------------------+
-   | Gate name           | Plugin method     | Reference                         |
-   +=====================+===================+===================================+
-   | :class:`.Evolution` | ``LieTrotter``    | :class:`FermionicLieTrotter`      |
-   +---------------------+-------------------+-----------------------------------+
-   | :class:`.Evolution` | ``SuzukiTrotter`` | :class:`FermionicSuzukiTrotter`   |
-   +---------------------+-------------------+-----------------------------------+
+   +---------------------------+-------------------+---------------------------------------+
+   | Gate name                 | Plugin method     | Reference                             |
+   +===========================+===================+=======================================+
+   | :class:`.Evolution`       | ``LieTrotter``    | :class:`FermionicLieTrotter`          |
+   +---------------------------+-------------------+---------------------------------------+
+   | :class:`.Evolution`       | ``SuzukiTrotter`` | :class:`FermionicSuzukiTrotter`       |
+   +---------------------------+-------------------+---------------------------------------+
+   | :class:`.OrbitalRotation` | ``Givens``        | :class:`FermionicGivensDecomposition` |
+   +---------------------------+-------------------+---------------------------------------+
 """
 
+from .givens_decomposition import FermionicGivensDecomposition
 from .lie_trotter import FermionicLieTrotter
 from .plugin import F2FSynthesisPlugin, F2FSynthesisPluginManager
 from .suzuki_trotter import FermionicSuzukiTrotter
@@ -74,6 +78,7 @@ from .suzuki_trotter import FermionicSuzukiTrotter
 __all__ = [
     "F2FSynthesisPlugin",
     "F2FSynthesisPluginManager",
+    "FermionicGivensDecomposition",
     "FermionicLieTrotter",
     "FermionicSuzukiTrotter",
 ]
