@@ -131,6 +131,10 @@ dev = [
     "tox>=4.28.0",
 ]
 
+[project.entry-points."qiskit_fermions.circuit.synthesis"]
+"Evolution.LieTrotter" = "qiskit_fermions.circuit.library.synthesis:FermionicLieTrotter"
+"Evolution.SuzukiTrotter" = "qiskit_fermions.circuit.library.synthesis:FermionicSuzukiTrotter"
+
 [project.entry-points."qiskit_fermions.transpiler.synthesis"]
 "Evolution.MapperFn" = "qiskit_fermions.transpiler.passes.synthesis:MapperFnEvolutionSynthesis"
 "FermionicMeasure.TrivialOccupation" = "qiskit_fermions.transpiler.passes.synthesis:TrivialOccupationFermionicMeasureSynthesis"

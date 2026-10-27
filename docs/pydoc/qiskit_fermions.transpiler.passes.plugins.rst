@@ -29,7 +29,7 @@ writing into :attr:`.F2QSynthesis.methods` directly.
 The table below lists the builtin synthesis plugins, organized by the :class:`.FermionicGate` that
 they act upon:
 
-.. _builtin_synthesis_plugins:
+.. _builtin_f2q_synthesis_plugins:
 
 .. table:: An overview of the builtin ``qiskit_fermions.transpiler.synthesis`` entry-points.
 

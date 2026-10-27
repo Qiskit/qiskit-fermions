@@ -32,6 +32,33 @@ from qiskit_fermions.transpiler.passes import (
 )
 
 
+@pytest.mark.parametrize(
+    ("config", "message"),
+    [
+        ({"Evolution": "NoSuchMethod"}, "No synthesis method 'NoSuchMethod'"),
+        ({"Evolution": ("NoSuchMethod", ())}, "No synthesis method 'NoSuchMethod'"),
+        ({"NotAnInstruction": "Anything"}, "No fermion-to-qubit synthesis is installed"),
+    ],
+)
+def test_an_unknown_instruction_or_method_is_rejected_when_the_pass_is_built(config, message):
+    with pytest.raises(KeyError, match=message):
+        F2QSynthesis(config)
+
+
+@pytest.mark.parametrize("value", [42, None, ("MapperFn",), ["MapperFn"], object()])
+def test_a_value_of_no_known_form_is_rejected(value):
+    with pytest.raises(TypeError, match="must be a method name"):
+        F2QSynthesis({"Evolution": value})  # type: ignore[dict-item]
+
+
+def test_config_by_instance_needs_no_entry_point():
+    plugin = MapperFnEvolutionSynthesis(jordan_wigner)
+
+    synth = F2QSynthesis({"Evolution": plugin})
+
+    assert synth.methods["Evolution"] is plugin
+
+
 def test_missing_plugin():
     """Test the handling of a missing fermion-to-qubit plugin."""
     hamil = FermionOperator.from_dict(

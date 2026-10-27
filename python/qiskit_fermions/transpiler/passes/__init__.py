@@ -31,7 +31,8 @@ These passes provide different kinds of optimization of :class:`.FermionicDAGCir
 .. autosummary::
    :toctree: ../stubs/
 
-   FermionicTrotterization
+   F2FSynthesis
+   ~optimization.f2f_synthesis.F2FSynthesisConfig
    MergeEvolutions
    MergeOrbitalRotations
    MergeSlaterDeterminantPreparation
@@ -72,12 +73,13 @@ The main logic for mapping a :class:`.FermionicDAGCircuit` to a
    :toctree: ../stubs/
 
    F2QSynthesis
-   ~synthesis.synthesis.F2QSynthesisConfig
+   ~synthesis.f2q_synthesis.F2QSynthesisConfig
 """
 
 from .layout import CustomF2QLayout, TrivialF2QLayout
 from .optimization import (
-    FermionicTrotterization,
+    F2FSynthesis,
+    F2FSynthesisConfig,
     MergeEvolutions,
     MergeOrbitalRotations,
     MergeSlaterDeterminantPreparation,
@@ -101,11 +103,12 @@ from .synthesis import (
 
 __all__ = [
     "CustomF2QLayout",
+    "F2FSynthesis",
+    "F2FSynthesisConfig",
     "F2QSynthesis",
     "F2QSynthesisConfig",
     "F2QSynthesisPlugin",
     "F2QSynthesisPluginManager",
-    "FermionicTrotterization",
     "GivensDecompositionOrbitalRotationSynthesis",
     "GivensDecompositionSlaterDeterminantSynthesis",
     "HopEvolutionSynthesis",

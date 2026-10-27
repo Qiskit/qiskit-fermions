@@ -25,7 +25,7 @@ if TYPE_CHECKING:
 
     from qiskit_fermions.protocols import SupportsFermionOperator
 
-    from .synthesis import FermionicEvolutionSynthesis
+    from .synthesis import F2FSynthesisPlugin
 
 
 class Evolution(FermionicGate):
@@ -43,25 +43,25 @@ class Evolution(FermionicGate):
 
     .. note::
        Breaking this gate down in fermionic space (into a circuit of smaller :class:`.Evolution`
-       gates) is **optional**, and it is what the :attr:`synthesis` attribute governs. The gate can
-       equally be handed straight to the fermion-to-qubit stage, which maps and synthesizes it whole,
-       however many terms its ``operator`` holds. See
+       gates) is **optional**, and it is what the :attr:`~.FermionicGate.synthesis` attribute
+       governs. The gate can equally be handed straight to the fermion-to-qubit stage, which maps and
+       synthesizes it whole, however many terms its ``operator`` holds. See
        :mod:`~qiskit_fermions.circuit.library.synthesis`.
 
        When it `is` decomposed (by :meth:`~.FermionicCircuit.decompose`, for instance)
-       :attr:`synthesis` decides how. It defaults to :class:`.FermionicLieTrotter`, which splits the
-       evolution group-by-group when the ``operator`` has
+       :attr:`~.FermionicGate.synthesis` decides how. It defaults to :class:`.FermionicLieTrotter`,
+       which splits the evolution group-by-group when the ``operator`` has
        :attr:`~qiskit_fermions.operators.OperatorTrait.groups` assigned (see
        :ref:`grouping_explanation`), and term-by-term otherwise (exact only when the individual factors
        mutually commute). The transpilation process may further alter the decomposition;
        :class:`.QDriftTrotterization`, for example, replaces the evolution with a randomized sample of
-       its terms. The gates it emits are :attr:`atomic`, so :attr:`synthesis` no longer applies to
-       them.
+       its terms. The gates it emits are :attr:`~.FermionicGate.atomic`, so
+       :attr:`~.FermionicGate.synthesis` no longer applies to them.
 
     .. note::
-       The state-vector simulation path does `not` go through :attr:`synthesis`: it exponentiates the
-       whole ``operator`` exactly. Simulating this gate therefore incurs no Trotter error, whereas a
-       decomposed circuit generally does.
+       The state-vector simulation path does `not` go through :attr:`~.FermionicGate.synthesis`: it
+       exponentiates the whole ``operator`` exactly. Simulating this gate therefore incurs no Trotter
+       error, whereas a decomposed circuit generally does.
     """
 
     def __init__(
@@ -70,7 +70,7 @@ class Evolution(FermionicGate):
         operator: OperatorTrait,
         time: float = 1.0,
         *,
-        synthesis: FermionicEvolutionSynthesis | None = None,
+        synthesis: F2FSynthesisPlugin | None = None,
         atomic: bool = False,
     ) -> None:
         r"""Initializing an instance of this gate can be done with the arguments listed below.
@@ -85,57 +85,21 @@ class Evolution(FermionicGate):
                 it gets decomposed at all. If ``None`` (the default), a
                 :class:`.FermionicLieTrotter` instance is used.
             atomic: whether this gate is a fully decomposed factor which must not be broken down any
-                further in fermionic space. See :attr:`atomic`.
+                further in fermionic space. See :attr:`.FermionicGate.atomic`.
         """
         from .synthesis import FermionicLieTrotter
 
         self.operator = operator
         """The operator under which to time evolve the acted-upon fermionic modes."""
 
-        # both read-only (see their properties): the definition is cached the first time it is built,
-        # so a later re-assignment of either would be silently ignored
-        self._synthesis: FermionicEvolutionSynthesis = synthesis or FermionicLieTrotter()
-        self._atomic = atomic
-
         super().__init__(
-            "Evolution", num_modes, [time], label=f"evolve({' '.join(str(operator).split())})"
+            "Evolution",
+            num_modes,
+            [time],
+            label=f"evolve({' '.join(str(operator).split())})",
+            synthesis=synthesis or FermionicLieTrotter(),
+            atomic=atomic,
         )
-
-    @property
-    def synthesis(self) -> FermionicEvolutionSynthesis:
-        """The fermion-to-fermion synthesis method with which this gate is decomposed.
-
-        This is read-only: the gate's definition is built once and then cached, so a synthesis method
-        assigned after the fact could not take effect. Pass it to the constructor instead.
-        """
-        return self._synthesis
-
-    @property
-    def atomic(self) -> bool:
-        r"""Whether this gate is a factor that must not be decomposed any further.
-
-        A :class:`.FermionicEvolutionSynthesis` marks the factors it emits as atomic, because they
-        are the result of the split it chose to perform: breaking them down again would discard that
-        choice. The evolution of a single operator term is atomic for the stronger reason that there
-        is nothing left to split.
-
-        An atomic gate has no definition at all, so :meth:`~.FermionicCircuit.decompose` leaves it in
-        place rather than expanding it. It still maps and synthesizes normally at the
-        fermion-to-qubit level, which is where a factor is turned into actual operations.
-
-        This is read-only, for the same reason as :attr:`synthesis`.
-        """
-        return self._atomic
-
-    def _define(self) -> None:
-        if self.atomic:
-            # A fully decomposed factor has no fermionic definition: it is left untouched by
-            # `decompose()` and lowered directly by the fermion-to-qubit stage. Note that this must
-            # leave `_definition` as `None` rather than assigning an empty circuit -- an empty
-            # definition would make `decompose()` *drop* the evolution instead of keeping it.
-            return
-
-        self._definition = self.synthesis.synthesize(self)._inner
 
     def inverse(self, annotated: bool = False) -> Evolution:
         r"""Returns the inverse of this gate, :math:`e^{+i t H}`.

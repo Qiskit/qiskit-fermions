@@ -36,8 +36,8 @@ from qiskit_fermions.transpiler import (
     QuantumDAGToCircuit,
 )
 from qiskit_fermions.transpiler.passes import (
+    F2FSynthesis,
     F2QSynthesis,
-    FermionicTrotterization,
     MapperFnEvolutionSynthesis,
     QDriftTrotterization,
     RelabelModes,
@@ -81,7 +81,7 @@ def _substituted_dag(gates: list[tuple[FermionOperator, float]]):
     for operator, time in gates:
         circuit.append(Evolution(NUM_MODES, operator, time=time), circuit.modes)
     dag = FermionicCircuitToDAG().run(circuit)
-    FermionicTrotterization(FermionicLieTrotter()).run(dag)
+    F2FSynthesis({"Evolution": FermionicLieTrotter()}).run(dag)
     return dag
 
 
@@ -113,6 +113,48 @@ def test_the_fixture_has_storage_out_of_sync_with_the_circuit():
     assert _signature(dag, dag.op_nodes()) != _signature(dag, dag.topological_op_nodes())
 
 
+def test_f2f_synthesis_visits_the_gates_in_circuit_order():
+    """The pass substitutes nodes itself, so it must not iterate in storage order.
+
+    A first pass splits each gate into plain (not atomic) factors, which leaves the storage of the
+    DAG out of sync with its wires. A second pass, with a plugin that records the order in which it
+    is handed the gates, then has to see them in circuit order.
+    """
+
+    class Split:
+        def synthesize(self, gate):
+            circuit = FermionicCircuit(gate.num_modes)
+            for factor in gate.operator.split_out_groups():
+                circuit.append(
+                    Evolution(gate.num_modes, factor, time=gate.params[0]), circuit.modes
+                )
+            return circuit
+
+    class Recorder:
+        def __init__(self):
+            self.seen = []
+
+        def synthesize(self, gate):
+            self.seen.append((round(float(gate.params[0]), 9), sorted(gate.operator.get_support())))
+            return FermionicCircuit(gate.num_modes)
+
+    circ = FermionicCircuit(NUM_MODES)
+    for operator, time in (
+        (_hop_groups((0, 1, 0.7), (1, 2, 0.3)), 0.6),
+        (_hop_groups((1, 2, 0.4), (0, 1, 0.2)), 0.5),
+        (_hop_groups((0, 1, 0.9), (1, 2, 0.5)), 0.8),
+    ):
+        circ.append(Evolution(NUM_MODES, operator, time=time), circ.modes)
+    dag = FermionicCircuitToDAG().run(circ)
+    F2FSynthesis({"Evolution": Split()}).run(dag)
+    assert _signature(dag, dag.op_nodes()) != _signature(dag, dag.topological_op_nodes())
+
+    recorder = Recorder()
+    F2FSynthesis({"Evolution": recorder}).run(dag)
+
+    assert [time for time, _ in recorder.seen] == [0.6, 0.6, 0.5, 0.5, 0.8, 0.8]
+
+
 def test_synthesis_lowers_successive_substitutions_in_circuit_order():
     """The factors of one substituted gate must not be interleaved with those of the next."""
     first = _hop_groups((0, 1, 0.7), (1, 2, 0.3))
@@ -128,7 +170,7 @@ def test_synthesis_lowers_successive_substitutions_in_circuit_order():
     synth.methods["Evolution"] = MapperFnEvolutionSynthesis(jordan_wigner)
     pm = MultiStagePassManager(
         input=FermionicCircuitToDAG(),
-        optimization=FermionicPassManager(FermionicTrotterization(FermionicLieTrotter())),
+        optimization=FermionicPassManager(F2FSynthesis({"Evolution": FermionicLieTrotter()})),
         layout=TrivialF2QLayout(),
         synthesis=synth,
         output=QuantumDAGToCircuit(),

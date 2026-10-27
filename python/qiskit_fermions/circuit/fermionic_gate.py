@@ -14,7 +14,8 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, cast
+import copy
+from typing import TYPE_CHECKING, Self, cast
 
 from qiskit.circuit import Gate
 
@@ -22,6 +23,8 @@ from .fermionic_instruction import FermionicInstruction
 
 if TYPE_CHECKING:
     import numpy as np
+
+    from .library.synthesis import F2FSynthesisPlugin
 
 
 class FermionicGate(FermionicInstruction, Gate):
@@ -32,6 +35,15 @@ class FermionicGate(FermionicInstruction, Gate):
     fermionic operation belongs here; subclass :class:`.FermionicInstruction` directly only for one
     that cannot be a gate, such as a measurement. As such, this class (mostly) serves as a type (for
     the time being).
+
+    .. rubric:: Breaking a gate down in fermionic space
+
+    Every fermionic gate has a :attr:`synthesis` and an :attr:`atomic` flag, which the
+    fermion-to-fermion synthesis framework relies on (see
+    :mod:`~qiskit_fermions.circuit.library.synthesis`). The :attr:`synthesis` is the method that
+    rewrites the gate into a circuit of smaller fermionic gates, and it is ``None`` for a gate that
+    does not break down. A gate that is :attr:`atomic` is never broken down, however it is asked to.
+    Both are chosen when the gate is built and are read-only afterwards.
 
     .. caution::
        Since this is a subclass of :class:`~qiskit.circuit.Gate` the documentation of its methods
@@ -50,10 +62,81 @@ class FermionicGate(FermionicInstruction, Gate):
         params: list | None = None,
         *,
         label: str | None = None,
+        synthesis: F2FSynthesisPlugin | None = None,
+        atomic: bool = False,
     ) -> None:
         if params is None:
             params = []
+
+        # both read-only (see their properties): the definition is cached the first time it is built,
+        # so a later re-assignment of either would be silently ignored
+        self._synthesis = synthesis
+        self._atomic = atomic
+
         super().__init__(name, num_modes, params, label)
+
+    @property
+    def synthesis(self) -> F2FSynthesisPlugin | None:
+        """The fermion-to-fermion synthesis method with which this gate is broken down, if any.
+
+        This is the customizable part of breaking a gate down: any object implementing the
+        :class:`.F2FSynthesisPlugin` protocol can be given, and the :class:`.F2FSynthesis` transpiler
+        pass selects one per gate type for a whole circuit. ``None`` marks a gate that does not break
+        down in fermionic space.
+
+        What the circuit that the method produces is equivalent to is specified by the gate, and
+        documented there. Where the gate's decomposition is that circuit,
+        :meth:`~.FermionicCircuit.decompose` yields it; a gate may deviate from this and document so.
+
+        This is read-only: the circuit that :meth:`~.FermionicCircuit.decompose` yields is built once
+        and then cached, so a synthesis method assigned after the fact could not take effect. Pass it
+        to the constructor instead, or use :meth:`with_synthesis`.
+        """
+        return self._synthesis
+
+    @property
+    def atomic(self) -> bool:
+        r"""Whether this gate is a factor that must not be broken down any further.
+
+        A synthesis marks the factors it emits as atomic, because they are the result of the split it
+        chose to perform: breaking them down again would discard that choice. A gate that is atomic
+        for the stronger reason that there is nothing left to split is marked the same way.
+
+        An atomic gate has no definition at all, so :meth:`~.FermionicCircuit.decompose` leaves it in
+        place rather than expanding it, and the :class:`.F2FSynthesis` pass leaves it alone. It still
+        maps and synthesizes normally at the fermion-to-qubit level, which is where a factor is turned
+        into actual operations.
+
+        This is read-only, for the same reason as :attr:`synthesis`.
+        """
+        return self._atomic
+
+    def with_synthesis(self, synthesis: F2FSynthesisPlugin | None) -> Self:
+        """Returns a copy of this gate that is broken down with another synthesis method.
+
+        The gate itself is left as it is, because a gate instance can be shared between circuits.
+
+        Args:
+            synthesis: the fermion-to-fermion synthesis method of the copy.
+
+        Returns:
+            A shallow copy of this gate whose :attr:`synthesis` is ``synthesis``.
+        """
+        gate = copy.copy(self)
+        gate._synthesis = synthesis
+        # the cached definition belongs to the method it was built with
+        gate._definition = None
+        return gate
+
+    def _define(self) -> None:
+        # A gate that is atomic, or that has no synthesis, has no fermionic definition: it is left
+        # untouched by `decompose()` and lowered directly by the fermion-to-qubit stage. Note that
+        # this must leave `_definition` as `None` rather than assigning an empty circuit -- an empty
+        # definition would make `decompose()` *drop* the gate instead of keeping it.
+        if self._atomic or self._synthesis is None:
+            return
+
+        self._definition = self._synthesis.synthesize(self)._inner
 
     def _apply_unitary_(
         self, vec: np.ndarray | None, norb: int, nelec: int | tuple[int, int], copy: bool
