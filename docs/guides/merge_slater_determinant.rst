@@ -290,9 +290,37 @@ The reduced decomposition drops all six phase gates and nearly halves the two-qu
 The prepared determinant is correct up to a global phase (physically irrelevant for state
 preparation), which is what the phase gates would have fixed.
 
+Two ways to break the gate down
+-------------------------------
+
+A :class:`.PrepareSlaterDeterminant` can be broken down in two different ways, and they are not
+interchangeable:
+
+:meth:`~.FermionicCircuit.decompose`
+   Expands the gate into its *definition*: the :class:`.InitializeModes` of the reference followed by
+   the full :class:`.OrbitalRotation`. This is equivalent to the gate as an *operator*, for any
+   input state.
+
+:attr:`.PrepareSlaterDeterminant.synthesis`, applied by :class:`.F2FSynthesis`
+   Replaces the gate with the reduced decomposition of this guide. This is equivalent to the gate
+   only as a *state preparation*: it produces the same determinant, up to a global phase, when the
+   modes start in the vacuum. It is cheaper precisely because it assumes that.
+
+Use the synthesis when the gate prepares a state on the vacuum, which is what the gate is for and
+what the transpiler does for you. Use :meth:`~.FermionicCircuit.decompose` when the gate has to
+keep acting as an operator, for example because other gates precede it on the same modes, or when
+you want to inspect or simulate the plain gates. The :class:`.F2FSynthesis` pass cannot know which
+case it is looking at, so it is up to the circuit you give it to prepare the determinant from the
+vacuum.
+
+Simulating a circuit with ffsim needs neither: every gate applies its whole unitary, so a circuit
+holding a :class:`.PrepareSlaterDeterminant` is simulated as it is, and stays on the fast path
+for the :class:`.OrbitalRotation` gates around it. Breaking only the Slater gate down with
+``circuit.decompose("PrepareSlaterDeterminant")`` leaves those rotations whole, too.
+
 .. seealso::
    :class:`.PrepareSlaterDeterminant`, :class:`.InitializeModes`, :class:`.OrbitalRotation`,
-   :class:`.MergeOrbitalRotations`,
-   :class:`.GivensDecompositionSlaterDeterminantSynthesis`, and the
+   :class:`.MergeOrbitalRotations`, :class:`.F2FSynthesis`,
+   :class:`.FermionicSlaterGivensDecomposition`, and the
    :ref:`LUCJ guide <lucj_transpilation>` for the workflow that produces the global-initialization
    pattern.

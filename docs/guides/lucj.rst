@@ -169,16 +169,18 @@ For a UCJ ansatz specifically, the synthesis stage has to cover two kinds of gat
   :class:`.MapperFnEvolutionSynthesis` takes a mapper function, so the
   :math:`e^{i \mathcal{J}_k}` layers lower through any encoding you can express as one. The
   :ref:`flow-set guides <1d_fermi_hubbard>` show how to write one.
-- **The orbital rotations.** An :class:`.OrbitalRotation` is not mapped to qubits as such. The
-  :class:`.F2FSynthesis` pass first breaks it down, in fermionic space, into
-  :class:`.Evolution` gates on one or two modes each, so any encoding that can map an
-  :class:`.Evolution` handles it. Under Jordan-Wigner, the factors between adjacent modes become
+- **The orbital rotations and the Slater-determinant preparation.** Neither an
+  :class:`.OrbitalRotation` nor the :class:`.PrepareSlaterDeterminant` that the leading
+  :class:`.InitializeModes` and rotation fuse into (see below) is mapped to qubits as such. The
+  :class:`.F2FSynthesis` pass first breaks them down, in fermionic space, into
+  :class:`.Evolution` gates on one or two modes each (and, for the preparation, an
+  :class:`.InitializeModes` of the reference), so any encoding that can map an
+  :class:`.Evolution` handles them. Under Jordan-Wigner, the factors between adjacent modes become
   :class:`~qiskit.circuit.library.XXPlusYYGate`\ objects at the qubit stage.
-- **Everything else.** The plugins for :class:`.InitializeModes` and
-  :class:`.PrepareSlaterDeterminant` are not parametrized by an encoding; each documents its
-  assumption of an occupation-basis encoding with a 1-to-1 mode-to-qubit mapping, and emits gates
-  directly on that basis. A different encoding needs its own plugin for each of these two, and none
-  ships yet.
+- **The initialization.** The plugin for :class:`.InitializeModes` is not parametrized by an
+  encoding: it documents its assumption of an occupation-basis encoding with a 1-to-1 mode-to-qubit
+  mapping, and emits gates directly on that basis. A different encoding needs its own plugin for it,
+  and none ships yet.
 
 How to transpile UCJ circuits under a non-Jordan-Wigner encoding is an open research question and
 this package provides the framework within which to develop such a pipeline.
@@ -202,7 +204,6 @@ a plugin for every fermionic gate the circuit contains:
    >>> from qiskit_fermions.mappers.library import jordan_wigner
    >>> from qiskit_fermions.transpiler.passes import F2QSynthesis
    >>> from qiskit_fermions.transpiler.passes.synthesis import (
-   ...     GivensDecompositionSlaterDeterminantSynthesis,
    ...     MapperFnEvolutionSynthesis,
    ...     TrivialOccupationInitializeModesSynthesis,
    ... )
@@ -210,16 +211,13 @@ a plugin for every fermionic gate the circuit contains:
    >>> synthesis = F2QSynthesis()
    >>> synthesis.methods["Evolution"] = MapperFnEvolutionSynthesis(jordan_wigner)
    >>> synthesis.methods["InitializeModes"] = TrivialOccupationInitializeModesSynthesis()
-   >>> synthesis.methods["PrepareSlaterDeterminant"] = (
-   ...     GivensDecompositionSlaterDeterminantSynthesis()
-   ... )
 
 Assigning instances like this is also how a plugin you wrote yourself enters the pipeline, without
 having to register it anywhere first.
 
 This is where the encoding is settled, in the two ways section 3 described: explicitly, by handing
-:func:`.jordan_wigner` to :class:`.MapperFnEvolutionSynthesis`, and implicitly, by the other three
-plugins already assuming it.
+:func:`.jordan_wigner` to :class:`.MapperFnEvolutionSynthesis`, and implicitly, by the other plugin
+already assuming it.
 
 That stage then slots into a :external:class:`~qiskit.passmanager.MultiStagePassManager` whose
 stages run in a fixed order:
@@ -252,7 +250,9 @@ stages run in a fixed order:
    ...         [
    ...             MergeOrbitalRotations(),
    ...             MergeSlaterDeterminantPreparation(),
-   ...             F2FSynthesis({"OrbitalRotation": "Givens"}),
+   ...             F2FSynthesis(
+   ...                 {"OrbitalRotation": "Givens", "PrepareSlaterDeterminant": "Givens"}
+   ...             ),
    ...         ]
    ...     ),
    ...     layout=FermionicPassManager(TrivialF2QLayout()),
@@ -440,7 +440,7 @@ original mode order:
    chosen device, so they are not reproduced here. The key point is the co-design; expressing the
    ansatz with a nearest-neighbor ``pairs_aa`` chain and hardware-filtered ``pairs_ab`` bridges keeps
    the synthesized circuit close to the device topology, minimizing the routing overhead (inserted
-   ``SWAP`` gates). See :class:`.GivensDecompositionSlaterDeterminantSynthesis` for a related
+   ``SWAP`` gates). See :class:`.FermionicSlaterGivensDecomposition` for a related
    synthesis choice (``minimize_2q_gate_count``), trading two-qubit gate count against routed depth.
 
 .. skip: end

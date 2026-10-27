@@ -135,12 +135,12 @@ dev = [
 "Evolution.LieTrotter" = "qiskit_fermions.circuit.library.synthesis:FermionicLieTrotter"
 "Evolution.SuzukiTrotter" = "qiskit_fermions.circuit.library.synthesis:FermionicSuzukiTrotter"
 "OrbitalRotation.Givens" = "qiskit_fermions.circuit.library.synthesis:FermionicGivensDecomposition"
+"PrepareSlaterDeterminant.Givens" = "qiskit_fermions.circuit.library.synthesis:FermionicSlaterGivensDecomposition"
 
 [project.entry-points."qiskit_fermions.transpiler.synthesis"]
 "Evolution.MapperFn" = "qiskit_fermions.transpiler.passes.synthesis:MapperFnEvolutionSynthesis"
 "FermionicMeasure.TrivialOccupation" = "qiskit_fermions.transpiler.passes.synthesis:TrivialOccupationFermionicMeasureSynthesis"
 "InitializeModes.TrivialOccupation" = "qiskit_fermions.transpiler.passes.synthesis:TrivialOccupationInitializeModesSynthesis"
-"PrepareSlaterDeterminant.GivensDecompositionSlater" = "qiskit_fermions.transpiler.passes.synthesis:GivensDecompositionSlaterDeterminantSynthesis"
 
 [tool.setuptools]
 include-package-data = true

@@ -1,0 +1,9 @@
+---
+features:
+  - |
+    A :class:`~qiskit_fermions.circuit.library.PrepareSlaterDeterminant` is now decomposed in
+    fermionic space, before any encoding is chosen. The new
+    :class:`~qiskit_fermions.circuit.library.synthesis.FermionicSlaterGivensDecomposition`,
+    registered as ``PrepareSlaterDeterminant.Givens``, turns the gate into an
+    :class:`~qiskit_fermions.circuit.library.InitializeModes` of the reference followed by atomic
+    :class:`~qiskit_fermions.circuit.library.Evolution` gates.

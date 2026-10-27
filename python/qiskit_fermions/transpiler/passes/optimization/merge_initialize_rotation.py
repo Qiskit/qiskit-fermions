@@ -33,10 +33,10 @@ class MergeSlaterDeterminantPreparation(FermionicDAGCircuitPass):
     An :class:`.InitializeModes` immediately followed by an :class:`.OrbitalRotation` prepares a
     Slater determinant: the modes start in the reference occupation and are then rotated into the
     target single-particle basis. This pass detects that pattern in a :class:`.FermionicDAGCircuit`
-    and rewrites it into a single :class:`.PrepareSlaterDeterminant` gate, which a later synthesis
-    stage can lower with the reduced-gate-count :func:`.givens_decomposition_slater` (via
-    :class:`.GivensDecompositionSlaterDeterminantSynthesis`) rather than the full square orbital
-    rotation.
+    and rewrites it into a single :class:`.PrepareSlaterDeterminant` gate, which a later pass
+    (:class:`.F2FSynthesis`) can decompose with the reduced-gate-count
+    :func:`.givens_decomposition_slater` (via :class:`.FermionicSlaterGivensDecomposition`) rather
+    than the full square orbital rotation.
 
     The rewrite is state-preserving: it only unlocks the cheaper synthesis and leaves the prepared
     state unchanged (see the *validate-then-rotate* semantics of :class:`.PrepareSlaterDeterminant`).
@@ -89,8 +89,8 @@ class MergeSlaterDeterminantPreparation(FermionicDAGCircuitPass):
 
     .. seealso::
        :class:`.PrepareSlaterDeterminant`, :class:`.InitializeModes`, :class:`.OrbitalRotation`,
-       :class:`.MergeOrbitalRotations`, and
-       :class:`.GivensDecompositionSlaterDeterminantSynthesis`.
+       :class:`.MergeOrbitalRotations`, :class:`.F2FSynthesis`, and
+       :class:`.FermionicSlaterGivensDecomposition`.
     """
 
     def run(self, dag: FermionicDAGCircuit) -> FermionicDAGCircuit:
@@ -131,6 +131,9 @@ class MergeSlaterDeterminantPreparation(FermionicDAGCircuitPass):
         # hashable and compare by identity (node id), so we key on the nodes directly.
         replacements: dict[DAGOpNode, list[tuple[PrepareSlaterDeterminant, list[int]]]] = {}
         consumed: set[DAGOpNode] = set()
+        # Both walks below only read the input DAG and emit into a fresh `out_dag`, so the lazy
+        # generator is safe. Circuit order matters for the second one, since it fixes the order in
+        # which the output is appended; storage order is out of sync after a substituting pass.
         for node in dag.topological_op_nodes():
             if not isinstance(node.op, InitializeModes):
                 continue

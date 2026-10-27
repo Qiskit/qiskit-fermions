@@ -12,9 +12,9 @@
 
 # ruff: noqa: D205,D212,D415
 """
-========================
-Fermionic Gate Synthesis
-========================
+===================================
+Circuit Library Synthesis (``F2F``)
+===================================
 
 .. currentmodule:: qiskit_fermions.circuit.library.synthesis
 
@@ -49,6 +49,7 @@ mapped operator, where the grouping is no longer available.
    F2FSynthesisPluginManager
    FermionicGivensDecomposition
    FermionicLieTrotter
+   FermionicSlaterGivensDecomposition
    FermionicSuzukiTrotter
 
 The table below lists the builtin plugins, organized by the :class:`.FermionicGate` that they act
@@ -59,20 +60,23 @@ upon. These are the entry points of the ``qiskit_fermions.circuit.synthesis`` gr
 
 .. table:: An overview of the builtin ``qiskit_fermions.circuit.synthesis`` entry-points.
 
-   +---------------------------+-------------------+---------------------------------------+
-   | Gate name                 | Plugin method     | Reference                             |
-   +===========================+===================+=======================================+
-   | :class:`.Evolution`       | ``LieTrotter``    | :class:`FermionicLieTrotter`          |
-   +---------------------------+-------------------+---------------------------------------+
-   | :class:`.Evolution`       | ``SuzukiTrotter`` | :class:`FermionicSuzukiTrotter`       |
-   +---------------------------+-------------------+---------------------------------------+
-   | :class:`.OrbitalRotation` | ``Givens``        | :class:`FermionicGivensDecomposition` |
-   +---------------------------+-------------------+---------------------------------------+
+   +------------------------------------+-------------------+---------------------------------------------+
+   | Gate name                          | Plugin method     | Reference                                   |
+   +====================================+===================+=============================================+
+   | :class:`.Evolution`                | ``LieTrotter``    | :class:`FermionicLieTrotter`                |
+   +------------------------------------+-------------------+---------------------------------------------+
+   | :class:`.Evolution`                | ``SuzukiTrotter`` | :class:`FermionicSuzukiTrotter`             |
+   +------------------------------------+-------------------+---------------------------------------------+
+   | :class:`.OrbitalRotation`          | ``Givens``        | :class:`FermionicGivensDecomposition`       |
+   +------------------------------------+-------------------+---------------------------------------------+
+   | :class:`.PrepareSlaterDeterminant` | ``Givens``        | :class:`FermionicSlaterGivensDecomposition` |
+   +------------------------------------+-------------------+---------------------------------------------+
 """
 
 from .givens_decomposition import FermionicGivensDecomposition
 from .lie_trotter import FermionicLieTrotter
 from .plugin import F2FSynthesisPlugin, F2FSynthesisPluginManager
+from .slater_givens_decomposition import FermionicSlaterGivensDecomposition
 from .suzuki_trotter import FermionicSuzukiTrotter
 
 __all__ = [
@@ -80,5 +84,6 @@ __all__ = [
     "F2FSynthesisPluginManager",
     "FermionicGivensDecomposition",
     "FermionicLieTrotter",
+    "FermionicSlaterGivensDecomposition",
     "FermionicSuzukiTrotter",
 ]

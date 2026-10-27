@@ -87,7 +87,7 @@ def generate_preset_jw_pass_manager(**kwargs) -> MultiStagePassManager:
         [
             MergeOrbitalRotations(),
             MergeSlaterDeterminantPreparation(),
-            F2FSynthesis({"OrbitalRotation": "Givens"}),
+            F2FSynthesis({"OrbitalRotation": "Givens", "PrepareSlaterDeterminant": "Givens"}),
         ]
     )
 
@@ -97,7 +97,6 @@ def generate_preset_jw_pass_manager(**kwargs) -> MultiStagePassManager:
         "Evolution": ("MapperFn", (jordan_wigner,)),
         "FermionicMeasure": "TrivialOccupation",
         "InitializeModes": "TrivialOccupation",
-        "PrepareSlaterDeterminant": "GivensDecompositionSlater",
     }
     synth = F2QSynthesis(config)
 
