@@ -12,6 +12,7 @@
 
 """Optimization passes."""
 
+from ._deprecated_trotterization import FermionicTrotterization
 from .f2f_synthesis import F2FSynthesis, F2FSynthesisConfig
 from .merge_evolutions import MergeEvolutions
 from .merge_initialize_rotation import MergeSlaterDeterminantPreparation
@@ -22,6 +23,7 @@ from .relabel_modes import RelabelModes
 __all__ = [
     "F2FSynthesis",
     "F2FSynthesisConfig",
+    "FermionicTrotterization",
     "MergeEvolutions",
     "MergeOrbitalRotations",
     "MergeSlaterDeterminantPreparation",

@@ -94,6 +94,10 @@ choose that order:
    simplify
 """
 
+from ._deprecated_givens import (
+    GivensDecompositionOrbitalRotationSynthesis,
+    GivensDecompositionSlaterDeterminantSynthesis,
+)
 from .evolution import MapperFnEvolutionSynthesis, group_wise, simplify
 from .f2q_synthesis import F2QSynthesis, F2QSynthesisConfig
 from .fermionic_measure import TrivialOccupationFermionicMeasureSynthesis
@@ -106,6 +110,8 @@ __all__ = [
     "F2QSynthesisConfig",
     "F2QSynthesisPlugin",
     "F2QSynthesisPluginManager",
+    "GivensDecompositionOrbitalRotationSynthesis",
+    "GivensDecompositionSlaterDeterminantSynthesis",
     "HopEvolutionSynthesis",
     "MapperFnEvolutionSynthesis",
     "TrivialOccupationFermionicMeasureSynthesis",

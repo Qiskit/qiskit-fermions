@@ -33,6 +33,7 @@ These passes provide different kinds of optimization of :class:`.FermionicDAGCir
 
    F2FSynthesis
    ~optimization.f2f_synthesis.F2FSynthesisConfig
+   FermionicTrotterization
    MergeEvolutions
    MergeOrbitalRotations
    MergeSlaterDeterminantPreparation
@@ -80,6 +81,7 @@ from .layout import CustomF2QLayout, TrivialF2QLayout
 from .optimization import (
     F2FSynthesis,
     F2FSynthesisConfig,
+    FermionicTrotterization,
     MergeEvolutions,
     MergeOrbitalRotations,
     MergeSlaterDeterminantPreparation,
@@ -91,6 +93,8 @@ from .synthesis import (
     F2QSynthesisConfig,
     F2QSynthesisPlugin,
     F2QSynthesisPluginManager,
+    GivensDecompositionOrbitalRotationSynthesis,
+    GivensDecompositionSlaterDeterminantSynthesis,
     HopEvolutionSynthesis,
     MapperFnEvolutionSynthesis,
     TrivialOccupationFermionicMeasureSynthesis,
@@ -107,6 +111,9 @@ __all__ = [
     "F2QSynthesisConfig",
     "F2QSynthesisPlugin",
     "F2QSynthesisPluginManager",
+    "FermionicTrotterization",
+    "GivensDecompositionOrbitalRotationSynthesis",
+    "GivensDecompositionSlaterDeterminantSynthesis",
     "HopEvolutionSynthesis",
     "MapperFnEvolutionSynthesis",
     "MergeEvolutions",

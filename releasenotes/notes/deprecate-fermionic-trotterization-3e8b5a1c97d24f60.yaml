@@ -1,0 +1,24 @@
+---
+deprecations:
+  - |
+    The ``FermionicTrotterization`` transpiler pass is deprecated in favor of
+    :class:`~qiskit_fermions.transpiler.passes.F2FSynthesis`, which acts on any gate that can be
+    broken down and not only on an :class:`~qiskit_fermions.circuit.library.Evolution`.
+    Where ``FermionicTrotterization(method, apply=..., filter=...)`` was used, write
+    ``F2FSynthesis({"Evolution": method}, apply=..., filter=...)``, or
+    name a registered method such as ``{"Evolution": "LieTrotter"}``.
+  - |
+    The ``OrbitalRotation.GivensDecomposition`` and
+    ``PrepareSlaterDeterminant.GivensDecompositionSlater`` fermion-to-qubit synthesis plugins (the
+    classes ``GivensDecompositionOrbitalRotationSynthesis`` and
+    ``GivensDecompositionSlaterDeterminantSynthesis``) are deprecated. They still work by running
+    the fermionic decomposition of :class:`~qiskit_fermions.transpiler.passes.F2FSynthesis` directly
+    and mapping the result under Jordan-Wigner, emitting the same gates as before. Instead, configure
+    :class:`~qiskit_fermions.transpiler.passes.F2FSynthesis` with ``{"OrbitalRotation": "Givens"}``
+    or ``{"PrepareSlaterDeterminant": "Givens"}`` in the ``optimization`` stage, after which any
+    encoding that can map an :class:`~qiskit_fermions.circuit.library.Evolution` handles the gate.
+    A pipeline assembled by hand also needs the
+    :class:`~qiskit_fermions.transpiler.passes.HopEvolutionSynthesis` in its ``qubit`` stage to
+    obtain :class:`~qiskit.circuit.library.XXPlusYYGate`\ s, as the Jordan-Wigner preset has.
+    The ``minimize_2q_gate_count`` argument of the Slater plugin, the peeling of disjoint
+    unit-orbitals, was removed: it has no effect any more and warns.
