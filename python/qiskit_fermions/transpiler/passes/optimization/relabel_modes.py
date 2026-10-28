@@ -327,6 +327,10 @@ class RelabelModes(FermionicDAGCircuitPass):
             return (None, None)
 
         gathered_excitations: list[tuple[int, ...]] = []
+        # NOTE: `op_nodes` yields the nodes in storage order, not circuit order. That is not a
+        # correctness issue here, because the excitations only feed an order-insensitive
+        # optimization model, but `topological_op_nodes` would be consistent with the rest of the
+        # passes and is a safe replacement, since this loop does not modify the DAG.
         for node in dag.op_nodes():
             if not isinstance(node.op, Evolution):
                 continue

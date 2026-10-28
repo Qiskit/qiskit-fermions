@@ -472,6 +472,8 @@ class FermionicCircuit:
         if copy:
             vec = vec.copy()
 
+        # Circuit order is required: each instruction acts on the state the previous one left. The
+        # DAG is only read here, so the lazy iteration is safe.
         for node in dag.topological_op_nodes():
             instr = node.op
 

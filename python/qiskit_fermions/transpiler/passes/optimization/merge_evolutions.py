@@ -115,6 +115,9 @@ class MergeEvolutions(FermionicDAGCircuitPass):
         Returns:
             The output circuit which is still acting on a fermionic register.
         """
+        # `collect_runs` returns the runs already collected (a set), not a lazy view, and the runs
+        # are disjoint, so replacing one block in place does not affect the others. No circuit
+        # order is needed across runs for the same reason; within a run the nodes are ordered.
         for run in dag.collect_runs(["Evolution"]):
             stretches: list[list[DAGOpNode]] = [[run[0]]]
             for node in run[1:]:
