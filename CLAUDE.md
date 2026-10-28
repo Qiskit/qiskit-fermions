@@ -91,7 +91,7 @@ Editable install for iterating on Python: `SETUPTOOLS_RUST_CARGO_PROFILE=release
 
 ## Transpiler / synthesis plugins
 
-Circuit synthesis is exposed as **stevedore entry points** under `qiskit_fermions.transpiler.synthesis` (see `pyproject.toml` `[project.entry-points]`), e.g. `Evolution.MapperFn`, `OrbitalRotation.GivensDecomposition`. Corresponding pass implementations are in `python/qiskit_fermions/transpiler/passes/synthesis/`.
+Synthesis has two stages, each a **stevedore entry-point** plugin framework with `<Gate>.<Method>` names (see `pyproject.toml` `[project.entry-points]`). The fermion-to-fermion stage (`qiskit_fermions.circuit.synthesis`, run by the `F2FSynthesis` pass, e.g. `OrbitalRotation.Givens`, `Evolution.SuzukiTrotter`) rewrites a gate into smaller fermionic gates and is configured by gate name; a gate that is not named is left whole. The fermion-to-qubit stage (`qiskit_fermions.transpiler.synthesis`, run by `F2QSynthesis`, e.g. `Evolution.MapperFn`) maps every instruction to qubits. The qubit stage's `HopEvolutionSynthesis` (a Qiskit HLS plugin) turns the mapped hop of an adjacent-mode Givens rotation into an `XXPlusYYGate`. Pass implementations are in `python/qiskit_fermions/transpiler/passes/synthesis/`; the fermion-to-fermion plugins are in `python/qiskit_fermions/circuit/library/synthesis/`.
 
 ## Versioning
 

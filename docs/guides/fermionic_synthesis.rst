@@ -17,9 +17,9 @@ it, whereas a fermion-to-qubit mapping returns a
 :class:`~qiskit.quantum_info.SparseObservable`, which has no concept of grouping.
 
 Two knobs select the method. :attr:`.Evolution.synthesis` sets it on one gate, and the
-:class:`.FermionicTrotterization` transpiler pass sets it across a whole circuit. Both take a
-:class:`.FermionicEvolutionSynthesis`, the interface any such rewrite implements. The methods this
-package currently provides are product formulas, which is what the rest of this guide uses:
+:class:`.F2FSynthesis` transpiler pass sets it across a whole circuit. Both take an
+:class:`.F2FSynthesisPlugin`, the interface any such rewrite implements. The methods this package
+currently provides for an evolution are product formulas, which is what the rest of this guide uses:
 :class:`.FermionicLieTrotter` for a first-order formula (the default) and
 :class:`.FermionicSuzukiTrotter` for a higher even order. Anything else implementing the interface
 is selected the same way, and the sections on the two knobs apply to it unchanged.
@@ -174,8 +174,9 @@ Set the method for a whole pipeline
 
 Setting :attr:`~.Evolution.synthesis` per gate means threading the choice through everything that
 builds one, including :class:`.UCC` and :class:`.UCJ`, which construct their gates internally. The
-:class:`.FermionicTrotterization` pass applies one method to every :class:`.Evolution` in a circuit
-instead, so the choice is made once for the pipeline:
+:class:`.F2FSynthesis` pass applies one method to every :class:`.Evolution` in a circuit instead, so
+the choice is made once for the pipeline. It is configured by gate name, the same way
+:class:`.F2QSynthesis` is, and a gate that is not named is left as it is:
 
 .. plot::
    :context:
@@ -183,13 +184,13 @@ instead, so the choice is made once for the pipeline:
    :include-source:
 
    >>> from qiskit_fermions.transpiler import FermionicPassManager
-   >>> from qiskit_fermions.transpiler.passes import FermionicTrotterization
+   >>> from qiskit_fermions.transpiler.passes import F2FSynthesis
    >>>
    >>> circuit = FermionicCircuit(num_sites)
    >>> circuit.append(Evolution(num_sites, hamiltonian, time=total_time), circuit.modes)
    >>>
    >>> expanded = FermionicPassManager(
-   ...     FermionicTrotterization(FermionicSuzukiTrotter(order=2, reps=4))
+   ...     F2FSynthesis({"Evolution": ("SuzukiTrotter", (), {"order": 2, "reps": 4})})
    ... ).run(circuit)
    >>> expanded.count_ops()["Evolution"]
    17
@@ -205,6 +206,22 @@ factors it emits are :attr:`~.Evolution.atomic` and so carry no definition of th
    as Qiskit's :class:`~qiskit.transpiler.passes.Decompose` (naming the gate as
    ``Decompose("Evolution")`` restricts it to the evolutions, leaving the other fermionic gates to
    their own synthesis plugins).
+
+   This is useful to choose the method for a whole circuit up front while deferring the expansion
+   to the point where it is wanted, for example to inspect the circuit first:
+
+   .. plot::
+      :context:
+      :nofigs:
+      :include-source:
+
+      >>> selected = FermionicPassManager(
+      ...     F2FSynthesis({"Evolution": ("SuzukiTrotter", (), {"order": 2})}, apply=False)
+      ... ).run(circuit)
+      >>> selected.count_ops()["Evolution"]  # selected, not yet expanded
+      1
+      >>> selected.decompose().count_ops()["Evolution"]  # expanded on demand
+      5
 
    Be aware of what an unexpanded gate does, though: it reaches the fermion-to-qubit stage whole,
    where it is mapped without :attr:`~.Evolution.synthesis` being consulted. That makes for an easy
@@ -259,7 +276,7 @@ contribute. It also works in the fixed-particle-number sector, which is both sma
    ...         circuit.modes,
    ...     )
    ...     # the method is set on the gate, so decompose() is what expands it here; a pipeline
-   ...     # would reach for FermionicTrotterization instead (see the note above)
+   ...     # would reach for F2FSynthesis instead (see the note above)
    ...     circuit = circuit.decompose()
    ...     evolved = ffsim.apply_unitary(initial, circuit, norb=norb, nelec=nelec)
    ...     error = 1 - abs(np.vdot(evolved, exact)) ** 2
@@ -373,7 +390,7 @@ that concrete, since number operators commute with each other:
 
 Both circuits are exact, so the second spends 80% more entangling gates for nothing. The diagonal
 Coulomb operators of a :class:`.UCJ` have this shape, which is why
-:attr:`.FermionicTrotterization.filter` exists: it takes a predicate over the
+:attr:`.F2FSynthesis.filter` exists: it takes a predicate over the
 :class:`~qiskit.dagcircuit.DAGOpNode` and leaves the rejected gates untouched, so one pass can raise
 the order on the gates that benefit and leave the rest at first order.
 
@@ -408,12 +425,12 @@ commute and a higher order has something to buy:
    >>> order_2 = FermionicSuzukiTrotter(order=2)
    >>>
    >>> everywhere = two_qubit_cost(
-   ...     FermionicPassManager(FermionicTrotterization(order_2)).run(mixed_circuit())
+   ...     FermionicPassManager(F2FSynthesis({"Evolution": order_2})).run(mixed_circuit())
    ... )
    >>> restricted = two_qubit_cost(
    ...     FermionicPassManager(
-   ...         FermionicTrotterization(
-   ...             order_2, filter=lambda node: not is_diagonal(node.op.operator)
+   ...         F2FSynthesis(
+   ...             {"Evolution": order_2}, filter=lambda node: not is_diagonal(node.op.operator)
    ...         )
    ...     ).run(mixed_circuit())
    ... )

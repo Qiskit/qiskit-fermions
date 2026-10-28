@@ -12,19 +12,24 @@
 
 # ruff: noqa: D205,D212,D415
 """
-===================
-Fermionic Synthesis
-===================
+===================================
+Circuit Library Synthesis (``F2F``)
+===================================
 
 .. currentmodule:: qiskit_fermions.circuit.library.synthesis
 
-This module provides the synthesis methods with which an :class:`.Evolution` gate is broken down into
-a :class:`.FermionicCircuit` of smaller fermionic gates. Pass one to the gate's ``synthesis`` argument
-to choose how its time evolution gets decomposed:
+This module provides the synthesis methods with which a gate is broken down into a
+:class:`.FermionicCircuit` of smaller fermionic gates, such as the Trotter formulas for an
+:class:`.Evolution`. Pass one to the gate's ``synthesis`` argument to choose how it gets decomposed:
 
 .. code-block:: python
 
    Evolution(num_modes, operator, time=1.0, synthesis=FermionicLieTrotter())
+
+or choose them for a whole circuit at once with the :class:`.F2FSynthesis` transpiler pass. Any class
+with a ``synthesize(gate)`` method can leverage a plugin (see :class:`.F2FSynthesisPlugin`), and the ones
+registered under the ``qiskit_fermions.circuit.synthesis`` entry point are available by name through
+the :class:`.F2FSynthesisPluginManager`.
 
 Both sides of this rewrite live in `fermionic` space, so these methods can exploit the
 :attr:`~qiskit_fermions.operators.OperatorTrait.groups` of the evolved operator (see
@@ -40,17 +45,53 @@ mapped operator, where the grouping is no longer available.
 .. autosummary::
    :toctree: ../stubs/
 
-   FermionicEvolutionSynthesis
+   F2FSynthesisPlugin
+   F2FSynthesisPluginManager
+
+.. _builtin_f2f_synthesis_plugins:
+
+Builtin plugins
+---------------
+
+The table below lists the builtin plugins, organized by the :class:`.FermionicGate` that they act
+upon. These are the entry points of the ``qiskit_fermions.circuit.synthesis`` group, named
+``<gate>.<method>``:
+
+.. table:: An overview of the builtin ``qiskit_fermions.circuit.synthesis`` entry-points.
+
+   +------------------------------------+--------------------+---------------------------------------------+
+   | Circuit instruction name           | Plugin method name | Reference                                   |
+   +====================================+====================+=============================================+
+   | :class:`.Evolution`                | ``LieTrotter``     | :class:`FermionicLieTrotter`                |
+   +------------------------------------+--------------------+---------------------------------------------+
+   | :class:`.Evolution`                | ``SuzukiTrotter``  | :class:`FermionicSuzukiTrotter`             |
+   +------------------------------------+--------------------+---------------------------------------------+
+   | :class:`.OrbitalRotation`          | ``Givens``         | :class:`FermionicGivensDecomposition`       |
+   +------------------------------------+--------------------+---------------------------------------------+
+   | :class:`.PrepareSlaterDeterminant` | ``Givens``         | :class:`FermionicSlaterGivensDecomposition` |
+   +------------------------------------+--------------------+---------------------------------------------+
+
+.. autosummary::
+   :toctree: ../stubs/
+   :class: sd-d-none
+
    FermionicLieTrotter
    FermionicSuzukiTrotter
+   FermionicGivensDecomposition
+   FermionicSlaterGivensDecomposition
 """
 
-from .evolution_synthesis import FermionicEvolutionSynthesis
+from .givens_decomposition import FermionicGivensDecomposition
 from .lie_trotter import FermionicLieTrotter
+from .plugin import F2FSynthesisPlugin, F2FSynthesisPluginManager
+from .slater_givens_decomposition import FermionicSlaterGivensDecomposition
 from .suzuki_trotter import FermionicSuzukiTrotter
 
 __all__ = [
-    "FermionicEvolutionSynthesis",
+    "F2FSynthesisPlugin",
+    "F2FSynthesisPluginManager",
+    "FermionicGivensDecomposition",
     "FermionicLieTrotter",
+    "FermionicSlaterGivensDecomposition",
     "FermionicSuzukiTrotter",
 ]

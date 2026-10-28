@@ -15,7 +15,6 @@
 from __future__ import annotations
 
 import numpy as np
-from qiskit.passmanager import MultiStagePassManager
 from qiskit.quantum_info import Statevector
 from qiskit_fermions.circuit import FermionicCircuit
 from qiskit_fermions.circuit.library import (
@@ -25,16 +24,12 @@ from qiskit_fermions.circuit.library import (
 )
 from qiskit_fermions.operators import FermionOperator
 from qiskit_fermions.operators.fermion_action import ann, cre
-from qiskit_fermions.transpiler import FermionicCircuitToDAG, QuantumDAGToCircuit
+from qiskit_fermions.transpiler import FermionicCircuitToDAG
 from qiskit_fermions.transpiler.passes import (
-    F2QSynthesis,
-    GivensDecompositionOrbitalRotationSynthesis,
     MergeOrbitalRotations,
-    TrivialF2QLayout,
-    TrivialOccupationInitializeModesSynthesis,
 )
 
-from ...utils import random_unitary
+from ...utils import random_unitary, reference_pass_manager
 
 
 def _nodes(dag) -> list[tuple[str, list[int]]]:
@@ -99,25 +94,8 @@ def test_merge_preserves_state():
     circ.append(OrbitalRotation(u1), circ.modes)
     circ.append(OrbitalRotation(u2), circ.modes)
 
-    def synth() -> F2QSynthesis:
-        s = F2QSynthesis()
-        s.methods["InitializeModes"] = TrivialOccupationInitializeModesSynthesis()
-        s.methods["OrbitalRotation"] = GivensDecompositionOrbitalRotationSynthesis()
-        return s
-
-    reference = MultiStagePassManager(
-        input=FermionicCircuitToDAG(),
-        layout=TrivialF2QLayout(),
-        synthesis=synth(),
-        output=QuantumDAGToCircuit(),
-    ).run(circ)
-    merged = MultiStagePassManager(
-        input=FermionicCircuitToDAG(),
-        optimization=MergeOrbitalRotations(),
-        layout=TrivialF2QLayout(),
-        synthesis=synth(),
-        output=QuantumDAGToCircuit(),
-    ).run(circ)
+    reference = reference_pass_manager(optimization_level=0).run(circ)
+    merged = reference_pass_manager([MergeOrbitalRotations()], optimization_level=0).run(circ)
 
     sv_ref = Statevector(reference).data
     sv_merged = Statevector(merged).data

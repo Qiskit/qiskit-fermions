@@ -15,11 +15,15 @@
 from __future__ import annotations
 
 import numbers
+from typing import TYPE_CHECKING
 
 import numpy as np
 import scipy.linalg
 
 from .. import FermionicGate
+
+if TYPE_CHECKING:
+    from .synthesis import F2FSynthesisPlugin
 
 
 class OrbitalRotation(FermionicGate):
@@ -40,20 +44,86 @@ class OrbitalRotation(FermionicGate):
 
     The number of fermionic modes the gate acts on is the dimension :math:`n` of
     ``rotation_unitary``.
+
+    .. note::
+       Breaking this gate down in fermionic space (into a circuit of smaller gates) is
+       **optional**, and it is what the :attr:`~.FermionicGate.synthesis` attribute governs. The gate can equally be
+       handed straight to the fermion-to-qubit stage. When it `is` decomposed (by
+       :meth:`~.FermionicCircuit.decompose`, for instance) :attr:`~.FermionicGate.synthesis`
+       decides how, and the
+       circuit it produces implements the same unitary as the gate: it `is` the definition of the
+       gate. It defaults to :class:`.FermionicGivensDecomposition`. See
+       :mod:`~qiskit_fermions.circuit.library.synthesis`.
+
+    .. note::
+       No fermion-to-qubit plugin maps this gate directly. Break it down in fermionic space first,
+       with the :class:`.F2FSynthesis` transpiler pass, so that the fermion-to-qubit stage only sees
+       the :class:`.Evolution` gates it produces.
+
+    .. note::
+       The state-vector simulation path does `not` go through :attr:`~.FermionicGate.synthesis`: it applies the
+       whole ``rotation_unitary`` at once, so the gate's definition is never read there.
     """
 
-    def __init__(self, rotation_unitary: np.ndarray) -> None:
+    def __init__(
+        self,
+        rotation_unitary: np.ndarray,
+        *,
+        synthesis: F2FSynthesisPlugin | None = None,
+    ) -> None:
         r"""Initializing an instance of this gate can be done with the arguments listed below.
 
         Args:
             rotation_unitary: the :math:`n \times n` unitary matrix :math:`U` defining the orbital
                 rotation via :math:`a^\dagger_i \mapsto \sum_j U_{ji} a^\dagger_j`. It must be
                 square and unitary; this is the caller's responsibility and is not verified.
+            synthesis: the fermion-to-fermion synthesis method with which to decompose this gate,
+                when it gets decomposed at all. If ``None`` (the default), a
+                :class:`.FermionicGivensDecomposition` instance is used.
         """
+        # deferred: the synthesis subpackage imports this module's siblings at load time
+        from .synthesis import FermionicGivensDecomposition
+
         self.rotation_unitary = np.asarray(rotation_unitary, dtype=complex)
         """The unitary matrix representing the orbital rotation coefficients."""
 
-        super().__init__("OrbitalRotation", self.rotation_unitary.shape[0], [])
+        super().__init__(
+            "OrbitalRotation",
+            self.rotation_unitary.shape[0],
+            [],
+            synthesis=synthesis or FermionicGivensDecomposition(),
+        )
+
+    def inverse(self, annotated: bool = False) -> OrbitalRotation:
+        r"""Returns the inverse of this gate, whose unitary is :math:`U^\dagger`.
+
+        Args:
+            annotated: ignored. The inverse of this gate is another :class:`.OrbitalRotation`, so it
+                never needs to be an :class:`~qiskit.circuit.AnnotatedOperation`.
+
+        Returns:
+            An :class:`.OrbitalRotation` gate with the adjoint unitary and the same synthesis.
+        """
+        # `Instruction.inverse` would recurse through the definition and return a plain `Gate`,
+        # losing the unitary and this gate's synthesis method; the adjoint is both cheaper and exact.
+        return OrbitalRotation(self.rotation_unitary.conj().T, synthesis=self.synthesis)
+
+    def __eq__(self, other: object) -> bool:
+        """Whether ``other`` is an orbital rotation with exactly the same unitary.
+
+        The synthesis is not compared: it decides how the gate is decomposed, not what it is.
+        """
+        if not isinstance(other, OrbitalRotation):
+            return False
+        return self.rotation_unitary.shape == other.rotation_unitary.shape and bool(
+            np.array_equal(self.rotation_unitary, other.rotation_unitary)
+        )
+
+    def __hash__(self) -> int:
+        """Hashes the unitary, consistently with :meth:`__eq__`."""
+        return hash(
+            (type(self).__name__, self.rotation_unitary.shape, self.rotation_unitary.tobytes())
+        )
 
     @classmethod
     def from_t1_amplitudes(cls, t1: np.ndarray) -> OrbitalRotation:

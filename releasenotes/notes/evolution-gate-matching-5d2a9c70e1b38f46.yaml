@@ -1,0 +1,22 @@
+---
+features:
+  - |
+    Added :class:`~qiskit_fermions.transpiler.passes.HopEvolutionSynthesis`, a plugin for Qiskit's
+    :class:`~qiskit.transpiler.passes.HighLevelSynthesis` that synthesizes the
+    :class:`~qiskit.circuit.library.PauliEvolutionGate` of a hop between two qubits (the image of a
+    fermionic hop between adjacent modes under the Jordan-Wigner mapping) as a single
+    :class:`~qiskit.circuit.library.XXPlusYYGate`. The gate is the exact evolution, native to
+    common basis-gate sets, and cheaper in two-qubit gates than the generic synthesis. Any other
+    gate is left to the next synthesis method.
+upgrade:
+  - |
+    :func:`~qiskit_fermions.transpiler.presets.generate_preset_jw_pass_manager` now registers the
+    :class:`~qiskit_fermions.transpiler.passes.HopEvolutionSynthesis` ahead of the methods that its
+    ``hls_config`` lists for ``PauliEvolution``, or ahead of the default method if none is given.
+    This is unconditional, in the same way that the preset has always lowered an orbital rotation
+    to :class:`~qiskit.circuit.library.XXPlusYYGate`\ s: a method that the given configuration lists
+    (including ``"default"``) only applies to what is not a hop. The given configuration is extended
+    and not modified. For a hop with a complex amplitude, the
+    :class:`~qiskit.circuit.library.XXPlusYYGate` replaces a product-formula approximation, so the
+    circuit is both shorter and exact where it was previously only accurate up to the Trotter error.
+    To opt out, assemble a pipeline from the individual stages instead of using the preset.

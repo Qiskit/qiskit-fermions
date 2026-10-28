@@ -26,6 +26,8 @@ from .orbital_rotation import OrbitalRotation
 if TYPE_CHECKING:
     from qiskit_fermions.circuit import FermionicCircuit
 
+    from .synthesis import F2FSynthesisPlugin
+
 
 class PrepareSlaterDeterminant(FermionicGate):
     r"""Prepares a Slater determinant from an occupation and an orbital rotation.
@@ -33,9 +35,9 @@ class PrepareSlaterDeterminant(FermionicGate):
     This gate is the composition of an :class:`.InitializeModes` reference occupation followed by an
     :class:`.OrbitalRotation`: it declares that the modes it acts on start in the determinant defined
     by ``occupation`` and are then rotated by ``rotation_unitary``. Because the initial occupation is
-    known, transpiling this gate can use the rectangular :func:`.givens_decomposition_slater` for a
-    reduced-gate-count synthesis (see :class:`.GivensDecompositionSlaterDeterminantSynthesis`) rather
-    than the full square decomposition an :class:`.OrbitalRotation` alone would require.
+    known, decomposing this gate can use the rectangular :func:`.givens_decomposition_slater` for a
+    reduced-gate-count synthesis (see :class:`.FermionicSlaterGivensDecomposition`) rather than the
+    full square decomposition an :class:`.OrbitalRotation` alone would require.
 
     Following the :class:`.OrbitalRotation` convention :math:`a^\dagger_i \mapsto \sum_j U_{ji}
     a^\dagger_j`, rotating the occupied modes maps them onto the corresponding columns of
@@ -47,12 +49,30 @@ class PrepareSlaterDeterminant(FermionicGate):
     state vector it validates that the vector is confined to the subspace ``occupation`` defines (via
     :class:`.InitializeModes`) and then applies ``rotation_unitary`` (via :class:`.OrbitalRotation`).
     It therefore requires a real reference state vector, prepared externally (e.g. via
-    :func:`ffsim.slater_determinant`). The *producer* behavior -- emitting the gates that set the
-    reference occupation -- lives in the synthesis plugin, not the simulation path.
+    :func:`ffsim.slater_determinant`). The *producer* behavior (emitting the gates that set the
+    reference occupation) lives in the :attr:`synthesis`, not the simulation path.
 
     Applying (rather than dropping) the rotation is what guarantees that merging an
     :class:`.InitializeModes` and an :class:`.OrbitalRotation` into this single gate leaves the
     simulated final state unchanged.
+
+    .. rubric:: Decomposition semantics
+
+    Breaking this gate down in fermionic space is **optional**, and it is what the :attr:`synthesis`
+    attribute governs. It defaults to :class:`.FermionicSlaterGivensDecomposition`. The two ways of
+    breaking the gate down differ, and deliberately so:
+
+    - the definition of the gate (what :meth:`~.FermionicCircuit.decompose` expands it into) is the
+      :class:`.InitializeModes` of ``occupation`` followed by an :class:`.OrbitalRotation`. It is
+      equivalent to the gate as an operator;
+    - :attr:`synthesis` produces a circuit that prepares the same Slater determinant `from the
+      vacuum`, up to a global phase. It is cheaper because it exploits the known reference, and
+      equivalent to the gate as a state preparation only.
+
+    .. note::
+       No fermion-to-qubit plugin maps this gate directly. Break it down in fermionic space first,
+       with the :class:`.F2FSynthesis` transpiler pass, so that the fermion-to-qubit stage only sees
+       the gates it produces.
 
     .. caution::
        This is an early development prototype. Beware of changes to its interface without warning
@@ -63,7 +83,13 @@ class PrepareSlaterDeterminant(FermionicGate):
        :func:`~qiskit_fermions.linalg.givens_decomposition_slater`.
     """
 
-    def __init__(self, occupation: Sequence[bool], rotation_unitary: np.ndarray) -> None:
+    def __init__(
+        self,
+        occupation: Sequence[bool],
+        rotation_unitary: np.ndarray,
+        *,
+        synthesis: F2FSynthesisPlugin | None = None,
+    ) -> None:
         r"""Initializing an instance of this gate can be done with the arguments listed below.
 
         Args:
@@ -73,11 +99,18 @@ class PrepareSlaterDeterminant(FermionicGate):
                 rotation via :math:`a^\dagger_i \mapsto \sum_j U_{ji} a^\dagger_j`, where :math:`n` is
                 the number of modes (``len(occupation)``). It must be square and unitary; this is the
                 caller's responsibility and is not verified.
+            synthesis: the fermion-to-fermion synthesis method with which to decompose this gate
+                into a state preparation, when it gets decomposed at all. If ``None`` (the default),
+                a :class:`.FermionicSlaterGivensDecomposition` instance is used. This does not affect
+                the definition of the gate, see the class documentation.
 
         Raises:
             ValueError: if ``rotation_unitary`` is not a square matrix whose dimension matches the
                 length of ``occupation``.
         """
+        # deferred: the synthesis subpackage imports this module's siblings at load time
+        from .synthesis import FermionicSlaterGivensDecomposition
+
         self.occupation = np.asarray(occupation, dtype=bool)
         """The reference occupation (one boolean per mode) the rotation is applied to."""
 
@@ -91,7 +124,12 @@ class PrepareSlaterDeterminant(FermionicGate):
                 f"({num_modes}, {num_modes}) to match the occupation length {num_modes}."
             )
 
-        super().__init__("PrepareSlaterDeterminant", num_modes, [])
+        super().__init__(
+            "PrepareSlaterDeterminant",
+            num_modes,
+            [],
+            synthesis=synthesis or FermionicSlaterGivensDecomposition(),
+        )
 
     def _build_definition(self) -> FermionicCircuit:
         """Builds the gate as a :class:`.FermionicCircuit` (shared by ``_define`` and the sim path).

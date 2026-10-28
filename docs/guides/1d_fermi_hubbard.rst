@@ -726,7 +726,7 @@ simultaneously for every :math:`j`. One ``CZ`` chain turns the entire weight-3
 :meth:`~qiskit.synthesis.EvolutionSynthesis.synthesize` method, which is all this class
 implements. It carries no number of Trotter steps, because it receives one flow set at a time
 and so cannot subdivide the evolution across the sets. That subdivision belongs a level up, in
-fermionic space, where a :class:`.FermionicEvolutionSynthesis` sees all of them at once (see
+fermionic space, where an :class:`.F2FSynthesisPlugin` sees all of them at once (see
 :ref:`step 9 <flowsets_check_dynamics>`):
 
 .. plot::
@@ -1166,7 +1166,7 @@ with the chain. At 14 modes it is already 12 against 34.
    never decomposed goes to the fermion-to-qubit stage whole, which maps it without consulting
    :attr:`.Evolution.synthesis` at all, so :attr:`~.FermionicLieTrotter.reps` would silently have no
    effect. ``trotter_steps`` from step 5 performs that decomposition; a pipeline that sets the
-   method with :class:`.FermionicTrotterization` gets the same expansion from the pass instead.
+   method with :class:`.F2FSynthesis` gets the same expansion from the pass instead.
 
 As a final cross-check, the site densities :math:`\langle n_j(t) \rangle = (1 - \langle
 V_j \rangle)/2` computed in the encoded space must reproduce the Jordan-Wigner result. This
@@ -1236,7 +1236,7 @@ What to take away
    anything else, rather than silently falling back to a generic product formula. A general
    implementation has two halves. Reading the flow-set structure from the operator's
    :attr:`~.TransferVertexOperator.groups` is what a
-   :class:`.FermionicEvolutionSynthesis` already does. Deriving the diagonalizing Clifford from the
+   :class:`.F2FSynthesisPlugin` for an evolution already does. Deriving the diagonalizing Clifford from the
    stabilizer group, as described in Section IV C of Ref. [1]_, is the half that remains encoding
    specific.
 

@@ -20,7 +20,7 @@ from qiskit_fermions.circuit import FermionicCircuit
 from qiskit_fermions.circuit.library import Evolution, InitializeModes, OrbitalRotation
 from qiskit_fermions.circuit.library.synthesis import FermionicLieTrotter, FermionicSuzukiTrotter
 from qiskit_fermions.operators import FermionOperator
-from qiskit_fermions.transpiler.passes import FermionicTrotterization, RelabelModes
+from qiskit_fermions.transpiler.passes import F2FSynthesis, RelabelModes
 from qiskit_fermions.transpiler.passmanager import FermionicPassManager
 
 NUM_MODES = 3
@@ -58,7 +58,7 @@ def test_pass_expands_the_evolution():
     """By default the pass applies the synthesis, so no separate expansion step is needed."""
     circuit = _circuit()
 
-    out = FermionicPassManager(FermionicTrotterization(FermionicSuzukiTrotter(order=2))).run(
+    out = FermionicPassManager(F2FSynthesis({"Evolution": FermionicSuzukiTrotter(order=2)})).run(
         circuit
     )
 
@@ -69,11 +69,11 @@ def test_pass_expands_the_evolution():
 
 def test_pass_expansion_is_idempotent():
     """The emitted factors are atomic, so running the pass again must not split them further."""
-    once = FermionicPassManager(FermionicTrotterization(FermionicSuzukiTrotter(order=2))).run(
+    once = FermionicPassManager(F2FSynthesis({"Evolution": FermionicSuzukiTrotter(order=2)})).run(
         _circuit()
     )
     thrice = FermionicPassManager(
-        [FermionicTrotterization(FermionicSuzukiTrotter(order=2))] * 3
+        [F2FSynthesis({"Evolution": FermionicSuzukiTrotter(order=2)})] * 3
     ).run(_circuit())
 
     assert dict(once.count_ops()) == dict(thrice.count_ops()) == {"Evolution": 3}
@@ -90,19 +90,48 @@ def test_pass_leaves_atomic_gates_alone():
     circuit = FermionicCircuit(NUM_MODES)
     circuit.append(Evolution(NUM_MODES, _hopping_chain(), time=0.5, atomic=True), circuit.modes)
 
-    out = FermionicPassManager(FermionicTrotterization(synthesis)).run(circuit)
+    out = FermionicPassManager(F2FSynthesis({"Evolution": synthesis})).run(circuit)
 
     (evolution,) = _evolutions(out)
     assert evolution.atomic
-    # the method is still selected, it is simply never consulted for an atomic gate
-    assert evolution.synthesis is synthesis
+    # it passes through unchanged: it is not even tagged with the method
+    assert evolution.synthesis is not synthesis
+
+
+def test_filter_is_not_consulted_for_atomic_gates():
+    seen = []
+    circuit = FermionicCircuit(NUM_MODES)
+    circuit.append(Evolution(NUM_MODES, _hopping_chain(), time=0.5, atomic=True), circuit.modes)
+
+    FermionicPassManager(
+        F2FSynthesis(
+            {"Evolution": FermionicSuzukiTrotter(order=2)}, filter=lambda node: seen.append(node)
+        )
+    ).run(circuit)
+
+    assert seen == []
+
+
+@pytest.mark.parametrize("apply", [True, False])
+def test_pass_does_not_tag_atomic_gates(apply):
+    atomic = Evolution(NUM_MODES, _hopping_chain(), time=0.5, atomic=True)
+    circuit = FermionicCircuit(NUM_MODES)
+    circuit.append(atomic, circuit.modes)
+
+    out = FermionicPassManager(
+        F2FSynthesis({"Evolution": FermionicSuzukiTrotter(order=2)}, apply=apply)
+    ).run(circuit)
+
+    (evolution,) = _evolutions(out)
+    assert evolution == atomic
+    assert evolution.synthesis is atomic.synthesis
 
 
 def test_apply_false_only_selects_the_synthesis_method():
     """With ``apply=False`` the gate stays whole and merely carries the method."""
     synthesis = FermionicSuzukiTrotter(order=2)
 
-    out = FermionicPassManager(FermionicTrotterization(synthesis, apply=False)).run(_circuit())
+    out = FermionicPassManager(F2FSynthesis({"Evolution": synthesis}, apply=False)).run(_circuit())
 
     (evolution,) = _evolutions(out)
     assert evolution.synthesis is synthesis
@@ -117,7 +146,7 @@ def test_pass_does_not_mutate_the_input_gate():
     circuit = FermionicCircuit(NUM_MODES)
     circuit.append(gate, circuit.modes)
 
-    FermionicPassManager(FermionicTrotterization(FermionicSuzukiTrotter(order=2))).run(circuit)
+    FermionicPassManager(F2FSynthesis({"Evolution": FermionicSuzukiTrotter(order=2)})).run(circuit)
 
     assert isinstance(gate.synthesis, FermionicLieTrotter)
 
@@ -127,7 +156,7 @@ def test_pass_leaves_other_gates_untouched():
     rotation = np.eye(NUM_MODES, dtype=complex)
     circuit = _circuit(InitializeModes(occupation), OrbitalRotation(rotation))
 
-    out = FermionicPassManager(FermionicTrotterization(FermionicSuzukiTrotter(order=2))).run(
+    out = FermionicPassManager(F2FSynthesis({"Evolution": FermionicSuzukiTrotter(order=2)})).run(
         circuit
     )
 
@@ -143,7 +172,7 @@ def test_filter_selects_a_subset(subtests):
 
     with subtests.test("rejecting everything"):
         out = FermionicPassManager(
-            FermionicTrotterization(synthesis, filter=lambda _node: False)
+            F2FSynthesis({"Evolution": synthesis}, filter=lambda _node: False)
         ).run(_circuit())
         # a rejected node is left untouched, so it is neither expanded nor re-tagged
         (evolution,) = _evolutions(out)
@@ -151,7 +180,7 @@ def test_filter_selects_a_subset(subtests):
 
     with subtests.test("accepting everything"):
         out = FermionicPassManager(
-            FermionicTrotterization(synthesis, filter=lambda _node: True)
+            F2FSynthesis({"Evolution": synthesis}, filter=lambda _node: True)
         ).run(_circuit())
         assert dict(out.count_ops()) == {"Evolution": 3}
 
@@ -165,7 +194,7 @@ def test_filter_receives_the_dag_node():
         return True
 
     FermionicPassManager(
-        FermionicTrotterization(FermionicSuzukiTrotter(order=2), filter=record)
+        F2FSynthesis({"Evolution": FermionicSuzukiTrotter(order=2)}, filter=record)
     ).run(_circuit())
 
     assert len(seen) == 1
@@ -176,7 +205,7 @@ def test_pass_preserves_the_operator_and_time():
     """With ``apply=False`` the gate is re-tagged, so its operator and time must survive intact."""
     operator = _hopping_chain()
     out = FermionicPassManager(
-        FermionicTrotterization(FermionicSuzukiTrotter(order=2), apply=False)
+        F2FSynthesis({"Evolution": FermionicSuzukiTrotter(order=2)}, apply=False)
     ).run(_circuit())
 
     (evolution,) = _evolutions(out)
@@ -187,7 +216,7 @@ def test_pass_preserves_the_operator_and_time():
 
 def test_expansion_preserves_the_total_evolution_time():
     """Every group must end up evolved for the gate's full time, however the formula splits it."""
-    out = FermionicPassManager(FermionicTrotterization(FermionicSuzukiTrotter(order=2))).run(
+    out = FermionicPassManager(F2FSynthesis({"Evolution": FermionicSuzukiTrotter(order=2)})).run(
         _circuit()
     )
 
@@ -212,7 +241,7 @@ def test_expansion_composes_with_relabel_modes():
     independent of that, and its automatic model translates through ``qargs`` before gathering.
     """
     out = FermionicPassManager(
-        [FermionicTrotterization(FermionicSuzukiTrotter(order=2)), RelabelModes([2, 1, 0])]
+        [F2FSynthesis({"Evolution": FermionicSuzukiTrotter(order=2)}), RelabelModes([2, 1, 0])]
     ).run(_circuit())
 
     assert dict(out.count_ops()) == {"Evolution": 3}

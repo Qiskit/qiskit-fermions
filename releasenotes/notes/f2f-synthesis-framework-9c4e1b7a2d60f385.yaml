@@ -1,0 +1,25 @@
+---
+features:
+  - |
+    Added the :class:`~qiskit_fermions.transpiler.passes.F2FSynthesis` transpiler pass, the
+    fermion-to-fermion counterpart of :class:`~qiskit_fermions.transpiler.passes.F2QSynthesis`. It
+    breaks gates down into circuits of smaller fermionic gates, with the plugin that its ``config``
+    names for each type of gate::
+
+        pm.optimization = FermionicPassManager(
+            [F2FSynthesis({"Evolution": ("SuzukiTrotter", (), {"order": 2, "reps": 4})})]
+        )
+
+    The plugins follow the same scheme as those of the fermion-to-qubit stage. They implement the
+    :class:`~qiskit_fermions.circuit.library.synthesis.F2FSynthesisPlugin` protocol, are managed by the
+    :class:`~qiskit_fermions.circuit.library.synthesis.F2FSynthesisPluginManager`, and are registered
+    under the ``qiskit_fermions.circuit.synthesis`` entry-point group as ``<gate>.<method>``. The
+    builtin ones are ``Evolution.LieTrotter`` and ``Evolution.SuzukiTrotter``. A plugin instance can
+    be given to the pass directly instead, in which case no entry point is needed.
+upgrade:
+  - |
+    The ``FermionicEvolutionSynthesis`` base class was removed. A synthesis method for an
+    :class:`~qiskit_fermions.circuit.library.Evolution` is any object with a ``synthesize(gate)``
+    method that returns a :class:`~qiskit_fermions.circuit.FermionicCircuit`; it no longer needs to
+    derive from a class. The type of the ``synthesis`` argument is now
+    :class:`~qiskit_fermions.circuit.library.synthesis.F2FSynthesisPlugin`.

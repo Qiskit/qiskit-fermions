@@ -16,8 +16,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from .evolution_synthesis import FermionicEvolutionSynthesis
-
 if TYPE_CHECKING:
     from qiskit_fermions.circuit import FermionicCircuit
 
@@ -100,7 +98,7 @@ def _merge_adjacent(schedule: list[tuple[int, float]]) -> list[tuple[int, float]
     return merged
 
 
-class FermionicSuzukiTrotter(FermionicEvolutionSynthesis):
+class FermionicSuzukiTrotter:
     r"""The higher-order Suzuki-Trotter product formula, applied in fermionic space.
 
     A product formula composes the factors of an operator symmetrically, so that the leading error

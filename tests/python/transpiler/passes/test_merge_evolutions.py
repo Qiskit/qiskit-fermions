@@ -21,7 +21,7 @@ from qiskit_fermions.circuit.library.synthesis import FermionicSuzukiTrotter
 from qiskit_fermions.operators import FermionOperator
 from qiskit_fermions.operators.fermion_action import ann, cre
 from qiskit_fermions.transpiler import FermionicCircuitToDAG
-from qiskit_fermions.transpiler.passes import FermionicTrotterization, MergeEvolutions
+from qiskit_fermions.transpiler.passes import F2FSynthesis, MergeEvolutions
 
 
 def _number(mode: int, coeff: float = 1.0) -> FermionOperator:
@@ -116,7 +116,7 @@ def test_merge_removes_the_seams_of_an_unmerged_suzuki_schedule():
     def expanded(merge_adjacent: bool):
         synthesis = FermionicSuzukiTrotter(order=2, reps=3, merge_adjacent=merge_adjacent)
         dag = FermionicCircuitToDAG().run(circ)
-        return FermionicTrotterization(synthesis).run(dag)
+        return F2FSynthesis({"Evolution": synthesis}).run(dag)
 
     unmerged = expanded(False)
     reference = expanded(True)

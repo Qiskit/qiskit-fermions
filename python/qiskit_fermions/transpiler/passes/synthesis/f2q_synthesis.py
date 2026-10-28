@@ -27,16 +27,20 @@ from ... import F2QLayout
 from .plugin import F2QSynthesisPlugin, F2QSynthesisPluginManager
 
 F2QSynthesisConfig: TypeAlias = dict[
-    str, str | tuple[str, Sequence[Any]] | tuple[str, Sequence[Any], Mapping[str, Any]]
+    str,
+    str
+    | tuple[str, Sequence[Any]]
+    | tuple[str, Sequence[Any], Mapping[str, Any]]
+    | F2QSynthesisPlugin,
 ]
 """The dictionary type used to configure the :attr:`.F2QSynthesis.methods`.
 
 The keys of this dictionary must be names of :class:`.FermionicInstruction` circuit instructions.
-The values can be one of three types:
+The values can be one of four types:
 
 1. ``str``: the simplest scenario simply specifies the name of the plugin method to use for the
    corresponding key in this dictionary. The plugin is extracted from the
-   :class:`.F2QSynthesisPluginManager` and it's ``__init__`` method may **not** require any
+   :class:`.F2QSynthesisPluginManager` and its ``__init__`` method may **not** require any
    arguments.
 2. ``tuple[str, Sequence[Any]]``: the first ``str`` is the same as the above, and the second
    ``Sequence[Any]`` can be used to provide any positional arguments to the plugin's ``__init__``
@@ -44,6 +48,8 @@ The values can be one of three types:
 3. ``tuple[str, Sequence[Any], Mapping[str, Any]]``: the first two fields are the same as in 2. and
    the third ``Mapping[str, Any]`` can be used to provide any keyword arguments to the plugin's
    ``__init__`` method.
+4. an instance of an :class:`.F2QSynthesisPlugin`, which is used as is. This is how a plugin that is
+   not registered through an entry point enters the pass.
 """
 
 
@@ -75,7 +81,6 @@ class F2QSynthesis(GenericPass[FermionicDAGCircuit, DAGCircuit]):
           ...     "Evolution": ("MapperFn", (jordan_wigner,)),
           ...     "FermionicMeasure": "TrivialOccupation",
           ...     "InitializeModes": "TrivialOccupation",
-          ...     "OrbitalRotation": "GivensDecomposition",
           ... }
           >>> synth = passes.F2QSynthesis(config)
 
@@ -90,7 +95,6 @@ class F2QSynthesis(GenericPass[FermionicDAGCircuit, DAGCircuit]):
           >>> synth.methods["Evolution"] = passes.MapperFnEvolutionSynthesis(jordan_wigner)
           >>> synth.methods["FermionicMeasure"] = passes.TrivialOccupationFermionicMeasureSynthesis()
           >>> synth.methods["InitializeModes"] = passes.TrivialOccupationInitializeModesSynthesis()
-          >>> synth.methods["OrbitalRotation"] = passes.GivensDecompositionOrbitalRotationSynthesis()
 
        Through this manual approach it is also possible to inject custom
        :class:`.F2QSynthesisPlugin` implementations without requiring them to be registered through
@@ -103,7 +107,14 @@ class F2QSynthesis(GenericPass[FermionicDAGCircuit, DAGCircuit]):
 
         Args:
             config: an optional dictionary to pre-populate the :attr:`methods` with plugins provided
-                by the :class:`.F2QSynthesisPluginManager`.
+                by the :class:`.F2QSynthesisPluginManager`, or with plugin instances. See
+                :type:`.F2QSynthesisConfig`.
+
+        Raises:
+            KeyError: if ``config`` names an instruction or a method for which no plugin is
+                installed.
+            TypeError: if ``config`` gives a value that is none of the forms of
+                :type:`.F2QSynthesisConfig`.
         """
         super().__init__()
 
@@ -130,13 +141,32 @@ class F2QSynthesis(GenericPass[FermionicDAGCircuit, DAGCircuit]):
                 match method_spec:
                     case str():
                         method_name = method_spec
-                    case (name, args):
+                    case (str() as name, args):
                         method_name = name
                         init_args = args
-                    case (name, args, kwargs):
+                    case (str() as name, args, kwargs):
                         method_name = name
                         init_args = args
                         init_kwargs = kwargs
+                    case _ if callable(getattr(method_spec, "run", None)):
+                        self.methods[op_name] = method_spec
+                        continue
+                    case _:
+                        raise TypeError(
+                            f"The synthesis for '{op_name}' must be a method name, a tuple of a "
+                            f"method name and its arguments, or a plugin instance, not {method_spec!r}."
+                        )
+
+                if op_name not in pm.plugins:
+                    raise KeyError(
+                        f"No fermion-to-qubit synthesis is installed for '{op_name}'. Instructions "
+                        f"that have one: {sorted(pm.op_names())}."
+                    )
+                if method_name not in pm.method_names(op_name):
+                    raise KeyError(
+                        f"No synthesis method '{method_name}' is installed for '{op_name}'. "
+                        f"Installed: {sorted(pm.method_names(op_name))}."
+                    )
 
                 method = pm.method(op_name, method_name)
                 self.methods[op_name] = method(*init_args, **init_kwargs)

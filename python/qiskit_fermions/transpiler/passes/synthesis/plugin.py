@@ -52,10 +52,10 @@ class F2QSynthesisPluginManager:
 
     .. literalinclude:: ../../pyproject.toml
        :language: toml
-       :start-at: entry-points
-       :end-before: setuptools
+       :start-at: qiskit_fermions.transpiler.synthesis
+       :end-before: [
 
-    An overview of all builtin plugins is given in :ref:`this table <builtin_synthesis_plugins>`.
+    An overview of all builtin plugins is given :ref:`here <builtin_f2q_synthesis_plugins>`.
     """
 
     def __init__(self) -> None:  # noqa: D107
@@ -99,6 +99,9 @@ class F2QSynthesisPluginManager:
 
         Returns:
             The :class:`.F2QSynthesisPlugin` class.
+
+        Raises:
+            KeyError: if no plugin is registered under that name.
         """
         plugin_name = op_name + "." + method_name
         return cast(type[F2QSynthesisPlugin], self._manager[plugin_name].plugin)

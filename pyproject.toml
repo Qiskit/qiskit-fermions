@@ -131,10 +131,17 @@ dev = [
     "tox>=4.28.0",
 ]
 
+[project.entry-points."qiskit_fermions.circuit.synthesis"]
+"Evolution.LieTrotter" = "qiskit_fermions.circuit.library.synthesis:FermionicLieTrotter"
+"Evolution.SuzukiTrotter" = "qiskit_fermions.circuit.library.synthesis:FermionicSuzukiTrotter"
+"OrbitalRotation.Givens" = "qiskit_fermions.circuit.library.synthesis:FermionicGivensDecomposition"
+"PrepareSlaterDeterminant.Givens" = "qiskit_fermions.circuit.library.synthesis:FermionicSlaterGivensDecomposition"
+
 [project.entry-points."qiskit_fermions.transpiler.synthesis"]
 "Evolution.MapperFn" = "qiskit_fermions.transpiler.passes.synthesis:MapperFnEvolutionSynthesis"
-"FermionicMeasure.TrivialOccupation" = "qiskit_fermions.transpiler.passes.synthesis:TrivialOccupationFermionicMeasureSynthesis"
 "InitializeModes.TrivialOccupation" = "qiskit_fermions.transpiler.passes.synthesis:TrivialOccupationInitializeModesSynthesis"
+"FermionicMeasure.TrivialOccupation" = "qiskit_fermions.transpiler.passes.synthesis:TrivialOccupationFermionicMeasureSynthesis"
+# DEPRECATED all of the following entry-points are deprecated and subject to removal in a future release
 "OrbitalRotation.GivensDecomposition" = "qiskit_fermions.transpiler.passes.synthesis:GivensDecompositionOrbitalRotationSynthesis"
 "PrepareSlaterDeterminant.GivensDecompositionSlater" = "qiskit_fermions.transpiler.passes.synthesis:GivensDecompositionSlaterDeterminantSynthesis"
 

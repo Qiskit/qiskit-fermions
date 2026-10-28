@@ -12,14 +12,17 @@
 
 """Optimization passes."""
 
+from ._deprecated_trotterization import FermionicTrotterization
+from .f2f_synthesis import F2FSynthesis, F2FSynthesisConfig
 from .merge_evolutions import MergeEvolutions
 from .merge_initialize_rotation import MergeSlaterDeterminantPreparation
 from .merge_orbital_rotations import MergeOrbitalRotations
 from .qdrift import QDriftTrotterization
 from .relabel_modes import RelabelModes
-from .trotterization import FermionicTrotterization
 
 __all__ = [
+    "F2FSynthesis",
+    "F2FSynthesisConfig",
     "FermionicTrotterization",
     "MergeEvolutions",
     "MergeOrbitalRotations",

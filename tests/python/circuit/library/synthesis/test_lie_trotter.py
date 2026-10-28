@@ -20,7 +20,6 @@ import pytest
 from qiskit_fermions.circuit import FermionicCircuit
 from qiskit_fermions.circuit.library import Evolution
 from qiskit_fermions.circuit.library.synthesis import (
-    FermionicEvolutionSynthesis,
     FermionicLieTrotter,
     FermionicSuzukiTrotter,
 )
@@ -45,7 +44,7 @@ def _hopping(*, grouped: bool) -> FermionOperator:
     return FermionOperator.from_terms([(actions, coeff) for actions, coeff, _ in terms])
 
 
-class _SingleFactor(FermionicEvolutionSynthesis):
+class _SingleFactor:
     """A minimal synthesis emitting the whole evolution as one full-width factor.
 
     Defined at module level so that a gate carrying it stays picklable.
@@ -176,8 +175,3 @@ def test_gate_with_custom_synthesis_is_picklable():
 
     assert reconstructed.count_ops() == circ.count_ops()
     assert isinstance(reconstructed._inner.data[0].operation.synthesis, _SingleFactor)
-
-
-def test_the_interface_cannot_be_instantiated():
-    with pytest.raises(TypeError, match="abstract"):
-        FermionicEvolutionSynthesis()  # type: ignore[abstract]
