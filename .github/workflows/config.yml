@@ -33,9 +33,9 @@ on:
       qiskit-minimum:
         description: >
           Oldest supported Qiskit release, used to build the Qiskit C API for the minimum-version
-          tests.  This does not *enforce* agreement with the `qiskit~=...` pins in `pyproject.toml`
-          (`build-system.requires`, `project.dependencies` and `dependency-groups.build`); it just
-          keeps the CI-side value in one greppable place.  Keep them in step by hand.
+          tests.  This does not *enforce* agreement with the lower bound of the `qiskit` requirement in
+          `pyproject.toml` (`build-system.requires`, `project.dependencies` and `dependency-groups.build`);
+          it just keeps the CI-side value in one greppable place.  Keep them in step by hand.
         value: '2.5.0'
 
       runner-linux-x86_64:
