@@ -211,6 +211,14 @@ class FermionicQDrift:
 
        F2FSynthesis({"Evolution": ("QDrift", (100,), {"rng": 42})})
 
+    A gate can also carry the method itself, as its :attr:`~.FermionicGate.synthesis`, and be broken
+    down by :meth:`~.FermionicCircuit.decompose` (or Qiskit's ``Decompose`` pass). This is how each
+    gate of a circuit gets its own ``num_terms``, ``weights`` and ``rng``:
+
+    .. code-block:: python
+
+       Evolution(num_modes, operator, time, synthesis=FermionicQDrift(100, weights=weights))
+
     .. note::
        The sampled gates are marked :attr:`.Evolution.atomic`: the random draw *is* the
        Trotterization this method performs, so the emitted gates are terminal factors and
@@ -324,10 +332,13 @@ class FermionicQDrift:
         One entry is expected per *group* when the evolved operator carries
         :attr:`~qiskit_fermions.operators.OperatorTrait.groups`, and per *term* otherwise; a
         mismatch raises :class:`ValueError`. Because such an array describes one specific operator,
-        it is meant for a circuit with a single :class:`.Evolution` gate. This method is stateless
-        and checks only the length against each gate it is given, so it cannot tell that the array
-        was meant for another operator of the same size: leave it unset for a circuit with several
-        gates, so that each derives its own.
+        it belongs to the gate of that operator: pass this method as the ``synthesis`` of that
+        :class:`.Evolution` gate, so that every gate of a circuit can hold the weights of its own
+        operator. This method is stateless and checks only the length against each gate it is given,
+        so it cannot tell that the array was meant for another operator of the same size. That is why
+        giving one method by gate name to :class:`.F2FSynthesis` suits a circuit with a single
+        :class:`.Evolution` gate, or one that leaves the weights unset so that each gate derives its
+        own.
 
         The granularity follows what is sampled, which is why it is the grouping that decides it: a
         grouped operator is sampled group-wise, so a weight describes a whole group. Whether the
