@@ -14,12 +14,12 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Protocol, cast
+from typing import TYPE_CHECKING, Protocol, cast
 
 from stevedore import ExtensionManager
 
 if TYPE_CHECKING:
-    from qiskit_fermions.circuit import FermionicCircuit
+    from qiskit_fermions.circuit import FermionicCircuit, FermionicGate
 
 
 class F2FSynthesisPlugin(Protocol):
@@ -46,13 +46,12 @@ class F2FSynthesisPlugin(Protocol):
        stage whole, where a plugin of that stage registered for it can map it directly.
     """
 
-    def synthesize(self, gate: Any) -> FermionicCircuit:
+    def synthesize(self, gate: FermionicGate) -> FermionicCircuit:
         """Synthesizes the provided gate.
 
         Args:
             gate: the gate to synthesize, which is of the one type that this plugin is registered for
-                (the first part of its entry-point name). It is typed loosely here so that a plugin
-                can declare that type in its own signature.
+                (the first part of its entry-point name).
 
         Returns:
             A :class:`.FermionicCircuit` on ``gate.num_modes`` modes implementing the gate, in the
@@ -76,7 +75,7 @@ class F2FSynthesisPluginManager:
        :start-at: qiskit_fermions.circuit.synthesis
        :end-before: [
 
-    An overview of all builtin plugins is given in :ref:`this table <builtin_f2f_synthesis_plugins>`.
+    An overview of all builtin plugins is given :ref:`here <builtin_f2f_synthesis_plugins>`.
     """
 
     def __init__(self) -> None:  # noqa: D107

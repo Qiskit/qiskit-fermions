@@ -27,7 +27,7 @@ This module provides the synthesis methods with which a gate is broken down into
    Evolution(num_modes, operator, time=1.0, synthesis=FermionicLieTrotter())
 
 or choose them for a whole circuit at once with the :class:`.F2FSynthesis` transpiler pass. Any class
-with a ``synthesize(gate)`` method is a method (see :class:`.F2FSynthesisPlugin`), and the ones
+with a ``synthesize(gate)`` method can leverage a plugin (see :class:`.F2FSynthesisPlugin`), and the ones
 registered under the ``qiskit_fermions.circuit.synthesis`` entry point are available by name through
 the :class:`.F2FSynthesisPluginManager`.
 
@@ -47,30 +47,38 @@ mapped operator, where the grouping is no longer available.
 
    F2FSynthesisPlugin
    F2FSynthesisPluginManager
-   FermionicGivensDecomposition
-   FermionicLieTrotter
-   FermionicSlaterGivensDecomposition
-   FermionicSuzukiTrotter
+
+.. _builtin_f2f_synthesis_plugins:
+
+Builtin plugins
+---------------
 
 The table below lists the builtin plugins, organized by the :class:`.FermionicGate` that they act
 upon. These are the entry points of the ``qiskit_fermions.circuit.synthesis`` group, named
 ``<gate>.<method>``:
 
-.. _builtin_f2f_synthesis_plugins:
-
 .. table:: An overview of the builtin ``qiskit_fermions.circuit.synthesis`` entry-points.
 
-   +------------------------------------+-------------------+---------------------------------------------+
-   | Gate name                          | Plugin method     | Reference                                   |
-   +====================================+===================+=============================================+
-   | :class:`.Evolution`                | ``LieTrotter``    | :class:`FermionicLieTrotter`                |
-   +------------------------------------+-------------------+---------------------------------------------+
-   | :class:`.Evolution`                | ``SuzukiTrotter`` | :class:`FermionicSuzukiTrotter`             |
-   +------------------------------------+-------------------+---------------------------------------------+
-   | :class:`.OrbitalRotation`          | ``Givens``        | :class:`FermionicGivensDecomposition`       |
-   +------------------------------------+-------------------+---------------------------------------------+
-   | :class:`.PrepareSlaterDeterminant` | ``Givens``        | :class:`FermionicSlaterGivensDecomposition` |
-   +------------------------------------+-------------------+---------------------------------------------+
+   +------------------------------------+--------------------+---------------------------------------------+
+   | Circuit instruction name           | Plugin method name | Reference                                   |
+   +====================================+====================+=============================================+
+   | :class:`.Evolution`                | ``LieTrotter``     | :class:`FermionicLieTrotter`                |
+   +------------------------------------+--------------------+---------------------------------------------+
+   | :class:`.Evolution`                | ``SuzukiTrotter``  | :class:`FermionicSuzukiTrotter`             |
+   +------------------------------------+--------------------+---------------------------------------------+
+   | :class:`.OrbitalRotation`          | ``Givens``         | :class:`FermionicGivensDecomposition`       |
+   +------------------------------------+--------------------+---------------------------------------------+
+   | :class:`.PrepareSlaterDeterminant` | ``Givens``         | :class:`FermionicSlaterGivensDecomposition` |
+   +------------------------------------+--------------------+---------------------------------------------+
+
+.. autosummary::
+   :toctree: ../stubs/
+   :class: sd-d-none
+
+   FermionicLieTrotter
+   FermionicSuzukiTrotter
+   FermionicGivensDecomposition
+   FermionicSlaterGivensDecomposition
 """
 
 from .givens_decomposition import FermionicGivensDecomposition

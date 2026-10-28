@@ -76,7 +76,7 @@ def _map_factors(
 
 
 class GivensDecompositionOrbitalRotationSynthesis:
-    """The former plugin for transpiling an :class:`.OrbitalRotation` into Givens rotations.
+    """**DEPRECATED** The former plugin for transpiling an :class:`.OrbitalRotation` into Givens rotations.
 
     This is the :class:`.FermionicGivensDecomposition` followed by the Jordan-Wigner mapping of its
     factors.
@@ -107,7 +107,7 @@ class GivensDecompositionOrbitalRotationSynthesis:
 
 
 class GivensDecompositionSlaterDeterminantSynthesis:
-    """The former plugin for transpiling a :class:`.PrepareSlaterDeterminant` into Givens rotations.
+    """**DEPRECATED** The former plugin for transpiling a :class:`.PrepareSlaterDeterminant` into Givens rotations.
 
     This is the :class:`.FermionicSlaterGivensDecomposition` followed by the Jordan-Wigner mapping
     of its gates.

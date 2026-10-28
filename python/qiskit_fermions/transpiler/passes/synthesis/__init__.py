@@ -37,27 +37,35 @@ combination of synthesis plugins is crucial and the :class:`.F2QSynthesis` trans
    F2QSynthesisPlugin
    F2QSynthesisPluginManager
 
+.. _builtin_f2q_synthesis_plugins:
+
+Builtin plugins
+---------------
+
 The plugins to use at runtime have to be registered in the :attr:`.F2QSynthesis.methods` attribute.
 This can be done easily through the ``config`` argument of :class:`.F2QSynthesis` which specifies
 the plugins to use from the :class:`.F2QSynthesisPluginManager` or it can be done manually by
 writing into :attr:`.F2QSynthesis.methods` directly.
 
-The table below lists the builtin synthesis plugins, organized by the :class:`.FermionicGate` that
-they act upon:
-
-.. _builtin_f2q_synthesis_plugins:
+The table below lists the builtin plugins, organized by the :class:`.FermionicGate` that they act
+upon. These are the entry points of the ``qiskit_fermions.transpiler.synthesis`` group, named
+``<gate>.<method>``:
 
 .. table:: An overview of the builtin ``qiskit_fermions.transpiler.synthesis`` entry-points.
 
-   +----------------------------+-----------------------+-------------------------------------------------------+
-   | Circuit instruction name   | Plugin method name    | Reference                                             |
-   +============================+=======================+=======================================================+
-   | :class:`.Evolution`        | ``MapperFn``          | :class:`MapperFnEvolutionSynthesis`                   |
-   +----------------------------+-----------------------+-------------------------------------------------------+
-   | :class:`.FermionicMeasure` | ``TrivialOccupation`` | :class:`TrivialOccupationFermionicMeasureSynthesis`   |
-   +----------------------------+-----------------------+-------------------------------------------------------+
-   | :class:`.InitializeModes`  | ``TrivialOccupation`` | :class:`TrivialOccupationInitializeModesSynthesis`    |
-   +----------------------------+-----------------------+-------------------------------------------------------+
+   +-------------------------------------+-------------------------------+--------------------------------------------------------+----------------+
+   | Circuit instruction name            | Plugin method name            | Reference                                              | Notes          |
+   +=====================================+===============================+========================================================+================+
+   | :class:`.Evolution`                 | ``MapperFn``                  | :class:`MapperFnEvolutionSynthesis`                    |                |
+   +-------------------------------------+-------------------------------+--------------------------------------------------------+----------------+
+   | :class:`.InitializeModes`           | ``TrivialOccupation``         | :class:`TrivialOccupationInitializeModesSynthesis`     |                |
+   +-------------------------------------+-------------------------------+--------------------------------------------------------+----------------+
+   | :class:`.FermionicMeasure`          | ``TrivialOccupation``         | :class:`TrivialOccupationFermionicMeasureSynthesis`    |                |
+   +-------------------------------------+-------------------------------+--------------------------------------------------------+----------------+
+   | :class:`.OrbitalRotation`           | ``GivensDecomposition``       | :class:`GivensDecompositionOrbitalRotationSynthesis`   | **DEPRECATED** |
+   +-------------------------------------+-------------------------------+--------------------------------------------------------+----------------+
+   | :class:`.PrepareSlaterDeterminant`  | ``GivensDecompositionSlater`` | :class:`GivensDecompositionSlaterDeterminantSynthesis` | **DEPRECATED** |
+   +-------------------------------------+-------------------------------+--------------------------------------------------------+----------------+
 
 .. autosummary::
    :toctree: ../stubs/
@@ -66,6 +74,8 @@ they act upon:
    MapperFnEvolutionSynthesis
    TrivialOccupationFermionicMeasureSynthesis
    TrivialOccupationInitializeModesSynthesis
+   GivensDecompositionOrbitalRotationSynthesis
+   GivensDecompositionSlaterDeterminantSynthesis
 
 Qubit-stage synthesis
 ---------------------

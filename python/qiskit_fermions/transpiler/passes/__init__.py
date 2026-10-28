@@ -33,12 +33,12 @@ These passes provide different kinds of optimization of :class:`.FermionicDAGCir
 
    F2FSynthesis
    ~optimization.f2f_synthesis.F2FSynthesisConfig
-   FermionicTrotterization
    MergeEvolutions
    MergeOrbitalRotations
    MergeSlaterDeterminantPreparation
    QDriftTrotterization
    RelabelModes
+   FermionicTrotterization
 
 .. _qiskit_fermions-transpiler-passes-layout:
 

@@ -55,7 +55,7 @@ class F2QSynthesisPluginManager:
        :start-at: qiskit_fermions.transpiler.synthesis
        :end-before: [
 
-    An overview of all builtin plugins is given in :ref:`this table <builtin_f2q_synthesis_plugins>`.
+    An overview of all builtin plugins is given :ref:`here <builtin_f2q_synthesis_plugins>`.
     """
 
     def __init__(self) -> None:  # noqa: D107

@@ -29,7 +29,7 @@ from .f2f_synthesis import F2FSynthesis
 
 
 class FermionicTrotterization(F2FSynthesis):
-    """The former pass to Trotterize :class:`.Evolution` gates.
+    """**DEPRECATED** The former pass to Trotterize :class:`.Evolution` gates.
 
     This is :class:`.F2FSynthesis` restricted to the :class:`.Evolution` gate: the ``synthesis``
     argument is the method for that gate.
