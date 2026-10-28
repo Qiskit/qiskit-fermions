@@ -1,0 +1,17 @@
+---
+features:
+  - |
+    The qDRIFT protocol is now a fermion-to-fermion synthesis method on an equal footing with the
+    product formulas. :class:`~qiskit_fermions.circuit.library.synthesis.FermionicQDrift` is
+    registered as ``Evolution.QDrift``, so it is selected like any other method::
+
+        F2FSynthesis({"Evolution": ("QDrift", (num_terms,), {"rng": 42})})
+
+    It takes the ``num_terms``, ``weights`` and ``rng`` arguments that
+    :class:`~qiskit_fermions.transpiler.passes.QDriftTrotterization` took.
+upgrade:
+  - |
+    A custom ``weights`` array of the qDRIFT sampling is no longer rejected up front for a circuit
+    with more than one :class:`~qiskit_fermions.circuit.library.Evolution` gate, since the method
+    that holds it is stateless and sees one gate at a time. Its length is still checked against
+    every gate it is given, so a mismatch raises a ``ValueError`` as before.

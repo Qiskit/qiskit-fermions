@@ -1,0 +1,9 @@
+---
+deprecations:
+  - |
+    The former signature of :class:`~qiskit_fermions.transpiler.passes.QDriftTrotterization`,
+    ``QDriftTrotterization(num_terms, *, filter_trivial=False, weights=None, rng=None)``, is
+    deprecated. Passing an ``int`` first returns a pass that samples by itself. Instead, write
+    ``F2FSynthesis({"Evolution": FermionicQDrift(num_terms, weights=..., rng=...)})`` where
+    ``filter_trivial`` was ``False``, and
+    ``QDriftTrotterization(FermionicQDrift(num_terms, weights=..., rng=...))`` where it was ``True``.

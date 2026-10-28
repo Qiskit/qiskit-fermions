@@ -134,6 +134,7 @@ dev = [
 [project.entry-points."qiskit_fermions.circuit.synthesis"]
 "Evolution.LieTrotter" = "qiskit_fermions.circuit.library.synthesis:FermionicLieTrotter"
 "Evolution.SuzukiTrotter" = "qiskit_fermions.circuit.library.synthesis:FermionicSuzukiTrotter"
+"Evolution.QDrift" = "qiskit_fermions.circuit.library.synthesis:FermionicQDrift"
 "OrbitalRotation.Givens" = "qiskit_fermions.circuit.library.synthesis:FermionicGivensDecomposition"
 "PrepareSlaterDeterminant.Givens" = "qiskit_fermions.circuit.library.synthesis:FermionicSlaterGivensDecomposition"
 

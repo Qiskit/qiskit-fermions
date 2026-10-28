@@ -20,6 +20,7 @@ from qiskit_fermions.circuit.library import Evolution, InitializeModes
 from qiskit_fermions.circuit.library.synthesis import (
     F2FSynthesisPluginManager,
     FermionicLieTrotter,
+    FermionicQDrift,
     FermionicSuzukiTrotter,
 )
 from qiskit_fermions.operators import FermionOperator
@@ -62,7 +63,8 @@ class _Marker:
 def test_the_builtin_plugins_are_installed():
     manager = F2FSynthesisPluginManager()
 
-    assert {"LieTrotter", "SuzukiTrotter"} <= set(manager.method_names("Evolution"))
+    assert {"LieTrotter", "SuzukiTrotter", "QDrift"} <= set(manager.method_names("Evolution"))
+    assert manager.method("Evolution", "QDrift") is FermionicQDrift
     assert manager.method("Evolution", "LieTrotter") is FermionicLieTrotter
     assert manager.method("Evolution", "SuzukiTrotter") is FermionicSuzukiTrotter
     assert "Evolution" in manager.op_names()

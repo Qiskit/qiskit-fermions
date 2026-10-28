@@ -14,12 +14,34 @@
 
 from __future__ import annotations
 
+import numpy as np
 from qiskit.dagcircuit import DAGOpNode
 
 from qiskit_fermions.circuit import FermionicDAGCircuit
 from qiskit_fermions.circuit.library import Evolution
 
 from ... import FermionicDAGCircuitPass
+
+
+def _same_value(a: object, b: object) -> bool:
+    """Whether two attribute values are equal, which ``==`` cannot say for arrays."""
+    if isinstance(a, np.ndarray) or isinstance(b, np.ndarray):
+        return bool(np.array_equal(a, b))
+    return bool(a == b)
+
+
+def _same_synthesis(a: object, b: object) -> bool:
+    """Whether two synthesis methods are of one kind and hold identical settings.
+
+    This compares the settings one by one rather than as a whole, because a method may hold an array
+    (sampling weights, say), whose comparison has no single truth value.
+    """
+    if type(a) is not type(b):
+        return False
+    settings_a, settings_b = vars(a), vars(b)
+    return settings_a.keys() == settings_b.keys() and all(
+        _same_value(settings_a[key], settings_b[key]) for key in settings_a
+    )
 
 
 def _mergeable(first: DAGOpNode, second: DAGOpNode, atol: float) -> bool:
@@ -34,9 +56,7 @@ def _mergeable(first: DAGOpNode, second: DAGOpNode, atol: float) -> bool:
     # an atomic gate must stay atomic, and a decomposable one must keep the way it decomposes
     if a.atomic != b.atomic:
         return False
-    if not a.atomic and (
-        type(a.synthesis) is not type(b.synthesis) or vars(a.synthesis) != vars(b.synthesis)
-    ):
+    if not a.atomic and not _same_synthesis(a.synthesis, b.synthesis):
         return False
 
     return bool(a.operator.equiv(b.operator, atol))

@@ -14,6 +14,7 @@
 
 from __future__ import annotations
 
+import numpy as np
 import pytest
 from qiskit_fermions.circuit import FermionicCircuit
 from qiskit_fermions.circuit.library import Evolution
@@ -205,6 +206,36 @@ def test_no_merge_of_different_synthesis():
     )
 
     assert _times(_merge(circ)) == pytest.approx([0.1, 0.2])
+
+
+class _WeightedSynthesis:
+    """A synthesis method whose settings include an array, which ``==`` cannot compare."""
+
+    def __init__(self, weights: list[float]) -> None:
+        self.weights = np.asarray(weights, dtype=float)
+
+    def synthesize(self, gate):  # pragma: no cover - never called, only compared
+        raise NotImplementedError
+
+
+def test_no_merge_of_different_array_settings():
+    """Array-valued settings are compared by value: different arrays must not merge, or raise."""
+    circ = FermionicCircuit(2)
+    for time, weights in ((0.1, [1.0, 2.0]), (0.2, [1.0, 3.0])):
+        synthesis = _WeightedSynthesis(weights)
+        circ.append(Evolution(2, _hopping(), time=time, synthesis=synthesis), circ.modes)
+
+    assert _times(_merge(circ)) == pytest.approx([0.1, 0.2])
+
+
+def test_merge_of_equal_array_settings():
+    """Equal arrays held in distinct objects describe the same method, so the gates merge."""
+    circ = FermionicCircuit(2)
+    for time in (0.1, 0.2):
+        synthesis = _WeightedSynthesis([1.0, 2.0])
+        circ.append(Evolution(2, _hopping(), time=time, synthesis=synthesis), circ.modes)
+
+    assert _times(_merge(circ)) == pytest.approx([0.3])
 
 
 def test_merge_stretches_split_by_a_different_operator():

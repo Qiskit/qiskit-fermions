@@ -27,7 +27,7 @@ from qiskit.passmanager import MultiStagePassManager
 from qiskit.quantum_info import Operator, SparsePauliOp
 from qiskit_fermions.circuit import FermionicCircuit
 from qiskit_fermions.circuit.library import Evolution
-from qiskit_fermions.circuit.library.synthesis import FermionicLieTrotter
+from qiskit_fermions.circuit.library.synthesis import FermionicLieTrotter, FermionicQDrift
 from qiskit_fermions.mappers.library import jordan_wigner
 from qiskit_fermions.operators import FermionOperator
 from qiskit_fermions.transpiler import (
@@ -39,7 +39,6 @@ from qiskit_fermions.transpiler.passes import (
     F2FSynthesis,
     F2QSynthesis,
     MapperFnEvolutionSynthesis,
-    QDriftTrotterization,
     RelabelModes,
     TrivialF2QLayout,
 )
@@ -212,7 +211,7 @@ def test_qdrift_keeps_the_circuit_order_of_a_substituted_dag():
     )
     assert _signature(dag, dag.op_nodes()) != _signature(dag, dag.topological_op_nodes())
 
-    sampled = QDriftTrotterization(1, rng=0).run(dag)
+    sampled = F2FSynthesis({"Evolution": FermionicQDrift(1, rng=0)}).run(dag)
 
     times = [float(node.op.params[0]) for node in sampled.topological_op_nodes()]
     assert times == sorted(times)
