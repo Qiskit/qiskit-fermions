@@ -12,6 +12,11 @@
 
   
   
+   .. rubric:: Attributes
+    
+   .. autoattribute:: atomic
+   .. autoattribute:: synthesis
+  
   
   
    .. rubric:: Inherited Attributes
@@ -163,9 +168,19 @@
 
   
 
+  
+
+  
+
+  
+
 
 
   
+  
+   .. rubric:: Methods
+    
+   .. automethod:: with_synthesis
   
   
   

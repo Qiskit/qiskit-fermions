@@ -3,12 +3,12 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="FermionicLieTrotter" href="qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter.html"><link rel="prev" title="Fermionic Synthesis" href="../pydoc/qiskit_fermions.circuit.library.synthesis.html">
+<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="FermionicLieTrotter" href="qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter.html"><link rel="prev" title="F2FSynthesisPlugin" href="qiskit_fermions.circuit.library.synthesis.F2FSynthesisPlugin.html">
         <link rel="prefetch" href="../_static/images/qiskit-light-logo.svg" as="image">
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>FermionicEvolutionSynthesis - Qiskit Fermions 0.4.0.dev0+e2ff0a3</title>
+        <title>F2FSynthesisPluginManager - Qiskit Fermions 0.4.0.dev0+bf5fb72</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=fc6d6d93" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.4.0.dev0+e2ff0a3</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.4.0.dev0+bf5fb72</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.4.0.dev0+e2ff0a3</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.4.0.dev0+bf5fb72</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -319,10 +319,13 @@
 <li class="toctree-l3"><a class="reference internal" href="qiskit_fermions.circuit.library.FermionicMeasure.html">FermionicMeasure</a></li>
 </ul>
 </li>
-<li class="toctree-l2 current has-children"><a class="reference internal" href="../pydoc/qiskit_fermions.circuit.library.synthesis.html">Fermionic Synthesis</a><input aria-label="Toggle navigation of Fermionic Synthesis" checked="" class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"/><label for="toctree-checkbox-12"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
-<li class="toctree-l3 current current-page"><a class="current reference internal" href="#">FermionicEvolutionSynthesis</a></li>
+<li class="toctree-l2 current has-children"><a class="reference internal" href="../pydoc/qiskit_fermions.circuit.library.synthesis.html">Circuit Library Synthesis (<code class="docutils literal notranslate"><span class="pre">F2F</span></code>)</a><input aria-label="Toggle navigation of Circuit Library Synthesis (F2F)" checked="" class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"/><label for="toctree-checkbox-12"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="qiskit_fermions.circuit.library.synthesis.F2FSynthesisPlugin.html">F2FSynthesisPlugin</a></li>
+<li class="toctree-l3 current current-page"><a class="current reference internal" href="#">F2FSynthesisPluginManager</a></li>
 <li class="toctree-l3"><a class="reference internal" href="qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter.html">FermionicLieTrotter</a></li>
 <li class="toctree-l3"><a class="reference internal" href="qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter.html">FermionicSuzukiTrotter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qiskit_fermions.circuit.library.synthesis.FermionicGivensDecomposition.html">FermionicGivensDecomposition</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qiskit_fermions.circuit.library.synthesis.FermionicSlaterGivensDecomposition.html">FermionicSlaterGivensDecomposition</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../pydoc/qiskit_fermions.transpiler.html">Transpiler</a><input aria-label="Toggle navigation of Transpiler" class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -334,26 +337,29 @@
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../pydoc/qiskit_fermions.transpiler.passes.html">Transpiler Passes</a><input aria-label="Toggle navigation of Transpiler Passes" class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" role="switch" type="checkbox"/><label for="toctree-checkbox-14"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="qiskit_fermions.transpiler.passes.FermionicTrotterization.html">FermionicTrotterization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qiskit_fermions.transpiler.passes.F2FSynthesis.html">F2FSynthesis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qiskit_fermions.transpiler.passes.optimization.f2f_synthesis.F2FSynthesisConfig.html">F2FSynthesisConfig</a></li>
 <li class="toctree-l3"><a class="reference internal" href="qiskit_fermions.transpiler.passes.MergeEvolutions.html">MergeEvolutions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="qiskit_fermions.transpiler.passes.MergeOrbitalRotations.html">MergeOrbitalRotations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="qiskit_fermions.transpiler.passes.MergeSlaterDeterminantPreparation.html">MergeSlaterDeterminantPreparation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="qiskit_fermions.transpiler.passes.QDriftTrotterization.html">QDriftTrotterization</a></li>
 <li class="toctree-l3"><a class="reference internal" href="qiskit_fermions.transpiler.passes.RelabelModes.html">RelabelModes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qiskit_fermions.transpiler.passes.FermionicTrotterization.html">FermionicTrotterization</a></li>
 <li class="toctree-l3"><a class="reference internal" href="qiskit_fermions.transpiler.passes.TrivialF2QLayout.html">TrivialF2QLayout</a></li>
 <li class="toctree-l3"><a class="reference internal" href="qiskit_fermions.transpiler.passes.CustomF2QLayout.html">CustomF2QLayout</a></li>
 <li class="toctree-l3"><a class="reference internal" href="qiskit_fermions.transpiler.passes.F2QSynthesis.html">F2QSynthesis</a></li>
-<li class="toctree-l3"><a class="reference internal" href="qiskit_fermions.transpiler.passes.synthesis.synthesis.F2QSynthesisConfig.html">F2QSynthesisConfig</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qiskit_fermions.transpiler.passes.synthesis.f2q_synthesis.F2QSynthesisConfig.html">F2QSynthesisConfig</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../pydoc/qiskit_fermions.transpiler.passes.plugins.html">Transpiler Pass Plugins</a><input aria-label="Toggle navigation of Transpiler Pass Plugins" class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../pydoc/qiskit_fermions.transpiler.passes.synthesis.html">Transpiler Pass Synthesis (<code class="docutils literal notranslate"><span class="pre">F2Q</span></code>)</a><input aria-label="Toggle navigation of Transpiler Pass Synthesis (F2Q)" class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="qiskit_fermions.transpiler.passes.synthesis.F2QSynthesisPlugin.html">F2QSynthesisPlugin</a></li>
 <li class="toctree-l3"><a class="reference internal" href="qiskit_fermions.transpiler.passes.synthesis.F2QSynthesisPluginManager.html">F2QSynthesisPluginManager</a></li>
-<li class="toctree-l3"><a class="reference internal" href="qiskit_fermions.transpiler.passes.synthesis.GivensDecompositionOrbitalRotationSynthesis.html">GivensDecompositionOrbitalRotationSynthesis</a></li>
-<li class="toctree-l3"><a class="reference internal" href="qiskit_fermions.transpiler.passes.synthesis.GivensDecompositionSlaterDeterminantSynthesis.html">GivensDecompositionSlaterDeterminantSynthesis</a></li>
 <li class="toctree-l3"><a class="reference internal" href="qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis.html">MapperFnEvolutionSynthesis</a></li>
 <li class="toctree-l3"><a class="reference internal" href="qiskit_fermions.transpiler.passes.synthesis.TrivialOccupationFermionicMeasureSynthesis.html">TrivialOccupationFermionicMeasureSynthesis</a></li>
 <li class="toctree-l3"><a class="reference internal" href="qiskit_fermions.transpiler.passes.synthesis.TrivialOccupationInitializeModesSynthesis.html">TrivialOccupationInitializeModesSynthesis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qiskit_fermions.transpiler.passes.synthesis.GivensDecompositionOrbitalRotationSynthesis.html">GivensDecompositionOrbitalRotationSynthesis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qiskit_fermions.transpiler.passes.synthesis.GivensDecompositionSlaterDeterminantSynthesis.html">GivensDecompositionSlaterDeterminantSynthesis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qiskit_fermions.transpiler.passes.synthesis.HopEvolutionSynthesis.html">HopEvolutionSynthesis</a></li>
 <li class="toctree-l3"><a class="reference internal" href="qiskit_fermions.transpiler.passes.synthesis.group_wise.html">group_wise</a></li>
 <li class="toctree-l3"><a class="reference internal" href="qiskit_fermions.transpiler.passes.synthesis.simplify.html">simplify</a></li>
 </ul>
@@ -429,7 +435,7 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="../_sources/stubs/qiskit_fermions.circuit.library.synthesis.FermionicEvolutionSynthesis.rst.txt" title="View this page">
+  <a class="muted-link" href="../_sources/stubs/qiskit_fermions.circuit.library.synthesis.F2FSynthesisPluginManager.rst.txt" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
@@ -447,52 +453,87 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="fermionicevolutionsynthesis">
-<h1>FermionicEvolutionSynthesis<a class="headerlink" href="#fermionicevolutionsynthesis" title="Link to this heading">¶</a></h1>
+          <section id="f2fsynthesispluginmanager">
+<h1>F2FSynthesisPluginManager<a class="headerlink" href="#f2fsynthesispluginmanager" title="Link to this heading">¶</a></h1>
 <dl class="py class">
-<dt class="sig sig-object py" id="qiskit_fermions.circuit.library.synthesis.FermionicEvolutionSynthesis">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">FermionicEvolutionSynthesis</span></span><a class="headerlink" href="#qiskit_fermions.circuit.library.synthesis.FermionicEvolutionSynthesis" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></a></p>
-<p>The interface for <cite>fermion-to-fermion</cite> synthesis of an <a class="reference internal" href="qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate.</p>
-<p>An implementation of this interface rewrites the time evolution <span class="math">\(e^{-i t H}\)</span> carried by an
-<a class="reference internal" href="qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate into a <a class="reference internal" href="qiskit_fermions.circuit.FermionicCircuit.html#qiskit_fermions.circuit.FermionicCircuit" title="qiskit_fermions.circuit.FermionicCircuit"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicCircuit</span></code></a> of <em>smaller</em> <a class="reference internal" href="qiskit_fermions.circuit.FermionicGate.html#qiskit_fermions.circuit.FermionicGate" title="qiskit_fermions.circuit.FermionicGate"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicGate</span></code></a>
-instances. Both sides of that rewrite live in <cite>fermionic</cite> space, which is what distinguishes this
-from the fermion-to-qubit synthesis performed later by <a class="reference internal" href="qiskit_fermions.transpiler.passes.F2QSynthesis.html#qiskit_fermions.transpiler.passes.F2QSynthesis" title="qiskit_fermions.transpiler.passes.F2QSynthesis"><code class="xref py py-class docutils literal notranslate"><span class="pre">F2QSynthesis</span></code></a>: the fermionic
-structure of <code class="docutils literal notranslate"><span class="pre">H</span></code> (in particular its <a class="reference internal" href="qiskit_fermions.operators.OperatorTrait.html#qiskit_fermions.operators.OperatorTrait.groups" title="qiskit_fermions.operators.OperatorTrait.groups"><code class="xref py py-attr docutils literal notranslate"><span class="pre">groups</span></code></a>
-(see <a class="reference internal" href="../guides/grouping.html#grouping-explanation"><span class="std std-ref">Group operator terms: use the operator structure</span></a>)) survives and is still available to that later stage.</p>
-<div class="admonition important">
-<p class="admonition-title">Important</p>
-<p>This fermion-to-fermion step is <strong>optional</strong>. An <a class="reference internal" href="qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate does not need to be
-broken down in fermionic space at all: the fermion-to-qubit stage can map and synthesize it
-directly, however many terms its operator holds. Splitting it up first is a <em>choice</em>, made
-because the resulting factors are individually cheaper to implement, or because the split
-exposes structure (such as mutually commuting groups) that the later stage can exploit.</p>
+<dt class="sig sig-object py" id="qiskit_fermions.circuit.library.synthesis.F2FSynthesisPluginManager">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">F2FSynthesisPluginManager</span></span><a class="headerlink" href="#qiskit_fermions.circuit.library.synthesis.F2FSynthesisPluginManager" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>A simple manager of the installed fermion-to-fermion synthesis plugins.</p>
+<p>All plugins that are registered under the <code class="docutils literal notranslate"><span class="pre">qiskit_fermions.circuit.synthesis</span></code>
+<a class="reference external" href="https://setuptools.pypa.io/en/latest/userguide/entry_point.html">entry-point</a> will be
+available to this class and get exposed by the <a class="reference internal" href="#qiskit_fermions.circuit.library.synthesis.F2FSynthesisPluginManager.plugins" title="qiskit_fermions.circuit.library.synthesis.F2FSynthesisPluginManager.plugins"><code class="xref py py-attr docutils literal notranslate"><span class="pre">plugins</span></code></a> attribute. The name of an entry
+point is the name of the gate class followed by the name of the method, separated by a dot, for
+example <code class="docutils literal notranslate"><span class="pre">OrbitalRotation.Givens</span></code>. Below is the table from the <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code> of this package
+itself:</p>
+<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="k">[project.entry-points.</span><span class="s2">"qiskit_fermions.circuit.synthesis"</span><span class="k">]</span>
+<span class="s2">"Evolution.LieTrotter"</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"qiskit_fermions.circuit.library.synthesis:FermionicLieTrotter"</span>
+<span class="s2">"Evolution.SuzukiTrotter"</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"qiskit_fermions.circuit.library.synthesis:FermionicSuzukiTrotter"</span>
+<span class="s2">"OrbitalRotation.Givens"</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"qiskit_fermions.circuit.library.synthesis:FermionicGivensDecomposition"</span>
+<span class="s2">"PrepareSlaterDeterminant.Givens"</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"qiskit_fermions.circuit.library.synthesis:FermionicSlaterGivensDecomposition"</span>
+</pre></div>
 </div>
-<p>Because the fermion-to-fermion and fermion-to-qubit steps compose, an evolution may end up
-approximated at either level, at both, or at neither. Where an approximation is involved at both,
-the accuracy of the result is governed by the weaker of the two.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Qiskit’s <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.synthesis.EvolutionSynthesis" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">EvolutionSynthesis</span></code></a> is the closest analogue, but it belongs
-to the qubit layer: it synthesizes a <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.library.PauliEvolutionGate" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">PauliEvolutionGate</span></code></a> into a
-<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumCircuit</span></code></a>, after the operator has already been mapped.</p>
-</div>
+<p>An overview of all builtin plugins is given <a class="reference internal" href="../pydoc/qiskit_fermions.circuit.library.synthesis.html#builtin-f2f-synthesis-plugins"><span class="std std-ref">here</span></a>.</p>
+<p class="rubric">Attributes</p>
+<dl class="field-list simple">
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qiskit_fermions.circuit.library.synthesis.F2FSynthesisPluginManager.plugins">
+<span class="sig-name descname"><span class="pre">plugins</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#qiskit_fermions.circuit.library.synthesis.F2FSynthesisPluginManager.plugins" title="Link to this definition">¶</a></dt>
+<dd><p>A dictionary mapping gate names to their synthesis methods.</p>
+<p>The keys of this dictionary are names of <a class="reference internal" href="qiskit_fermions.circuit.FermionicGate.html#qiskit_fermions.circuit.FermionicGate" title="qiskit_fermions.circuit.FermionicGate"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicGate</span></code></a> classes. The values are the
+list of installed <a class="reference internal" href="qiskit_fermions.circuit.library.synthesis.F2FSynthesisPlugin.html#qiskit_fermions.circuit.library.synthesis.F2FSynthesisPlugin" title="qiskit_fermions.circuit.library.synthesis.F2FSynthesisPlugin"><code class="xref py py-class docutils literal notranslate"><span class="pre">F2FSynthesisPlugin</span></code></a> methods that may be used to synthesize the
+instances of that particular gate.</p>
+</dd></dl>
+
 <p class="rubric">Methods</p>
 <dl class="py method">
-<dt class="sig sig-object py" id="qiskit_fermions.circuit.library.synthesis.FermionicEvolutionSynthesis.synthesize">
-<span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">synthesize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gate</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qiskit_fermions.circuit.library.synthesis.FermionicEvolutionSynthesis.synthesize" title="Link to this definition">¶</a></dt>
-<dd><p>Synthesizes the provided <a class="reference internal" href="qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate.</p>
+<dt class="sig sig-object py" id="qiskit_fermions.circuit.library.synthesis.F2FSynthesisPluginManager.method">
+<span class="sig-name descname"><span class="pre">method</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">op_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qiskit_fermions.circuit.library.synthesis.F2FSynthesisPluginManager.method" title="Link to this definition">¶</a></dt>
+<dd><p>Returns the requested <a class="reference internal" href="qiskit_fermions.circuit.library.synthesis.F2FSynthesisPlugin.html#qiskit_fermions.circuit.library.synthesis.F2FSynthesisPlugin" title="qiskit_fermions.circuit.library.synthesis.F2FSynthesisPlugin"><code class="xref py py-class docutils literal notranslate"><span class="pre">F2FSynthesisPlugin</span></code></a> type.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>gate</strong> (<a class="reference internal" href="qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><em>Evolution</em></a>) – the gate to synthesize. Its
-<a class="reference internal" href="qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution.operator" title="qiskit_fermions.circuit.library.Evolution.operator"><code class="xref py py-attr docutils literal notranslate"><span class="pre">operator</span></code></a> is the Hermitian operator
-<span class="math">\(H\)</span> and its <code class="docutils literal notranslate"><span class="pre">params[0]</span></code> the evolution time <span class="math">\(t\)</span> of <span class="math">\(e^{-i t H}\)</span>.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>op_name</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a>) – the name of the gate whose plugin to return.</p></li>
+<li><p><strong>method_name</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a>) – the name of the synthesis plugin.</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A <a class="reference internal" href="qiskit_fermions.circuit.FermionicCircuit.html#qiskit_fermions.circuit.FermionicCircuit" title="qiskit_fermions.circuit.FermionicCircuit"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicCircuit</span></code></a> on <code class="docutils literal notranslate"><span class="pre">gate.num_modes</span></code> modes implementing the evolution.</p>
+<dd class="field-even"><p>The <a class="reference internal" href="qiskit_fermions.circuit.library.synthesis.F2FSynthesisPlugin.html#qiskit_fermions.circuit.library.synthesis.F2FSynthesisPlugin" title="qiskit_fermions.circuit.library.synthesis.F2FSynthesisPlugin"><code class="xref py py-class docutils literal notranslate"><span class="pre">F2FSynthesisPlugin</span></code></a> class.</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#KeyError" title="(in Python v3.15)"><strong>KeyError</strong></a> – if no plugin is registered under that name.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#type" title="(in Python v3.15)">type</a>[<a class="reference internal" href="qiskit_fermions.circuit.library.synthesis.F2FSynthesisPlugin.html#qiskit_fermions.circuit.library.synthesis.F2FSynthesisPlugin" title="qiskit_fermions.circuit.library.synthesis.plugin.F2FSynthesisPlugin"><em>F2FSynthesisPlugin</em></a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qiskit_fermions.circuit.library.synthesis.F2FSynthesisPluginManager.method_names">
+<span class="sig-name descname"><span class="pre">method_names</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">op_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qiskit_fermions.circuit.library.synthesis.F2FSynthesisPluginManager.method_names" title="Link to this definition">¶</a></dt>
+<dd><p>Returns the names of all installed plugin methods for a given gate.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>op_name</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a>) – the name of the gate whose synthesis methods to return.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The list of installed plugin method names.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="qiskit_fermions.circuit.FermionicCircuit.html#qiskit_fermions.circuit.FermionicCircuit" title="qiskit_fermions.circuit.FermionicCircuit">FermionicCircuit</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)">list</a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)">str</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qiskit_fermions.circuit.library.synthesis.F2FSynthesisPluginManager.op_names">
+<span class="sig-name descname"><span class="pre">op_names</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qiskit_fermions.circuit.library.synthesis.F2FSynthesisPluginManager.op_names" title="Link to this definition">¶</a></dt>
+<dd><p>Returns the names of all gates for which any plugin is installed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)">list</a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)">str</a>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -515,14 +556,14 @@ to the qubit layer: it synthesizes a <a class="reference external" href="https:/
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="../pydoc/qiskit_fermions.circuit.library.synthesis.html">
+          <a class="prev-page" href="qiskit_fermions.circuit.library.synthesis.F2FSynthesisPlugin.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Fermionic Synthesis</div>
+                <div class="title">F2FSynthesisPlugin</div>
                 
               </div>
             </a>
@@ -557,9 +598,12 @@ to the qubit layer: it synthesizes a <a class="reference external" href="https:/
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">FermionicEvolutionSynthesis</a><ul>
-<li><a class="reference internal" href="#qiskit_fermions.circuit.library.synthesis.FermionicEvolutionSynthesis"><code class="docutils literal notranslate"><span class="pre">FermionicEvolutionSynthesis</span></code></a><ul>
-<li><a class="reference internal" href="#qiskit_fermions.circuit.library.synthesis.FermionicEvolutionSynthesis.synthesize"><code class="docutils literal notranslate"><span class="pre">FermionicEvolutionSynthesis.synthesize()</span></code></a></li>
+<li><a class="reference internal" href="#">F2FSynthesisPluginManager</a><ul>
+<li><a class="reference internal" href="#qiskit_fermions.circuit.library.synthesis.F2FSynthesisPluginManager"><code class="docutils literal notranslate"><span class="pre">F2FSynthesisPluginManager</span></code></a><ul>
+<li><a class="reference internal" href="#qiskit_fermions.circuit.library.synthesis.F2FSynthesisPluginManager.plugins"><code class="docutils literal notranslate"><span class="pre">F2FSynthesisPluginManager.plugins</span></code></a></li>
+<li><a class="reference internal" href="#qiskit_fermions.circuit.library.synthesis.F2FSynthesisPluginManager.method"><code class="docutils literal notranslate"><span class="pre">F2FSynthesisPluginManager.method()</span></code></a></li>
+<li><a class="reference internal" href="#qiskit_fermions.circuit.library.synthesis.F2FSynthesisPluginManager.method_names"><code class="docutils literal notranslate"><span class="pre">F2FSynthesisPluginManager.method_names()</span></code></a></li>
+<li><a class="reference internal" href="#qiskit_fermions.circuit.library.synthesis.F2FSynthesisPluginManager.op_names"><code class="docutils literal notranslate"><span class="pre">F2FSynthesisPluginManager.op_names()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -573,7 +617,7 @@ to the qubit layer: it synthesizes a <a class="reference external" href="https:/
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=7c7e38b3"></script>
+</div><script src="../_static/documentation_options.js?v=65856bcf"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

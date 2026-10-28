@@ -14,7 +14,7 @@
   
    .. rubric:: Attributes
     
-   .. autoattribute:: synthesis
+   .. autoattribute:: methods
    .. autoattribute:: apply
    .. autoattribute:: filter
   
@@ -104,10 +104,6 @@
 
   
   
-   .. rubric:: Methods
-    
-   .. automethod:: run
-  
   
   
   
@@ -116,6 +112,7 @@
     
    .. automethod:: execute
    .. automethod:: name
+   .. automethod:: run
    .. automethod:: update_status
   
   

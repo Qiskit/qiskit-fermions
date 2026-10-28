@@ -1,0 +1,98 @@
+﻿F2FSynthesisPluginManager
+=========================
+
+.. currentmodule:: qiskit_fermions.circuit.library.synthesis
+
+.. autoclass:: F2FSynthesisPluginManager
+   :show-inheritance:
+   :no-members:
+   :no-inherited-members:
+   :special-members:
+
+
+  
+  
+   .. rubric:: Attributes
+    
+   .. autoattribute:: plugins
+  
+  
+  
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+  
+  
+   .. rubric:: Methods
+    
+   .. automethod:: method
+   .. automethod:: method_names
+   .. automethod:: op_names
+  
+  
+  
+  
+  
+  
+  

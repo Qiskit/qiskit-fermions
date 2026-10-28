@@ -3,12 +3,12 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="FermionicTrotterization" href="../stubs/qiskit_fermions.transpiler.passes.FermionicTrotterization.html"><link rel="prev" title="QuantumDAGToCircuit" href="../stubs/qiskit_fermions.transpiler.QuantumDAGToCircuit.html">
+<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="F2FSynthesis" href="../stubs/qiskit_fermions.transpiler.passes.F2FSynthesis.html"><link rel="prev" title="QuantumDAGToCircuit" href="../stubs/qiskit_fermions.transpiler.QuantumDAGToCircuit.html">
         <link rel="prefetch" href="../_static/images/qiskit-light-logo.svg" as="image">
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Transpiler Passes - Qiskit Fermions 0.4.0.dev0+e2ff0a3</title>
+        <title>Transpiler Passes - Qiskit Fermions 0.4.0.dev0+bf5fb72</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=fc6d6d93" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.4.0.dev0+e2ff0a3</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.4.0.dev0+bf5fb72</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.4.0.dev0+e2ff0a3</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.4.0.dev0+bf5fb72</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -319,10 +319,13 @@
 <li class="toctree-l3"><a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.FermionicMeasure.html">FermionicMeasure</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="qiskit_fermions.circuit.library.synthesis.html">Fermionic Synthesis</a><input aria-label="Toggle navigation of Fermionic Synthesis" class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"/><label for="toctree-checkbox-12"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.synthesis.FermionicEvolutionSynthesis.html">FermionicEvolutionSynthesis</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="qiskit_fermions.circuit.library.synthesis.html">Circuit Library Synthesis (<code class="docutils literal notranslate"><span class="pre">F2F</span></code>)</a><input aria-label="Toggle navigation of Circuit Library Synthesis (F2F)" class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"/><label for="toctree-checkbox-12"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.synthesis.F2FSynthesisPlugin.html">F2FSynthesisPlugin</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.synthesis.F2FSynthesisPluginManager.html">F2FSynthesisPluginManager</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter.html">FermionicLieTrotter</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter.html">FermionicSuzukiTrotter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.synthesis.FermionicGivensDecomposition.html">FermionicGivensDecomposition</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.synthesis.FermionicSlaterGivensDecomposition.html">FermionicSlaterGivensDecomposition</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="qiskit_fermions.transpiler.html">Transpiler</a><input aria-label="Toggle navigation of Transpiler" class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -334,26 +337,29 @@
 </ul>
 </li>
 <li class="toctree-l2 current has-children current-page"><a class="current reference internal" href="#">Transpiler Passes</a><input aria-label="Toggle navigation of Transpiler Passes" checked="" class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" role="switch" type="checkbox"/><label for="toctree-checkbox-14"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.FermionicTrotterization.html">FermionicTrotterization</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.F2FSynthesis.html">F2FSynthesis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.optimization.f2f_synthesis.F2FSynthesisConfig.html">F2FSynthesisConfig</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.MergeEvolutions.html">MergeEvolutions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.MergeOrbitalRotations.html">MergeOrbitalRotations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.MergeSlaterDeterminantPreparation.html">MergeSlaterDeterminantPreparation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.QDriftTrotterization.html">QDriftTrotterization</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.RelabelModes.html">RelabelModes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.FermionicTrotterization.html">FermionicTrotterization</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.TrivialF2QLayout.html">TrivialF2QLayout</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.CustomF2QLayout.html">CustomF2QLayout</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.F2QSynthesis.html">F2QSynthesis</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.synthesis.synthesis.F2QSynthesisConfig.html">F2QSynthesisConfig</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.synthesis.f2q_synthesis.F2QSynthesisConfig.html">F2QSynthesisConfig</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="qiskit_fermions.transpiler.passes.plugins.html">Transpiler Pass Plugins</a><input aria-label="Toggle navigation of Transpiler Pass Plugins" class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="qiskit_fermions.transpiler.passes.synthesis.html">Transpiler Pass Synthesis (<code class="docutils literal notranslate"><span class="pre">F2Q</span></code>)</a><input aria-label="Toggle navigation of Transpiler Pass Synthesis (F2Q)" class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.synthesis.F2QSynthesisPlugin.html">F2QSynthesisPlugin</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.synthesis.F2QSynthesisPluginManager.html">F2QSynthesisPluginManager</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.synthesis.GivensDecompositionOrbitalRotationSynthesis.html">GivensDecompositionOrbitalRotationSynthesis</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.synthesis.GivensDecompositionSlaterDeterminantSynthesis.html">GivensDecompositionSlaterDeterminantSynthesis</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis.html">MapperFnEvolutionSynthesis</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.synthesis.TrivialOccupationFermionicMeasureSynthesis.html">TrivialOccupationFermionicMeasureSynthesis</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.synthesis.TrivialOccupationInitializeModesSynthesis.html">TrivialOccupationInitializeModesSynthesis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.synthesis.GivensDecompositionOrbitalRotationSynthesis.html">GivensDecompositionOrbitalRotationSynthesis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.synthesis.GivensDecompositionSlaterDeterminantSynthesis.html">GivensDecompositionSlaterDeterminantSynthesis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.synthesis.HopEvolutionSynthesis.html">HopEvolutionSynthesis</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.synthesis.group_wise.html">group_wise</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.synthesis.simplify.html">simplify</a></li>
 </ul>
@@ -457,23 +463,29 @@
 <div class="table-wrapper autosummary longtable docutils container">
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.FermionicTrotterization.html#qiskit_fermions.transpiler.passes.FermionicTrotterization" title="qiskit_fermions.transpiler.passes.FermionicTrotterization"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FermionicTrotterization</span></code></a>(synthesis, *[, ...])</p></td>
-<td><p>A transpilation pass Trotterizing <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gates in fermionic space.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.F2FSynthesis.html#qiskit_fermions.transpiler.passes.F2FSynthesis" title="qiskit_fermions.transpiler.passes.F2FSynthesis"><code class="xref py py-obj docutils literal notranslate"><span class="pre">F2FSynthesis</span></code></a>([config, apply, filter])</p></td>
+<td><p>A transpilation pass breaking gates down into smaller ones in fermionic space.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.MergeEvolutions.html#qiskit_fermions.transpiler.passes.MergeEvolutions" title="qiskit_fermions.transpiler.passes.MergeEvolutions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MergeEvolutions</span></code></a>([atol])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.optimization.f2f_synthesis.F2FSynthesisConfig.html#qiskit_fermions.transpiler.passes.optimization.f2f_synthesis.F2FSynthesisConfig" title="qiskit_fermions.transpiler.passes.optimization.f2f_synthesis.F2FSynthesisConfig"><code class="xref py py-obj docutils literal notranslate"><span class="pre">F2FSynthesisConfig</span></code></a></p></td>
+<td><p>The dictionary type used to configure the <a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.F2FSynthesis.html#qiskit_fermions.transpiler.passes.F2FSynthesis.methods" title="qiskit_fermions.transpiler.passes.F2FSynthesis.methods"><code class="xref py py-attr docutils literal notranslate"><span class="pre">F2FSynthesis.methods</span></code></a>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.MergeEvolutions.html#qiskit_fermions.transpiler.passes.MergeEvolutions" title="qiskit_fermions.transpiler.passes.MergeEvolutions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MergeEvolutions</span></code></a>([atol])</p></td>
 <td><p>A transpilation pass merging consecutive <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gates of the same operator.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.MergeOrbitalRotations.html#qiskit_fermions.transpiler.passes.MergeOrbitalRotations" title="qiskit_fermions.transpiler.passes.MergeOrbitalRotations"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MergeOrbitalRotations</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.MergeOrbitalRotations.html#qiskit_fermions.transpiler.passes.MergeOrbitalRotations" title="qiskit_fermions.transpiler.passes.MergeOrbitalRotations"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MergeOrbitalRotations</span></code></a>()</p></td>
 <td><p>A transpilation pass merging runs of consecutive orbital rotations into a single one.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.MergeSlaterDeterminantPreparation.html#qiskit_fermions.transpiler.passes.MergeSlaterDeterminantPreparation" title="qiskit_fermions.transpiler.passes.MergeSlaterDeterminantPreparation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MergeSlaterDeterminantPreparation</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.MergeSlaterDeterminantPreparation.html#qiskit_fermions.transpiler.passes.MergeSlaterDeterminantPreparation" title="qiskit_fermions.transpiler.passes.MergeSlaterDeterminantPreparation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MergeSlaterDeterminantPreparation</span></code></a>()</p></td>
 <td><p>A transpilation pass fusing an initialization and rotation into a Slater determinant prep.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.QDriftTrotterization.html#qiskit_fermions.transpiler.passes.QDriftTrotterization" title="qiskit_fermions.transpiler.passes.QDriftTrotterization"><code class="xref py py-obj docutils literal notranslate"><span class="pre">QDriftTrotterization</span></code></a>(num_terms, *[, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.QDriftTrotterization.html#qiskit_fermions.transpiler.passes.QDriftTrotterization" title="qiskit_fermions.transpiler.passes.QDriftTrotterization"><code class="xref py py-obj docutils literal notranslate"><span class="pre">QDriftTrotterization</span></code></a>(num_terms, *[, ...])</p></td>
 <td><p>A transpilation pass to Trotterize <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gates via the qDRIFT protocol.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.RelabelModes.html#qiskit_fermions.transpiler.passes.RelabelModes" title="qiskit_fermions.transpiler.passes.RelabelModes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RelabelModes</span></code></a>([permutation, solver])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.RelabelModes.html#qiskit_fermions.transpiler.passes.RelabelModes" title="qiskit_fermions.transpiler.passes.RelabelModes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RelabelModes</span></code></a>([permutation, solver])</p></td>
 <td><p>A transpilation pass to relabel the fermionic modes.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.FermionicTrotterization.html#qiskit_fermions.transpiler.passes.FermionicTrotterization" title="qiskit_fermions.transpiler.passes.FermionicTrotterization"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FermionicTrotterization</span></code></a>(synthesis, *[, ...])</p></td>
+<td><p><strong>DEPRECATED</strong> The former pass to Trotterize <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gates.</p></td>
 </tr>
 </tbody>
 </table>
@@ -506,7 +518,7 @@ needs to be placed in the <code class="docutils literal notranslate"><span class
 <a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.F2QSynthesis.html#qiskit_fermions.transpiler.passes.F2QSynthesis" title="qiskit_fermions.transpiler.passes.F2QSynthesis"><code class="xref py py-class docutils literal notranslate"><span class="pre">F2QSynthesis</span></code></a>. It is conceptually similar to Qiskit’s
 <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.transpiler.passes.HighLevelSynthesis" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">HighLevelSynthesis</span></code></a> because it simply iterates over the
 <a class="reference internal" href="../stubs/qiskit_fermions.circuit.FermionicDAGCircuit.html#qiskit_fermions.circuit.FermionicDAGCircuit" title="qiskit_fermions.circuit.FermionicDAGCircuit"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicDAGCircuit</span></code></a> instructions and delegates the mapping to qubit-based instructions to
-<a class="reference internal" href="qiskit_fermions.transpiler.passes.plugins.html#qiskit-fermions-transpiler-passes-synthesis-plugins"><span class="std std-ref">Transpiler Pass Plugins</span></a> for each of the encountered types of
+<a class="reference internal" href="qiskit_fermions.transpiler.passes.synthesis.html#qiskit-fermions-transpiler-passes-synthesis-plugins"><span class="std std-ref">Transpiler Pass Synthesis (F2Q)</span></a> for each of the encountered types of
 <a class="reference internal" href="../stubs/qiskit_fermions.circuit.FermionicGate.html#qiskit_fermions.circuit.FermionicGate" title="qiskit_fermions.circuit.FermionicGate"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicGate</span></code></a>.</p>
 <div class="table-wrapper autosummary longtable docutils container">
 <table class="autosummary longtable docutils align-default">
@@ -514,7 +526,7 @@ needs to be placed in the <code class="docutils literal notranslate"><span class
 <tr class="row-odd"><td><p><a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.F2QSynthesis.html#qiskit_fermions.transpiler.passes.F2QSynthesis" title="qiskit_fermions.transpiler.passes.F2QSynthesis"><code class="xref py py-obj docutils literal notranslate"><span class="pre">F2QSynthesis</span></code></a>([config])</p></td>
 <td><p>A transpilation pass to map fermion-based circuit instructions to qubit-based ones.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.synthesis.synthesis.F2QSynthesisConfig.html#qiskit_fermions.transpiler.passes.synthesis.synthesis.F2QSynthesisConfig" title="qiskit_fermions.transpiler.passes.synthesis.synthesis.F2QSynthesisConfig"><code class="xref py py-obj docutils literal notranslate"><span class="pre">F2QSynthesisConfig</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.synthesis.f2q_synthesis.F2QSynthesisConfig.html#qiskit_fermions.transpiler.passes.synthesis.f2q_synthesis.F2QSynthesisConfig" title="qiskit_fermions.transpiler.passes.synthesis.f2q_synthesis.F2QSynthesisConfig"><code class="xref py py-obj docutils literal notranslate"><span class="pre">F2QSynthesisConfig</span></code></a></p></td>
 <td><p>The dictionary type used to configure the <a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.F2QSynthesis.html#qiskit_fermions.transpiler.passes.F2QSynthesis.methods" title="qiskit_fermions.transpiler.passes.F2QSynthesis.methods"><code class="xref py py-attr docutils literal notranslate"><span class="pre">F2QSynthesis.methods</span></code></a>.</p></td>
 </tr>
 </tbody>
@@ -528,12 +540,12 @@ needs to be placed in the <code class="docutils literal notranslate"><span class
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="../stubs/qiskit_fermions.transpiler.passes.FermionicTrotterization.html">
+          <a class="next-page" href="../stubs/qiskit_fermions.transpiler.passes.F2FSynthesis.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">FermionicTrotterization</div>
+                <div class="title">F2FSynthesis</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
@@ -594,7 +606,7 @@ needs to be placed in the <code class="docutils literal notranslate"><span class
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=7c7e38b3"></script>
+</div><script src="../_static/documentation_options.js?v=65856bcf"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

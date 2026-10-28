@@ -160,6 +160,12 @@
 
   
 
+  
+
+  
+
+  
+
 
 
   
@@ -167,6 +173,7 @@
    .. rubric:: Methods
     
    .. automethod:: from_t1_amplitudes
+   .. automethod:: inverse
   
   
    .. rubric:: Protocol Methods

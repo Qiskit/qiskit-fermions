@@ -1,9 +1,9 @@
-﻿FermionicEvolutionSynthesis
-===========================
+﻿F2FSynthesisPlugin
+==================
 
 .. currentmodule:: qiskit_fermions.circuit.library.synthesis
 
-.. autoclass:: FermionicEvolutionSynthesis
+.. autoclass:: F2FSynthesisPlugin
    :show-inheritance:
    :no-members:
    :no-inherited-members:
@@ -15,6 +15,12 @@
   
   
 
+
+  
+
+  
+
+  
 
   
 
