@@ -464,6 +464,6 @@ Next steps
 - See :ref:`1d_fermi_hubbard` for a worked case where the fermionic formula supplies the step count
   that a custom qubit-side synthesis cannot.
 - Consult :mod:`~qiskit_fermions.circuit.library.synthesis` for the synthesis methods themselves,
-  and :class:`.QDriftTrotterization` for a randomized alternative.
+  and :class:`.FermionicQDrift` for a randomized alternative.
 
 .. _ffsim: https://qiskit-community.github.io/ffsim/

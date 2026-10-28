@@ -8,7 +8,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Generate SqDRIFT circuits - Qiskit Fermions 0.4.0.dev0+bf5fb72</title>
+        <title>Generate SqDRIFT circuits - Qiskit Fermions 0.4.0.dev0+ecd9e28</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=fc6d6d93" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.4.0.dev0+bf5fb72</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.4.0.dev0+ecd9e28</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.4.0.dev0+bf5fb72</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.4.0.dev0+ecd9e28</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -324,8 +324,10 @@
 <li class="toctree-l3"><a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.synthesis.F2FSynthesisPluginManager.html">F2FSynthesisPluginManager</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter.html">FermionicLieTrotter</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter.html">FermionicSuzukiTrotter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.synthesis.FermionicQDrift.html">FermionicQDrift</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.synthesis.FermionicGivensDecomposition.html">FermionicGivensDecomposition</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.synthesis.FermionicSlaterGivensDecomposition.html">FermionicSlaterGivensDecomposition</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.synthesis.QDriftSampler.html">QDriftSampler</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../pydoc/qiskit_fermions.transpiler.html">Transpiler</a><input aria-label="Toggle navigation of Transpiler" class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -584,7 +586,7 @@ C</label><div class="sd-tab-content docutils">
 </div>
 </div>
 <p>Filtering here, once, is considerably cheaper than filtering repeatedly.
-<a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.QDriftTrotterization.html#qiskit_fermions.transpiler.passes.QDriftTrotterization" title="qiskit_fermions.transpiler.passes.QDriftTrotterization"><code class="xref py py-class docutils literal notranslate"><span class="pre">QDriftTrotterization</span></code></a> runs once per transpiled circuit, so
+<a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.synthesis.FermionicQDrift.html#qiskit_fermions.circuit.library.synthesis.FermionicQDrift" title="qiskit_fermions.circuit.library.synthesis.FermionicQDrift"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicQDrift</span></code></a> runs once per transpiled circuit, so
 filtering the Hamiltonian initially, rather than on every call, avoids
 redoing work for every circuit generated from it.</p>
 </div>
@@ -595,7 +597,7 @@ here. Group indices are a per-term tag that says nothing about where those
 terms sit, so a group’s terms are in general scattered throughout the
 operator: the grouping applied above assigns indices in order of first
 encounter, which leaves a group’s second term far from its first.</p>
-<p><a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.QDriftTrotterization.html#qiskit_fermions.transpiler.passes.QDriftTrotterization" title="qiskit_fermions.transpiler.passes.QDriftTrotterization"><code class="xref py py-class docutils literal notranslate"><span class="pre">QDriftTrotterization</span></code></a> samples whole groups and looks each drawn group
+<p><a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.synthesis.FermionicQDrift.html#qiskit_fermions.circuit.library.synthesis.FermionicQDrift" title="qiskit_fermions.circuit.library.synthesis.FermionicQDrift"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicQDrift</span></code></a> samples whole groups and looks each drawn group
 up with
 <a class="reference internal" href="../stubs/qiskit_fermions.operators.OperatorTrait.html#qiskit_fermions.operators.OperatorTrait.split_out_groups" title="qiskit_fermions.operators.OperatorTrait.split_out_groups"><code class="xref py py-meth docutils literal notranslate"><span class="pre">split_out_groups()</span></code></a>. Finding a
 group among scattered terms means scanning all of them, so that lookup costs
@@ -636,15 +638,29 @@ happen only once no matter how many circuit randomizations are drawn from it.</p
 base circuit from which to draw samples. The
 <a class="reference internal" href="../pydoc/qiskit_fermions.circuit.library.html#module-qiskit_fermions.circuit.library" title="qiskit_fermions.circuit.library"><code class="xref py py-mod docutils literal notranslate"><span class="pre">qiskit_fermions.circuit.library</span></code></a> contains all the required
 components to do so, in compliance with Qiskit conventions.</p>
+<p>The qDRIFT protocol is the synthesis method <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.synthesis.FermionicQDrift.html#qiskit_fermions.circuit.library.synthesis.FermionicQDrift" title="qiskit_fermions.circuit.library.synthesis.FermionicQDrift"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicQDrift</span></code></a>, and the
+<a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate carries it as its <a class="reference internal" href="../stubs/qiskit_fermions.circuit.FermionicGate.html#qiskit_fermions.circuit.FermionicGate.synthesis" title="qiskit_fermions.circuit.FermionicGate.synthesis"><code class="xref py py-attr docutils literal notranslate"><span class="pre">synthesis</span></code></a>. The method
+introduces the few parameters you can use to customize the circuits to generate:</p>
+<ul class="simple">
+<li><p>The length of each circuit in terms of excitation groups: <code class="docutils literal notranslate"><span class="pre">num_groups</span></code></p></li>
+<li><p>Optionally, a seed for the random number generator: <code class="docutils literal notranslate"><span class="pre">rng</span></code></p></li>
+<li><p>Optionally, precomputed sampling weights, if the transpilation itself becomes a
+bottleneck: <code class="docutils literal notranslate"><span class="pre">weights</span></code> (see <a class="reference internal" href="#sqdrift-sampling-weights"><span class="std std-ref">(Optional) Precompute the sampling weights</span></a> below)</p></li>
+</ul>
+<p>Because the method is held by the gate, whatever describes the gate’s operator, such as
+those weights, sits right next to that operator.</p>
 <div class="sd-tab-set docutils">
 <input checked="checked" id="sd-tab-item-8" name="sd-tab-set-4" type="radio">
 <label class="sd-tab-label" data-sync-group="code" data-sync-id="python" for="sd-tab-item-8">
 PYTHON</label><div class="sd-tab-content docutils">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.circuit</span><span class="w"> </span><span class="kn">import</span> <span class="n">FermionicCircuit</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.circuit.library</span><span class="w"> </span><span class="kn">import</span> <span class="n">Evolution</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.circuit.library.synthesis</span><span class="w"> </span><span class="kn">import</span> <span class="n">FermionicQDrift</span>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">time</span> <span class="o">=</span> <span class="mf">1.0</span>  <span class="c1"># you can choose a desired scaling factor here</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">evo_gate</span> <span class="o">=</span> <span class="n">Evolution</span><span class="p">(</span><span class="n">num_modes</span><span class="p">,</span> <span class="n">canon</span><span class="p">,</span> <span class="n">time</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">num_groups</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">qdrift</span> <span class="o">=</span> <span class="n">FermionicQDrift</span><span class="p">(</span><span class="n">num_groups</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="mi">19</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">evo_gate</span> <span class="o">=</span> <span class="n">Evolution</span><span class="p">(</span><span class="n">num_modes</span><span class="p">,</span> <span class="n">canon</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">synthesis</span><span class="o">=</span><span class="n">qdrift</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">circ</span> <span class="o">=</span> <span class="n">FermionicCircuit</span><span class="p">(</span><span class="n">num_modes</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">circ</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">evo_gate</span><span class="p">,</span> <span class="n">circ</span><span class="o">.</span><span class="n">modes</span><span class="p">)</span>
@@ -666,47 +682,38 @@ C</label><div class="sd-tab-content docutils">
 nor measures their final state.</p>
 </div>
 </section>
-<section id="transpile-the-circuit-with-qdrift-trotterization">
-<h2>4. Transpile the circuit with QDrift Trotterization<a class="headerlink" href="#transpile-the-circuit-with-qdrift-trotterization" title="Link to this heading">¶</a></h2>
+<section id="transpile-the-circuit">
+<h2>4. Transpile the circuit<a class="headerlink" href="#transpile-the-circuit" title="Link to this heading">¶</a></h2>
 <p>The <a class="reference internal" href="../pydoc/qiskit_fermions.transpiler.html#module-qiskit_fermions.transpiler" title="qiskit_fermions.transpiler"><code class="xref py py-mod docutils literal notranslate"><span class="pre">qiskit_fermions.transpiler</span></code></a> module integrates directly with Qiskit’s
 transpilation pipeline, allowing the <a class="reference internal" href="../stubs/qiskit_fermions.circuit.FermionicCircuit.html#qiskit_fermions.circuit.FermionicCircuit" title="qiskit_fermions.circuit.FermionicCircuit"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicCircuit</span></code></a> constructed above
 to be directly transpiled to a <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumCircuit</span></code></a>.</p>
 <p>Use the <a class="reference internal" href="../stubs/qiskit_fermions.mappers.library.jordan_wigner.html#qiskit_fermions.mappers.library.jordan_wigner" title="qiskit_fermions.mappers.library.jordan_wigner"><code class="xref py py-func docutils literal notranslate"><span class="pre">jordan_wigner()</span></code></a> fermion-to-qubit mapping to
 convert the Hamiltonian expressed in terms of fermions to be expressed in Pauli strings instead. This
 can be done directly as part of the transpilation process by using the
-<code class="xref py py-class docutils literal notranslate"><span class="pre">EvolutionSynthesis</span></code> transpilation pass plugin. Use
+<a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.F2QSynthesis.html#qiskit_fermions.transpiler.passes.F2QSynthesis" title="qiskit_fermions.transpiler.passes.F2QSynthesis"><code class="xref py py-class docutils literal notranslate"><span class="pre">F2QSynthesis</span></code></a> transpilation pass. Use
 <a class="reference internal" href="../stubs/qiskit_fermions.transpiler.presets.generate_preset_jw_pass_manager.html#qiskit_fermions.transpiler.presets.generate_preset_jw_pass_manager" title="qiskit_fermions.transpiler.presets.generate_preset_jw_pass_manager"><code class="xref py py-func docutils literal notranslate"><span class="pre">generate_preset_jw_pass_manager()</span></code></a> to build
 <code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicStagedPassManager</span></code>, which ensures that the
 Jordan-Wigner encoding is used consistently for all circuit instructions.</p>
-<p>Crucially, add the <a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.QDriftTrotterization.html#qiskit_fermions.transpiler.passes.QDriftTrotterization" title="qiskit_fermions.transpiler.passes.QDriftTrotterization"><code class="xref py py-class docutils literal notranslate"><span class="pre">QDriftTrotterization</span></code></a> transpilation pass to the
-<code class="docutils literal notranslate"><span class="pre">optimization</span></code> stage of the transpilation pipeline. This ensures that the
-circuit does not use the time evolution of the entire Hamiltonian, whose depth
+<p>Crucially, add Qiskit’s <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.transpiler.passes.Decompose" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Decompose</span></code></a> pass to the
+<code class="docutils literal notranslate"><span class="pre">optimization</span></code> stage of the transpilation pipeline. It breaks the <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate
+down with the synthesis method the gate carries, which is the qDRIFT method prepared above. This
+ensures that the circuit does not use the time evolution of the entire Hamiltonian, whose depth
 would exceed the capabilities of currently available quantum computing hardware.</p>
 <p>Instead, it subsamples a fixed number of <code class="docutils literal notranslate"><span class="pre">groups</span></code> of Hamiltonian terms for
 each circuit, every time the circuit is transpiled. Through this, you can generate
 multiple circuit randomizations as required by the <a class="reference external" href="https://arxiv.org/abs/2508.02578">SqDRIFT</a> algorithm by
-repeatedly running the transpilation pipeline.</p>
-<p>This step also introduces the few parameters you can use to customize the
-circuits to generate:</p>
-<ul class="simple">
-<li><p>The number of circuits to generate: <code class="docutils literal notranslate"><span class="pre">num_sqdrift_randomizations</span></code></p></li>
-<li><p>The length of each circuit in terms of excitation groups: <code class="docutils literal notranslate"><span class="pre">num_groups</span></code></p></li>
-<li><p>Optionally, precomputed sampling weights, if the transpilation itself becomes a
-bottleneck: <code class="docutils literal notranslate"><span class="pre">weights</span></code> (see <a class="reference internal" href="#sqdrift-sampling-weights"><span class="std std-ref">(Optional) Precompute the sampling weights</span></a> below)</p></li>
-</ul>
+repeatedly running the transpilation pipeline. The number of circuits to generate is
+<code class="docutils literal notranslate"><span class="pre">num_sqdrift_randomizations</span></code>.</p>
 <div class="sd-tab-set docutils">
 <input checked="checked" id="sd-tab-item-10" name="sd-tab-set-5" type="radio">
 <label class="sd-tab-label" data-sync-group="code" data-sync-id="python" for="sd-tab-item-10">
 PYTHON</label><div class="sd-tab-content docutils">
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.transpiler</span><span class="w"> </span><span class="kn">import</span> <span class="n">FermionicPassManager</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit.transpiler.passes</span><span class="w"> </span><span class="kn">import</span> <span class="n">Decompose</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.transpiler</span><span class="w"> </span><span class="kn">import</span> <span class="n">FermionicPassManager</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.transpiler.presets</span><span class="w"> </span><span class="kn">import</span> <span class="n">generate_preset_jw_pass_manager</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.transpiler.passes</span><span class="w"> </span><span class="kn">import</span> <span class="n">QDriftTrotterization</span>
-<span class="gp">&gt;&gt;&gt;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">num_groups</span> <span class="o">=</span> <span class="mi">10</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">qdrift</span> <span class="o">=</span> <span class="n">QDriftTrotterization</span><span class="p">(</span><span class="n">num_groups</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="mi">19</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">pm</span> <span class="o">=</span> <span class="n">generate_preset_jw_pass_manager</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">pm</span><span class="o">.</span><span class="n">optimization</span> <span class="o">=</span> <span class="n">FermionicPassManager</span><span class="p">([</span><span class="n">qdrift</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pm</span><span class="o">.</span><span class="n">optimization</span> <span class="o">=</span> <span class="n">FermionicPassManager</span><span class="p">([</span><span class="n">Decompose</span><span class="p">([</span><span class="s2">"Evolution"</span><span class="p">])])</span>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">num_sqdrift_randomizations</span> <span class="o">=</span> <span class="mi">10</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">sqdrift_circuits</span> <span class="o">=</span> <span class="p">[</span>
@@ -727,9 +734,16 @@ C</label><div class="sd-tab-content docutils">
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>The preceding example fixes the <code class="docutils literal notranslate"><span class="pre">seed</span></code> for the random number
-generator used inside of the <a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.QDriftTrotterization.html#qiskit_fermions.transpiler.passes.QDriftTrotterization" title="qiskit_fermions.transpiler.passes.QDriftTrotterization"><code class="xref py py-class docutils literal notranslate"><span class="pre">QDriftTrotterization</span></code></a> transpilation
-pass.</p>
+<p>The preceding examples fix the <code class="docutils literal notranslate"><span class="pre">rng</span></code> seed of the <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.synthesis.FermionicQDrift.html#qiskit_fermions.circuit.library.synthesis.FermionicQDrift" title="qiskit_fermions.circuit.library.synthesis.FermionicQDrift"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicQDrift</span></code></a> synthesis
+method, so that the sequence of randomizations can be reproduced.</p>
+</div>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p>The same pipeline accepts the qDRIFT method in two other places. The
+<a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.F2FSynthesis.html#qiskit_fermions.transpiler.passes.F2FSynthesis" title="qiskit_fermions.transpiler.passes.F2FSynthesis"><code class="xref py py-class docutils literal notranslate"><span class="pre">F2FSynthesis</span></code></a> pass takes one method for <em>every</em> <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate by name,
+<code class="docutils literal notranslate"><span class="pre">F2FSynthesis({&quot;Evolution&quot;:</span> <span class="pre">FermionicQDrift(num_groups)})</span></code>, which is all that is needed
+when no gate holds anything specific to its operator. The next step uses the third one, the
+<a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.QDriftTrotterization.html#qiskit_fermions.transpiler.passes.QDriftTrotterization" title="qiskit_fermions.transpiler.passes.QDriftTrotterization"><code class="xref py py-class docutils literal notranslate"><span class="pre">QDriftTrotterization</span></code></a> pass.</p>
 </div>
 </section>
 <section id="filter-drawn-excitations-by-occupation">
@@ -738,13 +752,13 @@ pass.</p>
 can act entirely within a set of modes whose occupation is already fixed (all
 occupied or all unoccupied), where it cannot move a particle from one side to
 the other. Such an excitation tells you nothing about the sampled bitstrings, so
-a slot spent on it is a slot wasted. Setting <code class="docutils literal notranslate"><span class="pre">filter_trivial=True</span></code> on the
-<a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.QDriftTrotterization.html#qiskit_fermions.transpiler.passes.QDriftTrotterization" title="qiskit_fermions.transpiler.passes.QDriftTrotterization"><code class="xref py py-class docutils literal notranslate"><span class="pre">QDriftTrotterization</span></code></a> pass rejects such excitations as they are drawn
-and draws a replacement, so that each of the <code class="docutils literal notranslate"><span class="pre">num_groups</span></code> slots of the
-resulting circuit carries an excitation that couples the two sides.</p>
+a slot spent on it is a slot wasted. The <a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.QDriftTrotterization.html#qiskit_fermions.transpiler.passes.QDriftTrotterization" title="qiskit_fermions.transpiler.passes.QDriftTrotterization"><code class="xref py py-class docutils literal notranslate"><span class="pre">QDriftTrotterization</span></code></a> pass,
+which wraps the same <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.synthesis.FermionicQDrift.html#qiskit_fermions.circuit.library.synthesis.FermionicQDrift" title="qiskit_fermions.circuit.library.synthesis.FermionicQDrift"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicQDrift</span></code></a> method, rejects such excitations
+as they are drawn and draws a replacement, so that each of the <code class="docutils literal notranslate"><span class="pre">num_groups</span></code>
+slots of the resulting circuit carries an excitation that couples the two sides.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p>This filtering is not free, and it is off by default for that reason. What it
+<p>This filtering is not free, and it is a separate pass for that reason. What it
 conserves is the budget of <code class="docutils literal notranslate"><span class="pre">num_groups</span></code> sampled slots, not the circuit
 depth: since that budget is fixed, a rejected excitation is replaced rather
 than dropped, and a cheap one gives way to a coupling excitation that costs
@@ -763,7 +777,7 @@ grow: an excitation confined to the occupied set is genuinely inert on a
 product state, but the same reasoning gets weaker for later draws, once
 earlier accepted excitations have left the state entangled and marked most
 modes “uncertain”.</p>
-<p>Use <code class="docutils literal notranslate"><span class="pre">filter_trivial=True</span></code> for the bitstring-sampling workflow this guide
+<p>Use the filtering for the bitstring-sampling workflow this guide
 describes, where the circuits feed SQD post-processing and only the sampled
 bitstrings matter. Do not use it if you intend to estimate an expectation
 value from these circuits, or to rely on the qDRIFT error bound in any other
@@ -774,12 +788,13 @@ requires an <a class="reference internal" href="../stubs/qiskit_fermions.circuit
 gates in the circuit; <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.InitializeModes.html#qiskit_fermions.circuit.library.InitializeModes.from_hartree_fock" title="qiskit_fermions.circuit.library.InitializeModes.from_hartree_fock"><code class="xref py py-meth docutils literal notranslate"><span class="pre">InitializeModes.from_hartree_fock()</span></code></a> is a
 convenient way to construct one. Add one here for the N2 Hartree-Fock
 reference (seven alpha and seven beta electrons in 14 spatial orbitals) and compare the
-sampled excitations with and without <code class="docutils literal notranslate"><span class="pre">filter_trivial=True</span></code>:</p>
+sampled excitations with and without the filtering:</p>
 <div class="sd-tab-set docutils">
 <input checked="checked" id="sd-tab-item-12" name="sd-tab-set-6" type="radio">
 <label class="sd-tab-label" data-sync-group="code" data-sync-id="python" for="sd-tab-item-12">
 PYTHON</label><div class="sd-tab-content docutils">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.circuit.library</span><span class="w"> </span><span class="kn">import</span> <span class="n">InitializeModes</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.transpiler.passes</span><span class="w"> </span><span class="kn">import</span> <span class="n">F2FSynthesis</span><span class="p">,</span> <span class="n">QDriftTrotterization</span>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">init</span> <span class="o">=</span> <span class="n">InitializeModes</span><span class="o">.</span><span class="n">from_hartree_fock</span><span class="p">(</span><span class="n">fcidump</span><span class="o">.</span><span class="n">norb</span><span class="p">,</span> <span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">7</span><span class="p">))</span>
 <span class="gp">&gt;&gt;&gt;</span>
@@ -788,9 +803,11 @@ PYTHON</label><div class="sd-tab-content docutils">
 <span class="gp">&gt;&gt;&gt; </span><span class="n">hf_circ</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Evolution</span><span class="p">(</span><span class="n">num_modes</span><span class="p">,</span> <span class="n">canon</span><span class="p">,</span> <span class="n">time</span><span class="p">),</span> <span class="n">hf_circ</span><span class="o">.</span><span class="n">modes</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">num_groups</span> <span class="o">=</span> <span class="mi">5</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">qdrift_unfiltered</span> <span class="o">=</span> <span class="n">QDriftTrotterization</span><span class="p">(</span><span class="n">num_groups</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="mi">3480</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">qdrift_unfiltered</span> <span class="o">=</span> <span class="n">F2FSynthesis</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="p">{</span><span class="s2">"Evolution"</span><span class="p">:</span> <span class="n">FermionicQDrift</span><span class="p">(</span><span class="n">num_groups</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="mi">3480</span><span class="p">)}</span>
+<span class="gp">... </span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">qdrift_trivial</span> <span class="o">=</span> <span class="n">QDriftTrotterization</span><span class="p">(</span>
-<span class="gp">... </span>    <span class="n">num_groups</span><span class="p">,</span> <span class="n">filter_trivial</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="mi">3480</span>
+<span class="gp">... </span>    <span class="n">FermionicQDrift</span><span class="p">(</span><span class="n">num_groups</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="mi">3480</span><span class="p">)</span>
 <span class="gp">... </span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">instruction</span> <span class="ow">in</span> <span class="n">FermionicPassManager</span><span class="p">(</span><span class="n">qdrift_unfiltered</span><span class="p">)</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">hf_circ</span><span class="p">)</span><span class="o">.</span><span class="n">_inner</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
@@ -825,7 +842,7 @@ C</label><div class="sd-tab-content docutils">
 </div>
 <p>None of the excitations drawn without filtering touch the occupied set
 (<code class="docutils literal notranslate"><span class="pre">0-6</span></code> and <code class="docutils literal notranslate"><span class="pre">28-34</span></code>) at all, so none of them can move a particle between an
-occupied and an unoccupied mode. With <code class="docutils literal notranslate"><span class="pre">filter_trivial=True</span></code>, all five are
+occupied and an unoccupied mode. With the filtering, all five are
 rejected and replaced by excitations that do couple an occupied mode with an
 unoccupied one. For example, the first accepted excitation <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">1,</span> <span class="pre">6,</span> <span class="pre">7]</span></code> moves a
 particle between occupied modes <code class="docutils literal notranslate"><span class="pre">0</span></code>, <code class="docutils literal notranslate"><span class="pre">1</span></code>, and <code class="docutils literal notranslate"><span class="pre">6</span></code> and unoccupied mode
@@ -853,7 +870,7 @@ were over-weighted:</p>
 PYTHON</label><div class="sd-tab-content docutils">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># a freshly seeded pass, so the counts do not depend on earlier draws</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">qdrift_counted</span> <span class="o">=</span> <span class="n">QDriftTrotterization</span><span class="p">(</span>
-<span class="gp">... </span>    <span class="n">num_groups</span><span class="p">,</span> <span class="n">filter_trivial</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="mi">3480</span>
+<span class="gp">... </span>    <span class="n">FermionicQDrift</span><span class="p">(</span><span class="n">num_groups</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="mi">3480</span><span class="p">)</span>
 <span class="gp">... </span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">filtered</span> <span class="o">=</span> <span class="n">FermionicPassManager</span><span class="p">(</span><span class="n">qdrift_counted</span><span class="p">)</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">hf_circ</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">discarded</span> <span class="o">=</span> <span class="n">filtered</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"filter_trivial.discarded"</span><span class="p">)</span>
@@ -882,7 +899,7 @@ C</label><div class="sd-tab-content docutils">
 <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.InitializeModes.html#qiskit_fermions.circuit.library.InitializeModes" title="qiskit_fermions.circuit.library.InitializeModes"><code class="xref py py-class docutils literal notranslate"><span class="pre">InitializeModes</span></code></a> does, and any <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.OrbitalRotation.html#qiskit_fermions.circuit.library.OrbitalRotation" title="qiskit_fermions.circuit.library.OrbitalRotation"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrbitalRotation</span></code></a> marks every
 mode it acts on as “uncertain”. Without any of them, or when the seeded modes
 all land on one side (every mode occupied, or every mode unoccupied),
-<code class="docutils literal notranslate"><span class="pre">filter_trivial=True</span></code> emits a <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#UserWarning" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">UserWarning</span></code></a> and leaves the sampling
+the pass emits a <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#UserWarning" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">UserWarning</span></code></a> and leaves the sampling
 unfiltered for that <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate. On a Hamiltonian whose remaining
 terms can no longer couple the two tracked sets, the pass instead raises
 <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#RuntimeError" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">RuntimeError</span></code></a> after
@@ -893,19 +910,22 @@ terms can no longer couple the two tracked sets, the pass instead raises
 <span id="sqdrift-sampling-weights"></span><h2>(Optional) Precompute the sampling weights<a class="headerlink" href="#optional-precompute-the-sampling-weights" title="Link to this heading">¶</a></h2>
 <p>Reach for this only if the transpilation itself is a bottleneck. It changes
 nothing about the circuits you get.</p>
-<p><a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.QDriftTrotterization.html#qiskit_fermions.transpiler.passes.QDriftTrotterization" title="qiskit_fermions.transpiler.passes.QDriftTrotterization"><code class="xref py py-class docutils literal notranslate"><span class="pre">QDriftTrotterization</span></code></a> draws each group with a probability proportional to
+<p><a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.synthesis.FermionicQDrift.html#qiskit_fermions.circuit.library.synthesis.FermionicQDrift" title="qiskit_fermions.circuit.library.synthesis.FermionicQDrift"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicQDrift</span></code></a> draws each group with a probability proportional to
 the magnitude of its coefficient, and derives those magnitudes from the
 Hamiltonian on every call: one value per Hamiltonian <em>term</em>, reduced down to one
-per group. Because the pass is stateless it repeats that reduction for every
+per group. Because the method is stateless it repeats that reduction for every
 randomization, even though the result is identical every time. The <code class="docutils literal notranslate"><span class="pre">weights</span></code>
 argument lets you compute it once with
 <a class="reference internal" href="../stubs/qiskit_fermions.operators.terms.group_coeff_means.html#qiskit_fermions.operators.terms.group_coeff_means" title="qiskit_fermions.operators.terms.group_coeff_means"><code class="xref py py-func docutils literal notranslate"><span class="pre">group_coeff_means()</span></code></a> and hand the result
-over, moving the cost out of the loop while leaving the pass free of any cached,
+over, moving the cost out of the loop while leaving the method free of any cached,
 Hamiltonian-dependent state.</p>
 <p>This is the counterpart of the term ordering in step 2. That one hoists the group
 <em>lookup</em> out of the loop, this one the weight <em>reduction</em>, and each is only as
 noticeable as the other is absent, so it is worth applying both together. Since
-<code class="docutils literal notranslate"><span class="pre">canon</span></code> was already reordered above, the two compose directly:</p>
+<code class="docutils literal notranslate"><span class="pre">canon</span></code> was already reordered above, the two compose directly.</p>
+<p>The weights describe the groups of one particular operator, so they belong with
+the <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate of that operator: build the method for that gate
+and hand it over as the gate’s <code class="docutils literal notranslate"><span class="pre">synthesis</span></code>, exactly as in step 3.</p>
 <div class="sd-tab-set docutils">
 <input checked="checked" id="sd-tab-item-16" name="sd-tab-set-8" type="radio">
 <label class="sd-tab-label" data-sync-group="code" data-sync-id="python" for="sd-tab-item-16">
@@ -913,11 +933,14 @@ PYTHON</label><div class="sd-tab-content docutils">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.operators.terms.grouping</span><span class="w"> </span><span class="kn">import</span> <span class="n">group_coeff_means</span>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">weights</span> <span class="o">=</span> <span class="n">group_coeff_means</span><span class="p">(</span><span class="n">canon</span><span class="p">)</span>  <span class="c1"># `canon` is group-ordered, from step 2</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">qdrift_weighted</span> <span class="o">=</span> <span class="n">QDriftTrotterization</span><span class="p">(</span><span class="n">num_groups</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="mi">19</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">qdrift_weighted</span> <span class="o">=</span> <span class="n">FermionicQDrift</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="mi">19</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">weights</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">weighted_gate</span> <span class="o">=</span> <span class="n">Evolution</span><span class="p">(</span><span class="n">num_modes</span><span class="p">,</span> <span class="n">canon</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">synthesis</span><span class="o">=</span><span class="n">qdrift_weighted</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">pm</span><span class="o">.</span><span class="n">optimization</span> <span class="o">=</span> <span class="n">FermionicPassManager</span><span class="p">([</span><span class="n">qdrift_weighted</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">weighted_circ</span> <span class="o">=</span> <span class="n">FermionicCircuit</span><span class="p">(</span><span class="n">num_modes</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">weighted_circ</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">weighted_gate</span><span class="p">,</span> <span class="n">weighted_circ</span><span class="o">.</span><span class="n">modes</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">weighted_circuits</span> <span class="o">=</span> <span class="p">[</span>
-<span class="gp">... </span>    <span class="n">pm</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">circ</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_sqdrift_randomizations</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="n">pm</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">weighted_circ</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_sqdrift_randomizations</span><span class="p">)</span>
 <span class="gp">... </span><span class="p">]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">weighted_circuits</span><span class="p">)</span>
 <span class="go">10</span>
@@ -950,10 +973,17 @@ anything other than the Hamiltonian’s own coefficient magnitudes therefore
 changes which evolution the ensemble approximates, which is why this is a
 performance tool rather than a way to tune the sampling.</p>
 </div>
-<p>Because a weights array describes the groups of one particular operator, it is
-validated against each <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate it is applied to, and a circuit
-holding more than one such gate is rejected. Leaving <code class="docutils literal notranslate"><span class="pre">weights</span></code> unset keeps such
-a circuit supported, since each gate then derives its own.</p>
+<p>Because the weights belong to the gate whose operator they describe, a circuit
+may hold several <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gates, each with the weights of its own
+operator. The <a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.QDriftTrotterization.html#qiskit_fermions.transpiler.passes.QDriftTrotterization" title="qiskit_fermions.transpiler.passes.QDriftTrotterization"><code class="xref py py-class docutils literal notranslate"><span class="pre">QDriftTrotterization</span></code></a> pass of step 5 honors them in the
+same way: it draws a gate with the <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.synthesis.FermionicQDrift.html#qiskit_fermions.circuit.library.synthesis.FermionicQDrift" title="qiskit_fermions.circuit.library.synthesis.FermionicQDrift"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicQDrift</span></code></a> that the gate
+carries, and falls back to the one it was constructed with for the gates that
+carry none. Another kind of synthesis method on a gate is not a statement about
+qDRIFT, so the pass ignores it. Giving the method to a pass by gate name instead,
+as in <code class="docutils literal notranslate"><span class="pre">F2FSynthesis({&quot;Evolution&quot;:</span> <span class="pre">...})</span></code>, applies one method to every
+<a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate, so weights passed there are only meaningful for a circuit
+with a single one. The length of the weights is checked against each gate they are
+applied to.</p>
 </section>
 <section id="optional-optimize-the-fermionic-mode-indexing">
 <h2>(Optional) Optimize the fermionic mode indexing<a class="headerlink" href="#optional-optimize-the-fermionic-mode-indexing" title="Link to this heading">¶</a></h2>
@@ -973,7 +1003,7 @@ PYTHON</label><div class="sd-tab-content docutils">
 <span class="gp">&gt;&gt;&gt; </span><span class="n">solver</span> <span class="o">=</span> <span class="n">SolverFactory</span><span class="p">(</span><span class="s2">"appsi_highs"</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">solver</span><span class="o">.</span><span class="n">options</span><span class="p">[</span><span class="s2">"time_limit"</span><span class="p">]</span> <span class="o">=</span> <span class="mi">10</span>
 <span class="gp">&gt;&gt;&gt;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">qdrift</span> <span class="o">=</span> <span class="n">QDriftTrotterization</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="mi">19</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">qdrift</span> <span class="o">=</span> <span class="n">F2FSynthesis</span><span class="p">({</span><span class="s2">"Evolution"</span><span class="p">:</span> <span class="n">FermionicQDrift</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="mi">19</span><span class="p">)})</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">relabel</span> <span class="o">=</span> <span class="n">RelabelModes</span><span class="p">(</span><span class="n">solver</span><span class="o">=</span><span class="n">solver</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">pm</span><span class="o">.</span><span class="n">optimization</span> <span class="o">=</span> <span class="n">FermionicPassManager</span><span class="p">([</span><span class="n">qdrift</span><span class="p">,</span> <span class="n">relabel</span><span class="p">])</span>
@@ -1085,7 +1115,7 @@ tutorials</a>.</p>
 <li><a class="reference internal" href="#hamiltonian-setup">1. Hamiltonian setup</a></li>
 <li><a class="reference internal" href="#group-hamiltonian-terms">2. Group Hamiltonian terms</a></li>
 <li><a class="reference internal" href="#prepare-the-time-evolution-circuit">3. Prepare the time evolution circuit</a></li>
-<li><a class="reference internal" href="#transpile-the-circuit-with-qdrift-trotterization">4. Transpile the circuit with QDrift Trotterization</a></li>
+<li><a class="reference internal" href="#transpile-the-circuit">4. Transpile the circuit</a></li>
 <li><a class="reference internal" href="#filter-drawn-excitations-by-occupation">5. Filter drawn excitations by occupation</a></li>
 <li><a class="reference internal" href="#optional-precompute-the-sampling-weights">(Optional) Precompute the sampling weights</a></li>
 <li><a class="reference internal" href="#optional-optimize-the-fermionic-mode-indexing">(Optional) Optimize the fermionic mode indexing</a></li>
@@ -1101,7 +1131,7 @@ tutorials</a>.</p>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=65856bcf"></script>
+</div><script src="../_static/documentation_options.js?v=3d17250b"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

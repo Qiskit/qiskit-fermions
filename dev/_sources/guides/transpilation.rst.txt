@@ -24,8 +24,9 @@ this project split the transpilation into the following stages:
 **Optimization**
    Keeps the circuit in fermionic space. These
    passes use fermionic structure and commutation relations while
-   problem-aware knowledge remains fully available. :class:`.F2FSynthesis` and
-   :class:`.QDriftTrotterization` are the passes that Trotterize an :class:`.Evolution` gate here;
+   problem-aware knowledge remains fully available. :class:`.F2FSynthesis` is the pass that
+   Trotterizes an :class:`.Evolution` gate here, with a product formula or with
+   :class:`.FermionicQDrift`, and :class:`.QDriftTrotterization` its occupation-aware variant;
    see :ref:`qiskit_fermions-transpiler-passes-optimization` for the full set and
    :ref:`fermionic_synthesis_explanation` for how a product formula is chosen.
 

@@ -1,0 +1,97 @@
+﻿QDriftSampler
+=============
+
+.. currentmodule:: qiskit_fermions.circuit.library.synthesis
+
+.. autoclass:: QDriftSampler
+   :show-inheritance:
+   :no-members:
+   :no-inherited-members:
+   :special-members:
+
+
+  
+  
+   .. rubric:: Attributes
+    
+   .. autoattribute:: time
+  
+  
+  
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+  
+  
+   .. rubric:: Methods
+    
+   .. automethod:: draw
+   .. automethod:: sample
+  
+  
+  
+  
+  
+  
+  

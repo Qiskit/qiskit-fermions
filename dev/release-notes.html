@@ -8,7 +8,7 @@
         <link rel="prefetch" href="_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Release Notes - Qiskit Fermions 0.4.0.dev0+bf5fb72</title>
+        <title>Release Notes - Qiskit Fermions 0.4.0.dev0+ecd9e28</title>
       <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="_static/styles/qiskit-sphinx-theme.css?v=fc6d6d93" />
@@ -161,7 +161,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="index.html"><div class="brand">Qiskit Fermions 0.4.0.dev0+bf5fb72</div></a>
+      <a href="index.html"><div class="brand">Qiskit Fermions 0.4.0.dev0+ecd9e28</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
     <img class="sidebar-logo only-dark" src="_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.4.0.dev0+bf5fb72</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.4.0.dev0+ecd9e28</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="search.html" role="search">
@@ -324,8 +324,10 @@
 <li class="toctree-l3"><a class="reference internal" href="stubs/qiskit_fermions.circuit.library.synthesis.F2FSynthesisPluginManager.html">F2FSynthesisPluginManager</a></li>
 <li class="toctree-l3"><a class="reference internal" href="stubs/qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter.html">FermionicLieTrotter</a></li>
 <li class="toctree-l3"><a class="reference internal" href="stubs/qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter.html">FermionicSuzukiTrotter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="stubs/qiskit_fermions.circuit.library.synthesis.FermionicQDrift.html">FermionicQDrift</a></li>
 <li class="toctree-l3"><a class="reference internal" href="stubs/qiskit_fermions.circuit.library.synthesis.FermionicGivensDecomposition.html">FermionicGivensDecomposition</a></li>
 <li class="toctree-l3"><a class="reference internal" href="stubs/qiskit_fermions.circuit.library.synthesis.FermionicSlaterGivensDecomposition.html">FermionicSlaterGivensDecomposition</a></li>
+<li class="toctree-l3"><a class="reference internal" href="stubs/qiskit_fermions.circuit.library.synthesis.QDriftSampler.html">QDriftSampler</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="pydoc/qiskit_fermions.transpiler.html">Transpiler</a><input aria-label="Toggle navigation of Transpiler" class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -519,6 +521,26 @@ space, before any encoding is chosen. The new
 <a class="reference internal" href="stubs/qiskit_fermions.transpiler.passes.F2FSynthesis.html#qiskit_fermions.transpiler.passes.F2FSynthesis" title="qiskit_fermions.transpiler.passes.F2FSynthesis"><code class="xref py py-class docutils literal notranslate"><span class="pre">F2FSynthesis</span></code></a> with <code class="docutils literal notranslate"><span class="pre">{&quot;OrbitalRotation&quot;:</span> <span class="pre">&quot;Givens&quot;}</span></code>
 last in its <code class="docutils literal notranslate"><span class="pre">optimization</span></code> stage, after the passes that consume orbital rotations as such.</p></li>
 </ul>
+<ul>
+<li><p>The qDRIFT protocol is now a fermion-to-fermion synthesis method on an equal footing with the
+product formulas. <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.synthesis.FermionicQDrift.html#qiskit_fermions.circuit.library.synthesis.FermionicQDrift" title="qiskit_fermions.circuit.library.synthesis.FermionicQDrift"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicQDrift</span></code></a> is
+registered as <code class="docutils literal notranslate"><span class="pre">Evolution.QDrift</span></code>, so it is selected like any other method:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">F2FSynthesis</span><span class="p">({</span><span class="s2">"Evolution"</span><span class="p">:</span> <span class="p">(</span><span class="s2">"QDrift"</span><span class="p">,</span> <span class="p">(</span><span class="n">num_terms</span><span class="p">,),</span> <span class="p">{</span><span class="s2">"rng"</span><span class="p">:</span> <span class="mi">42</span><span class="p">})})</span>
+</pre></div>
+</div>
+<p>It takes the <code class="docutils literal notranslate"><span class="pre">num_terms</span></code>, <code class="docutils literal notranslate"><span class="pre">weights</span></code> and <code class="docutils literal notranslate"><span class="pre">rng</span></code> arguments that
+<a class="reference internal" href="stubs/qiskit_fermions.transpiler.passes.QDriftTrotterization.html#qiskit_fermions.transpiler.passes.QDriftTrotterization" title="qiskit_fermions.transpiler.passes.QDriftTrotterization"><code class="xref py py-class docutils literal notranslate"><span class="pre">QDriftTrotterization</span></code></a> took.</p>
+</li>
+</ul>
+<ul class="simple">
+<li><p><a class="reference internal" href="stubs/qiskit_fermions.transpiler.passes.QDriftTrotterization.html#qiskit_fermions.transpiler.passes.QDriftTrotterization" title="qiskit_fermions.transpiler.passes.QDriftTrotterization"><code class="xref py py-class docutils literal notranslate"><span class="pre">QDriftTrotterization</span></code></a> now draws an
+<a class="reference internal" href="stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate with the
+<a class="reference internal" href="stubs/qiskit_fermions.circuit.library.synthesis.FermionicQDrift.html#qiskit_fermions.circuit.library.synthesis.FermionicQDrift" title="qiskit_fermions.circuit.library.synthesis.FermionicQDrift"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicQDrift</span></code></a> that the gate carries as its
+<code class="docutils literal notranslate"><span class="pre">synthesis</span></code>, which lets every gate of a circuit hold the <code class="docutils literal notranslate"><span class="pre">weights</span></code> of its own operator. The
+method passed to the pass is now optional and applies to the gates that carry none; a gate with
+neither is left in place, with a <code class="docutils literal notranslate"><span class="pre">UserWarning</span></code>. A <code class="docutils literal notranslate"><span class="pre">synthesis</span></code> that is not a
+<code class="docutils literal notranslate"><span class="pre">FermionicQDrift</span></code> is ignored by the pass.</p></li>
+</ul>
 <ul class="simple">
 <li><p>A <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.PrepareSlaterDeterminant.html#qiskit_fermions.circuit.library.PrepareSlaterDeterminant" title="qiskit_fermions.circuit.library.PrepareSlaterDeterminant"><code class="xref py py-class docutils literal notranslate"><span class="pre">PrepareSlaterDeterminant</span></code></a> is now decomposed in
 fermionic space, before any encoding is chosen. The new
@@ -564,6 +586,12 @@ neighbouring gates of the same factor by default, so for <code class="docutils l
 emits fewer, longer-evolving gates than before. The result is mathematically identical. Pass
 <code class="docutils literal notranslate"><span class="pre">merge_adjacent=False</span></code> to keep the previous gate sequence.</p></li>
 </ul>
+<ul class="simple">
+<li><p>A custom <code class="docutils literal notranslate"><span class="pre">weights</span></code> array of the qDRIFT sampling is no longer rejected up front for a circuit
+with more than one <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate, since the method
+that holds it is stateless and sees one gate at a time. Its length is still checked against
+every gate it is given, so a mismatch raises a <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> as before.</p></li>
+</ul>
 </section>
 <section id="python-api-deprecation-notes">
 <span id="release-notes-upcoming-release-main-python-api-deprecation-notes"></span><h3>Python API Deprecation Notes<a class="headerlink" href="#python-api-deprecation-notes" title="Link to this heading">¶</a></h3>
@@ -590,6 +618,14 @@ A pipeline assembled by hand also needs the
 obtain <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.library.XXPlusYYGate" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">XXPlusYYGate</span></code></a>s, as the Jordan-Wigner preset has.
 The <code class="docutils literal notranslate"><span class="pre">minimize_2q_gate_count</span></code> argument of the Slater plugin, the peeling of disjoint
 unit-orbitals, was removed: it has no effect any more and warns.</p></li>
+</ul>
+<ul class="simple">
+<li><p>The former signature of <a class="reference internal" href="stubs/qiskit_fermions.transpiler.passes.QDriftTrotterization.html#qiskit_fermions.transpiler.passes.QDriftTrotterization" title="qiskit_fermions.transpiler.passes.QDriftTrotterization"><code class="xref py py-class docutils literal notranslate"><span class="pre">QDriftTrotterization</span></code></a>,
+<code class="docutils literal notranslate"><span class="pre">QDriftTrotterization(num_terms,</span> <span class="pre">*,</span> <span class="pre">filter_trivial=False,</span> <span class="pre">weights=None,</span> <span class="pre">rng=None)</span></code>, is
+deprecated. Passing an <code class="docutils literal notranslate"><span class="pre">int</span></code> first returns a pass that samples by itself. Instead, write
+<code class="docutils literal notranslate"><span class="pre">F2FSynthesis({&quot;Evolution&quot;:</span> <span class="pre">FermionicQDrift(num_terms,</span> <span class="pre">weights=...,</span> <span class="pre">rng=...)})</span></code> where
+<code class="docutils literal notranslate"><span class="pre">filter_trivial</span></code> was <code class="docutils literal notranslate"><span class="pre">False</span></code>, and
+<code class="docutils literal notranslate"><span class="pre">QDriftTrotterization(FermionicQDrift(num_terms,</span> <span class="pre">weights=...,</span> <span class="pre">rng=...))</span></code> where it was <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p></li>
 </ul>
 </section>
 <section id="bug-fixes">
@@ -1576,7 +1612,7 @@ Following Qiskit’s design philosophy, the core of this package is written in R
       
     </aside>
   </div>
-</div><script src="_static/documentation_options.js?v=65856bcf"></script>
+</div><script src="_static/documentation_options.js?v=3d17250b"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/scripts/furo.js?v=46bd48cc"></script>

@@ -15,9 +15,7 @@
    .. rubric:: Attributes
     
    .. autoattribute:: MAX_SAMPLE_RETRIES
-   .. autoattribute:: num_terms
-   .. autoattribute:: filter_trivial
-   .. autoattribute:: weights
+   .. autoattribute:: qdrift
   
   
   
