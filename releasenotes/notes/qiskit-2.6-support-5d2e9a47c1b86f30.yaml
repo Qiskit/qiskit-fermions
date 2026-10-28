@@ -1,0 +1,5 @@
+---
+other:
+  - |
+    ``qiskit~=2.6.0`` is now supported in addition to ``qiskit~=2.5.0``. The Qiskit requirement
+    is now ``qiskit>=2.5.0,<2.7``.

@@ -3,7 +3,7 @@
 requires = [
     "setuptools>=77.0.1",
     "setuptools-rust",
-    "qiskit~=2.5.0",
+    "qiskit>=2.5.0,<2.7",
 ]
 build-backend = "setuptools.build_meta"
 
@@ -34,10 +34,11 @@ classifiers = [
 requires-python = ">=3.11"
 
 dependencies = [
-    # Pinned to a single minor: `crates/qiskit-pyo3-ffi` is a pre-generated FFI snapshot tied to
-    # this Qiskit release, and its stability across Qiskit minors is not yet guaranteed. Widen
-    # this once a new minor has been verified against the vendored FFI.
-    "qiskit~=2.5.0",
+    # `crates/qiskit-pyo3-ffi` is a pre-generated FFI snapshot of the OLDEST supported Qiskit
+    # minor (the lower bound below). Qiskit only appends C API slots, so it keeps working against
+    # newer minors, but full C ABI stability is not yet guaranteed, hence the upper bound. Widen
+    # it only once a new minor has been verified against the vendored FFI.
+    "qiskit>=2.5.0,<2.7",
     "scipy>=1.10",
     "stevedore>=3.0.0",
     "typing-extensions",
@@ -71,7 +72,7 @@ pyomo = [
 build = [
     "setuptools>=77.0.1",
     "setuptools-rust",
-    "qiskit~=2.5.0",
+    "qiskit>=2.5.0,<2.7",
 ]
 style = [
     "ruff==0.16.9",

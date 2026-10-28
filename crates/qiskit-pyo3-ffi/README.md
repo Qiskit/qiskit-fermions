@@ -3,4 +3,10 @@ published to allow it get pulled in automatically, we vendor its source here.
 Being auto-generated, the actual contents are subject to change without detailed
 review.
 
+Developer note: the vendored snapshot must be generated from the OLDEST Qiskit minor we support
+(the lower bound of the `qiskit` requirement in `pyproject.toml`). Qiskit only appends C API
+slots, so the snapshot keeps working against newer minors, but a snapshot from a newer minor
+would reference slots that older supported minors do not have. Regenerate it only when raising
+that lower bound, and do not use C API functions that are newer than the lower bound.
+
 [1]: https://github.com/Qiskit/qiskit/blob/948fa866ab6ee273c93671504aef22f38d91f957/Makefile#L178-L181

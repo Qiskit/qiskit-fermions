@@ -108,10 +108,10 @@ jobs:
       - name: Install Python package
         shell: bash
         run: |
-          # `build`/`test` pin `qiskit` to a single minor (see `pyproject.toml`, tied to the
+          # `build`/`test` bound `qiskit` to released minors (see `pyproject.toml`, tied to the
           # vendored `qiskit-pyo3-ffi` snapshot), which conflicts with the dev wheel built here.
-          # Excluding `qiskit` from `uv`'s resolution means that pin is never checked against the
-          # already-installed dev version.
+          # Excluding `qiskit` from `uv`'s resolution means that bound is never checked against
+          # the already-installed dev version.
           pip install "qiskit @ file:$(echo build/qiskit/dist/*.whl)"
           uv pip install --system --exclude <(echo qiskit) --group build --group test
           SETUPTOOLS_RUST_CARGO_PROFILE=release uv pip install --system --exclude <(echo qiskit) -e .
