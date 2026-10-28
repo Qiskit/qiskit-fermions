@@ -1,0 +1,10 @@
+---
+features:
+  - |
+    :class:`~qiskit_fermions.transpiler.passes.QDriftTrotterization` now draws an
+    :class:`~qiskit_fermions.circuit.library.Evolution` gate with the
+    :class:`~qiskit_fermions.circuit.library.synthesis.FermionicQDrift` that the gate carries as its
+    ``synthesis``, which lets every gate of a circuit hold the ``weights`` of its own operator. The
+    method passed to the pass is now optional and applies to the gates that carry none; a gate with
+    neither is left in place, with a ``UserWarning``. A ``synthesis`` that is not a
+    ``FermionicQDrift`` is ignored by the pass.

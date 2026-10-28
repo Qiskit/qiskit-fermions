@@ -61,10 +61,13 @@ class LegacyQDriftTrotterization(QDriftTrotterization):
             weights: see :class:`.FermionicQDrift`.
             rng: see :class:`.FermionicQDrift`.
         """
-        super().__init__(FermionicQDrift(num_terms, weights=weights, rng=rng))
+        qdrift = FermionicQDrift(num_terms, weights=weights, rng=rng)
+        super().__init__(qdrift)
+        # kept apart from `self.qdrift`, which is optional for the pass this one specializes
+        self._legacy_qdrift = qdrift
         self.num_terms = num_terms
         self.filter_trivial = filter_trivial
-        self.weights = self.qdrift.weights
+        self.weights = qdrift.weights
 
     def run(self, dag: FermionicDAGCircuit) -> FermionicDAGCircuit:
         """Runs this transpilation pass.
@@ -77,4 +80,4 @@ class LegacyQDriftTrotterization(QDriftTrotterization):
         """
         if self.filter_trivial:
             return super().run(dag)
-        return F2FSynthesis({"Evolution": self.qdrift}).run(dag)
+        return F2FSynthesis({"Evolution": self._legacy_qdrift}).run(dag)

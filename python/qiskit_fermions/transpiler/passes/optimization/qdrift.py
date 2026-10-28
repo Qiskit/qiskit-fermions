@@ -47,6 +47,13 @@ class QDriftTrotterization(FermionicDAGCircuitPass):
     rejects a drawn term unless its support couples a known-occupied mode with a known-unoccupied
     one, drawing a replacement in its place.
 
+    The method that draws the terms of an :class:`.Evolution` gate is resolved per gate. A gate whose
+    :attr:`~.FermionicGate.synthesis` is a :class:`.FermionicQDrift` (or a subclass of it) is drawn
+    with that method, which is how a gate carries its own ``num_terms``, ``weights`` and ``rng``.
+    Any other :attr:`~.FermionicGate.synthesis` is not a statement about qDRIFT and is ignored. Such
+    a gate is drawn with the ``qdrift`` method given to this pass instead, and when there is none, it
+    is left in place (with a :class:`UserWarning`).
+
     That exists to stop the sampling from spending one of the ``num_terms`` slots on an excitation
     that cannot move a particle, and which therefore tells you nothing about the sampled bitstrings.
     It buys that with the protocol's convergence guarantee. To sample without rejecting anything,
@@ -113,24 +120,28 @@ class QDriftTrotterization(FermionicDAGCircuitPass):
     def __new__(cls, *args: Any, **kwargs: Any) -> Any:  # noqa: D102
         # Backwards compatibility: the former signature started with an `int`, and returns a shim.
         if cls is QDriftTrotterization and (
-            (args and not isinstance(args[0], FermionicQDrift)) or "num_terms" in kwargs
+            (args and args[0] is not None and not isinstance(args[0], FermionicQDrift))
+            or "num_terms" in kwargs
         ):
             from ._deprecated_qdrift import LegacyQDriftTrotterization
 
             return super().__new__(LegacyQDriftTrotterization)
         return super().__new__(cls)
 
-    def __init__(self, qdrift: FermionicQDrift) -> None:
+    def __init__(self, qdrift: FermionicQDrift | None = None) -> None:
         """Initializing this transpiler pass can be done with the argument below.
 
         Args:
-            qdrift: the synthesis method that draws the terms. Its ``num_terms``, ``weights`` and
-                ``rng`` apply as they do outside of this pass.
+            qdrift: the synthesis method that draws the terms of every :class:`.Evolution` gate
+                that does not carry a :class:`.FermionicQDrift` as its own
+                :attr:`~.FermionicGate.synthesis`. Its ``num_terms``, ``weights`` and ``rng`` apply
+                as they do outside of this pass. When ``None``, only the gates that carry their own
+                are drawn.
         """
         super().__init__()
 
         self.qdrift = qdrift
-        """The synthesis method that draws the terms."""
+        """The fallback synthesis method that draws the terms, or ``None`` if there is none."""
 
     def run(self, dag: FermionicDAGCircuit) -> FermionicDAGCircuit:
         """Runs this transpilation pass.
@@ -138,9 +149,12 @@ class QDriftTrotterization(FermionicDAGCircuitPass):
         Each :class:`.Evolution` node is replaced by :attr:`~.FermionicQDrift.num_terms` sampled
         :class:`.Evolution` gates, one per accepted draw. The emitted gates are marked
         :attr:`.Evolution.atomic` and carry over the :attr:`.Evolution.synthesis` method of the node
-        they replace. Nodes that are not :class:`.Evolution` gates are copied to the output
-        unchanged. Since the sampling is random, the output varies between runs unless the ``rng``
-        was seeded.
+        they replace. The method that draws them is the node's own :attr:`.Evolution.synthesis`
+        if that is a :class:`.FermionicQDrift`, and :attr:`qdrift` otherwise. A node for which there
+        is neither is copied to the output unchanged, with a :class:`UserWarning`, and every mode it
+        acts on is then treated as "uncertain" for the filtering of the nodes after it. Nodes that
+        are not :class:`.Evolution` gates are copied to the output unchanged. Since the sampling is
+        random, the output varies between runs unless the ``rng`` was seeded.
 
         Args:
             dag: the input circuit with fermion-based instructions. Only
@@ -222,7 +236,28 @@ class QDriftTrotterization(FermionicDAGCircuitPass):
                 out_dag.apply_operation_back(node.op, qargs=node.qargs, cargs=node.cargs)
                 continue
 
-            sampler = self.qdrift.sampler(node.op)
+            # A gate's own qDRIFT method wins over the pass-level one. Only a `FermionicQDrift` does
+            # so: any other method says nothing about how to draw terms, and honoring it would
+            # defeat the purpose of this pass.
+            qdrift = (
+                node.op.synthesis if isinstance(node.op.synthesis, FermionicQDrift) else self.qdrift
+            )
+            if qdrift is None:
+                warnings.warn(
+                    "This Evolution gate is left as it is because it does not carry a "
+                    "FermionicQDrift as its synthesis and the pass was given none.",
+                    category=UserWarning,
+                    stacklevel=2,
+                )
+                # Nothing is known about what the gate does to the occupations, so, like an
+                # `OrbitalRotation`, it makes every mode it acts on "uncertain" for what follows.
+                modes = set(_global_modes(dag, node).tolist())
+                occupied |= modes
+                unoccupied |= modes
+                out_dag.apply_operation_back(node.op, qargs=node.qargs, cargs=node.cargs)
+                continue
+
+            sampler = qdrift.sampler(node.op)
 
             if not (occupied and unoccupied):
                 match (bool(occupied), bool(unoccupied)):
@@ -256,7 +291,7 @@ class QDriftTrotterization(FermionicDAGCircuitPass):
             # this gate, which is what the metadata reports.
             failed_attempts = 0
             discarded = 0
-            while added_terms < self.qdrift.num_terms:
+            while added_terms < qdrift.num_terms:
                 evo = sampler.draw()
 
                 term_support = evo.operator.get_support()

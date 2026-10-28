@@ -1045,3 +1045,123 @@ def test_qdrift_filter_trivial_metadata_pickle():
     reconstructed = pickle.loads(pickle.dumps(qdrift_circ._inner))
     for key in ("filter_trivial.discarded", "filter_trivial.emitted"):
         assert reconstructed.metadata[key] == qdrift_circ.metadata[key]
+
+
+def _num_evolutions(circ: FermionicCircuit) -> int:
+    return circ.count_ops().get("Evolution", 0)
+
+
+def test_filtered_qdrift_draws_with_the_method_of_the_gate():
+    """A gate carrying a ``FermionicQDrift`` is drawn with it, with no method given to the pass."""
+    circ = _filter_trivial_circuit(_coupling_hamiltonian(), synthesis=FermionicQDrift(7, rng=1))
+
+    out = FermionicPassManager(FilteredQDrift()).run(circ)
+
+    assert _num_evolutions(out) == 7
+
+
+def test_filtered_qdrift_gate_method_wins_over_the_pass():
+    """The method of the gate takes precedence over the one given to the pass, for its own gate."""
+    hamil = _coupling_hamiltonian()
+    circ = FermionicCircuit(4)
+    circ.append(InitializeModes([True, True, False, False]), circ.modes)
+    circ.append(Evolution(4, hamil, time=1.0, synthesis=FermionicQDrift(5, rng=1)), circ.modes)
+    circ.append(Evolution(4, hamil, time=1.0), circ.modes)
+
+    out = FermionicPassManager(FilteredQDrift(FermionicQDrift(3, rng=2))).run(circ)
+
+    # five draws from the first gate and three from the fallback for the second one
+    assert _num_evolutions(out) == 5 + 3
+
+
+def test_filtered_qdrift_subclass_of_the_method_counts():
+    """A subclass of ``FermionicQDrift`` is still a qDRIFT method, so the gate's own wins."""
+
+    class Custom(FermionicQDrift):
+        pass
+
+    circ = _filter_trivial_circuit(_coupling_hamiltonian(), synthesis=Custom(6, rng=1))
+
+    out = FermionicPassManager(FilteredQDrift(FermionicQDrift(2, rng=2))).run(circ)
+
+    assert _num_evolutions(out) == 6
+
+
+def test_filtered_qdrift_ignores_another_product_formula_on_the_gate():
+    """Another Trotter method on the gate must not take precedence over the pass's qDRIFT."""
+    circ = _filter_trivial_circuit(
+        _coupling_hamiltonian(), synthesis=FermionicSuzukiTrotter(order=2)
+    )
+
+    out = FermionicPassManager(FilteredQDrift(FermionicQDrift(4, rng=1))).run(circ)
+
+    assert _num_evolutions(out) == 4
+
+
+def test_filtered_qdrift_warns_and_keeps_a_gate_without_any_method():
+    """Without a method on the gate or in the pass, the gate is kept and a warning is emitted."""
+    circ = _filter_trivial_circuit(_coupling_hamiltonian(), synthesis=FermionicSuzukiTrotter())
+
+    with pytest.warns(UserWarning, match="does not carry a FermionicQDrift"):
+        out = FermionicPassManager(FilteredQDrift()).run(circ)
+
+    (evolution,) = [i.operation for i in out._inner.data if i.operation.name == "Evolution"]
+    assert not evolution.atomic
+    assert isinstance(evolution.synthesis, FermionicSuzukiTrotter)
+
+
+def test_filtered_qdrift_mixes_gates_with_and_without_a_method():
+    """The gates without any method are kept next to the ones that are drawn."""
+    hamil = _coupling_hamiltonian()
+    circ = FermionicCircuit(4)
+    circ.append(InitializeModes([True, True, False, False]), circ.modes)
+    circ.append(Evolution(4, hamil, time=1.0, synthesis=FermionicQDrift(5, rng=1)), circ.modes)
+    circ.append(Evolution(4, hamil, time=1.0), circ.modes)
+
+    with pytest.warns(UserWarning, match="does not carry a FermionicQDrift"):
+        out = FermionicPassManager(FilteredQDrift()).run(circ)
+
+    assert _num_evolutions(out) == 5 + 1
+
+
+def test_filtered_qdrift_gates_hold_their_own_weights():
+    """Two gates over operators of one size each sample with the weights they carry.
+
+    This is what the pass-level method cannot express: its weights describe one operator.
+    """
+    first = FermionOperator.from_terms_with_groups(
+        [(((True, 2), (False, 0)), 1.0, 0), (((True, 3), (False, 1)), 1.0, 1)]
+    )
+    second = FermionOperator.from_terms_with_groups(
+        [(((True, 2), (False, 0)), 1.0, 0), (((True, 3), (False, 1)), 1.0, 1)]
+    )
+    circ = FermionicCircuit(4)
+    circ.append(InitializeModes([True, True, False, False]), circ.modes)
+    # a weight of zero on a group removes it from the draw altogether
+    circ.append(
+        Evolution(4, first, time=1.0, synthesis=FermionicQDrift(8, rng=1, weights=[1.0, 0.0])),
+        circ.modes,
+    )
+    circ.append(
+        Evolution(4, second, time=1.0, synthesis=FermionicQDrift(8, rng=1, weights=[0.0, 1.0])),
+        circ.modes,
+    )
+
+    out = FermionicPassManager(FilteredQDrift()).run(circ)
+
+    supports = [
+        sorted(i.operation.operator.get_support())
+        for i in out._inner.data
+        if i.operation.name == "Evolution"
+    ]
+    assert supports[:8] == [[0, 2]] * 8
+    assert supports[8:] == [[1, 3]] * 8
+
+
+def test_filtered_qdrift_legacy_signature_is_still_dispatched():
+    """Making ``qdrift`` optional must not change how the former, integer signature is told apart."""
+    with pytest.warns(DeprecationWarning):
+        legacy = FilteredQDrift(3, filter_trivial=True)
+
+    assert legacy.qdrift.num_terms == 3
+    assert FilteredQDrift().qdrift is None
