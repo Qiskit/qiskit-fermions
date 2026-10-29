@@ -3,12 +3,15 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="Transpile fermionic circuits" href="transpilation.html"><link rel="prev" title="Generate SqDRIFT circuits" href="sqdrift.html">
+<meta content="Getting-started guide that builds the Krylov time-evolution circuits of sample-based Krylov quantum diagonalization (SKQD) for the single-impurity Anderson model, transpiles them, and diagonalizes in the sampled subspace." name="description" />
+
+<link rel="alternate" type="text/markdown" href="skqd.html.md">
+<link rel="describedby" href="llms.txt"><link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="Transpile fermionic circuits" href="transpilation.html"><link rel="prev" title="Generate SqDRIFT circuits" href="sqdrift.html">
         <link rel="prefetch" href="../_static/images/qiskit-light-logo.svg" as="image">
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Generate Krylov time-evolution circuits (SKQD) - Qiskit Fermions 0.4.0.dev0+ecd9e28</title>
+        <title>Generate Krylov time-evolution circuits (SKQD) - Qiskit Fermions 0.4.0.dev0+7ba0356</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=fc6d6d93" />
@@ -161,7 +164,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.4.0.dev0+ecd9e28</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.4.0.dev0+7ba0356</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +190,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.4.0.dev0+ecd9e28</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.4.0.dev0+7ba0356</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -674,13 +677,13 @@ why SKQD sampling works in the momentum basis and not the position basis.</p>
 <h2>3. Prepare the reference state<a class="headerlink" href="#prepare-the-reference-state" title="Link to this heading">¶</a></h2>
 <p>The SKQD reference <span class="math">\(\lvert \psi_0 \rangle\)</span> is the superposition of all excitations of the
 electrons closest to the Fermi level into the nearest empty momentum modes. The <a class="reference external" href="https://arxiv.org/abs/2501.09702">SKQD</a> publication
-builds it with a hand-written network of <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.library.XXPlusYYGate" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">XXPlusYYGate</span></code></a>s.
+builds it with a hand-written network of <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.library.XXPlusYYGate" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">XXPlusYYGate</span></code></a>s.
 It looks strongly correlated (it
 has hundreds of nonzero computational-basis amplitudes), but a network of number-conserving two-mode
 rotations is a single-particle (fermionic Gaussian) operation, so the state it produces is a
 single Slater determinant. That means you can prepare it with one <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.PrepareSlaterDeterminant.html#qiskit_fermions.circuit.library.PrepareSlaterDeterminant" title="qiskit_fermions.circuit.library.PrepareSlaterDeterminant"><code class="xref py py-class docutils literal notranslate"><span class="pre">PrepareSlaterDeterminant</span></code></a>
 gate, given the single-particle rotation the network implements.</p>
-<p>Because each <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.library.XXPlusYYGate" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">XXPlusYYGate</span></code></a> acts as a Givens rotation on a
+<p>Because each <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.library.XXPlusYYGate" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">XXPlusYYGate</span></code></a> acts as a Givens rotation on a
 pair of modes, that rotation can be built directly in the single-particle picture (one Givens
 matrix per gate) instead of emitting the two-qubit gates by hand. The gates form a brickwork of nearest-neighbor rotations that fans out
 from the Fermi level in expanding layers, spreading each near-Fermi electron across the empty modes
@@ -728,7 +731,7 @@ same gate is applied once on the alpha modes <code class="docutils literal notra
 <span class="gp">&gt;&gt;&gt; </span><span class="n">reference_preparation</span> <span class="o">=</span> <span class="n">PrepareSlaterDeterminant</span><span class="p">(</span><span class="n">occupation</span><span class="p">,</span> <span class="n">reference_rotation</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>This declarative gate replaces the hand-coded <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.library.XXPlusYYGate" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">XXPlusYYGate</span></code></a>
+<p>This declarative gate replaces the hand-coded <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.library.XXPlusYYGate" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">XXPlusYYGate</span></code></a>
 network; the transpiler generates the Givens-rotation synthesis.</p>
 </section>
 <section id="assemble-the-krylov-circuits">
@@ -786,7 +789,7 @@ the exact simulation in step 6, and a measurement is not a unitary operation. St
 <p>Prefer measuring the <em>fermionic</em> circuit over the transpiled one. A fermionic measurement names the
 mode it reads, so layout and routing carry it along with the qubit that mode ended up on, and the
 sampled bitstring is indexed by mode. Measuring the transpiled circuit instead leaves you to undo
-<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.transpiler.TranspileLayout#final_index_layout" title="(in Qiskit v2.5)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">final_index_layout()</span></code></a> yourself, and silently returns
+<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.transpiler.TranspileLayout#final_index_layout" title="(in Qiskit v2.6)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">final_index_layout()</span></code></a> yourself, and silently returns
 permuted results if you forget. This relies on the occupation-basis Jordan-Wigner encoding the
 preset uses, where each mode is carried by one qubit.</p>
 </div>
@@ -833,9 +836,9 @@ of the time-evolution operator.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Splitting the Hamiltonian keeps these depths modest. The one-body evolution is a genuine
-orbital rotation, so it synthesizes to an <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.library.XXPlusYYGate" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">XXPlusYYGate</span></code></a>
+orbital rotation, so it synthesizes to an <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.library.XXPlusYYGate" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">XXPlusYYGate</span></code></a>
 brickwork on adjacent qubits. Each half step of the on-site interaction is a single
-<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.library.RZZGate" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">RZZGate</span></code></a> coupling the impurity’s two spin
+<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.library.RZZGate" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">RZZGate</span></code></a> coupling the impurity’s two spin
 modes; the cheap term that the second-order product sandwiches around the rotation. Handing the whole
 Hamiltonian to one <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate instead would Pauli-Trotterize the one-body part term
 by term, propagating long Jordan-Wigner <code class="docutils literal notranslate"><span class="pre">Z</span></code>-strings across the (long-range) impurity-bath
@@ -889,7 +892,7 @@ rotation. The gate applies <code class="docutils literal notranslate"><span clas
 <p>Pooling the samples from all five Krylov circuits, the support is tiny: a few hundred distinct
 bitstrings out of the <span class="math">\(\binom{8}{4}^2 = 4900\)</span> determinants in the <code class="docutils literal notranslate"><span class="pre">(4,</span> <span class="pre">4)</span></code> sector. This
 concentration, a direct consequence of the momentum-basis sparsity established in step 2, makes the subsequent classical diagonalization tractable.</p>
-<p>Plotting the counts with <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.visualization.plot_histogram" title="(in Qiskit v2.5)"><code class="xref py py-func docutils literal notranslate"><span class="pre">qiskit.visualization.plot_histogram()</span></code></a> makes the sparsity visible. A few
+<p>Plotting the counts with <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.visualization.plot_histogram" title="(in Qiskit v2.6)"><code class="xref py py-func docutils literal notranslate"><span class="pre">qiskit.visualization.plot_histogram()</span></code></a> makes the sparsity visible. A few
 configurations dominate, led by the reference determinant.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit.visualization</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot_histogram</span>
 <span class="gp">&gt;&gt;&gt;</span>
@@ -914,7 +917,7 @@ recovery: flipping occupations to repair configurations that violate the known p
 symmetry. Configuration recovery is designed to undo the damage of hardware noise, which corrupts
 sampled bitstrings into the wrong particle-number sector; the sampling here is noiseless, so
 there is nothing to repair on that front.</p>
-<p>The solver consumes the sampled counts as a <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.primitives.BitArray" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">BitArray</span></code></a>, built
+<p>The solver consumes the sampled counts as a <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.primitives.BitArray" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">BitArray</span></code></a>, built
 directly from the pooled <code class="docutils literal notranslate"><span class="pre">counts</span></code> of step 6. Pass <code class="docutils literal notranslate"><span class="pre">num_bits</span></code> explicitly: without it, the width
 is inferred from the widest sampled bitstring, which is narrower than <code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">*</span> <span class="pre">norb</span></code> whenever no
 sample occupies the last mode, and the solver then rejects the array. The solver diagonalizes in
@@ -1034,7 +1037,7 @@ momentum-basis sparsity established in step 2 sample-efficient.</p>
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on 2026/10/28</div>
+              Last updated on 2026/10/29</div>
           </div>
           <div class="right-details">
             
@@ -1075,7 +1078,7 @@ momentum-basis sparsity established in step 2 sample-efficient.</p>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=3d17250b"></script>
+</div><script src="../_static/documentation_options.js?v=92619de8"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

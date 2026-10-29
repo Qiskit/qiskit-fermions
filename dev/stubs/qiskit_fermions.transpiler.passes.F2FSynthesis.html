@@ -3,12 +3,14 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="F2FSynthesisConfig" href="qiskit_fermions.transpiler.passes.optimization.f2f_synthesis.F2FSynthesisConfig.html"><link rel="prev" title="Transpiler Passes" href="../pydoc/qiskit_fermions.transpiler.passes.html">
+
+<link rel="alternate" type="text/markdown" href="qiskit_fermions.transpiler.passes.F2FSynthesis.html.md">
+<link rel="describedby" href="llms.txt"><link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="F2FSynthesisConfig" href="qiskit_fermions.transpiler.passes.optimization.f2f_synthesis.F2FSynthesisConfig.html"><link rel="prev" title="Transpiler Passes" href="../pydoc/qiskit_fermions.transpiler.passes.html">
         <link rel="prefetch" href="../_static/images/qiskit-light-logo.svg" as="image">
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>F2FSynthesis - Qiskit Fermions 0.4.0.dev0+ecd9e28</title>
+        <title>F2FSynthesis - Qiskit Fermions 0.4.0.dev0+7ba0356</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=fc6d6d93" />
@@ -161,7 +163,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.4.0.dev0+ecd9e28</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.4.0.dev0+7ba0356</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +189,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.4.0.dev0+ecd9e28</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.4.0.dev0+7ba0356</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -460,7 +462,7 @@
 <dl class="py class">
 <dt class="sig sig-object py" id="qiskit_fermions.transpiler.passes.F2FSynthesis">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">F2FSynthesis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">apply</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qiskit_fermions.transpiler.passes.F2FSynthesis" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.GenericPass" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">GenericPass</span></code></a>[<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.dagcircuit.DAGCircuit" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DAGCircuit</span></code></a>, <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.dagcircuit.DAGCircuit" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DAGCircuit</span></code></a>]</p>
+<dd><p>Bases: <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.GenericPass" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">GenericPass</span></code></a>[<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.dagcircuit.DAGCircuit" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DAGCircuit</span></code></a>, <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.dagcircuit.DAGCircuit" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DAGCircuit</span></code></a>]</p>
 <p>A transpilation pass breaking gates down into smaller ones in fermionic space.</p>
 <p>Some gates can be rewritten into a circuit of smaller fermionic gates before they reach the
 fermion-to-qubit stage, which then maps and synthesizes those. This pass does that for the gates
@@ -542,7 +544,7 @@ restrict the pass to the gates that benefit.</p>
 <p>Expanding an operator that carries no <a class="reference internal" href="qiskit_fermions.operators.OperatorTrait.html#qiskit_fermions.operators.OperatorTrait.groups" title="qiskit_fermions.operators.OperatorTrait.groups"><code class="xref py py-attr docutils literal notranslate"><span class="pre">groups</span></code></a>
 splits it term by term, and a lone <span class="math">\(a^\dagger_i a_j\)</span> is not Hermitian, so its
 exponential is not unitary. Nothing complains until the mapped operator reaches
-<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.library.PauliEvolutionGate" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">PauliEvolutionGate</span></code></a>, which raises <code class="docutils literal notranslate"><span class="pre">ValueError:</span> <span class="pre">Operator</span>
+<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.library.PauliEvolutionGate" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">PauliEvolutionGate</span></code></a>, which raises <code class="docutils literal notranslate"><span class="pre">ValueError:</span> <span class="pre">Operator</span>
 <span class="pre">contains</span> <span class="pre">complex</span> <span class="pre">coefficients,</span> <span class="pre">which</span> <span class="pre">are</span> <span class="pre">not</span> <span class="pre">supported</span></code>. Assigning conjugate-paired groups
 is what makes each factor Hermitian.</p>
 </div>
@@ -556,7 +558,7 @@ by the <a class="reference internal" href="qiskit_fermions.circuit.library.synth
 <code class="docutils literal notranslate"><span class="pre">False</span></code>, the gate is only tagged with the plugin (unless it is atomic, which is
 never touched) and something else has to expand it later. See <a class="reference internal" href="#qiskit_fermions.transpiler.passes.F2FSynthesis.apply" title="qiskit_fermions.transpiler.passes.F2FSynthesis.apply"><code class="xref py py-attr docutils literal notranslate"><span class="pre">apply</span></code></a>.</p></li>
 <li><p><strong>filter</strong> (<em>Callable</em><em>[</em><em>[</em><em>DAGOpNode</em><em>]</em><em>, </em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><em>bool</em></a><em>] </em><em>| </em><em>None</em>) – an optional predicate deciding which nodes to break down. It is called with the
-<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.dagcircuit.DAGOpNode" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DAGOpNode</span></code></a> of a gate whose type is in <a class="reference internal" href="#qiskit_fermions.transpiler.passes.F2FSynthesis.methods" title="qiskit_fermions.transpiler.passes.F2FSynthesis.methods"><code class="xref py py-attr docutils literal notranslate"><span class="pre">methods</span></code></a>,
+<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.dagcircuit.DAGOpNode" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DAGOpNode</span></code></a> of a gate whose type is in <a class="reference internal" href="#qiskit_fermions.transpiler.passes.F2FSynthesis.methods" title="qiskit_fermions.transpiler.passes.F2FSynthesis.methods"><code class="xref py py-attr docutils literal notranslate"><span class="pre">methods</span></code></a>,
 and the node is left untouched unless it returns <code class="docutils literal notranslate"><span class="pre">True</span></code>. If <code class="docutils literal notranslate"><span class="pre">None</span></code> (the default),
 every such node is selected.</p></li>
 </ul>
@@ -610,9 +612,9 @@ equivalent gate merely carrying the plugin. All other nodes are left untouched. 
 is modified in place.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>dag</strong> (<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.dagcircuit.DAGCircuit" title="(in Qiskit v2.5)"><em>DAGCircuit</em></a>) – the input circuit with fermion-based instructions. Only
-<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.dagcircuit.DAGOpNode" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DAGOpNode</span></code></a> with <a class="reference internal" href="qiskit_fermions.circuit.FermionicGate.html#qiskit_fermions.circuit.FermionicGate" title="qiskit_fermions.circuit.FermionicGate"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicGate</span></code></a> instances as their
-<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.dagcircuit.DAGOpNode#op" title="(in Qiskit v2.5)"><code class="xref py py-attr docutils literal notranslate"><span class="pre">op</span></code></a> are supported, plus
+<dd class="field-odd"><p><strong>dag</strong> (<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.dagcircuit.DAGCircuit" title="(in Qiskit v2.6)"><em>DAGCircuit</em></a>) – the input circuit with fermion-based instructions. Only
+<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.dagcircuit.DAGOpNode" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DAGOpNode</span></code></a> with <a class="reference internal" href="qiskit_fermions.circuit.FermionicGate.html#qiskit_fermions.circuit.FermionicGate" title="qiskit_fermions.circuit.FermionicGate"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicGate</span></code></a> instances as their
+<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.dagcircuit.DAGOpNode#op" title="(in Qiskit v2.6)"><code class="xref py py-attr docutils literal notranslate"><span class="pre">op</span></code></a> are supported, plus
 <code class="xref py py-class docutils literal notranslate"><span class="pre">Barrier</span></code> and <a class="reference internal" href="qiskit_fermions.circuit.library.FermionicMeasure.html#qiskit_fermions.circuit.library.FermionicMeasure" title="qiskit_fermions.circuit.library.FermionicMeasure"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicMeasure</span></code></a>, which are
 carried through untouched (a measurement keeps the classical bit it writes into).</p>
 </dd>
@@ -620,7 +622,7 @@ carried through untouched (a measurement keeps the classical bit it writes into)
 <dd class="field-even"><p>The output circuit which is still acting on a fermionic register.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.dagcircuit.DAGCircuit" title="(in Qiskit v2.5)"><em>DAGCircuit</em></a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.dagcircuit.DAGCircuit" title="(in Qiskit v2.6)"><em>DAGCircuit</em></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -634,15 +636,15 @@ carried through untouched (a measurement keeps the classical bit it writes into)
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>passmanager_ir</strong> (<em>IR</em>) – Qiskit IR to optimize.</p></li>
-<li><p><strong>state</strong> (<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.PassManagerState" title="(in Qiskit v2.5)"><em>PassManagerState</em></a>) – State associated with workflow execution by the pass manager itself.</p></li>
-<li><p><strong>callback</strong> (<a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.15)"><em>Callable</em></a><em>[</em><em>[</em><a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.Task" title="(in Qiskit v2.5)"><em>Task</em></a><em>, </em><em>IR_OUT</em><em>, </em><a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.PropertySet" title="(in Qiskit v2.5)"><em>PropertySet</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><em>float</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><em>int</em></a><em>]</em><em>, </em><em>None</em><em>] </em><em>| </em><em>None</em>) – A callback function which is called per execution of optimization task.</p></li>
+<li><p><strong>state</strong> (<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.PassManagerState" title="(in Qiskit v2.6)"><em>PassManagerState</em></a>) – State associated with workflow execution by the pass manager itself.</p></li>
+<li><p><strong>callback</strong> (<a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.15)"><em>Callable</em></a><em>[</em><em>[</em><a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.Task" title="(in Qiskit v2.6)"><em>Task</em></a><em>, </em><em>IR_OUT</em><em>, </em><a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.PropertySet" title="(in Qiskit v2.6)"><em>PropertySet</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><em>float</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><em>int</em></a><em>]</em><em>, </em><em>None</em><em>] </em><em>| </em><em>None</em>) – A callback function which is called per execution of optimization task.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Optimized Qiskit IR and state of the workflow.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)">tuple</a>[<em>IR_OUT</em>, <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.PassManagerState" title="(in Qiskit v2.5)"><em>PassManagerState</em></a>]</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)">tuple</a>[<em>IR_OUT</em>, <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.PassManagerState" title="(in Qiskit v2.6)"><em>PassManagerState</em></a>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -665,7 +667,7 @@ carried through untouched (a measurement keeps the classical bit it writes into)
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>state</strong> (<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.PassManagerState" title="(in Qiskit v2.5)"><em>PassManagerState</em></a>) – Pass manager state to update.</p></li>
+<li><p><strong>state</strong> (<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.PassManagerState" title="(in Qiskit v2.6)"><em>PassManagerState</em></a>) – Pass manager state to update.</p></li>
 <li><p><strong>run_state</strong> (<em>RunState</em>) – Completion status of current task.</p></li>
 </ul>
 </dd>
@@ -673,7 +675,7 @@ carried through untouched (a measurement keeps the classical bit it writes into)
 <dd class="field-even"><p>Updated pass manager state.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.PassManagerState" title="(in Qiskit v2.5)"><em>PassManagerState</em></a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.PassManagerState" title="(in Qiskit v2.6)"><em>PassManagerState</em></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -717,7 +719,7 @@ carried through untouched (a measurement keeps the classical bit it writes into)
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on 2026/10/28</div>
+              Last updated on 2026/10/29</div>
           </div>
           <div class="right-details">
             
@@ -760,7 +762,7 @@ carried through untouched (a measurement keeps the classical bit it writes into)
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=3d17250b"></script>
+</div><script src="../_static/documentation_options.js?v=92619de8"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

@@ -1,0 +1,11 @@
+# Qiskit Fermions documentation previews
+
+> Unreleased builds of the Qiskit Fermions documentation, rebuilt whenever their branch changes. They may be outdated, incomplete, or describe features that never ship. Each link below is the `llms.txt` of one build.
+
+## Builds
+
+- [dev](https://qiskit.github.io/qiskit-fermions/dev/llms.txt): the development branch (`main`)
+
+## Released documentation
+
+- [Qiskit Fermions on the IBM Quantum Platform](https://quantum.cloud.ibm.com/docs/addons/qiskit-fermions): documentation of released versions, which the platform publishes with its own `llms.txt`

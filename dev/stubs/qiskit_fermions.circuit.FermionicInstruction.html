@@ -3,12 +3,14 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="FermionicGate" href="qiskit_fermions.circuit.FermionicGate.html"><link rel="prev" title="FermionicCircuit" href="qiskit_fermions.circuit.FermionicCircuit.html">
+
+<link rel="alternate" type="text/markdown" href="qiskit_fermions.circuit.FermionicInstruction.html.md">
+<link rel="describedby" href="llms.txt"><link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="FermionicGate" href="qiskit_fermions.circuit.FermionicGate.html"><link rel="prev" title="FermionicCircuit" href="qiskit_fermions.circuit.FermionicCircuit.html">
         <link rel="prefetch" href="../_static/images/qiskit-light-logo.svg" as="image">
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>FermionicInstruction - Qiskit Fermions 0.4.0.dev0+ecd9e28</title>
+        <title>FermionicInstruction - Qiskit Fermions 0.4.0.dev0+7ba0356</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=fc6d6d93" />
@@ -161,7 +163,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.4.0.dev0+ecd9e28</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.4.0.dev0+7ba0356</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +189,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.4.0.dev0+ecd9e28</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.4.0.dev0+7ba0356</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -460,18 +462,18 @@
 <dl class="py class">
 <dt class="sig sig-object py" id="qiskit_fermions.circuit.FermionicInstruction">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">FermionicInstruction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_qubits</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_clbits</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qiskit_fermions.circuit.FermionicInstruction" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.Instruction" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Instruction</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.Instruction" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Instruction</span></code></a></p>
 <p>The base class for all instructions acting on fermionic modes.</p>
 <p>This is the type that the fermion-to-qubit synthesis stage dispatches on, so it is what makes an
 instruction “fermionic” as far as this package is concerned.</p>
 <p>Most fermionic instructions are unitary and should subclass <a class="reference internal" href="qiskit_fermions.circuit.FermionicGate.html#qiskit_fermions.circuit.FermionicGate" title="qiskit_fermions.circuit.FermionicGate"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicGate</span></code></a> instead, which
-adds the <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.Gate" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Gate</span></code></a> interface on top of this one. Subclass this class directly
+adds the <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.Gate" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Gate</span></code></a> interface on top of this one. Subclass this class directly
 only for an instruction that cannot be a gate, the motivating case being one that acts on
-classical bits: <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.Gate" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Gate</span></code></a> fixes its classical-bit count at zero, so a
+classical bits: <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.Gate" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Gate</span></code></a> fixes its classical-bit count at zero, so a
 measurement (<a class="reference internal" href="qiskit_fermions.circuit.library.FermionicMeasure.html#qiskit_fermions.circuit.library.FermionicMeasure" title="qiskit_fermions.circuit.library.FermionicMeasure"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicMeasure</span></code></a>) cannot be a gate.</p>
 <div class="admonition caution">
 <p class="admonition-title">Caution</p>
-<p>Since this is a subclass of <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.Instruction" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Instruction</span></code></a> the documentation of its
+<p>Since this is a subclass of <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.Instruction" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Instruction</span></code></a> the documentation of its
 methods may refer to <cite>qubits</cite>. Those references should be interpreted as referring to
 <cite>fermions</cite> in the context of instances of this subclass.</p>
 <p>It may also happen that some of the inherited methods may not always make sense because of
@@ -623,7 +625,7 @@ and is not mutable.</p>
 was provided</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.Instruction" title="(in Qiskit v2.5)">qiskit.circuit.Instruction</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.Instruction" title="(in Qiskit v2.6)">qiskit.circuit.Instruction</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -660,7 +662,7 @@ as <code class="xref py py-class docutils literal notranslate"><span class="pre"
 <dl class="py method">
 <dt class="sig sig-object py" id="qiskit_fermions.circuit.FermionicInstruction.is_parameterized">
 <span class="sig-name descname"><span class="pre">is_parameterized</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qiskit_fermions.circuit.FermionicInstruction.is_parameterized" title="Link to this definition">¶</a></dt>
-<dd><p>Return whether the <code class="xref py py-class docutils literal notranslate"><span class="pre">Instruction</span></code> contains <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#circuit-compile-time-parameters" title="(in Qiskit v2.5)"><span class="xref std std-ref">compile-time parameters</span></a>.</p>
+<dd><p>Return whether the <code class="xref py py-class docutils literal notranslate"><span class="pre">Instruction</span></code> contains <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#circuit-compile-time-parameters" title="(in Qiskit v2.6)"><span class="xref std std-ref">compile-time parameters</span></a>.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -675,7 +677,7 @@ as <code class="xref py py-class docutils literal notranslate"><span class="pre"
 <dd class="field-even"><p>Containing the definition.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.Instruction" title="(in Qiskit v2.5)">qiskit.circuit.Instruction</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.Instruction" title="(in Qiskit v2.6)">qiskit.circuit.Instruction</a></p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>CircuitError</strong> – If n &lt; 1.</p>
@@ -698,7 +700,7 @@ It does not invert any gate.</p>
 </p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.Instruction" title="(in Qiskit v2.5)">qiskit.circuit.Instruction</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.Instruction" title="(in Qiskit v2.6)">qiskit.circuit.Instruction</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -778,7 +780,7 @@ will be a deepcopy of that instance.</p>
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on 2026/10/28</div>
+              Last updated on 2026/10/29</div>
           </div>
           <div class="right-details">
             
@@ -834,7 +836,7 @@ will be a deepcopy of that instance.</p>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=3d17250b"></script>
+</div><script src="../_static/documentation_options.js?v=92619de8"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

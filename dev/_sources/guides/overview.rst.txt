@@ -2,6 +2,9 @@
 Overview
 ########
 
+.. meta::
+   :description: Overview of the Qiskit Fermions guides, grouped by topic, with links to each one.
+
 ..
     _This page may *NOT* use any `.. toctree::` directives! Instead, the guides'
     toctree lives in the `docs/guides/index.rst` page. Here, all guides should

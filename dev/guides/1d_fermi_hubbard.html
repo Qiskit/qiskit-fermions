@@ -3,12 +3,15 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="Simulate 2D Fermi-Hubbard dynamics with flow sets" href="2d_fermi_hubbard.html"><link rel="prev" title="Overview" href="overview.html">
+<meta content="Tutorial that builds a circuit of constant two-qubit depth for the time dynamics of the spinless one-dimensional Fermi-Hubbard model: group terms into flow sets before mapping, write a custom ancilla-based encoding, and synthesize with the flow sets." name="description" />
+
+<link rel="alternate" type="text/markdown" href="1d_fermi_hubbard.html.md">
+<link rel="describedby" href="llms.txt"><link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="Simulate 2D Fermi-Hubbard dynamics with flow sets" href="2d_fermi_hubbard.html"><link rel="prev" title="Overview" href="overview.html">
         <link rel="prefetch" href="../_static/images/qiskit-light-logo.svg" as="image">
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Simulate 1D Fermi-Hubbard dynamics with flow sets - Qiskit Fermions 0.4.0.dev0+ecd9e28</title>
+        <title>Simulate 1D Fermi-Hubbard dynamics with flow sets - Qiskit Fermions 0.4.0.dev0+7ba0356</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=fc6d6d93" />
@@ -161,7 +164,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.4.0.dev0+ecd9e28</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.4.0.dev0+7ba0356</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +190,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.4.0.dev0+ecd9e28</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.4.0.dev0+7ba0356</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -721,7 +724,7 @@ over terms and their composition:</p>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
 <p>The <a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis.html#qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis.mapper_fn" title="qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis.mapper_fn"><code class="xref py py-attr docutils literal notranslate"><span class="pre">MapperFnEvolutionSynthesis.mapper_fn</span></code></a> expects the signature <code class="docutils literal notranslate"><span class="pre">(operator,</span> <span class="pre">num_qubits)</span></code>,
-and the return type must be a <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.quantum_info.SparseObservable" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">SparseObservable</span></code></a>, which makes
+and the return type must be a <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.quantum_info.SparseObservable" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">SparseObservable</span></code></a>, which makes
 the function directly usable as a transpiler plugin. See <a class="reference internal" href="#flowsets-transpile"><span class="std std-ref">step 6</span></a>.</p>
 </div>
 <p>Applying it to the Hamiltonian from step 1 gives the encoded operator on
@@ -910,7 +913,7 @@ into. The <code class="docutils literal notranslate"><span class="pre">synthesis
 product formula, which splits the operator by its
 <a class="reference internal" href="../stubs/qiskit_fermions.operators.TransferVertexOperator.html#qiskit_fermions.operators.TransferVertexOperator.groups" title="qiskit_fermions.operators.TransferVertexOperator.groups"><code class="xref py py-attr docutils literal notranslate"><span class="pre">groups</span></code></a> and evolves each group in turn.
 So the flow-set partitioning from step 2 <em>is</em> the Trotterization, and a single
-<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit#decompose" title="(in Qiskit v2.5)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">decompose()</span></code></a> performs it, giving <strong>one</strong>
+<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit#decompose" title="(in Qiskit v2.6)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">decompose()</span></code></a> performs it, giving <strong>one</strong>
 <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> <strong>per flow set</strong> in group order: east, west, then the diagonal interaction,
 carrying 3, 3, and 8 terms respectively.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">flow_set_circuit</span> <span class="o">=</span> <span class="n">circuit</span><span class="o">.</span><span class="n">decompose</span><span class="p">()</span>
@@ -958,14 +961,14 @@ is ignored.</p>
 <ul class="simple">
 <li><p><strong>A layout.</strong> The default <a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.TrivialF2QLayout.html#qiskit_fermions.transpiler.passes.TrivialF2QLayout" title="qiskit_fermions.transpiler.passes.TrivialF2QLayout"><code class="xref py py-class docutils literal notranslate"><span class="pre">TrivialF2QLayout</span></code></a> assumes one qubit per mode, which is
 wrong in this situation. <a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.CustomF2QLayout.html#qiskit_fermions.transpiler.passes.CustomF2QLayout" title="qiskit_fermions.transpiler.passes.CustomF2QLayout"><code class="xref py py-class docutils literal notranslate"><span class="pre">CustomF2QLayout</span></code></a> associates the fermionic register with a
-<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.QuantumRegister" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumRegister</span></code></a> of a different size, which is how ancilla qubits
+<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.QuantumRegister" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumRegister</span></code></a> of a different size, which is how ancilla qubits
 enter the pipeline.</p></li>
 <li><p><strong>A synthesis plugin.</strong> <a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis.html#qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis" title="qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis"><code class="xref py py-class docutils literal notranslate"><span class="pre">MapperFnEvolutionSynthesis</span></code></a> takes the mapper function
 directly, maps the <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate’s Hamiltonian with it, and emits a
-<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.library.PauliEvolutionGate" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">PauliEvolutionGate</span></code></a>, preserving the <span class="math">\(e^{-itH}\)</span>
+<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.library.PauliEvolutionGate" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">PauliEvolutionGate</span></code></a>, preserving the <span class="math">\(e^{-itH}\)</span>
 convention. Its <a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis.html#qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis.product_formula" title="qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis.product_formula"><code class="xref py py-attr docutils literal notranslate"><span class="pre">product_formula</span></code></a> decides how that gate is
 turned into rotations. Note that this is a <em>second</em>, independent product formula, acting on
-qubits after the mapping: Qiskit’s <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.synthesis.LieTrotter" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">LieTrotter</span></code></a> is passed here, and
+qubits after the mapping: Qiskit’s <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.synthesis.LieTrotter" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">LieTrotter</span></code></a> is passed here, and
 step 7 replaces it with one that knows about flow sets.</p></li>
 </ul>
 <p>Since every comparison below reruns this pipeline, it is worth wrapping once:</p>
@@ -1006,8 +1009,8 @@ custom layout.</p>
 <p>Now look at what the resulting circuit actually contains. Decomposing repeatedly reduces
 the evolution gates all the way down to <code class="docutils literal notranslate"><span class="pre">U</span></code> and <code class="docutils literal notranslate"><span class="pre">CX</span></code>, so that the two-qubit cost of the
 two synthesis strategies compared below is measured in the same currency:
-<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit#count_ops" title="(in Qiskit v2.5)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">count_ops()</span></code></a> then reports the <code class="docutils literal notranslate"><span class="pre">CX</span></code> count, and
-<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit#depth" title="(in Qiskit v2.5)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">depth()</span></code></a> takes a filter function to measure the
+<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit#count_ops" title="(in Qiskit v2.6)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">count_ops()</span></code></a> then reports the <code class="docutils literal notranslate"><span class="pre">CX</span></code> count, and
+<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit#depth" title="(in Qiskit v2.6)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">depth()</span></code></a> takes a filter function to measure the
 two-qubit depth. Note that this <code class="docutils literal notranslate"><span class="pre">reps</span></code> is a decomposition depth, unrelated to the number of
 Trotter steps a product formula takes, which also goes by <code class="docutils literal notranslate"><span class="pre">reps</span></code> later in this guide:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">decomposed</span> <span class="o">=</span> <span class="n">qubit_circuit</span><span class="o">.</span><span class="n">decompose</span><span class="p">(</span><span class="n">reps</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
@@ -1032,9 +1035,9 @@ rotation, then the ladder is undone. The weight-1 flow set is free; its terms ar
 lone rotations with no ladder around them, but each weight-3 term pays for four
 <code class="docutils literal notranslate"><span class="pre">CX</span></code>gates, and because the ladders are emitted sequentially, nothing overlaps.</p>
 <p>So the grouping survives the whole pipeline (three flow sets, three mapped
-<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.library.PauliEvolutionGate" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">PauliEvolutionGate</span></code></a>s) and still buys almost nothing. The
+<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.library.PauliEvolutionGate" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">PauliEvolutionGate</span></code></a>s) and still buys almost nothing. The
 fermionic Trotterization of step 5 did its job; what wastes it is the <em>qubit-side</em> formula.
-<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.synthesis.LieTrotter" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">LieTrotter</span></code></a> receives a set of terms it happens to be told nothing
+<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.synthesis.LieTrotter" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">LieTrotter</span></code></a> receives a set of terms it happens to be told nothing
 about, and compiles each in isolation. It cannot know they mutually commute, so it serializes
 what could share a basis change.</p>
 <p>That is the gap this encoding exists to close: two product formulas are at work, and only the
@@ -1055,8 +1058,8 @@ gates on nearest neighbors maps</p>
 </div>
 <p>simultaneously for every <span class="math">\(j\)</span>. One <code class="docutils literal notranslate"><span class="pre">CZ</span></code> chain turns the entire weight-3
 (west) flow set into a layer of independent single-qubit <span class="math">\(X\)</span> rotations. The
-<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.synthesis.EvolutionSynthesis" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">EvolutionSynthesis</span></code></a> interface only requests a
-<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.synthesis.EvolutionSynthesis#synthesize" title="(in Qiskit v2.5)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">synthesize()</span></code></a> method, which is all this class
+<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.synthesis.EvolutionSynthesis" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">EvolutionSynthesis</span></code></a> interface only requests a
+<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.synthesis.EvolutionSynthesis#synthesize" title="(in Qiskit v2.6)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">synthesize()</span></code></a> method, which is all this class
 implements. It carries no number of Trotter steps, because it receives one flow set at a time
 and so cannot subdivide the evolution across the sets. That subdivision belongs a level up, in
 fermionic space, where an <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.synthesis.F2FSynthesisPlugin.html#qiskit_fermions.circuit.library.synthesis.F2FSynthesisPlugin" title="qiskit_fermions.circuit.library.synthesis.F2FSynthesisPlugin"><code class="xref py py-class docutils literal notranslate"><span class="pre">F2FSynthesisPlugin</span></code></a> sees all of them at once (see
@@ -1136,10 +1139,10 @@ fermionic space, where an <a class="reference internal" href="../stubs/qiskit_fe
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Two details are easy to miss. A custom
-<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.synthesis.EvolutionSynthesis" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">EvolutionSynthesis</span></code></a> must expose a <code class="docutils literal notranslate"><span class="pre">preserve_order</span></code>
+<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.synthesis.EvolutionSynthesis" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">EvolutionSynthesis</span></code></a> must expose a <code class="docutils literal notranslate"><span class="pre">preserve_order</span></code>
 attribute, which the high-level-synthesis pass reads.</p>
 <p>Both helpers emit their gates in explicit layers rather than in term order, because
-<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit#depth" title="(in Qiskit v2.5)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">depth()</span></code></a> schedules gates <em>as soon as possible, in the
+<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit#depth" title="(in Qiskit v2.6)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">depth()</span></code></a> schedules gates <em>as soon as possible, in the
 order they were added</em>. Since all the gates within one of these sets commute, the order is free
 to choose.
 A term-by-term synthesis chooses the order badly. Emitting
@@ -1241,7 +1244,7 @@ Hamiltonian, well past what could be simulated by brute force:</p>
 <span class="go">[23, 47, 87, 207, 407]</span>
 </pre></div>
 </div>
-<p>The two-qubit <strong>depth stays at 12</strong> from four modes to 100, while <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.synthesis.LieTrotter" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">LieTrotter</span></code></a>
+<p>The two-qubit <strong>depth stays at 12</strong> from four modes to 100, while <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.synthesis.LieTrotter" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">LieTrotter</span></code></a>
 grows linearly to 407. The flow sets let it parallelize a little <em>within</em> the pipeline, but
 each set is still Trotterized term by term, so the growth is only slowed, not removed:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
@@ -1296,7 +1299,7 @@ helper from step 4 gives the right label:</p>
 <p>With the state prepared, two questions remain, and they are best asked separately: does the
 flow-set synthesis compute the <em>right</em> thing, and does it compute it more <em>cheaply</em>?</p>
 <p>Take correctness first. <code class="docutils literal notranslate"><span class="pre">FlowSetSynthesis</span></code> and Qiskit’s
-<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.synthesis.LieTrotter" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">LieTrotter</span></code></a> receive the same encoded flow sets from the same fermionic
+<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.synthesis.LieTrotter" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">LieTrotter</span></code></a> receive the same encoded flow sets from the same fermionic
 Trotterization, so they must realize the same unitary up to a global phase. The custom Cliffords
 reorganize the work; they do not change the result. Random statevectors detect any discrepancy far
 more cheaply than building the full unitary:</p>
@@ -1412,10 +1415,10 @@ for the asymptotics to show. The point is the <em>scaling</em> measured in
 with the chain. At 14 modes it is already 12 against 34.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p>The <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit#decompose" title="(in Qiskit v2.5)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">decompose()</span></code></a> calls above are essential, for two
+<p>The <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit#decompose" title="(in Qiskit v2.6)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">decompose()</span></code></a> calls above are essential, for two
 independent reasons.</p>
-<p><a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.quantum_info.Statevector#evolve" title="(in Qiskit v2.5)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">evolve()</span></code></a> and <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.quantum_info.Operator" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Operator</span></code></a> use a
-<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.library.PauliEvolutionGate" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">PauliEvolutionGate</span></code></a>’s <em>exact</em> definition, bypassing a custom
+<p><a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.quantum_info.Statevector#evolve" title="(in Qiskit v2.6)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">evolve()</span></code></a> and <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.quantum_info.Operator" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Operator</span></code></a> use a
+<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.library.PauliEvolutionGate" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">PauliEvolutionGate</span></code></a>’s <em>exact</em> definition, bypassing a custom
 qubit-side synthesis. Verifying against an un-decomposed circuit reports perfect fidelity even
 for a deliberately wrong synthesis.</p>
 <p>The same applies one level up, to the fermionic synthesis. An <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate that is
@@ -1458,7 +1461,7 @@ product formula:</p>
 <li><p><strong>Group before mapping.</strong> Flow sets are defined on the directed fermionic interaction
 graph, so the grouping is chosen while problem structure is still available. The
 <a class="reference internal" href="../stubs/qiskit_fermions.operators.TransferVertexOperator.html#qiskit_fermions.operators.TransferVertexOperator.groups" title="qiskit_fermions.operators.TransferVertexOperator.groups"><code class="xref py py-attr docutils literal notranslate"><span class="pre">groups</span></code></a> attribute carries it into the circuit, where a
-single <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit#decompose" title="(in Qiskit v2.5)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">decompose()</span></code></a> turns it into one
+single <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit#decompose" title="(in Qiskit v2.6)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">decompose()</span></code></a> turns it into one
 <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate per flow set.</p></li>
 <li><p><strong>Ancillas buy structure.</strong> Spending one extra qubit turns an entire flow set into
 weight-1 Paulis, whose evolution needs no entangling gates. Ref. <a class="footnote-reference brackets" href="#id10" id="id8" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a> observes this
@@ -1469,11 +1472,11 @@ Pauli string; <a class="reference internal" href="../stubs/qiskit_fermions.mappe
 <li><p><strong>The mapping and the grouping alone are not enough.</strong> Splitting the evolution per flow
 set only slowed the linear growth in depth; a term-by-term synthesis of each set still
 threw away the fact that its terms commute. Only supplying a flow-set-aware
-<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.synthesis.EvolutionSynthesis" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">EvolutionSynthesis</span></code></a> made the depth constant. Custom encodings,
+<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.synthesis.EvolutionSynthesis" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">EvolutionSynthesis</span></code></a> made the depth constant. Custom encodings,
 grouping, and custom synthesis are complementary: all three are needed.</p></li>
 <li><p><strong>Two product formulas, two jobs.</strong> <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter.html#qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter" title="qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicLieTrotter</span></code></a> fixes the approximation in
 fermionic space, where the grouping is still visible, so it alone sets the Trotter error and the
-step count. The qubit-side <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.synthesis.EvolutionSynthesis" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">EvolutionSynthesis</span></code></a> then decides only how
+step count. The qubit-side <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.synthesis.EvolutionSynthesis" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">EvolutionSynthesis</span></code></a> then decides only how
 cheaply each set is realized: step 9 confirms both choices give the same unitary. Separating the
 two is what lets the accuracy and the cost be tuned independently. See
 <a class="reference internal" href="fermionic_synthesis.html#fermionic-synthesis-explanation"><span class="std std-ref">Synthesize an Evolution gate in fermionic space</span></a>.</p></li>
@@ -1516,7 +1519,7 @@ changes both state preparation and the verification recipe from
 <a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.CustomF2QLayout.html#qiskit_fermions.transpiler.passes.CustomF2QLayout" title="qiskit_fermions.transpiler.passes.CustomF2QLayout"><code class="xref py py-class docutils literal notranslate"><span class="pre">CustomF2QLayout</span></code></a> for a register whose size differs from the mode count,
 <a class="reference internal" href="../stubs/qiskit_fermions.mappers.map_transfer_vertex_generators.html#qiskit_fermions.mappers.map_transfer_vertex_generators" title="qiskit_fermions.mappers.map_transfer_vertex_generators"><code class="xref py py-func docutils literal notranslate"><span class="pre">map_transfer_vertex_generators()</span></code></a> for the encoding itself,
 <a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis.html#qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis" title="qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis"><code class="xref py py-class docutils literal notranslate"><span class="pre">MapperFnEvolutionSynthesis</span></code></a> for wiring it into the transpiler, and a custom
-<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.synthesis.EvolutionSynthesis" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">EvolutionSynthesis</span></code></a> for making the flow-set structure pay off.
+<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.synthesis.EvolutionSynthesis" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">EvolutionSynthesis</span></code></a> for making the flow-set structure pay off.
 Only the encoding and the flow-set decomposition are different.</p>
 <p>The <a class="reference internal" href="2d_fermi_hubbard.html#d-fermi-hubbard"><span class="std std-ref">2D flow-set guide</span></a> picks up here, working
 through the Verstraete-Cirac encoding on a square lattice: four flow sets, a depth-2
@@ -1568,7 +1571,7 @@ qubit encodings (2026), <a class="reference external" href="https://arxiv.org/ab
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on 2026/10/28</div>
+              Last updated on 2026/10/29</div>
           </div>
           <div class="right-details">
             
@@ -1613,7 +1616,7 @@ qubit encodings (2026), <a class="reference external" href="https://arxiv.org/ab
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=3d17250b"></script>
+</div><script src="../_static/documentation_options.js?v=92619de8"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

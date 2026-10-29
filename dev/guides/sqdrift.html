@@ -3,12 +3,15 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="Generate Krylov time-evolution circuits (SKQD)" href="skqd.html"><link rel="prev" title="Work with fermionic circuits" href="circuit.html">
+<meta content="Getting-started guide that generates an ensemble of randomized qDRIFT time-evolution circuits for sample-based quantum diagonalization (SqDRIFT) from an electronic structure Hamiltonian, from term grouping to transpilation." name="description" />
+
+<link rel="alternate" type="text/markdown" href="sqdrift.html.md">
+<link rel="describedby" href="llms.txt"><link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="Generate Krylov time-evolution circuits (SKQD)" href="skqd.html"><link rel="prev" title="Work with fermionic circuits" href="circuit.html">
         <link rel="prefetch" href="../_static/images/qiskit-light-logo.svg" as="image">
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Generate SqDRIFT circuits - Qiskit Fermions 0.4.0.dev0+ecd9e28</title>
+        <title>Generate SqDRIFT circuits - Qiskit Fermions 0.4.0.dev0+7ba0356</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=fc6d6d93" />
@@ -161,7 +164,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.4.0.dev0+ecd9e28</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.4.0.dev0+7ba0356</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +190,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.4.0.dev0+ecd9e28</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.4.0.dev0+7ba0356</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -686,7 +689,7 @@ nor measures their final state.</p>
 <h2>4. Transpile the circuit<a class="headerlink" href="#transpile-the-circuit" title="Link to this heading">¶</a></h2>
 <p>The <a class="reference internal" href="../pydoc/qiskit_fermions.transpiler.html#module-qiskit_fermions.transpiler" title="qiskit_fermions.transpiler"><code class="xref py py-mod docutils literal notranslate"><span class="pre">qiskit_fermions.transpiler</span></code></a> module integrates directly with Qiskit’s
 transpilation pipeline, allowing the <a class="reference internal" href="../stubs/qiskit_fermions.circuit.FermionicCircuit.html#qiskit_fermions.circuit.FermionicCircuit" title="qiskit_fermions.circuit.FermionicCircuit"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicCircuit</span></code></a> constructed above
-to be directly transpiled to a <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumCircuit</span></code></a>.</p>
+to be directly transpiled to a <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumCircuit</span></code></a>.</p>
 <p>Use the <a class="reference internal" href="../stubs/qiskit_fermions.mappers.library.jordan_wigner.html#qiskit_fermions.mappers.library.jordan_wigner" title="qiskit_fermions.mappers.library.jordan_wigner"><code class="xref py py-func docutils literal notranslate"><span class="pre">jordan_wigner()</span></code></a> fermion-to-qubit mapping to
 convert the Hamiltonian expressed in terms of fermions to be expressed in Pauli strings instead. This
 can be done directly as part of the transpilation process by using the
@@ -694,7 +697,7 @@ can be done directly as part of the transpilation process by using the
 <a class="reference internal" href="../stubs/qiskit_fermions.transpiler.presets.generate_preset_jw_pass_manager.html#qiskit_fermions.transpiler.presets.generate_preset_jw_pass_manager" title="qiskit_fermions.transpiler.presets.generate_preset_jw_pass_manager"><code class="xref py py-func docutils literal notranslate"><span class="pre">generate_preset_jw_pass_manager()</span></code></a> to build
 <code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicStagedPassManager</span></code>, which ensures that the
 Jordan-Wigner encoding is used consistently for all circuit instructions.</p>
-<p>Crucially, add Qiskit’s <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.transpiler.passes.Decompose" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Decompose</span></code></a> pass to the
+<p>Crucially, add Qiskit’s <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.transpiler.passes.Decompose" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Decompose</span></code></a> pass to the
 <code class="docutils literal notranslate"><span class="pre">optimization</span></code> stage of the transpilation pipeline. It breaks the <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate
 down with the synthesis method the gate carries, which is the qDRIFT method prepared above. This
 ensures that the circuit does not use the time evolution of the entire Hamiltonian, whose depth
@@ -1037,7 +1040,7 @@ Where the accounting happens depends on where you measure.</p>
 <a class="reference internal" href="../stubs/qiskit_fermions.circuit.FermionicCircuit.html#qiskit_fermions.circuit.FermionicCircuit.measure_all" title="qiskit_fermions.circuit.FermionicCircuit.measure_all"><code class="xref py py-meth docutils literal notranslate"><span class="pre">FermionicCircuit.measure_all()</span></code></a> before transpiling, and there is nothing
 to do: each measurement names the mode it reads, so the relabeling carries it
 along and the sampled bitstrings are indexed by the original mode.</p>
-<p>Measure the transpiled <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumCircuit</span></code></a> instead, and the
+<p>Measure the transpiled <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumCircuit</span></code></a> instead, and the
 bitstrings must be post-processed using the <code class="docutils literal notranslate"><span class="pre">permutation</span></code> recorded in the
 circuit’s metadata. See the <a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.RelabelModes.html#qiskit_fermions.transpiler.passes.RelabelModes" title="qiskit_fermions.transpiler.passes.RelabelModes"><code class="xref py py-class docutils literal notranslate"><span class="pre">RelabelModes</span></code></a> documentation for the recipe.</p>
 </div>
@@ -1090,7 +1093,7 @@ tutorials</a>.</p>
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on 2026/10/28</div>
+              Last updated on 2026/10/29</div>
           </div>
           <div class="right-details">
             
@@ -1131,7 +1134,7 @@ tutorials</a>.</p>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=3d17250b"></script>
+</div><script src="../_static/documentation_options.js?v=92619de8"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

@@ -3,12 +3,14 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="group_wise" href="qiskit_fermions.transpiler.passes.synthesis.group_wise.html"><link rel="prev" title="GivensDecompositionSlaterDeterminantSynthesis" href="qiskit_fermions.transpiler.passes.synthesis.GivensDecompositionSlaterDeterminantSynthesis.html">
+
+<link rel="alternate" type="text/markdown" href="qiskit_fermions.transpiler.passes.synthesis.HopEvolutionSynthesis.html.md">
+<link rel="describedby" href="llms.txt"><link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="group_wise" href="qiskit_fermions.transpiler.passes.synthesis.group_wise.html"><link rel="prev" title="GivensDecompositionSlaterDeterminantSynthesis" href="qiskit_fermions.transpiler.passes.synthesis.GivensDecompositionSlaterDeterminantSynthesis.html">
         <link rel="prefetch" href="../_static/images/qiskit-light-logo.svg" as="image">
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>HopEvolutionSynthesis - Qiskit Fermions 0.4.0.dev0+ecd9e28</title>
+        <title>HopEvolutionSynthesis - Qiskit Fermions 0.4.0.dev0+7ba0356</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=fc6d6d93" />
@@ -161,7 +163,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.4.0.dev0+ecd9e28</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.4.0.dev0+7ba0356</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +189,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.4.0.dev0+ecd9e28</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.4.0.dev0+7ba0356</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -460,16 +462,16 @@
 <dl class="py class">
 <dt class="sig sig-object py" id="qiskit_fermions.transpiler.passes.synthesis.HopEvolutionSynthesis">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">HopEvolutionSynthesis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">atol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-12</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qiskit_fermions.transpiler.passes.synthesis.HopEvolutionSynthesis" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.transpiler.passes.synthesis.plugin.HighLevelSynthesisPlugin" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">HighLevelSynthesisPlugin</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.transpiler.passes.synthesis.plugin.HighLevelSynthesisPlugin" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">HighLevelSynthesisPlugin</span></code></a></p>
 <p>A high-level synthesis plugin for the evolution under a hop between two qubits.</p>
-<p>A <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.library.PauliEvolutionGate" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">PauliEvolutionGate</span></code></a> whose operator is a hop (see
+<p>A <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.library.PauliEvolutionGate" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">PauliEvolutionGate</span></code></a> whose operator is a hop (see
 <code class="xref py py-func docutils literal notranslate"><span class="pre">match_hop()</span></code>), such as the image of a fermionic hop between adjacent modes under
-Jordan-Wigner, is synthesized as a single <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.library.XXPlusYYGate" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">XXPlusYYGate</span></code></a>. That is
+Jordan-Wigner, is synthesized as a single <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.library.XXPlusYYGate" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">XXPlusYYGate</span></code></a>. That is
 the exact evolution. The generic synthesis of the same operator costs several times as many
 two-qubit gates, and a target whose only two-qubit gate is the
-<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.library.XXPlusYYGate" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">XXPlusYYGate</span></code></a> cannot be reached by it at all.</p>
+<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.library.XXPlusYYGate" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">XXPlusYYGate</span></code></a> cannot be reached by it at all.</p>
 <p>Any other gate is declined (the plugin returns <code class="docutils literal notranslate"><span class="pre">None</span></code>), so that the next method of the
-<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.transpiler.passes.HLSConfig" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">HLSConfig</span></code></a> is tried.</p>
+<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.transpiler.passes.HLSConfig" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">HLSConfig</span></code></a> is tried.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>The <code class="xref py py-attr docutils literal notranslate"><span class="pre">synthesis</span></code> of a matched gate does not
@@ -484,7 +486,7 @@ more accurate of the two.</p>
 </div>
 <p>The <a class="reference internal" href="qiskit_fermions.transpiler.presets.generate_preset_jw_pass_manager.html#qiskit_fermions.transpiler.presets.generate_preset_jw_pass_manager" title="qiskit_fermions.transpiler.presets.generate_preset_jw_pass_manager"><code class="xref py py-func docutils literal notranslate"><span class="pre">generate_preset_jw_pass_manager()</span></code></a> does so unconditionally, and merges the entry into
 any <code class="docutils literal notranslate"><span class="pre">hls_config</span></code> passed to it. That mirrors how the preset has always lowered an orbital
-rotation: it emits an <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.library.XXPlusYYGate" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">XXPlusYYGate</span></code></a> for each Givens factor, and
+rotation: it emits an <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.library.XXPlusYYGate" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">XXPlusYYGate</span></code></a> for each Givens factor, and
 the configuration cannot turn that off.</p>
 <p>Initializing this plugin can be done with the arguments listed below.</p>
 <dl class="field-list simple">
@@ -516,8 +518,8 @@ still considered a hop.</p>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A circuit with a single <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.library.XXPlusYYGate" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">XXPlusYYGate</span></code></a> if
-<code class="docutils literal notranslate"><span class="pre">high_level_object</span></code> is a <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.library.PauliEvolutionGate" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">PauliEvolutionGate</span></code></a> of a hop
+<dd class="field-even"><p>A circuit with a single <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.library.XXPlusYYGate" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">XXPlusYYGate</span></code></a> if
+<code class="docutils literal notranslate"><span class="pre">high_level_object</span></code> is a <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.library.PauliEvolutionGate" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">PauliEvolutionGate</span></code></a> of a hop
 with a fixed evolution time, and <code class="docutils literal notranslate"><span class="pre">None</span></code> otherwise.</p>
 </dd>
 </dl>
@@ -562,7 +564,7 @@ with a fixed evolution time, and <code class="docutils literal notranslate"><spa
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on 2026/10/28</div>
+              Last updated on 2026/10/29</div>
           </div>
           <div class="right-details">
             
@@ -600,7 +602,7 @@ with a fixed evolution time, and <code class="docutils literal notranslate"><spa
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=3d17250b"></script>
+</div><script src="../_static/documentation_options.js?v=92619de8"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

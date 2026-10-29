@@ -3,6 +3,11 @@
 Generate SqDRIFT circuits
 =========================
 
+.. meta::
+   :description: Getting-started guide that generates an ensemble of randomized qDRIFT
+                 time-evolution circuits for sample-based quantum diagonalization (SqDRIFT) from an
+                 electronic structure Hamiltonian, from term grouping to transpilation.
+
 With sample-based quantum diagonalization (`SQD`_), you must choose an ansatz from which to sample
 bitstrings.
 The `SqDRIFT`_ variant uses an ensemble of time evolution circuits

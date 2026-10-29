@@ -3,12 +3,14 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="FermionicInstruction" href="qiskit_fermions.circuit.FermionicInstruction.html"><link rel="prev" title="FermionicSpecifier" href="qiskit_fermions.circuit.FermionicSpecifier.html">
+
+<link rel="alternate" type="text/markdown" href="qiskit_fermions.circuit.FermionicCircuit.html.md">
+<link rel="describedby" href="llms.txt"><link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="FermionicInstruction" href="qiskit_fermions.circuit.FermionicInstruction.html"><link rel="prev" title="FermionicSpecifier" href="qiskit_fermions.circuit.FermionicSpecifier.html">
         <link rel="prefetch" href="../_static/images/qiskit-light-logo.svg" as="image">
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>FermionicCircuit - Qiskit Fermions 0.4.0.dev0+ecd9e28</title>
+        <title>FermionicCircuit - Qiskit Fermions 0.4.0.dev0+7ba0356</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=fc6d6d93" />
@@ -161,7 +163,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.4.0.dev0+ecd9e28</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.4.0.dev0+7ba0356</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +189,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.4.0.dev0+ecd9e28</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.4.0.dev0+7ba0356</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -461,9 +463,9 @@
 <dt class="sig sig-object py" id="qiskit_fermions.circuit.FermionicCircuit">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">FermionicCircuit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_modes</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qiskit_fermions.circuit.FermionicCircuit" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
-<p>A wrapper around <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumCircuit</span></code></a> for expressing fermionic circuits.</p>
+<p>A wrapper around <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumCircuit</span></code></a> for expressing fermionic circuits.</p>
 <p>This class maintains a reduced API compared to the full API of the underlying
-<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumCircuit</span></code></a>. This is done to avoid exposing (amongst other methods)
+<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumCircuit</span></code></a>. This is done to avoid exposing (amongst other methods)
 the ability to apply qubit-based gates onto a fermionic circuit, which would not be a
 well-defined operation in the general case.</p>
 <p><a class="reference internal" href="#qiskit_fermions.circuit.FermionicCircuit.barrier" title="qiskit_fermions.circuit.FermionicCircuit.barrier"><code class="xref py py-meth docutils literal notranslate"><span class="pre">barrier()</span></code></a> is re-exposed because it is an exception to that rule: a barrier acts on modes
@@ -484,7 +486,7 @@ transpilation, rather than on this circuit (see <a class="reference internal" hr
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qiskit_fermions.circuit.FermionicCircuit.metadata">
 <span class="sig-name descname"><span class="pre">metadata</span></span><a class="headerlink" href="#qiskit_fermions.circuit.FermionicCircuit.metadata" title="Link to this definition">¶</a></dt>
-<dd><p>Re-exposes <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit#metadata" title="(in Qiskit v2.5)"><code class="xref py py-attr docutils literal notranslate"><span class="pre">metadata</span></code></a>.</p>
+<dd><p>Re-exposes <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit#metadata" title="(in Qiskit v2.6)"><code class="xref py py-attr docutils literal notranslate"><span class="pre">metadata</span></code></a>.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -508,11 +510,11 @@ transpilation, rather than on this circuit (see <a class="reference internal" hr
 and is available as <a class="reference internal" href="#qiskit_fermions.circuit.FermionicCircuit.register" title="qiskit_fermions.circuit.FermionicCircuit.register"><code class="xref py py-attr docutils literal notranslate"><span class="pre">register</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>cregs</strong> (<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.ClassicalRegister" title="(in Qiskit v2.5)"><em>ClassicalRegister</em></a>) – the classical registers to add.</p>
+<dd class="field-odd"><p><strong>cregs</strong> (<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.ClassicalRegister" title="(in Qiskit v2.6)"><em>ClassicalRegister</em></a>) – the classical registers to add.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.15)"><strong>ValueError</strong></a> – if any of the provided registers is not a
-    <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.ClassicalRegister" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ClassicalRegister</span></code></a>.</p>
+    <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.ClassicalRegister" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ClassicalRegister</span></code></a>.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>None</p>
@@ -528,7 +530,7 @@ and is available as <a class="reference internal" href="#qiskit_fermions.circuit
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>gate</strong> (<a class="reference internal" href="qiskit_fermions.circuit.FermionicGate.html#qiskit_fermions.circuit.FermionicGate" title="qiskit_fermions.circuit.fermionic_gate.FermionicGate"><em>FermionicGate</em></a>) – the fermionic gate to apply.</p></li>
-<li><p><strong>fargs</strong> (<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.Qubit" title="(in Qiskit v2.5)"><em>Qubit</em></a><em> | </em><a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.QuantumRegister" title="(in Qiskit v2.5)"><em>QuantumRegister</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><em>int</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#slice" title="(in Python v3.15)"><em>slice</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Sequence" title="(in Python v3.15)"><em>Sequence</em></a><em>[</em><a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.Qubit" title="(in Qiskit v2.5)"><em>Qubit</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><em>int</em></a><em>]</em>) – the fermionic modes on which this gate acts.</p></li>
+<li><p><strong>fargs</strong> (<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.Qubit" title="(in Qiskit v2.6)"><em>Qubit</em></a><em> | </em><a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.QuantumRegister" title="(in Qiskit v2.6)"><em>QuantumRegister</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><em>int</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#slice" title="(in Python v3.15)"><em>slice</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Sequence" title="(in Python v3.15)"><em>Sequence</em></a><em>[</em><a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.Qubit" title="(in Qiskit v2.6)"><em>Qubit</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><em>int</em></a><em>]</em>) – the fermionic modes on which this gate acts.</p></li>
 <li><p><strong>cargs</strong> (<em>None</em>) – <p>the classical bits on which this gate acts.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
@@ -537,7 +539,7 @@ and so takes no classical bits; use <a class="reference internal" href="#qiskit_
 does.</p>
 </div>
 </p></li>
-<li><p><strong>copy</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><em>bool</em></a>) – forwarded to <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit#append" title="(in Qiskit v2.5)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">append()</span></code></a>.</p></li>
+<li><p><strong>copy</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><em>bool</em></a>) – forwarded to <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit#append" title="(in Qiskit v2.6)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">append()</span></code></a>.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
@@ -552,7 +554,7 @@ does.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qiskit_fermions.circuit.FermionicCircuit.barrier">
 <span class="sig-name descname"><span class="pre">barrier</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">fargs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qiskit_fermions.circuit.FermionicCircuit.barrier" title="Link to this definition">¶</a></dt>
-<dd><p>Re-exposes <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit#barrier" title="(in Qiskit v2.5)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">barrier()</span></code></a>.</p>
+<dd><p>Re-exposes <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit#barrier" title="(in Qiskit v2.6)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">barrier()</span></code></a>.</p>
 <p>A barrier carries no unitary effect. It marks a synchronization point that the optimization
 passes will not fuse gates across, which is how you keep a pass such as
 <a class="reference internal" href="qiskit_fermions.transpiler.passes.MergeOrbitalRotations.html#qiskit_fermions.transpiler.passes.MergeOrbitalRotations" title="qiskit_fermions.transpiler.passes.MergeOrbitalRotations"><code class="xref py py-class docutils literal notranslate"><span class="pre">MergeOrbitalRotations</span></code></a> or <a class="reference internal" href="qiskit_fermions.transpiler.passes.MergeSlaterDeterminantPreparation.html#qiskit_fermions.transpiler.passes.MergeSlaterDeterminantPreparation" title="qiskit_fermions.transpiler.passes.MergeSlaterDeterminantPreparation"><code class="xref py py-class docutils literal notranslate"><span class="pre">MergeSlaterDeterminantPreparation</span></code></a> from combining
@@ -560,7 +562,7 @@ the gates on either side of it.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>fargs</strong> (<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.Qubit" title="(in Qiskit v2.5)"><em>Qubit</em></a><em> | </em><a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.QuantumRegister" title="(in Qiskit v2.5)"><em>QuantumRegister</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><em>int</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#slice" title="(in Python v3.15)"><em>slice</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Sequence" title="(in Python v3.15)"><em>Sequence</em></a><em>[</em><a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.Qubit" title="(in Qiskit v2.5)"><em>Qubit</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><em>int</em></a><em>]</em>) – the fermionic modes on which to place the barrier. When omitted, the barrier spans
+<li><p><strong>fargs</strong> (<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.Qubit" title="(in Qiskit v2.6)"><em>Qubit</em></a><em> | </em><a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.QuantumRegister" title="(in Qiskit v2.6)"><em>QuantumRegister</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><em>int</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#slice" title="(in Python v3.15)"><em>slice</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Sequence" title="(in Python v3.15)"><em>Sequence</em></a><em>[</em><a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.Qubit" title="(in Qiskit v2.6)"><em>Qubit</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><em>int</em></a><em>]</em>) – the fermionic modes on which to place the barrier. When omitted, the barrier spans
 every mode of this circuit.</p></li>
 <li><p><strong>label</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a><em> | </em><em>None</em>) – the string label of the barrier.</p></li>
 </ul>
@@ -576,7 +578,7 @@ every mode of this circuit.</p></li>
 <span class="sig-name descname"><span class="pre">compose</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">front</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inplace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qiskit_fermions.circuit.FermionicCircuit.compose" title="Link to this definition">¶</a></dt>
 <dd><p>Composes another <a class="reference internal" href="#qiskit_fermions.circuit.FermionicCircuit" title="qiskit_fermions.circuit.FermionicCircuit"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicCircuit</span></code></a> onto this one.</p>
 <p>The instructions of <code class="docutils literal notranslate"><span class="pre">other</span></code> are inlined into this circuit, rather than wrapped into a single
-gate. This mirrors <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit#compose" title="(in Qiskit v2.5)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">compose()</span></code></a> with its default
+gate. This mirrors <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit#compose" title="(in Qiskit v2.6)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">compose()</span></code></a> with its default
 <code class="docutils literal notranslate"><span class="pre">wrap=False</span></code>. The <code class="docutils literal notranslate"><span class="pre">wrap=True</span></code> counterpart is deliberately not offered: a dedicated
 encapsulation mechanism is planned instead, so adding a second way to box up a block of
 instructions here would leave two patterns solving the same problem.</p>
@@ -585,7 +587,7 @@ instructions here would leave two patterns solving the same problem.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>other</strong> (<a class="reference internal" href="#qiskit_fermions.circuit.FermionicCircuit" title="qiskit_fermions.circuit.fermionic_circuit.FermionicCircuit"><em>FermionicCircuit</em></a>) – the circuit to compose onto this one. It may act on fewer modes than this circuit,
 in which case <code class="docutils literal notranslate"><span class="pre">fargs</span></code> selects the modes it is placed on.</p></li>
-<li><p><strong>fargs</strong> (<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.Qubit" title="(in Qiskit v2.5)"><em>Qubit</em></a><em> | </em><a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.QuantumRegister" title="(in Qiskit v2.5)"><em>QuantumRegister</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><em>int</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#slice" title="(in Python v3.15)"><em>slice</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Sequence" title="(in Python v3.15)"><em>Sequence</em></a><em>[</em><a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.Qubit" title="(in Qiskit v2.5)"><em>Qubit</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><em>int</em></a><em>] </em><em>| </em><em>None</em>) – the fermionic modes of this circuit onto which <code class="docutils literal notranslate"><span class="pre">other</span></code> is placed. Defaults to all
+<li><p><strong>fargs</strong> (<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.Qubit" title="(in Qiskit v2.6)"><em>Qubit</em></a><em> | </em><a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.QuantumRegister" title="(in Qiskit v2.6)"><em>QuantumRegister</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><em>int</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#slice" title="(in Python v3.15)"><em>slice</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Sequence" title="(in Python v3.15)"><em>Sequence</em></a><em>[</em><a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.Qubit" title="(in Qiskit v2.6)"><em>Qubit</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><em>int</em></a><em>] </em><em>| </em><em>None</em>) – the fermionic modes of this circuit onto which <code class="docutils literal notranslate"><span class="pre">other</span></code> is placed. Defaults to all
 of this circuit’s modes, in order.</p></li>
 <li><p><strong>front</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><em>bool</em></a>) – whether to compose <code class="docutils literal notranslate"><span class="pre">other</span></code> before rather than after this circuit’s instructions.</p></li>
 <li><p><strong>inplace</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><em>bool</em></a>) – whether to modify this circuit rather than return a new one.</p></li>
@@ -598,7 +600,7 @@ of this circuit’s modes, in order.</p></li>
 <dd class="field-odd"><ul class="simple">
 <li><p><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.15)"><strong>ValueError</strong></a> – if <code class="docutils literal notranslate"><span class="pre">other</span></code> is not an instance of <a class="reference internal" href="#qiskit_fermions.circuit.FermionicCircuit" title="qiskit_fermions.circuit.FermionicCircuit"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicCircuit</span></code></a>. Only fermionic
     circuits are accepted because the plain
-    <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit#compose" title="(in Qiskit v2.5)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">compose()</span></code></a> would happily inline
+    <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit#compose" title="(in Qiskit v2.6)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">compose()</span></code></a> would happily inline
     qubit-based instructions, bypassing the type guard that <a class="reference internal" href="#qiskit_fermions.circuit.FermionicCircuit.append" title="qiskit_fermions.circuit.FermionicCircuit.append"><code class="xref py py-meth docutils literal notranslate"><span class="pre">append()</span></code></a> enforces.</p></li>
 <li><p><strong>CircuitError</strong> – if <code class="docutils literal notranslate"><span class="pre">other</span></code> acts on more modes than this circuit, or <code class="docutils literal notranslate"><span class="pre">fargs</span></code> does not
     match its width.</p></li>
@@ -613,7 +615,7 @@ of this circuit’s modes, in order.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="qiskit_fermions.circuit.FermionicCircuit.count_ops">
 <span class="sig-name descname"><span class="pre">count_ops</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qiskit_fermions.circuit.FermionicCircuit.count_ops" title="Link to this definition">¶</a></dt>
-<dd><p>Re-exposes <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit#count_ops" title="(in Qiskit v2.5)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">count_ops()</span></code></a>.</p>
+<dd><p>Re-exposes <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit#count_ops" title="(in Qiskit v2.6)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">count_ops()</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/collections.html#collections.OrderedDict" title="(in Python v3.15)"><em>OrderedDict</em></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)">str</a>, <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)">int</a>]</p>
@@ -624,11 +626,11 @@ of this circuit’s modes, in order.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="qiskit_fermions.circuit.FermionicCircuit.decompose">
 <span class="sig-name descname"><span class="pre">decompose</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gates_to_decompose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qiskit_fermions.circuit.FermionicCircuit.decompose" title="Link to this definition">¶</a></dt>
-<dd><p>Re-exposes <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit#decompose" title="(in Qiskit v2.5)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">decompose()</span></code></a>.</p>
+<dd><p>Re-exposes <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit#decompose" title="(in Qiskit v2.6)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">decompose()</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>gates_to_decompose</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#type" title="(in Python v3.15)"><em>type</em></a><em>[</em><a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.Instruction" title="(in Qiskit v2.5)"><em>Instruction</em></a><em>] </em><em>| </em><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Sequence" title="(in Python v3.15)"><em>Sequence</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#type" title="(in Python v3.15)"><em>type</em></a><em>[</em><a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.Instruction" title="(in Qiskit v2.5)"><em>Instruction</em></a><em>]</em><em>] </em><em>| </em><em>None</em>)</p></li>
+<li><p><strong>gates_to_decompose</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#type" title="(in Python v3.15)"><em>type</em></a><em>[</em><a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.Instruction" title="(in Qiskit v2.6)"><em>Instruction</em></a><em>] </em><em>| </em><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Sequence" title="(in Python v3.15)"><em>Sequence</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#type" title="(in Python v3.15)"><em>type</em></a><em>[</em><a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.Instruction" title="(in Qiskit v2.6)"><em>Instruction</em></a><em>]</em><em>] </em><em>| </em><em>None</em>)</p></li>
 <li><p><strong>reps</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><em>int</em></a>)</p></li>
 </ul>
 </dd>
@@ -641,7 +643,7 @@ of this circuit’s modes, in order.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="qiskit_fermions.circuit.FermionicCircuit.draw">
 <span class="sig-name descname"><span class="pre">draw</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qiskit_fermions.circuit.FermionicCircuit.draw" title="Link to this definition">¶</a></dt>
-<dd><p>Directly exposes the inner circuit’s <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit#draw" title="(in Qiskit v2.5)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">draw()</span></code></a> method.</p>
+<dd><p>Directly exposes the inner circuit’s <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit#draw" title="(in Qiskit v2.6)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">draw()</span></code></a> method.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><em>Any</em></a></p>
@@ -683,14 +685,14 @@ classical bit it writes into is not.</p>
 <p>Mode <code class="docutils literal notranslate"><span class="pre">i</span></code> is measured into classical bit <code class="docutils literal notranslate"><span class="pre">i</span></code>, so a sampled bitstring is indexed by mode.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Unlike <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit#measure_all" title="(in Qiskit v2.5)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">measure_all()</span></code></a>, this inserts no
+<p>Unlike <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit#measure_all" title="(in Qiskit v2.6)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">measure_all()</span></code></a>, this inserts no
 <a class="reference internal" href="#qiskit_fermions.circuit.FermionicCircuit.barrier" title="qiskit_fermions.circuit.FermionicCircuit.barrier"><code class="xref py py-meth docutils literal notranslate"><span class="pre">barrier()</span></code></a> before the measurements. Call <a class="reference internal" href="#qiskit_fermions.circuit.FermionicCircuit.barrier" title="qiskit_fermions.circuit.FermionicCircuit.barrier"><code class="xref py py-meth docutils literal notranslate"><span class="pre">barrier()</span></code></a> yourself beforehand if you
 want one there.</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>add_bits</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><em>bool</em></a>) – whether to add a new <code class="docutils literal notranslate"><span class="pre">meas</span></code> <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.ClassicalRegister" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ClassicalRegister</span></code></a> sized to
+<li><p><strong>add_bits</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><em>bool</em></a>) – whether to add a new <code class="docutils literal notranslate"><span class="pre">meas</span></code> <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.ClassicalRegister" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ClassicalRegister</span></code></a> sized to
 this circuit’s modes. When this is <code class="docutils literal notranslate"><span class="pre">False</span></code>, the existing classical bits are used
 instead, and calling this method again simply measures into them a second time.</p></li>
 <li><p><strong>inplace</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><em>bool</em></a>) – whether to modify this circuit rather than return a new one.</p></li>
@@ -720,7 +722,7 @@ instead, and calling this method again simply measures into them a second time.<
 <dd><p>Repeats this circuit <code class="docutils literal notranslate"><span class="pre">reps</span></code> times.</p>
 <p>The repetitions are <cite>flattened</cite>: the returned circuit holds this circuit’s instructions
 <code class="docutils literal notranslate"><span class="pre">reps</span></code> times in sequence, rather than one gate wrapping the circuit as
-<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit#repeat" title="(in Qiskit v2.5)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">repeat()</span></code></a> produces. As a consequence
+<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit#repeat" title="(in Qiskit v2.6)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">repeat()</span></code></a> produces. As a consequence
 <a class="reference internal" href="#qiskit_fermions.circuit.FermionicCircuit.count_ops" title="qiskit_fermions.circuit.FermionicCircuit.count_ops"><code class="xref py py-meth docutils literal notranslate"><span class="pre">count_ops()</span></code></a> scales with <code class="docutils literal notranslate"><span class="pre">reps</span></code>, and <a class="reference internal" href="#qiskit_fermions.circuit.FermionicCircuit.decompose" title="qiskit_fermions.circuit.FermionicCircuit.decompose"><code class="xref py py-meth docutils literal notranslate"><span class="pre">decompose()</span></code></a> decomposes the repeated body
 rather than peeling off a repetition.</p>
 <p>Flattening also leaves the gates that meet at a repetition boundary adjacent, so the
@@ -892,7 +894,7 @@ or a pair of integers storing the numbers of spin alpha and spin beta fermions.<
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on 2026/10/28</div>
+              Last updated on 2026/10/29</div>
           </div>
           <div class="right-details">
             
@@ -943,7 +945,7 @@ or a pair of integers storing the numbers of spin alpha and spin beta fermions.<
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=3d17250b"></script>
+</div><script src="../_static/documentation_options.js?v=92619de8"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

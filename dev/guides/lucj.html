@@ -3,12 +3,15 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="How this package relates to ffsim" href="ffsim.html"><link rel="prev" title="Optimize Slater determinant preparation" href="merge_slater_determinant.html">
+<meta content="How to transpile a local unitary cluster Jastrow (LUCJ) ansatz built with ffsim: turn it into a fermionic circuit, lower it onto qubits through the fermion-to-qubit encoding of your choice, and match the device topology." name="description" />
+
+<link rel="alternate" type="text/markdown" href="lucj.html.md">
+<link rel="describedby" href="llms.txt"><link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="How this package relates to ffsim" href="ffsim.html"><link rel="prev" title="Optimize Slater determinant preparation" href="merge_slater_determinant.html">
         <link rel="prefetch" href="../_static/images/qiskit-light-logo.svg" as="image">
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Transpile an LUCJ ansatz - Qiskit Fermions 0.4.0.dev0+ecd9e28</title>
+        <title>Transpile an LUCJ ansatz - Qiskit Fermions 0.4.0.dev0+7ba0356</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=fc6d6d93" />
@@ -161,7 +164,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.4.0.dev0+ecd9e28</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.4.0.dev0+7ba0356</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +190,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.4.0.dev0+ecd9e28</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.4.0.dev0+7ba0356</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -605,7 +608,7 @@ flow-set guides use to make a Trotter step’s two-qubit depth independent of th
 <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gates on one or two modes each (and, for the preparation, an
 <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.InitializeModes.html#qiskit_fermions.circuit.library.InitializeModes" title="qiskit_fermions.circuit.library.InitializeModes"><code class="xref py py-class docutils literal notranslate"><span class="pre">InitializeModes</span></code></a> of the reference), so any encoding that can map an
 <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> handles them. Under Jordan-Wigner, the factors between adjacent modes become
-<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.library.XXPlusYYGate" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">XXPlusYYGate</span></code></a>objects at the qubit stage.</p></li>
+<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.library.XXPlusYYGate" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">XXPlusYYGate</span></code></a>objects at the qubit stage.</p></li>
 <li><p><strong>The initialization.</strong> The plugin for <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.InitializeModes.html#qiskit_fermions.circuit.library.InitializeModes" title="qiskit_fermions.circuit.library.InitializeModes"><code class="xref py py-class docutils literal notranslate"><span class="pre">InitializeModes</span></code></a> is not parametrized by an
 encoding: it documents its assumption of an occupation-basis encoding with a 1-to-1 mode-to-qubit
 mapping, and emits gates directly on that basis. A different encoding needs its own plugin for it,
@@ -619,7 +622,7 @@ equivalent to the one produced by <a class="reference internal" href="../stubs/q
 <section id="lower-it-through-jordan-wigner">
 <h2>4. Lower it through Jordan-Wigner<a class="headerlink" href="#lower-it-through-jordan-wigner" title="Link to this heading">¶</a></h2>
 <p>Lowering happens in <a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.F2QSynthesis.html#qiskit_fermions.transpiler.passes.F2QSynthesis" title="qiskit_fermions.transpiler.passes.F2QSynthesis"><code class="xref py py-class docutils literal notranslate"><span class="pre">F2QSynthesis</span></code></a>, which works like Qiskit’s
-<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.transpiler.passes.HighLevelSynthesis" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">HighLevelSynthesis</span></code></a>: it walks the fermionic instructions
+<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.transpiler.passes.HighLevelSynthesis" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">HighLevelSynthesis</span></code></a>: it walks the fermionic instructions
 and hands each to a plugin registered for that gate name. Its <a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.F2QSynthesis.html#qiskit_fermions.transpiler.passes.F2QSynthesis.methods" title="qiskit_fermions.transpiler.passes.F2QSynthesis.methods"><code class="xref py py-attr docutils literal notranslate"><span class="pre">F2QSynthesis.methods</span></code></a>
 attribute holds one <a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.synthesis.F2QSynthesisPlugin.html#qiskit_fermions.transpiler.passes.synthesis.F2QSynthesisPlugin" title="qiskit_fermions.transpiler.passes.synthesis.F2QSynthesisPlugin"><code class="xref py py-class docutils literal notranslate"><span class="pre">F2QSynthesisPlugin</span></code></a> per gate name, so building the stage means choosing
 a plugin for every fermionic gate the circuit contains:</p>
@@ -640,7 +643,7 @@ having to register it anywhere first.</p>
 <p>This is where the encoding is settled, in the two ways section 3 described: explicitly, by handing
 <a class="reference internal" href="../stubs/qiskit_fermions.mappers.library.jordan_wigner.html#qiskit_fermions.mappers.library.jordan_wigner" title="qiskit_fermions.mappers.library.jordan_wigner"><code class="xref py py-func docutils literal notranslate"><span class="pre">jordan_wigner()</span></code></a> to <a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis.html#qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis" title="qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis"><code class="xref py py-class docutils literal notranslate"><span class="pre">MapperFnEvolutionSynthesis</span></code></a>, and implicitly, by the other plugin
 already assuming it.</p>
-<p>That stage then slots into a <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.MultiStagePassManager" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultiStagePassManager</span></code></a> whose
+<p>That stage then slots into a <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.MultiStagePassManager" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultiStagePassManager</span></code></a> whose
 stages run in a fixed order:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit.passmanager</span><span class="w"> </span><span class="kn">import</span> <span class="n">MultiStagePassManager</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit.transpiler</span><span class="w"> </span><span class="kn">import</span> <span class="n">generate_preset_pass_manager</span>
@@ -704,8 +707,8 @@ evolutions.</p>
 </pre></div>
 </div>
 <p>Without a target device, this maps onto <code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">*</span> <span class="pre">norb</span></code> qubits with all-to-all connectivity assumed; the
-orbital rotations synthesize into <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.library.XXPlusYYGate" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">XXPlusYYGate</span></code></a>objects and the diagonal
-Coulomb evolutions into <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.library.RZZGate" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">RZZGate</span></code></a>objects:</p>
+orbital rotations synthesize into <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.library.XXPlusYYGate" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">XXPlusYYGate</span></code></a>objects and the diagonal
+Coulomb evolutions into <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.library.RZZGate" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">RZZGate</span></code></a>objects:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">transpiled</span><span class="o">.</span><span class="n">draw</span><span class="p">(</span><span class="s2">"mpl"</span><span class="p">,</span> <span class="n">fold</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
 <span class="go">&lt;Figure size ... with 1 Axes&gt;</span>
 </pre></div>
@@ -768,7 +771,7 @@ keeping the package’s own fermion-to-qubit synthesis:</p>
 <p>That composition is the point: the <code class="docutils literal notranslate"><span class="pre">qubit</span></code> stage is device-aware, while the fermion-to-qubit
 synthesis stage ahead of it stays this package’s own, and so stays replaceable. Replacing the <code class="docutils literal notranslate"><span class="pre">qubit</span></code>
 stage does drop what the preset registers there, which is the <a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.synthesis.HopEvolutionSynthesis.html#qiskit_fermions.transpiler.passes.synthesis.HopEvolutionSynthesis" title="qiskit_fermions.transpiler.passes.synthesis.HopEvolutionSynthesis"><code class="xref py py-class docutils literal notranslate"><span class="pre">HopEvolutionSynthesis</span></code></a> that
-turns the Givens factors of an orbital rotation into <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.library.XXPlusYYGate" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">XXPlusYYGate</span></code></a>objects. Pass it on through the <code class="docutils literal notranslate"><span class="pre">hls_config</span></code> as above, or the device’s basis has to be reached
+turns the Givens factors of an orbital rotation into <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.library.XXPlusYYGate" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">XXPlusYYGate</span></code></a>objects. Pass it on through the <code class="docutils literal notranslate"><span class="pre">hls_config</span></code> as above, or the device’s basis has to be reached
 without it.</p>
 <p>With <code class="docutils literal notranslate"><span class="pre">pm.qubit</span></code> now set to the device-aware pipeline, running the pass manager lays the circuit out
 on the backend’s qubits and routes it to the coupling map. For the <em>unrestricted</em> ansatz from
@@ -807,7 +810,7 @@ device topology and the router barely has to touch it:</p>
 <p>Drawing only the active qubits (<code class="docutils literal notranslate"><span class="pre">idle_wires=False</span></code>) shows the circuit restricted to the two spin
 chains and the alpha-beta bridge, expressed in the device basis gates. Layout and routing scatter the
 logical modes across the device’s physical qubits, so pass a <code class="docutils literal notranslate"><span class="pre">wire_order</span></code> taken from the
-circuit’s final layout (<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.transpiler.TranspileLayout#final_index_layout" title="(in Qiskit v2.5)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">final_index_layout()</span></code></a> lists the
+circuit’s final layout (<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.transpiler.TranspileLayout#final_index_layout" title="(in Qiskit v2.6)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">final_index_layout()</span></code></a> lists the
 physical qubit each input qubit ended on, in input-qubit order) to draw the wires back in the
 original mode order:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">wire_order</span> <span class="o">=</span> <span class="n">transpiled</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">final_index_layout</span><span class="p">(</span><span class="n">filter_ancillas</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
@@ -882,7 +885,7 @@ two packages divide the work, and which protocols let ffsim simulate this packag
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on 2026/10/28</div>
+              Last updated on 2026/10/29</div>
           </div>
           <div class="right-details">
             
@@ -921,7 +924,7 @@ two packages divide the work, and which protocols let ffsim simulate this packag
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=3d17250b"></script>
+</div><script src="../_static/documentation_options.js?v=92619de8"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

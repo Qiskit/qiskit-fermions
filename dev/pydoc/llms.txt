@@ -1,0 +1,31 @@
+# Qiskit Fermions
+
+> Qiskit Fermions extends Qiskit with tools for working with fermionic systems: operator data structures, a framework and library for converting operators between representations and to qubit operators (for example Jordan-Wigner and ternary-tree encodings), and a framework and library for synthesizing fermionic quantum circuits. The core is written in Rust and exposed through first-party Python and C APIs.
+
+
+2026, Qiskit addons team
+
+## Pages in this subsection
+
+- [&#96;qiskit-fermions&#96; Python API reference](index.html.md): Reference for the Python API of qiskit-fermions, covering operators, mappers, circuits, the transpiler, linear algebra, protocols, and utilities.
+- [Operator Representations](qiskit_fermions.operators.html.md): Data structures for representing fermionic operators in different bases: the second-quantization FermionOperator, the MajoranaOperator, and the EdgeVertexOperator and TransferVertexOperator interaction operators.
+- [Operator Library](qiskit_fermions.operators.library.html.md): Tools to construct commonly used operators, such as commutators of operators and electronic structure Hamiltonians from FCIDump files.
+- [Operator Terms](qiskit_fermions.operators.terms.html.md): Routines that operate on the individual terms of an operator, to group, filter, and order them.
+- [Representation Mappers](qiskit_fermions.mappers.html.md): Framework for implementing custom operator representation mappers, plus the ternary-tree data structures behind tree-based fermion-to-qubit encodings.
+- [Mapper Library](qiskit_fermions.mappers.library.html.md): Implementations of common operator mappers, such as the Jordan-Wigner and ternary-tree mappings to qubit operators, and conversions between operator representations.
+- [Mapper Optimizations](qiskit_fermions.mappers.optimization.html.md): This module provides various routines for optimizing fermion-to-qubit mappings.
+- [Circuit Representation](qiskit_fermions.circuit.html.md): Fermionic circuits: FermionicCircuit and related types that interpret Qiskit circuits as acting on fermionic modes rather than qubits.
+- [Circuit Library](qiskit_fermions.circuit.library.html.md): Library of fermionic gates and instructions, such as time evolution, mode initialization, orbital rotations, and measurement.
+- [Circuit Library Synthesis (&#96;F2F&#96;)](qiskit_fermions.circuit.library.synthesis.html.md): Fermion-to-fermion synthesis methods that break a gate down into smaller fermionic gates, such as Trotter and qDRIFT formulas for an Evolution gate, plus the F2FSynthesisPlugin interface for custom methods, which the F2FSynthesis transpiler pass applies.
+- [Transpiler](qiskit_fermions.transpiler.html.md): How Qiskit Fermions transpiles a FermionicCircuit to a QuantumCircuit: the transpilation stages, the pass manager, and the layout of fermionic modes onto qubits.
+- [Transpiler Passes](qiskit_fermions.transpiler.passes.html.md): Transpiler passes for the stages of the fermionic transpiler pipeline, such as the fermion-to-fermion and fermion-to-qubit synthesis passes.
+- [Transpiler Pass Synthesis (&#96;F2Q&#96;)](qiskit_fermions.transpiler.passes.synthesis.html.md): Plugin interface of the F2QSynthesis transpiler pass, which maps fermionic instructions to qubit instructions, and the plugins that implement it.
+- [Transpiler Pass Utilities](qiskit_fermions.transpiler.passes.utils.html.md): Several convenience functions are provided to simplify the implementation of common operations
+- [Transpiler Presets](qiskit_fermions.transpiler.presets.html.md): Functions that generate predefined transpiler pipelines, such as one for the Jordan-Wigner encoding.
+- [Linear Algebra Utilities](qiskit_fermions.linalg.html.md): Linear algebra utilities, such as Givens decompositions of orbital rotations and Slater determinants.
+- [Protocols](qiskit_fermions.protocols.html.md): Protocols used throughout the package, for example for operators that convert to other representations, compute commutators, or apply a unitary.
+- [Optional Dependencies](qiskit_fermions.utils.optionals.html.md): Lazy availability testers for the optional third-party dependencies of qiskit-fermions.
+
+## Optional
+
+- [Top-level llms.txt](../llms.txt): Complete documentation index.

@@ -3,12 +3,14 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="majorana_ternary_tree" href="qiskit_fermions.mappers.library.majorana_ternary_tree.html"><link rel="prev" title="transfer_vertex_to_edge_vertex" href="qiskit_fermions.mappers.library.transfer_vertex_to_edge_vertex.html">
+
+<link rel="alternate" type="text/markdown" href="qiskit_fermions.mappers.library.fermion_ternary_tree.html.md">
+<link rel="describedby" href="llms.txt"><link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="majorana_ternary_tree" href="qiskit_fermions.mappers.library.majorana_ternary_tree.html"><link rel="prev" title="transfer_vertex_to_edge_vertex" href="qiskit_fermions.mappers.library.transfer_vertex_to_edge_vertex.html">
         <link rel="prefetch" href="../_static/images/qiskit-light-logo.svg" as="image">
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>fermion_ternary_tree - Qiskit Fermions 0.4.0.dev0+ecd9e28</title>
+        <title>fermion_ternary_tree - Qiskit Fermions 0.4.0.dev0+7ba0356</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=fc6d6d93" />
@@ -161,7 +163,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.4.0.dev0+ecd9e28</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.4.0.dev0+7ba0356</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +189,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.4.0.dev0+ecd9e28</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.4.0.dev0+7ba0356</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -460,7 +462,7 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="qiskit_fermions.mappers.library.fermion_ternary_tree">
 <span class="sig-name descname"><span class="pre">fermion_ternary_tree</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">op</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_qubits</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qiskit_fermions.mappers.library.fermion_ternary_tree" title="Link to this definition">¶</a></dt>
-<dd><p>Map a <a class="reference internal" href="qiskit_fermions.operators.FermionOperator.html#qiskit_fermions.operators.FermionOperator" title="qiskit_fermions.operators.FermionOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionOperator</span></code></a> to a <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.quantum_info.SparseObservable" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">SparseObservable</span></code></a> under a
+<dd><p>Map a <a class="reference internal" href="qiskit_fermions.operators.FermionOperator.html#qiskit_fermions.operators.FermionOperator" title="qiskit_fermions.operators.FermionOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionOperator</span></code></a> to a <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.quantum_info.SparseObservable" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">SparseObservable</span></code></a> under a
 ternary-tree encoding.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -473,11 +475,11 @@ encoding’s mode count; a larger value pads with the identity.</p></li>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>The mapped qubit operator. The result is <cite>not</cite> guaranteed to be fully simplified; call
-<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.quantum_info.SparseObservable#simplify" title="(in Qiskit v2.5)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">simplify()</span></code></a> to combine any remaining duplicate
+<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.quantum_info.SparseObservable#simplify" title="(in Qiskit v2.6)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">simplify()</span></code></a> to combine any remaining duplicate
 terms. Duplicates are merged as the result is assembled, to bound the memory required, so
 the exact number of terms returned may vary with the number of threads used. Any grouping
 carried by <code class="docutils literal notranslate"><span class="pre">op</span></code> is not reflected in the result, as a
-<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.quantum_info.SparseObservable" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">SparseObservable</span></code></a> does not track groups.</p>
+<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.quantum_info.SparseObservable" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">SparseObservable</span></code></a> does not track groups.</p>
 </dd>
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -545,7 +547,7 @@ one.</p>
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on 2026/10/28</div>
+              Last updated on 2026/10/29</div>
           </div>
           <div class="right-details">
             
@@ -579,7 +581,7 @@ one.</p>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=3d17250b"></script>
+</div><script src="../_static/documentation_options.js?v=92619de8"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

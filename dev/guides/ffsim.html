@@ -3,12 +3,15 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="qiskit-fermions Python API reference" href="../pydoc/index.html"><link rel="prev" title="Transpile an LUCJ ansatz" href="lucj.html">
+<meta content="How Qiskit Fermions and ffsim divide the work: ffsim owns the ansatz operators and fast fixed-particle-number simulation, while Qiskit Fermions owns fermionic circuits and their transpilation under any encoding." name="description" />
+
+<link rel="alternate" type="text/markdown" href="ffsim.html.md">
+<link rel="describedby" href="llms.txt"><link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="qiskit-fermions Python API reference" href="../pydoc/index.html"><link rel="prev" title="Transpile an LUCJ ansatz" href="lucj.html">
         <link rel="prefetch" href="../_static/images/qiskit-light-logo.svg" as="image">
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>How this package relates to ffsim - Qiskit Fermions 0.4.0.dev0+ecd9e28</title>
+        <title>How this package relates to ffsim - Qiskit Fermions 0.4.0.dev0+7ba0356</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=fc6d6d93" />
@@ -161,7 +164,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.4.0.dev0+ecd9e28</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.4.0.dev0+7ba0356</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +190,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.4.0.dev0+ecd9e28</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.4.0.dev0+7ba0356</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -549,7 +552,7 @@ API.</p>
 above). Installing it unlocks simulation: <a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.SupportsLinearOperator.html#ffsim.SupportsLinearOperator" title="(in ffsim)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ffsim.SupportsLinearOperator</span></code></a> and
 <a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.SupportsTrace.html#ffsim.SupportsTrace" title="(in ffsim)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ffsim.SupportsTrace</span></code></a> are implemented by converting this package’s <a class="reference internal" href="../stubs/qiskit_fermions.operators.FermionOperator.html#qiskit_fermions.operators.FermionOperator" title="qiskit_fermions.operators.FermionOperator"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionOperator</span></code></a> into
 an <a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.FermionOperator.html#ffsim.FermionOperator" title="(in ffsim)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ffsim.FermionOperator</span></code></a>, so without ffsim they raise
-<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/exceptions#qiskit.exceptions.MissingOptionalLibraryError" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">MissingOptionalLibraryError</span></code></a>. Everything that does not simulate (building
+<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/exceptions#qiskit.exceptions.MissingOptionalLibraryError" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">MissingOptionalLibraryError</span></code></a>. Everything that does not simulate (building
 operators, mapping them, and transpiling the resulting circuits) needs none of it.</p>
 <p><a class="reference external" href="https://qiskit-community.github.io/ffsim/">ffsim</a> transitively depends on <a class="reference external" href="https://pyscf.org/">PySCF</a>, which does not support Windows, so
 on Windows the extra resolves to nothing (a silent no-op through a <code class="docutils literal notranslate"><span class="pre">sys_platform</span></code> marker) rather
@@ -592,7 +595,7 @@ the fixed-sector representation, and that is the price of the compact FCI space 
 fermionic simulation tractable in the first place. If your algorithm needs particle-number-violating
 operators (for example, a qubit-native error channel, or an operator built for a mapped Hamiltonian
 that does not conserve particle numbers term by term), transpile to qubits first and simulate the
-resulting <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumCircuit</span></code></a> with a qubit-level simulator instead. Any
+resulting <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumCircuit</span></code></a> with a qubit-level simulator instead. Any
 transpilation route works for this; the
 <a class="reference internal" href="circuit.html#fermionic-circuit-explanation"><span class="std std-ref">fermionic circuit</span></a> and <a class="reference internal" href="transpilation.html#transpilation-explanation"><span class="std std-ref">transpilation</span></a> guides go into more detail, but
 <a class="reference internal" href="../stubs/qiskit_fermions.transpiler.presets.generate_preset_jw_pass_manager.html#qiskit_fermions.transpiler.presets.generate_preset_jw_pass_manager" title="qiskit_fermions.transpiler.presets.generate_preset_jw_pass_manager"><code class="xref py py-func docutils literal notranslate"><span class="pre">generate_preset_jw_pass_manager()</span></code></a> is a reasonable default
@@ -693,7 +696,7 @@ they build.</p></li>
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on 2026/10/28</div>
+              Last updated on 2026/10/29</div>
           </div>
           <div class="right-details">
             
@@ -733,7 +736,7 @@ they build.</p></li>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=3d17250b"></script>
+</div><script src="../_static/documentation_options.js?v=92619de8"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

@@ -3,12 +3,14 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="Circuit Library Synthesis (F2F)" href="../pydoc/qiskit_fermions.circuit.library.synthesis.html"><link rel="prev" title="UCJ" href="qiskit_fermions.circuit.library.UCJ.html">
+
+<link rel="alternate" type="text/markdown" href="qiskit_fermions.circuit.library.FermionicMeasure.html.md">
+<link rel="describedby" href="llms.txt"><link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="Circuit Library Synthesis (F2F)" href="../pydoc/qiskit_fermions.circuit.library.synthesis.html"><link rel="prev" title="UCJ" href="qiskit_fermions.circuit.library.UCJ.html">
         <link rel="prefetch" href="../_static/images/qiskit-light-logo.svg" as="image">
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>FermionicMeasure - Qiskit Fermions 0.4.0.dev0+ecd9e28</title>
+        <title>FermionicMeasure - Qiskit Fermions 0.4.0.dev0+7ba0356</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=fc6d6d93" />
@@ -161,7 +163,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.4.0.dev0+ecd9e28</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.4.0.dev0+7ba0356</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +189,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.4.0.dev0+ecd9e28</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.4.0.dev0+7ba0356</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -460,14 +462,14 @@
 <dl class="py class">
 <dt class="sig sig-object py" id="qiskit_fermions.circuit.library.FermionicMeasure">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">FermionicMeasure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_force_mutable</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qiskit_fermions.circuit.library.FermionicMeasure" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="qiskit_fermions.circuit.FermionicInstruction.html#qiskit_fermions.circuit.FermionicInstruction" title="qiskit_fermions.circuit.fermionic_instruction.FermionicInstruction"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicInstruction</span></code></a>, <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.Measure" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Measure</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="qiskit_fermions.circuit.FermionicInstruction.html#qiskit_fermions.circuit.FermionicInstruction" title="qiskit_fermions.circuit.fermionic_instruction.FermionicInstruction"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicInstruction</span></code></a>, <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.Measure" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Measure</span></code></a></p>
 <p>A measurement of a single fermionic mode, writing its outcome into one classical bit.</p>
-<p>This is the fermionic counterpart of <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.Measure" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Measure</span></code></a>, and the one
+<p>This is the fermionic counterpart of <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.Measure" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Measure</span></code></a>, and the one
 instruction on a <a class="reference internal" href="qiskit_fermions.circuit.FermionicCircuit.html#qiskit_fermions.circuit.FermionicCircuit" title="qiskit_fermions.circuit.FermionicCircuit"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicCircuit</span></code></a> that is not a <a class="reference internal" href="qiskit_fermions.circuit.FermionicGate.html#qiskit_fermions.circuit.FermionicGate" title="qiskit_fermions.circuit.FermionicGate"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicGate</span></code></a>: a measurement is
-not unitary, and <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.Gate" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Gate</span></code></a> admits no classical bits. Place it with
+not unitary, and <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.Gate" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Gate</span></code></a> admits no classical bits. Place it with
 <a class="reference internal" href="qiskit_fermions.circuit.FermionicCircuit.html#qiskit_fermions.circuit.FermionicCircuit.measure" title="qiskit_fermions.circuit.FermionicCircuit.measure"><code class="xref py py-meth docutils literal notranslate"><span class="pre">FermionicCircuit.measure()</span></code></a> or <a class="reference internal" href="qiskit_fermions.circuit.FermionicCircuit.html#qiskit_fermions.circuit.FermionicCircuit.measure_all" title="qiskit_fermions.circuit.FermionicCircuit.measure_all"><code class="xref py py-meth docutils literal notranslate"><span class="pre">FermionicCircuit.measure_all()</span></code></a> rather than constructing
 it directly.</p>
-<p>It subclasses <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.Measure" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Measure</span></code></a> so that the circuit drawers, which dispatch
+<p>It subclasses <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.Measure" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Measure</span></code></a> so that the circuit drawers, which dispatch
 on <code class="docutils literal notranslate"><span class="pre">isinstance(op,</span> <span class="pre">Measure)</span></code>, render it with the usual measurement symbol rather than as a
 generic boxed instruction.</p>
 <div class="admonition important">
@@ -531,7 +533,7 @@ own.</p>
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on 2026/10/28</div>
+              Last updated on 2026/10/29</div>
           </div>
           <div class="right-details">
             
@@ -565,7 +567,7 @@ own.</p>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=3d17250b"></script>
+</div><script src="../_static/documentation_options.js?v=92619de8"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
