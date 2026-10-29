@@ -3,6 +3,9 @@
 Map operator representations
 ============================
 
+.. meta::
+   :description: How to implement a custom operator mapper and how to use the library mappers.
+
 **Mappers** are routines that transform operators from one representation to another
 while preserving mathematical equivalence. Use them to work flexibly across
 different operator algebras and to prepare operators for quantum circuit execution.

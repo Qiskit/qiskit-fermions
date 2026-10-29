@@ -4,6 +4,10 @@
 Operator Terms
 ==============
 
+.. meta::
+   :description: C API functions that operate on the individual terms of an operator, to group,
+                 filter, and order them.
+
 .. toctree::
    :hidden:
    :maxdepth: 1
