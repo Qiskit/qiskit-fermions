@@ -3,6 +3,10 @@
 Group operator terms: use the operator structure
 ================================================
 
+.. meta::
+   :description: How to define and analyze a grouping of operator terms through the groups array of
+                 an operator, and why grouping matters for circuit synthesis.
+
 Grouping is one of the operations under :mod:`qiskit_fermions.operators.terms`,
 which collects routines that partition the terms of an operator based on their
 structure.

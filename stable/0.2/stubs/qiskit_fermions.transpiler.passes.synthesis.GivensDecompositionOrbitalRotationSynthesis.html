@@ -3,12 +3,14 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="GivensDecompositionSlaterDeterminantSynthesis" href="qiskit_fermions.transpiler.passes.synthesis.GivensDecompositionSlaterDeterminantSynthesis.html"><link rel="prev" title="F2QSynthesisPluginManager" href="qiskit_fermions.transpiler.passes.synthesis.F2QSynthesisPluginManager.html">
+
+<link rel="alternate" type="text/markdown" href="qiskit_fermions.transpiler.passes.synthesis.GivensDecompositionOrbitalRotationSynthesis.html.md">
+<link rel="describedby" href="llms.txt"><link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="GivensDecompositionSlaterDeterminantSynthesis" href="qiskit_fermions.transpiler.passes.synthesis.GivensDecompositionSlaterDeterminantSynthesis.html"><link rel="prev" title="F2QSynthesisPluginManager" href="qiskit_fermions.transpiler.passes.synthesis.F2QSynthesisPluginManager.html">
         <link rel="prefetch" href="../_static/images/qiskit-light-logo.svg" as="image">
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>GivensDecompositionOrbitalRotationSynthesis - Qiskit Fermions 0.2.0+179a243</title>
+        <title>GivensDecompositionOrbitalRotationSynthesis - Qiskit Fermions 0.2.0+e668435</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=fc6d6d93" />
@@ -161,7 +163,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0+179a243</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0+e668435</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +189,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0+179a243</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0+e668435</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -459,10 +461,10 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>in_node</strong> (<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.dagcircuit.DAGOpNode" title="(in Qiskit v2.5)"><em>DAGOpNode</em></a>) – the input fermion-based circuit instruction. When this plugin gets called, the
+<li><p><strong>in_node</strong> (<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.dagcircuit.DAGOpNode" title="(in Qiskit v2.6)"><em>DAGOpNode</em></a>) – the input fermion-based circuit instruction. When this plugin gets called, the
 <code class="docutils literal notranslate"><span class="pre">in_node.op</span></code> attribute <cite>must</cite> be of type <a class="reference internal" href="qiskit_fermions.circuit.library.OrbitalRotation.html#qiskit_fermions.circuit.library.OrbitalRotation" title="qiskit_fermions.circuit.library.OrbitalRotation"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrbitalRotation</span></code></a>.</p></li>
-<li><p><strong>out_dag</strong> (<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.dagcircuit.DAGCircuit" title="(in Qiskit v2.5)"><em>DAGCircuit</em></a>) – the output qubit-based circuit.</p></li>
-<li><p><strong>f2q_layout</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><em>dict</em></a><em>[</em><a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.QuantumRegister" title="(in Qiskit v2.5)"><em>QuantumRegister</em></a><em>, </em><a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.QuantumRegister" title="(in Qiskit v2.5)"><em>QuantumRegister</em></a><em>]</em>) – the global transpilation <a class="reference internal" href="qiskit_fermions.transpiler.F2QLayout.html#qiskit_fermions.transpiler.F2QLayout" title="qiskit_fermions.transpiler.F2QLayout"><code class="xref py py-class docutils literal notranslate"><span class="pre">F2QLayout</span></code></a>
+<li><p><strong>out_dag</strong> (<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.dagcircuit.DAGCircuit" title="(in Qiskit v2.6)"><em>DAGCircuit</em></a>) – the output qubit-based circuit.</p></li>
+<li><p><strong>f2q_layout</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><em>dict</em></a><em>[</em><a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.QuantumRegister" title="(in Qiskit v2.6)"><em>QuantumRegister</em></a><em>, </em><a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.QuantumRegister" title="(in Qiskit v2.6)"><em>QuantumRegister</em></a><em>]</em>) – the global transpilation <a class="reference internal" href="qiskit_fermions.transpiler.F2QLayout.html#qiskit_fermions.transpiler.F2QLayout" title="qiskit_fermions.transpiler.F2QLayout"><code class="xref py py-class docutils literal notranslate"><span class="pre">F2QLayout</span></code></a>
 setting.</p></li>
 </ul>
 </dd>
@@ -482,9 +484,9 @@ arguments.</p>
 </dd>
 <dt class="field-even">Parameters<span class="colon">:</span></dt>
 <dd class="field-even"><ul class="simple">
-<li><p><strong>in_node</strong> (<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.dagcircuit.DAGOpNode" title="(in Qiskit v2.5)"><em>DAGOpNode</em></a>)</p></li>
-<li><p><strong>out_dag</strong> (<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.dagcircuit.DAGCircuit" title="(in Qiskit v2.5)"><em>DAGCircuit</em></a>)</p></li>
-<li><p><strong>f2q_layout</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><em>dict</em></a><em>[</em><a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.QuantumRegister" title="(in Qiskit v2.5)"><em>QuantumRegister</em></a><em>, </em><a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.QuantumRegister" title="(in Qiskit v2.5)"><em>QuantumRegister</em></a><em>]</em>)</p></li>
+<li><p><strong>in_node</strong> (<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.dagcircuit.DAGOpNode" title="(in Qiskit v2.6)"><em>DAGOpNode</em></a>)</p></li>
+<li><p><strong>out_dag</strong> (<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.dagcircuit.DAGCircuit" title="(in Qiskit v2.6)"><em>DAGCircuit</em></a>)</p></li>
+<li><p><strong>f2q_layout</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><em>dict</em></a><em>[</em><a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.QuantumRegister" title="(in Qiskit v2.6)"><em>QuantumRegister</em></a><em>, </em><a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.QuantumRegister" title="(in Qiskit v2.6)"><em>QuantumRegister</em></a><em>]</em>)</p></li>
 </ul>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
@@ -532,7 +534,7 @@ arguments.</p>
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on 2026/10/20</div>
+              Last updated on 2026/10/29</div>
           </div>
           <div class="right-details">
             
@@ -569,7 +571,7 @@ arguments.</p>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=367b42e8"></script>
+</div><script src="../_static/documentation_options.js?v=88cc5c3b"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

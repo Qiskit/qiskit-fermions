@@ -6,6 +6,7 @@
 
 - [dev](https://qiskit.github.io/qiskit-fermions/dev/llms.txt): the development branch (`main`)
 - [stable/0.3](https://qiskit.github.io/qiskit-fermions/stable/0.3/llms.txt): the 0.3 release series
+- [stable/0.2](https://qiskit.github.io/qiskit-fermions/stable/0.2/llms.txt): the 0.2 release series
 
 ## Released documentation
 

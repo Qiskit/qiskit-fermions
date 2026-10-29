@@ -3,12 +3,15 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="prev" title="QfExitCode" href="cdoc/qf-exit-code.html">
+<meta content="Release notes of Qiskit Fermions for each release, covering both the Python API and the C API." name="description" />
+
+<link rel="alternate" type="text/markdown" href="release-notes.html.md">
+<link rel="describedby" href="llms.txt"><link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="prev" title="QfExitCode" href="cdoc/qf-exit-code.html">
         <link rel="prefetch" href="_static/images/qiskit-light-logo.svg" as="image">
         <link rel="prefetch" href="_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Release Notes - Qiskit Fermions 0.2.0+179a243</title>
+        <title>Release Notes - Qiskit Fermions 0.2.0+e668435</title>
       <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="_static/styles/qiskit-sphinx-theme.css?v=fc6d6d93" />
@@ -161,7 +164,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="index.html"><div class="brand">Qiskit Fermions 0.2.0+179a243</div></a>
+      <a href="index.html"><div class="brand">Qiskit Fermions 0.2.0+e668435</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +190,7 @@
     <img class="sidebar-logo only-dark" src="_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0+179a243</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0+e668435</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="search.html" role="search">
@@ -450,7 +453,7 @@ Additionally, this release draws a sharper boundary around what this package is 
 <ul>
 <li><p>How an <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate gets decomposed in fermionic space is now configurable through its
 new keyword-only <code class="docutils literal notranslate"><span class="pre">synthesis</span></code> argument, mirroring the <code class="docutils literal notranslate"><span class="pre">synthesis</span></code> argument of Qiskit’s
-<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.library.PauliEvolutionGate" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">PauliEvolutionGate</span></code></a>. The available methods live in the new
+<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.library.PauliEvolutionGate" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">PauliEvolutionGate</span></code></a>. The available methods live in the new
 <a class="reference internal" href="pydoc/qiskit_fermions.circuit.library.synthesis.html#module-qiskit_fermions.circuit.library.synthesis" title="qiskit_fermions.circuit.library.synthesis"><code class="xref py py-mod docutils literal notranslate"><span class="pre">qiskit_fermions.circuit.library.synthesis</span></code></a> module, which provides the
 <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.synthesis.FermionicEvolutionSynthesis.html#qiskit_fermions.circuit.library.synthesis.FermionicEvolutionSynthesis" title="qiskit_fermions.circuit.library.synthesis.FermionicEvolutionSynthesis"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicEvolutionSynthesis</span></code></a> interface and its
 first-order <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter.html#qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter" title="qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicLieTrotter</span></code></a>
@@ -460,7 +463,7 @@ fermion-to-qubit stage regardless of how many terms its operator holds. Decompos
 is a choice, taken to obtain cheaper factors or to expose structure (such as mutually commuting
 <a class="reference internal" href="stubs/qiskit_fermions.operators.OperatorTrait.html#qiskit_fermions.operators.OperatorTrait.groups" title="qiskit_fermions.operators.OperatorTrait.groups"><code class="xref py py-attr docutils literal notranslate"><span class="pre">groups</span></code></a>) that the later stage can exploit.
 Because both sides of the rewrite stay in fermionic space, that structure survives it, which is
-what these methods can exploit and Qiskit’s <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.synthesis.EvolutionSynthesis" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">EvolutionSynthesis</span></code></a> cannot.</p>
+what these methods can exploit and Qiskit’s <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.synthesis.EvolutionSynthesis" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">EvolutionSynthesis</span></code></a> cannot.</p>
 <p>The default is unchanged: leaving <code class="docutils literal notranslate"><span class="pre">synthesis</span></code> at <code class="docutils literal notranslate"><span class="pre">None</span></code> uses
 <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter.html#qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter" title="qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicLieTrotter</span></code></a>, which reproduces exactly
 the decomposition that <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> performed before, so existing circuits synthesize
@@ -563,7 +566,7 @@ benefit from a higher order with ones that do not, such as the all-commuting dia
 operators of a <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.UCJ.html#qiskit_fermions.circuit.library.UCJ" title="qiskit_fermions.circuit.library.UCJ"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCJ</span></code></a>.</p>
 <p>The pass expands each selected gate into the factors its method emits, so no separate expansion
 step is needed. Pass <code class="docutils literal notranslate"><span class="pre">apply=False</span></code> to only select the method and leave the expansion to
-something else, such as Qiskit’s <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.transpiler.passes.Decompose" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Decompose</span></code></a>; note that a gate
+something else, such as Qiskit’s <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.transpiler.passes.Decompose" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Decompose</span></code></a>; note that a gate
 which is never expanded reaches the fermion-to-qubit stage whole, where it is mapped without
 <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution.synthesis" title="qiskit_fermions.circuit.library.Evolution.synthesis"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Evolution.synthesis</span></code></a> ever being read.</p>
 </li>
@@ -648,7 +651,7 @@ layer:</p>
 <ul class="simple">
 <li><p><a class="reference internal" href="stubs/qiskit_fermions.transpiler.passes.QDriftTrotterization.html#qiskit_fermions.transpiler.passes.QDriftTrotterization" title="qiskit_fermions.transpiler.passes.QDriftTrotterization"><code class="xref py py-class docutils literal notranslate"><span class="pre">QDriftTrotterization</span></code></a> now records how many draws its <code class="docutils literal notranslate"><span class="pre">filter_trivial</span></code> mode discarded.
 When at least one <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate was actually filtered, the returned circuit’s
-<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.dagcircuit.DAGCircuit#metadata" title="(in Qiskit v2.5)"><code class="xref py py-attr docutils literal notranslate"><span class="pre">metadata</span></code></a> carries <code class="docutils literal notranslate"><span class="pre">filter_trivial.discarded</span></code> and
+<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.dagcircuit.DAGCircuit#metadata" title="(in Qiskit v2.6)"><code class="xref py py-attr docutils literal notranslate"><span class="pre">metadata</span></code></a> carries <code class="docutils literal notranslate"><span class="pre">filter_trivial.discarded</span></code> and
 <code class="docutils literal notranslate"><span class="pre">filter_trivial.emitted</span></code>, each holding one count per filtered gate in circuit order. Their
 ratio estimates the acceptance probability, which is the factor by which the filtering inflated
 the coefficients of the terms it retained. Neither field is present when no gate was filtered,
@@ -911,7 +914,7 @@ support Windows, simulation is consequently unavailable on Windows; the rest of 
 every platform. Windows users who need to simulate can do so through the <a class="reference external" href="https://learn.microsoft.com/en-us/windows/wsl/">Windows Subsystem
 for Linux</a>.</p>
 <p>Calling a simulation entry point without ffsim installed now raises
-<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/exceptions#qiskit.exceptions.MissingOptionalLibraryError" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">MissingOptionalLibraryError</span></code></a>.</p>
+<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/exceptions#qiskit.exceptions.MissingOptionalLibraryError" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">MissingOptionalLibraryError</span></code></a>.</p>
 </li>
 </ul>
 <ul class="simple">
@@ -952,7 +955,7 @@ its own. <a class="reference internal" href="stubs/qiskit_fermions.circuit.libra
 <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.OrbitalRotation.html#qiskit_fermions.circuit.library.OrbitalRotation" title="qiskit_fermions.circuit.library.OrbitalRotation"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrbitalRotation</span></code></a>.</p>
 <p>Since ffsim is now the gate’s input type rather than an optional accelerator, constructing a
 <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.UCC.html#qiskit_fermions.circuit.library.UCC" title="qiskit_fermions.circuit.library.UCC"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCC</span></code></a> requires the <code class="docutils literal notranslate"><span class="pre">ffsim</span></code> extra (<code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">&quot;qiskit-fermions[ffsim]&quot;</span></code>) and raises
-<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/exceptions#qiskit.exceptions.MissingOptionalLibraryError" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">MissingOptionalLibraryError</span></code></a> without it. ffsim does not support
+<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/exceptions#qiskit.exceptions.MissingOptionalLibraryError" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">MissingOptionalLibraryError</span></code></a> without it. ffsim does not support
 Windows, so the gate is unavailable there; use WSL.</p>
 </li>
 </ul>
@@ -983,7 +986,7 @@ own.</p>
 <p>Since ffsim is now the gate’s input type rather than an optional accelerator, constructing a
 <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.UCJ.html#qiskit_fermions.circuit.library.UCJ" title="qiskit_fermions.circuit.library.UCJ"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCJ</span></code></a> requires the <code class="docutils literal notranslate"><span class="pre">ffsim</span></code> extra
 (<code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">&quot;qiskit-fermions[ffsim]&quot;</span></code>) and raises
-<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/exceptions#qiskit.exceptions.MissingOptionalLibraryError" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">MissingOptionalLibraryError</span></code></a> without it. ffsim does not support
+<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/exceptions#qiskit.exceptions.MissingOptionalLibraryError" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">MissingOptionalLibraryError</span></code></a> without it. ffsim does not support
 Windows, so the gate is unavailable there; use WSL.</p>
 </li>
 </ul>
@@ -1067,7 +1070,7 @@ memory is tight.</p>
 <p>The mapped operator is unchanged: canonicalization only merges duplicate terms, so the result
 represents exactly the same observable as before. It is, however, no longer guaranteed to be
 fully simplified, and the number of terms it holds may vary with the thread count. Call
-<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.quantum_info.SparseObservable#simplify" title="(in Qiskit v2.5)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">simplify()</span></code></a> (<code class="docutils literal notranslate"><span class="pre">qk_obs_canonicalize</span></code> in C) if you
+<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.quantum_info.SparseObservable#simplify" title="(in Qiskit v2.6)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">simplify()</span></code></a> (<code class="docutils literal notranslate"><span class="pre">qk_obs_canonicalize</span></code> in C) if you
 need every duplicate combined.</p>
 </li>
 </ul>
@@ -1119,7 +1122,7 @@ non-normalized state. Since a group is now atomic, the split that produced them 
 <li><p><code class="docutils literal notranslate"><span class="pre">Evolution.inverse()</span></code> is now implemented directly, returning an <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> that evolves
 the same operator for the negated time and preserves the gate’s <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution.synthesis" title="qiskit_fermions.circuit.library.Evolution.synthesis"><code class="xref py py-attr docutils literal notranslate"><span class="pre">synthesis</span></code></a>
 method. Previously the inherited implementation recursed through the gate’s definition and returned
-a plain <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.Gate" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Gate</span></code></a>, discarding both the operator and the synthesis method.</p></li>
+a plain <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.Gate" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Gate</span></code></a>, discarding both the operator and the synthesis method.</p></li>
 </ul>
 </section>
 <section id="performance-improvements">
@@ -1173,7 +1176,7 @@ Following Qiskit’s design philosophy, the core of this package is written in R
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on 2026/10/20</div>
+              Last updated on 2026/10/29</div>
           </div>
           <div class="right-details">
             
@@ -1221,7 +1224,7 @@ Following Qiskit’s design philosophy, the core of this package is written in R
       
     </aside>
   </div>
-</div><script src="_static/documentation_options.js?v=367b42e8"></script>
+</div><script src="_static/documentation_options.js?v=88cc5c3b"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/scripts/furo.js?v=46bd48cc"></script>

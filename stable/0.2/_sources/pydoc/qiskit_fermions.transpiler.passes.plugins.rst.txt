@@ -4,6 +4,10 @@
 Transpiler Pass Plugins
 =======================
 
+.. meta::
+   :description: Plugin interface of the F2QSynthesis transpiler pass, which maps fermionic
+                 instructions to qubit instructions, and the plugins that implement it.
+
 .. currentmodule:: qiskit_fermions.transpiler.passes.synthesis
 
 The :class:`.F2QSynthesis` transpiler pass exposes a `plugin interface` (see

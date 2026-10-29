@@ -3,12 +3,14 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="map_transfer_vertex_generators" href="qiskit_fermions.mappers.map_transfer_vertex_generators.html"><link rel="prev" title="map_majorana_action_generators" href="qiskit_fermions.mappers.map_majorana_action_generators.html">
+
+<link rel="alternate" type="text/markdown" href="qiskit_fermions.mappers.map_edge_vertex_generators.html.md">
+<link rel="describedby" href="llms.txt"><link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="map_transfer_vertex_generators" href="qiskit_fermions.mappers.map_transfer_vertex_generators.html"><link rel="prev" title="map_majorana_action_generators" href="qiskit_fermions.mappers.map_majorana_action_generators.html">
         <link rel="prefetch" href="../_static/images/qiskit-light-logo.svg" as="image">
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>map_edge_vertex_generators - Qiskit Fermions 0.2.0+179a243</title>
+        <title>map_edge_vertex_generators - Qiskit Fermions 0.2.0+e668435</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=fc6d6d93" />
@@ -161,7 +163,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0+179a243</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0+e668435</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +189,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0+179a243</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0+e668435</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -450,9 +452,9 @@ generator, this allows mapping to arbitrary output types.</p>
 <p class="admonition-title">Note</p>
 <p>The output type <code class="docutils literal notranslate"><span class="pre">T</span></code> must support multiplication by a scalar via <code class="docutils literal notranslate"><span class="pre">__mul__</span></code>.
 If <code class="docutils literal notranslate"><span class="pre">compose=None</span></code> it must also support composition of two instances via <code class="docutils literal notranslate"><span class="pre">__and__</span></code>.
-<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.quantum_info.SparseObservable" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">SparseObservable</span></code></a> does not, which is why the example below
-names <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.quantum_info.SparseObservable#compose" title="(in Qiskit v2.5)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">compose()</span></code></a> explicitly; a type with an
-<code class="docutils literal notranslate"><span class="pre">__and__</span></code> (such as <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.quantum_info.SparsePauliOp" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">SparsePauliOp</span></code></a>) can rely on the default.</p>
+<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.quantum_info.SparseObservable" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">SparseObservable</span></code></a> does not, which is why the example below
+names <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.quantum_info.SparseObservable#compose" title="(in Qiskit v2.6)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">compose()</span></code></a> explicitly; a type with an
+<code class="docutils literal notranslate"><span class="pre">__and__</span></code> (such as <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.quantum_info.SparsePauliOp" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">SparsePauliOp</span></code></a>) can rely on the default.</p>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -556,7 +558,7 @@ instances. If this is not provided, it will default to using <a class="reference
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on 2026/10/20</div>
+              Last updated on 2026/10/29</div>
           </div>
           <div class="right-details">
             
@@ -590,7 +592,7 @@ instances. If this is not provided, it will default to using <a class="reference
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=367b42e8"></script>
+</div><script src="../_static/documentation_options.js?v=88cc5c3b"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

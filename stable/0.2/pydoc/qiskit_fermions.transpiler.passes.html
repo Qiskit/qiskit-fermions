@@ -3,12 +3,15 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="FermionicTrotterization" href="../stubs/qiskit_fermions.transpiler.passes.FermionicTrotterization.html"><link rel="prev" title="QuantumDAGToCircuit" href="../stubs/qiskit_fermions.transpiler.QuantumDAGToCircuit.html">
+<meta content="Transpiler passes for the stages of the fermionic transpiler pipeline: fermionic optimization passes, layout passes, and the fermion-to-qubit synthesis pass." name="description" />
+
+<link rel="alternate" type="text/markdown" href="qiskit_fermions.transpiler.passes.html.md">
+<link rel="describedby" href="llms.txt"><link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="FermionicTrotterization" href="../stubs/qiskit_fermions.transpiler.passes.FermionicTrotterization.html"><link rel="prev" title="QuantumDAGToCircuit" href="../stubs/qiskit_fermions.transpiler.QuantumDAGToCircuit.html">
         <link rel="prefetch" href="../_static/images/qiskit-light-logo.svg" as="image">
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Transpiler Passes - Qiskit Fermions 0.2.0+179a243</title>
+        <title>Transpiler Passes - Qiskit Fermions 0.2.0+e668435</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=fc6d6d93" />
@@ -161,7 +164,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0+179a243</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.2.0+e668435</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +190,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0+179a243</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.2.0+e668435</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -469,7 +472,7 @@
 <p>These passes are designed to help configuring the global
 <a class="reference internal" href="../stubs/qiskit_fermions.transpiler.F2QLayout.html#qiskit_fermions.transpiler.F2QLayout" title="qiskit_fermions.transpiler.F2QLayout"><code class="xref py py-type docutils literal notranslate"><span class="pre">F2QLayout</span></code></a> setting for the transpilation process. This setting
 needs to be placed in the <code class="docutils literal notranslate"><span class="pre">f2q_layout</span></code> field of the
-<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.PassManagerState#property_set" title="(in Qiskit v2.5)"><code class="xref py py-attr docutils literal notranslate"><span class="pre">property_set</span></code></a>, from where it will be read during the
+<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.PassManagerState#property_set" title="(in Qiskit v2.6)"><code class="xref py py-attr docutils literal notranslate"><span class="pre">property_set</span></code></a>, from where it will be read during the
 <a class="reference internal" href="#qiskit-fermions-transpiler-passes-synthesis"><span class="std std-ref">Synthesis Passes</span></a>.</p>
 <div class="table-wrapper autosummary longtable docutils container">
 <table class="autosummary longtable docutils align-default">
@@ -487,9 +490,9 @@ needs to be placed in the <code class="docutils literal notranslate"><span class
 <section id="synthesis-passes">
 <span id="qiskit-fermions-transpiler-passes-synthesis"></span><h2>Synthesis Passes<a class="headerlink" href="#synthesis-passes" title="Link to this heading">¶</a></h2>
 <p>The main logic for mapping a <a class="reference internal" href="../stubs/qiskit_fermions.circuit.FermionicDAGCircuit.html#qiskit_fermions.circuit.FermionicDAGCircuit" title="qiskit_fermions.circuit.FermionicDAGCircuit"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicDAGCircuit</span></code></a> to a
-<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.dagcircuit.DAGCircuit" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DAGCircuit</span></code></a> is implemented by a single synthesis pass, namely the
+<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.dagcircuit.DAGCircuit" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DAGCircuit</span></code></a> is implemented by a single synthesis pass, namely the
 <a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.F2QSynthesis.html#qiskit_fermions.transpiler.passes.F2QSynthesis" title="qiskit_fermions.transpiler.passes.F2QSynthesis"><code class="xref py py-class docutils literal notranslate"><span class="pre">F2QSynthesis</span></code></a>. It is conceptually similar to Qiskit’s
-<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.transpiler.passes.HighLevelSynthesis" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">HighLevelSynthesis</span></code></a> because it simply iterates over the
+<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.transpiler.passes.HighLevelSynthesis" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">HighLevelSynthesis</span></code></a> because it simply iterates over the
 <a class="reference internal" href="../stubs/qiskit_fermions.circuit.FermionicDAGCircuit.html#qiskit_fermions.circuit.FermionicDAGCircuit" title="qiskit_fermions.circuit.FermionicDAGCircuit"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicDAGCircuit</span></code></a> instructions and delegates the mapping to qubit-based instructions to
 <a class="reference internal" href="qiskit_fermions.transpiler.passes.plugins.html#qiskit-fermions-transpiler-passes-synthesis-plugins"><span class="std std-ref">Transpiler Pass Plugins</span></a> for each of the encountered types of
 <a class="reference internal" href="../stubs/qiskit_fermions.circuit.FermionicGate.html#qiskit_fermions.circuit.FermionicGate" title="qiskit_fermions.circuit.FermionicGate"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicGate</span></code></a>.</p>
@@ -543,7 +546,7 @@ needs to be placed in the <code class="docutils literal notranslate"><span class
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on 2026/10/20</div>
+              Last updated on 2026/10/29</div>
           </div>
           <div class="right-details">
             
@@ -579,7 +582,7 @@ needs to be placed in the <code class="docutils literal notranslate"><span class
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=367b42e8"></script>
+</div><script src="../_static/documentation_options.js?v=88cc5c3b"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

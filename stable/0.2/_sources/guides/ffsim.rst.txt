@@ -3,6 +3,11 @@
 How this package relates to ffsim
 =================================
 
+.. meta::
+   :description: How Qiskit Fermions and ffsim divide the work: ffsim owns the ansatz operators and
+                 fast fixed-particle-number simulation, while Qiskit Fermions owns fermionic
+                 circuits and their transpilation under any encoding.
+
 .. important::
 
    The concepts in this guide are only available in the Python API.

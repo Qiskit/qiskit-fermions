@@ -3,6 +3,10 @@
 Work with fermionic circuits
 ============================
 
+.. meta::
+   :description: How to build, repeat, measure, and transpile a FermionicCircuit, which implements
+                 quantum algorithms in fermionic space instead of mapping to qubits first.
+
 .. important::
 
    The concepts in this guide are currently available only in the Python API.

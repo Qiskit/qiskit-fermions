@@ -1,0 +1,30 @@
+# Qiskit Fermions
+
+> Qiskit Fermions extends Qiskit with tools for working with fermionic systems: operator data structures, a framework and library for converting operators between representations and to qubit operators (for example the Jordan-Wigner encoding), and a framework and library for synthesizing fermionic quantum circuits. The core is written in Rust and exposed through first-party Python and C APIs.
+
+
+2026, Qiskit addons team
+
+## Pages in this subsection
+
+- [&#96;qiskit-fermions&#96; C API reference](index.html.md): Reference for the C API of qiskit-fermions, covering operator representations, mappers, and miscellaneous items.
+- [Operator Representations](qf-operators.html.md): The C API provides various data structures for representing fermionic operators in different bases.
+- [QfFermionOperator](qf-ferm-op.html.md): A spin-less fermionic operator.
+- [QfMajoranaOperator](qf-maj-op.html.md): A Majorana fermion operator.
+- [QfEdgeVertexOperator](qf-edge-op.html.md): An edge-vertex operator.
+- [QfTransferVertexOperator](qf-transfer-op.html.md): A transfer-vertex operator.
+- [Operator Library](qf-operators-library.html.md): The C API provides various functions to simplify the construction of commonly used operators.
+- [Commutator Generators](qf-commutators.html.md): C API functions that compute the commutator, anti-commutator, and double commutator of operator representations.
+- [Electronic Integrals](qf-electronic-integrals.html.md): C API constructor functions that build electronic structure Hamiltonians from integral coefficients in several layouts (tril, full, spin, and sym).
+- [FCIDump](qf-fcidump.html.md): An electronic structure Hamiltonian in FCIDump format.
+- [Operator Terms](qf-operators-terms.html.md): C API functions that operate on the individual terms of an operator, to group, filter, and order them.
+- [Grouping Functions](qf-operators-terms-grouping.html.md): C API functions that assign operator terms to groups automatically and that analyze an existing grouping.
+- [Filtering Functions](qf-operators-terms-filtering.html.md): Filters out the terms of an operator that are diagonal in the occupation-number basis.
+- [Ordering Functions](qf-operators-terms-ordering.html.md): C API functions that reorder the terms of an operator, either canonically or by group index.
+- [Mapper Library](qf-mappers-library.html.md): C API functions that map operators to qubit operators with the Jordan-Wigner encoding, and that convert between operator representations.
+- [Various](qf-various.html.md): Miscellaneous items of the C API, such as return codes.
+- [QfExitCode](qf-exit-code.html.md): Integer exit codes returned to C.
+
+## Optional
+
+- [Top-level llms.txt](../llms.txt): Complete documentation index.
