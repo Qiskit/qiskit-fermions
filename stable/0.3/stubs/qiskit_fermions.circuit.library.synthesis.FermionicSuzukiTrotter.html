@@ -3,12 +3,14 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="Transpiler" href="../pydoc/qiskit_fermions.transpiler.html"><link rel="prev" title="FermionicLieTrotter" href="qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter.html">
+
+<link rel="alternate" type="text/markdown" href="qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter.html.md">
+<link rel="describedby" href="llms.txt"><link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="Transpiler" href="../pydoc/qiskit_fermions.transpiler.html"><link rel="prev" title="FermionicLieTrotter" href="qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter.html">
         <link rel="prefetch" href="../_static/images/qiskit-light-logo.svg" as="image">
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>FermionicSuzukiTrotter - Qiskit Fermions 0.3.1+28e8ee3</title>
+        <title>FermionicSuzukiTrotter - Qiskit Fermions 0.3.1+0f61081</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=fc6d6d93" />
@@ -161,7 +163,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.3.1+28e8ee3</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.3.1+0f61081</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +189,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.3.1+28e8ee3</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.3.1+0f61081</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -502,7 +504,7 @@ It is the caller’s responsibility to group accordingly; this is not verified.<
 <p>An operator with no groups is split term by term, which has the same effect, since an
 individual term is generally not Hermitian. The resulting factors are valid fermionic
 operators and the gates are built without complaint, but the fermion-to-qubit stage then
-rejects them: <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.library.PauliEvolutionGate" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">PauliEvolutionGate</span></code></a> requires real coefficients
+rejects them: <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.library.PauliEvolutionGate" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">PauliEvolutionGate</span></code></a> requires real coefficients
 and raises <code class="docutils literal notranslate"><span class="pre">ValueError:</span> <span class="pre">Operator</span> <span class="pre">contains</span> <span class="pre">complex</span> <span class="pre">coefficients,</span> <span class="pre">which</span> <span class="pre">are</span> <span class="pre">not</span> <span class="pre">supported</span></code>.</p>
 <p>Note that the symmetrization partially cancels the error of a non-Hermitian factor, so an
 incorrectly grouped operator can look markedly better at an even order than at first order while
@@ -595,7 +597,7 @@ the formula. A factor may appear more than once, at different evolution times.</
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on 2026/10/28</div>
+              Last updated on 2026/10/29</div>
           </div>
           <div class="right-details">
             
@@ -634,7 +636,7 @@ the formula. A factor may appear more than once, at different evolution times.</
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=d8e4499a"></script>
+</div><script src="../_static/documentation_options.js?v=54100633"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

@@ -3,12 +3,15 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="F2QLayout" href="../stubs/qiskit_fermions.transpiler.F2QLayout.html"><link rel="prev" title="FermionicSuzukiTrotter" href="../stubs/qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter.html">
+<meta content="How Qiskit Fermions transpiles a FermionicCircuit to a QuantumCircuit: the transpilation stages, the pass manager, and the layout of fermionic modes onto qubits." name="description" />
+
+<link rel="alternate" type="text/markdown" href="qiskit_fermions.transpiler.html.md">
+<link rel="describedby" href="llms.txt"><link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="F2QLayout" href="../stubs/qiskit_fermions.transpiler.F2QLayout.html"><link rel="prev" title="FermionicSuzukiTrotter" href="../stubs/qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter.html">
         <link rel="prefetch" href="../_static/images/qiskit-light-logo.svg" as="image">
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Transpiler - Qiskit Fermions 0.3.1+28e8ee3</title>
+        <title>Transpiler - Qiskit Fermions 0.3.1+0f61081</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=fc6d6d93" />
@@ -161,7 +164,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.3.1+28e8ee3</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.3.1+0f61081</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +190,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.3.1+28e8ee3</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.3.1+0f61081</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -453,9 +456,9 @@
 <p>Transpilation is the process of rewriting a given input circuit to conform with desired criteria
 such as topological and operational constraints of the hardware used to execute the final circuit.
 We are not going to explain this in more detail here, and instead refer to Qiskit’s documentation of
-the <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/transpiler#module-qiskit.transpiler" title="(in Qiskit v2.5)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">qiskit.transpiler</span></code></a> module.</p>
+the <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/transpiler#module-qiskit.transpiler" title="(in Qiskit v2.6)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">qiskit.transpiler</span></code></a> module.</p>
 <p>The focus here lies on explaining how we achieve the transpilation of a <a class="reference internal" href="../stubs/qiskit_fermions.circuit.FermionicCircuit.html#qiskit_fermions.circuit.FermionicCircuit" title="qiskit_fermions.circuit.FermionicCircuit"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicCircuit</span></code></a>
-to a <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumCircuit</span></code></a>.</p>
+to a <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumCircuit</span></code></a>.</p>
 </section>
 <section id="stages">
 <h2>Stages<a class="headerlink" href="#stages" title="Link to this heading">¶</a></h2>
@@ -514,7 +517,7 @@ qubits, the configured layout must account for that).</p>
 register. Consequently, we cannot associate a single fermionic mode with a single qubit.
 Therefore, the user-provided fermion-to-qubit layout (<a class="reference internal" href="../stubs/qiskit_fermions.transpiler.F2QLayout.html#qiskit_fermions.transpiler.F2QLayout" title="qiskit_fermions.transpiler.F2QLayout"><code class="xref py py-type docutils literal notranslate"><span class="pre">F2QLayout</span></code></a>) associates
 <a class="reference internal" href="../stubs/qiskit_fermions.circuit.FermionicRegister.html#qiskit_fermions.circuit.FermionicRegister" title="qiskit_fermions.circuit.FermionicRegister"><code class="xref py py-type docutils literal notranslate"><span class="pre">FermionicRegister</span></code></a> instances with
-<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.QuantumRegister" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumRegister</span></code></a> ones.</p>
+<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.QuantumRegister" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumRegister</span></code></a> ones.</p>
 <div class="table-wrapper autosummary longtable docutils container">
 <table class="autosummary longtable docutils align-default">
 <tbody>
@@ -531,7 +534,7 @@ refer to <a class="reference internal" href="qiskit_fermions.transpiler.passes.h
 <section id="synthesis">
 <span id="qiskit-fermions-transpiler-stage-synthesis"></span><h3>Synthesis<a class="headerlink" href="#synthesis" title="Link to this heading">¶</a></h3>
 <p>At its core, the transpilation is handled by the <a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.F2QSynthesis.html#qiskit_fermions.transpiler.passes.F2QSynthesis" title="qiskit_fermions.transpiler.passes.F2QSynthesis"><code class="xref py py-class docutils literal notranslate"><span class="pre">F2QSynthesis</span></code></a> transpiler pass. It is
-conceptually similar to Qiskit’s <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.transpiler.passes.HighLevelSynthesis" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">HighLevelSynthesis</span></code></a> pass, which
+conceptually similar to Qiskit’s <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.transpiler.passes.HighLevelSynthesis" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">HighLevelSynthesis</span></code></a> pass, which
 uses various <cite>plugins</cite> for transpiling high-level circuit instructions. For more details, refer to
 the documentation of <a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.F2QSynthesis.html#qiskit_fermions.transpiler.passes.F2QSynthesis" title="qiskit_fermions.transpiler.passes.F2QSynthesis"><code class="xref py py-class docutils literal notranslate"><span class="pre">F2QSynthesis</span></code></a> directly.</p>
 <p>How a given <a class="reference internal" href="../stubs/qiskit_fermions.circuit.FermionicGate.html#qiskit_fermions.circuit.FermionicGate" title="qiskit_fermions.circuit.FermionicGate"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicGate</span></code></a> can be synthesized in terms of qubit-based operations will
@@ -541,7 +544,7 @@ details, refer to <a class="reference internal" href="qiskit_fermions.transpiler
 <section id="qubit">
 <span id="qiskit-fermions-transpiler-stage-qubit"></span><h3>Qubit<a class="headerlink" href="#qubit" title="Link to this heading">¶</a></h3>
 <p>At this point in the transpilation process, we have reached a
-<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.dagcircuit.DAGCircuit" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DAGCircuit</span></code></a> instance and can continue to use Qiskit’s transpilation
+<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.dagcircuit.DAGCircuit" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DAGCircuit</span></code></a> instance and can continue to use Qiskit’s transpilation
 pipeline as one would usually.</p>
 <div class="admonition hint">
 <p class="admonition-title">Hint</p>
@@ -563,7 +566,7 @@ orchestrate the various <code class="xref py py-class docutils literal notransla
 (IR) to another, such as the <a class="reference internal" href="#qiskit-fermions-transpiler-stage-input"><span class="std std-ref">Input</span></a>,
 <a class="reference internal" href="#qiskit-fermions-transpiler-stage-synthesis"><span class="std std-ref">Synthesis</span></a>, and
 <a class="reference internal" href="#qiskit-fermions-transpiler-stage-output"><span class="std std-ref">Output</span></a> stages above) or a stage can be a
-<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.BasePassManager" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">BasePassManager</span></code></a> whose internal passes can be modified.</p>
+<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.BasePassManager" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">BasePassManager</span></code></a> whose internal passes can be modified.</p>
 <p>For the stages operating on fermionic circuits (<a class="reference internal" href="#qiskit-fermions-transpiler-stage-optimization"><span class="std std-ref">Optimization</span></a>
 and <a class="reference internal" href="#qiskit-fermions-transpiler-stage-layout"><span class="std std-ref">Layout</span></a>), the type of passmanager to use is
 <a class="reference internal" href="../stubs/qiskit_fermions.transpiler.FermionicPassManager.html#qiskit_fermions.transpiler.FermionicPassManager" title="qiskit_fermions.transpiler.FermionicPassManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicPassManager</span></code></a>.</p>
@@ -589,7 +592,7 @@ and <a class="reference internal" href="#qiskit-fermions-transpiler-stage-layout
 <td><p>Converts a <a class="reference internal" href="../stubs/qiskit_fermions.circuit.FermionicDAGCircuit.html#qiskit_fermions.circuit.FermionicDAGCircuit" title="qiskit_fermions.circuit.FermionicDAGCircuit"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicDAGCircuit</span></code></a> to a <a class="reference internal" href="../stubs/qiskit_fermions.circuit.FermionicCircuit.html#qiskit_fermions.circuit.FermionicCircuit" title="qiskit_fermions.circuit.FermionicCircuit"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicCircuit</span></code></a>.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="../stubs/qiskit_fermions.transpiler.QuantumDAGToCircuit.html#qiskit_fermions.transpiler.QuantumDAGToCircuit" title="qiskit_fermions.transpiler.QuantumDAGToCircuit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">QuantumDAGToCircuit</span></code></a>()</p></td>
-<td><p>Converts a <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.dagcircuit.DAGCircuit" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DAGCircuit</span></code></a> to a <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumCircuit</span></code></a>.</p></td>
+<td><p>Converts a <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.dagcircuit.DAGCircuit" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DAGCircuit</span></code></a> to a <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumCircuit</span></code></a>.</p></td>
 </tr>
 </tbody>
 </table>
@@ -638,7 +641,7 @@ functions for quickly building pre-defined transpilation pipelines.</p>
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on 2026/10/28</div>
+              Last updated on 2026/10/29</div>
           </div>
           <div class="right-details">
             
@@ -686,7 +689,7 @@ functions for quickly building pre-defined transpilation pipelines.</p>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=d8e4499a"></script>
+</div><script src="../_static/documentation_options.js?v=54100633"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

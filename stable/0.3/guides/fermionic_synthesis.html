@@ -3,12 +3,15 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="Optimize Slater determinant preparation" href="merge_slater_determinant.html"><link rel="prev" title="Transpile fermionic circuits" href="transpilation.html">
+<meta content="How to synthesize an Evolution gate into smaller fermionic gates with product formulas, on one gate or across a whole pipeline, and how to measure the payoff." name="description" />
+
+<link rel="alternate" type="text/markdown" href="fermionic_synthesis.html.md">
+<link rel="describedby" href="llms.txt"><link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="Optimize Slater determinant preparation" href="merge_slater_determinant.html"><link rel="prev" title="Transpile fermionic circuits" href="transpilation.html">
         <link rel="prefetch" href="../_static/images/qiskit-light-logo.svg" as="image">
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Synthesize an Evolution gate in fermionic space - Qiskit Fermions 0.3.1+28e8ee3</title>
+        <title>Synthesize an Evolution gate in fermionic space - Qiskit Fermions 0.3.1+0f61081</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=fc6d6d93" />
@@ -161,7 +164,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.3.1+28e8ee3</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.3.1+0f61081</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +190,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.3.1+28e8ee3</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.3.1+0f61081</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -459,7 +462,7 @@ fermionic gates. Both sides of the rewrite stay in fermionic space, which is wha
 from the fermion-to-qubit synthesis that follows: the operator’s
 <a class="reference internal" href="../stubs/qiskit_fermions.operators.OperatorTrait.html#qiskit_fermions.operators.OperatorTrait.groups" title="qiskit_fermions.operators.OperatorTrait.groups"><code class="xref py py-attr docutils literal notranslate"><span class="pre">groups</span></code></a> (see <a class="reference internal" href="grouping.html#grouping-explanation"><span class="std std-ref">Group operator terms: use the operator structure</span></a>) survive
 it, whereas a fermion-to-qubit mapping returns a
-<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.quantum_info.SparseObservable" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">SparseObservable</span></code></a>, which has no concept of grouping.</p>
+<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.quantum_info.SparseObservable" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">SparseObservable</span></code></a>, which has no concept of grouping.</p>
 <p>Two knobs select the method. <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution.synthesis" title="qiskit_fermions.circuit.library.Evolution.synthesis"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Evolution.synthesis</span></code></a> sets it on one gate, and the
 <a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.FermionicTrotterization.html#qiskit_fermions.transpiler.passes.FermionicTrotterization" title="qiskit_fermions.transpiler.passes.FermionicTrotterization"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicTrotterization</span></code></a> transpiler pass sets it across a whole circuit. Both take a
 <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.synthesis.FermionicEvolutionSynthesis.html#qiskit_fermions.circuit.library.synthesis.FermionicEvolutionSynthesis" title="qiskit_fermions.circuit.library.synthesis.FermionicEvolutionSynthesis"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicEvolutionSynthesis</span></code></a>, the interface any such rewrite implements. The methods this
@@ -542,7 +545,7 @@ and a lone <span class="math">\(a^\dagger_i a_j\)</span> is not Hermitian:</p>
 </div>
 <p>Such a factor is a valid fermionic operator, and this package will build the gate for it, so nothing
 complains until the mapped operator reaches
-<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.library.PauliEvolutionGate" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">PauliEvolutionGate</span></code></a>, which requires real coefficients and raises
+<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.library.PauliEvolutionGate" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">PauliEvolutionGate</span></code></a>, which requires real coefficients and raises
 <code class="docutils literal notranslate"><span class="pre">ValueError:</span> <span class="pre">Operator</span> <span class="pre">contains</span> <span class="pre">complex</span> <span class="pre">coefficients,</span> <span class="pre">which</span> <span class="pre">are</span> <span class="pre">not</span> <span class="pre">supported</span></code>. Checking the
 grouping up front turns that late failure into an answer available before any circuit is built.</p>
 </section>
@@ -612,7 +615,7 @@ factors it emits are <a class="reference internal" href="../stubs/qiskit_fermion
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Pass <code class="docutils literal notranslate"><span class="pre">apply=False</span></code> to only <em>select</em> the method and leave the expansion to something else, such
-as Qiskit’s <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.transpiler.passes.Decompose" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Decompose</span></code></a> (naming the gate as
+as Qiskit’s <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.transpiler.passes.Decompose" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Decompose</span></code></a> (naming the gate as
 <code class="docutils literal notranslate"><span class="pre">Decompose(&quot;Evolution&quot;)</span></code> restricts it to the evolutions, leaving the other fermionic gates to
 their own synthesis plugins).</p>
 <p>Be aware of what an unexpanded gate does, though: it reaches the fermion-to-qubit stage whole,
@@ -735,7 +738,7 @@ that concrete, since number operators commute with each other:</p>
 <p>Both circuits are exact, so the second spends 80% more entangling gates for nothing. The diagonal
 Coulomb operators of a <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.UCJ.html#qiskit_fermions.circuit.library.UCJ" title="qiskit_fermions.circuit.library.UCJ"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCJ</span></code></a> have this shape, which is why
 <a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.FermionicTrotterization.html#qiskit_fermions.transpiler.passes.FermionicTrotterization.filter" title="qiskit_fermions.transpiler.passes.FermionicTrotterization.filter"><code class="xref py py-attr docutils literal notranslate"><span class="pre">FermionicTrotterization.filter</span></code></a> exists: it takes a predicate over the
-<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.dagcircuit.DAGOpNode" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DAGOpNode</span></code></a> and leaves the rejected gates untouched, so one pass can raise
+<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.dagcircuit.DAGOpNode" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DAGOpNode</span></code></a> and leaves the rejected gates untouched, so one pass can raise
 the order on the gates that benefit and leave the rest at first order.</p>
 <p>A circuit holding both kinds of evolution shows what that saves. The predicate below accepts a gate
 only when its operator moves particles between modes, which is exactly when the groups fail to
@@ -844,7 +847,7 @@ and <a class="reference internal" href="../stubs/qiskit_fermions.transpiler.pass
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on 2026/10/28</div>
+              Last updated on 2026/10/29</div>
           </div>
           <div class="right-details">
             
@@ -883,7 +886,7 @@ and <a class="reference internal" href="../stubs/qiskit_fermions.transpiler.pass
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=d8e4499a"></script>
+</div><script src="../_static/documentation_options.js?v=54100633"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

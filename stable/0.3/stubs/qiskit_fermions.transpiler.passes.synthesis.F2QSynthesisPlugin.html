@@ -3,12 +3,14 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="F2QSynthesisPluginManager" href="qiskit_fermions.transpiler.passes.synthesis.F2QSynthesisPluginManager.html"><link rel="prev" title="Transpiler Pass Plugins" href="../pydoc/qiskit_fermions.transpiler.passes.plugins.html">
+
+<link rel="alternate" type="text/markdown" href="qiskit_fermions.transpiler.passes.synthesis.F2QSynthesisPlugin.html.md">
+<link rel="describedby" href="llms.txt"><link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="F2QSynthesisPluginManager" href="qiskit_fermions.transpiler.passes.synthesis.F2QSynthesisPluginManager.html"><link rel="prev" title="Transpiler Pass Plugins" href="../pydoc/qiskit_fermions.transpiler.passes.plugins.html">
         <link rel="prefetch" href="../_static/images/qiskit-light-logo.svg" as="image">
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>F2QSynthesisPlugin - Qiskit Fermions 0.3.1+28e8ee3</title>
+        <title>F2QSynthesisPlugin - Qiskit Fermions 0.3.1+0f61081</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=fc6d6d93" />
@@ -161,7 +163,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.3.1+28e8ee3</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.3.1+0f61081</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +189,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.3.1+28e8ee3</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.3.1+0f61081</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -461,15 +463,15 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>in_node</strong> (<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.dagcircuit.DAGOpNode" title="(in Qiskit v2.5)"><em>DAGOpNode</em></a>) – a fermion-based circuit instruction stored in a
-<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.dagcircuit.DAGOpNode" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DAGOpNode</span></code></a>. Specifically, this guarantees that
-<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.dagcircuit.DAGOpNode#op" title="(in Qiskit v2.5)"><code class="xref py py-attr docutils literal notranslate"><span class="pre">op</span></code></a> is of type <a class="reference internal" href="qiskit_fermions.circuit.FermionicGate.html#qiskit_fermions.circuit.FermionicGate" title="qiskit_fermions.circuit.FermionicGate"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicGate</span></code></a>.</p></li>
-<li><p><strong>out_dag</strong> (<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.dagcircuit.DAGCircuit" title="(in Qiskit v2.5)"><em>DAGCircuit</em></a>) – the qubit-based <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.dagcircuit.DAGCircuit" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DAGCircuit</span></code></a> into which this plugin
+<li><p><strong>in_node</strong> (<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.dagcircuit.DAGOpNode" title="(in Qiskit v2.6)"><em>DAGOpNode</em></a>) – a fermion-based circuit instruction stored in a
+<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.dagcircuit.DAGOpNode" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DAGOpNode</span></code></a>. Specifically, this guarantees that
+<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.dagcircuit.DAGOpNode#op" title="(in Qiskit v2.6)"><code class="xref py py-attr docutils literal notranslate"><span class="pre">op</span></code></a> is of type <a class="reference internal" href="qiskit_fermions.circuit.FermionicGate.html#qiskit_fermions.circuit.FermionicGate" title="qiskit_fermions.circuit.FermionicGate"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicGate</span></code></a>.</p></li>
+<li><p><strong>out_dag</strong> (<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.dagcircuit.DAGCircuit" title="(in Qiskit v2.6)"><em>DAGCircuit</em></a>) – the qubit-based <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.dagcircuit.DAGCircuit" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DAGCircuit</span></code></a> into which this plugin
 must insert the translated circuit instruction.</p></li>
-<li><p><strong>f2q_layout</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><em>dict</em></a><em>[</em><a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.QuantumRegister" title="(in Qiskit v2.5)"><em>QuantumRegister</em></a><em>, </em><a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.QuantumRegister" title="(in Qiskit v2.5)"><em>QuantumRegister</em></a><em>]</em>) – the <a class="reference internal" href="qiskit_fermions.transpiler.F2QLayout.html#qiskit_fermions.transpiler.F2QLayout" title="qiskit_fermions.transpiler.F2QLayout"><code class="xref py py-type docutils literal notranslate"><span class="pre">F2QLayout</span></code></a> setting that is global to
+<li><p><strong>f2q_layout</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><em>dict</em></a><em>[</em><a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.QuantumRegister" title="(in Qiskit v2.6)"><em>QuantumRegister</em></a><em>, </em><a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.QuantumRegister" title="(in Qiskit v2.6)"><em>QuantumRegister</em></a><em>]</em>) – the <a class="reference internal" href="qiskit_fermions.transpiler.F2QLayout.html#qiskit_fermions.transpiler.F2QLayout" title="qiskit_fermions.transpiler.F2QLayout"><code class="xref py py-type docutils literal notranslate"><span class="pre">F2QLayout</span></code></a> setting that is global to
 the transpilation process. It is the plugin’s responsibility to respect this mapping
 of <a class="reference internal" href="qiskit_fermions.circuit.FermionicRegister.html#qiskit_fermions.circuit.FermionicRegister" title="qiskit_fermions.circuit.FermionicRegister"><code class="xref py py-type docutils literal notranslate"><span class="pre">FermionicRegister</span></code></a> to
-<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.QuantumRegister" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumRegister</span></code></a>.</p></li>
+<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.QuantumRegister" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumRegister</span></code></a>.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
@@ -517,7 +519,7 @@ of <a class="reference internal" href="qiskit_fermions.circuit.FermionicRegister
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on 2026/10/28</div>
+              Last updated on 2026/10/29</div>
           </div>
           <div class="right-details">
             
@@ -554,7 +556,7 @@ of <a class="reference internal" href="qiskit_fermions.circuit.FermionicRegister
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=d8e4499a"></script>
+</div><script src="../_static/documentation_options.js?v=54100633"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

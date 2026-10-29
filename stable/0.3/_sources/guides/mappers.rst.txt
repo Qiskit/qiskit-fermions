@@ -3,6 +3,10 @@
 Map operator representations
 ============================
 
+.. meta::
+   :description: How to implement a custom operator mapper, use the library mappers, and choose a
+                 fermion-to-qubit encoding with ternary trees.
+
 **Mappers** are routines that transform operators from one representation to another
 while preserving mathematical equivalence. Use them to work flexibly across
 different operator algebras and to prepare operators for quantum circuit execution.

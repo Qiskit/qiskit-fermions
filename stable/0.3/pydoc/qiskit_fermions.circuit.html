@@ -3,12 +3,15 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="FermionicDAGCircuit" href="../stubs/qiskit_fermions.circuit.FermionicDAGCircuit.html"><link rel="prev" title="build_excitation_span_minimization_model" href="../stubs/qiskit_fermions.mappers.optimization.build_excitation_span_minimization_model.html">
+<meta content="Fermionic circuits: FermionicCircuit and related types that interpret Qiskit circuits as acting on fermionic modes rather than qubits." name="description" />
+
+<link rel="alternate" type="text/markdown" href="qiskit_fermions.circuit.html.md">
+<link rel="describedby" href="llms.txt"><link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="FermionicDAGCircuit" href="../stubs/qiskit_fermions.circuit.FermionicDAGCircuit.html"><link rel="prev" title="build_excitation_span_minimization_model" href="../stubs/qiskit_fermions.mappers.optimization.build_excitation_span_minimization_model.html">
         <link rel="prefetch" href="../_static/images/qiskit-light-logo.svg" as="image">
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Circuit Representation - Qiskit Fermions 0.3.1+28e8ee3</title>
+        <title>Circuit Representation - Qiskit Fermions 0.3.1+0f61081</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=fc6d6d93" />
@@ -161,7 +164,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.3.1+28e8ee3</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.3.1+0f61081</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +190,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.3.1+28e8ee3</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.3.1+0f61081</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -448,17 +451,17 @@
         <article role="main" id="furo-main-content">
           <section id="circuit-representation">
 <span id="module-qiskit_fermions.circuit"></span><h1>Circuit Representation<a class="headerlink" href="#circuit-representation" title="Link to this heading">¶</a></h1>
-<p>With this module you can build <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumCircuit</span></code></a> objects that are
+<p>With this module you can build <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumCircuit</span></code></a> objects that are
 interpreted as acting on <cite>fermionic</cite> modes rather than <cite>qubits</cite>.</p>
 <p>The following objects are simple type aliases to make this re-interpretation more clear:</p>
 <div class="table-wrapper autosummary longtable docutils container">
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="../stubs/qiskit_fermions.circuit.FermionicDAGCircuit.html#qiskit_fermions.circuit.FermionicDAGCircuit" title="qiskit_fermions.circuit.FermionicDAGCircuit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FermionicDAGCircuit</span></code></a></p></td>
-<td><p>A type alias of <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.dagcircuit.DAGCircuit" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DAGCircuit</span></code></a>.</p></td>
+<td><p>A type alias of <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.dagcircuit.DAGCircuit" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DAGCircuit</span></code></a>.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="../stubs/qiskit_fermions.circuit.FermionicMode.html#qiskit_fermions.circuit.FermionicMode" title="qiskit_fermions.circuit.FermionicMode"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FermionicMode</span></code></a></p></td>
-<td><p>A type alias of <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.Qubit" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Qubit</span></code></a>.</p></td>
+<td><p>A type alias of <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.Qubit" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Qubit</span></code></a>.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="../stubs/qiskit_fermions.circuit.FermionicRegister.html#qiskit_fermions.circuit.FermionicRegister" title="qiskit_fermions.circuit.FermionicRegister"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FermionicRegister</span></code></a></p></td>
 <td><p>A type alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">QubitRegister</span></code>.</p></td>
@@ -475,7 +478,7 @@ the <a class="reference internal" href="qiskit_fermions.circuit.library.html#mod
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="../stubs/qiskit_fermions.circuit.FermionicCircuit.html#qiskit_fermions.circuit.FermionicCircuit" title="qiskit_fermions.circuit.FermionicCircuit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FermionicCircuit</span></code></a>(num_modes)</p></td>
-<td><p>A wrapper around <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit" title="(in Qiskit v2.5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumCircuit</span></code></a> for expressing fermionic circuits.</p></td>
+<td><p>A wrapper around <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumCircuit</span></code></a> for expressing fermionic circuits.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="../stubs/qiskit_fermions.circuit.FermionicInstruction.html#qiskit_fermions.circuit.FermionicInstruction" title="qiskit_fermions.circuit.FermionicInstruction"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FermionicInstruction</span></code></a>(name, num_qubits, ...)</p></td>
 <td><p>The base class for all instructions acting on fermionic modes.</p></td>
@@ -523,7 +526,7 @@ the <a class="reference internal" href="qiskit_fermions.circuit.library.html#mod
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on 2026/10/28</div>
+              Last updated on 2026/10/29</div>
           </div>
           <div class="right-details">
             
@@ -538,7 +541,7 @@ the <a class="reference internal" href="qiskit_fermions.circuit.library.html#mod
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=d8e4499a"></script>
+</div><script src="../_static/documentation_options.js?v=54100633"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

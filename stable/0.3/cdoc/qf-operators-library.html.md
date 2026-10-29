@@ -1,0 +1,32 @@
+<a id="qf-operator-library"></a>
+
+# Operator Library
+
+The C API provides various functions to simplify the construction of commonly used operators.
+
+## Commutator Generators
+
+| [`qf_op_type_commutator()`](qf-commutators.html.md#c.qf_op_type_commutator)               | Computes the commutator of two operators.          |
+|----------------------------------------------------------------------------------------------------------------|----------------------------------------------------|
+| [`qf_op_type_anti_commutator()`](qf-commutators.html.md#c.qf_op_type_anti_commutator)     | Computes the anti-commutator of two operators.     |
+| [`qf_op_type_double_commutator()`](qf-commutators.html.md#c.qf_op_type_double_commutator) | Computes the double-commutator of three operators. |
+
+## Common Operators
+
+This section provides a quick reference for various operator constructor functions, grouped by
+category.
+
+### Electronic Integrals
+
+| [`qf_ferm_op_from_1body_tril_spin_sym()`](qf-electronic-integrals.html.md#c.qf_ferm_op_from_1body_tril_spin_sym)   | Constructs from spin-symmetric triangular 1-body<br/>integrals.        |
+|--------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------|
+| [`qf_ferm_op_from_1body_tril_spin()`](qf-electronic-integrals.html.md#c.qf_ferm_op_from_1body_tril_spin)           | Constructs from separate spin-species triangular<br/>1-body integrals. |
+| [`qf_ferm_op_from_2body_tril_spin_sym()`](qf-electronic-integrals.html.md#c.qf_ferm_op_from_2body_tril_spin_sym)   | Constructs from spin-symmetric triangular 2-body<br/>integrals.        |
+| [`qf_ferm_op_from_2body_tril_spin()`](qf-electronic-integrals.html.md#c.qf_ferm_op_from_2body_tril_spin)           | Constructs from separate spin-species triangular<br/>2-body integrals. |
+
+## Other Generators
+
+Finally, the following additional operator generator utilities exist:
+
+| [`QfFCIDump`](qf-fcidump.html.md#c.QfFCIDump)   | An electronic structure Hamiltonian in FCIDump format.   |
+|--------------------------------------------------------------------------|----------------------------------------------------------|

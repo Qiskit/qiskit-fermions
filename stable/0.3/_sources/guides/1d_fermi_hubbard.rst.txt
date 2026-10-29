@@ -3,6 +3,12 @@
 Simulate 1D Fermi-Hubbard dynamics with flow sets
 =================================================
 
+.. meta::
+   :description: Tutorial that builds a circuit of constant two-qubit depth for the time dynamics of
+                 the spinless one-dimensional Fermi-Hubbard model: group terms into flow sets
+                 before mapping, write a custom ancilla-based encoding, and synthesize with the
+                 flow sets.
+
 .. important::
 
    The functions described in this guide are currently available only in the Python API.

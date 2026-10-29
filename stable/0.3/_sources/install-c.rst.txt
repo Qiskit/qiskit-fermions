@@ -1,6 +1,11 @@
 Install the C API
 =================
 
+.. meta::
+   :description: Build the Qiskit Fermions C API from source: install the Rust toolchain and clang,
+                 compile the Qiskit C API and then the qiskit-fermions C API, and optionally run the
+                 C unit tests.
+
 Prerequisites
 ^^^^^^^^^^^^^
 
