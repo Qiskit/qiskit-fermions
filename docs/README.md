@@ -77,6 +77,39 @@ block such that Sphinx can parse and render the contents.
 Cross-references to other C API objects can be created only inside RST blocks/files and need to be
 correctly pre-fixed, for example like so: ``:c:func:`qf_ferm_op_free` ``.
 
+## LLM-friendly output
+
+Besides the HTML, the build writes an `llms.txt` index and a Markdown copy of every page
+(`<page>.html.md`) next to it, using [`sphinx-llm`](https://github.com/NVIDIA/sphinx-llm). It is
+configured in `docs/conf.py`, together with a few adjustments to the Markdown sub-build. These files
+are only published with the previews on GitHub Pages; the IBM Quantum Platform generates its own.
+
+Each entry of the `llms.txt` index carries a one-line description. Unless a page sets one, it is
+scraped from the page's first paragraph, which is often an introductory sentence that only makes
+sense next to the title. Hence the landing, guide, and module pages set it by hand:
+
+```rst
+.. meta::
+   :description: Routines that operate on the individual terms of an operator, to group, filter, and
+                 order them.
+```
+
+Put the directive directly below the page title, or above the `automodule` directive on the module
+pages in `docs/pydoc/`. Write one or two sentences of plain text, without RST markup (the index
+shows it literally), in the style of the rest of the documentation. Descriptions are written by hand
+because the documentation build must not call an LLM.
+
+These descriptions name concrete classes, functions, and concepts, and nothing checks them against
+the code, so they go stale silently. Revisit the description of a page whenever you:
+
+- add, remove, or rename something that it names, or add something that it should now mention, such
+  as a new operator representation, gate, transpiler pass, mapper, or synthesis plugin
+- add a module or guide page, which needs a description of its own
+- change what a guide covers
+
+The pages under `docs/stubs/` are generated from the docstrings, so their description is the first
+line of the docstring. Make it a complete summary sentence.
+
 ## Release Notes
 
 Release notes are managed by [`reno`](https://pypi.org/project/reno/).

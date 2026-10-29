@@ -3,6 +3,10 @@
 Synthesize an Evolution gate in fermionic space
 ===============================================
 
+.. meta::
+   :description: How to synthesize an Evolution gate into smaller fermionic gates with product
+                 formulas, on one gate or across a whole pipeline, and how to measure the payoff.
+
 .. important::
 
    The concepts in this guide are currently available only in the Python API.

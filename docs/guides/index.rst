@@ -2,6 +2,9 @@
 More guides
 ###########
 
+.. meta::
+   :description: Table of contents of all Qiskit Fermions guides.
+
 ..
     _This page generates the table of contents of all guides in this package.
     Their order should be kept in sync with the manually written

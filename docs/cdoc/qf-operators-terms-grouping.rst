@@ -2,6 +2,10 @@
 Grouping Functions
 ==================
 
+.. meta::
+   :description: C API functions that assign operator terms to groups automatically and that analyze
+                 an existing grouping.
+
 Refer to :ref:`grouping_explanation` for a detailed explanation of this module's
 functionality.
 

@@ -72,7 +72,7 @@ class RelabelModes(FermionicDAGCircuitPass):
     mode and needs **no post-processing at all**:
 
     .. plot::
-       :context:
+       :context: close-figs
        :nofigs:
        :include-source:
 
@@ -116,7 +116,7 @@ class RelabelModes(FermionicDAGCircuitPass):
     original order:
 
     .. plot::
-       :context:
+       :context: close-figs
        :alt: The fermionic circuit and its transpiled form, whose measurements sit on permuted qubits
              while writing into classical bits that remain in the original mode order.
 

@@ -2,6 +2,15 @@
 ``qiskit-fermions`` Python API reference
 ########################################
 
+.. meta::
+   :description: Reference for the Python API of qiskit-fermions, covering operators, mappers,
+                 circuits, the transpiler, linear algebra, protocols, and utilities.
+
+..
+    _Each page listed below sets its own `.. meta:: :description:`, which becomes its entry in
+    `llms.txt`. When you add a module page, or change what a module provides, update that
+    description. See `docs/README.md`, section "LLM-friendly output".
+
 This is the reference for the Python API of the ``qiskit-fermions`` package.
 
 *********
