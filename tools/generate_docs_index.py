@@ -42,6 +42,9 @@ the filesystem makes the page correct for whatever state the working tree is in 
 is also why the publishing workflow must call this script *inside* its push-retry loop, after replaying
 onto the updated branch tip, not once before it.
 
+Next to it goes an ``llms.txt`` that points at the ``llms.txt`` each build ships, so the one address a
+tool can guess leads to all of them; see ``build_llms_txt``.
+
 It also writes an empty ``.nojekyll``.  Pages runs Jekyll by default when serving from a branch, and
 Jekyll ignores directories whose names begin with an underscore -- which would silently drop
 ``_static``, ``_images`` and friends, leaving every page rendered without CSS or images.
@@ -56,10 +59,19 @@ import argparse
 import datetime
 import html
 import pathlib
+import re
 import sys
 
 #: Repository that owns the previews, used to link each pull-request entry back to GitHub.
 REPO = "Qiskit/qiskit-fermions"
+
+#: Public address of the Pages site.  The root ``llms.txt`` links with absolute URLs because an agent
+#: fetching that file has no page to resolve a relative link against.
+SITE_URL = "https://qiskit.github.io/qiskit-fermions"
+
+#: Name of the LLM-oriented index.  Each documentation build ships its own, written by `sphinx-llm`;
+#: the one at the root of the site only points at those.
+LLMS_TXT = "llms.txt"
 
 #: Label a pull request must carry for its preview to be built and published, and a link to it on
 #: GitHub.  Kept in step with the `if:` guard in `.github/workflows/docs.yml` -- if that label is ever
@@ -522,8 +534,86 @@ def build_index(root: pathlib.Path) -> str:
     )
 
 
+#: Shape of a release-branch directory name.  Stricter than "any directory": its name is interpolated
+#: into a Markdown link below, so anything unexpected is left out rather than escaped.
+_STABLE_VERSION = re.compile(r"^[0-9]+\.[0-9]+$")
+
+
+def _llms_entry(prefix: str, name: str, note: str) -> str:
+    """Render one ``llms.txt`` list item pointing at the index of the build in ``prefix``.
+
+    Args:
+        prefix: Directory of the build within the site, e.g. ``"dev"`` or ``"stable/0.3"``.
+        name: Link text.
+        note: What the build documents.
+
+    Returns:
+        A Markdown list item with an absolute URL.
+    """
+    return f"- [{name}]({SITE_URL}/{prefix}/{LLMS_TXT}): {note}"
+
+
+def build_llms_txt(root: pathlib.Path) -> str | None:
+    """Render the root ``llms.txt``, which only points at the ``llms.txt`` of each build.
+
+    Every documentation build ships its own index, written by `sphinx-llm`.  This one makes them
+    discoverable from the one address a tool can guess, ``/llms.txt``, without duplicating anything:
+    it lists the builds and nothing else.
+
+    Only ``dev/`` and the release branches are listed.  A release branch is skipped when its build
+    has no ``llms.txt``, which is the case for every branch that was last built before the extension
+    was added and cannot be rebuilt.  Pull-request previews are skipped on purpose: they are unreviewed
+    work in progress, which is not something to point an agent at.
+
+    Args:
+        root: Root of the published site, i.e. a checkout of the ``gh-pages`` branch.
+
+    Returns:
+        The file's content, or ``None`` when no build has an index to point at.
+    """
+    entries = []
+    if _is_build(root / "dev") and (root / "dev" / LLMS_TXT).is_file():
+        entries.append(_llms_entry("dev", "dev", "the development branch (`main`)"))
+    stable_root = root / "stable"
+    if stable_root.is_dir():
+        versions = sorted(
+            (
+                path.name
+                for path in stable_root.iterdir()
+                if _STABLE_VERSION.match(path.name)
+                and _is_build(path)
+                and (path / LLMS_TXT).is_file()
+            ),
+            key=_stable_sort_key,
+            reverse=True,
+        )
+        entries.extend(
+            _llms_entry(f"stable/{name}", f"stable/{name}", f"the {name} release series")
+            for name in versions
+        )
+    if not entries:
+        return None
+    builds = "\n".join(entries)
+    return (
+        "# Qiskit Fermions documentation previews\n"
+        "\n"
+        "> Unreleased builds of the Qiskit Fermions documentation, rebuilt whenever their branch "
+        "changes. They may be outdated, incomplete, or describe features that never ship. Each link "
+        "below is the `llms.txt` of one build.\n"
+        "\n"
+        "## Builds\n"
+        "\n"
+        f"{builds}\n"
+        "\n"
+        "## Released documentation\n"
+        "\n"
+        f"- [Qiskit Fermions on the IBM Quantum Platform]({RELEASED_DOCS_URL}): documentation of "
+        "released versions, which the platform publishes with its own `llms.txt`\n"
+    )
+
+
 def main() -> int:
-    """Write ``index.html`` and ``.nojekyll`` into the requested directory.
+    """Write ``index.html``, ``llms.txt`` and ``.nojekyll`` into the requested directory.
 
     Returns:
         A process exit status.
@@ -543,6 +633,16 @@ def main() -> int:
     (args.root / "index.html").write_text(build_index(args.root), encoding="utf-8")
     (args.root / NOJEKYLL).touch()
     print(f"Wrote {args.root / 'index.html'} and {args.root / NOJEKYLL}")
+
+    # Derived from the filesystem like the page above, and for the same reason.  With nothing to point
+    # at, remove a file left by an earlier run rather than leave it listing builds that are gone.
+    llms_txt = build_llms_txt(args.root)
+    if llms_txt is None:
+        (args.root / LLMS_TXT).unlink(missing_ok=True)
+        print(f"No build has a {LLMS_TXT}; not writing one at the root.")
+    else:
+        (args.root / LLMS_TXT).write_text(llms_txt, encoding="utf-8")
+        print(f"Wrote {args.root / LLMS_TXT}")
     return 0
 
 
