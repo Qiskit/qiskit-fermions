@@ -3,6 +3,10 @@
 Transpile fermionic circuits
 ============================
 
+.. meta::
+   :description: How to transpile a FermionicCircuit to a qubit QuantumCircuit through the stages of
+                 the fermionic transpiler pipeline, with a worked Jordan-Wigner example.
+
 .. important::
 
    The concepts in this guide are currently available only in the Python API.

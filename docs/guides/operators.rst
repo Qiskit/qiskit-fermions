@@ -3,6 +3,11 @@
 Design principles of operator representations
 =============================================
 
+.. meta::
+   :description: Design principles shared by all operator representations in
+                 qiskit_fermions.operators, such as sparse term storage, mode-based indexing, term
+                 grouping, and arithmetic.
+
 This guide explains the common design principles and core concepts shared across
 all operator representations in the :mod:`~qiskit_fermions.operators` module.
 
