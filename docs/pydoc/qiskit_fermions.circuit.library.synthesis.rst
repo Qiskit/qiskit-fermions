@@ -1,8 +1,7 @@
 .. meta::
-   :description: Fermion-to-fermion synthesis methods that break a gate down into smaller fermionic
-                 gates, such as Trotter and qDRIFT formulas for an Evolution gate, plus the
-                 F2FSynthesisPlugin interface for custom methods, which the F2FSynthesis
-                 transpiler pass applies.
+   :description: Fermion-to-fermion synthesis methods that break an Evolution gate down into smaller
+                 fermionic gates, such as Lie-Trotter and Suzuki-Trotter product formulas, plus
+                 the FermionicEvolutionSynthesis interface for custom methods.
 
 .. automodule:: qiskit_fermions.circuit.library.synthesis
    :no-members:
