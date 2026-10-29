@@ -3,6 +3,11 @@
 Generate Krylov time-evolution circuits (SKQD)
 ==============================================
 
+.. meta::
+   :description: Getting-started guide that builds the Krylov time-evolution circuits of
+                 sample-based Krylov quantum diagonalization (SKQD) for the single-impurity Anderson
+                 model, transpiles them, and diagonalizes in the sampled subspace.
+
 .. important::
 
    The concepts in this guide are currently available only in the Python API.

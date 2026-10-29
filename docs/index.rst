@@ -2,6 +2,12 @@
 Qiskit Fermions
 ###############
 
+.. meta::
+   :description: Overview of Qiskit Fermions, an extension of the Qiskit SDK for fermionic systems:
+                 operator data structures, operator conversion methods including fermion-to-qubit
+                 encodings, fermionic circuits, and a transpilation pipeline with fermion-to-fermion
+                 and fermion-to-qubit stages that turns them into qubit circuits.
+
 ``qiskit-fermions`` extends the Qiskit SDK with tools for working on fermionic
 systems. Within its scope it provides the following:
 
