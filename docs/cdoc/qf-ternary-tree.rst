@@ -4,6 +4,10 @@
 Ternary Trees
 =============
 
+.. meta::
+   :description: C API for ternary trees, which define fermion-to-qubit encodings of N fermionic
+                 modes onto N qubits: construct a tree and query the resulting encoding.
+
 A ternary tree on :math:`N` nodes defines a fermion-to-qubit encoding of :math:`N` fermionic modes onto
 :math:`N` qubits. Each node is a qubit carrying three downward **links**, labelled ``X``, ``Y`` and
 ``Z``. A link either descends to a child node (an *edge*) or terminates (a *leg*), and each leg's path

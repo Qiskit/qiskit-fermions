@@ -3,6 +3,11 @@
 Transpile an LUCJ ansatz
 ========================
 
+.. meta::
+   :description: How to transpile a local unitary cluster Jastrow (LUCJ) ansatz built with ffsim:
+                 turn it into a fermionic circuit, lower it onto qubits through the fermion-to-qubit
+                 encoding of your choice, and match the device topology.
+
 .. important::
 
    The concepts in this guide are only available in the Python API.

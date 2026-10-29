@@ -3,6 +3,11 @@
 Optimize Slater determinant preparation
 =======================================
 
+.. meta::
+   :description: How the MergeSlaterDeterminantPreparation transpiler pass rewrites an
+                 InitializeModes gate followed by an OrbitalRotation gate into a
+                 PrepareSlaterDeterminant gate, which unlocks a cheaper synthesis.
+
 .. important::
 
    The concepts in this guide are currently available only in the Python API.

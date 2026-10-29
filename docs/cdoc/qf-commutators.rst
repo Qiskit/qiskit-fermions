@@ -2,6 +2,10 @@
 Commutator Generators
 *********************
 
+.. meta::
+   :description: C API functions that compute the commutator, anti-commutator, and double commutator
+                 of operator representations.
+
 The :ref:`operator representations <qf_operators>` provide efficient functions
 for the computation of various commutators. Since these functions work with
 generic operator representations (a notion that does not exist in C), they are
