@@ -4,6 +4,10 @@
 Mapper Library
 ==============
 
+.. meta::
+   :description: C API functions that map operators to qubit operators with the Jordan-Wigner
+                 encoding, and that convert between operator representations.
+
 The C API provides efficient implementations of commonly used operator representation mapper
 routines.
 

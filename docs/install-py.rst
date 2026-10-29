@@ -1,6 +1,11 @@
 Install the Python API
 ======================
 
+.. meta::
+   :description: Install the Qiskit Fermions Python package from PyPI with pip, or from source for
+                 development, including the optional dependencies and how to verify and test the
+                 installation.
+
 Prerequisites
 ^^^^^^^^^^^^^
 

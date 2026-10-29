@@ -12,8 +12,11 @@
 
 import logging
 import os
+import posixpath
 import sys
 from importlib.metadata import version as metadata_version
+
+from docutils import nodes
 
 # Reduce logging level to WARNING for the `qiskit` package to avoid unnecessary verbosity during
 # documentation generation.
@@ -68,6 +71,7 @@ extensions = [
     "qiskit_sphinx_theme",
     "sphinxcontrib.katex",
     "breathe",
+    "sphinx_llm.txt",
 ]
 
 breathe_projects = {"qiskit_fermions": "xml/"}
@@ -77,6 +81,25 @@ breathe_domain_by_extension = {
 }
 
 copybutton_exclude = ".linenos, .gp, .go"
+
+# The markdown builder behind `sphinx_llm.txt` does not know every docutils node and warns about
+# each one it meets, which `-W` turns into an error.  These are the three we currently hit: the
+# `abbreviation` nodes that autodoc emits for the bare `*` in signatures, the `caption` of a table of
+# download links, and `citation` nodes.  Naming them, rather than silencing every unknown node, keeps
+# `-W` effective for any node that is new.  The nodes are still kept as inline code.
+# Upstream: liran-funaro/sphinx-markdown-builder#42 and #63 (abbreviation), #76 (caption).
+llms_txt_suppress_unknown_node_warnings = ["abbreviation", "caption", "citation", "meta"]
+# Only emit `<page>.html.md` next to each `<page>.html`; the default ("auto") also writes a
+# redundant `<page>.md` copy of every page.
+llms_txt_suffix_mode = "append"
+# Static text for the `llms.txt` header (no LLM call involved).
+llms_txt_description = (
+    "Qiskit Fermions extends Qiskit with tools for working with fermionic systems: operator data "
+    "structures, a framework and library for converting operators between representations and to "
+    "qubit operators (for example the Jordan-Wigner encoding), and a framework and "
+    "library for synthesizing fermionic quantum circuits. The core is written in Rust and exposed "
+    "through first-party Python and C APIs."
+)
 
 html_last_updated_fmt = "%Y/%m/%d"
 html_title = f"{project} {release}"
@@ -174,3 +197,56 @@ redirects = {
 
 def linkcode_resolve(domain, info):
     return None
+
+
+# ----------------------------------------------------------------------------------
+# LLM-friendly Markdown output (`sphinx_llm.txt`)
+# ----------------------------------------------------------------------------------
+
+
+def _adapt_doctree_for_markdown(app, doctree, docname):
+    """Adjust the doctree of the Markdown sub-build that `sphinx_llm.txt` runs next to the HTML build.
+
+    Only active in that sub-build, so the HTML output is untouched.  Three things differ:
+
+    * Images.  `sphinx_markdown_builder` writes an image node's `uri` verbatim, but at that point it
+      is a path relative to the *source root* (or, for the `plot` directive, to wherever the
+      sub-build wrote the figure), so it resolves to nothing from the page that contains it.  The
+      HTML build copies every image to `_images/` under a unique name, and the two outputs are merged
+      into one tree afterwards, so linking to that copy gives a working relative path.
+      Upstream: liran-funaro/sphinx-markdown-builder#33.
+    * Comments.  RST comments become `<!-- -->` blocks in the Markdown, and the description scraper
+      of `sphinx_llm.txt` only skips the first line of such a block, so a multi-line comment ends up
+      as the page's description in `llms.txt`.  They carry nothing for a reader, so drop them.
+    * `Bases: ...`.  Autodoc puts this line first in every class entry, so the scraper picks it as
+      the description of the page.  Moving it behind the first prose paragraph keeps the inheritance
+      information and lets the docstring's own summary line become the description.
+    """
+    if not app.tags.has("sphinx_llm_markdown"):
+        return
+
+    page_dir = posixpath.dirname(docname) or "."
+    for node in doctree.findall(nodes.image):
+        entry = app.env.images.get(node["uri"])
+        if entry is not None:
+            node["uri"] = posixpath.relpath(f"_images/{entry[1]}", page_dir)
+
+    for node in list(doctree.findall(nodes.comment)):
+        node.parent.remove(node)
+
+    for node in list(doctree.findall(nodes.paragraph)):
+        if not node.astext().startswith("Bases: "):
+            continue
+        parent = node.parent
+        position = parent.index(node)
+        following = [
+            child for child in parent.children[position + 1 :] if isinstance(child, nodes.paragraph)
+        ]
+        if following:
+            parent.remove(node)
+            parent.insert(parent.index(following[0]) + 1, node)
+
+
+def setup(app):
+    app.connect("doctree-resolved", _adapt_doctree_for_markdown)
+    return {"parallel_read_safe": True, "parallel_write_safe": True}

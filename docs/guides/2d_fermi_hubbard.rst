@@ -3,6 +3,12 @@
 Simulate 2D Fermi-Hubbard dynamics with flow sets
 =================================================
 
+.. meta::
+   :description: Tutorial that extends the flow-set approach to the spinless two-dimensional
+                 Fermi-Hubbard model on a square lattice with the Verstraete-Cirac encoding, then
+                 verifies the circuit, the physics on the stabilizer subspace, and Trotter
+                 convergence.
+
 .. important::
 
    The concepts in this guide are currently available only in the Python API.
