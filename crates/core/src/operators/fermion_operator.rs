@@ -623,11 +623,8 @@ impl OperatorTrait for FermionOperator {
             out._append_term(term.coeff, term.actions, term.modes);
             groups.push(term.group);
         }
-        // One group index is pushed per appended term above, so the length check cannot fire; going
-        // through the checked setter anyway keeps that a property of this loop rather than an
-        // assumption spread across the file.
-        out.set_groups(Some(groups))
-            .expect("one group index is pushed per appended term");
+        // Built in lockstep with the terms above, so the length check of `set_groups` is redundant.
+        out._write_groups(Some(groups));
         out
     }
 
@@ -643,7 +640,7 @@ impl OperatorTrait for FermionOperator {
         if permutation.iter().collect::<HashSet<_>>().len() != permutation.len() {
             return Err(CoherenceError::DuplicateIndices);
         }
-        // The relabelled modes are computed before anything is copied, so that the error path does
+        // The relabeled modes are computed before anything is copied, so that the error path does
         // not first clone the entire operator only to discard it.
         let modes: Vec<u32> = self
             .modes
@@ -660,7 +657,7 @@ impl OperatorTrait for FermionOperator {
             actions: self.actions.clone(),
             modes,
             boundaries: self.boundaries.clone(),
-            // Relabelling permutes mode indices without reordering, splitting or merging terms, so
+            // Relabeling permutes mode indices without reordering, splitting or merging terms, so
             // any grouping of those terms carries over unchanged. This is the one operation that
             // preserves `groups` rather than dropping it.
             groups: self.groups.clone(),

@@ -39,7 +39,7 @@ class Evolution(FermionicGate):
         U = e^{-i t H}.
 
     For :math:`U` to be unitary, :math:`H` must be Hermitian. This is the caller's responsibility
-    and is not verified.
+    and is not verified; :meth:`~qiskit_fermions.operators.FermionOperator.is_hermitian` can check it.
 
     .. note::
        Breaking this gate down in fermionic space (into a circuit of smaller :class:`.Evolution`

@@ -295,7 +295,7 @@ class TestTransferVertexOperator(OperatorContractTests):
     def test_normal_ordered(self, subtests):
         cls = self.get_class()
 
-        # These cases pin the pure *reordering* behaviour, so they opt out of the contraction that
+        # These cases pin the pure *reordering* behavior, so they opt out of the contraction that
         # `reduce=True` (the default) would additionally apply. See `test_normal_ordered_reduce`.
         with subtests.test("no change"):
             op = cls.from_dict({((0, 0), (1, 1), (1, 1), (0, 1)): 1})
@@ -323,7 +323,7 @@ class TestTransferVertexOperator(OperatorContractTests):
 
         with subtests.test("transfer operators sharing one mode do not fuse"):
             # Unlike two edge operators, `T_{0,1} T_{0,2}` cannot collapse into a single generator:
-            # cancelling the shared Majorana leaves an (even, odd) pair from two different modes.
+            # canceling the shared Majorana leaves an (even, odd) pair from two different modes.
             # So this term keeps its length, and reducing must not invent a shorter form.
             op = cls.from_dict({((0, 1), (0, 2)): 1})
             reduced = op.normal_ordered()

@@ -70,7 +70,7 @@ def test_schedule_factor_counts(subtests):
 
 
 def test_schedule_merges_repetition_boundaries():
-    """The palindromes of neighbouring reps end and begin on the same factor, which is fused."""
+    """The palindromes of neighboring reps end and begin on the same factor, which is fused."""
     doubled = _suzuki_schedule(2, 3, 2)
 
     assert [index for index, _ in doubled] == [0, 1, 2, 1, 0, 1, 2, 1, 0]
@@ -88,7 +88,7 @@ def test_schedule_repeats_scale_with_reps_unmerged():
 
 
 def test_merging_preserves_total_time_per_factor(subtests):
-    """Fusing neighbours redistributes time but never changes what each factor accumulates."""
+    """Fusing neighbors redistributes time but never changes what each factor accumulates."""
     for order in ORDERS:
         for reps in REPS:
             with subtests.test(f"order={order} reps={reps}"):

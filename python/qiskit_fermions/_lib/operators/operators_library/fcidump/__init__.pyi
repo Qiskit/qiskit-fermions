@@ -186,7 +186,7 @@ class FCIDump:
         
         Raises:
             OSError: if ``file_path`` cannot be opened or read.
-            ValueError: if the file does not honour the FCIDump format (a missing header namelist, a
+            ValueError: if the file does not honor the FCIDump format (a missing header namelist, a
                 missing ``NORB`` or ``NELEC`` field, or a malformed ``MS2`` field), or if it carries
                 an MO energy value, which is not supported yet.
         """

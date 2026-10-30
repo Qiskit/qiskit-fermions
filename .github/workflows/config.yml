@@ -1,6 +1,6 @@
 ---
 
-# This is a no-op workflow whose only purpose is to centralise shared CI configuration values.  It's
+# This is a no-op workflow whose only purpose is to centralize shared CI configuration values.  It's
 # also possible to specify these in the GitHub web interface, but that separates them from the rest
 # of the configuration logic and means that changes to the configuration do not appear in the git
 # history.

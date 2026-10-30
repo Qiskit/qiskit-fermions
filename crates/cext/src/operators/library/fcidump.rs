@@ -26,7 +26,7 @@ use qiskit_fermions_core::operators::library::fcidump::FCIDump;
 ///        only written to on success; on failure it is left untouched.
 ///
 /// @return An exit code. This is ``QfExitCode_ValueError`` if the file cannot be opened or read, or
-///         if it does not honour the FCIDump format (a missing header namelist, a missing ``NORB``
+///         if it does not honor the FCIDump format (a missing header namelist, a missing ``NORB``
 ///         or ``NELEC`` field, a malformed ``MS2`` field, or an unsupported MO energy value).
 ///
 /// @rst
@@ -54,7 +54,7 @@ pub unsafe extern "C" fn qf_fcidump_from_file(
 
     // The core reports every parse failure as an `FCIDumpError`. Surfacing it as an exit code (and
     // leaving `out` alone) is what keeps a bad path from unwinding across the FFI boundary, which is
-    // undefined behaviour in an `extern "C"` function.
+    // undefined behavior in an `extern "C"` function.
     match FCIDump::from_file(rust_file_path) {
         Ok(fcidump) => {
             // SAFETY: Per documentation, `out` is non-null and aligned.

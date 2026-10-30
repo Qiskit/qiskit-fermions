@@ -42,7 +42,7 @@ class FermionicCircuit:
     """A wrapper around :class:`~qiskit.circuit.QuantumCircuit` for expressing fermionic circuits.
 
     This class maintains a reduced API compared to the full API of the underlying
-    :class:`~qiskit.circuit.QuantumCircuit`. This is done to avoid exposing (amongst other methods)
+    :class:`~qiskit.circuit.QuantumCircuit`. This is done to avoid exposing (among other methods)
     the ability to apply qubit-based gates onto a fermionic circuit, which would not be a
     well-defined operation in the general case.
 

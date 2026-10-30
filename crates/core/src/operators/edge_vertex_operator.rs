@@ -235,7 +235,7 @@ impl EdgeVertexOperator {
     ///
     /// `reduce` additionally contracts adjacent generators via the identities in
     /// [`_reduce_once`], which is what makes the result a genuine canonical form. Pass `false` to
-    /// get the reorder-only behaviour.
+    /// get the reorder-only behavior.
     pub fn normal_ordered(&self, ascending: bool, reduce: bool) -> Self {
         let mut result = Self::zero();
         self.iter()
@@ -755,7 +755,7 @@ impl OperatorTrait for EdgeVertexOperator {
                 })
                 .collect()
         };
-        // Both index buffers are relabelled before anything is copied, so that the error path does
+        // Both index buffers are relabeled before anything is copied, so that the error path does
         // not first clone the entire operator only to discard it. The left buffer is still mapped
         // first, keeping the error it reports ahead of the right buffer's.
         let left_indices = relabel(&self.left_indices)?;
@@ -765,7 +765,7 @@ impl OperatorTrait for EdgeVertexOperator {
             left_indices,
             right_indices,
             boundaries: self.boundaries.clone(),
-            // Relabelling permutes mode indices without reordering, splitting or merging terms, so
+            // Relabeling permutes mode indices without reordering, splitting or merging terms, so
             // any grouping of those terms carries over unchanged. This is the one operation that
             // preserves `groups` rather than dropping it.
             groups: self.groups.clone(),
@@ -1942,7 +1942,7 @@ mod tests {
 
     /// A right-side index outside the permutation must still be reported.
     ///
-    /// Both buffers are relabelled through one closure now, so the right side needs its own case to
+    /// Both buffers are relabeled through one closure now, so the right side needs its own case to
     /// show it is mapped at all rather than copied through.
     #[test]
     fn test_relabel_modes_index_too_small_err_from_right() {

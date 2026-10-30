@@ -29,7 +29,7 @@ that has not.  ``main`` and the ``stable/<X.Y>`` branches are listed together as
 pull-request previews separately as work in progress.  That split is the reason a reader is here at all:
 a preview is worth reading only once you know how provisional it is.
 
-A pull-request entry is additionally labelled with that pull request's title, which this script cannot
+A pull-request entry is additionally labeled with that pull request's title, which this script cannot
 know: it reads a directory listing.  The publishing action therefore drops the title into a
 ``.pr-title`` file inside the preview directory, and this script reads it if it is there.  That keeps
 the rule below intact -- the *listing* still comes only from the filesystem -- and keeps the title
@@ -74,8 +74,9 @@ SITE_URL = "https://qiskit.github.io/qiskit-fermions"
 LLMS_TXT = "llms.txt"
 
 #: Label a pull request must carry for its preview to be built and published, and a link to it on
-#: GitHub.  Kept in step with the `if:` guard in `.github/workflows/docs.yml` -- if that label is ever
-#: renamed, this is the other place that names it.
+#: GitHub.  Kept in step with the `if:` guard of the `publish-preview` job in
+#: `.github/workflows/branch-protection.yml` -- if that label is ever renamed, this is the other place
+#: that names it.
 PREVIEW_LABEL = "ci: preview docs"
 PREVIEW_LABEL_URL = f"https://github.com/{REPO}/labels/ci%3A%20preview%20docs"
 
@@ -175,7 +176,7 @@ body {{
 /* Deliberately no `display` here: `.brand img` is (0,1,1) and would outrank the (0,1,0) class selectors
    below, pinning both logos visible.  Sizing only; the rules below own visibility. */
 .brand img {{ width: 100%; max-width: 11rem; height: auto; }}
-/* The two logo files differ only in the colour of the wordmark, so exactly one is ever shown.  This
+/* The two logo files differ only in the color of the wordmark, so exactly one is ever shown.  This
    page has no theme switcher -- unlike the Sphinx builds, which is why they need a `data-theme`
    attribute and this does not -- so the OS preference alone decides, matching the palette above. */
 .logo-light {{ display: block; }}

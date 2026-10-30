@@ -316,7 +316,7 @@ over terms and their composition:
    ...                 [("ZXZ", [k, k + 1, k + 2], 0.5)], num_qubits=num_qubits
    ...             )
    ...         case _:
-   ...             raise ValueError(f"not a nearest-neighbour transfer operator: {action}")
+   ...             raise ValueError(f"not a nearest-neighbor transfer operator: {action}")
    >>>
    >>> def flow_set_encoding(operator, num_qubits):
    ...     return map_transfer_vertex_generators(

@@ -584,7 +584,7 @@ impl OperatorTrait for MajoranaOperator {
         if permutation.iter().collect::<HashSet<_>>().len() != permutation.len() {
             return Err(CoherenceError::DuplicateIndices);
         }
-        // The relabelled modes are computed before anything is copied, so that the error path does
+        // The relabeled modes are computed before anything is copied, so that the error path does
         // not first clone the entire operator only to discard it.
         let modes: Vec<u32> = self
             .modes
@@ -600,7 +600,7 @@ impl OperatorTrait for MajoranaOperator {
             coeffs: self.coeffs.clone(),
             modes,
             boundaries: self.boundaries.clone(),
-            // Relabelling permutes mode indices without reordering, splitting or merging terms, so
+            // Relabeling permutes mode indices without reordering, splitting or merging terms, so
             // any grouping of those terms carries over unchanged. This is the one operation that
             // preserves `groups` rather than dropping it.
             groups: self.groups.clone(),

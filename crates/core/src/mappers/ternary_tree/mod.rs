@@ -48,7 +48,7 @@ pub type NodeId = u32;
 /// There are always exactly `2 * num_nodes + 1` legs; see [`TernaryTree::num_legs`].
 pub type LegId = u32;
 
-/// The Pauli labelling one of a node's three downward links.
+/// The Pauli labeling one of a node's three downward links.
 ///
 /// The discriminants are the symplectic `(z, x)` bit pair Qiskit uses, with `z` in the low bit and
 /// `x` in the next: `Z = 0b01`, `X = 0b10`, `Y = 0b11`. That makes them the discriminants of
@@ -165,7 +165,7 @@ pub enum Slot {
 #[derive(Error, Debug, PartialEq, Eq)]
 pub enum TernaryTreeError {
     /// Two of a node's links carry the same Pauli label.
-    #[error("node {node} has more than one link labelled {label:?}")]
+    #[error("node {node} has more than one link labeled {label:?}")]
     DuplicateLabel {
         /// The offending node.
         node: NodeId,
@@ -246,9 +246,9 @@ pub const MAX_NODES: u32 = (u32::MAX - 1) / 2;
 
 /// A rooted ternary tree defining a fermion-to-qubit encoding.
 ///
-/// Each node is a qubit and carries three downward **links**, labelled `X`, `Y` and `Z`. A link
+/// Each node is a qubit and carries three downward **links**, labeled `X`, `Y` and `Z`. A link
 /// either descends to a child node (an *edge*) or terminates (a *leg*). Each leg's upward path to
-/// the root spells a Pauli string: crossing the link labelled `P` that descends *from* node `u`
+/// the root spells a Pauli string: crossing the link labeled `P` that descends *from* node `u`
 /// contributes `P` on qubit `u`, with the identity everywhere else.
 ///
 /// # Validity is structural
@@ -917,7 +917,7 @@ mod tests {
         // fixture, not the output of any algorithm. Do not read a provenance into it. It is in
         // particular not what the Bonsai algorithm would produce: at node 4 the `Z` link descends
         // to the shallower arm (subtree depth 3) while `X` takes the deeper one (depth 4), which no
-        // longest-path-first labelling rule would do, and no parent graph for it exists in this
+        // longest-path-first labeling rule would do, and no parent graph for it exists in this
         // repository.
         let z = PauliLabel::Z;
         let x = PauliLabel::X;

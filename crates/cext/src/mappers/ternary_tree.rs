@@ -42,9 +42,9 @@ use qiskit_fermions_core::mappers::ternary_tree::{PauliLabel, TernaryTree};
 /// @rst
 ///
 /// A ternary tree on :math:`N` nodes defines a fermion-to-qubit encoding of :math:`N` fermionic modes
-/// onto :math:`N` qubits. Each node is a qubit carrying three downward **links**, labelled ``X``,
+/// onto :math:`N` qubits. Each node is a qubit carrying three downward **links**, labeled ``X``,
 /// ``Y`` and ``Z``. A link either descends to a child node (an *edge*) or terminates (a *leg*), and
-/// each leg's path back to the root spells a Pauli string: crossing the link labelled :math:`P` that
+/// each leg's path back to the root spells a Pauli string: crossing the link labeled :math:`P` that
 /// descends *from* node :math:`u` contributes :math:`P` on qubit :math:`u`.
 ///
 /// Every tree of this shape yields a valid encoding, and the familiar ones are particular shapes. This

@@ -143,7 +143,7 @@ jobs:
           # endpoint's `id` is a different, numeric value and would not work here.)
           #
           # `first(...)` emits nothing at all when no comment matches, which is the ordinary case for a
-          # pull request that was never labelled for a preview.  Selecting the object before building
+          # pull request that was never labeled for a preview.  Selecting the object before building
           # the row matters: reading the fields off a `null` would emit a row whose missing id collapses
           # the array, shifting `isMinimized` into `node_id` and sending `false` to the mutation below.
           # `|| true` because `read` reports failure on the resulting empty input.

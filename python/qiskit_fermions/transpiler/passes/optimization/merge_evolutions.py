@@ -45,7 +45,7 @@ def _same_synthesis(a: object, b: object) -> bool:
 
 
 def _mergeable(first: DAGOpNode, second: DAGOpNode, atol: float) -> bool:
-    """Whether two neighbouring :class:`.Evolution` nodes combine into a single one."""
+    """Whether two neighboring :class:`.Evolution` nodes combine into a single one."""
     a, b = first.op, second.op
 
     # the operator's mode labels are relative to the gate's wires, so their order must agree
@@ -71,13 +71,13 @@ class MergeEvolutions(FermionicDAGCircuitPass):
 
         e^{-i t_2 H} e^{-i t_1 H} = e^{-i (t_1 + t_2) H},
 
-    because :math:`H` commutes with itself. This pass finds neighbouring :class:`.Evolution` gates
+    because :math:`H` commutes with itself. This pass finds neighboring :class:`.Evolution` gates
     of equivalent operators and replaces them by one gate whose evolution time is the sum of theirs.
     The rewrite is exact, so it changes neither the simulated state nor the Trotter error of the
     circuit; it only removes a gate, and with it the synthesized operations that gate would have
     produced.
 
-    Such neighbours arise wherever two sequences of factors meet on the same factor. Examples are the
+    Such neighbors arise wherever two sequences of factors meet on the same factor. Examples are the
     seams between the repetitions of :meth:`.FermionicCircuit.repeat`, between consecutive
     :class:`.UCC` or :class:`.UCJ` layers, or between consecutive samples of
     :class:`.QDriftTrotterization`. :class:`.FermionicSuzukiTrotter` already fuses the seams within

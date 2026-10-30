@@ -162,7 +162,7 @@ Pass a synthesis method to the gate, then decompose it. Each gate it emits comes
 
 First order emits one factor per group. Order two emits the symmetric palindrome, so the two outer
 groups appear twice at half the time each, giving five. Four repetitions of that would give twenty,
-but each repetition ends on the same group the next one begins with. Those neighbouring gates
+but each repetition ends on the same group the next one begins with. Those neighboring gates
 evolve under the same operator, so they are fused into one gate with the summed time, which saves
 one gate per seam. Pass ``merge_adjacent=False`` to keep the textbook sequence. Every order splits
 the operator the same way; what changes is the ordering of the factors and their evolution times,
@@ -200,7 +200,7 @@ the choice is made once for the pipeline. It is configured by gate name, the sam
    17
 
 This is the same count :meth:`~.FermionicCircuit.decompose` gives for that method above. The
-:class:`.MergeEvolutions` pass applies the same fusion to neighbouring gates that did not come from
+:class:`.MergeEvolutions` pass applies the same fusion to neighboring gates that did not come from
 one synthesis, such as the seams between consecutive circuits. The pass carries the formula out
 itself, so no separate expansion step is needed, and running it twice changes nothing, since the
 factors it emits are :attr:`~.Evolution.atomic` and so carry no definition of their own.
@@ -332,9 +332,9 @@ comparison rests on is asserted as a relation:
    >>> positions = np.arange(len(labels))
    >>> fig, axes = plt.subplots(figsize=(7, 4))
    >>> bars = axes.bar(positions - 0.2, counts, 0.4, label="CX gates")
-   >>> labelled = axes.bar_label(bars, fontsize=8)
+   >>> labeled = axes.bar_label(bars, fontsize=8)
    >>> bars = axes.bar(positions + 0.2, depths, 0.4, label="CX depth")
-   >>> labelled = axes.bar_label(bars, fontsize=8)
+   >>> labeled = axes.bar_label(bars, fontsize=8)
    >>>
    >>> ticks = axes.set_xticks(positions, labels)
    >>> _ = axes.set_ylabel("count")

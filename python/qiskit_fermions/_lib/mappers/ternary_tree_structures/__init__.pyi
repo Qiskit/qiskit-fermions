@@ -15,9 +15,9 @@ class TernaryTree:
     A ternary tree defining a fermion-to-qubit encoding.
     
     A ternary tree on :math:`N` nodes encodes :math:`N` fermionic modes onto :math:`N` qubits. Each
-    node is a qubit carrying three downward **links**, labelled ``X``, ``Y`` and ``Z``. A link
+    node is a qubit carrying three downward **links**, labeled ``X``, ``Y`` and ``Z``. A link
     either descends to a child node (an *edge*) or terminates (a *leg*). Each leg's upward path to
-    the root spells a Pauli string: crossing the link labelled :math:`P` that descends *from* node
+    the root spells a Pauli string: crossing the link labeled :math:`P` that descends *from* node
     :math:`u` contributes :math:`P` on qubit :math:`u`, with the identity everywhere else.
     
     Every tree of this shape yields a valid encoding, so the constructor accepts an arbitrary one.

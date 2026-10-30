@@ -314,9 +314,11 @@ crate::declare_operator_iters!(
 /// .. autosummary::
 ///
 ///    is_hermitian
+///    get_support
 ///    max_rank
 ///    min_num_modes
 ///    conserves_particle_number
+///    conserves_sector
 ///
 /// .. [1] https://en.wikipedia.org/wiki/Second_quantization#Fermion_creation_and_annihilation_operators
 #[gen_stub_pyclass]
@@ -822,16 +824,14 @@ impl PyFermionOperator {
             groups.push(group);
             Ok(())
         })?;
-        // One group index is pushed per appended term above, so the length check cannot fire.
-        inner
-            .set_groups(Some(groups))
-            .expect("one group index is pushed per appended term");
+        // Built in lockstep with the terms above, so the length check of `set_groups` is redundant.
+        inner._write_groups(Some(groups));
         Ok(inner.into())
     }
 
     /// An optional vector of `group indices` for each term.
     ///
-    /// For more information refer to the :mod:`~qiskit_fermions.operators.terms.grouping` module.
+    /// For more information refer to the :ref:`grouping_explanation` guide.
     #[getter]
     pub fn get_groups(&self) -> Option<Vec<u32>> {
         self.inner.groups.clone()

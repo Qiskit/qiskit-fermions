@@ -52,7 +52,7 @@ fn split_integral_line(line: &str) -> Option<(f64, usize, usize, usize, usize)> 
 
 /// Error cases arising while parsing an FCIDump file.
 ///
-/// These are all user-input failures (a bad path, or a file that does not honour the format), so
+/// These are all user-input failures (a bad path, or a file that does not honor the format), so
 /// they are reported as a recoverable error rather than a panic: the Python and C bindings turn
 /// them into a catchable exception and an exit code respectively.
 #[derive(Error, Debug)]
@@ -735,7 +735,7 @@ mod tests {
     #[test]
     fn test_from_file_mo_energy_integral_unsupported() {
         // An integral line of the form `(i, a, j, 0)` with `i, a, j` all nonzero hits the
-        // not-yet-implemented `(_, _, _, 0)` arm. Pin the current behaviour (a clean error) so the
+        // not-yet-implemented `(_, _, _, 0)` arm. Pin the current behavior (a clean error) so the
         // gap stays visible and any future support is a deliberate change.
         let path = write_temp_fcidump(
             "mo_energy",
@@ -783,7 +783,7 @@ mod tests {
     fn test_split_integral_line_takes_the_last_four_indices() {
         // The replaced regex opened with a greedy `(.+)`, so on a line with more than five fields
         // the *last* four became the indices and everything before them the coefficient. That line
-        // shape is not legal FCIDUMP, but pin the behaviour so the rewrite is a faithful swap: here
+        // shape is not legal FCIDUMP, but pin the behavior so the rewrite is a faithful swap: here
         // the coefficient text is `0.5 1`, which is not a float, so the record is skipped.
         assert_eq!(split_integral_line(" 0.5 1 1 1 1 2"), None);
         // With a coefficient that survives the greedy match, the last four fields are the indices.

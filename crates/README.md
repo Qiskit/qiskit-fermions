@@ -14,8 +14,9 @@ Below are some guidelines that should be adhered to when working on this crate:
   the Python API and will allow the C API built on top of this core to be fully independent from
   Python (in the future, once the Qiskit Rust core fulfills the same criterion).
 - As long as we do not plan a public Rust API, this crate can depend on Qiskit's FFI crates. If we
-  desire to publish a Rust crate in the future, this dependency may be problematic (TODO: figure out
-  the implications of this in more detail). If that time comes, we may choose to separate those parts
+  desire to publish a Rust crate in the future, this dependency is problematic: `qiskit-pyo3-ffi` is
+  vendored in this repository precisely because it is not published yet, and a published crate
+  cannot depend on an unpublished one. If that time comes, we may choose to separate those parts
   of this crate that depend on Qiskit out into a separate crate. That should leave us with a core data
   model crate in Rust, whose usage may be useful to other Rust packages (e.g. `ffsim`).
 

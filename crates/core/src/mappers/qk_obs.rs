@@ -474,7 +474,7 @@ mod tests {
         // fixed multiple of the distinct content however much duplication passes through.
         //
         // Driven against the accumulator directly rather than through `fermion_jordan_wigner`, whose
-        // final unconditional compaction would mask the trigger's behaviour.
+        // final unconditional compaction would mask the trigger's behavior.
         //
         // The workload matters. Appending one Pauli string over and over merges back to a single term
         // every time, which makes the bound trivial. Merging must be only *partly* effective for the

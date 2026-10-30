@@ -255,7 +255,7 @@ mod tests {
         );
 
         // A Hermitian conjugate pair with imaginary coefficients has equal magnitudes but unequal
-        // coefficients, so only the `abs` form recognises it as uniform.
+        // coefficients, so only the `abs` form recognizes it as uniform.
         let conjugate_pair = FermionOperator {
             coeffs: vec![imag, -imag],
             actions: vec![true, false, true, false],
@@ -300,7 +300,7 @@ mod tests {
             Some(vec![false, true])
         );
 
-        // the tolerance is honoured
+        // the tolerance is honored
         let nearly = build_op(
             vec![one, Complex64::new(1.00001, 0.0), one],
             Some(vec![0, 0, 1]),

@@ -136,7 +136,7 @@ class TestGroupsAreHermitian:
         op.groups = [0, 0, 2]
         assert groups_are_hermitian(op) == [True, True, False]
 
-    def test_atol_is_honoured(self, subtests):
+    def test_atol_is_honored(self, subtests):
         op = FermionOperator.from_dict(
             {
                 (cre(0), ann(1)): 1.00001j,
@@ -171,7 +171,7 @@ class TestGroupsHaveUniformCoeffs:
         with subtests.test("exact coefficients"):
             assert groups_have_uniform_coeffs(op, abs=False) == [False, True]
 
-    def test_atol_is_honoured(self, subtests):
+    def test_atol_is_honored(self, subtests):
         op = FermionOperator(
             [1.0, 1.00001],
             [True, False, True, False],

@@ -1,5 +1,5 @@
 ---
-prelude: >
+prelude: |
     This release adds a framework for ternary-tree fermion-to-qubit encodings. A ternary tree is
     described once and compiled into an encoding that all four operator mappers accept, which makes
     every mapping expressible as such a tree available, including the Jordan-Wigner, parity,

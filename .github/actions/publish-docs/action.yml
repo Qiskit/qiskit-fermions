@@ -3,10 +3,10 @@
 # Publishes a built documentation tree into a directory of the `gh-pages` branch.
 #
 # The Pages site for this repository hosts several builds side by side -- `dev/` for `main`,
-# `stable/<X.Y>/` for release branches and `pr/<N>/` for labelled pull requests -- which is why it is
+# `stable/<X.Y>/` for release branches and `pr/<N>/` for labeled pull requests -- which is why it is
 # served from a branch rather than through `actions/deploy-pages`: that action uploads a single artifact
 # that replaces the whole site, with no notion of sub-paths.  Publishing is therefore an ordinary
-# `git push`, and this action is the one implementation of it, shared by all three callers so that they
+# `git push`, and this action is the one implementation of it, shared by all callers so that they
 # cannot drift apart.
 #
 # It is a composite action rather than a reusable workflow for the same reason as
@@ -28,8 +28,7 @@ inputs:
   artifact-run-id:
     description: >
       Run ID to download the artifact from.  Leave empty to take it from the current run; set it to
-      reach into the run that built the documentation, which is what the preview workflow does since it
-      is triggered by `workflow_run` and so has no artifacts of its own.
+      reach into a different run that built the documentation.
     required: false
     default: ''
   prefix:
@@ -94,8 +93,7 @@ runs:
         path: downloaded
         # Default to this run, so the deploy path -- where the build is a preceding job of the same run
         # -- needs neither a run id nor `actions: read`.  Passing a run id switches to a cross-run
-        # download, which additionally requires a token carrying `actions: read`; that is the preview
-        # path, whose build happened in the `workflow_run` that triggered it.
+        # download, which additionally requires a token carrying `actions: read`.
         run-id: ${{ inputs.artifact-run-id != '' && inputs.artifact-run-id || github.run_id }}
         github-token: ${{ inputs.artifact-run-id != '' && inputs.github-token || '' }}
 

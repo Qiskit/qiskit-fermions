@@ -46,7 +46,7 @@ def _times(dag) -> list[float]:
 
 
 def test_merge_two_evolutions_sums_the_time():
-    """Two neighbouring evolutions under the same operator fuse into one with the summed time."""
+    """Two neighboring evolutions under the same operator fuse into one with the summed time."""
     circ = FermionicCircuit(2)
     circ.append(Evolution(2, _hopping(), time=0.25), circ.modes)
     circ.append(Evolution(2, _hopping(), time=0.5), circ.modes)
