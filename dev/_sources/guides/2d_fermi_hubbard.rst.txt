@@ -756,7 +756,7 @@ cheaper than one might fear:
 
    >>> from qiskit.synthesis.evolution import EvolutionSynthesis
    >>>
-   >>> # The interaction couples nearest neighbours only, so every interior site carries four
+   >>> # The interaction couples nearest neighbors only, so every interior site carries four
    >>> # Rzz gates -- one per bond -- and can only do one at a time: four layers is the best
    >>> # any schedule can achieve. Horizontal bonds split by column parity, vertical ones by
    >>> # row parity, which achieves it.

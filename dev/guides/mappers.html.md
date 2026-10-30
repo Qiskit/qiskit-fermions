@@ -159,9 +159,9 @@ onto a Pauli string of weight $n$. Encodings that spread the parity information 
 instead of a chain do asymptotically better.
 
 A **ternary tree** on $n$ nodes captures this whole family. Each node is a qubit carrying three
-downward links labelled `X`, `Y` and `Z`; a link either descends to a child node (an *edge*) or
+downward links labeled `X`, `Y` and `Z`; a link either descends to a child node (an *edge*) or
 terminates (a *leg*). Each leg’s path back to the root spells a Pauli string: crossing the link
-labelled $P$ that descends *from* node $u$ contributes $P$ on qubit $u$. Every
+labeled $P$ that descends *from* node $u$ contributes $P$ on qubit $u$. Every
 such tree yields a valid encoding, and the familiar ones are simply particular shapes – a chain along
 `Z` is Jordan-Wigner, while a tree in which every node has three children, as far as the node count
 allows, is balanced.

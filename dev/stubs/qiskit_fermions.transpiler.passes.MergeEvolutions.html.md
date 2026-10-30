@@ -12,13 +12,13 @@ $$
 e^{-i t_2 H} e^{-i t_1 H} = e^{-i (t_1 + t_2) H},
 $$
 
-because $H$ commutes with itself. This pass finds neighbouring [`Evolution`](qiskit_fermions.circuit.library.Evolution.html.md#qiskit_fermions.circuit.library.Evolution) gates
+because $H$ commutes with itself. This pass finds neighboring [`Evolution`](qiskit_fermions.circuit.library.Evolution.html.md#qiskit_fermions.circuit.library.Evolution) gates
 of equivalent operators and replaces them by one gate whose evolution time is the sum of theirs.
 The rewrite is exact, so it changes neither the simulated state nor the Trotter error of the
 circuit; it only removes a gate, and with it the synthesized operations that gate would have
 produced.
 
-Such neighbours arise wherever two sequences of factors meet on the same factor. Examples are the
+Such neighbors arise wherever two sequences of factors meet on the same factor. Examples are the
 seams between the repetitions of [`FermionicCircuit.repeat()`](qiskit_fermions.circuit.FermionicCircuit.html.md#qiskit_fermions.circuit.FermionicCircuit.repeat), between consecutive
 [`UCC`](qiskit_fermions.circuit.library.UCC.html.md#qiskit_fermions.circuit.library.UCC) or [`UCJ`](qiskit_fermions.circuit.library.UCJ.html.md#qiskit_fermions.circuit.library.UCJ) layers, or between consecutive samples of
 [`QDriftTrotterization`](qiskit_fermions.transpiler.passes.QDriftTrotterization.html.md#qiskit_fermions.transpiler.passes.QDriftTrotterization). [`FermionicSuzukiTrotter`](qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter.html.md#qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter) already fuses the seams within

@@ -6,8 +6,8 @@ Wraps a mapper function so that it maps an operator one group at a time.
 
 Rather than mapping the operator in one go, the wrapped function maps each of its
 [`groups`](qiskit_fermions.operators.OperatorTrait.html.md#qiskit_fermions.operators.OperatorTrait.groups) separately and sums the results (see
-[Group operator terms: use the operator structure](../guides/grouping.html.md#grouping-explanation)). The sum is the same operator either way, but its Pauli terms come out
-grouped: the terms of one group are adjacent instead of interleaved with everybody else’s.
+[Group operator terms: use the operator structure](../guides/grouping.html.md#grouping-explanation)). The sum is the same operator either way, but its Pauli terms come
+out grouped: the terms of one group are adjacent instead of interleaved with everybody else’s.
 
 That matters because a product formula synthesizes the terms in the order it receives them. Where
 the terms of a group act on disjoint qubits, having them adjacent lets them be scheduled in

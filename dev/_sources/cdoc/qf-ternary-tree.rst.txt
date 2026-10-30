@@ -9,9 +9,9 @@ Ternary Trees
                  modes onto N qubits: construct a tree and query the resulting encoding.
 
 A ternary tree on :math:`N` nodes defines a fermion-to-qubit encoding of :math:`N` fermionic modes onto
-:math:`N` qubits. Each node is a qubit carrying three downward **links**, labelled ``X``, ``Y`` and
+:math:`N` qubits. Each node is a qubit carrying three downward **links**, labeled ``X``, ``Y`` and
 ``Z``. A link either descends to a child node (an *edge*) or terminates (a *leg*), and each leg's path
-back to the root spells a Pauli string: crossing the link labelled :math:`P` that descends *from* node
+back to the root spells a Pauli string: crossing the link labeled :math:`P` that descends *from* node
 :math:`u` contributes :math:`P` on qubit :math:`u`, with the identity everywhere else.
 
 Every tree of this shape yields a valid encoding, and the encodings named in the literature are simply

@@ -11,7 +11,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Synthesize an Evolution gate in fermionic space - Qiskit Fermions 0.4.0.dev0+7ba0356</title>
+        <title>Synthesize an Evolution gate in fermionic space - Qiskit Fermions 0.4.0.dev0+0dd740e</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=fc6d6d93" />
@@ -164,7 +164,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.4.0.dev0+7ba0356</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.4.0.dev0+0dd740e</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -190,7 +190,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.4.0.dev0+7ba0356</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.4.0.dev0+0dd740e</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -591,7 +591,7 @@ grouping up front turns that late failure into an answer available before any ci
 </div>
 <p>First order emits one factor per group. Order two emits the symmetric palindrome, so the two outer
 groups appear twice at half the time each, giving five. Four repetitions of that would give twenty,
-but each repetition ends on the same group the next one begins with. Those neighbouring gates
+but each repetition ends on the same group the next one begins with. Those neighboring gates
 evolve under the same operator, so they are fused into one gate with the summed time, which saves
 one gate per seam. Pass <code class="docutils literal notranslate"><span class="pre">merge_adjacent=False</span></code> to keep the textbook sequence. Every order splits
 the operator the same way; what changes is the ordering of the factors and their evolution times,
@@ -624,7 +624,7 @@ the choice is made once for the pipeline. It is configured by gate name, the sam
 </pre></div>
 </div>
 <p>This is the same count <a class="reference internal" href="../stubs/qiskit_fermions.circuit.FermionicCircuit.html#qiskit_fermions.circuit.FermionicCircuit.decompose" title="qiskit_fermions.circuit.FermionicCircuit.decompose"><code class="xref py py-meth docutils literal notranslate"><span class="pre">decompose()</span></code></a> gives for that method above. The
-<a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.MergeEvolutions.html#qiskit_fermions.transpiler.passes.MergeEvolutions" title="qiskit_fermions.transpiler.passes.MergeEvolutions"><code class="xref py py-class docutils literal notranslate"><span class="pre">MergeEvolutions</span></code></a> pass applies the same fusion to neighbouring gates that did not come from
+<a class="reference internal" href="../stubs/qiskit_fermions.transpiler.passes.MergeEvolutions.html#qiskit_fermions.transpiler.passes.MergeEvolutions" title="qiskit_fermions.transpiler.passes.MergeEvolutions"><code class="xref py py-class docutils literal notranslate"><span class="pre">MergeEvolutions</span></code></a> pass applies the same fusion to neighboring gates that did not come from
 one synthesis, such as the seams between consecutive circuits. The pass carries the formula out
 itself, so no separate expansion step is needed, and running it twice changes nothing, since the
 factors it emits are <code class="xref py py-attr docutils literal notranslate"><span class="pre">atomic</span></code> and so carry no definition of their own.</p>
@@ -874,7 +874,7 @@ and <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on 2026/10/29</div>
+              Last updated on 2026/10/30</div>
           </div>
           <div class="right-details">
             
@@ -913,7 +913,7 @@ and <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=92619de8"></script>
+</div><script src="../_static/documentation_options.js?v=c13b2e50"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

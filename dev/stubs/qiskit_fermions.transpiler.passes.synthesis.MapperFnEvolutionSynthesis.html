@@ -10,7 +10,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>MapperFnEvolutionSynthesis - Qiskit Fermions 0.4.0.dev0+7ba0356</title>
+        <title>MapperFnEvolutionSynthesis - Qiskit Fermions 0.4.0.dev0+0dd740e</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=fc6d6d93" />
@@ -163,7 +163,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.4.0.dev0+7ba0356</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.4.0.dev0+0dd740e</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -189,7 +189,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.4.0.dev0+7ba0356</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.4.0.dev0+0dd740e</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -499,6 +499,19 @@ metrics such as depth or gate count can vary between them.</p>
 </pre></div>
 </div>
 </div>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p><a class="reference internal" href="#qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis.product_formula" title="qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis.product_formula"><code class="xref py py-attr docutils literal notranslate"><span class="pre">product_formula</span></code></a> only subdivides the terms <strong>within</strong> the operator of a single
+<a class="reference internal" href="qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate. It cannot interleave <em>separate</em> gates, so when a grouped operator
+has already been decomposed into one <a class="reference internal" href="qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> per group (see
+<a class="reference internal" href="../guides/grouping.html#grouping-explanation"><span class="std std-ref">Group operator terms: use the operator structure</span></a>), raising its repetition count does <strong>not</strong> reduce the outer
+Trotter error between the groups – which do not generally commute. The result stays a single
+outer Trotter step, and its error does not vanish as the repetition count grows.</p>
+<p>To converge the grouped evolution, repeat the whole thing: append <code class="docutils literal notranslate"><span class="pre">steps</span></code>
+<a class="reference internal" href="qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gates at <code class="docutils literal notranslate"><span class="pre">time</span> <span class="pre">/</span> <span class="pre">steps</span></code> each. This is the flip side of grouping being
+decided upstream – the partition survives into the circuit, and so does responsibility for
+stepping it.</p>
+</div>
 <p>Initializing this transpiler pass plugin can be done with the arguments listed below.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -621,7 +634,7 @@ arguments.</p>
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on 2026/10/29</div>
+              Last updated on 2026/10/30</div>
           </div>
           <div class="right-details">
             
@@ -660,7 +673,7 @@ arguments.</p>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=92619de8"></script>
+</div><script src="../_static/documentation_options.js?v=c13b2e50"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

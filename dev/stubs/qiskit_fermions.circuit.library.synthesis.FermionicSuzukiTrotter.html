@@ -10,7 +10,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>FermionicSuzukiTrotter - Qiskit Fermions 0.4.0.dev0+7ba0356</title>
+        <title>FermionicSuzukiTrotter - Qiskit Fermions 0.4.0.dev0+0dd740e</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=fc6d6d93" />
@@ -163,7 +163,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.4.0.dev0+7ba0356</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.4.0.dev0+0dd740e</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -189,7 +189,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.4.0.dev0+7ba0356</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.4.0.dev0+0dd740e</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -479,6 +479,10 @@ Suzuki’s recursion, each level composing five sweeps of the level below.</p>
 it has them (see <a class="reference internal" href="../guides/grouping.html#grouping-explanation"><span class="std std-ref">Group operator terms: use the operator structure</span></a>), and term-by-term otherwise. Every order splits it
 the same way: what a higher order changes is the ordering of the factors and their time scales, not
 the partition.</p>
+<p>Splitting along the groups is something this stage can do and Qiskit’s qubit-side
+<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.synthesis.SuzukiTrotter" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">SuzukiTrotter</span></code></a> cannot: once the operator has been mapped and handed to
+a <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.library.PauliEvolutionGate" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">PauliEvolutionGate</span></code></a>, the grouping is gone, and the formula can
+only subdivide the terms within the one operator it is given.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>A higher order buys accuracy with depth: an order-<span class="math">\(k\)</span> formula emits roughly
@@ -509,7 +513,8 @@ moves unless a higher order is requested.</p>
 <p>Each factor must be Hermitian for its exponential to be unitary, which does not follow from
 their sum being Hermitian: splitting a Hermitian operator can produce non-Hermitian groups (for
 example, separating <span class="math">\(a^\dagger_0 a_1\)</span> from its conjugate partner <span class="math">\(a^\dagger_1 a_0\)</span>).
-It is the caller’s responsibility to group accordingly; this is not verified.</p>
+It is the caller’s responsibility to group accordingly; this is not verified, but
+<a class="reference internal" href="qiskit_fermions.operators.terms.groups_are_hermitian.html#qiskit_fermions.operators.terms.groups_are_hermitian" title="qiskit_fermions.operators.terms.groups_are_hermitian"><code class="xref py py-func docutils literal notranslate"><span class="pre">groups_are_hermitian()</span></code></a> checks it.</p>
 <p>An operator with no groups is split term by term, which has the same effect, since an
 individual term is generally not Hermitian. The resulting factors are valid fermionic
 operators and the gates are built without complaint, but the fermion-to-qubit stage then
@@ -528,12 +533,13 @@ still being wrong.</p>
 are symmetric.</p></li>
 <li><p><strong>reps</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><em>int</em></a>) – the number of times to repeat the formula, each repetition evolving for
 <code class="docutils literal notranslate"><span class="pre">time</span> <span class="pre">/</span> <span class="pre">reps</span></code>.</p></li>
-<li><p><strong>merge_adjacent</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><em>bool</em></a>) – whether to fuse neighbouring gates of the same factor into one, summing
+<li><p><strong>merge_adjacent</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><em>bool</em></a>) – whether to fuse neighboring gates of the same factor into one, summing
 their evolution times. See <a class="reference internal" href="#qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter.merge_adjacent" title="qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter.merge_adjacent"><code class="xref py py-attr docutils literal notranslate"><span class="pre">merge_adjacent</span></code></a>.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.15)"><strong>ValueError</strong></a> – if <code class="docutils literal notranslate"><span class="pre">order</span></code> is neither <code class="docutils literal notranslate"><span class="pre">1</span></code> nor a positive even integer, or if <code class="docutils literal notranslate"><span class="pre">reps</span></code> is not positive.</p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.15)"><strong>ValueError</strong></a> – if <code class="docutils literal notranslate"><span class="pre">order</span></code> is neither <code class="docutils literal notranslate"><span class="pre">1</span></code> nor a positive even integer, or if <code class="docutils literal notranslate"><span class="pre">reps</span></code> is
+    not positive.</p>
 </dd>
 </dl>
 <p class="rubric">Attributes</p>
@@ -552,7 +558,7 @@ their evolution times. See <a class="reference internal" href="#qiskit_fermions.
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter.merge_adjacent">
 <span class="sig-name descname"><span class="pre">merge_adjacent</span></span><a class="headerlink" href="#qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter.merge_adjacent" title="Link to this definition">¶</a></dt>
-<dd><p>Whether neighbouring gates of the same factor are fused into one.</p>
+<dd><p>Whether neighboring gates of the same factor are fused into one.</p>
 <p>The palindromic structure makes the last factor of one repetition (and of each sub-sweep of
 a higher order) the first of the next. Their exponentials combine exactly, as
 <span class="math">\(e^{-i a H} e^{-i b H} = e^{-i (a + b) H}\)</span>, so fusing them shortens the circuit without
@@ -620,7 +626,7 @@ the formula. A factor may appear more than once, at different evolution times.</
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on 2026/10/29</div>
+              Last updated on 2026/10/30</div>
           </div>
           <div class="right-details">
             
@@ -660,7 +666,7 @@ the formula. A factor may appear more than once, at different evolution times.</
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=92619de8"></script>
+</div><script src="../_static/documentation_options.js?v=c13b2e50"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

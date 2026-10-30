@@ -10,7 +10,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>MergeEvolutions - Qiskit Fermions 0.4.0.dev0+7ba0356</title>
+        <title>MergeEvolutions - Qiskit Fermions 0.4.0.dev0+0dd740e</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=fc6d6d93" />
@@ -163,7 +163,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.4.0.dev0+7ba0356</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.4.0.dev0+0dd740e</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -189,7 +189,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.4.0.dev0+7ba0356</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.4.0.dev0+0dd740e</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -469,12 +469,12 @@
 <div class="math">
 \[e^{-i t_2 H} e^{-i t_1 H} = e^{-i (t_1 + t_2) H},\]</div>
 </div>
-<p>because <span class="math">\(H\)</span> commutes with itself. This pass finds neighbouring <a class="reference internal" href="qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gates
+<p>because <span class="math">\(H\)</span> commutes with itself. This pass finds neighboring <a class="reference internal" href="qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gates
 of equivalent operators and replaces them by one gate whose evolution time is the sum of theirs.
 The rewrite is exact, so it changes neither the simulated state nor the Trotter error of the
 circuit; it only removes a gate, and with it the synthesized operations that gate would have
 produced.</p>
-<p>Such neighbours arise wherever two sequences of factors meet on the same factor. Examples are the
+<p>Such neighbors arise wherever two sequences of factors meet on the same factor. Examples are the
 seams between the repetitions of <a class="reference internal" href="qiskit_fermions.circuit.FermionicCircuit.html#qiskit_fermions.circuit.FermionicCircuit.repeat" title="qiskit_fermions.circuit.FermionicCircuit.repeat"><code class="xref py py-meth docutils literal notranslate"><span class="pre">FermionicCircuit.repeat()</span></code></a>, between consecutive
 <a class="reference internal" href="qiskit_fermions.circuit.library.UCC.html#qiskit_fermions.circuit.library.UCC" title="qiskit_fermions.circuit.library.UCC"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCC</span></code></a> or <a class="reference internal" href="qiskit_fermions.circuit.library.UCJ.html#qiskit_fermions.circuit.library.UCJ" title="qiskit_fermions.circuit.library.UCJ"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCJ</span></code></a> layers, or between consecutive samples of
 <a class="reference internal" href="qiskit_fermions.transpiler.passes.QDriftTrotterization.html#qiskit_fermions.transpiler.passes.QDriftTrotterization" title="qiskit_fermions.transpiler.passes.QDriftTrotterization"><code class="xref py py-class docutils literal notranslate"><span class="pre">QDriftTrotterization</span></code></a>. <a class="reference internal" href="qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter.html#qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter" title="qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicSuzukiTrotter</span></code></a> already fuses the seams within
@@ -632,7 +632,7 @@ carried through untouched (a measurement keeps the classical bit it writes into)
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on 2026/10/29</div>
+              Last updated on 2026/10/30</div>
           </div>
           <div class="right-details">
             
@@ -673,7 +673,7 @@ carried through untouched (a measurement keeps the classical bit it writes into)
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=92619de8"></script>
+</div><script src="../_static/documentation_options.js?v=c13b2e50"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

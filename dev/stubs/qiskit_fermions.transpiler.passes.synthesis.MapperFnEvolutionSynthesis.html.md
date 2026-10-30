@@ -43,6 +43,19 @@ Wrap the mapper in [`simplify()`](qiskit_fermions.transpiler.passes.synthesis.si
 MapperFnEvolutionSynthesis(simplify(jordan_wigner))
 ```
 
+#### IMPORTANT
+[`product_formula`](#qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis.product_formula) only subdivides the terms **within** the operator of a single
+[`Evolution`](qiskit_fermions.circuit.library.Evolution.html.md#qiskit_fermions.circuit.library.Evolution) gate. It cannot interleave *separate* gates, so when a grouped operator
+has already been decomposed into one [`Evolution`](qiskit_fermions.circuit.library.Evolution.html.md#qiskit_fermions.circuit.library.Evolution) per group (see
+[Group operator terms: use the operator structure](../guides/grouping.html.md#grouping-explanation)), raising its repetition count does **not** reduce the outer
+Trotter error between the groups – which do not generally commute. The result stays a single
+outer Trotter step, and its error does not vanish as the repetition count grows.
+
+To converge the grouped evolution, repeat the whole thing: append `steps`
+[`Evolution`](qiskit_fermions.circuit.library.Evolution.html.md#qiskit_fermions.circuit.library.Evolution) gates at `time / steps` each. This is the flip side of grouping being
+decided upstream – the partition survives into the circuit, and so does responsibility for
+stepping it.
+
 Initializing this transpiler pass plugin can be done with the arguments listed below.
 
 * **Parameters:**

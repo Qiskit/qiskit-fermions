@@ -279,7 +279,7 @@ Finally, various methods exist to check certain properties of an operator:
 
 An optional vector of group indices for each term.
 
-For more information refer to the `grouping` module.
+For more information refer to the [Group operator terms: use the operator structure](../guides/grouping.html.md#grouping-explanation) guide.
 
 ### Methods
 
@@ -665,7 +665,7 @@ have to be taken into account. See
 #### NOTE
 Fewer contractions are available here than for [`EdgeVertexOperator`](qiskit_fermions.operators.EdgeVertexOperator.html.md#qiskit_fermions.operators.EdgeVertexOperator). Two edge
 operators sharing a single mode *fuse* into one, but the analogous transfer product does
-not: writing $T_{jk} = \frac{i}{2} \gamma_{2j} \gamma_{2k-1}$, cancelling the
+not: writing $T_{jk} = \frac{i}{2} \gamma_{2j} \gamma_{2k-1}$, canceling the
 shared Majorana always leaves an (even, odd) pair drawn from two different modes, which
 is not a single generator. Only `V(j) V(j)`, `T(j,k) T(j,k)` and `T(j,k) T(k,j)`
 contract.

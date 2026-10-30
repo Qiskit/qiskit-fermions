@@ -14,7 +14,7 @@ U = e^{-i t H}.
 $$
 
 For $U$ to be unitary, $H$ must be Hermitian. This is the caller’s responsibility
-and is not verified.
+and is not verified; [`is_hermitian()`](qiskit_fermions.operators.FermionOperator.html.md#qiskit_fermions.operators.FermionOperator.is_hermitian) can check it.
 
 #### NOTE
 Breaking this gate down in fermionic space (into a circuit of smaller [`Evolution`](#qiskit_fermions.circuit.library.Evolution)

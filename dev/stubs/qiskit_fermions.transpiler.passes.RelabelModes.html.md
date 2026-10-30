@@ -61,7 +61,7 @@ mode and needs **no post-processing at all**:
 {'001011': 1}
 ```
 
-Drawing the two circuits side by side shows what travelled and what did not. The fermionic
+Drawing the two circuits side by side shows what traveled and what did not. The fermionic
 measurements read modes `0..5` in order; after synthesis they sit on permuted qubits, yet each one
 still writes into the classical bit of the mode it measures, so the `meas` labels remain in the
 original order:

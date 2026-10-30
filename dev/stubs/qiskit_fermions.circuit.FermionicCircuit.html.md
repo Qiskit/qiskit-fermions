@@ -7,7 +7,7 @@ A wrapper around [`QuantumCircuit`](https://quantum.cloud.ibm.com/docs/api/qiski
 Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
 This class maintains a reduced API compared to the full API of the underlying
-[`QuantumCircuit`](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit). This is done to avoid exposing (amongst other methods)
+[`QuantumCircuit`](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit). This is done to avoid exposing (among other methods)
 the ability to apply qubit-based gates onto a fermionic circuit, which would not be a
 well-defined operation in the general case.
 

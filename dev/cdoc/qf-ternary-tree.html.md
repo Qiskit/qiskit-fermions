@@ -3,9 +3,9 @@
 # Ternary Trees
 
 A ternary tree on $N$ nodes defines a fermion-to-qubit encoding of $N$ fermionic modes onto
-$N$ qubits. Each node is a qubit carrying three downward **links**, labelled `X`, `Y` and
+$N$ qubits. Each node is a qubit carrying three downward **links**, labeled `X`, `Y` and
 `Z`. A link either descends to a child node (an *edge*) or terminates (a *leg*), and each leg’s path
-back to the root spells a Pauli string: crossing the link labelled $P$ that descends *from* node
+back to the root spells a Pauli string: crossing the link labeled $P$ that descends *from* node
 $u$ contributes $P$ on qubit $u$, with the identity everywhere else.
 
 Every tree of this shape yields a valid encoding, and the encodings named in the literature are simply
@@ -63,9 +63,9 @@ strings’ $Z$ chains cancel; on the balanced tree at four modes it has weight 3
 Constructs a ternary tree from a parent-and-label specification. 
 
 A ternary tree on $N$ nodes defines a fermion-to-qubit encoding of $N$ fermionic modes
-onto $N$ qubits. Each node is a qubit carrying three downward **links**, labelled `X`,
+onto $N$ qubits. Each node is a qubit carrying three downward **links**, labeled `X`,
 `Y` and `Z`. A link either descends to a child node (an *edge*) or terminates (a *leg*), and
-each leg’s path back to the root spells a Pauli string: crossing the link labelled $P$ that
+each leg’s path back to the root spells a Pauli string: crossing the link labeled $P$ that
 descends *from* node $u$ contributes $P$ on qubit $u$.
 
 Every tree of this shape yields a valid encoding, and the familiar ones are particular shapes. This

@@ -59,7 +59,7 @@ The number of times the product formula is repeated.
 
 #### merge_adjacent
 
-Whether neighbouring gates of the same factor are fused into one.
+Whether neighboring gates of the same factor are fused into one.
 
 The palindromic structure makes the last factor of one repetition (and of each sub-sweep of
 a higher order) the first of the next. Their exponentials combine exactly, as

@@ -39,7 +39,7 @@ implementation, listed under [Ternary-tree encodings](../pydoc/qiskit_fermions.m
 ```
 
 A chain along `Z` reproduces [`jordan_wigner()`](qiskit_fermions.mappers.library.jordan_wigner.html.md#qiskit_fermions.mappers.library.jordan_wigner), which is what makes the tree a
-generalisation of it rather than an alternative to it:
+generalization of it rather than an alternative to it:
 
 ```pycon
 >>> from qiskit_fermions.mappers.library import jordan_wigner

@@ -252,7 +252,7 @@ Finally, various methods exist to check certain properties of an operator:
 
 An optional vector of group indices for each term.
 
-For more information refer to the `grouping` module.
+For more information refer to the [Group operator terms: use the operator structure](../guides/grouping.html.md#grouping-explanation) guide.
 
 ### Methods
 

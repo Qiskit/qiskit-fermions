@@ -10,7 +10,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>ternary_tree - Qiskit Fermions 0.4.0.dev0+7ba0356</title>
+        <title>ternary_tree - Qiskit Fermions 0.4.0.dev0+0dd740e</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=fc6d6d93" />
@@ -163,7 +163,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.4.0.dev0+7ba0356</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.4.0.dev0+0dd740e</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -189,7 +189,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.4.0.dev0+7ba0356</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.4.0.dev0+0dd740e</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -505,7 +505,7 @@ encoding’s mode count; a larger value pads with the identity.</p></li>
 </pre></div>
 </div>
 <p>A chain along <code class="docutils literal notranslate"><span class="pre">Z</span></code> reproduces <a class="reference internal" href="qiskit_fermions.mappers.library.jordan_wigner.html#qiskit_fermions.mappers.library.jordan_wigner" title="qiskit_fermions.mappers.library.jordan_wigner"><code class="xref py py-func docutils literal notranslate"><span class="pre">jordan_wigner()</span></code></a>, which is what makes the tree a
-generalisation of it rather than an alternative to it:</p>
+generalization of it rather than an alternative to it:</p>
 <div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.mappers.library</span><span class="w"> </span><span class="kn">import</span> <span class="n">jordan_wigner</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">chain</span> <span class="o">=</span> <span class="n">TernaryTreeEncoding</span><span class="p">(</span><span class="n">TernaryTree</span><span class="o">.</span><span class="n">chain</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="s2">"Z"</span><span class="p">))</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">bool</span><span class="p">((</span><span class="n">ternary_tree</span><span class="p">(</span><span class="n">fop</span><span class="p">,</span> <span class="n">chain</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="n">jordan_wigner</span><span class="p">(</span><span class="n">fop</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span><span class="o">.</span><span class="n">num_terms</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
@@ -560,7 +560,7 @@ else (an object that is not a fermionic operator at all) raises a <a class="refe
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on 2026/10/29</div>
+              Last updated on 2026/10/30</div>
           </div>
           <div class="right-details">
             
@@ -594,7 +594,7 @@ else (an object that is not a fermionic operator at all) raises a <a class="refe
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=92619de8"></script>
+</div><script src="../_static/documentation_options.js?v=c13b2e50"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

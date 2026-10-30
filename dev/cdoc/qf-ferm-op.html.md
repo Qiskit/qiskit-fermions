@@ -649,7 +649,7 @@ subtraction function is provided.
 QfFermionOperator *one = qf_ferm_op_one();
 QfFermionOperator *other = qf_ferm_op_one();
 
-// Subtracting via a factor of -1 leaves the two terms cancelling each other out.
+// Subtracting via a factor of -1 leaves the two terms canceling each other out.
 QkComplex64 factor = {-1.0, 0.0};
 QfFermionOperator *result = qf_ferm_op_scaled_add(one, other, &factor);
 

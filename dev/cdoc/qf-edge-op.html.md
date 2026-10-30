@@ -693,7 +693,7 @@ subtraction function is provided.
 QfEdgeVertexOperator *one = qf_edge_op_one();
 QfEdgeVertexOperator *other = qf_edge_op_one();
 
-// Subtracting via a factor of -1 leaves the two terms cancelling each other out.
+// Subtracting via a factor of -1 leaves the two terms canceling each other out.
 QkComplex64 factor = {-1.0, 0.0};
 QfEdgeVertexOperator *result = qf_edge_op_scaled_add(one, other, &factor);
 
@@ -1104,8 +1104,8 @@ assert(exit == QfExitCode_Success);
 ```
 
  #### NOTE
-Both index arrays are relabelled. Unlike most operations, this preserves the operator’s
-`groups` attribute, since relabelling permutes mode indices without reordering, splitting
+Both index arrays are relabeled. Unlike most operations, this preserves the operator’s
+`groups` attribute, since relabeling permutes mode indices without reordering, splitting
 or merging terms.
 
 * **Parameters:**

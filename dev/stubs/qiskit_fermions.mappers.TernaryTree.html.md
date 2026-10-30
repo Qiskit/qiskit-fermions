@@ -7,9 +7,9 @@ A ternary tree defining a fermion-to-qubit encoding.
 Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
 A ternary tree on $N$ nodes encodes $N$ fermionic modes onto $N$ qubits. Each
-node is a qubit carrying three downward **links**, labelled `X`, `Y` and `Z`. A link
+node is a qubit carrying three downward **links**, labeled `X`, `Y` and `Z`. A link
 either descends to a child node (an *edge*) or terminates (a *leg*). Each leg’s upward path to
-the root spells a Pauli string: crossing the link labelled $P$ that descends *from* node
+the root spells a Pauli string: crossing the link labeled $P$ that descends *from* node
 $u$ contributes $P$ on qubit $u$, with the identity everywhere else.
 
 Every tree of this shape yields a valid encoding, so the constructor accepts an arbitrary one.

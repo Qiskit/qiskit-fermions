@@ -24,6 +24,11 @@ it has them (see [Group operator terms: use the operator structure](../guides/gr
 the same way: what a higher order changes is the ordering of the factors and their time scales, not
 the partition.
 
+Splitting along the groups is something this stage can do and Qiskit’s qubit-side
+[`SuzukiTrotter`](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.synthesis.SuzukiTrotter) cannot: once the operator has been mapped and handed to
+a [`PauliEvolutionGate`](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.library.PauliEvolutionGate), the grouping is gone, and the formula can
+only subdivide the terms within the one operator it is given.
+
 #### NOTE
 A higher order buys accuracy with depth: an order-$k$ formula emits roughly
 $5^{(k-2)/2}$ times as many factors as an order-2 one. Increasing [`reps`](#qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter.reps) instead
@@ -50,7 +55,8 @@ moves unless a higher order is requested.
 Each factor must be Hermitian for its exponential to be unitary, which does not follow from
 their sum being Hermitian: splitting a Hermitian operator can produce non-Hermitian groups (for
 example, separating $a^\dagger_0 a_1$ from its conjugate partner $a^\dagger_1 a_0$).
-It is the caller’s responsibility to group accordingly; this is not verified.
+It is the caller’s responsibility to group accordingly; this is not verified, but
+[`groups_are_hermitian()`](qiskit_fermions.operators.terms.groups_are_hermitian.html.md#qiskit_fermions.operators.terms.groups_are_hermitian) checks it.
 
 An operator with no groups is split term by term, which has the same effect, since an
 individual term is generally not Hermitian. The resulting factors are valid fermionic
@@ -70,10 +76,11 @@ Initializing an instance of this synthesis method can be done with the arguments
     are symmetric.
   * **reps** ([*int*](https://docs.python.org/3/builtins/functions.html#int)) – the number of times to repeat the formula, each repetition evolving for
     `time / reps`.
-  * **merge_adjacent** ([*bool*](https://docs.python.org/3/builtins/functions.html#bool)) – whether to fuse neighbouring gates of the same factor into one, summing
+  * **merge_adjacent** ([*bool*](https://docs.python.org/3/builtins/functions.html#bool)) – whether to fuse neighboring gates of the same factor into one, summing
     their evolution times. See [`merge_adjacent`](#qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter.merge_adjacent).
 * **Raises:**
-  [**ValueError**](https://docs.python.org/3/builtins/exceptions.html#ValueError) – if `order` is neither `1` nor a positive even integer, or if `reps` is not positive.
+  [**ValueError**](https://docs.python.org/3/builtins/exceptions.html#ValueError) – if `order` is neither `1` nor a positive even integer, or if `reps` is
+      not positive.
 
 ### Attributes
 
@@ -87,7 +94,7 @@ The number of times the product formula is repeated.
 
 #### merge_adjacent
 
-Whether neighbouring gates of the same factor are fused into one.
+Whether neighboring gates of the same factor are fused into one.
 
 The palindromic structure makes the last factor of one repetition (and of each sub-sweep of
 a higher order) the first of the next. Their exponentials combine exactly, as

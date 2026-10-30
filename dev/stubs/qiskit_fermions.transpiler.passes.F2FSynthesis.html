@@ -10,7 +10,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>F2FSynthesis - Qiskit Fermions 0.4.0.dev0+7ba0356</title>
+        <title>F2FSynthesis - Qiskit Fermions 0.4.0.dev0+0dd740e</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=fc6d6d93" />
@@ -163,7 +163,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.4.0.dev0+7ba0356</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.4.0.dev0+0dd740e</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -189,7 +189,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.4.0.dev0+7ba0356</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.4.0.dev0+0dd740e</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -542,11 +542,12 @@ mutually commute (the diagonal-Coulomb operators of a <a class="reference intern
 synthesized exactly at any order, so a higher order only adds depth. Use <a class="reference internal" href="#qiskit_fermions.transpiler.passes.F2FSynthesis.filter" title="qiskit_fermions.transpiler.passes.F2FSynthesis.filter"><code class="xref py py-attr docutils literal notranslate"><span class="pre">filter</span></code></a> to
 restrict the pass to the gates that benefit.</p>
 <p>Expanding an operator that carries no <a class="reference internal" href="qiskit_fermions.operators.OperatorTrait.html#qiskit_fermions.operators.OperatorTrait.groups" title="qiskit_fermions.operators.OperatorTrait.groups"><code class="xref py py-attr docutils literal notranslate"><span class="pre">groups</span></code></a>
-splits it term by term, and a lone <span class="math">\(a^\dagger_i a_j\)</span> is not Hermitian, so its
-exponential is not unitary. Nothing complains until the mapped operator reaches
+splits it term by term, and a lone hopping term <span class="math">\(a^\dagger_i a_j\)</span> is not Hermitian, so
+its exponential is not unitary. Nothing complains until the mapped operator reaches
 <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.library.PauliEvolutionGate" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">PauliEvolutionGate</span></code></a>, which raises <code class="docutils literal notranslate"><span class="pre">ValueError:</span> <span class="pre">Operator</span>
 <span class="pre">contains</span> <span class="pre">complex</span> <span class="pre">coefficients,</span> <span class="pre">which</span> <span class="pre">are</span> <span class="pre">not</span> <span class="pre">supported</span></code>. Assigning conjugate-paired groups
-is what makes each factor Hermitian.</p>
+is what makes each factor Hermitian; see
+<code class="xref py py-func docutils literal notranslate"><span class="pre">groups_are_hermitian()</span></code>.</p>
 </div>
 <p>Initializing this transpiler pass can be done with the arguments listed below.</p>
 <dl class="field-list simple">
@@ -719,7 +720,7 @@ carried through untouched (a measurement keeps the classical bit it writes into)
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on 2026/10/29</div>
+              Last updated on 2026/10/30</div>
           </div>
           <div class="right-details">
             
@@ -762,7 +763,7 @@ carried through untouched (a measurement keeps the classical bit it writes into)
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=92619de8"></script>
+</div><script src="../_static/documentation_options.js?v=c13b2e50"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

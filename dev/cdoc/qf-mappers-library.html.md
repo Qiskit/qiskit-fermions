@@ -175,7 +175,7 @@ two routes cost about the same.
 
 ## Memory usage
 
-See [`qf_ferm_op_jordan_wigner()`](#c.qf_ferm_op_jordan_wigner); the same parallelization and merging behaviour applies.
+See [`qf_ferm_op_jordan_wigner()`](#c.qf_ferm_op_jordan_wigner); the same parallelization and merging behavior applies.
 
 ## Example
 
@@ -225,7 +225,7 @@ $\sigma^Z$ string spans only the modes strictly *between* the two endpoints.
 
 ## Memory usage
 
-See [`qf_ferm_op_jordan_wigner()`](#c.qf_ferm_op_jordan_wigner); the same parallelization and merging behaviour applies.
+See [`qf_ferm_op_jordan_wigner()`](#c.qf_ferm_op_jordan_wigner); the same parallelization and merging behavior applies.
 
 ## Example
 
@@ -286,7 +286,7 @@ where $P = X$ for $l \lt r$ and $P = Y$ otherwise.
 
 ## Memory usage
 
-See [`qf_ferm_op_jordan_wigner()`](#c.qf_ferm_op_jordan_wigner); the same parallelization and merging behaviour applies.
+See [`qf_ferm_op_jordan_wigner()`](#c.qf_ferm_op_jordan_wigner); the same parallelization and merging behavior applies.
 
 ## Example
 

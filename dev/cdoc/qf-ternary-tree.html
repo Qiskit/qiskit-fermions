@@ -11,7 +11,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Ternary Trees - Qiskit Fermions 0.4.0.dev0+7ba0356</title>
+        <title>Ternary Trees - Qiskit Fermions 0.4.0.dev0+0dd740e</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=fc6d6d93" />
@@ -164,7 +164,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.4.0.dev0+7ba0356</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.4.0.dev0+0dd740e</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -190,7 +190,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.4.0.dev0+7ba0356</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.4.0.dev0+0dd740e</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -461,9 +461,9 @@
           <section id="ternary-trees">
 <span id="qf-ternary-tree"></span><h1>Ternary Trees<a class="headerlink" href="#ternary-trees" title="Link to this heading">¶</a></h1>
 <p>A ternary tree on <span class="math">\(N\)</span> nodes defines a fermion-to-qubit encoding of <span class="math">\(N\)</span> fermionic modes onto
-<span class="math">\(N\)</span> qubits. Each node is a qubit carrying three downward <strong>links</strong>, labelled <code class="docutils literal notranslate"><span class="pre">X</span></code>, <code class="docutils literal notranslate"><span class="pre">Y</span></code> and
+<span class="math">\(N\)</span> qubits. Each node is a qubit carrying three downward <strong>links</strong>, labeled <code class="docutils literal notranslate"><span class="pre">X</span></code>, <code class="docutils literal notranslate"><span class="pre">Y</span></code> and
 <code class="docutils literal notranslate"><span class="pre">Z</span></code>. A link either descends to a child node (an <em>edge</em>) or terminates (a <em>leg</em>), and each leg’s path
-back to the root spells a Pauli string: crossing the link labelled <span class="math">\(P\)</span> that descends <em>from</em> node
+back to the root spells a Pauli string: crossing the link labeled <span class="math">\(P\)</span> that descends <em>from</em> node
 <span class="math">\(u\)</span> contributes <span class="math">\(P\)</span> on qubit <span class="math">\(u\)</span>, with the identity everywhere else.</p>
 <p>Every tree of this shape yields a valid encoding, and the encodings named in the literature are simply
 particular shapes:</p>
@@ -570,9 +570,9 @@ the encoding.</p></td>
 <span class="target" id="group__qf__ternary__tree_1ga18dd40c465c3f466652723886c599be4"></span><a class="reference internal" href="qf-exit-code.html#c.QfExitCode" title="QfExitCode"><span class="n"><span class="pre">QfExitCode</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">qf_ternary_tree_new</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n"><span class="pre">num_nodes</span></span>, <span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n"><span class="pre">root</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">parents</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">QfPauliLabel</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">labels</span></span>, <span class="n"><span class="pre">QfTernaryTree</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">out</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.qf_ternary_tree_new" title="Link to this definition">¶</a><br /></dt>
 <dd><p>Constructs a ternary tree from a parent-and-label specification. </p>
 <p><p>A ternary tree on <span class="math">\(N\)</span> nodes defines a fermion-to-qubit encoding of <span class="math">\(N\)</span> fermionic modes
-onto <span class="math">\(N\)</span> qubits. Each node is a qubit carrying three downward <strong>links</strong>, labelled <code class="docutils literal notranslate"><span class="pre">X</span></code>,
+onto <span class="math">\(N\)</span> qubits. Each node is a qubit carrying three downward <strong>links</strong>, labeled <code class="docutils literal notranslate"><span class="pre">X</span></code>,
 <code class="docutils literal notranslate"><span class="pre">Y</span></code> and <code class="docutils literal notranslate"><span class="pre">Z</span></code>. A link either descends to a child node (an <em>edge</em>) or terminates (a <em>leg</em>), and
-each leg’s path back to the root spells a Pauli string: crossing the link labelled <span class="math">\(P\)</span> that
+each leg’s path back to the root spells a Pauli string: crossing the link labeled <span class="math">\(P\)</span> that
 descends <em>from</em> node <span class="math">\(u\)</span> contributes <span class="math">\(P\)</span> on qubit <span class="math">\(u\)</span>.</p>
 <p>Every tree of this shape yields a valid encoding, and the familiar ones are particular shapes. This
 is the general constructor; <a class="reference internal" href="#c.qf_ternary_tree_chain" title="qf_ternary_tree_chain"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_ternary_tree_chain()</span></code></a> and
@@ -1002,7 +1002,7 @@ was compiled from has been freed.</p>
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on 2026/10/29</div>
+              Last updated on 2026/10/30</div>
           </div>
           <div class="right-details">
             
@@ -1047,7 +1047,7 @@ was compiled from has been freed.</p>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=92619de8"></script>
+</div><script src="../_static/documentation_options.js?v=c13b2e50"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

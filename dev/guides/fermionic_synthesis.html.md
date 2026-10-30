@@ -142,7 +142,7 @@ Pass a synthesis method to the gate, then decompose it. Each gate it emits comes
 
 First order emits one factor per group. Order two emits the symmetric palindrome, so the two outer
 groups appear twice at half the time each, giving five. Four repetitions of that would give twenty,
-but each repetition ends on the same group the next one begins with. Those neighbouring gates
+but each repetition ends on the same group the next one begins with. Those neighboring gates
 evolve under the same operator, so they are fused into one gate with the summed time, which saves
 one gate per seam. Pass `merge_adjacent=False` to keep the textbook sequence. Every order splits
 the operator the same way; what changes is the ordering of the factors and their evolution times,
@@ -176,7 +176,7 @@ the choice is made once for the pipeline. It is configured by gate name, the sam
 ```
 
 This is the same count [`decompose()`](../stubs/qiskit_fermions.circuit.FermionicCircuit.html.md#qiskit_fermions.circuit.FermionicCircuit.decompose) gives for that method above. The
-[`MergeEvolutions`](../stubs/qiskit_fermions.transpiler.passes.MergeEvolutions.html.md#qiskit_fermions.transpiler.passes.MergeEvolutions) pass applies the same fusion to neighbouring gates that did not come from
+[`MergeEvolutions`](../stubs/qiskit_fermions.transpiler.passes.MergeEvolutions.html.md#qiskit_fermions.transpiler.passes.MergeEvolutions) pass applies the same fusion to neighboring gates that did not come from
 one synthesis, such as the seams between consecutive circuits. The pass carries the formula out
 itself, so no separate expansion step is needed, and running it twice changes nothing, since the
 factors it emits are `atomic` and so carry no definition of their own.

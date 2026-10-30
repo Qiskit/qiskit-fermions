@@ -98,7 +98,7 @@ assert(exit == QfExitCode_Success);
   * **file_path** – The path to the FCIDump file. 
   * **out** – A pointer to the pointer that will be set to the parsed FCIDump data structure. It is only written to on success; on failure it is left untouched.
 * **Returns:**
-  An exit code. This is `[QfExitCode_ValueError](qf-exit-code.html.md#group__qf__exit__code_1gga89daaa15e32524338df290dbd873caf1a869710ce98addf007187616631c85470)` if the file cannot be opened or read, or if it does not honour the FCIDump format (a missing header namelist, a missing `NORB` or `NELEC` field, a malformed `MS2` field, or an unsupported MO energy value).
+  An exit code. This is `[QfExitCode_ValueError](qf-exit-code.html.md#group__qf__exit__code_1gga89daaa15e32524338df290dbd873caf1a869710ce98addf007187616631c85470)` if the file cannot be opened or read, or if it does not honor the FCIDump format (a missing header namelist, a missing `NORB` or `NELEC` field, a malformed `MS2` field, or an unsupported MO energy value).
 
 ### void qf_fcidump_free([QfFCIDump](#c.QfFCIDump) \*fcidump)
 

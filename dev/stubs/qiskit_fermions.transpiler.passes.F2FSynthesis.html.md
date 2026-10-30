@@ -85,11 +85,12 @@ synthesized exactly at any order, so a higher order only adds depth. Use [`filte
 restrict the pass to the gates that benefit.
 
 Expanding an operator that carries no [`groups`](qiskit_fermions.operators.OperatorTrait.html.md#qiskit_fermions.operators.OperatorTrait.groups)
-splits it term by term, and a lone $a^\dagger_i a_j$ is not Hermitian, so its
-exponential is not unitary. Nothing complains until the mapped operator reaches
+splits it term by term, and a lone hopping term $a^\dagger_i a_j$ is not Hermitian, so
+its exponential is not unitary. Nothing complains until the mapped operator reaches
 [`PauliEvolutionGate`](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.library.PauliEvolutionGate), which raises `ValueError: Operator
 contains complex coefficients, which are not supported`. Assigning conjugate-paired groups
-is what makes each factor Hermitian.
+is what makes each factor Hermitian; see
+`groups_are_hermitian()`.
 
 Initializing this transpiler pass can be done with the arguments listed below.
 

@@ -162,7 +162,7 @@ fcidump = FCIDump.from_file("molecule.fcidump")
   The constructed data structure.
 * **Raises:**
   * [**OSError**](https://docs.python.org/3/builtins/exceptions.html#OSError) – if `file_path` cannot be opened or read.
-  * [**ValueError**](https://docs.python.org/3/builtins/exceptions.html#ValueError) – if the file does not honour the FCIDump format (a missing header namelist, a
+  * [**ValueError**](https://docs.python.org/3/builtins/exceptions.html#ValueError) – if the file does not honor the FCIDump format (a missing header namelist, a
         missing `NORB` or `NELEC` field, or a malformed `MS2` field), or if it carries
         an MO energy value, which is not supported yet.
 

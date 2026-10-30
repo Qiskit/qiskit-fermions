@@ -48,7 +48,7 @@
   removes the repeated factor where, for example, two repetitions of a product formula meet.
 
 - [`FermionicSuzukiTrotter`](stubs/qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter.html.md#qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter) gained a
-  `merge_adjacent` argument, which is enabled by default. It fuses neighbouring gates of the
+  `merge_adjacent` argument, which is enabled by default. It fuses neighboring gates of the
   same factor, as found at the seams between repetitions and between the sub-sweeps of the
   higher orders. The product formula is unchanged, but the synthesized circuit has fewer gates.
   Pass `merge_adjacent=False` to obtain the previous gate sequence.
@@ -119,7 +119,7 @@
   [`F2FSynthesisPlugin`](stubs/qiskit_fermions.circuit.library.synthesis.F2FSynthesisPlugin.html.md#qiskit_fermions.circuit.library.synthesis.F2FSynthesisPlugin).
 
 - [`FermionicSuzukiTrotter`](stubs/qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter.html.md#qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter) now fuses
-  neighbouring gates of the same factor by default, so for `reps > 1` or `order >= 4` it
+  neighboring gates of the same factor by default, so for `reps > 1` or `order >= 4` it
   emits fewer, longer-evolving gates than before. The result is mathematically identical. Pass
   `merge_adjacent=False` to keep the previous gate sequence.
 
@@ -195,8 +195,18 @@
 
 ### Prelude
 
-This release adds a framework for ternary-tree fermion-to-qubit encodings. A ternary tree is described once and compiled into an encoding that all four operator mappers accept, which makes every mapping expressible as such a tree available, including the Jordan-Wigner, parity, Bravyi-Kitaev and Jiang-Kalev-Mruczkiewicz-Neven (JKMN) encodings. The framework is available from both the Python and the C API, and with it this package moves beyond Jordan-Wigner as the only mapper it ships.
-The [`FermionicCircuit`](stubs/qiskit_fermions.circuit.FermionicCircuit.html.md#qiskit_fermions.circuit.FermionicCircuit) also became considerably more complete. It can now be composed with other circuits, repeated, separated by barriers and measured, all at the fermionic level. A measurement names the mode it reads, so the sampled bitstrings stay indexed by the original mode even after the transpiler relabels modes or routes qubits, and the new `FermionicMeasure` synthesis plugin is part of the preset Jordan-Wigner pass manager.
+This release adds a framework for ternary-tree fermion-to-qubit encodings. A ternary tree is
+described once and compiled into an encoding that all four operator mappers accept, which makes
+every mapping expressible as such a tree available, including the Jordan-Wigner, parity,
+Bravyi-Kitaev and Jiang-Kalev-Mruczkiewicz-Neven (JKMN) encodings. The framework is available
+from both the Python and the C API, and with it this package moves beyond Jordan-Wigner as the
+only mapper it ships.
+
+The [`FermionicCircuit`](stubs/qiskit_fermions.circuit.FermionicCircuit.html.md#qiskit_fermions.circuit.FermionicCircuit) also became considerably more complete. It can now be composed with
+other circuits, repeated, separated by barriers and measured, all at the fermionic level. A
+measurement names the mode it reads, so the sampled bitstrings stay indexed by the original
+mode even after the transpiler relabels modes or routes qubits, and the new `FermionicMeasure`
+synthesis plugin is part of the preset Jordan-Wigner pass manager.
 
 <a id="release-notes-0-3-0-python-api-features"></a>
 
@@ -350,9 +360,29 @@ The [`FermionicCircuit`](stubs/qiskit_fermions.circuit.FermionicCircuit.html.md#
 
 ### Prelude
 
-This release grows the control this package gives over circuit synthesis. An `Evolution` gate now takes an explicit `synthesis` method, a new `synthesis` module supplies fermionic product formulas of first and higher order, and the `FermionicTrotterization` pass selects and applies one across every evolution in a circuit at once. Alongside it, the Jordan-Wigner mapper gained direct implementations for all four operator representations, and new adapters let a mapper’s output be simplified or emitted group by group.
-The C API caught up considerably. The edge-vertex and transfer-vertex representations, their mappers and their algebra are now reachable from C, as are the operator support, sector conservation, in-place and scaled arithmetic, and group ordering. Both APIs also gained access to the electronic integrals parsed by an FCIDump, which previously could only be reached by converting the whole data structure into an operator.
-Additionally, this release draws a sharper boundary around what this package is for: fermionic operators, the mappers that convert them, and the mapper-agnostic circuit and its transpilation. Simulation is [ffsim](https://github.com/qiskit-community/ffsim)’s concern, so the native FCI kernel and the linear-algebra utilities that duplicated it have been removed in favor of delegating to ffsim, and the `UCC` and `UCJ` gates now wrap ffsim’s operators instead of reimplementing their parameterizations. Simulation consequently requires the `ffsim` extra and, through ffsim’s dependency on PySCF, is unavailable on Windows; building operators, mapping them and transpiling the resulting circuits remain supported everywhere. Since this is still a pre-1.0 release, all of this was done by removal rather than deprecation: the upgrade notes below pair every removed API with its replacement, and are worth reading in full before upgrading.
+This release grows the control this package gives over circuit synthesis. An `Evolution` gate
+now takes an explicit `synthesis` method, a new `synthesis` module supplies fermionic product
+formulas of first and higher order, and the `FermionicTrotterization` pass selects and applies
+one across every evolution in a circuit at once. Alongside it, the Jordan-Wigner mapper gained
+direct implementations for all four operator representations, and new adapters let a mapper’s
+output be simplified or emitted group by group.
+
+The C API caught up considerably. The edge-vertex and transfer-vertex representations, their
+mappers and their algebra are now reachable from C, as are the operator support, sector
+conservation, in-place and scaled arithmetic, and group ordering. Both APIs also gained access to
+the electronic integrals parsed by an FCIDump, which previously could only be reached by
+converting the whole data structure into an operator.
+
+Additionally, this release draws a sharper boundary around what this package is for: fermionic
+operators, the mappers that convert them, and the mapper-agnostic circuit and its transpilation.
+Simulation is [ffsim](https://github.com/qiskit-community/ffsim)’s concern, so the native FCI
+kernel and the linear-algebra utilities that duplicated it have been removed in favor of
+delegating to ffsim, and the `UCC` and `UCJ` gates now wrap ffsim’s operators instead of
+reimplementing their parameterizations. Simulation consequently requires the `ffsim` extra and,
+through ffsim’s dependency on PySCF, is unavailable on Windows; building operators, mapping them
+and transpiling the resulting circuits remain supported everywhere. Since this is still a pre-1.0
+release, all of this was done by removal rather than deprecation: the upgrade notes below pair
+every removed API with its replacement, and are worth reading in full before upgrading.
 
 <a id="release-notes-0-2-0-python-api-features"></a>
 
@@ -736,7 +766,7 @@ Additionally, this release draws a sharper boundary around what this package is 
 
 - [`from_file()`](stubs/qiskit_fermions.operators.library.FCIDump.html.md#qiskit_fermions.operators.library.FCIDump.from_file) now raises a catchable Python
   exception when it cannot parse a file, instead of propagating a Rust panic. A path that cannot
-  be opened or read raises [`OSError`](https://docs.python.org/3/builtins/exceptions.html#OSError), while a file that does not honour the FCIDump format
+  be opened or read raises [`OSError`](https://docs.python.org/3/builtins/exceptions.html#OSError), while a file that does not honor the FCIDump format
   (a missing header namelist, a missing `NORB` or `NELEC` field, or a malformed `MS2` field)
   raises [`ValueError`](https://docs.python.org/3/builtins/exceptions.html#ValueError). An FCIDump carrying an MO energy value, which is still unsupported,
   also raises [`ValueError`](https://docs.python.org/3/builtins/exceptions.html#ValueError).
@@ -890,12 +920,12 @@ Additionally, this release draws a sharper boundary around what this package is 
   QfExitCode exit = qf_fcidump_from_file("molecule.fcidump", &fcidump);
   ```
 
-  It returns [`QfExitCode_ValueError`](cdoc/qf-exit-code.html.md#c.QfExitCode.QfExitCode_ValueError) when a file does not honour the FCIDump format
+  It returns [`QfExitCode_ValueError`](cdoc/qf-exit-code.html.md#c.QfExitCode.QfExitCode_ValueError) when a file does not honor the FCIDump format
   (a missing header namelist, a missing `NORB` or `NELEC` field, a malformed `MS2` field, or
   an MO energy value, which is still unsupported), leaving the out-parameter untouched. This
   replaces the previous signature, which returned the pointer directly and had no way to report a
   failure (an unparsable file unwound a Rust panic across the FFI boundary, which is undefined
-  behaviour).
+  behavior).
 
 - `qf_ferm_op_group_weights` and its per-type counterparts have been renamed to
   [`qf_ferm_op_group_coeff_means()`](cdoc/qf-operators-terms-grouping.html.md#c.qf_ferm_op_group_coeff_means) and friends. Their behavior is unchanged.
@@ -1019,5 +1049,10 @@ Additionally, this release draws a sharper boundary around what this package is 
 
 ### Prelude
 
-This is the first release of Qiskit Fermions, an extension of Qiskit with tools for fermionic systems.  It provides operator data structures, a framework and library for converting those operators to qubit form (mappers), and a framework and library for synthesizing the corresponding quantum circuits.
-Following Qiskit’s design philosophy, the core of this package is written in Rust and exposed through first-party bindings for both Python and C.
+This is the first release of Qiskit Fermions, an extension of Qiskit with tools for fermionic
+systems.  It provides operator data structures, a framework and library for converting those
+operators to qubit form (mappers), and a framework and library for synthesizing the
+corresponding quantum circuits.
+
+Following Qiskit’s design philosophy, the core of this package is written in Rust and exposed
+through first-party bindings for both Python and C.
