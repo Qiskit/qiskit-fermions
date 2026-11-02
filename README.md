@@ -8,7 +8,7 @@
   [![Python](https://img.shields.io/badge/python-3.11%7C3.12%7C3.13%7C3.14-blue.svg)](https://www.python.org/)
   [![rustc](https://img.shields.io/badge/rustc-1.95+-blue.svg)](https://rust-lang.github.io/rfcs/2495-min-rust-version.html)
   ![Platform](https://img.shields.io/badge/%F0%9F%92%BB%20Platform-Linux%20%7C%20macOS%20%7C%20Windows-informational)
-  [![Tests](https://github.com/Qiskit/qiskit-fermions/actions/workflows/test_development_versions.yml/badge.svg)](https://github.com/Qiskit/qiskit-fermions/actions/workflows/test_development_versions.yml)
+  [![Tests](https://github.com/Qiskit/qiskit-fermions/actions/workflows/on-nightly.yml/badge.svg)](https://github.com/Qiskit/qiskit-fermions/actions/workflows/on-nightly.yml)
   [![Coverage](https://coveralls.io/repos/github/Qiskit/qiskit-fermions/badge.svg?branch=main)](https://coveralls.io/github/Qiskit/qiskit-fermions?branch=main)
 </div>
 
