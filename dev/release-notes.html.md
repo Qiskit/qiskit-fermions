@@ -6,6 +6,28 @@
 
 ## Upcoming release (`main`)
 
+<a id="release-notes-upcoming-release-main-prelude"></a>
+
+### Prelude
+
+This release moves the synthesis of fermionic gates into fermionic space. The new
+[`F2FSynthesis`](stubs/qiskit_fermions.transpiler.passes.F2FSynthesis.html.md#qiskit_fermions.transpiler.passes.F2FSynthesis) pass is the fermion-to-fermion
+counterpart of [`F2QSynthesis`](stubs/qiskit_fermions.transpiler.passes.F2QSynthesis.html.md#qiskit_fermions.transpiler.passes.F2QSynthesis): it breaks a gate down
+into smaller fermionic gates with the plugin that you name for it, before any encoding is
+chosen. The product formulas, the qDRIFT protocol and the Givens decompositions of an
+[`OrbitalRotation`](stubs/qiskit_fermions.circuit.library.OrbitalRotation.html.md#qiskit_fermions.circuit.library.OrbitalRotation) and a
+[`PrepareSlaterDeterminant`](stubs/qiskit_fermions.circuit.library.PrepareSlaterDeterminant.html.md#qiskit_fermions.circuit.library.PrepareSlaterDeterminant) are all available as such
+plugins, so these gates are no longer tied to the Jordan-Wigner mapping.
+
+The Jordan-Wigner preset pass manager builds on this and now produces shorter, and in the case of
+hops exact, circuits. A new [`MergeEvolutions`](stubs/qiskit_fermions.transpiler.passes.MergeEvolutions.html.md#qiskit_fermions.transpiler.passes.MergeEvolutions) pass
+further reduces the number of gates by fusing consecutive evolutions.
+
+Several existing passes and plugins are deprecated in favor of
+[`F2FSynthesis`](stubs/qiskit_fermions.transpiler.passes.F2FSynthesis.html.md#qiskit_fermions.transpiler.passes.F2FSynthesis); please see the deprecation notes below
+for how to migrate. This release also includes bug fixes (see below) and adds support for
+Qiskit 2.6.
+
 <a id="release-notes-upcoming-release-main-python-api-features"></a>
 
 ### Python API Features
