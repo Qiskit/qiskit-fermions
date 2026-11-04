@@ -1,0 +1,172 @@
+# Qiskit Fermions
+
+> Qiskit Fermions extends Qiskit with tools for working with fermionic systems: operator data structures, a framework and library for converting operators between representations and to qubit operators (for example Jordan-Wigner and ternary-tree encodings), and a framework and library for synthesizing fermionic quantum circuits. The core is written in Rust and exposed through first-party Python and C APIs.
+
+
+2026, Qiskit addons team
+
+## Pages
+
+- [Qiskit Fermions](index.html.md): Overview of Qiskit Fermions, an extension of the Qiskit SDK for fermionic systems: operator data structures, operator conversion methods including fermion-to-qubit encodings, fermionic circuits, and a transpilation pipeline with fermion-to-fermion and fermion-to-qubit stages that turns them into qubit circuits.
+- [Installation instructions](install.html.md): Choose between the installation instructions for the Python API and the C API of Qiskit Fermions.
+- [Install the C API](install-c.html.md): Build the Qiskit Fermions C API from source: install the Rust toolchain and clang, compile the Qiskit C API and then the qiskit-fermions C API, and optionally run the C unit tests.
+- [Install the Python API](install-py.html.md): Install the Qiskit Fermions Python package from PyPI with pip, or from source for development, including the optional dependencies and how to verify and test the installation.
+- [Overview](guides/overview.html.md): Overview of the Qiskit Fermions guides, grouped by topic, with links to each one.
+- [Simulate 1D Fermi-Hubbard dynamics with flow sets](guides/1d_fermi_hubbard.html.md): Tutorial that builds a circuit of constant two-qubit depth for the time dynamics of the spinless one-dimensional Fermi-Hubbard model: group terms into flow sets before mapping, write a custom ancilla-based encoding, and synthesize with the flow sets.
+- [Simulate 2D Fermi-Hubbard dynamics with flow sets](guides/2d_fermi_hubbard.html.md): Tutorial that extends the flow-set approach to the spinless two-dimensional Fermi-Hubbard model on a square lattice with the Verstraete-Cirac encoding, then verifies the circuit, the physics on the stabilizer subspace, and Trotter convergence.
+- [More guides](guides/index.html.md): Table of contents of all Qiskit Fermions guides.
+- [Design principles of operator representations](guides/operators.html.md): Design principles shared by all operator representations in qiskit_fermions.operators, such as sparse term storage, mode-based indexing, term grouping, and arithmetic.
+- [Group operator terms: use the operator structure](guides/grouping.html.md): How to define and analyze a grouping of operator terms through the groups array of an operator, and why grouping matters for circuit synthesis.
+- [Map operator representations](guides/mappers.html.md): How to implement a custom operator mapper, use the library mappers, and choose a fermion-to-qubit encoding with ternary trees.
+- [Work with fermionic circuits](guides/circuit.html.md): How to build, repeat, measure, and transpile a FermionicCircuit, which implements quantum algorithms in fermionic space instead of mapping to qubits first.
+- [Generate SqDRIFT circuits](guides/sqdrift.html.md): Getting-started guide that generates an ensemble of randomized qDRIFT time-evolution circuits for sample-based quantum diagonalization (SqDRIFT) from an electronic structure Hamiltonian, from term grouping to transpilation.
+- [Generate Krylov time-evolution circuits (SKQD)](guides/skqd.html.md): Getting-started guide that builds the Krylov time-evolution circuits of sample-based Krylov quantum diagonalization (SKQD) for the single-impurity Anderson model, transpiles them, and diagonalizes in the sampled subspace.
+- [Transpile fermionic circuits](guides/transpilation.html.md): How to transpile a FermionicCircuit to a qubit QuantumCircuit through the stages of the fermionic transpiler pipeline, with a worked Jordan-Wigner example.
+- [Synthesize an Evolution gate in fermionic space](guides/fermionic_synthesis.html.md): How to synthesize an Evolution gate into smaller fermionic gates with product formulas, on one gate or across a whole pipeline, and how to measure the payoff.
+- [Optimize Slater determinant preparation](guides/merge_slater_determinant.html.md): How the MergeSlaterDeterminantPreparation transpiler pass rewrites an InitializeModes gate followed by an OrbitalRotation gate into a PrepareSlaterDeterminant gate, which unlocks a cheaper synthesis.
+- [Transpile an LUCJ ansatz](guides/lucj.html.md): How to transpile a local unitary cluster Jastrow (LUCJ) ansatz built with ffsim: turn it into a fermionic circuit, lower it onto qubits through the fermion-to-qubit encoding of your choice, and match the device topology.
+- [How this package relates to ffsim](guides/ffsim.html.md): How Qiskit Fermions and ffsim divide the work: ffsim owns the ansatz operators and fast fixed-particle-number simulation, while Qiskit Fermions owns fermionic circuits and their transpilation under any encoding.
+- [&#96;qiskit-fermions&#96; Python API reference](pydoc/index.html.md): Reference for the Python API of qiskit-fermions, covering operators, mappers, circuits, the transpiler, linear algebra, protocols, and utilities.
+- [Operator Representations](pydoc/qiskit_fermions.operators.html.md): Data structures for representing fermionic operators in different bases: the second-quantization FermionOperator, the MajoranaOperator, and the EdgeVertexOperator and TransferVertexOperator interaction operators.
+- [OperatorTrait](stubs/qiskit_fermions.operators.OperatorTrait.html.md): A protocol indicating all methods implemented by operator classes.
+- [FermionAction](stubs/qiskit_fermions.operators.fermion_action.FermionAction.html.md): A fermionic creation or annihilation action.
+- [FermionOperator](stubs/qiskit_fermions.operators.FermionOperator.html.md): A spin-less fermionic operator.
+- [cre](stubs/qiskit_fermions.operators.cre.html.md): Constructs a creation action on the fermionic mode at &#96;mode&#96;.
+- [ann](stubs/qiskit_fermions.operators.ann.html.md): Constructs an annihilation action on the fermionic mode at &#96;mode&#96;.
+- [MajoranaAction](stubs/qiskit_fermions.operators.majorana_action.MajoranaAction.html.md): The MajoranaAction type. See &#96;gamma()&#96; for more details.
+- [MajoranaOperator](stubs/qiskit_fermions.operators.MajoranaOperator.html.md): A Majorana fermion operator.
+- [gamma](stubs/qiskit_fermions.operators.gamma.html.md): Create a majorana fermion.
+- [EdgeAction](stubs/qiskit_fermions.operators.edge_action.EdgeAction.html.md): The EdgeAction type.
+- [TransferAction](stubs/qiskit_fermions.operators.transfer_action.TransferAction.html.md): The TransferAction type.
+- [EdgeVertexOperator](stubs/qiskit_fermions.operators.EdgeVertexOperator.html.md): An edge-vertex operator.
+- [TransferVertexOperator](stubs/qiskit_fermions.operators.TransferVertexOperator.html.md): A transfer-vertex operator.
+- [Operator Library](pydoc/qiskit_fermions.operators.library.html.md): Tools to construct commonly used operators, such as commutators of operators and electronic structure Hamiltonians from FCIDump files.
+- [commutator](stubs/qiskit_fermions.operators.library.commutator.html.md): Computes the commutator of two operators.
+- [anti_commutator](stubs/qiskit_fermions.operators.library.anti_commutator.html.md): Computes the anti-commutator of two operators.
+- [double_commutator](stubs/qiskit_fermions.operators.library.double_commutator.html.md): Computes the double-commutator of three operators.
+- [FCIDump](stubs/qiskit_fermions.operators.library.FCIDump.html.md): An electronic structure Hamiltonian in FCIDump format.
+- [Operator Terms](pydoc/qiskit_fermions.operators.terms.html.md): Routines that operate on the individual terms of an operator, to group, filter, and order them.
+- [group_terms_by_electronic_structure](stubs/qiskit_fermions.operators.terms.group_terms_by_electronic_structure.html.md): Groups the terms of an operator by their electronic structure.
+- [group_coeff_means](stubs/qiskit_fermions.operators.terms.group_coeff_means.html.md): Returns the mean absolute coefficient magnitude of each group.
+- [groups_are_hermitian](stubs/qiskit_fermions.operators.terms.groups_are_hermitian.html.md): Returns, for each group, whether the operator formed by that group’s terms is Hermitian.
+- [groups_have_uniform_coeffs](stubs/qiskit_fermions.operators.terms.groups_have_uniform_coeffs.html.md): Returns, for each group, whether all of its coefficients are numerically equal.
+- [filter_diagonal_terms](stubs/qiskit_fermions.operators.terms.filter_diagonal_terms.html.md): Filters out the terms of an operator that are diagonal in the occupation-number basis.
+- [canonical_order](stubs/qiskit_fermions.operators.terms.canonical_order.html.md): Returns a copy of an operator with its terms sorted into a canonical order.
+- [group_order](stubs/qiskit_fermions.operators.terms.group_order.html.md): Returns a copy of an operator with its terms ordered by group index.
+- [order_terms](stubs/qiskit_fermions.operators.terms.order_terms.html.md): Returns a copy of an operator with its terms reordered by a user-provided key.
+- [Representation Mappers](pydoc/qiskit_fermions.mappers.html.md): Framework for implementing custom operator representation mappers, plus the ternary-tree data structures behind tree-based fermion-to-qubit encodings.
+- [map_fermion_action_generators](stubs/qiskit_fermions.mappers.map_fermion_action_generators.html.md): Map a &#96;FermionOperator&#96; to another operator type.
+- [map_majorana_action_generators](stubs/qiskit_fermions.mappers.map_majorana_action_generators.html.md): Map a &#96;MajoranaOperator&#96; to another operator type.
+- [map_edge_vertex_generators](stubs/qiskit_fermions.mappers.map_edge_vertex_generators.html.md): Map a &#96;EdgeVertexOperator&#96; to another operator type.
+- [map_transfer_vertex_generators](stubs/qiskit_fermions.mappers.map_transfer_vertex_generators.html.md): Map a &#96;TransferVertexOperator&#96; to another operator type.
+- [TernaryTree](stubs/qiskit_fermions.mappers.TernaryTree.html.md): A ternary tree defining a fermion-to-qubit encoding.
+- [TernaryTreeEncoding](stubs/qiskit_fermions.mappers.TernaryTreeEncoding.html.md): A ternary tree compiled into the Pauli images of its Majorana operators.
+- [Mapper Library](pydoc/qiskit_fermions.mappers.library.html.md): Implementations of common operator mappers, such as the Jordan-Wigner and ternary-tree mappings to qubit operators, and conversions between operator representations.
+- [fermion_operator](stubs/qiskit_fermions.mappers.library.fermion_operator.html.md): Converts an operator into a &#96;FermionOperator&#96;.
+- [jordan_wigner](stubs/qiskit_fermions.mappers.library.jordan_wigner.html.md): Map an operator to a &#96;SparseObservable&#96; under the Jordan-Wigner transformation.
+- [majorana_operator](stubs/qiskit_fermions.mappers.library.majorana_operator.html.md): Converts an operator into a &#96;MajoranaOperator&#96;.
+- [ternary_tree](stubs/qiskit_fermions.mappers.library.ternary_tree.html.md): Map an operator to a &#96;SparseObservable&#96; under a ternary-tree encoding.
+- [fermion_jordan_wigner](stubs/qiskit_fermions.mappers.library.fermion_jordan_wigner.html.md): Map a &#96;FermionOperator&#96; to a &#96;SparseObservable&#96; under the
+- [majorana_jordan_wigner](stubs/qiskit_fermions.mappers.library.majorana_jordan_wigner.html.md): Map a &#96;MajoranaOperator&#96; to a &#96;SparseObservable&#96; under the
+- [edge_vertex_jordan_wigner](stubs/qiskit_fermions.mappers.library.edge_vertex_jordan_wigner.html.md): Map an &#96;EdgeVertexOperator&#96; to a &#96;SparseObservable&#96; under the
+- [transfer_vertex_jordan_wigner](stubs/qiskit_fermions.mappers.library.transfer_vertex_jordan_wigner.html.md): Map a &#96;TransferVertexOperator&#96; to a &#96;SparseObservable&#96; under
+- [fermion_to_majorana](stubs/qiskit_fermions.mappers.library.fermion_to_majorana.html.md): Map a &#96;FermionOperator&#96; to a &#96;MajoranaOperator&#96;.
+- [majorana_to_fermion](stubs/qiskit_fermions.mappers.library.majorana_to_fermion.html.md): Map a &#96;MajoranaOperator&#96; to a &#96;FermionOperator&#96;.
+- [edge_vertex_to_fermion](stubs/qiskit_fermions.mappers.library.edge_vertex_to_fermion.html.md): Map an &#96;EdgeVertexOperator&#96; to a &#96;FermionOperator&#96;.
+- [edge_vertex_to_majorana](stubs/qiskit_fermions.mappers.library.edge_vertex_to_majorana.html.md): Map an &#96;EdgeVertexOperator&#96; to a &#96;MajoranaOperator&#96;.
+- [transfer_vertex_to_fermion](stubs/qiskit_fermions.mappers.library.transfer_vertex_to_fermion.html.md): Map a &#96;TransferVertexOperator&#96; to a &#96;FermionOperator&#96;.
+- [transfer_vertex_to_majorana](stubs/qiskit_fermions.mappers.library.transfer_vertex_to_majorana.html.md): Map a &#96;TransferVertexOperator&#96; to a &#96;MajoranaOperator&#96;.
+- [transfer_vertex_to_edge_vertex](stubs/qiskit_fermions.mappers.library.transfer_vertex_to_edge_vertex.html.md): Map a &#96;TransferVertexOperator&#96; to an &#96;EdgeVertexOperator&#96;.
+- [fermion_ternary_tree](stubs/qiskit_fermions.mappers.library.fermion_ternary_tree.html.md): Map a &#96;FermionOperator&#96; to a &#96;SparseObservable&#96; under a
+- [majorana_ternary_tree](stubs/qiskit_fermions.mappers.library.majorana_ternary_tree.html.md): Map a &#96;MajoranaOperator&#96; to a &#96;SparseObservable&#96; under a
+- [edge_vertex_ternary_tree](stubs/qiskit_fermions.mappers.library.edge_vertex_ternary_tree.html.md): Map an &#96;EdgeVertexOperator&#96; to a &#96;SparseObservable&#96; under a
+- [transfer_vertex_ternary_tree](stubs/qiskit_fermions.mappers.library.transfer_vertex_ternary_tree.html.md): Map a &#96;TransferVertexOperator&#96; to a &#96;SparseObservable&#96; under
+- [Mapper Optimizations](pydoc/qiskit_fermions.mappers.optimization.html.md): This module provides various routines for optimizing fermion-to-qubit mappings.
+- [build_excitation_span_minimization_model](stubs/qiskit_fermions.mappers.optimization.build_excitation_span_minimization_model.html.md): Build a Pyomo model for ordering fermionic modes to minimize excitation spans.
+- [Circuit Representation](pydoc/qiskit_fermions.circuit.html.md): Fermionic circuits: FermionicCircuit and related types that interpret Qiskit circuits as acting on fermionic modes rather than qubits.
+- [FermionicDAGCircuit](stubs/qiskit_fermions.circuit.FermionicDAGCircuit.html.md): A type alias of &#96;DAGCircuit&#96;.
+- [FermionicMode](stubs/qiskit_fermions.circuit.FermionicMode.html.md): A type alias of &#96;Qubit&#96;.
+- [FermionicRegister](stubs/qiskit_fermions.circuit.FermionicRegister.html.md): A type alias of &#96;QubitRegister&#96;.
+- [FermionicSpecifier](stubs/qiskit_fermions.circuit.FermionicSpecifier.html.md): A type alias equivalent to Qiskit’s &#96;QubitSpecifier&#96; but for fermionic modes.
+- [FermionicCircuit](stubs/qiskit_fermions.circuit.FermionicCircuit.html.md): A wrapper around &#96;QuantumCircuit&#96; for expressing fermionic circuits.
+- [FermionicInstruction](stubs/qiskit_fermions.circuit.FermionicInstruction.html.md): The base class for all instructions acting on fermionic modes.
+- [FermionicGate](stubs/qiskit_fermions.circuit.FermionicGate.html.md): The base class for all fermionic gates.
+- [Circuit Library](pydoc/qiskit_fermions.circuit.library.html.md): Library of fermionic gates and instructions, such as time evolution, mode initialization, orbital rotations, and measurement.
+- [Evolution](stubs/qiskit_fermions.circuit.library.Evolution.html.md): Implements the time evolution of an operator.
+- [InitializeModes](stubs/qiskit_fermions.circuit.library.InitializeModes.html.md): Prepares (or, under simulation, certifies) a fermionic mode occupation.
+- [OrbitalRotation](stubs/qiskit_fermions.circuit.library.OrbitalRotation.html.md): Implements an orbital rotation.
+- [PrepareSlaterDeterminant](stubs/qiskit_fermions.circuit.library.PrepareSlaterDeterminant.html.md): Prepares a Slater determinant from an occupation and an orbital rotation.
+- [UCC](stubs/qiskit_fermions.circuit.library.UCC.html.md): Implements the unitary coupled-cluster singles and doubles (UCCSD) ansatz.
+- [UCJ](stubs/qiskit_fermions.circuit.library.UCJ.html.md): Implements the (local) unitary cluster Jastrow ((L)UCJ) ansatz.
+- [FermionicMeasure](stubs/qiskit_fermions.circuit.library.FermionicMeasure.html.md): A measurement of a single fermionic mode, writing its outcome into one classical bit.
+- [Circuit Library Synthesis (&#96;F2F&#96;)](pydoc/qiskit_fermions.circuit.library.synthesis.html.md): Fermion-to-fermion synthesis methods that break a gate down into smaller fermionic gates, such as Trotter and qDRIFT formulas for an Evolution gate, plus the F2FSynthesisPlugin interface for custom methods, which the F2FSynthesis transpiler pass applies.
+- [F2FSynthesisPlugin](stubs/qiskit_fermions.circuit.library.synthesis.F2FSynthesisPlugin.html.md): The protocol for plugins to the &#96;F2FSynthesis&#96; transpiler pass.
+- [F2FSynthesisPluginManager](stubs/qiskit_fermions.circuit.library.synthesis.F2FSynthesisPluginManager.html.md): A simple manager of the installed fermion-to-fermion synthesis plugins.
+- [FermionicLieTrotter](stubs/qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter.html.md): The first-order Lie-Trotter product formula, applied in fermionic space.
+- [FermionicSuzukiTrotter](stubs/qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter.html.md): The higher-order Suzuki-Trotter product formula, applied in fermionic space.
+- [FermionicQDrift](stubs/qiskit_fermions.circuit.library.synthesis.FermionicQDrift.html.md): A synthesis method that Trotterizes an &#96;Evolution&#96; via the qDRIFT protocol.
+- [FermionicGivensDecomposition](stubs/qiskit_fermions.circuit.library.synthesis.FermionicGivensDecomposition.html.md): The decomposition of an orbital rotation into Givens rotations and phases.
+- [FermionicSlaterGivensDecomposition](stubs/qiskit_fermions.circuit.library.synthesis.FermionicSlaterGivensDecomposition.html.md): The decomposition of a Slater determinant preparation into Givens rotations.
+- [QDriftSampler](stubs/qiskit_fermions.circuit.library.synthesis.QDriftSampler.html.md): The draws of the qDRIFT protocol for one &#96;Evolution&#96; gate.
+- [Transpiler](pydoc/qiskit_fermions.transpiler.html.md): How Qiskit Fermions transpiles a FermionicCircuit to a QuantumCircuit: the transpilation stages, the pass manager, and the layout of fermionic modes onto qubits.
+- [F2QLayout](stubs/qiskit_fermions.transpiler.F2QLayout.html.md): A mapping of fermionic mode registers to quantum registers.
+- [FermionicPassManager](stubs/qiskit_fermions.transpiler.FermionicPassManager.html.md): A transpiler pass manager converting one &#96;FermionicCircuit&#96; to another.
+- [FermionicCircuitToDAG](stubs/qiskit_fermions.transpiler.FermionicCircuitToDAG.html.md): Converts a &#96;FermionicCircuit&#96; to a &#96;FermionicDAGCircuit&#96;.
+- [FermionicDAGToCircuit](stubs/qiskit_fermions.transpiler.FermionicDAGToCircuit.html.md): Converts a &#96;FermionicDAGCircuit&#96; to a &#96;FermionicCircuit&#96;.
+- [QuantumDAGToCircuit](stubs/qiskit_fermions.transpiler.QuantumDAGToCircuit.html.md): Converts a &#96;DAGCircuit&#96; to a &#96;QuantumCircuit&#96;.
+- [Transpiler Passes](pydoc/qiskit_fermions.transpiler.passes.html.md): Transpiler passes for the stages of the fermionic transpiler pipeline, such as the fermion-to-fermion and fermion-to-qubit synthesis passes.
+- [F2FSynthesis](stubs/qiskit_fermions.transpiler.passes.F2FSynthesis.html.md): A transpilation pass breaking gates down into smaller ones in fermionic space.
+- [F2FSynthesisConfig](stubs/qiskit_fermions.transpiler.passes.optimization.f2f_synthesis.F2FSynthesisConfig.html.md): The dictionary type used to configure the &#96;F2FSynthesis.methods&#96;.
+- [MergeEvolutions](stubs/qiskit_fermions.transpiler.passes.MergeEvolutions.html.md): A transpilation pass merging consecutive &#96;Evolution&#96; gates of the same operator.
+- [MergeOrbitalRotations](stubs/qiskit_fermions.transpiler.passes.MergeOrbitalRotations.html.md): A transpilation pass merging runs of consecutive orbital rotations into a single one.
+- [MergeSlaterDeterminantPreparation](stubs/qiskit_fermions.transpiler.passes.MergeSlaterDeterminantPreparation.html.md): A transpilation pass fusing an initialization and rotation into a Slater determinant prep.
+- [QDriftTrotterization](stubs/qiskit_fermions.transpiler.passes.QDriftTrotterization.html.md): A transpilation pass to Trotterize &#96;Evolution&#96; gates via qDRIFT, skipping trivial draws.
+- [RelabelModes](stubs/qiskit_fermions.transpiler.passes.RelabelModes.html.md): A transpilation pass to relabel the fermionic modes.
+- [FermionicTrotterization](stubs/qiskit_fermions.transpiler.passes.FermionicTrotterization.html.md): &#42;&#42;DEPRECATED&#42;&#42; The former pass to Trotterize &#96;Evolution&#96; gates.
+- [TrivialF2QLayout](stubs/qiskit_fermions.transpiler.passes.TrivialF2QLayout.html.md): Trivially maps $n$ fermionic modes to $n$ qubits.
+- [CustomF2QLayout](stubs/qiskit_fermions.transpiler.passes.CustomF2QLayout.html.md): Sets the user-provided &#96;F2QLayout&#96; in the transpiler.
+- [F2QSynthesis](stubs/qiskit_fermions.transpiler.passes.F2QSynthesis.html.md): A transpilation pass to map fermion-based circuit instructions to qubit-based ones.
+- [F2QSynthesisConfig](stubs/qiskit_fermions.transpiler.passes.synthesis.f2q_synthesis.F2QSynthesisConfig.html.md): The dictionary type used to configure the &#96;F2QSynthesis.methods&#96;.
+- [Transpiler Pass Synthesis (&#96;F2Q&#96;)](pydoc/qiskit_fermions.transpiler.passes.synthesis.html.md): Plugin interface of the F2QSynthesis transpiler pass, which maps fermionic instructions to qubit instructions, and the plugins that implement it.
+- [F2QSynthesisPlugin](stubs/qiskit_fermions.transpiler.passes.synthesis.F2QSynthesisPlugin.html.md): The protocol for plugins to the &#96;F2QSynthesis&#96; transpiler pass.
+- [F2QSynthesisPluginManager](stubs/qiskit_fermions.transpiler.passes.synthesis.F2QSynthesisPluginManager.html.md): A simple manager of the installed fermion-to-qubit synthesis plugins.
+- [MapperFnEvolutionSynthesis](stubs/qiskit_fermions.transpiler.passes.synthesis.MapperFnEvolutionSynthesis.html.md): A &#96;F2QSynthesisPlugin&#96; for transpiling &#96;Evolution&#96; under a custom mapping.
+- [TrivialOccupationFermionicMeasureSynthesis](stubs/qiskit_fermions.transpiler.passes.synthesis.TrivialOccupationFermionicMeasureSynthesis.html.md): A &#96;F2QSynthesisPlugin&#96; for transpiling &#96;FermionicMeasure&#96; with trivial occupation.
+- [TrivialOccupationInitializeModesSynthesis](stubs/qiskit_fermions.transpiler.passes.synthesis.TrivialOccupationInitializeModesSynthesis.html.md): A &#96;F2QSynthesisPlugin&#96; for transpiling &#96;InitializeModes&#96; with trivial occupation.
+- [GivensDecompositionOrbitalRotationSynthesis](stubs/qiskit_fermions.transpiler.passes.synthesis.GivensDecompositionOrbitalRotationSynthesis.html.md): &#42;&#42;DEPRECATED&#42;&#42; The former plugin for transpiling an &#96;OrbitalRotation&#96; into Givens rotations.
+- [GivensDecompositionSlaterDeterminantSynthesis](stubs/qiskit_fermions.transpiler.passes.synthesis.GivensDecompositionSlaterDeterminantSynthesis.html.md): &#42;&#42;DEPRECATED&#42;&#42; The former plugin for transpiling a &#96;PrepareSlaterDeterminant&#96; into Givens rotations.
+- [HopEvolutionSynthesis](stubs/qiskit_fermions.transpiler.passes.synthesis.HopEvolutionSynthesis.html.md): A high-level synthesis plugin for the evolution under a hop between two qubits.
+- [group_wise](stubs/qiskit_fermions.transpiler.passes.synthesis.group_wise.html.md): Wraps a mapper function so that it maps an operator one group at a time.
+- [simplify](stubs/qiskit_fermions.transpiler.passes.synthesis.simplify.html.md): Wraps a mapper function so that it simplifies the operator it returns.
+- [Transpiler Pass Utilities](pydoc/qiskit_fermions.transpiler.passes.utils.html.md): Several convenience functions are provided to simplify the implementation of common operations
+- [map_node_single_register](stubs/qiskit_fermions.transpiler.passes.utils.map_node_single_register.html.md): Map the single fermionic mode register acted upon by the circuit operation.
+- [Transpiler Presets](pydoc/qiskit_fermions.transpiler.presets.html.md): Functions that generate predefined transpiler pipelines, such as one for the Jordan-Wigner encoding.
+- [generate_preset_jw_pass_manager](stubs/qiskit_fermions.transpiler.presets.generate_preset_jw_pass_manager.html.md): Generates a preset transpiler pipeline based on the &#96;jordan_wigner()&#96; mapping.
+- [Linear Algebra Utilities](pydoc/qiskit_fermions.linalg.html.md): Linear algebra utilities, such as Givens decompositions of orbital rotations and Slater determinants.
+- [givens_decomposition](stubs/qiskit_fermions.linalg.givens_decomposition.html.md): Decomposes a unitary matrix into Givens rotations and diagonal phases.
+- [givens_decomposition_slater](stubs/qiskit_fermions.linalg.givens_decomposition_slater.html.md): Decomposes the occupied orbitals of a Slater determinant into Givens rotations.
+- [Protocols](pydoc/qiskit_fermions.protocols.html.md): Protocols used throughout the package, for example for operators that convert to other representations, compute commutators, or apply a unitary.
+- [SupportsApplyUnitaryPlaced](stubs/qiskit_fermions.protocols.SupportsApplyUnitaryPlaced.html.md): A package-specific extension of &#96;ffsim.SupportsApplyUnitary&#96;.
+- [SupportsCommutators](stubs/qiskit_fermions.protocols.SupportsCommutators.html.md): A Protocol indicating support for efficient commutator generation.
+- [SupportsFermionOperator](stubs/qiskit_fermions.protocols.SupportsFermionOperator.html.md): This package’s operator-conversion contract, converting an operator to a &#96;FermionOperator&#96;.
+- [SupportsMajoranaOperator](stubs/qiskit_fermions.protocols.SupportsMajoranaOperator.html.md): An equivalent of the &#96;SupportsFermionOperator&#96; protocol, targeting Majorana operators.
+- [Optional Dependencies](pydoc/qiskit_fermions.utils.optionals.html.md): Lazy availability testers for the optional third-party dependencies of qiskit-fermions.
+- [&#96;qiskit-fermions&#96; C API reference](cdoc/index.html.md): Reference for the C API of qiskit-fermions, covering operator representations, mappers, and miscellaneous items.
+- [Operator Representations](cdoc/qf-operators.html.md): The C API provides various data structures for representing fermionic operators in different bases.
+- [QfFermionOperator](cdoc/qf-ferm-op.html.md): A spin-less fermionic operator.
+- [QfMajoranaOperator](cdoc/qf-maj-op.html.md): A Majorana fermion operator.
+- [QfEdgeVertexOperator](cdoc/qf-edge-op.html.md): An edge-vertex operator.
+- [QfTransferVertexOperator](cdoc/qf-transfer-op.html.md): A transfer-vertex operator.
+- [Operator Library](cdoc/qf-operators-library.html.md): The C API provides various functions to simplify the construction of commonly used operators.
+- [Commutator Generators](cdoc/qf-commutators.html.md): C API functions that compute the commutator, anti-commutator, and double commutator of operator representations.
+- [Electronic Integrals](cdoc/qf-electronic-integrals.html.md): C API constructor functions that build electronic structure Hamiltonians from integral coefficients in several layouts (tril, full, spin, and sym).
+- [FCIDump](cdoc/qf-fcidump.html.md): An electronic structure Hamiltonian in FCIDump format.
+- [Operator Terms](cdoc/qf-operators-terms.html.md): C API functions that operate on the individual terms of an operator, to group, filter, and order them.
+- [Grouping Functions](cdoc/qf-operators-terms-grouping.html.md): C API functions that assign operator terms to groups automatically and that analyze an existing grouping.
+- [Filtering Functions](cdoc/qf-operators-terms-filtering.html.md): Filters out the terms of an operator that are diagonal in the occupation-number basis.
+- [Ordering Functions](cdoc/qf-operators-terms-ordering.html.md): C API functions that reorder the terms of an operator, either canonically or by group index.
+- [Mapper Library](cdoc/qf-mappers-library.html.md): C API functions that map operators to qubit operators with the Jordan-Wigner and ternary-tree encodings, and that convert between operator representations.
+- [Ternary Trees](cdoc/qf-ternary-tree.html.md): C API for ternary trees, which define fermion-to-qubit encodings of N fermionic modes onto N qubits: construct a tree and query the resulting encoding.
+- [Various](cdoc/qf-various.html.md): Miscellaneous items of the C API, such as return codes.
+- [QfExitCode](cdoc/qf-exit-code.html.md): Integer exit codes returned to C.
+- [Release Notes](release-notes.html.md): Release notes of Qiskit Fermions for each release, covering both the Python API and the C API.
