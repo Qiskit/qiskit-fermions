@@ -1,6 +1,0 @@
-﻿FermionicDAGCircuit
-===================
-
-.. currentmodule:: qiskit_fermions.circuit
-
-.. autodata:: FermionicDAGCircuit

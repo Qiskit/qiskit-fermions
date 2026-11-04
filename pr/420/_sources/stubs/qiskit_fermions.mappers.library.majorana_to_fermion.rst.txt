@@ -1,6 +1,0 @@
-﻿majorana\_to\_fermion
-=====================
-
-.. currentmodule:: qiskit_fermions.mappers.library
-
-.. autofunction:: majorana_to_fermion

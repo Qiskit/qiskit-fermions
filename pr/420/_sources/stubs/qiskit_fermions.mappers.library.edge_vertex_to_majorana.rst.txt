@@ -1,6 +1,0 @@
-﻿edge\_vertex\_to\_majorana
-==========================
-
-.. currentmodule:: qiskit_fermions.mappers.library
-
-.. autofunction:: edge_vertex_to_majorana

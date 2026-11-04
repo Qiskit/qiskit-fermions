@@ -1,6 +1,0 @@
-﻿FermionicSpecifier
-==================
-
-.. currentmodule:: qiskit_fermions.circuit
-
-.. autodata:: FermionicSpecifier
