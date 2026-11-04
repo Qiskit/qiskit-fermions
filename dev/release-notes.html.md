@@ -2,11 +2,11 @@
 
 # Release Notes
 
-<a id="release-notes-upcoming-release-main"></a>
+<a id="release-notes-0-4-0"></a>
 
-## Upcoming release (`main`)
+## 0.4.0
 
-<a id="release-notes-upcoming-release-main-prelude"></a>
+<a id="release-notes-0-4-0-prelude"></a>
 
 ### Prelude
 
@@ -28,7 +28,7 @@ Several existing passes and plugins are deprecated in favor of
 for how to migrate. This release also includes bug fixes (see below) and adds support for
 Qiskit 2.6.
 
-<a id="release-notes-upcoming-release-main-python-api-features"></a>
+<a id="release-notes-0-4-0-python-api-features"></a>
 
 ### Python API Features
 
@@ -110,7 +110,7 @@ Qiskit 2.6.
   [`InitializeModes`](stubs/qiskit_fermions.circuit.library.InitializeModes.html.md#qiskit_fermions.circuit.library.InitializeModes) of the reference followed by atomic
   [`Evolution`](stubs/qiskit_fermions.circuit.library.Evolution.html.md#qiskit_fermions.circuit.library.Evolution) gates.
 
-<a id="release-notes-upcoming-release-main-c-api-features"></a>
+<a id="release-notes-0-4-0-c-api-features"></a>
 
 ### C API Features
 
@@ -119,7 +119,7 @@ Qiskit 2.6.
   smallest number of modes that can host an operator (`0` if it acts on none). For a Majorana
   operator this counts fermionic modes.
 
-<a id="release-notes-upcoming-release-main-python-api-upgrade-notes"></a>
+<a id="release-notes-0-4-0-python-api-upgrade-notes"></a>
 
 ### Python API Upgrade Notes
 
@@ -150,7 +150,7 @@ Qiskit 2.6.
   that holds it is stateless and sees one gate at a time. Its length is still checked against
   every gate it is given, so a mismatch raises a `ValueError` as before.
 
-<a id="release-notes-upcoming-release-main-python-api-deprecation-notes"></a>
+<a id="release-notes-0-4-0-python-api-deprecation-notes"></a>
 
 ### Python API Deprecation Notes
 
@@ -183,7 +183,7 @@ Qiskit 2.6.
   `filter_trivial` was `False`, and
   `QDriftTrotterization(FermionicQDrift(num_terms, weights=..., rng=...))` where it was `True`.
 
-<a id="release-notes-upcoming-release-main-bug-fixes"></a>
+<a id="release-notes-0-4-0-bug-fixes"></a>
 
 ### Bug Fixes
 
@@ -202,7 +202,7 @@ Qiskit 2.6.
   accepted and synthesis then failed with a `RecursionError`, unless the evolved operator
   had a single factor.
 
-<a id="release-notes-upcoming-release-main-other-notes"></a>
+<a id="release-notes-0-4-0-other-notes"></a>
 
 ### Other Notes
 
