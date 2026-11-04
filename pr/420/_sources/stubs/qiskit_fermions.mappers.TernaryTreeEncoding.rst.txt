@@ -1,0 +1,96 @@
+﻿TernaryTreeEncoding
+===================
+
+.. currentmodule:: qiskit_fermions.mappers
+
+.. autoclass:: TernaryTreeEncoding
+   :show-inheritance:
+   :no-members:
+   :no-inherited-members:
+   :special-members:
+
+
+  
+  
+   .. rubric:: Attributes
+    
+   .. autoattribute:: max_weight
+   .. autoattribute:: num_modes
+  
+  
+  
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+  
+  
+   .. rubric:: Methods
+    
+   .. automethod:: majorana_image
+   .. automethod:: total_parity
+  
+  
+  
+  
+  
+  
+  

@@ -1,0 +1,6 @@
+﻿group\_coeff\_means
+===================
+
+.. currentmodule:: qiskit_fermions.operators.terms
+
+.. autofunction:: group_coeff_means

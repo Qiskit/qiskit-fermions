@@ -1,0 +1,28 @@
+# Qiskit Fermions
+
+> Qiskit Fermions extends Qiskit with tools for working with fermionic systems: operator data structures, a framework and library for converting operators between representations and to qubit operators (for example Jordan-Wigner and ternary-tree encodings), and a framework and library for synthesizing fermionic quantum circuits. The core is written in Rust and exposed through first-party Python and C APIs.
+
+
+2026, Qiskit addons team
+
+## Pages in this subsection
+
+- [Overview](overview.html.md): Overview of the Qiskit Fermions guides, grouped by topic, with links to each one.
+- [Simulate 1D Fermi-Hubbard dynamics with flow sets](1d_fermi_hubbard.html.md): Tutorial that builds a circuit of constant two-qubit depth for the time dynamics of the spinless one-dimensional Fermi-Hubbard model: group terms into flow sets before mapping, write a custom ancilla-based encoding, and synthesize with the flow sets.
+- [Simulate 2D Fermi-Hubbard dynamics with flow sets](2d_fermi_hubbard.html.md): Tutorial that extends the flow-set approach to the spinless two-dimensional Fermi-Hubbard model on a square lattice with the Verstraete-Cirac encoding, then verifies the circuit, the physics on the stabilizer subspace, and Trotter convergence.
+- [More guides](index.html.md): Table of contents of all Qiskit Fermions guides.
+- [Design principles of operator representations](operators.html.md): Design principles shared by all operator representations in qiskit_fermions.operators, such as sparse term storage, mode-based indexing, term grouping, and arithmetic.
+- [Group operator terms: use the operator structure](grouping.html.md): How to define and analyze a grouping of operator terms through the groups array of an operator, and why grouping matters for circuit synthesis.
+- [Map operator representations](mappers.html.md): How to implement a custom operator mapper, use the library mappers, and choose a fermion-to-qubit encoding with ternary trees.
+- [Work with fermionic circuits](circuit.html.md): How to build, repeat, measure, and transpile a FermionicCircuit, which implements quantum algorithms in fermionic space instead of mapping to qubits first.
+- [Generate SqDRIFT circuits](sqdrift.html.md): Getting-started guide that generates an ensemble of randomized qDRIFT time-evolution circuits for sample-based quantum diagonalization (SqDRIFT) from an electronic structure Hamiltonian, from term grouping to transpilation.
+- [Generate Krylov time-evolution circuits (SKQD)](skqd.html.md): Getting-started guide that builds the Krylov time-evolution circuits of sample-based Krylov quantum diagonalization (SKQD) for the single-impurity Anderson model, transpiles them, and diagonalizes in the sampled subspace.
+- [Transpile fermionic circuits](transpilation.html.md): How to transpile a FermionicCircuit to a qubit QuantumCircuit through the stages of the fermionic transpiler pipeline, with a worked Jordan-Wigner example.
+- [Synthesize an Evolution gate in fermionic space](fermionic_synthesis.html.md): How to synthesize an Evolution gate into smaller fermionic gates with product formulas, on one gate or across a whole pipeline, and how to measure the payoff.
+- [Optimize Slater determinant preparation](merge_slater_determinant.html.md): How the MergeSlaterDeterminantPreparation transpiler pass rewrites an InitializeModes gate followed by an OrbitalRotation gate into a PrepareSlaterDeterminant gate, which unlocks a cheaper synthesis.
+- [Transpile an LUCJ ansatz](lucj.html.md): How to transpile a local unitary cluster Jastrow (LUCJ) ansatz built with ffsim: turn it into a fermionic circuit, lower it onto qubits through the fermion-to-qubit encoding of your choice, and match the device topology.
+- [How this package relates to ffsim](ffsim.html.md): How Qiskit Fermions and ffsim divide the work: ffsim owns the ansatz operators and fast fixed-particle-number simulation, while Qiskit Fermions owns fermionic circuits and their transpilation under any encoding.
+
+## Optional
+
+- [Top-level llms.txt](../llms.txt): Complete documentation index.

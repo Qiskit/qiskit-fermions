@@ -1,0 +1,6 @@
+﻿generate\_preset\_jw\_pass\_manager
+===================================
+
+.. currentmodule:: qiskit_fermions.transpiler.presets
+
+.. autofunction:: generate_preset_jw_pass_manager

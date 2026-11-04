@@ -1,0 +1,88 @@
+﻿TrivialOccupationFermionicMeasureSynthesis
+==========================================
+
+.. currentmodule:: qiskit_fermions.transpiler.passes.synthesis
+
+.. autoclass:: TrivialOccupationFermionicMeasureSynthesis
+   :show-inheritance:
+   :no-members:
+   :no-inherited-members:
+   :special-members:
+
+
+  
+  
+  
+  
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+  
+  
+   .. rubric:: Methods
+    
+   .. automethod:: run
+  
+  
+  
+  
+  
+  
+  

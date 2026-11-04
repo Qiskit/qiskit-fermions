@@ -1,0 +1,173 @@
+﻿FermionicInstruction
+====================
+
+.. currentmodule:: qiskit_fermions.circuit
+
+.. autoclass:: FermionicInstruction
+   :show-inheritance:
+   :no-members:
+   :no-inherited-members:
+   :special-members:
+
+
+  
+  
+   .. rubric:: Attributes
+    
+   .. autoattribute:: num_modes
+  
+  
+  
+   .. rubric:: Inherited Attributes
+    
+   .. autoattribute:: base_class
+   .. autoattribute:: decompositions
+   .. autoattribute:: definition
+   .. autoattribute:: label
+   .. autoattribute:: mutable
+   .. autoattribute:: name
+   .. autoattribute:: num_clbits
+   .. autoattribute:: num_qubits
+   .. autoattribute:: params
+  
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+  
+  
+  
+  
+  
+  
+   .. rubric:: Inherited Methods
+    
+   .. automethod:: add_decomposition
+   .. automethod:: broadcast_arguments
+   .. automethod:: copy
+   .. automethod:: inverse
+   .. automethod:: is_parameterized
+   .. automethod:: repeat
+   .. automethod:: reverse_ops
+   .. automethod:: soft_compare
+   .. automethod:: to_mutable
+   .. automethod:: validate_parameter
+  
+  
+  
