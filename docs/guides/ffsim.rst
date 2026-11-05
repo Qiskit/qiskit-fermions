@@ -114,11 +114,6 @@ an :class:`ffsim.FermionOperator`, so without ffsim they raise
 :class:`~qiskit.exceptions.MissingOptionalLibraryError`. Everything that does not simulate (building
 operators, mapping them, and transpiling the resulting circuits) needs none of it.
 
-`ffsim`_ transitively depends on `PySCF <https://pyscf.org/>`_, which does not support Windows, so
-on Windows the extra resolves to nothing (a silent no-op through a ``sys_platform`` marker) rather
-than an install failure. Windows users who want to simulate can do so through the `Windows
-Subsystem for Linux <https://learn.microsoft.com/en-us/windows/wsl/>`_ in the meantime.
-
 Fermionic simulation lives in a fixed particle-number sector
 ------------------------------------------------------------
 
