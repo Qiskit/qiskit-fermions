@@ -1,0 +1,5 @@
+---
+other:
+  - |
+    The optional downstream dependency ``ffsim>=0.0.86`` now fully supports
+    Windows and we have adjusted our documentation and guidance accordingly.

@@ -22,7 +22,7 @@ pytest_collect_file = Sybil(
     parsers=[
         DocTestParser(optionflags=ELLIPSIS | NORMALIZE_WHITESPACE | NUMBER),
         # ``SkipParser`` lets a docstring gate its doctest on an optional dependency, the same way
-        # the guides under ``docs/`` do. Needed because ffsim has no Windows support.
+        # the guides under ``docs/`` do. Needed because optional dependencies may be unavailable.
         SkipParser(),
     ],
     patterns=["*.py", "*.pyi"],

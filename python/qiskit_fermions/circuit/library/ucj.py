@@ -77,9 +77,7 @@ class UCJ(FermionicGate):
        block is zero, which is the same operator.
 
     .. note::
-       ffsim does not support Windows (through its unconditional PySCF dependency), so this gate
-       requires the ``ffsim`` extra (``pip install "qiskit-fermions[ffsim]"``) and is unavailable
-       there. Use `WSL <https://learn.microsoft.com/windows/wsl/>`__ on Windows.
+       This gate requires the ``ffsim`` extra (``pip install "qiskit-fermions[ffsim]"``).
 
     .. caution::
        This is an early development prototype. Beware of changes to its interface without warning
