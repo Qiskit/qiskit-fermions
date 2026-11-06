@@ -42,7 +42,7 @@ fermionic quantum circuits that exploits particle-number and spin-Z conservation
 :external:func:`ffsim.apply_unitary`.
 
 .. note::
-   ``ffsim`` does not support Windows, which is why it is an optional dependency.
+   ``ffsim`` is an optional dependency because only simulation and the ansatz gates need it.
 
 .. seealso::
    :external:class:`~qiskit.utils.LazyDependencyManager` for usage examples and the available
@@ -66,8 +66,7 @@ diagonalization (SQD): it projects a Hamiltonian onto the subspace spanned by me
 basis configurations and iteratively refines that subspace via *configuration recovery*.
 
 .. note::
-   ``qiskit-addon-sqd`` pulls in PySCF, which does not support Windows, which is why it is an optional
-   dependency.
+   ``qiskit-addon-sqd`` is an optional dependency because only the SQD workflows need it.
 
 .. seealso::
    :external:class:`~qiskit.utils.LazyDependencyManager` for usage examples and the available
