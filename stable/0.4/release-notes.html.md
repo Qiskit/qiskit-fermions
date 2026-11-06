@@ -2,11 +2,11 @@
 
 # Release Notes
 
-<a id="release-notes-upcoming-release-stable-0-4"></a>
+<a id="release-notes-0-4-1"></a>
 
-## Upcoming release (`stable/0.4`)
+## 0.4.1
 
-<a id="release-notes-upcoming-release-stable-0-4-other-notes"></a>
+<a id="release-notes-0-4-1-other-notes"></a>
 
 ### Other Notes
 
