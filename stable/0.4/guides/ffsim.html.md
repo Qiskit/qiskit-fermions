@@ -87,11 +87,6 @@ an [`ffsim.FermionOperator`](https://qiskit-community.github.io/ffsim/api/stubs/
 [`MissingOptionalLibraryError`](https://quantum.cloud.ibm.com/docs/api/qiskit/exceptions#qiskit.exceptions.MissingOptionalLibraryError). Everything that does not simulate (building
 operators, mapping them, and transpiling the resulting circuits) needs none of it.
 
-[ffsim](https://qiskit-community.github.io/ffsim/) transitively depends on [PySCF](https://pyscf.org/), which does not support Windows, so
-on Windows the extra resolves to nothing (a silent no-op through a `sys_platform` marker) rather
-than an install failure. Windows users who want to simulate can do so through the [Windows
-Subsystem for Linux](https://learn.microsoft.com/en-us/windows/wsl/) in the meantime.
-
 ## Fermionic simulation lives in a fixed particle-number sector
 
 Both `_apply_unitary_` and `_linear_operator_` take an `nelec` argument and represent the state
