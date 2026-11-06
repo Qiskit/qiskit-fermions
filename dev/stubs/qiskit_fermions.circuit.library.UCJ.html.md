@@ -50,9 +50,7 @@ the two-register reading as an [`UCJOpSpinBalanced`](https://qiskit-community.gi
 block is zero, which is the same operator.
 
 #### NOTE
-ffsim does not support Windows (through its unconditional PySCF dependency), so this gate
-requires the `ffsim` extra (`pip install "qiskit-fermions[ffsim]"`) and is unavailable
-there. Use [WSL](https://learn.microsoft.com/windows/wsl/) on Windows.
+This gate requires the `ffsim` extra (`pip install "qiskit-fermions[ffsim]"`).
 
 #### CAUTION
 This is an early development prototype. Beware of changes to its interface without warning

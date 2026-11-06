@@ -81,11 +81,8 @@ On the simulation side, ffsim is the backend. This package’s gates and operato
 implement the protocol methods ffsim’s simulation functions consume
 (`_apply_unitary_`, `_linear_operator_` and `_trace_`; see
 [`qiskit_fermions.protocols`](pydoc/qiskit_fermions.protocols.html.md#module-qiskit_fermions.protocols)), so ffsim’s tools work on them natively, with
-no conversion step. Because ffsim depends
-on PySCF, which does not support Windows, simulating on Windows means going
-through the [Windows Subsystem for Linux](https://learn.microsoft.com/en-us/windows/wsl/) for now. Building operators,
-mapping them and transpiling the resulting circuits need none of this and work
-everywhere.
+no conversion step. Building operators, mapping them and transpiling the
+resulting circuits do not need ffsim at all.
 
 For the full picture, read the
 [ffsim relationship guide](guides/ffsim.html.md#ffsim-relationship-explanation).

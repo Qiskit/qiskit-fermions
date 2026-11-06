@@ -2,6 +2,17 @@
 
 # Release Notes
 
+<a id="release-notes-upcoming-release-main"></a>
+
+## Upcoming release (`main`)
+
+<a id="release-notes-upcoming-release-main-other-notes"></a>
+
+### Other Notes
+
+- The optional downstream dependency `ffsim>=0.0.86` now fully supports
+  Windows and we have adjusted our documentation and guidance accordingly.
+
 <a id="release-notes-0-4-0"></a>
 
 ## 0.4.0
