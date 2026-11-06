@@ -121,10 +121,8 @@ operator directly as their input.
 
 On the simulation side, ffsim is the backend. This package's gates and operators implement the
 protocol methods ffsim's simulation functions consume (`_apply_unitary_`, `_linear_operator_` and
-`_trace_`), so ffsim's tools work on them natively, with no conversion step. Because ffsim depends
-on PySCF, which does not support Windows, simulating on Windows means going through
-[WSL](https://learn.microsoft.com/en-us/windows/wsl/) for now. Building operators, mapping them and
-transpiling the resulting circuits need none of this and work everywhere.
+`_trace_`), so ffsim's tools work on them natively, with no conversion step. Building operators,
+mapping them and transpiling the resulting circuits do not need ffsim at all.
 
 For the full picture, refer to the [ffsim relationship guide](docs/guides/ffsim.rst).
 

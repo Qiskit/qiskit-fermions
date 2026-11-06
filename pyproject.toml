@@ -56,10 +56,9 @@ all = [
     "qiskit-fermions[ffsim,pyomo]",
 ]
 ffsim = [
-    # ffsim (and its unconditional PySCF dependency) does not support Windows, so restrict it to
-    # non-Windows platforms. The ansatz gates of the circuit library take an ffsim operator as their
-    # input, so they require this extra; everything else in the package works without it.
-    "ffsim; sys_platform != 'win32'",
+    # The ansatz gates of the circuit library take an ffsim operator as their input,
+    # so they require this extra; everything else in the package works without it.
+    "ffsim",
 ]
 pyomo = [
     # Pyomo is a modeling layer, not a solver: choosing one is deliberately left to the user (see
@@ -100,9 +99,8 @@ doctest = [
 ]
 guidetest = [
     {include-group = "doctest"},
-    # Neither supports Windows, so both are gated and the doctests needing them skip there.
-    "ffsim; sys_platform != 'win32'",
-    "qiskit-addon-sqd; sys_platform != 'win32'",
+    "ffsim",
+    "qiskit-addon-sqd",
 ]
 test = [
     {include-group = "doctest"},

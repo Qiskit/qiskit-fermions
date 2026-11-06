@@ -163,10 +163,6 @@ qiskit-addon-sqd, `docs` inherits them from it, and the test workflows run `make
 `.[all]` install. The coverage job runs only `make pycoverage` and installs `.[all]` itself, so
 coverage is unaffected.
 
-Neither `ffsim` nor `qiskit-addon-sqd` supports Windows, so on that platform they are unavailable by
-design and their tests skip to zero. Read a green Windows run with that in mind: it is not evidence
-that the ffsim-gated tests passed.
-
 ## Coverage
 
 - [ ] figure out how to measure coverage in these different settings and document it here
