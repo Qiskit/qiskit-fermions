@@ -102,6 +102,22 @@ def test_an_orbital_rotation_matches_the_modern_pipeline(num_modes):
     assert Operator(legacy).equiv(Operator(modern))
 
 
+@pytest.mark.parametrize("wires", [[0, 2], [3, 1, 0, 2]])
+def test_an_orbital_rotation_on_permuted_or_gapped_wires_matches_the_modern_pipeline(wires):
+    """A factor between modes that are not adjacent on the register is emitted exactly, too."""
+    circ = FermionicCircuit(5)
+    circ.append(OrbitalRotation(random_unitary(len(wires), seed=4)), [circ.modes[w] for w in wires])
+    with pytest.warns(DeprecationWarning):
+        plugin = GivensDecompositionOrbitalRotationSynthesis()
+
+    legacy = _legacy_pass_manager("OrbitalRotation", plugin).run(circ)
+    modern = reference_pass_manager(optimization_level=0).run(circ)
+
+    assert legacy.count_ops()["cz"] > 0
+    assert dict(legacy.count_ops()) == dict(modern.count_ops())
+    assert Operator(legacy).equiv(Operator(modern))
+
+
 @pytest.mark.parametrize("occupation", [[1, 1, 0, 0, 0], [1, 0, 1, 0, 0], [0, 1, 1, 1, 0]])
 def test_a_slater_determinant_matches_the_modern_pipeline(occupation):
     num_modes = len(occupation)

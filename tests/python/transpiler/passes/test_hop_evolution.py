@@ -51,10 +51,25 @@ def _evolution_matrix(observable, time):
     )
 
 
-def _embedded_matrix(gate, qubits, num_qubits):
+def _embedded_matrix(hop, qubits, num_qubits):
     circ = QuantumCircuit(num_qubits)
-    circ.append(gate, list(qubits))
+    circ.compose(hop, list(qubits), inplace=True)
     return Operator(circ).data
+
+
+def _string_hop_observable(alpha, beta, ends, strings, num_qubits):
+    """A hop between the qubits ``ends`` with a Z on each of the qubits ``strings``."""
+    indices = [ends[0], *strings, ends[1]]
+    middle = "Z" * len(strings)
+    return SparseObservable.from_sparse_list(
+        [
+            (f"X{middle}X", indices, alpha),
+            (f"Y{middle}Y", indices, alpha),
+            (f"X{middle}Y", indices, beta),
+            (f"Y{middle}X", indices, -beta),
+        ],
+        num_qubits=num_qubits,
+    )
 
 
 @pytest.mark.parametrize("qubits", [[0, 1], [1, 0], [0, 2], [3, 1]])
@@ -69,11 +84,51 @@ def test_match_hop_is_the_exact_evolution(qubits):
 
         match = match_hop(observable, time)
         assert match is not None
-        gate, gate_qubits = match
+        hop, hop_qubits = match
+        assert dict(hop.count_ops()) == {"xx_plus_yy": 1}
 
         expected = _evolution_matrix(observable, time)
         np.testing.assert_allclose(
-            _embedded_matrix(gate, gate_qubits, num_qubits), expected, atol=1e-12
+            _embedded_matrix(hop, hop_qubits, num_qubits), expected, atol=1e-12
+        )
+
+
+@pytest.mark.parametrize(
+    ("ends", "strings"),
+    [
+        # the Jordan-Wigner image of a hop across one, two and three modes
+        ((0, 2), (1,)),
+        ((0, 3), (1, 2)),
+        ((4, 0), (1, 2, 3)),
+        # a gapped string, as for a hop between modes on non-contiguous wires
+        ((5, 1), (2, 4)),
+        # a string outside the interval of the two ends, which other encodings can produce
+        ((1, 3), (0, 2, 5)),
+    ],
+)
+def test_match_hop_with_a_z_string_is_the_exact_evolution(ends, strings):
+    """A Z-string on the other qubits is synthesized exactly, around a single XXPlusYYGate."""
+    rng = np.random.default_rng(11)
+    num_qubits = 6
+    for _ in range(10):
+        alpha, beta = rng.normal(size=2)
+        time = rng.uniform(-2.0, 2.0)
+        observable = _string_hop_observable(alpha, beta, ends, strings, num_qubits)
+
+        match = match_hop(observable, time)
+        assert match is not None
+        hop, hop_qubits = match
+        assert sorted(hop_qubits) == sorted([*ends, *strings])
+
+        ops = dict(hop.count_ops())
+        assert ops.pop("xx_plus_yy") == 1
+        assert ops.pop("cz") == 2
+        assert ops.pop("cx", 0) == 2 * (len(strings) - 1)
+        assert not ops
+
+        expected = _evolution_matrix(observable, time)
+        np.testing.assert_allclose(
+            _embedded_matrix(hop, hop_qubits, num_qubits), expected, atol=1e-12
         )
 
 
@@ -104,8 +159,18 @@ def test_match_hop_ignores_term_order():
         [("XX", [0, 1], 1.0), ("YY", [0, 1], 0.5)],
         # XY without the matching -YX
         [("XY", [0, 1], 1.0), ("YX", [0, 1], 1.0)],
-        # a Z-string in between (the JW image of a hop across a mode)
-        [("XZX", [0, 1, 2], 1.0), ("YZY", [0, 1, 2], 1.0)],
+        # an X instead of a Z in between
+        [("XXX", [0, 1, 2], 1.0), ("YXY", [0, 1, 2], 1.0)],
+        # a Z-string on only some of the terms
+        [("XZX", [0, 1, 2], 1.0), ("YY", [0, 2], 1.0)],
+        # Z-strings on different qubits
+        [("XZX", [0, 1, 2], 1.0), ("YZY", [0, 1, 3], 1.0)],
+        # the same support, but different ends
+        [("XZX", [0, 1, 2], 1.0), ("ZXX", [0, 1, 2], 1.0)],
+        # a third non-Z Pauli
+        [("XYX", [0, 1, 2], 1.0), ("YYY", [0, 1, 2], 1.0)],
+        # a pure Z-string
+        [("ZZ", [0, 1], 1.0)],
         # an extra, non-matching term
         [("XX", [0, 1], 1.0), ("YY", [0, 1], 1.0), ("ZZ", [0, 1], 0.1)],
         # terms on different pairs of qubits
@@ -115,7 +180,7 @@ def test_match_hop_ignores_term_order():
     ],
 )
 def test_match_hop_rejects_other_generators(terms):
-    observable = SparseObservable.from_sparse_list(terms, num_qubits=3)
+    observable = SparseObservable.from_sparse_list(terms, num_qubits=4)
     assert match_hop(observable, 1.0) is None
 
 
@@ -168,7 +233,7 @@ def test_plugin_beats_the_generic_synthesis_in_cx_count():
 def test_plugin_declines_other_operators():
     """Anything that is not a hop is left to the next method, and keeps the product formula."""
     observable = SparseObservable.from_sparse_list(
-        [("XZX", [0, 1, 2], 1.0), ("YZY", [0, 1, 2], 1.0)], num_qubits=3
+        [("XX", [0, 1], 1.0), ("YY", [1, 2], 1.0)], num_qubits=3
     )
     gate = PauliEvolutionGate(observable, time=0.5, synthesis=SuzukiTrotter(order=2, reps=2))
     circ = QuantumCircuit(3)
@@ -243,16 +308,40 @@ def test_preset_emits_xx_plus_yy_for_a_hop():
     np.testing.assert_allclose(Operator(out).data, _evolution_matrix(hop, 0.6), atol=1e-12)
 
 
-def test_preset_keeps_a_hop_across_a_mode_generic():
-    circ = _hop_circuit(3, [(0, 2)], 0.6)
+def test_preset_synthesizes_a_complex_hop_across_a_mode_exactly():
+    """The Z-string of a hop across a mode is accounted for, not Trotterized.
 
-    out = generate_preset_jw_pass_manager(optimization_level=0, basis_gates=["cx", "u3"]).run(circ)
-
-    assert "xx_plus_yy" not in out.count_ops()
-    hop = jordan_wigner(
-        FermionOperator.from_dict({((True, 0), (False, 2)): 0.8, ((True, 2), (False, 0)): 0.8}), 3
+    The ``XZX + YZY`` and ``XZY - YZX`` parts of a hop with a complex amplitude do not commute, so a
+    product formula would only approximate its evolution.
+    """
+    hop = FermionOperator.from_dict(
+        {((True, 0), (False, 2)): 0.5 + 0.6j, ((True, 2), (False, 0)): 0.5 - 0.6j}
     )
-    np.testing.assert_allclose(Operator(out).data, _evolution_matrix(hop, 0.6), atol=1e-12)
+    circ = FermionicCircuit(3)
+    circ.append(Evolution(3, hop, time=0.6), circ.modes)
+
+    out = generate_preset_jw_pass_manager(
+        optimization_level=0, basis_gates=["xx_plus_yy", "cz", "u3"]
+    ).run(circ)
+
+    assert dict(out.count_ops()) == {"xx_plus_yy": 1, "cz": 2}
+    expected = _evolution_matrix(jordan_wigner(hop, 3), 0.6)
+    np.testing.assert_allclose(Operator(out).data, expected, atol=1e-12)
+
+
+def test_a_hop_across_a_mode_beats_the_generic_synthesis_in_cx_count():
+    observable = _string_hop_observable(0.7, 0.2, (0, 2), (1,), 3)
+    circ = QuantumCircuit(3)
+    circ.append(PauliEvolutionGate(observable, time=0.5), [0, 1, 2])
+    config = HLSConfig(PauliEvolution=[HopEvolutionSynthesis(), "default"])
+
+    generic = _transpile(circ, None, optimization_level=1, basis_gates=["cx", "u3"])
+    matched = _transpile(circ, config, optimization_level=1, basis_gates=["cx", "u3"])
+
+    assert matched.count_ops()["cx"] < generic.count_ops()["cx"]
+    exact = _evolution_matrix(observable, 0.5)
+    np.testing.assert_allclose(Operator(matched).data, exact, atol=1e-12)
+    assert np.abs(Operator(generic).data - exact).max() > 1e-3
 
 
 def test_preset_forces_the_hop_synthesis_over_a_user_hls_config():
@@ -273,7 +362,16 @@ def test_preset_forces_the_hop_synthesis_over_a_user_hls_config():
 
 def test_preset_keeps_the_methods_of_a_user_hls_config():
     """What the user lists for a Pauli evolution still applies to whatever is not a hop."""
-    circ = _hop_circuit(3, [(0, 2)], 0.6)
+    # a hop plus a density-density interaction, whose image has ZZ terms that no hop has
+    interacting = FermionOperator.from_dict(
+        {
+            ((True, 0), (False, 2)): 0.8,
+            ((True, 2), (False, 0)): 0.8,
+            ((True, 0), (False, 0), (True, 2), (False, 2)): 0.5,
+        }
+    )
+    circ = FermionicCircuit(3)
+    circ.append(Evolution(3, interacting, time=0.6), circ.modes)
     config = HLSConfig(PauliEvolution=[("default", {})])
 
     out = generate_preset_jw_pass_manager(
