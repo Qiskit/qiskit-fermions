@@ -1,0 +1,15 @@
+---
+features:
+  - |
+    :class:`~qiskit_fermions.circuit.library.Evolution` has a new
+    :meth:`~qiskit_fermions.circuit.library.Evolution.equiv` method, which compares two
+    evolutions up to an absolute tolerance on both the operator and the time.
+fixes:
+  - |
+    :class:`~qiskit_fermions.circuit.library.Evolution`,
+    :class:`~qiskit_fermions.circuit.library.InitializeModes` and
+    :class:`~qiskit_fermions.circuit.library.PrepareSlaterDeterminant` now compare equal only
+    when they define the same gate, and they are hashable. Previously, ``==`` ignored the evolved
+    operator and the mode occupation, so for example ``InitializeModes([True, False])`` compared
+    equal to ``InitializeModes([False, True])``. The synthesis method and the
+    :attr:`~qiskit_fermions.circuit.FermionicGate.atomic` flag are not part of the comparison.

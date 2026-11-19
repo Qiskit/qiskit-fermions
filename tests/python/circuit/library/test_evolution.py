@@ -142,3 +142,38 @@ def test_inverse_preserves_the_synthesis_and_atomicity():
 
     assert inverse.atomic
     assert inverse.synthesis is evo.synthesis
+
+
+def test_equality_compares_the_operator_the_time_and_the_modes():
+    hamil = FermionOperator.from_dict({((True, 0), (False, 1)): 1.0, ((True, 1), (False, 0)): 1.0})
+    other = FermionOperator.from_dict({((True, 0), (False, 1)): 2.0, ((True, 1), (False, 0)): 2.0})
+    evo = Evolution(2, hamil, time=0.5)
+
+    # the synthesis and the atomic flag are not part of what the gate is
+    assert evo == Evolution(2, hamil, time=0.5, atomic=True)
+    assert hash(evo) == hash(Evolution(2, hamil, time=0.5))
+    assert evo != Evolution(2, other, time=0.5)
+    assert evo != Evolution(2, hamil, time=0.25)
+    assert evo != Evolution(3, hamil, time=0.5)
+
+
+def test_equality_does_not_depend_on_the_order_of_the_terms():
+    forward = FermionOperator.from_dict(
+        {((True, 0), (False, 1)): 1.0, ((True, 1), (False, 0)): 1.0}
+    )
+    backward = FermionOperator.from_dict(
+        {((True, 1), (False, 0)): 1.0, ((True, 0), (False, 1)): 1.0}
+    )
+    assert Evolution(2, forward, time=0.5) == Evolution(2, backward, time=0.5)
+
+
+def test_equiv_compares_up_to_a_tolerance():
+    hamil = FermionOperator.from_dict({((True, 0), (False, 1)): 1.0, ((True, 1), (False, 0)): 1.0})
+    close = FermionOperator.from_dict(
+        {((True, 0), (False, 1)): 1.0 + 1e-12, ((True, 1), (False, 0)): 1.0}
+    )
+    evo = Evolution(2, hamil, time=0.5)
+
+    assert evo.equiv(Evolution(2, close, time=0.5 + 1e-12))
+    assert not evo.equiv(Evolution(2, close, time=0.5 + 1e-12), atol=1e-14)
+    assert not evo.equiv(Evolution(2, hamil, time=0.6))

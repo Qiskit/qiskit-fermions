@@ -26,6 +26,15 @@ from qiskit_fermions.circuit.library import (
 from ...utils import random_unitary
 
 
+def test_equality_compares_the_occupation_and_the_unitary():
+    unitary = random_unitary(3, seed=1)
+    gate = PrepareSlaterDeterminant([True, False, True], unitary)
+    assert gate == PrepareSlaterDeterminant([True, False, True], unitary.copy())
+    assert hash(gate) == hash(PrepareSlaterDeterminant([True, False, True], unitary))
+    assert gate != PrepareSlaterDeterminant([True, True, False], unitary)
+    assert gate != PrepareSlaterDeterminant([True, False, True], random_unitary(3, seed=2))
+
+
 def test_prepare_slater_determinant_gate():
     """The gate stores its occupation and rotation and reports the right mode count."""
     occupation = [True, True, False, False]
