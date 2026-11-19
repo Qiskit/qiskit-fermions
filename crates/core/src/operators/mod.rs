@@ -152,6 +152,20 @@ pub trait OperatorTrait {
     /// the coefficients, so that they need not be reimplemented per operator type.
     fn coeffs(&self) -> &[Complex64];
 
+    /// Returns the number of terms held.
+    ///
+    /// Counted off the coefficients rather than the term boundaries. The two agree for any coherent
+    /// operator (`boundaries` carries one offset per term plus a trailing one), but the coefficients
+    /// are the better basis on two counts: no arithmetic is needed, and the incremental builders push
+    /// a term's coefficient *before* its boundary, so this already counts a term mid-append while
+    /// `boundaries.len() - 1` would not.
+    ///
+    /// Note this counts *terms*, not the factors within them; for the latter, reach for the operator's
+    /// own index buffers.
+    fn num_terms(&self) -> usize {
+        self.coeffs().len()
+    }
+
     /// Returns the operator's group indices, one per term, or `None` if it tracks no groups.
     ///
     /// This is the single point of access through which the trait's group-related provided methods
@@ -193,11 +207,11 @@ pub trait OperatorTrait {
     /// [`clear_groups`](Self::clear_groups).
     fn set_groups(&mut self, groups: Option<Vec<u32>>) -> Result<(), CoherenceError> {
         if let Some(groups) = &groups
-            && groups.len() != self.coeffs().len()
+            && groups.len() != self.num_terms()
         {
             return Err(CoherenceError::GroupLengthMismatch {
                 num_groups: groups.len(),
-                num_terms: self.coeffs().len(),
+                num_terms: self.num_terms(),
             });
         }
         self._write_groups(groups);

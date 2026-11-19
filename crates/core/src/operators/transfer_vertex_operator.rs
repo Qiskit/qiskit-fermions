@@ -10,7 +10,11 @@
 // copyright notice, and modified files need to carry a notice indicating
 // that they have been altered from the originals.
 
+use crate::operators::terms::grouping::clash::{ClashError, Edge};
 use crate::operators::terms::grouping::group_term_range;
+use crate::operators::terms::majorana_expansion::{
+    GENERATORS_PER_MODE, MajoranaExpansion, Monomial, expand_vertex_term,
+};
 use crate::operators::{
     CoherenceError, GroupedTerm, OperatorMacro, OperatorTrait, ScaledTerm, TermSortKey,
 };
@@ -226,6 +230,19 @@ impl TransferVertexOperator {
         }
     }
 
+    /// Returns the pairs of terms that do **not** commute, i.e. this operator's *clash graph*.
+    ///
+    /// Each pair is reported once as `(i, j)` with `i < j`, in ascending order, indexing into this
+    /// operator's current term order. Pass the edges to a graph library to color or draw them.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`ClashError::TooManyTerms`] if the operator has more terms than `u32` indices can
+    /// address.
+    pub fn non_commutation_edges(&self) -> Result<Vec<Edge>, ClashError> {
+        crate::operators::terms::grouping::clash::non_commutation_edges(self)
+    }
+
     /// Returns an equivalent operator with normal-ordered terms.
     ///
     /// `reduce` additionally contracts adjacent generators via the identities in [`_reduce_once`].
@@ -401,8 +418,8 @@ fn _compose(
     // The output size is known exactly: one term per (left, right) pair, each holding the factors
     // of both inputs. Reserving up front turns the inner loop's repeated `extend_from_slice` into
     // plain memcpy without the reallocation-and-copy rounds an unreserved vector would incur.
-    let num_terms = a.coeffs.len() * b.coeffs.len();
-    let num_factors = a.left_indices.len() * b.coeffs.len() + b.left_indices.len() * a.coeffs.len();
+    let num_terms = a.num_terms() * b.num_terms();
+    let num_factors = a.left_indices.len() * b.num_terms() + b.left_indices.len() * a.num_terms();
     let mut coeffs = Vec::with_capacity(num_terms);
     let mut left_indices = Vec::with_capacity(num_factors);
     let mut right_indices = Vec::with_capacity(num_factors);
@@ -492,7 +509,7 @@ impl OperatorTrait for TransferVertexOperator {
     }
 
     fn adjoint(&self) -> Self {
-        let mut coeffs = Vec::with_capacity(self.coeffs.len());
+        let mut coeffs = Vec::with_capacity(self.num_terms());
         let mut left_indices = Vec::with_capacity(self.left_indices.len());
         let mut right_indices = Vec::with_capacity(self.right_indices.len());
 
@@ -718,6 +735,30 @@ impl OperatorTrait for TransferVertexOperator {
             // preserves `groups` rather than dropping it.
             groups: self.groups.clone(),
         })
+    }
+}
+
+impl MajoranaExpansion for TransferVertexOperator {
+    fn majorana_monomials_into(&self, index: usize, out: &mut Vec<Monomial>) {
+        let range = self.boundaries[index]..self.boundaries[index + 1];
+        expand_vertex_term(
+            &self.left_indices[range.clone()],
+            &self.right_indices[range],
+            out,
+            // `V_j = -i gamma_{2j} gamma_{2j+1}`, `T_jk = (i/2) gamma_{2j+1} gamma_{2k}` for `j < k`,
+            // and `T_kj = -(i/2) gamma_{2j} gamma_{2k+1}`. Unlike the edge operator, the two
+            // orientations of a bond have *different* supports, which is what distinguishes one
+            // direction of a transfer from the other.
+            |left, right| {
+                if left == right {
+                    (GENERATORS_PER_MODE * left, GENERATORS_PER_MODE * left + 1)
+                } else if left < right {
+                    (GENERATORS_PER_MODE * left + 1, GENERATORS_PER_MODE * right)
+                } else {
+                    (GENERATORS_PER_MODE * right, GENERATORS_PER_MODE * left + 1)
+                }
+            },
+        );
     }
 }
 

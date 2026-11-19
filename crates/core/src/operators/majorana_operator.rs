@@ -10,7 +10,11 @@
 // copyright notice, and modified files need to carry a notice indicating
 // that they have been altered from the originals.
 
+use crate::operators::terms::grouping::clash::{ClashError, Edge};
 use crate::operators::terms::grouping::group_term_range;
+use crate::operators::terms::majorana_expansion::{
+    MajoranaExpansion, Monomial, product_support, single_monomial,
+};
 use crate::operators::{
     CoherenceError, GroupedTerm, OperatorMacro, OperatorTrait, ScaledTerm, TermSortKey,
 };
@@ -200,6 +204,19 @@ impl MajoranaOperator {
         }
     }
 
+    /// Returns the pairs of terms that do **not** commute, i.e. this operator's *clash graph*.
+    ///
+    /// Each pair is reported once as `(i, j)` with `i < j`, in ascending order, indexing into this
+    /// operator's current term order. Pass the edges to a graph library to color or draw them.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`ClashError::TooManyTerms`] if the operator has more terms than `u32` indices can
+    /// address.
+    pub fn non_commutation_edges(&self) -> Result<Vec<Edge>, ClashError> {
+        crate::operators::terms::grouping::clash::non_commutation_edges(self)
+    }
+
     pub fn normal_ordered(&self, ascending: bool, reduce: bool) -> Self {
         let mut coeffs = vec![];
         let mut modes = vec![];
@@ -330,8 +347,8 @@ fn _compose(a: &MajoranaOperator, b: &MajoranaOperator) -> (Vec<Complex64>, Vec<
     // The output size is known exactly: one term per (left, right) pair, each holding the factors
     // of both inputs. Reserving up front turns the inner loop's repeated `extend_from_slice` into
     // plain memcpy without the reallocation-and-copy rounds an unreserved vector would incur.
-    let num_terms = a.coeffs.len() * b.coeffs.len();
-    let num_factors = a.modes.len() * b.coeffs.len() + b.modes.len() * a.coeffs.len();
+    let num_terms = a.num_terms() * b.num_terms();
+    let num_factors = a.modes.len() * b.num_terms() + b.modes.len() * a.num_terms();
     let mut coeffs = Vec::with_capacity(num_terms);
     let mut modes = Vec::with_capacity(num_factors);
     let mut boundaries = Vec::with_capacity(num_terms + 1);
@@ -605,6 +622,17 @@ impl OperatorTrait for MajoranaOperator {
             // preserves `groups` rather than dropping it.
             groups: self.groups.clone(),
         })
+    }
+}
+
+impl MajoranaExpansion for MajoranaOperator {
+    fn majorana_monomials_into(&self, index: usize, out: &mut Vec<Monomial>) {
+        // The stored mode indices already *are* Majorana generator indices.
+        let generators = self.modes[self.boundaries[index]..self.boundaries[index + 1]]
+            .iter()
+            .map(|&generator| u64::from(generator))
+            .collect();
+        single_monomial(product_support(generators), out);
     }
 }
 

@@ -12,4 +12,5 @@
 
 pub mod filtering;
 pub mod grouping;
+pub mod majorana_expansion;
 pub mod ordering;

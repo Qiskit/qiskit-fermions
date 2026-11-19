@@ -28,14 +28,14 @@ fn retain_terms(op: &mut FermionOperator, keep: impl Fn(FermionOperatorTermView)
     // We compute the new flat storage for the surviving terms into fresh vectors and only assign
     // them back at the end, because `op.iter()` borrows `op` immutably for the duration of the
     // loop.
-    let mut coeffs = Vec::with_capacity(op.coeffs.len());
+    let mut coeffs = Vec::with_capacity(op.num_terms());
     let mut actions = Vec::with_capacity(op.actions.len());
     let mut modes = Vec::with_capacity(op.modes.len());
     let mut boundaries = vec![0usize];
     let mut groups = op
         .groups
         .as_ref()
-        .map(|_| Vec::with_capacity(op.coeffs.len()));
+        .map(|_| Vec::with_capacity(op.num_terms()));
     // Maps an original group index to its reassigned, contiguous index. Entries are created lazily
     // in order of first appearance among the surviving terms, so the resulting indices span
     // 0..k without gaps even when entire groups are dropped.

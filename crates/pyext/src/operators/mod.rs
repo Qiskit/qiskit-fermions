@@ -75,7 +75,7 @@ macro_rules! impl_operator_magic_methods {
             }
 
             fn __len__(&self) -> usize {
-                self.inner.boundaries.len() - 1
+                ::qiskit_fermions_core::operators::OperatorTrait::num_terms(&self.inner)
             }
 
             fn __deepcopy__(&self, _memo: &Bound<'_, PyAny>) -> Self {

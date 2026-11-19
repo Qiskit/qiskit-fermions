@@ -11,6 +11,7 @@
 // that they have been altered from the originals.
 
 use crate::exit_codes::ExitCode;
+use crate::operators::leak_edges;
 use crate::pointers::{const_ptr_as_ref, mut_ptr_as_ref, slice_from_ptr};
 
 use num_complex::Complex64;
@@ -926,7 +927,7 @@ pub unsafe extern "C" fn qf_transfer_op_add(
 ///     QfTransferVertexOperator *result = qf_transfer_op_scaled_add(one, other, &factor);
 ///
 ///     QfTransferVertexOperator *simplified = qf_transfer_op_simplify(result, 1e-10);
-///     assert(qf_transfer_op_len(simplified) == 0);
+///     assert(qf_transfer_op_num_terms(simplified) == 0);
 ///
 /// @endrst
 #[unsafe(no_mangle)]
@@ -970,7 +971,7 @@ pub unsafe extern "C" fn qf_transfer_op_scaled_add(
 ///
 ///     qf_transfer_op_add_inplace(left, right);
 ///
-///     assert(qf_transfer_op_len(left) == 2);
+///     assert(qf_transfer_op_num_terms(left) == 2);
 ///
 /// @endrst
 #[unsafe(no_mangle)]
@@ -1015,7 +1016,7 @@ pub unsafe extern "C" fn qf_transfer_op_add_inplace(
 ///     qf_transfer_op_scaled_add_inplace(left, right, &factor);
 ///
 ///     QfTransferVertexOperator *simplified = qf_transfer_op_simplify(left, 1e-10);
-///     assert(qf_transfer_op_len(simplified) == 0);
+///     assert(qf_transfer_op_num_terms(simplified) == 0);
 ///
 /// @endrst
 #[unsafe(no_mangle)]
@@ -1281,7 +1282,7 @@ pub unsafe extern "C" fn qf_transfer_op_ichop(op: *mut TransferVertexOperator, a
 ///
 ///     QfTransferVertexOperator *canon = qf_transfer_op_simplify(op, 1e-4);
 ///
-///     assert(qf_transfer_op_len(canon) == 1);
+///     assert(qf_transfer_op_num_terms(canon) == 1);
 ///
 /// @endrst
 #[unsafe(no_mangle)]
@@ -1506,15 +1507,15 @@ pub unsafe extern "C" fn qf_transfer_op_equiv(
 ///     QkComplex64 coeff = {1.0, 0.0};
 ///     qf_transfer_op_add_term(op, 2, left, right, &coeff);
 ///
-///     assert(qf_transfer_op_len(op) == 1);
+///     assert(qf_transfer_op_num_terms(op) == 1);
 ///
 /// @endrst
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn qf_transfer_op_len(op: *const TransferVertexOperator) -> usize {
+pub unsafe extern "C" fn qf_transfer_op_num_terms(op: *const TransferVertexOperator) -> usize {
     // SAFETY: Per documentation, the pointers are non-null and aligned.
     let op = unsafe { const_ptr_as_ref(op) };
 
-    op.boundaries.len() - 1
+    OperatorTrait::num_terms(op)
 }
 
 /// @ingroup qf_transfer_op
@@ -1578,5 +1579,70 @@ pub unsafe extern "C" fn qf_transfer_op_relabel_modes(
     };
 
     *op = relabeled_op;
+    ExitCode::Success
+}
+
+/// @ingroup qf_transfer_op
+///
+/// @brief Gets the pairs of terms of an operator that do not commute.
+///
+/// @param op A pointer to the operator whose terms to relate.
+/// @param edges_out A pointer to the array pointer into which to write the edges. The array is
+///     allocated by this function and must be released with :c:func:`qf_edges_free`.
+/// @param num_edges_out A pointer to the integer into which to write the number of edges.
+///
+/// @return An exit code. ``QfExitCode_ValueError`` is returned if the operator has more than
+///     :math:`2^{32}` terms, which the ``uint32_t`` indices cannot address, in which case nothing is
+///     allocated and the out-pointers are left untouched.
+///
+/// @rst
+///
+/// This is the operator's *clash graph*: one node per term, and an edge between every pair of terms
+/// that do **not** commute. Each pair is reported once as ``(i, j)`` with ``i < j``, in ascending
+/// order, flattened into ``2 * num_edges_out`` indices. The indices refer to the operator's current
+/// term order.
+///
+/// A term whose coefficient is exactly zero commutes with every other term, so it never has an edge.
+/// Every other term counts as written, so call :c:func:`qf_transfer_op_simplify` first: it removes
+/// near-zero terms and merges duplicates, either of which would otherwise inflate the graph. It can
+/// also reorder the terms, so compute the edges on its result.
+///
+/// The array holds one pair per clash, so it grows quadratically with the number of terms. To group a
+/// large operator, use :c:func:`qf_transfer_op_group_terms_by_non_commutation`, which never builds
+/// it.
+///
+/// Unlike the ``qf_transfer_op_num_*``/``qf_transfer_op_get_*`` pairs elsewhere in this API, the edge count is not
+/// available separately: it is only known once the graph has been built, and building it is the
+/// quadratic part. Allocating here therefore pays that cost once rather than twice.
+///
+/// .. code-block:: c
+///     :linenos:
+///
+///     uint32_t *edges = NULL;
+///     uint64_t num_edges = 0;
+///     QfExitCode exit = qf_transfer_op_non_commutation_edges(op, &edges, &num_edges);
+///
+///     for (uint64_t i = 0; i < num_edges; i++) {
+///         uint32_t left = edges[2 * i];
+///         uint32_t right = edges[2 * i + 1];
+///     }
+///
+///     qf_edges_free(edges, num_edges);
+///
+/// @endrst
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn qf_transfer_op_non_commutation_edges(
+    op: *const TransferVertexOperator,
+    edges_out: *mut *mut u32,
+    num_edges_out: *mut u64,
+) -> ExitCode {
+    // SAFETY: Per documentation, the pointer is non-null and aligned.
+    let op = unsafe { const_ptr_as_ref(op) };
+
+    let Ok(edges) = op.non_commutation_edges() else {
+        return ExitCode::ValueError;
+    };
+    // SAFETY: Per documentation, both out-pointers are non-null and aligned.
+    unsafe { leak_edges(edges, edges_out, num_edges_out) };
     ExitCode::Success
 }

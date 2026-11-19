@@ -10,7 +10,11 @@
 // copyright notice, and modified files need to carry a notice indicating
 // that they have been altered from the originals.
 
+use crate::operators::terms::grouping::clash::{ClashError, Edge};
 use crate::operators::terms::grouping::group_term_range;
+use crate::operators::terms::majorana_expansion::{
+    GENERATORS_PER_MODE, MajoranaExpansion, Monomial, expand_vertex_term,
+};
 use crate::operators::{
     CoherenceError, GroupedTerm, OperatorMacro, OperatorTrait, ScaledTerm, TermSortKey,
 };
@@ -224,6 +228,19 @@ impl EdgeVertexOperator {
                 )
             }
         }
+    }
+
+    /// Returns the pairs of terms that do **not** commute, i.e. this operator's *clash graph*.
+    ///
+    /// Each pair is reported once as `(i, j)` with `i < j`, in ascending order, indexing into this
+    /// operator's current term order. Pass the edges to a graph library to color or draw them.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`ClashError::TooManyTerms`] if the operator has more terms than `u32` indices can
+    /// address.
+    pub fn non_commutation_edges(&self) -> Result<Vec<Edge>, ClashError> {
+        crate::operators::terms::grouping::clash::non_commutation_edges(self)
     }
 
     /// Returns an equivalent operator with normal-ordered terms.
@@ -459,8 +476,8 @@ fn _compose(
     // The output size is known exactly: one term per (left, right) pair, each holding the factors
     // of both inputs. Reserving up front turns the inner loop's repeated `extend_from_slice` into
     // plain memcpy without the reallocation-and-copy rounds an unreserved vector would incur.
-    let num_terms = a.coeffs.len() * b.coeffs.len();
-    let num_factors = a.left_indices.len() * b.coeffs.len() + b.left_indices.len() * a.coeffs.len();
+    let num_terms = a.num_terms() * b.num_terms();
+    let num_factors = a.left_indices.len() * b.num_terms() + b.left_indices.len() * a.num_terms();
     let mut coeffs = Vec::with_capacity(num_terms);
     let mut left_indices = Vec::with_capacity(num_factors);
     let mut right_indices = Vec::with_capacity(num_factors);
@@ -544,7 +561,7 @@ impl OperatorTrait for EdgeVertexOperator {
     }
 
     fn adjoint(&self) -> Self {
-        let mut coeffs = Vec::with_capacity(self.coeffs.len());
+        let mut coeffs = Vec::with_capacity(self.num_terms());
         let mut left_indices = Vec::with_capacity(self.left_indices.len());
         let mut right_indices = Vec::with_capacity(self.right_indices.len());
 
@@ -770,6 +787,28 @@ impl OperatorTrait for EdgeVertexOperator {
             // preserves `groups` rather than dropping it.
             groups: self.groups.clone(),
         })
+    }
+}
+
+impl MajoranaExpansion for EdgeVertexOperator {
+    fn majorana_monomials_into(&self, index: usize, out: &mut Vec<Monomial>) {
+        let range = self.boundaries[index]..self.boundaries[index + 1];
+        expand_vertex_term(
+            &self.left_indices[range.clone()],
+            &self.right_indices[range],
+            out,
+            // `V_j = -i gamma_{2j} gamma_{2j+1}` and `E_jk = -i gamma_{2j} gamma_{2k}`, both written
+            // on the *first* generator of each mode. `E_jk` and `E_kj` therefore share a support,
+            // which is right: they differ only by the sign that `E_kj = -E_jk` records, and the sign
+            // is not part of the support.
+            |left, right| {
+                if left == right {
+                    (GENERATORS_PER_MODE * left, GENERATORS_PER_MODE * left + 1)
+                } else {
+                    (GENERATORS_PER_MODE * left, GENERATORS_PER_MODE * right)
+                }
+            },
+        );
     }
 }
 

@@ -17,6 +17,9 @@ from qiskit_fermions._lib.operators.operators_terms.grouping.analysis import (
     groups_are_hermitian,
     groups_have_uniform_coeffs,
 )
+from qiskit_fermions._lib.operators.operators_terms.grouping.clash import (
+    group_terms_by_non_commutation,
+)
 from qiskit_fermions._lib.operators.operators_terms.grouping.electronic_structure import (
     group_terms_by_electronic_structure,
 )
@@ -24,6 +27,7 @@ from qiskit_fermions._lib.operators.operators_terms.grouping.electronic_structur
 __all__ = [
     "group_coeff_means",
     "group_terms_by_electronic_structure",
+    "group_terms_by_non_commutation",
     "groups_are_hermitian",
     "groups_have_uniform_coeffs",
 ]

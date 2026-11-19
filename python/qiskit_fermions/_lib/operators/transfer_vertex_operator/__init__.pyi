@@ -979,6 +979,64 @@ class TransferVertexOperator:
             ValueError: if ``permutation`` contains duplicate entries, or is too short to relabel
                 some mode the operator acts upon.
         """
+    def non_commutation_edges(self) -> builtins.list[tuple[builtins.int, builtins.int]]:
+        r"""
+        Return the pairs of terms that do **not** commute, i.e. this operator's *clash graph*.
+        
+        Each pair is reported once as ``(i, j)`` with ``i < j``, in ascending order, indexing into this
+        operator's current term order. This is the fermionic counterpart of
+        :meth:`~qiskit.quantum_info.PauliList.noncommutation_graph`, one level up the stack: the
+        relation is read off the fermionic algebra rather than off a qubit mapping, so it holds
+        independently of which mapper is applied afterwards.
+        
+        Commutation relates two whole terms, so this is an all-to-all comparison over the terms,
+        independent of how many generators any one of them multiplies together.
+        
+        A term whose coefficient is exactly zero commutes with every other term, so it never has an
+        edge. Every other term counts as written, so call :meth:`~.TransferVertexOperator.simplify` first: it removes
+        near-zero terms and merges duplicates, either of which would otherwise inflate the graph. It
+        can also reorder the terms, so compute the edges on its result.
+        
+        The list holds one pair per clash, so it grows quadratically with the number of terms. To
+        group a large operator, use :func:`.group_terms_by_non_commutation`, which never builds it.
+        
+        Returns:
+            The clashing index pairs, sorted ascending.
+        
+        Raises:
+            ValueError: if the operator has more than :math:`2^{32}` terms, which its 32-bit term
+                indices cannot address.
+        
+        .. note::
+            Indices refer to the operator's *current* term order, which is not preserved across every
+            transformation. Build the operator from its sparse arrays, or apply
+            :func:`.canonical_order` first, when the result has to be reproducible.
+        
+        Examples:
+            Build a graph from the edges with any graph library, for example ``rustworkx``:
+        
+            .. plot::
+               :include-source:
+               :nofigs:
+               :context: close-figs
+        
+                >>> import rustworkx as rx
+                >>> from qiskit_fermions.operators import TransferVertexOperator
+                >>>
+                >>> # built from the sparse arrays rather than a dictionary, because only the former
+                >>> # fixes the term order that the indices below refer to
+                >>> op = TransferVertexOperator([1.0, 1.0, 1.0], [0, 2, 3], [1, 1, 4], [0, 1, 2, 3])
+                >>> edges = op.non_commutation_edges()
+                >>> edges
+                [(0, 1)]
+                >>> graph = rx.PyGraph()
+                >>> _ = graph.add_nodes_from(range(len(op)))
+                >>> _ = graph.add_edges_from_no_data(edges)
+        
+            Terms 0 and 1 are two transfers into the same target, which anticommute; term 2 is
+            disjoint from both and stays isolated. Note a head-to-tail chain such as
+            ``T_01, T_12`` would *commute* and so produce no edge.
+        """
     def __getnewargs__(self) -> tuple[builtins.list[builtins.complex], builtins.list[builtins.int], builtins.list[builtins.int], builtins.list[builtins.int]]:
         r"""
         Returns the constructor arguments needed to pickle this operator.

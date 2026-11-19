@@ -11,4 +11,5 @@
 // that they have been altered from the originals.
 
 pub mod analysis;
+pub mod clash;
 pub mod electronic_structure;

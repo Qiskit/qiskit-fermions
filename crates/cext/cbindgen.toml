@@ -69,6 +69,30 @@ void qf_transfer_op_group_coeff_means(const QfTransferVertexOperator *op, double
 void qf_transfer_op_groups_are_hermitian(const QfTransferVertexOperator *op, double atol, bool *hermitian_out);
 /// @ingroup qf_operator_terms_grouping
 void qf_transfer_op_groups_have_uniform_coeffs(const QfTransferVertexOperator *op, double atol, bool abs, bool *uniform_out);
+
+/// @ingroup qf_operators
+void qf_edges_free(uint32_t *edges, uint64_t num_edges);
+
+/// @ingroup qf_ferm_op
+QfExitCode qf_ferm_op_non_commutation_edges(const QfFermionOperator *op, uint32_t **edges_out, uint64_t *num_edges_out);
+/// @ingroup qf_operator_terms_grouping
+QfExitCode qf_ferm_op_group_terms_by_non_commutation(QfFermionOperator *op);
+
+/// @ingroup qf_maj_op
+QfExitCode qf_maj_op_non_commutation_edges(const QfMajoranaOperator *op, uint32_t **edges_out, uint64_t *num_edges_out);
+/// @ingroup qf_operator_terms_grouping
+QfExitCode qf_maj_op_group_terms_by_non_commutation(QfMajoranaOperator *op);
+
+/// @ingroup qf_edge_op
+QfExitCode qf_edge_op_non_commutation_edges(const QfEdgeVertexOperator *op, uint32_t **edges_out, uint64_t *num_edges_out);
+/// @ingroup qf_operator_terms_grouping
+QfExitCode qf_edge_op_group_terms_by_non_commutation(QfEdgeVertexOperator *op);
+
+/// @ingroup qf_transfer_op
+QfExitCode qf_transfer_op_non_commutation_edges(const QfTransferVertexOperator *op, uint32_t **edges_out, uint64_t *num_edges_out);
+/// @ingroup qf_operator_terms_grouping
+QfExitCode qf_transfer_op_group_terms_by_non_commutation(QfTransferVertexOperator *op);
+
 """
 
 [parse]

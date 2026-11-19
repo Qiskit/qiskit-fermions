@@ -212,9 +212,9 @@ static int test_scaled_add(void) {
     // Scaling by zero still appends the terms; only their coefficients vanish.
     QkComplex64 zero_factor = {0.0, 0.0};
     QfEdgeVertexOperator *scaled_zero = qf_edge_op_scaled_add(op_a, op_b, &zero_factor);
-    passed_all = passed_all && (qf_edge_op_len(scaled_zero) == qf_edge_op_len(added));
+    passed_all = passed_all && (qf_edge_op_num_terms(scaled_zero) == qf_edge_op_num_terms(added));
     QfEdgeVertexOperator *chopped = qf_edge_op_simplify(scaled_zero, 1e-10);
-    passed_all = passed_all && (qf_edge_op_len(chopped) == qf_edge_op_len(op_a));
+    passed_all = passed_all && (qf_edge_op_num_terms(chopped) == qf_edge_op_num_terms(op_a));
 
     // Appending terms drops the grouping, exactly as `add` does.
     uint32_t groups_in[1] = {0};
@@ -417,7 +417,7 @@ static int test_simplify(void) {
 
     QfEdgeVertexOperator *canon = qf_edge_op_simplify(op, 1e-4);
 
-    bool correct_len = qf_edge_op_len(canon) == 1;
+    bool correct_len = qf_edge_op_num_terms(canon) == 1;
 
     QkComplex64 *coeffs_out;
     uint64_t coeffs_len;
@@ -425,7 +425,7 @@ static int test_simplify(void) {
     bool correct_coeff = (coeffs_len == 1) && (coeffs_out[0].re > 9.9e-4);
 
     qf_edge_op_ichop(op, 1e-4);
-    bool ichop_dropped_all = qf_edge_op_len(op) == 0;
+    bool ichop_dropped_all = qf_edge_op_num_terms(op) == 0;
 
     qf_edge_op_free(op);
     qf_edge_op_free(canon);
@@ -563,14 +563,14 @@ static int test_is_hermitian(void) {
 
 static int test_len(void) {
     QfEdgeVertexOperator *op = qf_edge_op_zero();
-    bool empty = qf_edge_op_len(op) == 0;
+    bool empty = qf_edge_op_num_terms(op) == 0;
 
     uint32_t left[2] = {0, 1};
     uint32_t right[2] = {1, 2};
     QkComplex64 coeff = {1.0, 0.0};
     qf_edge_op_add_term(op, 2, left, right, &coeff);
 
-    bool one_term = qf_edge_op_len(op) == 1;
+    bool one_term = qf_edge_op_num_terms(op) == 1;
 
     qf_edge_op_free(op);
 
@@ -674,7 +674,7 @@ static int test_groups(void) {
     QfEdgeVertexOperator *group_ops[2];
     qf_edge_op_split_out_groups(op, NULL, 0, group_ops);
     bool correct_split_len =
-        (qf_edge_op_len(group_ops[0]) == 2) && (qf_edge_op_len(group_ops[1]) == 2);
+        (qf_edge_op_num_terms(group_ops[0]) == 2) && (qf_edge_op_num_terms(group_ops[1]) == 2);
 
     // a duplicate index must be materialized once per occurrence, not deduplicated
     uint32_t group_indices[2] = {1, 1};
@@ -778,7 +778,7 @@ static int test_map_to_fermion(void) {
 
     // `V(0) = 1 - 2 a^dag_0 a_0` is Hermitian, and so is its fermionic image.
     bool is_hermitian = qf_ferm_op_is_hermitian(fer_op, 1e-10);
-    bool non_empty = qf_ferm_op_len(fer_op) > 0;
+    bool non_empty = qf_ferm_op_num_terms(fer_op) > 0;
 
     qf_edge_op_free(op);
     qf_ferm_op_free(fer_op);
@@ -799,7 +799,7 @@ static int test_map_to_majorana(void) {
     QfMajoranaOperator *maj_op = qf_edge_vertex_to_majorana(op);
 
     bool is_hermitian = qf_maj_op_is_hermitian(maj_op, 1e-10);
-    bool non_empty = qf_maj_op_len(maj_op) > 0;
+    bool non_empty = qf_maj_op_num_terms(maj_op) > 0;
 
     qf_edge_op_free(op);
     qf_maj_op_free(maj_op);

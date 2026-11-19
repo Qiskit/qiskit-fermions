@@ -214,9 +214,9 @@ static int test_scaled_add(void) {
     // Scaling by zero still appends the terms; only their coefficients vanish.
     QkComplex64 zero_factor = {0.0, 0.0};
     QfFermionOperator *scaled_zero = qf_ferm_op_scaled_add(op_a, op_b, &zero_factor);
-    passed_all = passed_all && (qf_ferm_op_len(scaled_zero) == qf_ferm_op_len(added));
+    passed_all = passed_all && (qf_ferm_op_num_terms(scaled_zero) == qf_ferm_op_num_terms(added));
     QfFermionOperator *chopped = qf_ferm_op_simplify(scaled_zero, 1e-10);
-    passed_all = passed_all && (qf_ferm_op_len(chopped) == qf_ferm_op_len(op_a));
+    passed_all = passed_all && (qf_ferm_op_num_terms(chopped) == qf_ferm_op_num_terms(op_a));
 
     // Appending terms drops the grouping, exactly as `add` does.
     uint32_t groups_in[1] = {0};
@@ -815,7 +815,7 @@ static int test_len(void) {
     QkComplex64 coeff = {1.0, 0.0};
     qf_ferm_op_add_term(op, 4, action, modes, &coeff);
 
-    size_t len = qf_ferm_op_len(op);
+    size_t len = qf_ferm_op_num_terms(op);
 
     bool correct = len == 1;
 

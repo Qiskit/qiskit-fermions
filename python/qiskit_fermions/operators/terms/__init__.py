@@ -37,6 +37,7 @@ a collection of functions which determine the grouping information automatically
    :toctree: ../stubs/
 
    group_terms_by_electronic_structure
+   group_terms_by_non_commutation
 
 Analysis
 ^^^^^^^^
@@ -100,6 +101,7 @@ from .filtering import filter_diagonal_terms
 from .grouping import (
     group_coeff_means,
     group_terms_by_electronic_structure,
+    group_terms_by_non_commutation,
     groups_are_hermitian,
     groups_have_uniform_coeffs,
 )
@@ -111,6 +113,7 @@ __all__ = [
     "group_coeff_means",
     "group_order",
     "group_terms_by_electronic_structure",
+    "group_terms_by_non_commutation",
     "groups_are_hermitian",
     "groups_have_uniform_coeffs",
     "order_terms",

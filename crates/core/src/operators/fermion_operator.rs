@@ -10,7 +10,11 @@
 // copyright notice, and modified files need to carry a notice indicating
 // that they have been altered from the originals.
 
+use crate::operators::terms::grouping::clash::{ClashError, Edge, MAX_FERMION_TERM_DEGREE};
 use crate::operators::terms::grouping::group_term_range;
+use crate::operators::terms::majorana_expansion::{
+    GENERATORS_PER_MODE, MajoranaExpansion, Monomial, cancel_repeated_generators, sort_sign,
+};
 use crate::operators::{
     CoherenceError, GroupedTerm, OperatorMacro, OperatorTrait, ScaledTerm, TermSortKey,
 };
@@ -224,6 +228,21 @@ impl FermionOperator {
         }
     }
 
+    /// Returns the pairs of terms that do **not** commute, i.e. this operator's *clash graph*.
+    ///
+    /// Each pair is reported once as `(i, j)` with `i < j`, in ascending order, indexing into this
+    /// operator's current term order. Pass the edges to a graph library to color or draw them.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`ClashError::DegreeTooLarge`] if a term with a non-zero coefficient exceeds
+    /// [`MAX_FERMION_TERM_DEGREE`]: each factor of a fermionic term is a sum of two Majorana
+    /// generators, so the expansion this needs grows as `2^degree`. Returns
+    /// [`ClashError::TooManyTerms`] if the operator has more terms than `u32` indices can address.
+    pub fn non_commutation_edges(&self) -> Result<Vec<Edge>, ClashError> {
+        crate::operators::terms::grouping::clash::non_commutation_edges(self)
+    }
+
     pub fn normal_ordered(&self, sandwich: Option<bool>) -> Self {
         let mut result = Self::zero();
         self.iter()
@@ -379,8 +398,8 @@ fn _compose(
     // The output size is known exactly: one term per (left, right) pair, each holding the factors
     // of both inputs. Reserving up front turns the inner loop's repeated `extend_from_slice` into
     // plain memcpy without the reallocation-and-copy rounds an unreserved vector would incur.
-    let num_terms = a.coeffs.len() * b.coeffs.len();
-    let num_factors = a.modes.len() * b.coeffs.len() + b.modes.len() * a.coeffs.len();
+    let num_terms = a.num_terms() * b.num_terms();
+    let num_factors = a.modes.len() * b.num_terms() + b.modes.len() * a.num_terms();
     let mut coeffs = Vec::with_capacity(num_terms);
     let mut actions = Vec::with_capacity(num_factors);
     let mut modes = Vec::with_capacity(num_factors);
@@ -665,9 +684,93 @@ impl OperatorTrait for FermionOperator {
     }
 }
 
+impl MajoranaExpansion for FermionOperator {
+    fn majorana_monomials_into(&self, index: usize, out: &mut Vec<Monomial>) {
+        out.clear();
+        let range = self.boundaries[index]..self.boundaries[index + 1];
+        let actions = &self.actions[range.clone()];
+        let modes = &self.modes[range];
+
+        // Each factor of the term is a *sum* of two Majorana generators,
+        //
+        //     a^dagger_p = (gamma_{2p} - i gamma_{2p+1}) / 2 ,
+        //     a_p        = (gamma_{2p} + i gamma_{2p+1}) / 2 ,
+        //
+        // so a term of degree `d` is a sum of `2^d` monomials: one per way of choosing which of the
+        // two generators each factor contributes. The loop below enumerates those choices by treating
+        // `choice` as a bitmask over factor positions, bit `p` selecting the odd generator at
+        // position `p`. Iterating `0..2^d` therefore visits every combination exactly once.
+        // A hard check rather than a debug assertion, because this method is public and the shift
+        // below silently wraps past 63 in a release build, truncating the expansion. Checking once per
+        // term costs nothing next to the `2^d` monomials that follow.
+        let degree = modes.len();
+        assert!(
+            degree <= MAX_FERMION_TERM_DEGREE,
+            "`check_expandable` must reject a term of degree {degree} before it is expanded"
+        );
+        out.reserve(1usize << degree);
+
+        // One buffer serves every choice, since only the support derived from it is kept.
+        let mut generators: Vec<u64> = Vec::with_capacity(degree);
+        for choice in 0..(1u64 << degree) {
+            let mut coeff = Complex64::ONE;
+            generators.clear();
+            for (position, (&mode, &is_creation)) in modes.iter().zip(actions).enumerate() {
+                let picks_odd = (choice >> position) & 1 == 1;
+                generators.push(GENERATORS_PER_MODE * u64::from(mode) + u64::from(picks_odd));
+                coeff *= match (picks_odd, is_creation) {
+                    (false, _) => Complex64::new(0.5, 0.0),
+                    (true, true) => Complex64::new(0.0, -0.5),
+                    (true, false) => Complex64::new(0.0, 0.5),
+                };
+            }
+
+            // The generators were collected in the term's written order, which is not canonical.
+            // Sorting them is what makes two monomials with the same support comparable, and costs one
+            // sign flip per transposition.
+            if sort_sign(&mut generators) {
+                coeff = -coeff;
+            }
+
+            // `support` ends up holding each *distinct surviving* generator once, so the
+            // `gamma_{2p} gamma_{2p}` choice of `a^dagger_p a_p` yields an *empty* support, i.e. the
+            // identity, with its amplitude carried entirely by `coeff`.
+            let mut support = generators.clone();
+            cancel_repeated_generators(&mut support);
+            out.push((support, coeff));
+        }
+    }
+
+    fn check_expandable(&self) -> Result<(), ClashError> {
+        // A term with an exactly zero coefficient is never expanded (see `expand_all`), so its degree
+        // costs nothing and must not be refused.
+        let terms = self.boundaries.windows(2).zip(&self.coeffs).enumerate();
+        for (term, (window, coeff)) in terms {
+            let degree = window[1] - window[0];
+            if degree > MAX_FERMION_TERM_DEGREE && *coeff != Complex64::ZERO {
+                return Err(ClashError::DegreeTooLarge { term, degree });
+            }
+        }
+        Ok(())
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    #[should_panic(expected = "`check_expandable` must reject a term of degree 64")]
+    fn test_expansion_refuses_an_unchecked_degree() {
+        let op = FermionOperator {
+            coeffs: vec![Complex64::ONE],
+            actions: vec![true; 64],
+            modes: (0..64).collect(),
+            boundaries: vec![0, 64],
+            groups: None,
+        };
+        op.majorana_monomials_into(0, &mut Vec::new());
+    }
 
     #[test]
     fn test_zero() {

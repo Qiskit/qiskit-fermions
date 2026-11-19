@@ -10,46 +10,10 @@
 // copyright notice, and modified files need to carry a notice indicating
 // that they have been altered from the originals.
 
-use pyo3::exceptions::PyTypeError;
 use pyo3::prelude::*;
 use pyo3_stub_gen::derive::*;
 
-use crate::operators::edge_vertex_operator::PyEdgeVertexOperator;
-use crate::operators::fermion_operator::PyFermionOperator;
-use crate::operators::majorana_operator::PyMajoranaOperator;
-use crate::operators::transfer_vertex_operator::PyTransferVertexOperator;
 use qiskit_fermions_core::operators::terms::grouping::analysis as core_analysis;
-
-/// Applies a group-analysis routine to whichever concrete operator type `op` holds.
-///
-/// The routines in `core` are generic over the operator type, but Python hands us an untyped object,
-/// so each wrapper resolves it here. `cast` is a borrowing type check: on a miss it returns a
-/// borrowed error without allocating a `PyErr`, and on a hit it hands back a `&Bound` we borrow
-/// from. Every routine reads through a shared borrow, so no clone of the input is needed.
-macro_rules! dispatch {
-    ($op:expr, $name:literal, |$inner:ident| $call:expr) => {{
-        if let Ok(bound) = $op.cast::<PyFermionOperator>() {
-            let $inner = &bound.borrow().inner;
-            return Ok($call);
-        }
-        if let Ok(bound) = $op.cast::<PyMajoranaOperator>() {
-            let $inner = &bound.borrow().inner;
-            return Ok($call);
-        }
-        if let Ok(bound) = $op.cast::<PyEdgeVertexOperator>() {
-            let $inner = &bound.borrow().inner;
-            return Ok($call);
-        }
-        if let Ok(bound) = $op.cast::<PyTransferVertexOperator>() {
-            let $inner = &bound.borrow().inner;
-            return Ok($call);
-        }
-        Err(PyTypeError::new_err(concat!(
-            $name,
-            " expects a fermionic, Majorana, edge-vertex or transfer-vertex operator"
-        )))
-    }};
-}
 
 /// Returns the mean absolute coefficient magnitude of each group.
 ///
@@ -104,7 +68,7 @@ pub fn py_group_coeff_means(
     ))]
     op: &Bound<'_, PyAny>,
 ) -> PyResult<Option<Vec<f64>>> {
-    dispatch!(op, "group_coeff_means", |inner| {
+    dispatch!(ref, op, "group_coeff_means", |inner| {
         core_analysis::group_coeff_means(inner)
     })
 }
@@ -166,7 +130,7 @@ pub fn py_groups_are_hermitian(
     op: &Bound<'_, PyAny>,
     atol: f64,
 ) -> PyResult<Option<Vec<bool>>> {
-    dispatch!(op, "groups_are_hermitian", |inner| {
+    dispatch!(ref, op, "groups_are_hermitian", |inner| {
         core_analysis::groups_are_hermitian(inner, atol)
     })
 }
@@ -227,7 +191,7 @@ pub fn py_groups_have_uniform_coeffs(
     atol: f64,
     abs: bool,
 ) -> PyResult<Option<Vec<bool>>> {
-    dispatch!(op, "groups_have_uniform_coeffs", |inner| {
+    dispatch!(ref, op, "groups_have_uniform_coeffs", |inner| {
         core_analysis::groups_have_uniform_coeffs(inner, atol, abs)
     })
 }
