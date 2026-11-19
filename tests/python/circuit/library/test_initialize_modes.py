@@ -43,6 +43,14 @@ def test_initialize_modes_gate(subtests):
         _test_initialize_modes(np.asarray([True, False, True, False], dtype=bool))
 
 
+def test_equality_compares_the_occupation():
+    gate = InitializeModes([True, False, True])
+    assert gate == InitializeModes((True, False, True))
+    assert hash(gate) == hash(InitializeModes([True, False, True]))
+    assert gate != InitializeModes([True, True, False])
+    assert gate != InitializeModes([True, False, True, False])
+
+
 def test_apply_unitary_rejects_out_of_range_mode():
     """A gate placed onto a mode outside ``[0, num_modes)`` is rejected before touching ``vec``.
 

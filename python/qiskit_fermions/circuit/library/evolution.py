@@ -14,6 +14,7 @@
 
 from __future__ import annotations
 
+import numbers
 from typing import TYPE_CHECKING, cast
 
 from qiskit_fermions.operators import OperatorTrait
@@ -121,6 +122,52 @@ class Evolution(FermionicGate):
             synthesis=self.synthesis,
             atomic=self.atomic,
         )
+
+    def __eq__(self, other: object) -> bool:
+        """Whether ``other`` is an evolution of an equal operator for the same time on as many modes.
+
+        The operators are compared with :meth:`.FermionOperator.equiv` and no tolerance, since the
+        ``==`` of two operators depends on how their terms are stored. The
+        :attr:`~.FermionicGate.synthesis` and :attr:`~.FermionicGate.atomic` flag are not compared:
+        they decide how the gate is broken down, not what it is.
+        """
+        if not isinstance(other, Evolution):
+            return False
+        return (
+            self.num_modes == other.num_modes
+            and self.params == other.params
+            and type(self.operator) is type(other.operator)
+            and bool(self.operator.equiv(other.operator, 0.0))
+        )
+
+    def __hash__(self) -> int:
+        """Hashes the number of modes and the time, consistently with :meth:`__eq__`."""
+        return hash((type(self).__name__, self.num_modes, tuple(self.params)))
+
+    def equiv(self, other: object, atol: float = 1e-10) -> bool:
+        """Whether ``other`` is an evolution of an equivalent operator for the same time.
+
+        Unlike :meth:`__eq__`, the operators are compared up to the tolerance ``atol`` (see
+        :meth:`.FermionOperator.equiv`), and so are numeric times.
+
+        Args:
+            other: the operation to compare with.
+            atol: the absolute tolerance of the comparison.
+
+        Returns:
+            Whether the two evolutions act the same.
+        """
+        if not isinstance(other, Evolution) or self.num_modes != other.num_modes:
+            return False
+        (time,), (other_time,) = self.params, other.params
+        if isinstance(time, numbers.Complex) and isinstance(other_time, numbers.Complex):
+            if abs(complex(time) - complex(other_time)) > atol:
+                return False
+        elif time != other_time:
+            return False
+        if type(self.operator) is not type(other.operator):
+            return False
+        return bool(self.operator.equiv(other.operator, atol))
 
     def _apply_unitary_placed_(
         self,
