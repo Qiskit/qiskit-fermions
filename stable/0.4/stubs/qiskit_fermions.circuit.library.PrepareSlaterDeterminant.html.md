@@ -23,7 +23,7 @@ Under simulation this gate is **validate-then-rotate**, not a state producer: gi
 state vector it validates that the vector is confined to the subspace `occupation` defines (via
 [`InitializeModes`](qiskit_fermions.circuit.library.InitializeModes.html.md#qiskit_fermions.circuit.library.InitializeModes)) and then applies `rotation_unitary` (via [`OrbitalRotation`](qiskit_fermions.circuit.library.OrbitalRotation.html.md#qiskit_fermions.circuit.library.OrbitalRotation)).
 It therefore requires a real reference state vector, prepared externally (e.g. via
-[`ffsim.slater_determinant()`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.slater_determinant.html#ffsim.slater_determinant)). The *producer* behavior (emitting the gates that set the
+[`ffsim.slater_determinant()`](https://qiskit.github.io/ffsim/api/stubs/ffsim.slater_determinant.html#ffsim.slater_determinant)). The *producer* behavior (emitting the gates that set the
 reference occupation) lives in the [`synthesis`](../pydoc/qiskit_fermions.circuit.library.synthesis.html.md#module-qiskit_fermions.circuit.library.synthesis), not the simulation path.
 
 Applying (rather than dropping) the rotation is what guarantees that merging an

@@ -440,8 +440,8 @@ steps (four in this case):
 
 On hardware, you would run the transpiled circuits and measure. This is the noiseless (statevector)
 version of that step, showing the bitstrings SKQD would collect. Simulate each untranspiled
-[`FermionicCircuit`](../stubs/qiskit_fermions.circuit.FermionicCircuit.html.md#qiskit_fermions.circuit.FermionicCircuit) with [`ffsim.apply_unitary()`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.apply_unitary.html#ffsim.apply_unitary) and sample the resulting statevector with
-[`ffsim.sample_state_vector()`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.sample_state_vector.html#ffsim.sample_state_vector).
+[`FermionicCircuit`](../stubs/qiskit_fermions.circuit.FermionicCircuit.html.md#qiskit_fermions.circuit.FermionicCircuit) with [`ffsim.apply_unitary()`](https://qiskit.github.io/ffsim/api/stubs/ffsim.apply_unitary.html#ffsim.apply_unitary) and sample the resulting statevector with
+[`ffsim.sample_state_vector()`](https://qiskit.github.io/ffsim/api/stubs/ffsim.sample_state_vector.html#ffsim.sample_state_vector).
 
 A [`PrepareSlaterDeterminant`](../stubs/qiskit_fermions.circuit.library.PrepareSlaterDeterminant.html.md#qiskit_fermions.circuit.library.PrepareSlaterDeterminant) gate is validate-then-rotate under simulation (it
 checks that the incoming state occupies its reference determinant, then applies the rotation). Therefore, the
@@ -580,6 +580,6 @@ subspace-diagonalization post-processing, including its behavior on noisy sample
 configuration recovery does the most work.
 
 Read the [ffsim relationship guide](ffsim.html.md#ffsim-relationship-explanation) to understand why
-[`ffsim.apply_unitary()`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.apply_unitary.html#ffsim.apply_unitary) and [`ffsim.sample_state_vector()`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.sample_state_vector.html#ffsim.sample_state_vector) work natively on this package’s
+[`ffsim.apply_unitary()`](https://qiskit.github.io/ffsim/api/stubs/ffsim.apply_unitary.html#ffsim.apply_unitary) and [`ffsim.sample_state_vector()`](https://qiskit.github.io/ffsim/api/stubs/ffsim.sample_state_vector.html#ffsim.sample_state_vector) work natively on this package’s
 fermionic circuits, and why the fixed-particle-number sector used in step 6 makes the
 momentum-basis sparsity established in step 2 sample-efficient.

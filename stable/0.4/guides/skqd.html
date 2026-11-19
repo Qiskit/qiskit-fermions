@@ -11,13 +11,13 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Generate Krylov time-evolution circuits (SKQD) - Qiskit Fermions 0.4.1</title>
+        <title>Generate Krylov time-evolution circuits (SKQD) - Qiskit Fermions 0.4.1+1bdbc43</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=fc6d6d93" />
     <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
-    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=6a604523" />
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css" />
     <link rel="stylesheet" type="text/css" href="../_static/katex-math.css?v=05624691" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=8dab3a3b" />
@@ -164,7 +164,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.4.1</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.4.1+1bdbc43</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -190,7 +190,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.4.1</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.4.1+1bdbc43</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -867,8 +867,8 @@ steps (four in this case):</p>
 <h2>6. Sample bitstrings from the Krylov circuits<a class="headerlink" href="#sample-bitstrings-from-the-krylov-circuits" title="Link to this heading">¶</a></h2>
 <p>On hardware, you would run the transpiled circuits and measure. This is the noiseless (statevector)
 version of that step, showing the bitstrings SKQD would collect. Simulate each untranspiled
-<a class="reference internal" href="../stubs/qiskit_fermions.circuit.FermionicCircuit.html#qiskit_fermions.circuit.FermionicCircuit" title="qiskit_fermions.circuit.FermionicCircuit"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicCircuit</span></code></a> with <a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.apply_unitary.html#ffsim.apply_unitary" title="(in ffsim)"><code class="xref py py-func docutils literal notranslate"><span class="pre">ffsim.apply_unitary()</span></code></a> and sample the resulting statevector with
-<a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.sample_state_vector.html#ffsim.sample_state_vector" title="(in ffsim)"><code class="xref py py-func docutils literal notranslate"><span class="pre">ffsim.sample_state_vector()</span></code></a>.</p>
+<a class="reference internal" href="../stubs/qiskit_fermions.circuit.FermionicCircuit.html#qiskit_fermions.circuit.FermionicCircuit" title="qiskit_fermions.circuit.FermionicCircuit"><code class="xref py py-class docutils literal notranslate"><span class="pre">FermionicCircuit</span></code></a> with <a class="reference external" href="https://qiskit.github.io/ffsim/api/stubs/ffsim.apply_unitary.html#ffsim.apply_unitary" title="(in ffsim)"><code class="xref py py-func docutils literal notranslate"><span class="pre">ffsim.apply_unitary()</span></code></a> and sample the resulting statevector with
+<a class="reference external" href="https://qiskit.github.io/ffsim/api/stubs/ffsim.sample_state_vector.html#ffsim.sample_state_vector" title="(in ffsim)"><code class="xref py py-func docutils literal notranslate"><span class="pre">ffsim.sample_state_vector()</span></code></a>.</p>
 <p>A <a class="reference internal" href="../stubs/qiskit_fermions.circuit.library.PrepareSlaterDeterminant.html#qiskit_fermions.circuit.library.PrepareSlaterDeterminant" title="qiskit_fermions.circuit.library.PrepareSlaterDeterminant"><code class="xref py py-class docutils literal notranslate"><span class="pre">PrepareSlaterDeterminant</span></code></a> gate is validate-then-rotate under simulation (it
 checks that the incoming state occupies its reference determinant, then applies the rotation). Therefore, the
 input is the plain occupation determinant: the lowest <code class="docutils literal notranslate"><span class="pre">nocc</span></code> modes filled per spin, with no
@@ -996,7 +996,7 @@ and to the <a class="reference external" href="https://quantum.cloud.ibm.com/doc
 subspace-diagonalization post-processing, including its behavior on noisy samples, where
 configuration recovery does the most work.</p>
 <p>Read the <a class="reference internal" href="ffsim.html#ffsim-relationship-explanation"><span class="std std-ref">ffsim relationship guide</span></a> to understand why
-<a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.apply_unitary.html#ffsim.apply_unitary" title="(in ffsim)"><code class="xref py py-func docutils literal notranslate"><span class="pre">ffsim.apply_unitary()</span></code></a> and <a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.sample_state_vector.html#ffsim.sample_state_vector" title="(in ffsim)"><code class="xref py py-func docutils literal notranslate"><span class="pre">ffsim.sample_state_vector()</span></code></a> work natively on this package’s
+<a class="reference external" href="https://qiskit.github.io/ffsim/api/stubs/ffsim.apply_unitary.html#ffsim.apply_unitary" title="(in ffsim)"><code class="xref py py-func docutils literal notranslate"><span class="pre">ffsim.apply_unitary()</span></code></a> and <a class="reference external" href="https://qiskit.github.io/ffsim/api/stubs/ffsim.sample_state_vector.html#ffsim.sample_state_vector" title="(in ffsim)"><code class="xref py py-func docutils literal notranslate"><span class="pre">ffsim.sample_state_vector()</span></code></a> work natively on this package’s
 fermionic circuits, and why the fixed-particle-number sector used in step 6 makes the
 momentum-basis sparsity established in step 2 sample-efficient.</p>
 </section>
@@ -1037,7 +1037,7 @@ momentum-basis sparsity established in step 2 sample-efficient.</p>
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on 2026/11/06</div>
+              Last updated on 2026/11/19</div>
           </div>
           <div class="right-details">
             
@@ -1078,13 +1078,13 @@ momentum-basis sparsity established in step 2 sample-efficient.</p>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=c87aa342"></script>
+</div><script src="../_static/documentation_options.js?v=946b811c"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../_static/copybutton.js?v=6dbb43f8"></script>
-    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script data-sd-tabs-storage-prefix="sphinx-design-tab-id-" src="../_static/design-tabs.js?v=fcb327ea"></script>
     <script src="../_static/katex.min.js?v=5cc8ed51"></script>
     <script src="../_static/auto-render.min.js?v=af98beb9"></script>
     <script src="../_static/katex_autorenderer.js?v=bebc588a"></script>

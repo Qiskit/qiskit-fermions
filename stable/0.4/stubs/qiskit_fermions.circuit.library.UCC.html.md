@@ -30,11 +30,11 @@ modes this gate acts on. All four act on `2 * norb` block-spin modes (mode `p` i
 orbital `p`, mode `norb + p` is beta orbital `p`), with the occupied orbitals ordered before
 the virtual ones:
 
-- [`UCCSDOpRestrictedReal`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.UCCSDOpRestrictedReal.html#ffsim.UCCSDOpRestrictedReal) and
-  [`UCCSDOpRestricted`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.UCCSDOpRestricted.html#ffsim.UCCSDOpRestricted) share one spatial parametrization between both spin
+- [`UCCSDOpRestrictedReal`](https://qiskit.github.io/ffsim/api/stubs/ffsim.UCCSDOpRestrictedReal.html#ffsim.UCCSDOpRestrictedReal) and
+  [`UCCSDOpRestricted`](https://qiskit.github.io/ffsim/api/stubs/ffsim.UCCSDOpRestricted.html#ffsim.UCCSDOpRestricted) share one spatial parametrization between both spin
   sectors: `t1` has shape `(nocc, nvrt)` and `t2` has shape `(nocc, nocc, nvrt, nvrt)`.
-- [`UCCSDOpUnrestrictedReal`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.UCCSDOpUnrestrictedReal.html#ffsim.UCCSDOpUnrestrictedReal) and
-  [`UCCSDOpUnrestricted`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.UCCSDOpUnrestricted.html#ffsim.UCCSDOpUnrestricted) parameterize the spin sectors independently:
+- [`UCCSDOpUnrestrictedReal`](https://qiskit.github.io/ffsim/api/stubs/ffsim.UCCSDOpUnrestrictedReal.html#ffsim.UCCSDOpUnrestrictedReal) and
+  [`UCCSDOpUnrestricted`](https://qiskit.github.io/ffsim/api/stubs/ffsim.UCCSDOpUnrestricted.html#ffsim.UCCSDOpUnrestricted) parameterize the spin sectors independently:
   `t1` is a pair `(t1a, t1b)` and `t2` a triple `(t2aa, t2ab, t2bb)`.
 
 #### NOTE
@@ -42,7 +42,7 @@ The cluster operator only ever sees the part of a same-spin $t_2$ block that is
 symmetric under the *simultaneous* exchange $t_2[i,j,a,b] = t_2[j,i,b,a]$, because the
 underlying excitation $a^\dagger_a a^\dagger_b a_j a_i$ is invariant under relabeling
 the pairs $(i,a) \leftrightarrow (j,b)$. Coupled-cluster amplitudes (from PySCF, or
-ffsim’s own [`uccsd_generator_restricted()`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.uccsd_generator_restricted.html#ffsim.uccsd_generator_restricted)) always carry that symmetry, so
+ffsim’s own [`uccsd_generator_restricted()`](https://qiskit.github.io/ffsim/api/stubs/ffsim.uccsd_generator_restricted.html#ffsim.uccsd_generator_restricted)) always carry that symmetry, so
 this gate and ffsim agree exactly on them. A hand-built `t2` without it describes the same
 ansatz here as its symmetrized counterpart, whereas ffsim reads the raw tensor.
 
@@ -85,10 +85,10 @@ Initializing an instance of this gate can be done with the argument listed below
 
 * **Parameters:**
   **uccsd_op** (*Any*) – the ffsim UCCSD operator to build the circuit from, one of
-  [`UCCSDOpRestrictedReal`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.UCCSDOpRestrictedReal.html#ffsim.UCCSDOpRestrictedReal),
-  [`UCCSDOpRestricted`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.UCCSDOpRestricted.html#ffsim.UCCSDOpRestricted),
-  [`UCCSDOpUnrestrictedReal`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.UCCSDOpUnrestrictedReal.html#ffsim.UCCSDOpUnrestrictedReal) or
-  [`UCCSDOpUnrestricted`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.UCCSDOpUnrestricted.html#ffsim.UCCSDOpUnrestricted). Its type determines the spin variant
+  [`UCCSDOpRestrictedReal`](https://qiskit.github.io/ffsim/api/stubs/ffsim.UCCSDOpRestrictedReal.html#ffsim.UCCSDOpRestrictedReal),
+  [`UCCSDOpRestricted`](https://qiskit.github.io/ffsim/api/stubs/ffsim.UCCSDOpRestricted.html#ffsim.UCCSDOpRestricted),
+  [`UCCSDOpUnrestrictedReal`](https://qiskit.github.io/ffsim/api/stubs/ffsim.UCCSDOpUnrestrictedReal.html#ffsim.UCCSDOpUnrestrictedReal) or
+  [`UCCSDOpUnrestricted`](https://qiskit.github.io/ffsim/api/stubs/ffsim.UCCSDOpUnrestricted.html#ffsim.UCCSDOpUnrestricted). Its type determines the spin variant
   (see the class docstring).
 * **Raises:**
   * **MissingOptionalLibraryError** – if `ffsim` is not installed.

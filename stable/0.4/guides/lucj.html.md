@@ -48,7 +48,7 @@ stages used below.
 The ansatz is initialized from the amplitudes of a coupled-cluster singles and doubles (CCSD)
 calculation. Run restricted Hartree-Fock followed by CCSD for a hydrogen molecule in the `6-31g`
 basis, using [PySCF](https://pyscf.org/) for the quantum chemistry, then hand the amplitudes to
-ffsim’s [`from_t_amplitudes()`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.UCJOpSpinBalanced.html#ffsim.UCJOpSpinBalanced.from_t_amplitudes). It performs a *double
+ffsim’s [`from_t_amplitudes()`](https://qiskit.github.io/ffsim/api/stubs/ffsim.UCJOpSpinBalanced.html#ffsim.UCJOpSpinBalanced.from_t_amplitudes). It performs a *double
 factorization* of the $t_2$ amplitudes to obtain the per-layer diagonal Coulomb matrices and
 orbital rotations, and derives an optional final orbital rotation from the $t_1$ amplitudes.
 The number of repetitions $L$ is whatever that factorization yields; `n_reps` truncates it,
@@ -141,7 +141,7 @@ this package adds over ffsim’s own Qiskit gates, which are specific to the Jor
 transformation.
 
 For Jordan-Wigner alone you would not need this detour: ffsim ships
-[`UCJOpSpinBalancedJW`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.qiskit.UCJOpSpinBalancedJW.html#ffsim.qiskit.UCJOpSpinBalancedJW) and its siblings, which take a UCJ operator to a
+[`UCJOpSpinBalancedJW`](https://qiskit.github.io/ffsim/api/stubs/ffsim.qiskit.UCJOpSpinBalancedJW.html#ffsim.qiskit.UCJOpSpinBalancedJW) and its siblings, which take a UCJ operator to a
 qubit circuit on their own. The reason to route the ansatz through a fermionic circuit is everything
 *else* an encoding can buy you. Local encodings, for instance, spend extra qubits to bound the Pauli
 weight of each term, which the [1D](1d_fermi_hubbard.html.md#d-fermi-hubbard) and [2D](2d_fermi_hubbard.html.md#d-fermi-hubbard)
@@ -297,7 +297,7 @@ True
 
 A real device has a restricted qubit coupling map, and the LUCJ ansatz is designed to match it. The
 same-spin (`pairs_aa`) interactions form two linear chains and the alpha-beta (`pairs_ab`)
-interactions bridge them. ffsim’s [`generate_lucj_pass_manager()`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.qiskit.generate_lucj_pass_manager.html#ffsim.qiskit.generate_lucj_pass_manager) builds a
+interactions bridge them. ffsim’s [`generate_lucj_pass_manager()`](https://qiskit.github.io/ffsim/api/stubs/ffsim.qiskit.generate_lucj_pass_manager.html#ffsim.qiskit.generate_lucj_pass_manager) builds a
 device-aware qubit pipeline for this structure, and returns the subset of `pairs_ab` the
 hardware can actually accommodate. Slot that pipeline into the preset’s `qubit` stage while
 keeping the package’s own fermion-to-qubit synthesis:
@@ -359,7 +359,7 @@ directly, the router must insert many `SWAP` gates to bridge them:
 
 The fix is to feed `allowed_pairs_ab` back into the ansatz construction, through the
 `interaction_pairs` argument of
-[`from_t_amplitudes()`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.UCJOpSpinBalanced.html#ffsim.UCJOpSpinBalanced.from_t_amplitudes), so the diagonal Coulomb operator only
+[`from_t_amplitudes()`](https://qiskit.github.io/ffsim/api/stubs/ffsim.UCJOpSpinBalanced.html#ffsim.UCJOpSpinBalanced.from_t_amplitudes), so the diagonal Coulomb operator only
 contains alpha-beta terms the coupling map can implement directly. The ansatz then matches the
 device topology and the router barely has to touch it:
 

@@ -1137,8 +1137,8 @@ True
 
 Returns a SciPy `LinearOperator` for this operator on the `(norb, nelec)` FCI sector.
 
-This implements [`ffsim.SupportsLinearOperator`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.SupportsLinearOperator.html#ffsim.SupportsLinearOperator) by converting to an
-[`ffsim.FermionOperator`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.FermionOperator.html#ffsim.FermionOperator) and handing that to [`ffsim.linear_operator()`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.linear_operator.html#ffsim.linear_operator): simulation is
+This implements [`ffsim.SupportsLinearOperator`](https://qiskit.github.io/ffsim/api/stubs/ffsim.SupportsLinearOperator.html#ffsim.SupportsLinearOperator) by converting to an
+[`ffsim.FermionOperator`](https://qiskit.github.io/ffsim/api/stubs/ffsim.FermionOperator.html#ffsim.FermionOperator) and handing that to [`ffsim.linear_operator()`](https://qiskit.github.io/ffsim/api/stubs/ffsim.linear_operator.html#ffsim.linear_operator): simulation is
 ffsim’s concern, and this package owns the mapper-agnostic circuit rather than a second
 simulation backend.
 
@@ -1167,7 +1167,7 @@ This implements the [`SupportsMajoranaOperator`](qiskit_fermions.protocols.Suppo
 
 Returns the trace of this operator on the `(norb, nelec)` FCI sector.
 
-This implements [`ffsim.SupportsTrace`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.SupportsTrace.html#ffsim.SupportsTrace) via [`ffsim.trace()`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.trace.html#ffsim.trace), mirroring
+This implements [`ffsim.SupportsTrace`](https://qiskit.github.io/ffsim/api/stubs/ffsim.SupportsTrace.html#ffsim.SupportsTrace) via [`ffsim.trace()`](https://qiskit.github.io/ffsim/api/stubs/ffsim.trace.html#ffsim.trace), mirroring
 `_linear_operator_`.
 
 * **Parameters:**

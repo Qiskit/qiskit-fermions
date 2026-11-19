@@ -15,7 +15,7 @@ when a dependency is required.
 fermionic quantum circuits that exploits particle-number and spin-Z conservation.
 
 [`FermionicCircuit`](../stubs/qiskit_fermions.circuit.FermionicCircuit.html.md#qiskit_fermions.circuit.FermionicCircuit) instances can be simulated using
-[`ffsim.apply_unitary()`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.apply_unitary.html#ffsim.apply_unitary).
+[`ffsim.apply_unitary()`](https://qiskit.github.io/ffsim/api/stubs/ffsim.apply_unitary.html#ffsim.apply_unitary).
 
 #### NOTE
 `ffsim` is an optional dependency because only simulation and the ansatz gates need it.

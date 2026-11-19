@@ -5,7 +5,7 @@
 Converts an operator into a [`FermionOperator`](qiskit_fermions.operators.FermionOperator.html.md#qiskit_fermions.operators.FermionOperator).
 
 This is a thin, type-agnostic wrapper around the [`SupportsFermionOperator`](qiskit_fermions.protocols.SupportsFermionOperator.html.md#qiskit_fermions.protocols.SupportsFermionOperator) protocol
-method, mirroring the free-function style of [`ffsim.fermion_operator()`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.fermion_operator.html#ffsim.fermion_operator).
+method, mirroring the free-function style of [`ffsim.fermion_operator()`](https://qiskit.github.io/ffsim/api/stubs/ffsim.fermion_operator.html#ffsim.fermion_operator).
 
 * **Parameters:**
   **operator** ([*SupportsFermionOperator*](qiskit_fermions.protocols.SupportsFermionOperator.html.md#qiskit_fermions.protocols.SupportsFermionOperator)) – the operator to convert, implementing [`SupportsFermionOperator`](qiskit_fermions.protocols.SupportsFermionOperator.html.md#qiskit_fermions.protocols.SupportsFermionOperator).

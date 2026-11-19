@@ -11,13 +11,13 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Design principles of operator representations - Qiskit Fermions 0.4.1</title>
+        <title>Design principles of operator representations - Qiskit Fermions 0.4.1+1bdbc43</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=fc6d6d93" />
     <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
-    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=6a604523" />
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css" />
     <link rel="stylesheet" type="text/css" href="../_static/katex-math.css?v=05624691" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=8dab3a3b" />
@@ -164,7 +164,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.4.1</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.4.1+1bdbc43</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -190,7 +190,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.4.1</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.4.1+1bdbc43</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -532,8 +532,8 @@ understand the full storage format.</p>
 construction using the sparse arrays:</p>
 <div class="sd-tab-set docutils">
 <input checked="checked" id="sd-tab-item-0" name="sd-tab-set-0" type="radio">
-<label class="sd-tab-label" data-sync-group="code" data-sync-id="python" for="sd-tab-item-0">
-PYTHON</label><div class="sd-tab-content docutils">
+<label aria-controls="sd-tab-item-0-content" class="sd-tab-label" data-sync-group="code" data-sync-id="python" for="sd-tab-item-0">
+PYTHON</label><div class="sd-tab-content docutils" id="sd-tab-item-0-content">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.operators</span><span class="w"> </span><span class="kn">import</span> <span class="n">FermionOperator</span>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># Construct operators directly using sparse arrays</span>
@@ -562,8 +562,8 @@ PYTHON</label><div class="sd-tab-content docutils">
 </div>
 </div>
 <input id="sd-tab-item-1" name="sd-tab-set-0" type="radio">
-<label class="sd-tab-label" data-sync-group="code" data-sync-id="c" for="sd-tab-item-1">
-C</label><div class="sd-tab-content docutils">
+<label aria-controls="sd-tab-item-1-content" class="sd-tab-label" data-sync-group="code" data-sync-id="c" for="sd-tab-item-1">
+C</label><div class="sd-tab-content docutils" id="sd-tab-item-1-content">
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;qiskit_fermions.h&gt;</span>
 
 <span class="c1">// Construct first operator: 1.0 * +0 -1</span>
@@ -599,8 +599,8 @@ abstract away the sparse storage details. These make it easier to build operator
 without worrying about managing coefficient, mode, and boundary arrays:</p>
 <div class="sd-tab-set docutils">
 <input checked="checked" id="sd-tab-item-2" name="sd-tab-set-1" type="radio">
-<label class="sd-tab-label" data-sync-group="code" data-sync-id="python" for="sd-tab-item-2">
-PYTHON</label><div class="sd-tab-content docutils">
+<label aria-controls="sd-tab-item-2-content" class="sd-tab-label" data-sync-group="code" data-sync-id="python" for="sd-tab-item-2">
+PYTHON</label><div class="sd-tab-content docutils" id="sd-tab-item-2-content">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.operators</span><span class="w"> </span><span class="kn">import</span> <span class="n">FermionOperator</span><span class="p">,</span> <span class="n">cre</span><span class="p">,</span> <span class="n">ann</span>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># Construct operators using operator algebra notation</span>
@@ -616,8 +616,8 @@ PYTHON</label><div class="sd-tab-content docutils">
 </div>
 </div>
 <input id="sd-tab-item-3" name="sd-tab-set-1" type="radio">
-<label class="sd-tab-label" data-sync-group="code" data-sync-id="c" for="sd-tab-item-3">
-C</label><div class="sd-tab-content docutils">
+<label aria-controls="sd-tab-item-3-content" class="sd-tab-label" data-sync-group="code" data-sync-id="c" for="sd-tab-item-3">
+C</label><div class="sd-tab-content docutils" id="sd-tab-item-3-content">
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="c1">// The C API uses direct array construction; convenience methods are not available.</span>
 </pre></div>
 </div>
@@ -640,8 +640,8 @@ You can then reconstruct a new operator from the transformed terms by using
 <a class="reference internal" href="../stubs/qiskit_fermions.operators.OperatorTrait.html#qiskit_fermions.operators.OperatorTrait.from_terms" title="qiskit_fermions.operators.OperatorTrait.from_terms"><code class="xref py py-meth docutils literal notranslate"><span class="pre">OperatorTrait.from_terms()</span></code></a>.</p>
 <div class="sd-tab-set docutils">
 <input checked="checked" id="sd-tab-item-4" name="sd-tab-set-2" type="radio">
-<label class="sd-tab-label" data-sync-group="code" data-sync-id="python" for="sd-tab-item-4">
-PYTHON</label><div class="sd-tab-content docutils">
+<label aria-controls="sd-tab-item-4-content" class="sd-tab-label" data-sync-group="code" data-sync-id="python" for="sd-tab-item-4">
+PYTHON</label><div class="sd-tab-content docutils" id="sd-tab-item-4-content">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.operators</span><span class="w"> </span><span class="kn">import</span> <span class="n">FermionOperator</span><span class="p">,</span> <span class="n">cre</span><span class="p">,</span> <span class="n">ann</span>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># Construct an operator with terms of different orders</span>
@@ -667,8 +667,8 @@ PYTHON</label><div class="sd-tab-content docutils">
 </div>
 </div>
 <input id="sd-tab-item-5" name="sd-tab-set-2" type="radio">
-<label class="sd-tab-label" data-sync-group="code" data-sync-id="c" for="sd-tab-item-5">
-C</label><div class="sd-tab-content docutils">
+<label aria-controls="sd-tab-item-5-content" class="sd-tab-label" data-sync-group="code" data-sync-id="c" for="sd-tab-item-5">
+C</label><div class="sd-tab-content docutils" id="sd-tab-item-5-content">
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="c1">// WARNING: Term iteration and filtering are not yet available in the C API.</span>
 </pre></div>
 </div>
@@ -723,8 +723,8 @@ operations like circuit synthesis and decomposition by using methods like
 the <a class="reference internal" href="grouping.html#grouping-explanation"><span class="std std-ref">grouping</span></a> guide.</p>
 <div class="sd-tab-set docutils">
 <input checked="checked" id="sd-tab-item-6" name="sd-tab-set-3" type="radio">
-<label class="sd-tab-label" data-sync-group="code" data-sync-id="python" for="sd-tab-item-6">
-PYTHON</label><div class="sd-tab-content docutils">
+<label aria-controls="sd-tab-item-6-content" class="sd-tab-label" data-sync-group="code" data-sync-id="python" for="sd-tab-item-6">
+PYTHON</label><div class="sd-tab-content docutils" id="sd-tab-item-6-content">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.operators</span><span class="w"> </span><span class="kn">import</span> <span class="n">MajoranaOperator</span><span class="p">,</span> <span class="n">gamma</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">op</span> <span class="o">=</span> <span class="n">MajoranaOperator</span><span class="o">.</span><span class="n">from_dict</span><span class="p">({</span>
 <span class="gp">... </span>    <span class="p">(</span><span class="n">gamma</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">False</span><span class="p">),):</span> <span class="mf">1.0</span><span class="p">,</span>
@@ -739,8 +739,8 @@ PYTHON</label><div class="sd-tab-content docutils">
 </div>
 </div>
 <input id="sd-tab-item-7" name="sd-tab-set-3" type="radio">
-<label class="sd-tab-label" data-sync-group="code" data-sync-id="c" for="sd-tab-item-7">
-C</label><div class="sd-tab-content docutils">
+<label aria-controls="sd-tab-item-7-content" class="sd-tab-label" data-sync-group="code" data-sync-id="c" for="sd-tab-item-7">
+C</label><div class="sd-tab-content docutils" id="sd-tab-item-7-content">
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;qiskit_fermions.h&gt;</span>
 
 <span class="c1">// Create operator with 3 terms</span>
@@ -775,8 +775,8 @@ checking), and more. See the <a class="reference internal" href="../stubs/qiskit
 reference of all available operations.</p>
 <div class="sd-tab-set docutils">
 <input checked="checked" id="sd-tab-item-8" name="sd-tab-set-4" type="radio">
-<label class="sd-tab-label" data-sync-group="code" data-sync-id="python" for="sd-tab-item-8">
-PYTHON</label><div class="sd-tab-content docutils">
+<label aria-controls="sd-tab-item-8-content" class="sd-tab-label" data-sync-group="code" data-sync-id="python" for="sd-tab-item-8">
+PYTHON</label><div class="sd-tab-content docutils" id="sd-tab-item-8-content">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.operators</span><span class="w"> </span><span class="kn">import</span> <span class="n">FermionOperator</span><span class="p">,</span> <span class="n">cre</span><span class="p">,</span> <span class="n">ann</span>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># Construct a Hermitian operator: H = +0 -1 + +1 -0</span>
@@ -792,8 +792,8 @@ PYTHON</label><div class="sd-tab-content docutils">
 </div>
 </div>
 <input id="sd-tab-item-9" name="sd-tab-set-4" type="radio">
-<label class="sd-tab-label" data-sync-group="code" data-sync-id="c" for="sd-tab-item-9">
-C</label><div class="sd-tab-content docutils">
+<label aria-controls="sd-tab-item-9-content" class="sd-tab-label" data-sync-group="code" data-sync-id="c" for="sd-tab-item-9">
+C</label><div class="sd-tab-content docutils" id="sd-tab-item-9-content">
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;qiskit_fermions.h&gt;</span>
 
 <span class="c1">// Construct a Hermitian operator: H = +0 -1 + +1 -0</span>
@@ -873,8 +873,8 @@ ordering is implemented.</p>
 </div>
 <div class="sd-tab-set docutils">
 <input checked="checked" id="sd-tab-item-10" name="sd-tab-set-5" type="radio">
-<label class="sd-tab-label" data-sync-group="code" data-sync-id="python" for="sd-tab-item-10">
-PYTHON</label><div class="sd-tab-content docutils">
+<label aria-controls="sd-tab-item-10-content" class="sd-tab-label" data-sync-group="code" data-sync-id="python" for="sd-tab-item-10">
+PYTHON</label><div class="sd-tab-content docutils" id="sd-tab-item-10-content">
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qiskit_fermions.operators</span><span class="w"> </span><span class="kn">import</span> <span class="n">FermionOperator</span><span class="p">,</span> <span class="n">cre</span><span class="p">,</span> <span class="n">ann</span>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># Two different representations of the same operator</span>
@@ -894,8 +894,8 @@ PYTHON</label><div class="sd-tab-content docutils">
 </div>
 </div>
 <input id="sd-tab-item-11" name="sd-tab-set-5" type="radio">
-<label class="sd-tab-label" data-sync-group="code" data-sync-id="c" for="sd-tab-item-11">
-C</label><div class="sd-tab-content docutils">
+<label aria-controls="sd-tab-item-11-content" class="sd-tab-label" data-sync-group="code" data-sync-id="c" for="sd-tab-item-11">
+C</label><div class="sd-tab-content docutils" id="sd-tab-item-11-content">
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;qiskit_fermions.h&gt;</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;stdbool.h&gt;</span>
 
@@ -978,7 +978,7 @@ your operator type to see what parameters are available.</p>
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on 2026/11/06</div>
+              Last updated on 2026/11/19</div>
           </div>
           <div class="right-details">
             
@@ -1022,13 +1022,13 @@ your operator type to see what parameters are available.</p>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=c87aa342"></script>
+</div><script src="../_static/documentation_options.js?v=946b811c"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../_static/copybutton.js?v=6dbb43f8"></script>
-    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script data-sd-tabs-storage-prefix="sphinx-design-tab-id-" src="../_static/design-tabs.js?v=fcb327ea"></script>
     <script src="../_static/katex.min.js?v=5cc8ed51"></script>
     <script src="../_static/auto-render.min.js?v=af98beb9"></script>
     <script src="../_static/katex_autorenderer.js?v=bebc588a"></script>

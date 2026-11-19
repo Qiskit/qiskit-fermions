@@ -79,7 +79,7 @@ Returns the inverse of this gate, $e^{+i t H}$.
 Applies `exp(-i * time * operator)` after relabeling the operator to global modes.
 
 The operator is relabeled onto its global modes, converted to an
-[`ffsim.FermionOperator`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.FermionOperator.html#ffsim.FermionOperator) and handed to [`ffsim.linear_operator()`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.linear_operator.html#ffsim.linear_operator), then applied to
+[`ffsim.FermionOperator`](https://qiskit.github.io/ffsim/api/stubs/ffsim.FermionOperator.html#ffsim.FermionOperator) and handed to [`ffsim.linear_operator()`](https://qiskit.github.io/ffsim/api/stubs/ffsim.linear_operator.html#ffsim.linear_operator), then applied to
 the vector via [`scipy.sparse.linalg.expm_multiply()`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.linalg.expm_multiply.html#scipy.sparse.linalg.expm_multiply). An operator that is not already a
 [`FermionOperator`](qiskit_fermions.operators.FermionOperator.html.md#qiskit_fermions.operators.FermionOperator) is first converted through the
 [`SupportsFermionOperator`](qiskit_fermions.protocols.SupportsFermionOperator.html.md#qiskit_fermions.protocols.SupportsFermionOperator) protocol, so any operator type of this package can be

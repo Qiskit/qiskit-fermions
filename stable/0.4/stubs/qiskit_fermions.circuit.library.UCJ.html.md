@@ -35,18 +35,18 @@ encoding. Passing an ffsim operator through unchanged is what keeps the two cons
 Accepts any of ffsim’s three UCJ operators, whose type fixes the spin variant and the number of
 modes this gate acts on:
 
-- [`UCJOpSpinBalanced`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.UCJOpSpinBalanced.html#ffsim.UCJOpSpinBalanced) acts on `2 * norb` block-spin modes, with one
+- [`UCJOpSpinBalanced`](https://qiskit.github.io/ffsim/api/stubs/ffsim.UCJOpSpinBalanced.html#ffsim.UCJOpSpinBalanced) acts on `2 * norb` block-spin modes, with one
   orbital rotation shared by both spin sectors and `[alpha-alpha, alpha-beta]` diagonal Coulomb
   matrices (beta-beta reuses alpha-alpha, beta-alpha reuses alpha-beta).
-- [`UCJOpSpinUnbalanced`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.UCJOpSpinUnbalanced.html#ffsim.UCJOpSpinUnbalanced) acts on `2 * norb` block-spin modes, with
+- [`UCJOpSpinUnbalanced`](https://qiskit.github.io/ffsim/api/stubs/ffsim.UCJOpSpinUnbalanced.html#ffsim.UCJOpSpinUnbalanced) acts on `2 * norb` block-spin modes, with
   independent `[alpha, beta]` rotations and `[alpha-alpha, alpha-beta, beta-beta]` matrices.
-- [`UCJOpSpinless`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.UCJOpSpinless.html#ffsim.UCJOpSpinless) acts on `norb` spinless modes.
+- [`UCJOpSpinless`](https://qiskit.github.io/ffsim/api/stubs/ffsim.UCJOpSpinless.html#ffsim.UCJOpSpinless) acts on `norb` spinless modes.
 
 #### NOTE
-ffsim’s [`UCJOpSpinless`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.UCJOpSpinless.html#ffsim.UCJOpSpinless) is also valid on a spinful sector, where its
+ffsim’s [`UCJOpSpinless`](https://qiskit.github.io/ffsim/api/stubs/ffsim.UCJOpSpinless.html#ffsim.UCJOpSpinless) is also valid on a spinful sector, where its
 tensors act on both spin sectors with no cross-spin term. A gate has to fix its width when it
 is constructed, so this gate always reads that type as a single `norb`-mode register. Build
-the two-register reading as an [`UCJOpSpinBalanced`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.UCJOpSpinBalanced.html#ffsim.UCJOpSpinBalanced) whose alpha-beta
+the two-register reading as an [`UCJOpSpinBalanced`](https://qiskit.github.io/ffsim/api/stubs/ffsim.UCJOpSpinBalanced.html#ffsim.UCJOpSpinBalanced) whose alpha-beta
 block is zero, which is the same operator.
 
 #### NOTE
@@ -69,9 +69,9 @@ Initializing an instance of this gate can be done with the argument listed below
 
 * **Parameters:**
   **ucj_op** (*Any*) – the ffsim UCJ operator to build the circuit from, one of
-  [`UCJOpSpinBalanced`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.UCJOpSpinBalanced.html#ffsim.UCJOpSpinBalanced),
-  [`UCJOpSpinUnbalanced`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.UCJOpSpinUnbalanced.html#ffsim.UCJOpSpinUnbalanced) or
-  [`UCJOpSpinless`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.UCJOpSpinless.html#ffsim.UCJOpSpinless). Its type determines the spin variant and the
+  [`UCJOpSpinBalanced`](https://qiskit.github.io/ffsim/api/stubs/ffsim.UCJOpSpinBalanced.html#ffsim.UCJOpSpinBalanced),
+  [`UCJOpSpinUnbalanced`](https://qiskit.github.io/ffsim/api/stubs/ffsim.UCJOpSpinUnbalanced.html#ffsim.UCJOpSpinUnbalanced) or
+  [`UCJOpSpinless`](https://qiskit.github.io/ffsim/api/stubs/ffsim.UCJOpSpinless.html#ffsim.UCJOpSpinless). Its type determines the spin variant and the
   number of modes this gate acts on (see the class docstring).
 * **Raises:**
   * **MissingOptionalLibraryError** – if `ffsim` is not installed.
