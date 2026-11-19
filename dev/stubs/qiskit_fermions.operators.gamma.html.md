@@ -19,9 +19,9 @@ mode and then by variant. For example, a normally ordered string like
 `((True, 1), (False, 0), (True, 0)`.
 
 * **Parameters:**
-  * **mode** (*int*) – index of the fermionic mode.
-  * **is_prime** (*bool*) – whether to create $\gamma$ (False) or $\gamma'$ (True).
+  * **mode** ([*int*](https://docs.python.org/3/builtins/functions.html#int)) – index of the fermionic mode.
+  * **is_prime** ([*bool*](https://docs.python.org/3/builtins/functions.html#bool)) – whether to create $\gamma$ (False) or $\gamma'$ (True).
 * **Returns:**
   A `MajoranaAction` object, which is essentially the flat index `2*mode+int(is_prime)`.
 * **Return type:**
-  int
+  [int](https://docs.python.org/3/builtins/functions.html#int)

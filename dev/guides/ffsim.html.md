@@ -99,13 +99,13 @@ the spinful case, each spin species’ particle number individually) can be repr
 operator whose action would move amplitude to a different particle number has nowhere to put it.
 
 ffsim resolves this by rejecting such an operator outright: converting one to a linear operator
-raises a `ValueError` naming which conservation law fails. That is the right default, because
+raises a [`ValueError`](https://docs.python.org/3/builtins/exceptions.html#ValueError) naming which conservation law fails. That is the right default, because
 applying $\exp(-i t H)$ for a Hamiltonian $H$ with a non-particle-conserving term would
 otherwise turn a would-be unitary into a non-unitary, physically-meaningless map.
 
 - [`Evolution`](../stubs/qiskit_fermions.circuit.library.Evolution.html.md#qiskit_fermions.circuit.library.Evolution) surfaces that rejection from the operator it evolves.
 - [`OrbitalRotation`](../stubs/qiskit_fermions.circuit.library.OrbitalRotation.html.md#qiskit_fermions.circuit.library.OrbitalRotation) checks that its (embedded) rotation matrix is block-diagonal across the
-  alpha/beta split in the spinful case, and raises a `ValueError` if it mixes spin sectors.
+  alpha/beta split in the spinful case, and raises a [`ValueError`](https://docs.python.org/3/builtins/exceptions.html#ValueError) if it mixes spin sectors.
 
 ```pycon
 >>> from qiskit_fermions.circuit.library import Evolution

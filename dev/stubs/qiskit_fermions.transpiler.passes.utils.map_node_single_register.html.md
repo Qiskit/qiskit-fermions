@@ -19,11 +19,11 @@ makes the usage of [`RelabelModes`](qiskit_fermions.transpiler.passes.RelabelMod
 
 * **Parameters:**
   * **in_node** ([*DAGOpNode*](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.dagcircuit.DAGOpNode)) – the node whose indices to parse.
-  * **f2q_layout** (*dict* *[*[*QuantumRegister*](https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.QuantumRegister) *,* [*QuantumRegister*](https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.QuantumRegister) *]*) – the mapping of fermionic to qubit registers.
+  * **f2q_layout** ([*dict*](https://docs.python.org/3/builtins/stdtypes.html#dict) *[*[*QuantumRegister*](https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.QuantumRegister) *,* [*QuantumRegister*](https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.QuantumRegister) *]*) – the mapping of fermionic to qubit registers.
 * **Returns:**
   The list of the global fermionic mode indices and mapped qubit register instance.
 * **Raises:**
-  **NotImplementedError** – when the provided node acts on fermionic modes that do not all belong
+  [**NotImplementedError**](https://docs.python.org/3/builtins/exceptions.html#NotImplementedError) – when the provided node acts on fermionic modes that do not all belong
       to the same [`FermionicRegister`](qiskit_fermions.circuit.FermionicRegister.html.md#qiskit_fermions.circuit.FermionicRegister).
 * **Return type:**
-  tuple[list[int], [*QuantumRegister*](https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.QuantumRegister)]
+  [tuple](https://docs.python.org/3/builtins/stdtypes.html#tuple)[[list](https://docs.python.org/3/builtins/stdtypes.html#list)[[int](https://docs.python.org/3/builtins/functions.html#int)], [*QuantumRegister*](https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.QuantumRegister)]

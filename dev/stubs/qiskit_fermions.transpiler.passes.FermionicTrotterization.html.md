@@ -16,12 +16,12 @@ Deprecated since version 0.4.0: The class `qiskit_fermions.transpiler.passes.opt
 
 * **Parameters:**
   * **synthesis** ([*F2FSynthesisPlugin*](qiskit_fermions.circuit.library.synthesis.F2FSynthesisPlugin.html.md#qiskit_fermions.circuit.library.synthesis.F2FSynthesisPlugin)) – the synthesis method for [`Evolution`](qiskit_fermions.circuit.library.Evolution.html.md#qiskit_fermions.circuit.library.Evolution) gates.
-  * **apply** (*bool*) – see [`F2FSynthesis`](qiskit_fermions.transpiler.passes.F2FSynthesis.html.md#qiskit_fermions.transpiler.passes.F2FSynthesis).
-  * **filter** (*Callable* *[* *[**DAGOpNode* *]* *,* *bool* *]*  *|* *None*) – see [`F2FSynthesis`](qiskit_fermions.transpiler.passes.F2FSynthesis.html.md#qiskit_fermions.transpiler.passes.F2FSynthesis).
+  * **apply** ([*bool*](https://docs.python.org/3/builtins/functions.html#bool)) – see [`F2FSynthesis`](qiskit_fermions.transpiler.passes.F2FSynthesis.html.md#qiskit_fermions.transpiler.passes.F2FSynthesis).
+  * **filter** (*Callable* *[* *[**DAGOpNode* *]* *,* [*bool*](https://docs.python.org/3/builtins/functions.html#bool) *]*  *|* *None*) – see [`F2FSynthesis`](qiskit_fermions.transpiler.passes.F2FSynthesis.html.md#qiskit_fermions.transpiler.passes.F2FSynthesis).
 
 ### Attributes
 
-#### methods *: dict[str, [F2FSynthesisPlugin](qiskit_fermions.circuit.library.synthesis.F2FSynthesisPlugin.html.md#qiskit_fermions.circuit.library.synthesis.F2FSynthesisPlugin)]*
+#### methods *: [dict](https://docs.python.org/3/builtins/stdtypes.html#dict)[[str](https://docs.python.org/3/builtins/stdtypes.html#str), [F2FSynthesisPlugin](qiskit_fermions.circuit.library.synthesis.F2FSynthesisPlugin.html.md#qiskit_fermions.circuit.library.synthesis.F2FSynthesisPlugin)]*
 
 A dictionary of the fermion-to-fermion synthesis methods, by gate.
 
@@ -55,18 +55,18 @@ Execute optimization task for input Qiskit IR.
 * **Parameters:**
   * **passmanager_ir** (*IR*) – Qiskit IR to optimize.
   * **state** ([*PassManagerState*](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.PassManagerState)) – State associated with workflow execution by the pass manager itself.
-  * **callback** (*Callable* *[* *[*[*Task*](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.Task) *,* *IR_OUT* *,* [*PropertySet*](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.PropertySet) *,* *float* *,* *int* *]* *,* *None* *]*  *|* *None*) – A callback function which is called per execution of optimization task.
+  * **callback** ([*Callable*](https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable) *[* *[*[*Task*](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.Task) *,* *IR_OUT* *,* [*PropertySet*](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.PropertySet) *,* [*float*](https://docs.python.org/3/builtins/functions.html#float) *,* [*int*](https://docs.python.org/3/builtins/functions.html#int) *]* *,* *None* *]*  *|* *None*) – A callback function which is called per execution of optimization task.
 * **Returns:**
   Optimized Qiskit IR and state of the workflow.
 * **Return type:**
-  tuple[*IR_OUT*, [*PassManagerState*](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.PassManagerState)]
+  [tuple](https://docs.python.org/3/builtins/stdtypes.html#tuple)[*IR_OUT*, [*PassManagerState*](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.PassManagerState)]
 
 #### name()
 
 Name of the pass.
 
 * **Return type:**
-  str
+  [str](https://docs.python.org/3/builtins/stdtypes.html#str)
 
 #### run(dag)
 

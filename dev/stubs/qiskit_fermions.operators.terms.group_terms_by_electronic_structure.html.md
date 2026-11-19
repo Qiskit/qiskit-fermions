@@ -49,4 +49,4 @@ assert normal.has_groups()
   * **num_modes** – the number of spin-less fermionic modes in the system.
   * **two_body_physicist_order** – whether the 2-body terms are stored in physicists order.
 * **Raises:**
-  **ValueError** – if an unexpected term is encountered.
+  [**ValueError**](https://docs.python.org/3/builtins/exceptions.html#ValueError) – if an unexpected term is encountered.

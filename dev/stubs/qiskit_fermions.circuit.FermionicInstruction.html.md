@@ -24,14 +24,14 @@ It may also happen that some of the inherited methods may not always make sense 
 this re-interpretation. You have been warned.
 
 * **Parameters:**
-  * **name** (*str*) – instruction name
-  * **num_qubits** (*int*) – instruction’s qubit width
-  * **num_clbits** (*int*) – instruction’s clbit width
-  * **params** (*list* *[**int* *|**float* *|**complex* *|**str* *|**ndarray* *|**list* *|**ParameterExpression* *]*) – list of parameters
-  * **label** (*str* *or* *None*) – An optional label for identifying the instruction.
+  * **name** ([*str*](https://docs.python.org/3/builtins/stdtypes.html#str)) – instruction name
+  * **num_qubits** ([*int*](https://docs.python.org/3/builtins/functions.html#int)) – instruction’s qubit width
+  * **num_clbits** ([*int*](https://docs.python.org/3/builtins/functions.html#int)) – instruction’s clbit width
+  * **params** ([*list*](https://docs.python.org/3/builtins/stdtypes.html#list) *[*[*int*](https://docs.python.org/3/builtins/functions.html#int) *|*[*float*](https://docs.python.org/3/builtins/functions.html#float) *|*[*complex*](https://docs.python.org/3/builtins/functions.html#complex) *|*[*str*](https://docs.python.org/3/builtins/stdtypes.html#str) *|**ndarray* *|*[*list*](https://docs.python.org/3/builtins/stdtypes.html#list) *|**ParameterExpression* *]*) – list of parameters
+  * **label** ([*str*](https://docs.python.org/3/builtins/stdtypes.html#str) *or* *None*) – An optional label for identifying the instruction.
 * **Raises:**
   * **CircuitError** – when the register is not in the correct format.
-  * **TypeError** – when the optional label is provided, but it is not a string.
+  * [**TypeError**](https://docs.python.org/3/builtins/exceptions.html#TypeError) – when the optional label is provided, but it is not a string.
 
 ### Attributes
 
@@ -132,7 +132,7 @@ Validation of the arguments.
 Copy of the instruction.
 
 * **Parameters:**
-  **name** (*str*) – name to be given to the copied circuit, if `None` then the name stays the same.
+  **name** ([*str*](https://docs.python.org/3/builtins/stdtypes.html#str)) – name to be given to the copied circuit, if `None` then the name stays the same.
 * **Returns:**
   a copy of the current instruction, with the name updated if it
   was provided
@@ -157,7 +157,7 @@ which may include ignoring it and always returning a concrete gate class
 if the inverse is defined as a standard gate.
 
 * **Parameters:**
-  **annotated** (*bool*) – if set to True the output inverse gate will be returned
+  **annotated** ([*bool*](https://docs.python.org/3/builtins/functions.html#bool)) – if set to True the output inverse gate will be returned
   as `AnnotatedOperation`.
 * **Returns:**
   The inverse operation.
@@ -174,7 +174,7 @@ Return whether the `Instruction` contains [compile-time parameters](https://quan
 Creates an instruction with `self` repeated $n$ times.
 
 * **Parameters:**
-  **n** (*int*) – Number of times to repeat the instruction
+  **n** ([*int*](https://docs.python.org/3/builtins/functions.html#int)) – Number of times to repeat the instruction
 * **Returns:**
   Containing the definition.
 * **Return type:**
@@ -207,7 +207,7 @@ account.
 * **Returns:**
   are self and other equal up to parameter expressions.
 * **Return type:**
-  bool
+  [bool](https://docs.python.org/3/builtins/functions.html#bool)
 
 #### to_mutable()
 

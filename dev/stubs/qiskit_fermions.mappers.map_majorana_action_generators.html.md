@@ -55,10 +55,10 @@ it uses while assembling the result.
 
 * **Parameters:**
   * **operator** ([*MajoranaOperator*](qiskit_fermions.operators.MajoranaOperator.html.md#qiskit_fermions.operators.MajoranaOperator)) – the operator to be mapped.
-  * **map_action** (*Callable* *[* *[**int* *]* *,* *T* *]*) – the function to map a single [`MajoranaAction`](qiskit_fermions.operators.majorana_action.MajoranaAction.html.md#qiskit_fermions.operators.majorana_action.MajoranaAction) to the desired output type.
-  * **identity** (*Callable* *[* *[* *]* *,* *T* *]*) – the function to generate the multiplicative identity instance of the output type.
-  * **compose** (*Callable* *[* *[**T* *,* *T* *]* *,* *T* *]*  *|* *None*) – an optional function to implement the compositiion logic of two output type
-    instances. If this is not provided, it will default to using `operator.and_()`.
+  * **map_action** ([*Callable*](https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable) *[* *[*[*int*](https://docs.python.org/3/builtins/functions.html#int) *]* *,* *T* *]*) – the function to map a single [`MajoranaAction`](qiskit_fermions.operators.majorana_action.MajoranaAction.html.md#qiskit_fermions.operators.majorana_action.MajoranaAction) to the desired output type.
+  * **identity** ([*Callable*](https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable) *[* *[* *]* *,* *T* *]*) – the function to generate the multiplicative identity instance of the output type.
+  * **compose** ([*Callable*](https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable) *[* *[**T* *,* *T* *]* *,* *T* *]*  *|* *None*) – an optional function to implement the compositiion logic of two output type
+    instances. If this is not provided, it will default to using [`operator.and_()`](https://docs.python.org/3/library/operator.html#operator.and_).
 * **Returns:**
   The mapped operator.
 * **Return type:**

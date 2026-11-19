@@ -20,9 +20,9 @@ Fermionic mode $j$ is mapped to qubit $j$ of the resulting
   the exact number of terms returned may vary with the number of threads used. This does not
   affect the operator that the result represents.
 * **Raises:**
-  * **ValueError** – if `num_qubits` is too small to hold the operator’s support, i.e. if it is
+  * [**ValueError**](https://docs.python.org/3/builtins/exceptions.html#ValueError) – if `num_qubits` is too small to hold the operator’s support, i.e. if it is
         not larger than the largest mode index acted upon by `op`.
-  * **OverflowError** – if `num_qubits` is negative or does not fit in 32 bits.
+  * [**OverflowError**](https://docs.python.org/3/builtins/exceptions.html#OverflowError) – if `num_qubits` is negative or does not fit in 32 bits.
 
 ## Definition
 

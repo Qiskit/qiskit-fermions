@@ -1,6 +1,6 @@
 # FermionicMode
 
-### FermionicMode *: TypeAlias* *= <class 'qiskit.circuit.Qubit'>*
+### FermionicMode *: [TypeAlias](https://docs.python.org/3/library/typing.html#typing.TypeAlias)* *= <class 'qiskit.circuit.Qubit'>*
 
 A type alias of [`Qubit`](https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.Qubit).
 

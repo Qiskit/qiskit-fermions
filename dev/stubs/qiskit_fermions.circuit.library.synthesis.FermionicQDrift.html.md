@@ -4,7 +4,7 @@
 
 A synthesis method that Trotterizes an [`Evolution`](qiskit_fermions.circuit.library.Evolution.html.md#qiskit_fermions.circuit.library.Evolution) via the qDRIFT protocol.
 
-Bases: `object`
+Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
 This method replaces the exact evolution $e^{-i t H}$ of an [`Evolution`](qiskit_fermions.circuit.library.Evolution.html.md#qiskit_fermions.circuit.library.Evolution) gate by a
 randomized product formula: it draws `num_terms` samples from the Hamiltonian’s terms (or
@@ -88,18 +88,18 @@ To skip the draws that cannot move a particle, see [`QDriftTrotterization`](qisk
 Initializing an instance of this synthesis method can be done with the arguments below.
 
 * **Parameters:**
-  * **num_terms** (*int*) – the number of terms to sample for the qDRIFT Trotterization. This equals the
+  * **num_terms** ([*int*](https://docs.python.org/3/builtins/functions.html#int)) – the number of terms to sample for the qDRIFT Trotterization. This equals the
     number of [`Evolution`](qiskit_fermions.circuit.library.Evolution.html.md#qiskit_fermions.circuit.library.Evolution) gates emitted per input gate; a larger value reduces
     the Trotterization error at the cost of a deeper circuit.
-  * **weights** (*Sequence* *[**float* *]*  *|* *np.ndarray* *|* *None*) – the sampling weights to use instead of the coefficient magnitudes derived from
+  * **weights** (*Sequence* *[*[*float*](https://docs.python.org/3/builtins/functions.html#float) *]*  *|* *np.ndarray* *|* *None*) – the sampling weights to use instead of the coefficient magnitudes derived from
     the Hamiltonian. If `None` (the default), they are computed from the evolved
     operator on every call, which reproduces the textbook qDRIFT distribution. See
     [`weights`](#qiskit_fermions.circuit.library.synthesis.FermionicQDrift.weights) for the expected length, the sign convention and the effect on the
     evolution time.
-  * **rng** (*np.random.Generator* *|* *int* *|* *None*) – the random number generator (rng) to be used. When this is an `int`, the internal
+  * **rng** (*np.random.Generator* *|* [*int*](https://docs.python.org/3/builtins/functions.html#int) *|* *None*) – the random number generator (rng) to be used. When this is an `int`, the internal
     rng will be initialized with `np.random.default_rng(seed=rng)`.
 * **Raises:**
-  **ValueError** – if `weights` is not one-dimensional, is empty, holds a non-finite or
+  [**ValueError**](https://docs.python.org/3/builtins/exceptions.html#ValueError) – if `weights` is not one-dimensional, is empty, holds a non-finite or
       negative entry, or sums to zero.
 
 ### Attributes
@@ -108,7 +108,7 @@ Initializing an instance of this synthesis method can be done with the arguments
 
 The number of terms to include in the qDRIFT Trotterization.
 
-#### weights *: [ndarray](https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray) | None*
+#### weights *: [ndarray](https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray) | [None](https://docs.python.org/3/builtins/constants.html#None)*
 
 The sampling weights $w_j$, or `None` to derive them from the evolved operator.
 
@@ -122,7 +122,7 @@ changes which evolution the ensemble approximates (see the caution in the class 
 
 One entry is expected per *group* when the evolved operator carries
 [`groups`](qiskit_fermions.operators.OperatorTrait.html.md#qiskit_fermions.operators.OperatorTrait.groups), and per *term* otherwise; a
-mismatch raises `ValueError`. Because such an array describes one specific operator,
+mismatch raises [`ValueError`](https://docs.python.org/3/builtins/exceptions.html#ValueError). Because such an array describes one specific operator,
 it belongs to the gate of that operator: pass this method as the `synthesis` of that
 [`Evolution`](qiskit_fermions.circuit.library.Evolution.html.md#qiskit_fermions.circuit.library.Evolution) gate, so that every gate of a circuit can hold the weights of its own
 operator. This method is stateless and checks only the length against each gate it is given,
@@ -154,7 +154,7 @@ Prepares the draws for a gate without taking any of them.
 * **Returns:**
   The sampler, from which gates can be drawn in a batch or one at a time.
 * **Raises:**
-  **ValueError** – if [`weights`](#qiskit_fermions.circuit.library.synthesis.FermionicQDrift.weights) was supplied and its length does not match the number of
+  [**ValueError**](https://docs.python.org/3/builtins/exceptions.html#ValueError) – if [`weights`](#qiskit_fermions.circuit.library.synthesis.FermionicQDrift.weights) was supplied and its length does not match the number of
       groups (or terms) of the operator of `gate`.
 * **Return type:**
   [QDriftSampler](qiskit_fermions.circuit.library.synthesis.QDriftSampler.html.md#qiskit_fermions.circuit.library.synthesis.QDriftSampler)
@@ -168,7 +168,7 @@ Synthesizes the gate into `num_terms` sampled gates.
 * **Returns:**
   A [`FermionicCircuit`](qiskit_fermions.circuit.FermionicCircuit.html.md#qiskit_fermions.circuit.FermionicCircuit) holding one atomic [`Evolution`](qiskit_fermions.circuit.library.Evolution.html.md#qiskit_fermions.circuit.library.Evolution) gate per draw.
 * **Raises:**
-  **ValueError** – if [`weights`](#qiskit_fermions.circuit.library.synthesis.FermionicQDrift.weights) was supplied and its length does not match the number of
+  [**ValueError**](https://docs.python.org/3/builtins/exceptions.html#ValueError) – if [`weights`](#qiskit_fermions.circuit.library.synthesis.FermionicQDrift.weights) was supplied and its length does not match the number of
       groups (or terms) of the operator of `gate`.
 * **Return type:**
   [FermionicCircuit](qiskit_fermions.circuit.FermionicCircuit.html.md#qiskit_fermions.circuit.FermionicCircuit)

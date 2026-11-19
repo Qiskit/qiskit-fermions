@@ -4,7 +4,7 @@
 
 A protocol indicating all methods implemented by operator classes.
 
-Bases: `Protocol`
+Bases: [`Protocol`](https://docs.python.org/3/library/typing.html#typing.Protocol)
 
 ### Attributes
 
@@ -19,49 +19,49 @@ Returns the groups indices.
 Returns the adjoint of this operator.
 
 * **Return type:**
-  *Self*
+  [*Self*](https://docs.python.org/3/library/typing.html#typing.Self)
 
 #### equiv(other, atol)
 
 Checks this operator with another for equivalence up to the specified absolute tolerance.
 
 * **Parameters:**
-  * **other** (*Self*)
-  * **atol** (*float*)
+  * **other** ([*Self*](https://docs.python.org/3/library/typing.html#typing.Self))
+  * **atol** ([*float*](https://docs.python.org/3/builtins/functions.html#float))
 * **Return type:**
-  bool
+  [bool](https://docs.python.org/3/builtins/functions.html#bool)
 
 #### *classmethod* from_terms(terms)
 
 Constructs a new operator from an iterator (see also [`iter_terms()`](#qiskit_fermions.operators.OperatorTrait.iter_terms)).
 
 * **Parameters:**
-  **terms** (*Iterable*)
+  **terms** ([*Iterable*](https://docs.python.org/3/library/collections.abc.html#collections.abc.Iterable))
 * **Return type:**
-  *Self*
+  [*Self*](https://docs.python.org/3/library/typing.html#typing.Self)
 
 #### *classmethod* from_terms_with_groups(terms)
 
 Constructs a new operator from an iterator (see also [`iter_terms_with_groups()`](#qiskit_fermions.operators.OperatorTrait.iter_terms_with_groups)).
 
 * **Parameters:**
-  **terms** (*Iterable*)
+  **terms** ([*Iterable*](https://docs.python.org/3/library/collections.abc.html#collections.abc.Iterable))
 * **Return type:**
-  *Self*
+  [*Self*](https://docs.python.org/3/library/typing.html#typing.Self)
 
 #### get_coeffs()
 
 Returns the term coefficients.
 
 * **Return type:**
-  list[complex]
+  [list](https://docs.python.org/3/builtins/stdtypes.html#list)[[complex](https://docs.python.org/3/builtins/functions.html#complex)]
 
 #### get_support()
 
 Returns the set of mode indices which this operator acts upon.
 
 * **Return type:**
-  frozenset[int]
+  [frozenset](https://docs.python.org/3/builtins/stdtypes.html#frozenset)[[int](https://docs.python.org/3/builtins/functions.html#int)]
 
 #### has_groups()
 
@@ -71,14 +71,14 @@ This is equivalent to (but cheaper than) checking `op.groups is not None`, becau
 not copy the group indices out of the operator in order to inspect them.
 
 * **Return type:**
-  bool
+  [bool](https://docs.python.org/3/builtins/functions.html#bool)
 
 #### ichop(atol)
 
 Trims coefficients below the absolute tolerance from this operator.
 
 * **Parameters:**
-  **atol** (*float*)
+  **atol** ([*float*](https://docs.python.org/3/builtins/functions.html#float))
 
 #### is_hermitian(atol=1e-08)
 
@@ -95,26 +95,26 @@ types whose normal form is a genuine canonical form; for the others this check i
 Consult the specific implementation to find out which of the two applies.
 
 * **Parameters:**
-  **atol** (*float*) – The numerical accuracy upto which coefficients are considered equal. This value
+  **atol** ([*float*](https://docs.python.org/3/builtins/functions.html#float)) – The numerical accuracy upto which coefficients are considered equal. This value
   defaults to `1e-8`.
 * **Returns:**
   Whether this operator is Hermitian.
 * **Return type:**
-  bool
+  [bool](https://docs.python.org/3/builtins/functions.html#bool)
 
 #### iter_terms()
 
 Iterates over the terms of this operator.
 
 * **Return type:**
-  *Iterator*
+  [*Iterator*](https://docs.python.org/3/library/collections.abc.html#collections.abc.Iterator)
 
 #### iter_terms_with_groups()
 
 Iterates over the terms of this operator with their group indices.
 
 * **Return type:**
-  *Iterator*
+  [*Iterator*](https://docs.python.org/3/library/collections.abc.html#collections.abc.Iterator)
 
 #### min_num_modes()
 
@@ -126,7 +126,7 @@ operators: one more than the largest *fermionic* mode, i.e. `max_index // 2 + 1`
 [`get_support()`](#qiskit_fermions.operators.OperatorTrait.get_support).
 
 * **Return type:**
-  int
+  [int](https://docs.python.org/3/builtins/functions.html#int)
 
 #### normal_ordered(\*args, \*\*kwargs)
 
@@ -136,39 +136,39 @@ Returns the normal-ordered form of this operator.
 A specific implementation of this method may take additional arguments.
 
 * **Return type:**
-  *Self*
+  [*Self*](https://docs.python.org/3/library/typing.html#typing.Self)
 
 #### num_groups()
 
 Returns the number of groups.
 
 * **Return type:**
-  int | None
+  [int](https://docs.python.org/3/builtins/functions.html#int) | None
 
 #### *classmethod* one()
 
 Constructs the multiplicative identity operator.
 
 * **Return type:**
-  *Self*
+  [*Self*](https://docs.python.org/3/library/typing.html#typing.Self)
 
 #### relabel_modes(permutation)
 
 Relabels the modes of the operator.
 
 * **Parameters:**
-  **permutation** (*list* *[**int* *]*)
+  **permutation** ([*list*](https://docs.python.org/3/builtins/stdtypes.html#list) *[*[*int*](https://docs.python.org/3/builtins/functions.html#int) *]*)
 * **Return type:**
-  *Self*
+  [*Self*](https://docs.python.org/3/library/typing.html#typing.Self)
 
 #### simplify(atol)
 
 Simplifies the terms of this operator, discarding those below the absolute tolerance.
 
 * **Parameters:**
-  **atol** (*float*)
+  **atol** ([*float*](https://docs.python.org/3/builtins/functions.html#float))
 * **Return type:**
-  *Self*
+  [*Self*](https://docs.python.org/3/library/typing.html#typing.Self)
 
 #### split_out_groups(group_indices=None)
 
@@ -179,13 +179,13 @@ If `group_indices` is omitted, every group is built, in index order. Otherwise, 
 the requested indices are built, in the given order.
 
 * **Parameters:**
-  **group_indices** (*Sequence* *[**int* *]*  *|* *None*)
+  **group_indices** ([*Sequence*](https://docs.python.org/3/library/collections.abc.html#collections.abc.Sequence) *[*[*int*](https://docs.python.org/3/builtins/functions.html#int) *]*  *|* *None*)
 * **Return type:**
-  list[*Self*]
+  [list](https://docs.python.org/3/builtins/stdtypes.html#list)[[*Self*](https://docs.python.org/3/library/typing.html#typing.Self)]
 
 #### *classmethod* zero()
 
 Constructs the additive identity operator.
 
 * **Return type:**
-  *Self*
+  [*Self*](https://docs.python.org/3/library/typing.html#typing.Self)

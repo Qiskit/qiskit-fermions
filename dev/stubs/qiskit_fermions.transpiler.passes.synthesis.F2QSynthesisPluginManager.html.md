@@ -4,7 +4,7 @@
 
 A simple manager of the installed fermion-to-qubit synthesis plugins.
 
-Bases: `object`
+Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
 All plugins that are registered under the `qiskit_fermions.transpiler.synthesis`
 [entry-point](https://setuptools.pypa.io/en/latest/userguide/entry_point.html) will be
@@ -26,7 +26,7 @@ An overview of all builtin plugins is given [here](../pydoc/qiskit_fermions.tran
 
 ### Attributes
 
-#### plugins *: dict[str, list[str]]*
+#### plugins *: [dict](https://docs.python.org/3/builtins/stdtypes.html#dict)[[str](https://docs.python.org/3/builtins/stdtypes.html#str), [list](https://docs.python.org/3/builtins/stdtypes.html#list)[[str](https://docs.python.org/3/builtins/stdtypes.html#str)]]*
 
 A dictionary mapping circuit instruction names to their synthesis methods.
 
@@ -41,29 +41,29 @@ instances of that particular gate to its qubit form.
 Returns the requested [`F2QSynthesisPlugin`](qiskit_fermions.transpiler.passes.synthesis.F2QSynthesisPlugin.html.md#qiskit_fermions.transpiler.passes.synthesis.F2QSynthesisPlugin) type.
 
 * **Parameters:**
-  * **op_name** (*str*) – the name of the operation whose plugin to return.
-  * **method_name** (*str*) – the name of the synthesis plugin.
+  * **op_name** ([*str*](https://docs.python.org/3/builtins/stdtypes.html#str)) – the name of the operation whose plugin to return.
+  * **method_name** ([*str*](https://docs.python.org/3/builtins/stdtypes.html#str)) – the name of the synthesis plugin.
 * **Returns:**
   The [`F2QSynthesisPlugin`](qiskit_fermions.transpiler.passes.synthesis.F2QSynthesisPlugin.html.md#qiskit_fermions.transpiler.passes.synthesis.F2QSynthesisPlugin) class.
 * **Raises:**
-  **KeyError** – if no plugin is registered under that name.
+  [**KeyError**](https://docs.python.org/3/builtins/exceptions.html#KeyError) – if no plugin is registered under that name.
 * **Return type:**
-  type[[*F2QSynthesisPlugin*](qiskit_fermions.transpiler.passes.synthesis.F2QSynthesisPlugin.html.md#qiskit_fermions.transpiler.passes.synthesis.F2QSynthesisPlugin)]
+  [type](https://docs.python.org/3/builtins/functions.html#type)[[*F2QSynthesisPlugin*](qiskit_fermions.transpiler.passes.synthesis.F2QSynthesisPlugin.html.md#qiskit_fermions.transpiler.passes.synthesis.F2QSynthesisPlugin)]
 
 #### method_names(op_name)
 
 Returns the names of all installed plugin methods for a given circuit instruction.
 
 * **Parameters:**
-  **op_name** (*str*) – the name of the operation whose synthesis methods to return.
+  **op_name** ([*str*](https://docs.python.org/3/builtins/stdtypes.html#str)) – the name of the operation whose synthesis methods to return.
 * **Returns:**
   The list of installed plugin method names.
 * **Return type:**
-  list[str]
+  [list](https://docs.python.org/3/builtins/stdtypes.html#list)[[str](https://docs.python.org/3/builtins/stdtypes.html#str)]
 
 #### op_names()
 
 Returns the names of all circuit instructions for which any plugin is installed.
 
 * **Return type:**
-  list[str]
+  [list](https://docs.python.org/3/builtins/stdtypes.html#list)[[str](https://docs.python.org/3/builtins/stdtypes.html#str)]

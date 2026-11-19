@@ -45,6 +45,18 @@
   rotations on the same modes in a different order, for example `(0, 1)` followed by `(1, 0)`,
   were merged into a single rotation that prepares a different state.
 
+- [`QDriftTrotterization`](stubs/qiskit_fermions.transpiler.passes.QDriftTrotterization.html.md#qiskit_fermions.transpiler.passes.QDriftTrotterization) now places the gates it samples
+  on the modes of the [`Evolution`](stubs/qiskit_fermions.circuit.library.Evolution.html.md#qiskit_fermions.circuit.library.Evolution) gate they replace, in
+  that gate’s order. Previously they were placed on all modes of the circuit, so a gate that did
+  not act on every mode of the circuit in order was replaced by gates acting on the wrong modes.
+
+- [`QDriftTrotterization`](stubs/qiskit_fermions.transpiler.passes.QDriftTrotterization.html.md#qiskit_fermions.transpiler.passes.QDriftTrotterization) now compares a sampled term
+  with the occupations of the circuit modes that the term acts on. Previously it compared the
+  term’s indices within its [`Evolution`](stubs/qiskit_fermions.circuit.library.Evolution.html.md#qiskit_fermions.circuit.library.Evolution) gate with the
+  occupations of the circuit modes of the same indices. For a gate that does not act on the
+  leading modes of the circuit in order, the pass could therefore keep the wrong terms, or raise
+  a `RuntimeError` after rejecting every term.
+
 - [`MergeSlaterDeterminantPreparation`](stubs/qiskit_fermions.transpiler.passes.MergeSlaterDeterminantPreparation.html.md#qiskit_fermions.transpiler.passes.MergeSlaterDeterminantPreparation) now accounts for
   the order of the wires an [`InitializeModes`](stubs/qiskit_fermions.circuit.library.InitializeModes.html.md#qiskit_fermions.circuit.library.InitializeModes) or
   [`OrbitalRotation`](stubs/qiskit_fermions.circuit.library.OrbitalRotation.html.md#qiskit_fermions.circuit.library.OrbitalRotation) is placed on. Previously, a gate placed
@@ -634,7 +646,7 @@ every removed API with its replacement, and are worth reading in full before upg
 - [`jordan_wigner()`](stubs/qiskit_fermions.mappers.library.jordan_wigner.html.md#qiskit_fermions.mappers.library.jordan_wigner) now dispatches on all four operator types
   rather than only [`FermionOperator`](stubs/qiskit_fermions.operators.FermionOperator.html.md#qiskit_fermions.operators.FermionOperator), delegating to whichever
   direct implementation matches the operator it is given. Passing one of the other three operator
-  types previously raised a `TypeError`.
+  types previously raised a [`TypeError`](https://docs.python.org/3/builtins/exceptions.html#TypeError).
 
 - The [`is_hermitian()`](stubs/qiskit_fermions.operators.OperatorTrait.html.md#qiskit_fermions.operators.OperatorTrait.is_hermitian) method is now part of the
   [`OperatorTrait`](stubs/qiskit_fermions.operators.OperatorTrait.html.md#qiskit_fermions.operators.OperatorTrait) protocol. Every operator class already
@@ -672,7 +684,7 @@ every removed API with its replacement, and are worth reading in full before upg
   [`FermionOperator`](stubs/qiskit_fermions.operators.FermionOperator.html.md#qiskit_fermions.operators.FermionOperator). An operator of another type is converted through its fermionic image
   (the [`SupportsFermionOperator`](stubs/qiskit_fermions.protocols.SupportsFermionOperator.html.md#qiskit_fermions.protocols.SupportsFermionOperator) protocol) before being simulated, so evolving a
   [`MajoranaOperator`](stubs/qiskit_fermions.operators.MajoranaOperator.html.md#qiskit_fermions.operators.MajoranaOperator), [`EdgeVertexOperator`](stubs/qiskit_fermions.operators.EdgeVertexOperator.html.md#qiskit_fermions.operators.EdgeVertexOperator) or [`TransferVertexOperator`](stubs/qiskit_fermions.operators.TransferVertexOperator.html.md#qiskit_fermions.operators.TransferVertexOperator) no
-  longer raises `NotImplementedError`.
+  longer raises [`NotImplementedError`](https://docs.python.org/3/builtins/exceptions.html#NotImplementedError).
 
 - [`FermionOperator`](stubs/qiskit_fermions.operators.FermionOperator.html.md#qiskit_fermions.operators.FermionOperator) now implements [`ffsim.SupportsTrace`](https://qiskit.github.io/ffsim/api/stubs/ffsim.SupportsTrace.html#ffsim.SupportsTrace) through a new
   [`_trace_()`](stubs/qiskit_fermions.operators.FermionOperator.html.md#qiskit_fermions.operators.FermionOperator._trace_) method, so [`ffsim.trace()`](https://qiskit.github.io/ffsim/api/stubs/ffsim.trace.html#ffsim.trace) can
@@ -845,10 +857,10 @@ every removed API with its replacement, and are worth reading in full before upg
 
 - [`from_file()`](stubs/qiskit_fermions.operators.library.FCIDump.html.md#qiskit_fermions.operators.library.FCIDump.from_file) now raises a catchable Python
   exception when it cannot parse a file, instead of propagating a Rust panic. A path that cannot
-  be opened or read raises `OSError`, while a file that does not honor the FCIDump format
+  be opened or read raises [`OSError`](https://docs.python.org/3/builtins/exceptions.html#OSError), while a file that does not honor the FCIDump format
   (a missing header namelist, a missing `NORB` or `NELEC` field, or a malformed `MS2` field)
-  raises `ValueError`. An FCIDump carrying an MO energy value, which is still unsupported,
-  also raises `ValueError`.
+  raises [`ValueError`](https://docs.python.org/3/builtins/exceptions.html#ValueError). An FCIDump carrying an MO energy value, which is still unsupported,
+  also raises [`ValueError`](https://docs.python.org/3/builtins/exceptions.html#ValueError).
 
 - The `group_weights` method has been removed from every operator class and from the
   [`OperatorTrait`](stubs/qiskit_fermions.operators.OperatorTrait.html.md#qiskit_fermions.operators.OperatorTrait) protocol. It is replaced by

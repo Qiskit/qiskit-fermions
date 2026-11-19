@@ -52,10 +52,10 @@ uses while assembling the result.
 
 * **Parameters:**
   * **operator** ([*FermionOperator*](qiskit_fermions.operators.FermionOperator.html.md#qiskit_fermions.operators.FermionOperator)) – the operator to be mapped.
-  * **map_action** (*Callable* *[* *[**tuple* *[**bool* *,* *int* *]* *]* *,* *T* *]*) – the function to map a single [`FermionAction`](qiskit_fermions.operators.fermion_action.FermionAction.html.md#qiskit_fermions.operators.fermion_action.FermionAction) to the desired output type.
-  * **identity** (*Callable* *[* *[* *]* *,* *T* *]*) – the function to generate the multiplicative identity instance of the output type.
-  * **compose** (*Callable* *[* *[**T* *,* *T* *]* *,* *T* *]*  *|* *None*) – an optional function to implement the compositiion logic of two output type
-    instances. If this is not provided, it will default to using `operator.and_()`.
+  * **map_action** ([*Callable*](https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable) *[* *[*[*tuple*](https://docs.python.org/3/builtins/stdtypes.html#tuple) *[*[*bool*](https://docs.python.org/3/builtins/functions.html#bool) *,* [*int*](https://docs.python.org/3/builtins/functions.html#int) *]* *]* *,* *T* *]*) – the function to map a single [`FermionAction`](qiskit_fermions.operators.fermion_action.FermionAction.html.md#qiskit_fermions.operators.fermion_action.FermionAction) to the desired output type.
+  * **identity** ([*Callable*](https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable) *[* *[* *]* *,* *T* *]*) – the function to generate the multiplicative identity instance of the output type.
+  * **compose** ([*Callable*](https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable) *[* *[**T* *,* *T* *]* *,* *T* *]*  *|* *None*) – an optional function to implement the compositiion logic of two output type
+    instances. If this is not provided, it will default to using [`operator.and_()`](https://docs.python.org/3/library/operator.html#operator.and_).
 * **Returns:**
   The mapped operator.
 * **Return type:**

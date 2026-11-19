@@ -42,5 +42,5 @@ None
   The mean absolute coefficient magnitude of each group index, or `None` if the operator
   tracks no groups.
 * **Raises:**
-  **TypeError** – if `op` is not a supported operator type (see
+  [**TypeError**](https://docs.python.org/3/builtins/exceptions.html#TypeError) – if `op` is not a supported operator type (see
       [`OperatorTrait`](qiskit_fermions.operators.OperatorTrait.html.md#qiskit_fermions.operators.OperatorTrait)).

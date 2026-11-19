@@ -33,7 +33,7 @@ during the pre-release development of this package.
 Initializing an instance of this gate can be done with the arguments listed below.
 
 * **Parameters:**
-  **occupation** (*Sequence* *[**bool* *]*) – a sequence of booleans indicating the occupation for each mode in the
+  **occupation** (*Sequence* *[*[*bool*](https://docs.python.org/3/builtins/functions.html#bool) *]*) – a sequence of booleans indicating the occupation for each mode in the
   [`FermionicRegister`](qiskit_fermions.circuit.FermionicRegister.html.md#qiskit_fermions.circuit.FermionicRegister) being initialized by this gate.
 
 ### Attributes
@@ -56,15 +56,15 @@ spinful block-spin interpretation of the `2 * norb` modes). Place the returned g
 matching register to certify a Hartree-Fock reference state.
 
 * **Parameters:**
-  * **norb** (*int*) – the number of spatial orbitals.
-  * **nelec** (*int* *|* *tuple* *[**int* *,* *int* *]*) – either a single integer for a spinless system, or a pair of integers storing the
+  * **norb** ([*int*](https://docs.python.org/3/builtins/functions.html#int)) – the number of spatial orbitals.
+  * **nelec** ([*int*](https://docs.python.org/3/builtins/functions.html#int) *|* [*tuple*](https://docs.python.org/3/builtins/stdtypes.html#tuple) *[*[*int*](https://docs.python.org/3/builtins/functions.html#int) *,* [*int*](https://docs.python.org/3/builtins/functions.html#int) *]*) – either a single integer for a spinless system, or a pair of integers storing the
     numbers of spin alpha and spin beta fermions.
 * **Returns:**
   An [`InitializeModes`](#qiskit_fermions.circuit.library.InitializeModes) gate whose occupation is the Hartree-Fock determinant.
 * **Raises:**
-  **ValueError** – if the electron count exceeds the `norb` orbitals available in a sector.
+  [**ValueError**](https://docs.python.org/3/builtins/exceptions.html#ValueError) – if the electron count exceeds the `norb` orbitals available in a sector.
 * **Return type:**
-  *Self*
+  [*Self*](https://docs.python.org/3/library/typing.html#typing.Self)
 
 ### Protocol Methods
 
@@ -102,18 +102,18 @@ so this validates the reference without pinning it to a specific determinant vec
 * **Parameters:**
   * **vec** ([*ndarray*](https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray)) – the state vector to validate. Its length must match the `(norb, nelec)` sector
     dimension.
-  * **norb** (*int*) – the number of spatial orbitals of the *global* state vector.
-  * **nelec** (*int* *|* *tuple* *[**int* *,* *int* *]*) – either a single integer for a spinless system, or a pair of integers storing the
+  * **norb** ([*int*](https://docs.python.org/3/builtins/functions.html#int)) – the number of spatial orbitals of the *global* state vector.
+  * **nelec** ([*int*](https://docs.python.org/3/builtins/functions.html#int) *|* [*tuple*](https://docs.python.org/3/builtins/stdtypes.html#tuple) *[*[*int*](https://docs.python.org/3/builtins/functions.html#int) *,* [*int*](https://docs.python.org/3/builtins/functions.html#int) *]*) – either a single integer for a spinless system, or a pair of integers storing the
     numbers of spin alpha and spin beta fermions. An integer selects the spinless mode
     interpretation (the `norb` modes are orbitals); a pair selects the spinful
     `(orb, spin)` block-spin interpretation of the `2 * norb` modes.
-  * **copy** (*bool*) – accepted for protocol conformance but has no effect – this gate does not mutate the
+  * **copy** ([*bool*](https://docs.python.org/3/builtins/functions.html#bool)) – accepted for protocol conformance but has no effect – this gate does not mutate the
     state, so `vec` is returned as-is regardless.
-  * **freg_indices** (*list* *[**int* *]*) – the absolute (global) mode indices that this gate’s local modes map onto.
+  * **freg_indices** ([*list*](https://docs.python.org/3/builtins/stdtypes.html#list) *[*[*int*](https://docs.python.org/3/builtins/functions.html#int) *]*) – the absolute (global) mode indices that this gate’s local modes map onto.
 * **Returns:**
   The input `vec`, unchanged, once its confinement to the occupation subspace is verified.
 * **Raises:**
-  **ValueError** – if an occupied mode falls outside the range implied by `norb`; if a spinful
+  [**ValueError**](https://docs.python.org/3/builtins/exceptions.html#ValueError) – if an occupied mode falls outside the range implied by `norb`; if a spinful
       gate partially straddles both spin sectors (without pinning a full determinant); if
       `vec`’s length does not match the `(norb, nelec)` sector dimension; or if `vec`
       has amplitude outside the subspace the occupation defines.

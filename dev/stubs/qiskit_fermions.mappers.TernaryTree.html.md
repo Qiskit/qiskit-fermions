@@ -4,7 +4,7 @@
 
 A ternary tree defining a fermion-to-qubit encoding.
 
-Bases: `object`
+Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
 A ternary tree on $N$ nodes encodes $N$ fermionic modes onto $N$ qubits. Each
 node is a qubit carrying three downward **links**, labeled `X`, `Y` and `Z`. A link
@@ -134,9 +134,9 @@ shape. See the [mappers guide](../guides/mappers.html.md#bravyi-kitaev-by-hand) 
   * **order** – the labels to attach children along, as a 3-character string. Changing it changes
     which Pauli strings the encoding produces, though not their weight.
 * **Raises:**
-  * **ValueError** – if `num_nodes` is zero, `branching` is not between 1 and 3, `order`
+  * [**ValueError**](https://docs.python.org/3/builtins/exceptions.html#ValueError) – if `num_nodes` is zero, `branching` is not between 1 and 3, `order`
         is not 3 Pauli labels, or its first `branching` labels are not distinct.
-  * **OverflowError** – if `num_nodes` is negative or does not fit in 32 bits.
+  * [**OverflowError**](https://docs.python.org/3/builtins/exceptions.html#OverflowError) – if `num_nodes` is negative or does not fit in 32 bits.
 
 #### *static* chain(num_nodes, label)
 
@@ -152,8 +152,8 @@ This is only a convenience: it is [`breadth_first()`](#qiskit_fermions.mappers.T
   * **num_nodes** – the number of modes, and hence qubits.
   * **label** – the link the chain descends along.
 * **Raises:**
-  * **ValueError** – if `num_nodes` is zero or `label` is not a Pauli label.
-  * **OverflowError** – if `num_nodes` is negative or does not fit in 32 bits.
+  * [**ValueError**](https://docs.python.org/3/builtins/exceptions.html#ValueError) – if `num_nodes` is zero or `label` is not a Pauli label.
+  * [**OverflowError**](https://docs.python.org/3/builtins/exceptions.html#OverflowError) – if `num_nodes` is negative or does not fit in 32 bits.
 
 #### children(node)
 
@@ -168,7 +168,7 @@ Links that terminate in a leg are omitted.
 ```
 
 * **Raises:**
-  **ValueError** – if `node` is out of range.
+  [**ValueError**](https://docs.python.org/3/builtins/exceptions.html#ValueError) – if `node` is out of range.
 
 #### leg_paths()
 

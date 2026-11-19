@@ -14,6 +14,6 @@ a ternary-tree encoding.
   The mapped qubit operator, subject to the same simplification and grouping caveats as
   [`fermion_ternary_tree()`](qiskit_fermions.mappers.library.fermion_ternary_tree.html.md#qiskit_fermions.mappers.library.fermion_ternary_tree).
 * **Raises:**
-  * **ValueError** – if `op` acts on a mode the encoding does not cover, or `num_qubits` is
+  * [**ValueError**](https://docs.python.org/3/builtins/exceptions.html#ValueError) – if `op` acts on a mode the encoding does not cover, or `num_qubits` is
         smaller than the encoding’s mode count.
-  * **OverflowError** – if `num_qubits` is negative or does not fit in 32 bits.
+  * [**OverflowError**](https://docs.python.org/3/builtins/exceptions.html#OverflowError) – if `num_qubits` is negative or does not fit in 32 bits.

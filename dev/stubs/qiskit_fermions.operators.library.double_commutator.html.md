@@ -47,7 +47,7 @@ All three inputs must be of the same operator type. This will also determine the
   * **op_a** (*T*) – the operator $A$ above.
   * **op_b** (*T*) – the operator $B$ above.
   * **op_c** (*T*) – the operator $C$ above.
-  * **sign** (*bool*) – the nature of the outer (anti-)commutator as per the definition above.
+  * **sign** ([*bool*](https://docs.python.org/3/builtins/functions.html#bool)) – the nature of the outer (anti-)commutator as per the definition above.
 * **Returns:**
   The double-commutator as per the definition above.
 * **Return type:**

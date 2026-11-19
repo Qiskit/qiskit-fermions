@@ -18,7 +18,7 @@ The method that draws the terms of an [`Evolution`](qiskit_fermions.circuit.libr
 with that method, which is how a gate carries its own `num_terms`, `weights` and `rng`.
 Any other [`synthesis`](qiskit_fermions.circuit.FermionicGate.html.md#qiskit_fermions.circuit.FermionicGate.synthesis) is not a statement about qDRIFT and is ignored. Such
 a gate is drawn with the `qdrift` method given to this pass instead, and when there is none, it
-is left in place (with a `UserWarning`).
+is left in place (with a [`UserWarning`](https://docs.python.org/3/builtins/exceptions.html#UserWarning)).
 
 That exists to stop the sampling from spending one of the `num_terms` slots on an excitation
 that cannot move a particle, and which therefore tells you nothing about the sampled bitstrings.
@@ -47,7 +47,7 @@ on the qDRIFT error bound: those results are biased by an amount the pass does n
 Filtering requires an [`InitializeModes`](qiskit_fermions.circuit.library.InitializeModes.html.md#qiskit_fermions.circuit.library.InitializeModes) or [`PrepareSlaterDeterminant`](qiskit_fermions.circuit.library.PrepareSlaterDeterminant.html.md#qiskit_fermions.circuit.library.PrepareSlaterDeterminant) gate to
 precede the [`Evolution`](qiskit_fermions.circuit.library.Evolution.html.md#qiskit_fermions.circuit.library.Evolution) gates being Trotterized, to seed the initial occupied and
 unoccupied mode sets. If none is found, or if the sets it seeds turn out to be entirely occupied
-or entirely unoccupied, filtering is skipped for that gate and a `UserWarning` is emitted
+or entirely unoccupied, filtering is skipped for that gate and a [`UserWarning`](https://docs.python.org/3/builtins/exceptions.html#UserWarning) is emitted
 instead, and the gate is sampled as [`FermionicQDrift`](qiskit_fermions.circuit.library.synthesis.FermionicQDrift.html.md#qiskit_fermions.circuit.library.synthesis.FermionicQDrift) would.
 
 The sets are updated as the circuit is traversed: a drawn term is accepted only if its support
@@ -70,7 +70,7 @@ small one means the retained terms were weighted far above their true share of t
 
 #### IMPORTANT
 Neither field is present when no gate was filtered, which covers every case in which
-filtering was skipped with a `UserWarning`. Read them defensively, for example with
+filtering was skipped with a [`UserWarning`](https://docs.python.org/3/builtins/exceptions.html#UserWarning). Read them defensively, for example with
 `qcirc.metadata.get("filter_trivial.discarded")`. A discarded count of zero is different
 from an absent field: it says the filtering ran on that gate and accepted every draw, so it
 left the sampling distribution untouched.
@@ -93,7 +93,7 @@ Initializing this transpiler pass can be done with the argument below.
 #### MAX_SAMPLE_RETRIES *= 1000000*
 
 The maximum number of consecutive rejected samples tolerated before [`run()`](#qiskit_fermions.transpiler.passes.QDriftTrotterization.run) gives up and
-raises `RuntimeError`. This guards against an infinite loop when the Hamiltonian’s
+raises [`RuntimeError`](https://docs.python.org/3/builtins/exceptions.html#RuntimeError). This guards against an infinite loop when the Hamiltonian’s
 remaining terms cannot bridge the tracked occupied/unoccupied mode sets. That happens when both
 sets remain small and disjoint (few modes have been marked occupied or unoccupied, and none has
 yet become “uncertain”) and no remaining term’s support touches both.
@@ -113,7 +113,7 @@ Each [`Evolution`](qiskit_fermions.circuit.library.Evolution.html.md#qiskit_ferm
 `Evolution.atomic` and carry over the `Evolution.synthesis` method of the node
 they replace. The method that draws them is the node’s own `Evolution.synthesis`
 if that is a [`FermionicQDrift`](qiskit_fermions.circuit.library.synthesis.FermionicQDrift.html.md#qiskit_fermions.circuit.library.synthesis.FermionicQDrift), and [`qdrift`](#qiskit_fermions.transpiler.passes.QDriftTrotterization.qdrift) otherwise. A node for which there
-is neither is copied to the output unchanged, with a `UserWarning`, and every mode it
+is neither is copied to the output unchanged, with a [`UserWarning`](https://docs.python.org/3/builtins/exceptions.html#UserWarning), and every mode it
 acts on is then treated as “uncertain” for the filtering of the nodes after it. Nodes that
 are not [`Evolution`](qiskit_fermions.circuit.library.Evolution.html.md#qiskit_fermions.circuit.library.Evolution) gates are copied to the output unchanged. Since the sampling is
 random, the output varies between runs unless the `rng` was seeded.
@@ -130,9 +130,9 @@ random, the output varies between runs unless the `rng` was seeded.
   `filter_trivial.discarded` and `filter_trivial.emitted` counts described in the
   class docstring.
 * **Raises:**
-  * **RuntimeError** – if [`MAX_SAMPLE_RETRIES`](#qiskit_fermions.transpiler.passes.QDriftTrotterization.MAX_SAMPLE_RETRIES) consecutive draws are rejected without any
+  * [**RuntimeError**](https://docs.python.org/3/builtins/exceptions.html#RuntimeError) – if [`MAX_SAMPLE_RETRIES`](#qiskit_fermions.transpiler.passes.QDriftTrotterization.MAX_SAMPLE_RETRIES) consecutive draws are rejected without any
         of them coupling the tracked occupied and unoccupied mode sets.
-  * **ValueError** – if [`weights`](qiskit_fermions.circuit.library.synthesis.FermionicQDrift.html.md#qiskit_fermions.circuit.library.synthesis.FermionicQDrift.weights) was supplied and its length does not
+  * [**ValueError**](https://docs.python.org/3/builtins/exceptions.html#ValueError) – if [`weights`](qiskit_fermions.circuit.library.synthesis.FermionicQDrift.html.md#qiskit_fermions.circuit.library.synthesis.FermionicQDrift.weights) was supplied and its length does not
         match the number of groups (or terms) of an evolved operator.
 * **Return type:**
   [*DAGCircuit*](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.dagcircuit.DAGCircuit)
@@ -146,18 +146,18 @@ Execute optimization task for input Qiskit IR.
 * **Parameters:**
   * **passmanager_ir** (*IR*) – Qiskit IR to optimize.
   * **state** ([*PassManagerState*](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.PassManagerState)) – State associated with workflow execution by the pass manager itself.
-  * **callback** (*Callable* *[* *[*[*Task*](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.Task) *,* *IR_OUT* *,* [*PropertySet*](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.PropertySet) *,* *float* *,* *int* *]* *,* *None* *]*  *|* *None*) – A callback function which is called per execution of optimization task.
+  * **callback** ([*Callable*](https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable) *[* *[*[*Task*](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.Task) *,* *IR_OUT* *,* [*PropertySet*](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.PropertySet) *,* [*float*](https://docs.python.org/3/builtins/functions.html#float) *,* [*int*](https://docs.python.org/3/builtins/functions.html#int) *]* *,* *None* *]*  *|* *None*) – A callback function which is called per execution of optimization task.
 * **Returns:**
   Optimized Qiskit IR and state of the workflow.
 * **Return type:**
-  tuple[*IR_OUT*, [*PassManagerState*](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.PassManagerState)]
+  [tuple](https://docs.python.org/3/builtins/stdtypes.html#tuple)[*IR_OUT*, [*PassManagerState*](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.PassManagerState)]
 
 #### name()
 
 Name of the pass.
 
 * **Return type:**
-  str
+  [str](https://docs.python.org/3/builtins/stdtypes.html#str)
 
 #### update_status(state, run_state)
 

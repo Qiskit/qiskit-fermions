@@ -67,18 +67,18 @@ Execute optimization task for input Qiskit IR.
 * **Parameters:**
   * **passmanager_ir** (*IR*) – Qiskit IR to optimize.
   * **state** ([*PassManagerState*](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.PassManagerState)) – State associated with workflow execution by the pass manager itself.
-  * **callback** (*Callable* *[* *[*[*Task*](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.Task) *,* *IR_OUT* *,* [*PropertySet*](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.PropertySet) *,* *float* *,* *int* *]* *,* *None* *]*  *|* *None*) – A callback function which is called per execution of optimization task.
+  * **callback** ([*Callable*](https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable) *[* *[*[*Task*](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.Task) *,* *IR_OUT* *,* [*PropertySet*](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.PropertySet) *,* [*float*](https://docs.python.org/3/builtins/functions.html#float) *,* [*int*](https://docs.python.org/3/builtins/functions.html#int) *]* *,* *None* *]*  *|* *None*) – A callback function which is called per execution of optimization task.
 * **Returns:**
   Optimized Qiskit IR and state of the workflow.
 * **Return type:**
-  tuple[*IR_OUT*, [*PassManagerState*](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.PassManagerState)]
+  [tuple](https://docs.python.org/3/builtins/stdtypes.html#tuple)[*IR_OUT*, [*PassManagerState*](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.PassManagerState)]
 
 #### name()
 
 Name of the pass.
 
 * **Return type:**
-  str
+  [str](https://docs.python.org/3/builtins/stdtypes.html#str)
 
 #### update_status(state, run_state)
 

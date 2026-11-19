@@ -4,7 +4,7 @@
 
 A wrapper around [`QuantumCircuit`](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit) for expressing fermionic circuits.
 
-Bases: `object`
+Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
 This class maintains a reduced API compared to the full API of the underlying
 [`QuantumCircuit`](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit). This is done to avoid exposing (among other methods)
@@ -24,7 +24,7 @@ transpilation, rather than on this circuit (see [`FermionicMeasure`](qiskit_ferm
 Initializing a circuit instance can be done with the arguments listed below.
 
 * **Parameters:**
-  **num_modes** (*int*) – the number of fermionic modes on which this circuit acts.
+  **num_modes** ([*int*](https://docs.python.org/3/builtins/functions.html#int)) – the number of fermionic modes on which this circuit acts.
 
 ### Attributes
 
@@ -52,7 +52,7 @@ and is available as [`register`](#qiskit_fermions.circuit.FermionicCircuit.regis
 * **Parameters:**
   **cregs** ([*ClassicalRegister*](https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.ClassicalRegister)) – the classical registers to add.
 * **Raises:**
-  **ValueError** – if any of the provided registers is not a
+  [**ValueError**](https://docs.python.org/3/builtins/exceptions.html#ValueError) – if any of the provided registers is not a
       [`ClassicalRegister`](https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.ClassicalRegister).
 * **Return type:**
   None
@@ -63,7 +63,7 @@ Appends a [`FermionicGate`](qiskit_fermions.circuit.FermionicGate.html.md#qiskit
 
 * **Parameters:**
   * **gate** ([*FermionicGate*](qiskit_fermions.circuit.FermionicGate.html.md#qiskit_fermions.circuit.FermionicGate)) – the fermionic gate to apply.
-  * **fargs** ([*Qubit*](https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.Qubit) *|* [*QuantumRegister*](https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.QuantumRegister) *|* *int* *|* *slice* *|* *Sequence* *[*[*Qubit*](https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.Qubit) *|* *int* *]*) – the fermionic modes on which this gate acts.
+  * **fargs** ([*Qubit*](https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.Qubit) *|* [*QuantumRegister*](https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.QuantumRegister) *|* [*int*](https://docs.python.org/3/builtins/functions.html#int) *|* [*slice*](https://docs.python.org/3/builtins/functions.html#slice) *|* [*Sequence*](https://docs.python.org/3/library/collections.abc.html#collections.abc.Sequence) *[*[*Qubit*](https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.Qubit) *|* [*int*](https://docs.python.org/3/builtins/functions.html#int) *]*) – the fermionic modes on which this gate acts.
   * **cargs** (*None*) – 
 
     the classical bits on which this gate acts.
@@ -72,9 +72,9 @@ Appends a [`FermionicGate`](qiskit_fermions.circuit.FermionicGate.html.md#qiskit
     No gates of this kind are currently supported. A [`FermionicGate`](qiskit_fermions.circuit.FermionicGate.html.md#qiskit_fermions.circuit.FermionicGate) is unitary
     and so takes no classical bits; use [`measure()`](#qiskit_fermions.circuit.FermionicCircuit.measure) to add the one instruction that
     does.
-  * **copy** (*bool*) – forwarded to [`append()`](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit#append).
+  * **copy** ([*bool*](https://docs.python.org/3/builtins/functions.html#bool)) – forwarded to [`append()`](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit#append).
 * **Raises:**
-  **ValueError** – if the provided `gate` is not an instance of [`FermionicGate`](qiskit_fermions.circuit.FermionicGate.html.md#qiskit_fermions.circuit.FermionicGate).
+  [**ValueError**](https://docs.python.org/3/builtins/exceptions.html#ValueError) – if the provided `gate` is not an instance of [`FermionicGate`](qiskit_fermions.circuit.FermionicGate.html.md#qiskit_fermions.circuit.FermionicGate).
 * **Return type:**
   None
 
@@ -88,9 +88,9 @@ passes will not fuse gates across, which is how you keep a pass such as
 the gates on either side of it.
 
 * **Parameters:**
-  * **fargs** ([*Qubit*](https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.Qubit) *|* [*QuantumRegister*](https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.QuantumRegister) *|* *int* *|* *slice* *|* *Sequence* *[*[*Qubit*](https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.Qubit) *|* *int* *]*) – the fermionic modes on which to place the barrier. When omitted, the barrier spans
+  * **fargs** ([*Qubit*](https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.Qubit) *|* [*QuantumRegister*](https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.QuantumRegister) *|* [*int*](https://docs.python.org/3/builtins/functions.html#int) *|* [*slice*](https://docs.python.org/3/builtins/functions.html#slice) *|* [*Sequence*](https://docs.python.org/3/library/collections.abc.html#collections.abc.Sequence) *[*[*Qubit*](https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.Qubit) *|* [*int*](https://docs.python.org/3/builtins/functions.html#int) *]*) – the fermionic modes on which to place the barrier. When omitted, the barrier spans
     every mode of this circuit.
-  * **label** (*str* *|* *None*) – the string label of the barrier.
+  * **label** ([*str*](https://docs.python.org/3/builtins/stdtypes.html#str) *|* *None*) – the string label of the barrier.
 * **Return type:**
   None
 
@@ -107,14 +107,14 @@ instructions here would leave two patterns solving the same problem.
 * **Parameters:**
   * **other** ([*FermionicCircuit*](#qiskit_fermions.circuit.FermionicCircuit)) – the circuit to compose onto this one. It may act on fewer modes than this circuit,
     in which case `fargs` selects the modes it is placed on.
-  * **fargs** ([*Qubit*](https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.Qubit) *|* [*QuantumRegister*](https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.QuantumRegister) *|* *int* *|* *slice* *|* *Sequence* *[*[*Qubit*](https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.Qubit) *|* *int* *]*  *|* *None*) – the fermionic modes of this circuit onto which `other` is placed. Defaults to all
+  * **fargs** ([*Qubit*](https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.Qubit) *|* [*QuantumRegister*](https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.QuantumRegister) *|* [*int*](https://docs.python.org/3/builtins/functions.html#int) *|* [*slice*](https://docs.python.org/3/builtins/functions.html#slice) *|* [*Sequence*](https://docs.python.org/3/library/collections.abc.html#collections.abc.Sequence) *[*[*Qubit*](https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.Qubit) *|* [*int*](https://docs.python.org/3/builtins/functions.html#int) *]*  *|* *None*) – the fermionic modes of this circuit onto which `other` is placed. Defaults to all
     of this circuit’s modes, in order.
-  * **front** (*bool*) – whether to compose `other` before rather than after this circuit’s instructions.
-  * **inplace** (*bool*) – whether to modify this circuit rather than return a new one.
+  * **front** ([*bool*](https://docs.python.org/3/builtins/functions.html#bool)) – whether to compose `other` before rather than after this circuit’s instructions.
+  * **inplace** ([*bool*](https://docs.python.org/3/builtins/functions.html#bool)) – whether to modify this circuit rather than return a new one.
 * **Returns:**
   The composed circuit, or `None` if `inplace` is set.
 * **Raises:**
-  * **ValueError** – if `other` is not an instance of [`FermionicCircuit`](#qiskit_fermions.circuit.FermionicCircuit). Only fermionic
+  * [**ValueError**](https://docs.python.org/3/builtins/exceptions.html#ValueError) – if `other` is not an instance of [`FermionicCircuit`](#qiskit_fermions.circuit.FermionicCircuit). Only fermionic
         circuits are accepted because the plain
         [`compose()`](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit#compose) would happily inline
         qubit-based instructions, bypassing the type guard that [`append()`](#qiskit_fermions.circuit.FermionicCircuit.append) enforces.
@@ -128,15 +128,15 @@ instructions here would leave two patterns solving the same problem.
 Re-exposes [`count_ops()`](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit#count_ops).
 
 * **Return type:**
-  *OrderedDict*[str, int]
+  [*OrderedDict*](https://docs.python.org/3/library/collections.html#collections.OrderedDict)[[str](https://docs.python.org/3/builtins/stdtypes.html#str), [int](https://docs.python.org/3/builtins/functions.html#int)]
 
 #### decompose(gates_to_decompose=None, reps=1)
 
 Re-exposes [`decompose()`](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit#decompose).
 
 * **Parameters:**
-  * **gates_to_decompose** (*str* *|* *type* *[*[*Instruction*](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.Instruction) *]*  *|* *Sequence* *[**str* *|* *type* *[*[*Instruction*](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.Instruction) *]* *]*  *|* *None*)
-  * **reps** (*int*)
+  * **gates_to_decompose** ([*str*](https://docs.python.org/3/builtins/stdtypes.html#str) *|* [*type*](https://docs.python.org/3/builtins/functions.html#type) *[*[*Instruction*](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.Instruction) *]*  *|* [*Sequence*](https://docs.python.org/3/library/collections.abc.html#collections.abc.Sequence) *[*[*str*](https://docs.python.org/3/builtins/stdtypes.html#str) *|* [*type*](https://docs.python.org/3/builtins/functions.html#type) *[*[*Instruction*](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.Instruction) *]* *]*  *|* *None*)
+  * **reps** ([*int*](https://docs.python.org/3/builtins/functions.html#int))
 * **Return type:**
   [*FermionicCircuit*](#qiskit_fermions.circuit.FermionicCircuit)
 
@@ -145,7 +145,7 @@ Re-exposes [`decompose()`](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.
 Directly exposes the inner circuit’s [`draw()`](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit#draw) method.
 
 * **Return type:**
-  *Any*
+  [*Any*](https://docs.python.org/3/library/typing.html#typing.Any)
 
 #### measure(fargs, cargs)
 
@@ -180,17 +180,17 @@ Unlike [`measure_all()`](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.ci
 want one there.
 
 * **Parameters:**
-  * **add_bits** (*bool*) – whether to add a new `meas` [`ClassicalRegister`](https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.ClassicalRegister) sized to
+  * **add_bits** ([*bool*](https://docs.python.org/3/builtins/functions.html#bool)) – whether to add a new `meas` [`ClassicalRegister`](https://quantum.cloud.ibm.com/docs/api/qiskit/circuit#qiskit.circuit.ClassicalRegister) sized to
     this circuit’s modes. When this is `False`, the existing classical bits are used
     instead, and calling this method again simply measures into them a second time.
-  * **inplace** (*bool*) – whether to modify this circuit rather than return a new one.
+  * **inplace** ([*bool*](https://docs.python.org/3/builtins/functions.html#bool)) – whether to modify this circuit rather than return a new one.
 * **Returns:**
   The measured circuit, or `None` if `inplace` is set.
 * **Raises:**
   * **CircuitError** – if `add_bits` is set and this circuit already carries a register named
         `meas` (which is what a second `measure_all()` call runs into). Pass
         `add_bits=False` to measure into the existing bits instead.
-  * **ValueError** – if `add_bits` is not set and this circuit has fewer classical bits than
+  * [**ValueError**](https://docs.python.org/3/builtins/exceptions.html#ValueError) – if `add_bits` is not set and this circuit has fewer classical bits than
         modes.
 * **Return type:**
   [*FermionicCircuit*](#qiskit_fermions.circuit.FermionicCircuit) | None
@@ -219,15 +219,15 @@ holding one [`Evolution`](qiskit_fermions.circuit.library.Evolution.html.md#qisk
 boundary fusion and how to prevent it.
 
 * **Parameters:**
-  * **reps** (*int*) – how often this circuit should be repeated. Repeating it zero times yields an empty
+  * **reps** ([*int*](https://docs.python.org/3/builtins/functions.html#int)) – how often this circuit should be repeated. Repeating it zero times yields an empty
     circuit, which is the identity.
-  * **insert_barriers** (*bool*) – whether to place a [`barrier()`](#qiskit_fermions.circuit.FermionicCircuit.barrier) between consecutive repetitions. No
+  * **insert_barriers** ([*bool*](https://docs.python.org/3/builtins/functions.html#bool)) – whether to place a [`barrier()`](#qiskit_fermions.circuit.FermionicCircuit.barrier) between consecutive repetitions. No
     barrier is placed after the final repetition, so the returned circuit ends on the same
     instruction it would without this argument.
 * **Returns:**
   A new circuit containing `reps` repetitions of this circuit.
 * **Raises:**
-  **ValueError** – if `reps` is negative.
+  [**ValueError**](https://docs.python.org/3/builtins/exceptions.html#ValueError) – if `reps` is negative.
 * **Return type:**
   [*FermionicCircuit*](#qiskit_fermions.circuit.FermionicCircuit)
 
@@ -247,17 +247,17 @@ are the vector’s modes `0..num_modes` (i.e. an identity mode placement).
 
 * **Parameters:**
   * **vec** ([*ndarray*](https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray)) – the state vector to apply this circuit to. An empty circuit returns it unchanged.
-  * **norb** (*int*) – the number of spatial orbitals.
-  * **nelec** (*int* *|* *tuple* *[**int* *,* *int* *]*) – either a single integer representing the number of fermions for a spinless system,
+  * **norb** ([*int*](https://docs.python.org/3/builtins/functions.html#int)) – the number of spatial orbitals.
+  * **nelec** ([*int*](https://docs.python.org/3/builtins/functions.html#int) *|* [*tuple*](https://docs.python.org/3/builtins/stdtypes.html#tuple) *[*[*int*](https://docs.python.org/3/builtins/functions.html#int) *,* [*int*](https://docs.python.org/3/builtins/functions.html#int) *]*) – either a single integer representing the number of fermions for a spinless system,
     or a pair of integers storing the numbers of spin alpha and spin beta fermions.
-  * **copy** (*bool*) – whether to copy the vector before operating on it.
+  * **copy** ([*bool*](https://docs.python.org/3/builtins/functions.html#bool)) – whether to copy the vector before operating on it.
 * **Returns:**
   The transformed vector.
 * **Raises:**
-  * **TypeError** – if a circuit instruction other than a
+  * [**TypeError**](https://docs.python.org/3/builtins/exceptions.html#TypeError) – if a circuit instruction other than a
         `Barrier` does not implement ffsim’s
         [`ffsim.SupportsApplyUnitary`](https://qiskit.github.io/ffsim/api/stubs/ffsim.SupportsApplyUnitary.html#ffsim.SupportsApplyUnitary) protocol.
-  * **ValueError** – if a circuit instruction declines to apply its unitary for the given
+  * [**ValueError**](https://docs.python.org/3/builtins/exceptions.html#ValueError) – if a circuit instruction declines to apply its unitary for the given
         `norb` and `nelec`; or if an instruction implementing only the plain
         `_apply_unitary_` protocol is placed on a non-identity mode subset.
 * **Return type:**
@@ -292,18 +292,18 @@ constrains transpilation without contributing to the state vector.
 
 * **Parameters:**
   * **vec** ([*ndarray*](https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray)) – the state vector to apply this circuit to. An empty circuit returns it unchanged.
-  * **norb** (*int*) – the number of spatial orbitals of the *global* state vector.
-  * **nelec** (*int* *|* *tuple* *[**int* *,* *int* *]*) – either a single integer representing the number of fermions for a spinless system,
+  * **norb** ([*int*](https://docs.python.org/3/builtins/functions.html#int)) – the number of spatial orbitals of the *global* state vector.
+  * **nelec** ([*int*](https://docs.python.org/3/builtins/functions.html#int) *|* [*tuple*](https://docs.python.org/3/builtins/stdtypes.html#tuple) *[*[*int*](https://docs.python.org/3/builtins/functions.html#int) *,* [*int*](https://docs.python.org/3/builtins/functions.html#int) *]*) – either a single integer representing the number of fermions for a spinless system,
     or a pair of integers storing the numbers of spin alpha and spin beta fermions.
-  * **copy** (*bool*) – whether to copy the vector before operating on it.
-  * **freg_indices** (*list* *[**int* *]*) – the absolute (global) mode indices that this circuit’s modes map onto.
+  * **copy** ([*bool*](https://docs.python.org/3/builtins/functions.html#bool)) – whether to copy the vector before operating on it.
+  * **freg_indices** ([*list*](https://docs.python.org/3/builtins/stdtypes.html#list) *[*[*int*](https://docs.python.org/3/builtins/functions.html#int) *]*) – the absolute (global) mode indices that this circuit’s modes map onto.
 * **Returns:**
   The transformed vector.
 * **Raises:**
-  * **TypeError** – if a circuit instruction other than a
+  * [**TypeError**](https://docs.python.org/3/builtins/exceptions.html#TypeError) – if a circuit instruction other than a
         `Barrier` does not implement ffsim’s
         [`ffsim.SupportsApplyUnitary`](https://qiskit.github.io/ffsim/api/stubs/ffsim.SupportsApplyUnitary.html#ffsim.SupportsApplyUnitary) protocol.
-  * **ValueError** – if a circuit instruction declines to apply its unitary for the given
+  * [**ValueError**](https://docs.python.org/3/builtins/exceptions.html#ValueError) – if a circuit instruction declines to apply its unitary for the given
         `norb` and `nelec`; or if an instruction implementing only the plain
         `_apply_unitary_` protocol is placed on a non-identity mode subset.
 * **Return type:**

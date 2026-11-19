@@ -64,11 +64,11 @@ function rather than copying this one.
 
 * **Parameters:**
   * **operator** ([*TransferVertexOperator*](qiskit_fermions.operators.TransferVertexOperator.html.md#qiskit_fermions.operators.TransferVertexOperator)) – the operator to be mapped.
-  * **map_action** (*Callable* *[* *[**tuple* *[**int* *,* *int* *]* *]* *,* *T* *]*) – the function to map a single [`TransferAction`](qiskit_fermions.operators.transfer_action.TransferAction.html.md#qiskit_fermions.operators.transfer_action.TransferAction) to the desired
+  * **map_action** ([*Callable*](https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable) *[* *[*[*tuple*](https://docs.python.org/3/builtins/stdtypes.html#tuple) *[*[*int*](https://docs.python.org/3/builtins/functions.html#int) *,* [*int*](https://docs.python.org/3/builtins/functions.html#int) *]* *]* *,* *T* *]*) – the function to map a single [`TransferAction`](qiskit_fermions.operators.transfer_action.TransferAction.html.md#qiskit_fermions.operators.transfer_action.TransferAction) to the desired
     output type.
-  * **identity** (*Callable* *[* *[* *]* *,* *T* *]*) – the function to generate the multiplicative identity instance of the output type.
-  * **compose** (*Callable* *[* *[**T* *,* *T* *]* *,* *T* *]*  *|* *None*) – an optional function to implement the compositiion logic of two output type
-    instances. If this is not provided, it will default to using `operator.and_()`.
+  * **identity** ([*Callable*](https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable) *[* *[* *]* *,* *T* *]*) – the function to generate the multiplicative identity instance of the output type.
+  * **compose** ([*Callable*](https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable) *[* *[**T* *,* *T* *]* *,* *T* *]*  *|* *None*) – an optional function to implement the compositiion logic of two output type
+    instances. If this is not provided, it will default to using [`operator.and_()`](https://docs.python.org/3/library/operator.html#operator.and_).
 * **Returns:**
   The mapped operator.
 * **Return type:**

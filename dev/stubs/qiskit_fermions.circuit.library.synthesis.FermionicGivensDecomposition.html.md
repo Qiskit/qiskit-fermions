@@ -4,7 +4,7 @@
 
 The decomposition of an orbital rotation into Givens rotations and phases.
 
-Bases: `object`
+Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
 The unitary $U$ of the [`OrbitalRotation`](qiskit_fermions.circuit.library.OrbitalRotation.html.md#qiskit_fermions.circuit.library.OrbitalRotation) is factorized with
 [`givens_decomposition()`](qiskit_fermions.linalg.givens_decomposition.html.md#qiskit_fermions.linalg.givens_decomposition) into at most $n(n-1)/2$ rotations between *adjacent* modes
@@ -32,7 +32,7 @@ adds no error: only the synthesis of the individual factors can.
 Initializing an instance of this synthesis method can be done with the arguments below.
 
 * **Parameters:**
-  **atol** (*float*) – the absolute tolerance below which factors and entries are dropped. This is
+  **atol** ([*float*](https://docs.python.org/3/builtins/functions.html#float)) – the absolute tolerance below which factors and entries are dropped. This is
   applied to the entries of the generator of a factor and to the angle of a
   single-mode phase.
 

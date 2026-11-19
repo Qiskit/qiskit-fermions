@@ -17,10 +17,10 @@ product of several of them composes those strings rather than inflating into a s
   The mapped qubit operator, subject to the same simplification and grouping caveats as
   [`fermion_ternary_tree()`](qiskit_fermions.mappers.library.fermion_ternary_tree.html.md#qiskit_fermions.mappers.library.fermion_ternary_tree).
 * **Raises:**
-  * **ValueError** – if `op` acts on a mode the encoding does not cover, or `num_qubits` is
+  * [**ValueError**](https://docs.python.org/3/builtins/exceptions.html#ValueError) – if `op` acts on a mode the encoding does not cover, or `num_qubits` is
         smaller than the encoding’s mode count. Note that Majorana index $m$ acts on mode
         $\lfloor m/2 \rfloor$.
-  * **OverflowError** – if `num_qubits` is negative or does not fit in 32 bits.
+  * [**OverflowError**](https://docs.python.org/3/builtins/exceptions.html#OverflowError) – if `num_qubits` is negative or does not fit in 32 bits.
 
 ## Usage
 
