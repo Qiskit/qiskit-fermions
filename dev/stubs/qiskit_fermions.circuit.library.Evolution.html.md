@@ -60,6 +60,21 @@ The operator under which to time evolve the acted-upon fermionic modes.
 
 ### Methods
 
+#### equiv(other, atol=1e-10)
+
+Whether `other` is an evolution of an equivalent operator for the same time.
+
+Unlike `__eq__()`, the operators are compared up to the tolerance `atol` (see
+[`FermionOperator.equiv()`](qiskit_fermions.operators.FermionOperator.html.md#qiskit_fermions.operators.FermionOperator.equiv)), and so are numeric times.
+
+* **Parameters:**
+  * **other** ([*object*](https://docs.python.org/3/builtins/functions.html#object)) – the operation to compare with.
+  * **atol** ([*float*](https://docs.python.org/3/builtins/functions.html#float)) – the absolute tolerance of the comparison.
+* **Returns:**
+  Whether the two evolutions act the same.
+* **Return type:**
+  [bool](https://docs.python.org/3/builtins/functions.html#bool)
+
 #### inverse(annotated=False)
 
 Returns the inverse of this gate, $e^{+i t H}$.

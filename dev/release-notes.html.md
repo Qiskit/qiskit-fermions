@@ -6,6 +6,26 @@
 
 ## Upcoming release (`main`)
 
+<a id="release-notes-upcoming-release-main-python-api-features"></a>
+
+### Python API Features
+
+- [`Evolution`](stubs/qiskit_fermions.circuit.library.Evolution.html.md#qiskit_fermions.circuit.library.Evolution) has a new
+  [`equiv()`](stubs/qiskit_fermions.circuit.library.Evolution.html.md#qiskit_fermions.circuit.library.Evolution.equiv) method, which compares two
+  evolutions up to an absolute tolerance on both the operator and the time.
+
+<a id="release-notes-upcoming-release-main-bug-fixes"></a>
+
+### Bug Fixes
+
+- [`Evolution`](stubs/qiskit_fermions.circuit.library.Evolution.html.md#qiskit_fermions.circuit.library.Evolution),
+  [`InitializeModes`](stubs/qiskit_fermions.circuit.library.InitializeModes.html.md#qiskit_fermions.circuit.library.InitializeModes) and
+  [`PrepareSlaterDeterminant`](stubs/qiskit_fermions.circuit.library.PrepareSlaterDeterminant.html.md#qiskit_fermions.circuit.library.PrepareSlaterDeterminant) now compare equal only
+  when they define the same gate, and they are hashable. Previously, `==` ignored the evolved
+  operator and the mode occupation, so for example `InitializeModes([True, False])` compared
+  equal to `InitializeModes([False, True])`. The synthesis method and the
+  [`atomic`](stubs/qiskit_fermions.circuit.FermionicGate.html.md#qiskit_fermions.circuit.FermionicGate.atomic) flag are not part of the comparison.
+
 <a id="release-notes-upcoming-release-main-other-notes"></a>
 
 ### Other Notes

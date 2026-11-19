@@ -10,7 +10,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Evolution - Qiskit Fermions 0.5.0.dev0+73f1106</title>
+        <title>Evolution - Qiskit Fermions 0.5.0.dev0+93de8b2</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=fc6d6d93" />
@@ -163,7 +163,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.5.0.dev0+73f1106</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.5.0.dev0+93de8b2</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -189,7 +189,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.5.0.dev0+73f1106</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.5.0.dev0+93de8b2</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -521,6 +521,28 @@ further in fermionic space. See <a class="reference internal" href="qiskit_fermi
 
 <p class="rubric">Methods</p>
 <dl class="py method">
+<dt class="sig sig-object py" id="qiskit_fermions.circuit.library.Evolution.equiv">
+<span class="sig-name descname"><span class="pre">equiv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-10</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qiskit_fermions.circuit.library.Evolution.equiv" title="Link to this definition">¶</a></dt>
+<dd><p>Whether <code class="docutils literal notranslate"><span class="pre">other</span></code> is an evolution of an equivalent operator for the same time.</p>
+<p>Unlike <code class="xref py py-meth docutils literal notranslate"><span class="pre">__eq__()</span></code>, the operators are compared up to the tolerance <code class="docutils literal notranslate"><span class="pre">atol</span></code> (see
+<a class="reference internal" href="qiskit_fermions.operators.FermionOperator.html#qiskit_fermions.operators.FermionOperator.equiv" title="qiskit_fermions.operators.FermionOperator.equiv"><code class="xref py py-meth docutils literal notranslate"><span class="pre">FermionOperator.equiv()</span></code></a>), and so are numeric times.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>other</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.15)"><em>object</em></a>) – the operation to compare with.</p></li>
+<li><p><strong>atol</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><em>float</em></a>) – the absolute tolerance of the comparison.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Whether the two evolutions act the same.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="qiskit_fermions.circuit.library.Evolution.inverse">
 <span class="sig-name descname"><span class="pre">inverse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">annotated</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qiskit_fermions.circuit.library.Evolution.inverse" title="Link to this definition">¶</a></dt>
 <dd><p>Returns the inverse of this gate, <span class="math">\(e^{+i t H}\)</span>.</p>
@@ -645,6 +667,7 @@ applied, mirroring the transpiler’s synthesis pass.</p></li>
 <li><a class="reference internal" href="#">Evolution</a><ul>
 <li><a class="reference internal" href="#qiskit_fermions.circuit.library.Evolution"><code class="docutils literal notranslate"><span class="pre">Evolution</span></code></a><ul>
 <li><a class="reference internal" href="#qiskit_fermions.circuit.library.Evolution.operator"><code class="docutils literal notranslate"><span class="pre">Evolution.operator</span></code></a></li>
+<li><a class="reference internal" href="#qiskit_fermions.circuit.library.Evolution.equiv"><code class="docutils literal notranslate"><span class="pre">Evolution.equiv()</span></code></a></li>
 <li><a class="reference internal" href="#qiskit_fermions.circuit.library.Evolution.inverse"><code class="docutils literal notranslate"><span class="pre">Evolution.inverse()</span></code></a></li>
 <li><a class="reference internal" href="#qiskit_fermions.circuit.library.Evolution._apply_unitary_placed_"><code class="docutils literal notranslate"><span class="pre">Evolution._apply_unitary_placed_()</span></code></a></li>
 </ul>
@@ -660,7 +683,7 @@ applied, mirroring the transpiler’s synthesis pass.</p></li>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=ec44a6d4"></script>
+</div><script src="../_static/documentation_options.js?v=21387bed"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

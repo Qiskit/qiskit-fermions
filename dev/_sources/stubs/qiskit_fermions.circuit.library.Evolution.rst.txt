@@ -162,12 +162,15 @@
 
   
 
+  
+
 
 
   
   
    .. rubric:: Methods
     
+   .. automethod:: equiv
    .. automethod:: inverse
   
   
