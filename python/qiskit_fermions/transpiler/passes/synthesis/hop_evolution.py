@@ -31,27 +31,40 @@ _MAX_TERMS = 4
 
 def match_hop(
     observable: SparseObservable, time: float, *, atol: float = DEFAULT_ATOL
-) -> tuple[XXPlusYYGate, tuple[int, int]] | None:
-    r"""Recognizes the evolution under a hop between two qubits.
+) -> tuple[QuantumCircuit, tuple[int, ...]] | None:
+    r"""Recognizes the evolution under a hop between two qubits, with or without a Z-string.
 
-    Let :math:`a` and :math:`b` be two qubits. A hop is the generator
+    Let :math:`a < b` be two qubits and :math:`M` a (possibly empty) set of other qubits. A hop is
+    the generator
 
     .. math::
 
-        H = \alpha (X_a X_b + Y_a Y_b) + \beta (X_a Y_b - Y_a X_b),
+        H = Z_M \left[ \alpha (X_a X_b + Y_a Y_b) + \beta (X_a Y_b - Y_a X_b) \right],
+        \qquad Z_M = \prod_{m \in M} Z_m.
 
-    which is the image of a fermionic hop between adjacent modes under Jordan-Wigner. With the
-    evolution time :math:`t`, :math:`e^{-i t H} = \mathrm{XXPlusYY}(\theta, \varphi)` for
-    :math:`\theta = 4 t \sqrt{\alpha^2 + \beta^2}` and :math:`\varphi = \operatorname{atan2}(\beta,
-    \alpha)`. The sign of :math:`t` lives in :math:`\theta` alone, so :math:`\varphi` must not depend
-    on it. Terms that are absent count as zero, so a pure :math:`XX + YY` or a pure :math:`XY - YX`
-    generator also matches.
+    Under Jordan-Wigner, it is the image of a fermionic hop between adjacent modes for an empty
+    :math:`M`, and of one across the modes mapped to the qubits :math:`a < m < b` otherwise. Nothing
+    requires :math:`M` to lie between :math:`a` and :math:`b`, though. Terms that are absent count as
+    zero, so a pure :math:`XX + YY` or a pure :math:`XY - YX` generator also matches.
 
-    The gate is the exact evolution. The :math:`XX + YY` and :math:`XY - YX` parts do not commute
+    With the evolution time :math:`t`, the hop without the string evolves as
+    :math:`e^{-i t h} = \mathrm{XXPlusYY}(\theta, \varphi)` for :math:`\theta = 4 t \sqrt{\alpha^2 +
+    \beta^2}` and :math:`\varphi = \operatorname{atan2}(\beta, \alpha)`. The sign of :math:`t` lives
+    in :math:`\theta` alone, so :math:`\varphi` must not depend on it. The string :math:`Z_M`
+    commutes with :math:`h` and only flips the sign of the evolution time on the odd-parity subspace
+    of :math:`M`, and so does conjugating :math:`h` with :math:`Z_a`. The returned circuit therefore
+    computes the parity of :math:`M` onto the lowest qubit of :math:`M` with a ladder of
+    :class:`~qiskit.circuit.library.CXGate`, applies the :class:`~qiskit.circuit.library.XXPlusYYGate`
+    between two :class:`~qiskit.circuit.library.CZGate` controlled on that parity, and undoes the
+    ladder. For an empty :math:`M`, it is the :class:`~qiskit.circuit.library.XXPlusYYGate` alone.
+    In general, it costs two :class:`~qiskit.circuit.library.CZGate` and :math:`2(|M| - 1)`
+    :class:`~qiskit.circuit.library.CXGate` on top of the
+    :class:`~qiskit.circuit.library.XXPlusYYGate`.
+
+    The circuit is the exact evolution. The :math:`XX + YY` and :math:`XY - YX` parts do not commute
     (unless one of them vanishes), so a product formula only approximates the same evolution, with a
-    Trotter error. Nothing about the two qubits is assumed. A hop across other qubits maps to a
-    longer Pauli string and is therefore not recognized, which keeps the match an operator identity
-    rather than a statement about the state the gate acts on.
+    Trotter error. Nothing about the qubits is assumed: the match is an operator identity rather
+    than a statement about the state the circuit acts on.
 
     Args:
         observable: the qubit operator.
@@ -60,51 +73,79 @@ def match_hop(
             imaginary parts must vanish.
 
     Returns:
-        The gate and the pair of qubit indices it acts on, in the gate's qubit order, or ``None`` if
-        ``observable`` is not a hop.
+        The circuit and the qubit indices it acts on, such that its qubit ``i`` is the qubit
+        ``indices[i]`` of ``observable``, or ``None`` if ``observable`` is not a hop. The indices
+        start with :math:`a` and end with :math:`b`, with :math:`M` in ascending order in between.
     """
     terms = observable.to_sparse_list()
     if not 0 < len(terms) <= _MAX_TERMS:
         return None
 
     support: tuple[int, ...] | None = None
+    ends: tuple[int, int] | None = None
     coeffs = {"XX": 0.0, "YY": 0.0, "XY": 0.0, "YX": 0.0}
     for label, indices, coeff in terms:
-        if label not in coeffs or len(indices) != 2:
+        # every qubit but the two ends carries a Z
+        term_ends = tuple(pos for pos, pauli in enumerate(label) if pauli != "Z")
+        if len(term_ends) != 2:
             return None
         if support is None:
-            support = tuple(indices)
-        elif tuple(indices) != support:
+            # ``to_sparse_list`` sorts the indices of each term, so ``support`` is sorted
+            support, ends = tuple(indices), term_ends
+        elif tuple(indices) != support or term_ends != ends:
+            return None
+        key = label[term_ends[0]] + label[term_ends[1]]
+        if key not in coeffs:
             return None
         if abs(complex(coeff).imag) > atol:
             return None
-        coeffs[label] += complex(coeff).real
+        coeffs[key] += complex(coeff).real
 
-    assert support is not None
+    assert support is not None and ends is not None
     if not np.isclose(coeffs["XX"], coeffs["YY"], rtol=0.0, atol=atol):
         return None
     if not np.isclose(coeffs["XY"], -coeffs["YX"], rtol=0.0, atol=atol):
         return None
 
-    # the sparse label ``XY`` is X on the first and Y on the second index of ``support``
+    # the key ``XY`` is X on the lower and Y on the higher end
     alpha, beta = coeffs["XX"], coeffs["XY"]
     if abs(alpha) <= atol and abs(beta) <= atol:
         return None
 
     theta = 4.0 * time * np.hypot(alpha, beta)
     phi = np.arctan2(beta, alpha)
-    return XXPlusYYGate(theta, phi), (support[0], support[1])
+
+    # local qubit 0 is the end a, the last one the end b, and 1..k the string, in ascending order
+    strings = tuple(index for pos, index in enumerate(support) if pos not in ends)
+    indices = (support[ends[0]], *strings, support[ends[1]])
+    last = len(indices) - 1
+    ladder = QuantumCircuit(len(indices))
+    for middle in range(last - 1, 1, -1):
+        ladder.cx(middle, middle - 1)
+
+    circuit = QuantumCircuit(len(indices))
+    if last > 1:
+        circuit.compose(ladder, inplace=True)
+        circuit.cz(1, 0)
+    circuit.append(XXPlusYYGate(theta, phi), [0, last])
+    if last > 1:
+        circuit.cz(1, 0)
+        circuit.compose(ladder.inverse(), inplace=True)
+    return circuit, indices
 
 
 class HopEvolutionSynthesis(HighLevelSynthesisPlugin):
     r"""A high-level synthesis plugin for the evolution under a hop between two qubits.
 
     A :class:`~qiskit.circuit.library.PauliEvolutionGate` whose operator is a hop (see
-    :func:`match_hop`), such as the image of a fermionic hop between adjacent modes under
-    Jordan-Wigner, is synthesized as a single :class:`~qiskit.circuit.library.XXPlusYYGate`. That is
-    the exact evolution. The generic synthesis of the same operator costs several times as many
-    two-qubit gates, and a target whose only two-qubit gate is the
-    :class:`~qiskit.circuit.library.XXPlusYYGate` cannot be reached by it at all.
+    :func:`match_hop`), such as the image of a fermionic hop under Jordan-Wigner, is synthesized
+    exactly around a single :class:`~qiskit.circuit.library.XXPlusYYGate`. A hop between adjacent
+    modes becomes that gate alone, and a hop across other modes adds the two
+    :class:`~qiskit.circuit.library.CZGate` and the :class:`~qiskit.circuit.library.CXGate` ladder
+    that account for its Z-string. The generic synthesis of the same operator costs more two-qubit
+    gates, and a target whose only two-qubit gate is the
+    :class:`~qiskit.circuit.library.XXPlusYYGate` cannot be reached by it for an adjacent hop at
+    all.
 
     Any other gate is declined (the plugin returns ``None``), so that the next method of the
     :class:`~qiskit.transpiler.passes.synthesis.high_level_synthesis.HLSConfig` is tried.
@@ -123,7 +164,9 @@ class HopEvolutionSynthesis(HighLevelSynthesisPlugin):
     The :func:`.generate_preset_jw_pass_manager` does so unconditionally, and merges the entry into
     any ``hls_config`` passed to it. That mirrors how the preset has always lowered an orbital
     rotation: it emits an :class:`~qiskit.circuit.library.XXPlusYYGate` for each Givens factor, and
-    the configuration cannot turn that off.
+    the configuration cannot turn that off. A factor between modes that are adjacent in the
+    :class:`.OrbitalRotation` but not on the register, because its wires are permuted or not
+    contiguous, is a hop across the modes in between and is synthesized exactly, too.
     """
 
     def __init__(self, *, atol: float = DEFAULT_ATOL) -> None:
@@ -149,9 +192,9 @@ class HopEvolutionSynthesis(HighLevelSynthesisPlugin):
             options: unused.
 
         Returns:
-            A circuit with a single :class:`~qiskit.circuit.library.XXPlusYYGate` if
-            ``high_level_object`` is a :class:`~qiskit.circuit.library.PauliEvolutionGate` of a hop
-            with a fixed evolution time, and ``None`` otherwise.
+            The circuit of :func:`match_hop` if ``high_level_object`` is a
+            :class:`~qiskit.circuit.library.PauliEvolutionGate` of a hop with a fixed evolution
+            time, and ``None`` otherwise.
         """
         if not isinstance(high_level_object, PauliEvolutionGate):
             return None
@@ -170,7 +213,7 @@ class HopEvolutionSynthesis(HighLevelSynthesisPlugin):
         if matched is None:
             return None
 
-        gate, indices = matched
+        hop, indices = matched
         circuit = QuantumCircuit(high_level_object.num_qubits)
-        circuit.append(gate, list(indices))
+        circuit.compose(hop, list(indices), inplace=True)
         return circuit
