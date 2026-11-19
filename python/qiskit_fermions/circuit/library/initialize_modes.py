@@ -102,6 +102,16 @@ class InitializeModes(FermionicGate):
 
         super().__init__("InitializeModes", len(self.occupation), [])
 
+    def __eq__(self, other: object) -> bool:
+        """Whether ``other`` initializes as many modes to the same occupation."""
+        if not isinstance(other, InitializeModes):
+            return False
+        return bool(np.array_equal(self.occupation, other.occupation))
+
+    def __hash__(self) -> int:
+        """Hashes the occupation, consistently with :meth:`__eq__`."""
+        return hash((type(self).__name__, self.occupation.tobytes()))
+
     @classmethod
     def from_hartree_fock(cls, norb: int, nelec: int | tuple[int, int]) -> Self:
         """Builds the gate for the Hartree-Fock reference occupation of ``(norb, nelec)``.

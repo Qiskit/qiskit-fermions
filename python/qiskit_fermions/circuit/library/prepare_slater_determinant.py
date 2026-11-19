@@ -131,6 +131,24 @@ class PrepareSlaterDeterminant(FermionicGate):
             synthesis=synthesis or FermionicSlaterGivensDecomposition(),
         )
 
+    def __eq__(self, other: object) -> bool:
+        """Whether ``other`` prepares the same determinant: equal occupation and unitary.
+
+        The synthesis is not compared: it decides how the gate is decomposed, not what it is.
+        """
+        if not isinstance(other, PrepareSlaterDeterminant):
+            return False
+        return bool(
+            np.array_equal(self.occupation, other.occupation)
+            and np.array_equal(self.rotation_unitary, other.rotation_unitary)
+        )
+
+    def __hash__(self) -> int:
+        """Hashes the occupation and the unitary, consistently with :meth:`__eq__`."""
+        return hash(
+            (type(self).__name__, self.occupation.tobytes(), self.rotation_unitary.tobytes())
+        )
+
     def _build_definition(self) -> FermionicCircuit:
         """Builds the gate as a :class:`.FermionicCircuit` (shared by ``_define`` and the sim path).
 
