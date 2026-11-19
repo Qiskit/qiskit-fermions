@@ -10,7 +10,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>MergeOrbitalRotations - Qiskit Fermions 0.4.1+d67bec0</title>
+        <title>MergeOrbitalRotations - Qiskit Fermions 0.4.1+9d079f3</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=fc6d6d93" />
@@ -163,7 +163,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.4.1+d67bec0</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.4.1+9d079f3</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -189,7 +189,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.4.1+d67bec0</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.4.1+9d079f3</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -476,9 +476,9 @@ rotation <span class="math">\(U_2\)</span> maps <span class="math">\(a^\dagger_i
 run’s rotations are multiplied in circuit order (later rotation on the left) to form the merged
 <code class="docutils literal notranslate"><span class="pre">rotation_unitary</span></code>. Because the merged gate implements exactly that composed basis change, the
 rewrite leaves the simulated state vector unchanged.</p>
-<p>Only rotations on the <em>identical</em> mode set are merged: two rotations on different (even
-overlapping) mode sets, or rotations separated by any other operation on a shared wire, break the
-run and are left untouched. This is the shape produced, e.g., by two adjacent per-spin rotations
+<p>Only rotations on the <em>identical</em> modes, in the identical order, are merged: two rotations on
+different (even overlapping) mode sets, on the same modes in a different order, or separated by
+any other operation on a shared wire, break the run and are left untouched. This is the shape produced, e.g., by two adjacent per-spin rotations
 on the same spin half, or by consecutive <a class="reference internal" href="qiskit_fermions.circuit.library.UCJ.html#qiskit_fermions.circuit.library.UCJ" title="qiskit_fermions.circuit.library.UCJ"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCJ</span></code></a> layers whose trailing and leading orbital
 rotations meet on the same modes.</p>
 <div class="admonition caution">
@@ -650,7 +650,7 @@ carried through untouched (a measurement keeps the classical bit it writes into)
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=3a98b6cc"></script>
+</div><script src="../_static/documentation_options.js?v=84cf4cd4"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
