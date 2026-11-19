@@ -162,7 +162,7 @@ intersphinx_mapping = {
     "cqiskit": ("https://quantum.cloud.ibm.com/docs/api/qiskit-c/", None),
     "qiskit_addon_sqd": ("https://quantum.cloud.ibm.com/docs/api/qiskit-addon-sqd/", None),
     "pyomo": ("https://pyomo.readthedocs.io/en/stable/", None),
-    "ffsim": ("https://qiskit-community.github.io/ffsim/", None),
+    "ffsim": ("https://qiskit.github.io/ffsim/", None),
     "pyscf": ("https://pyscf.org/", None),
 }
 
