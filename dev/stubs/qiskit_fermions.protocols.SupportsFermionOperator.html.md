@@ -4,7 +4,7 @@
 
 This package’s operator-conversion contract, converting an operator to a [`FermionOperator`](qiskit_fermions.operators.FermionOperator.html.md#qiskit_fermions.operators.FermionOperator).
 
-Bases: [`Protocol`](https://docs.python.org/3/library/typing.html#typing.Protocol)
+Bases: `Protocol`
 
 See [`fermion_operator()`](qiskit_fermions.mappers.library.fermion_operator.html.md#qiskit_fermions.mappers.library.fermion_operator) for the type-agnostic helper function dispatching to the method
 below.

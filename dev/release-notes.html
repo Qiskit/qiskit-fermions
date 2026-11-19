@@ -11,7 +11,7 @@
         <link rel="prefetch" href="_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Release Notes - Qiskit Fermions 0.5.0.dev0+602c074</title>
+        <title>Release Notes - Qiskit Fermions 0.5.0.dev0+6202b83</title>
       <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="_static/styles/qiskit-sphinx-theme.css?v=fc6d6d93" />
@@ -164,7 +164,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="index.html"><div class="brand">Qiskit Fermions 0.5.0.dev0+602c074</div></a>
+      <a href="index.html"><div class="brand">Qiskit Fermions 0.5.0.dev0+6202b83</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -190,7 +190,7 @@
     <img class="sidebar-logo only-dark" src="_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.5.0.dev0+602c074</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.5.0.dev0+6202b83</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="search.html" role="search">
@@ -501,6 +501,14 @@ same order. Previously, consecutive rotations on different mode sets, for exampl
 <code class="docutils literal notranslate"><span class="pre">(1,</span> <span class="pre">2)</span></code>, then <code class="docutils literal notranslate"><span class="pre">(0,</span> <span class="pre">1,</span> <span class="pre">2)</span></code>, then <code class="docutils literal notranslate"><span class="pre">(1,</span> <span class="pre">2)</span></code>, made the pass fail with a <code class="docutils literal notranslate"><span class="pre">ValueError</span></code>, and
 rotations on the same modes in a different order, for example <code class="docutils literal notranslate"><span class="pre">(0,</span> <span class="pre">1)</span></code> followed by <code class="docutils literal notranslate"><span class="pre">(1,</span> <span class="pre">0)</span></code>,
 were merged into a single rotation that prepares a different state.</p></li>
+</ul>
+<ul class="simple">
+<li><p><a class="reference internal" href="stubs/qiskit_fermions.transpiler.passes.MergeSlaterDeterminantPreparation.html#qiskit_fermions.transpiler.passes.MergeSlaterDeterminantPreparation" title="qiskit_fermions.transpiler.passes.MergeSlaterDeterminantPreparation"><code class="xref py py-class docutils literal notranslate"><span class="pre">MergeSlaterDeterminantPreparation</span></code></a> now accounts for
+the order of the wires an <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.InitializeModes.html#qiskit_fermions.circuit.library.InitializeModes" title="qiskit_fermions.circuit.library.InitializeModes"><code class="xref py py-class docutils literal notranslate"><span class="pre">InitializeModes</span></code></a> or
+<a class="reference internal" href="stubs/qiskit_fermions.circuit.library.OrbitalRotation.html#qiskit_fermions.circuit.library.OrbitalRotation" title="qiskit_fermions.circuit.library.OrbitalRotation"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrbitalRotation</span></code></a> is placed on. Previously, a gate placed
+on permuted modes, for example an <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.OrbitalRotation.html#qiskit_fermions.circuit.library.OrbitalRotation" title="qiskit_fermions.circuit.library.OrbitalRotation"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrbitalRotation</span></code></a> on
+modes <code class="docutils literal notranslate"><span class="pre">(1,</span> <span class="pre">0)</span></code>, was fused with its occupation or unitary as written, so the resulting
+<a class="reference internal" href="stubs/qiskit_fermions.circuit.library.PrepareSlaterDeterminant.html#qiskit_fermions.circuit.library.PrepareSlaterDeterminant" title="qiskit_fermions.circuit.library.PrepareSlaterDeterminant"><code class="xref py py-class docutils literal notranslate"><span class="pre">PrepareSlaterDeterminant</span></code></a> prepared a different state.</p></li>
 </ul>
 </section>
 <section id="other-notes">
@@ -1722,7 +1730,7 @@ through first-party bindings for both Python and C.</p>
       
     </aside>
   </div>
-</div><script src="_static/documentation_options.js?v=441ac704"></script>
+</div><script src="_static/documentation_options.js?v=3b008d84"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/scripts/furo.js?v=46bd48cc"></script>

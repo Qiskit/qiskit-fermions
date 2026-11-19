@@ -8,23 +8,23 @@ This is the type-agnostic entry point to the ternary-tree mappers, mirroring
 [`jordan_wigner()`](qiskit_fermions.mappers.library.jordan_wigner.html.md#qiskit_fermions.mappers.library.jordan_wigner). It dispatches on the concrete type of `operator` to the matching direct
 implementation, listed under [Ternary-tree encodings](../pydoc/qiskit_fermions.mappers.library.html.md#ternary-tree-mappers) in the
 [`library`](../pydoc/qiskit_fermions.mappers.library.html.md#module-qiskit_fermions.mappers.library) documentation. An operator type without one raises a
-[`TypeError`](https://docs.python.org/3/builtins/exceptions.html#TypeError).
+`TypeError`.
 
 * **Parameters:**
   * **operator** ([*OperatorTrait*](qiskit_fermions.operators.OperatorTrait.html.md#qiskit_fermions.operators.OperatorTrait)) – the operator to map.
   * **encoding** ([*TernaryTreeEncoding*](qiskit_fermions.mappers.TernaryTreeEncoding.html.md#qiskit_fermions.mappers.TernaryTreeEncoding)) – the compiled encoding to map through. Compile it once with
     [`TernaryTreeEncoding`](qiskit_fermions.mappers.TernaryTreeEncoding.html.md#qiskit_fermions.mappers.TernaryTreeEncoding) and reuse it across every operator
     mapped through the same tree.
-  * **num_qubits** ([*int*](https://docs.python.org/3/builtins/functions.html#int)) – the number of qubits for the resulting qubit operator. Must be at least the
+  * **num_qubits** (*int*) – the number of qubits for the resulting qubit operator. Must be at least the
     encoding’s mode count; a larger value pads with the identity.
 * **Returns:**
   The mapped qubit operator, subject to the same simplification and grouping caveats as
   [`fermion_ternary_tree()`](qiskit_fermions.mappers.library.fermion_ternary_tree.html.md#qiskit_fermions.mappers.library.fermion_ternary_tree).
 * **Raises:**
-  * [**TypeError**](https://docs.python.org/3/builtins/exceptions.html#TypeError) – if `operator` is of a type for which no ternary-tree implementation exists.
-  * [**ValueError**](https://docs.python.org/3/builtins/exceptions.html#ValueError) – if `operator` acts on a mode the encoding does not cover, or `num_qubits` is
+  * **TypeError** – if `operator` is of a type for which no ternary-tree implementation exists.
+  * **ValueError** – if `operator` acts on a mode the encoding does not cover, or `num_qubits` is
         smaller than the encoding’s mode count.
-  * [**OverflowError**](https://docs.python.org/3/builtins/exceptions.html#OverflowError) – if `num_qubits` is negative or does not fit in 32 bits.
+  * **OverflowError** – if `num_qubits` is negative or does not fit in 32 bits.
 * **Return type:**
   [*SparseObservable*](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.quantum_info.SparseObservable)
 
@@ -49,7 +49,7 @@ True
 ```
 
 Every operator type has a direct implementation, so the dispatch is total over them. Anything
-else (an object that is not a fermionic operator at all) raises a [`TypeError`](https://docs.python.org/3/builtins/exceptions.html#TypeError):
+else (an object that is not a fermionic operator at all) raises a `TypeError`:
 
 ```pycon
 >>> from qiskit.quantum_info import SparseObservable

@@ -59,7 +59,7 @@ during the pre-release development of this package.
 Initializing an instance of this gate can be done with the arguments listed below.
 
 * **Parameters:**
-  * **occupation** (*Sequence* *[*[*bool*](https://docs.python.org/3/builtins/functions.html#bool) *]*) – a sequence of booleans indicating the reference occupation for each mode this
+  * **occupation** (*Sequence* *[**bool* *]*) – a sequence of booleans indicating the reference occupation for each mode this
     gate acts on.
   * **rotation_unitary** (*np.ndarray*) – the $n \times n$ unitary matrix $U$ defining the orbital
     rotation via $a^\dagger_i \mapsto \sum_j U_{ji} a^\dagger_j$, where $n$ is
@@ -70,7 +70,7 @@ Initializing an instance of this gate can be done with the arguments listed belo
     a [`FermionicSlaterGivensDecomposition`](qiskit_fermions.circuit.library.synthesis.FermionicSlaterGivensDecomposition.html.md#qiskit_fermions.circuit.library.synthesis.FermionicSlaterGivensDecomposition) instance is used. This does not affect
     the definition of the gate, see the class documentation.
 * **Raises:**
-  [**ValueError**](https://docs.python.org/3/builtins/exceptions.html#ValueError) – if `rotation_unitary` is not a square matrix whose dimension matches the
+  **ValueError** – if `rotation_unitary` is not a square matrix whose dimension matches the
       length of `occupation`.
 
 ### Attributes
@@ -97,11 +97,11 @@ spin-mixing rotations).
 
 * **Parameters:**
   * **vec** ([*ndarray*](https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray)) – the reference state vector to validate and rotate.
-  * **norb** ([*int*](https://docs.python.org/3/builtins/functions.html#int)) – the number of spatial orbitals of the *global* state vector.
-  * **nelec** ([*int*](https://docs.python.org/3/builtins/functions.html#int) *|* [*tuple*](https://docs.python.org/3/builtins/stdtypes.html#tuple) *[*[*int*](https://docs.python.org/3/builtins/functions.html#int) *,* [*int*](https://docs.python.org/3/builtins/functions.html#int) *]*) – either a single integer for a spinless system, or a pair of integers storing the
+  * **norb** (*int*) – the number of spatial orbitals of the *global* state vector.
+  * **nelec** (*int* *|* *tuple* *[**int* *,* *int* *]*) – either a single integer for a spinless system, or a pair of integers storing the
     numbers of spin alpha and spin beta fermions.
-  * **copy** ([*bool*](https://docs.python.org/3/builtins/functions.html#bool)) – whether to copy the vector before operating on it.
-  * **freg_indices** ([*list*](https://docs.python.org/3/builtins/stdtypes.html#list) *[*[*int*](https://docs.python.org/3/builtins/functions.html#int) *]*) – the absolute (global) mode indices that this gate’s local modes map onto.
+  * **copy** (*bool*) – whether to copy the vector before operating on it.
+  * **freg_indices** (*list* *[**int* *]*) – the absolute (global) mode indices that this gate’s local modes map onto.
 * **Returns:**
   The transformed vector.
 * **Return type:**

@@ -4,7 +4,7 @@
 
 The decomposition of a Slater determinant preparation into Givens rotations.
 
-Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
+Bases: `object`
 
 This exploits the known reference occupation to synthesize the gate with the rectangular
 [`givens_decomposition_slater()`](qiskit_fermions.linalg.givens_decomposition_slater.html.md#qiskit_fermions.linalg.givens_decomposition_slater): only the $m$ occupied orbitals
@@ -42,7 +42,7 @@ cheaply on a constrained coupling map.
 Initializing an instance of this synthesis method can be done with the arguments below.
 
 * **Parameters:**
-  **atol** ([*float*](https://docs.python.org/3/builtins/functions.html#float)) – the absolute tolerance below which factors and entries are dropped. This is
+  **atol** (*float*) – the absolute tolerance below which factors and entries are dropped. This is
   applied to the entries of the generator of a rotation, see
   [`FermionicGivensDecomposition`](qiskit_fermions.circuit.library.synthesis.FermionicGivensDecomposition.html.md#qiskit_fermions.circuit.library.synthesis.FermionicGivensDecomposition).
 

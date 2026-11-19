@@ -215,7 +215,7 @@ $T_{kj} = -V_j V_k T_{jk}$.
 There is one problem. [`map_transfer_vertex_generators()`](../stubs/qiskit_fermions.mappers.map_transfer_vertex_generators.html.md#qiskit_fermions.mappers.map_transfer_vertex_generators) calls back with a generator and
 nothing else, while deciding a bond’s Pauli string also needs `cols` to recover row and column
 coordinates from a mode index. Rather than nest the functions to close over it,
-[`functools.partial()`](https://docs.python.org/3/library/functools.html#functools.partial) binds it, which keeps both functions at the top level and
+`functools.partial()` binds it, which keeps both functions at the top level and
 independently callable.
 
 ```pycon

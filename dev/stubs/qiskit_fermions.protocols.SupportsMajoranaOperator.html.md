@@ -4,7 +4,7 @@
 
 An equivalent of the [`SupportsFermionOperator`](qiskit_fermions.protocols.SupportsFermionOperator.html.md#qiskit_fermions.protocols.SupportsFermionOperator) protocol, targeting Majorana operators.
 
-Bases: [`Protocol`](https://docs.python.org/3/library/typing.html#typing.Protocol)
+Bases: `Protocol`
 
 See [`majorana_operator()`](qiskit_fermions.mappers.library.majorana_operator.html.md#qiskit_fermions.mappers.library.majorana_operator) for the type-agnostic helper function dispatching to the method
 below.

@@ -4,7 +4,7 @@
 
 A Protocol indicating support for efficient commutator generation.
 
-Bases: [`Protocol`](https://docs.python.org/3/library/typing.html#typing.Protocol)
+Bases: `Protocol`
 
 Implementation of this protocol requires the three methods below. See [`commutator()`](qiskit_fermions.operators.library.commutator.html.md#qiskit_fermions.operators.library.commutator),
 [`anti_commutator()`](qiskit_fermions.operators.library.anti_commutator.html.md#qiskit_fermions.operators.library.anti_commutator), and [`double_commutator()`](qiskit_fermions.operators.library.double_commutator.html.md#qiskit_fermions.operators.library.double_commutator) for the type-agnostic helper functions
@@ -56,6 +56,6 @@ See [`double_commutator()`](qiskit_fermions.operators.library.double_commutator.
   * **op_a** (*T*)
   * **op_b** (*T*)
   * **op_c** (*T*)
-  * **sign** ([*bool*](https://docs.python.org/3/builtins/functions.html#bool))
+  * **sign** (*bool*)
 * **Return type:**
   *T*

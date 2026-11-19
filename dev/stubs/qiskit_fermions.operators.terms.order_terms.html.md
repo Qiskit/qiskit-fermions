@@ -6,7 +6,7 @@ Returns a copy of an operator with its terms reordered by a user-provided key.
 
 Unlike [`canonical_order()`](qiskit_fermions.operators.terms.canonical_order.html.md#qiskit_fermions.operators.terms.canonical_order), which imposes a single fixed, coefficient-independent order,
 this function lets you sort the terms by any criterion you like: the `key` function is applied
-to each term exactly as [`sorted()`](https://docs.python.org/3/builtins/functions.html#sorted) would, and the terms are rebuilt into a new operator of
+to each term exactly as `sorted()` would, and the terms are rebuilt into a new operator of
 the same type in the resulting order. This is useful whenever the *order* of the terms matters
 for a downstream computation (e.g. randomized product-formula sampling), since it gives you a
 deterministic, reproducible order independent of how the operator happened to be assembled.
@@ -41,9 +41,9 @@ moves – and if the input tracks no groups, neither does the result.
 
 * **Parameters:**
   * **op** ([*OperatorTrait*](qiskit_fermions.operators.OperatorTrait.html.md#qiskit_fermions.operators.OperatorTrait)) – the operator whose terms to reorder.
-  * **key** ([*Callable*](https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable) *[* *[*[*tuple*](https://docs.python.org/3/builtins/stdtypes.html#tuple) *]* *,* [*Any*](https://docs.python.org/3/library/typing.html#typing.Any) *]*) – a function of a single term, used exactly as the `key` argument of [`sorted()`](https://docs.python.org/3/builtins/functions.html#sorted). It
+  * **key** (*Callable* *[* *[**tuple* *]* *,* *Any* *]*) – a function of a single term, used exactly as the `key` argument of `sorted()`. It
     receives each term as the tuple described in the note above.
-  * **reverse** ([*bool*](https://docs.python.org/3/builtins/functions.html#bool)) – if `True`, the terms are sorted in descending order of `key`.
+  * **reverse** (*bool*) – if `True`, the terms are sorted in descending order of `key`.
 * **Returns:**
   A new operator of the same type with its terms in the requested order.
 * **Return type:**

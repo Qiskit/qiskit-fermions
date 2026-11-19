@@ -7,7 +7,7 @@ module provides various tools to simplify the construction of commonly used oper
 
 ## Commutator Generators
 
-Operator classes can implement the [`SupportsCommutators`](../stubs/qiskit_fermions.protocols.SupportsCommutators.html.md#qiskit_fermions.protocols.SupportsCommutators) [`Protocol`](https://docs.python.org/3/library/typing.html#typing.Protocol), which
+Operator classes can implement the [`SupportsCommutators`](../stubs/qiskit_fermions.protocols.SupportsCommutators.html.md#qiskit_fermions.protocols.SupportsCommutators) `Protocol`, which
 allows them to be used with the functions listed in the table below, to quickly compute multiple
 commutator variants.
 

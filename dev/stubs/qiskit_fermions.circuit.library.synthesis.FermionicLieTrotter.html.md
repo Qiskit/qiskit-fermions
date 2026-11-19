@@ -42,10 +42,10 @@ The Hermiticity requirement on the individual factors, described in the
 Initializing an instance of this synthesis method can be done with the argument below.
 
 * **Parameters:**
-  **reps** ([*int*](https://docs.python.org/3/builtins/functions.html#int)) – the number of times to repeat the formula, each repetition evolving for
+  **reps** (*int*) – the number of times to repeat the formula, each repetition evolving for
   `time / reps`.
 * **Raises:**
-  [**ValueError**](https://docs.python.org/3/builtins/exceptions.html#ValueError) – if `reps` is not positive.
+  **ValueError** – if `reps` is not positive.
 
 ### Attributes
 

@@ -425,10 +425,10 @@ Filtering needs occupation information to filter against. A
 [`InitializeModes`](../stubs/qiskit_fermions.circuit.library.InitializeModes.html.md#qiskit_fermions.circuit.library.InitializeModes) does, and any [`OrbitalRotation`](../stubs/qiskit_fermions.circuit.library.OrbitalRotation.html.md#qiskit_fermions.circuit.library.OrbitalRotation) marks every
 mode it acts on as “uncertain”. Without any of them, or when the seeded modes
 all land on one side (every mode occupied, or every mode unoccupied),
-the pass emits a [`UserWarning`](https://docs.python.org/3/builtins/exceptions.html#UserWarning) and leaves the sampling
+the pass emits a `UserWarning` and leaves the sampling
 unfiltered for that [`Evolution`](../stubs/qiskit_fermions.circuit.library.Evolution.html.md#qiskit_fermions.circuit.library.Evolution) gate. On a Hamiltonian whose remaining
 terms can no longer couple the two tracked sets, the pass instead raises
-[`RuntimeError`](https://docs.python.org/3/builtins/exceptions.html#RuntimeError) after
+`RuntimeError` after
 [`QDriftTrotterization.MAX_SAMPLE_RETRIES`](../stubs/qiskit_fermions.transpiler.passes.QDriftTrotterization.html.md#qiskit_fermions.transpiler.passes.QDriftTrotterization.MAX_SAMPLE_RETRIES) consecutive rejections.
 
 <a id="sqdrift-sampling-weights"></a>

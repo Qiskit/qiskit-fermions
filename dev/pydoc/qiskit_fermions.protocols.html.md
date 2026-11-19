@@ -4,9 +4,9 @@
 
 This module provides various protocols used throughout the package.
 
-A [`typing.Protocol`](https://docs.python.org/3/library/typing.html#typing.Protocol) is an interface that a class can fulfill structurally, without
+A `typing.Protocol` is an interface that a class can fulfill structurally, without
 explicitly inheriting from it. For example, any class that implements a `__len__` method
-satisfies [`Sized`](https://docs.python.org/3/library/typing.html#typing.Sized), whether or not it says so anywhere in its class hierarchy.
+satisfies `Sized`, whether or not it says so anywhere in its class hierarchy.
 
 The protocols in this module follow the same idea, but each one centers on a single, otherwise
 unremarkable dunder-style method (for example `_majorana_operator_`). A class implementing that

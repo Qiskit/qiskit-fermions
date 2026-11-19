@@ -30,17 +30,17 @@ It may also happen that some of the inherited methods may not always make sense 
 this re-interpretation. You have been warned.
 
 * **Parameters:**
-  * **name** ([*str*](https://docs.python.org/3/builtins/stdtypes.html#str)) – instruction name
-  * **num_qubits** ([*int*](https://docs.python.org/3/builtins/functions.html#int)) – instruction’s qubit width
-  * **num_clbits** ([*int*](https://docs.python.org/3/builtins/functions.html#int)) – instruction’s clbit width
-  * **params** ([*list*](https://docs.python.org/3/builtins/stdtypes.html#list) *[*[*int*](https://docs.python.org/3/builtins/functions.html#int) *|*[*float*](https://docs.python.org/3/builtins/functions.html#float) *|*[*complex*](https://docs.python.org/3/builtins/functions.html#complex) *|*[*str*](https://docs.python.org/3/builtins/stdtypes.html#str) *|**ndarray* *|*[*list*](https://docs.python.org/3/builtins/stdtypes.html#list) *|**ParameterExpression* *]*) – list of parameters
-  * **label** ([*str*](https://docs.python.org/3/builtins/stdtypes.html#str) *or* *None*) – An optional label for identifying the instruction.
-  * **num_modes** ([*int*](https://docs.python.org/3/builtins/functions.html#int))
+  * **name** (*str*) – instruction name
+  * **num_qubits** (*int*) – instruction’s qubit width
+  * **num_clbits** (*int*) – instruction’s clbit width
+  * **params** (*list* *[**int* *|**float* *|**complex* *|**str* *|**ndarray* *|**list* *|**ParameterExpression* *]*) – list of parameters
+  * **label** (*str* *or* *None*) – An optional label for identifying the instruction.
+  * **num_modes** (*int*)
   * **synthesis** ([*F2FSynthesisPlugin*](qiskit_fermions.circuit.library.synthesis.F2FSynthesisPlugin.html.md#qiskit_fermions.circuit.library.synthesis.F2FSynthesisPlugin) *|* *None*)
-  * **atomic** ([*bool*](https://docs.python.org/3/builtins/functions.html#bool))
+  * **atomic** (*bool*)
 * **Raises:**
   * **CircuitError** – when the register is not in the correct format.
-  * [**TypeError**](https://docs.python.org/3/builtins/exceptions.html#TypeError) – when the optional label is provided, but it is not a string.
+  * **TypeError** – when the optional label is provided, but it is not a string.
 
 ### Attributes
 
@@ -178,14 +178,14 @@ that method for the semantics of `vec` (including whether a `None` vector is acc
 `norb`, `nelec`, and `copy`.
 
 * **Raises:**
-  [**NotImplementedError**](https://docs.python.org/3/builtins/exceptions.html#NotImplementedError) – if this gate does not implement `_apply_unitary_placed_` (a bare
+  **NotImplementedError** – if this gate does not implement `_apply_unitary_placed_` (a bare
       [`FermionicGate`](#qiskit_fermions.circuit.FermionicGate) used only as a type marker), and therefore cannot be applied to
       a state vector.
 * **Parameters:**
   * **vec** (*np.ndarray* *|* *None*)
-  * **norb** ([*int*](https://docs.python.org/3/builtins/functions.html#int))
-  * **nelec** ([*int*](https://docs.python.org/3/builtins/functions.html#int) *|* [*tuple*](https://docs.python.org/3/builtins/stdtypes.html#tuple) *[*[*int*](https://docs.python.org/3/builtins/functions.html#int) *,* [*int*](https://docs.python.org/3/builtins/functions.html#int) *]*)
-  * **copy** ([*bool*](https://docs.python.org/3/builtins/functions.html#bool))
+  * **norb** (*int*)
+  * **nelec** (*int* *|* *tuple* *[**int* *,* *int* *]*)
+  * **copy** (*bool*)
 * **Return type:**
   np.ndarray
 
@@ -225,15 +225,15 @@ The general broadcasting rules are:
 >   [q[0], q[1]], [r[0], r[1]],  ...] -> [q[0], r[0], ...], [q[1], r[1], ...]
 >   ```
 * **Parameters:**
-  * **qargs** ([*list*](https://docs.python.org/3/builtins/stdtypes.html#list)) – List of quantum bit arguments.
-  * **cargs** ([*list*](https://docs.python.org/3/builtins/stdtypes.html#list)) – List of classical bit arguments.
+  * **qargs** (*list*) – List of quantum bit arguments.
+  * **cargs** (*list*) – List of classical bit arguments.
 * **Returns:**
   A tuple with single arguments.
 * **Raises:**
   **CircuitError** – If the input is not valid. For example, the number of
       arguments does not match the gate expectation.
 * **Return type:**
-  [*Iterable*](https://docs.python.org/3/library/collections.abc.html#collections.abc.Iterable)[[tuple](https://docs.python.org/3/builtins/stdtypes.html#tuple)[[list](https://docs.python.org/3/builtins/stdtypes.html#list), [list](https://docs.python.org/3/builtins/stdtypes.html#list)]]
+  *Iterable*[tuple[list, list]]
 
 #### control(num_ctrl_qubits=1, label=None, ctrl_state=None, annotated=None)
 
@@ -246,12 +246,12 @@ is `False`, and as `AnnotatedOperation` when `annotated` is `True`.
 Deprecated since version 2.3: `qiskit.circuit.gate.Gate.control()`’s argument `annotated` is deprecated as of Qiskit 2.3. It will be removed in Qiskit 3.0. The method Gate.control() no longer accepts annotated=None. The new default is annotated=True, which represents the controlled gate as an AnnotatedOperation (unless a dedicated controlled-gate class already exists). You can explicitly set annotated=False to preserve the previous behavior. However, using annotated=True is recommended, as it defers construction of the controlled circuit to transpiler, and furthermore enables additional controlled-gate optimizations (typically leading to higher-quality circuits).
 
 * **Parameters:**
-  * **num_ctrl_qubits** ([*int*](https://docs.python.org/3/builtins/functions.html#int)) – Number of controls to add. Defaults to `1`.
-  * **label** ([*str*](https://docs.python.org/3/builtins/stdtypes.html#str) *|* *None*) – Optional gate label. Defaults to `None`.
+  * **num_ctrl_qubits** (*int*) – Number of controls to add. Defaults to `1`.
+  * **label** (*str* *|* *None*) – Optional gate label. Defaults to `None`.
     Ignored if the controlled gate is implemented as an annotated operation.
-  * **ctrl_state** ([*int*](https://docs.python.org/3/builtins/functions.html#int) *|* [*str*](https://docs.python.org/3/builtins/stdtypes.html#str) *|* *None*) – The control state of the gate, specified either as an integer or a bitstring
+  * **ctrl_state** (*int* *|* *str* *|* *None*) – The control state of the gate, specified either as an integer or a bitstring
     (e.g. `"110"`). If `None`, defaults to the all-ones state `2**num_ctrl_qubits - 1`.
-  * **annotated** ([*bool*](https://docs.python.org/3/builtins/functions.html#bool) *|* *None*) – Indicates whether the controlled gate should be implemented as a controlled gate
+  * **annotated** (*bool* *|* *None*) – Indicates whether the controlled gate should be implemented as a controlled gate
     or as an annotated operation. If `None`, treated as `False`.
 * **Returns:**
   A controlled version of this gate.
@@ -263,7 +263,7 @@ Deprecated since version 2.3: `qiskit.circuit.gate.Gate.control()`’s argument 
 Copy of the instruction.
 
 * **Parameters:**
-  **name** ([*str*](https://docs.python.org/3/builtins/stdtypes.html#str)) – name to be given to the copied circuit, if `None` then the name stays the same.
+  **name** (*str*) – name to be given to the copied circuit, if `None` then the name stays the same.
 * **Returns:**
   a copy of the current instruction, with the name updated if it
   was provided
@@ -288,7 +288,7 @@ which may include ignoring it and always returning a concrete gate class
 if the inverse is defined as a standard gate.
 
 * **Parameters:**
-  **annotated** ([*bool*](https://docs.python.org/3/builtins/functions.html#bool)) – if set to True the output inverse gate will be returned
+  **annotated** (*bool*) – if set to True the output inverse gate will be returned
   as `AnnotatedOperation`.
 * **Returns:**
   The inverse operation.
@@ -310,8 +310,8 @@ gates, such as `RXGate`, when the power of a gate can be expressed in terms of a
 standard gate that is returned directly.
 
 * **Parameters:**
-  * **exponent** ([*float*](https://docs.python.org/3/builtins/functions.html#float)) – the power to raise the gate to
-  * **annotated** ([*bool*](https://docs.python.org/3/builtins/functions.html#bool)) – indicates whether the power gate can be implemented
+  * **exponent** (*float*) – the power to raise the gate to
+  * **annotated** (*bool*) – indicates whether the power gate can be implemented
     as an annotated operation. In the case of several standard
     gates, such as `RXGate`, this argument is ignored when
     the power of a gate can be expressed in terms of another
@@ -326,7 +326,7 @@ standard gate that is returned directly.
 Creates an instruction with `self` repeated $n$ times.
 
 * **Parameters:**
-  **n** ([*int*](https://docs.python.org/3/builtins/functions.html#int)) – Number of times to repeat the instruction
+  **n** (*int*) – Number of times to repeat the instruction
 * **Returns:**
   Containing the definition.
 * **Return type:**
@@ -359,7 +359,7 @@ account.
 * **Returns:**
   are self and other equal up to parameter expressions.
 * **Return type:**
-  [bool](https://docs.python.org/3/builtins/functions.html#bool)
+  bool
 
 #### to_matrix()
 

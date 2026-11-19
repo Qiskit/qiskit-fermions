@@ -4,7 +4,7 @@
 
 A ternary tree compiled into the Pauli images of its Majorana operators.
 
-Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
+Bases: `object`
 
 Pairing the tree’s legs into Majorana operators and building their Pauli strings is done once,
 here, rather than per mapped operator. Pass one of these to the ternary-tree mappers.
@@ -82,8 +82,8 @@ distinct qubits, so it is Hermitian and squares to the identity with no phase to
 * **Parameters:**
   **majorana** – the Majorana index, `2 * mode + is_prime`.
 * **Raises:**
-  * [**ValueError**](https://docs.python.org/3/builtins/exceptions.html#ValueError) – if `majorana` is not below `2 * num_modes`.
-  * [**OverflowError**](https://docs.python.org/3/builtins/exceptions.html#OverflowError) – if `majorana` is negative or does not fit in 32 bits.
+  * **ValueError** – if `majorana` is not below `2 * num_modes`.
+  * **OverflowError** – if `majorana` is negative or does not fit in 32 bits.
 
 #### total_parity(num_qubits)
 
@@ -127,5 +127,5 @@ every mode map.
 * **Return type:**
   The total-parity observable
 * **Raises:**
-  * [**ValueError**](https://docs.python.org/3/builtins/exceptions.html#ValueError) – if `num_qubits` is below the encoding’s mode count.
-  * [**OverflowError**](https://docs.python.org/3/builtins/exceptions.html#OverflowError) – if `num_qubits` is negative or does not fit in 32 bits.
+  * **ValueError** – if `num_qubits` is below the encoding’s mode count.
+  * **OverflowError** – if `num_qubits` is negative or does not fit in 32 bits.

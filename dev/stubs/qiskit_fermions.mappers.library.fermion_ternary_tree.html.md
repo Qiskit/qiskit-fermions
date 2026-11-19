@@ -18,9 +18,9 @@ ternary-tree encoding.
   carried by `op` is not reflected in the result, as a
   [`SparseObservable`](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.quantum_info.SparseObservable) does not track groups.
 * **Raises:**
-  * [**ValueError**](https://docs.python.org/3/builtins/exceptions.html#ValueError) – if `op` acts on a mode the encoding does not cover, or `num_qubits` is
+  * **ValueError** – if `op` acts on a mode the encoding does not cover, or `num_qubits` is
         smaller than the encoding’s mode count.
-  * [**OverflowError**](https://docs.python.org/3/builtins/exceptions.html#OverflowError) – if `num_qubits` is negative or does not fit in 32 bits.
+  * **OverflowError** – if `num_qubits` is negative or does not fit in 32 bits.
 
 ## Usage
 

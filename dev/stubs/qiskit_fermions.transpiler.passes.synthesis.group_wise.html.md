@@ -26,8 +26,8 @@ Composing this with [`simplify()`](qiskit_fermions.transpiler.passes.synthesis.s
 into a canonical order and so discards the grouping this produces.
 
 * **Parameters:**
-  **mapper_fn** ([*Callable*](https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable) *[* *[*[*OperatorTrait*](qiskit_fermions.operators.OperatorTrait.html.md#qiskit_fermions.operators.OperatorTrait) *,* [*int*](https://docs.python.org/3/builtins/functions.html#int) *]* *,* [*SparseObservable*](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.quantum_info.SparseObservable) *]*) – the mapper function to wrap.
+  **mapper_fn** (*Callable* *[* *[*[*OperatorTrait*](qiskit_fermions.operators.OperatorTrait.html.md#qiskit_fermions.operators.OperatorTrait) *,* *int* *]* *,* [*SparseObservable*](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.quantum_info.SparseObservable) *]*) – the mapper function to wrap.
 * **Returns:**
   A mapper function that maps `mapper_fn` over the operator’s groups and sums the results.
 * **Return type:**
-  [*Callable*](https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable)[[[*OperatorTrait*](qiskit_fermions.operators.OperatorTrait.html.md#qiskit_fermions.operators.OperatorTrait), [int](https://docs.python.org/3/builtins/functions.html#int)], [*SparseObservable*](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.quantum_info.SparseObservable)]
+  *Callable*[[[*OperatorTrait*](qiskit_fermions.operators.OperatorTrait.html.md#qiskit_fermions.operators.OperatorTrait), int], [*SparseObservable*](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.quantum_info.SparseObservable)]

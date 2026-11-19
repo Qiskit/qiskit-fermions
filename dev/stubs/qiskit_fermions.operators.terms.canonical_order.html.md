@@ -39,5 +39,5 @@ no groups, neither does the result.
 * **Returns:**
   A new operator of the same type with its terms in canonical order.
 * **Raises:**
-  [**TypeError**](https://docs.python.org/3/builtins/exceptions.html#TypeError) – if `op` is not a supported operator type (see
+  **TypeError** – if `op` is not a supported operator type (see
       [`OperatorTrait`](qiskit_fermions.operators.OperatorTrait.html.md#qiskit_fermions.operators.OperatorTrait)).

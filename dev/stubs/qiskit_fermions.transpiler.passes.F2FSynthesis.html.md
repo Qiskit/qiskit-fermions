@@ -97,21 +97,21 @@ Initializing this transpiler pass can be done with the arguments listed below.
 * **Parameters:**
   * **config** ([*F2FSynthesisConfig*](qiskit_fermions.transpiler.passes.optimization.f2f_synthesis.F2FSynthesisConfig.html.md#qiskit_fermions.transpiler.passes.optimization.f2f_synthesis.F2FSynthesisConfig) *|* *None*) – an optional dictionary to pre-populate the [`methods`](#qiskit_fermions.transpiler.passes.F2FSynthesis.methods) with plugins provided
     by the [`F2FSynthesisPluginManager`](qiskit_fermions.circuit.library.synthesis.F2FSynthesisPluginManager.html.md#qiskit_fermions.circuit.library.synthesis.F2FSynthesisPluginManager). See `F2FSynthesisConfig`.
-  * **apply** ([*bool*](https://docs.python.org/3/builtins/functions.html#bool)) – whether to expand each selected gate into the factors its plugin produces. When
+  * **apply** (*bool*) – whether to expand each selected gate into the factors its plugin produces. When
     `False`, the gate is only tagged with the plugin (unless it is atomic, which is
     never touched) and something else has to expand it later. See [`apply`](#qiskit_fermions.transpiler.passes.F2FSynthesis.apply).
-  * **filter** (*Callable* *[* *[**DAGOpNode* *]* *,* [*bool*](https://docs.python.org/3/builtins/functions.html#bool) *]*  *|* *None*) – an optional predicate deciding which nodes to break down. It is called with the
+  * **filter** (*Callable* *[* *[**DAGOpNode* *]* *,* *bool* *]*  *|* *None*) – an optional predicate deciding which nodes to break down. It is called with the
     [`DAGOpNode`](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.dagcircuit.DAGOpNode) of a gate whose type is in [`methods`](#qiskit_fermions.transpiler.passes.F2FSynthesis.methods),
     and the node is left untouched unless it returns `True`. If `None` (the default),
     every such node is selected.
 * **Raises:**
-  * [**KeyError**](https://docs.python.org/3/builtins/exceptions.html#KeyError) – if `config` names a gate or a method for which no plugin is installed.
-  * [**TypeError**](https://docs.python.org/3/builtins/exceptions.html#TypeError) – if `config` gives a value that is none of the forms of
+  * **KeyError** – if `config` names a gate or a method for which no plugin is installed.
+  * **TypeError** – if `config` gives a value that is none of the forms of
         `F2FSynthesisConfig`.
 
 ### Attributes
 
-#### methods *: [dict](https://docs.python.org/3/builtins/stdtypes.html#dict)[[str](https://docs.python.org/3/builtins/stdtypes.html#str), [F2FSynthesisPlugin](qiskit_fermions.circuit.library.synthesis.F2FSynthesisPlugin.html.md#qiskit_fermions.circuit.library.synthesis.F2FSynthesisPlugin)]*
+#### methods *: dict[str, [F2FSynthesisPlugin](qiskit_fermions.circuit.library.synthesis.F2FSynthesisPlugin.html.md#qiskit_fermions.circuit.library.synthesis.F2FSynthesisPlugin)]*
 
 A dictionary of the fermion-to-fermion synthesis methods, by gate.
 
@@ -167,18 +167,18 @@ Execute optimization task for input Qiskit IR.
 * **Parameters:**
   * **passmanager_ir** (*IR*) – Qiskit IR to optimize.
   * **state** ([*PassManagerState*](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.PassManagerState)) – State associated with workflow execution by the pass manager itself.
-  * **callback** ([*Callable*](https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable) *[* *[*[*Task*](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.Task) *,* *IR_OUT* *,* [*PropertySet*](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.PropertySet) *,* [*float*](https://docs.python.org/3/builtins/functions.html#float) *,* [*int*](https://docs.python.org/3/builtins/functions.html#int) *]* *,* *None* *]*  *|* *None*) – A callback function which is called per execution of optimization task.
+  * **callback** (*Callable* *[* *[*[*Task*](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.Task) *,* *IR_OUT* *,* [*PropertySet*](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.PropertySet) *,* *float* *,* *int* *]* *,* *None* *]*  *|* *None*) – A callback function which is called per execution of optimization task.
 * **Returns:**
   Optimized Qiskit IR and state of the workflow.
 * **Return type:**
-  [tuple](https://docs.python.org/3/builtins/stdtypes.html#tuple)[*IR_OUT*, [*PassManagerState*](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.PassManagerState)]
+  tuple[*IR_OUT*, [*PassManagerState*](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.PassManagerState)]
 
 #### name()
 
 Name of the pass.
 
 * **Return type:**
-  [str](https://docs.python.org/3/builtins/stdtypes.html#str)
+  str
 
 #### update_status(state, run_state)
 

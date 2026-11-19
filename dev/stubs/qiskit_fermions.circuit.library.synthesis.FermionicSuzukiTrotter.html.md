@@ -4,7 +4,7 @@
 
 The higher-order Suzuki-Trotter product formula, applied in fermionic space.
 
-Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
+Bases: `object`
 
 A product formula composes the factors of an operator symmetrically, so that the leading error
 terms cancel. For $\texttt{order} = 2$ and factors $H_j$, the approximation is the
@@ -71,15 +71,15 @@ still being wrong.
 Initializing an instance of this synthesis method can be done with the arguments below.
 
 * **Parameters:**
-  * **order** ([*int*](https://docs.python.org/3/builtins/functions.html#int)) – the order of the product formula. Must be `1` (which reduces to
+  * **order** (*int*) – the order of the product formula. Must be `1` (which reduces to
     [`FermionicLieTrotter`](qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter.html.md#qiskit_fermions.circuit.library.synthesis.FermionicLieTrotter)) or a positive even integer, since the Suzuki formulas
     are symmetric.
-  * **reps** ([*int*](https://docs.python.org/3/builtins/functions.html#int)) – the number of times to repeat the formula, each repetition evolving for
+  * **reps** (*int*) – the number of times to repeat the formula, each repetition evolving for
     `time / reps`.
-  * **merge_adjacent** ([*bool*](https://docs.python.org/3/builtins/functions.html#bool)) – whether to fuse neighboring gates of the same factor into one, summing
+  * **merge_adjacent** (*bool*) – whether to fuse neighboring gates of the same factor into one, summing
     their evolution times. See [`merge_adjacent`](#qiskit_fermions.circuit.library.synthesis.FermionicSuzukiTrotter.merge_adjacent).
 * **Raises:**
-  [**ValueError**](https://docs.python.org/3/builtins/exceptions.html#ValueError) – if `order` is neither `1` nor a positive even integer, or if `reps` is
+  **ValueError** – if `order` is neither `1` nor a positive even integer, or if `reps` is
       not positive.
 
 ### Attributes

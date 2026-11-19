@@ -4,7 +4,7 @@
 
 A simple manager of the installed fermion-to-fermion synthesis plugins.
 
-Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
+Bases: `object`
 
 All plugins that are registered under the `qiskit_fermions.circuit.synthesis`
 [entry-point](https://setuptools.pypa.io/en/latest/userguide/entry_point.html) will be
@@ -27,7 +27,7 @@ An overview of all builtin plugins is given [here](../pydoc/qiskit_fermions.circ
 
 ### Attributes
 
-#### plugins *: [dict](https://docs.python.org/3/builtins/stdtypes.html#dict)[[str](https://docs.python.org/3/builtins/stdtypes.html#str), [list](https://docs.python.org/3/builtins/stdtypes.html#list)[[str](https://docs.python.org/3/builtins/stdtypes.html#str)]]*
+#### plugins *: dict[str, list[str]]*
 
 A dictionary mapping gate names to their synthesis methods.
 
@@ -42,29 +42,29 @@ instances of that particular gate.
 Returns the requested [`F2FSynthesisPlugin`](qiskit_fermions.circuit.library.synthesis.F2FSynthesisPlugin.html.md#qiskit_fermions.circuit.library.synthesis.F2FSynthesisPlugin) type.
 
 * **Parameters:**
-  * **op_name** ([*str*](https://docs.python.org/3/builtins/stdtypes.html#str)) – the name of the gate whose plugin to return.
-  * **method_name** ([*str*](https://docs.python.org/3/builtins/stdtypes.html#str)) – the name of the synthesis plugin.
+  * **op_name** (*str*) – the name of the gate whose plugin to return.
+  * **method_name** (*str*) – the name of the synthesis plugin.
 * **Returns:**
   The [`F2FSynthesisPlugin`](qiskit_fermions.circuit.library.synthesis.F2FSynthesisPlugin.html.md#qiskit_fermions.circuit.library.synthesis.F2FSynthesisPlugin) class.
 * **Raises:**
-  [**KeyError**](https://docs.python.org/3/builtins/exceptions.html#KeyError) – if no plugin is registered under that name.
+  **KeyError** – if no plugin is registered under that name.
 * **Return type:**
-  [type](https://docs.python.org/3/builtins/functions.html#type)[[*F2FSynthesisPlugin*](qiskit_fermions.circuit.library.synthesis.F2FSynthesisPlugin.html.md#qiskit_fermions.circuit.library.synthesis.F2FSynthesisPlugin)]
+  type[[*F2FSynthesisPlugin*](qiskit_fermions.circuit.library.synthesis.F2FSynthesisPlugin.html.md#qiskit_fermions.circuit.library.synthesis.F2FSynthesisPlugin)]
 
 #### method_names(op_name)
 
 Returns the names of all installed plugin methods for a given gate.
 
 * **Parameters:**
-  **op_name** ([*str*](https://docs.python.org/3/builtins/stdtypes.html#str)) – the name of the gate whose synthesis methods to return.
+  **op_name** (*str*) – the name of the gate whose synthesis methods to return.
 * **Returns:**
   The list of installed plugin method names.
 * **Return type:**
-  [list](https://docs.python.org/3/builtins/stdtypes.html#list)[[str](https://docs.python.org/3/builtins/stdtypes.html#str)]
+  list[str]
 
 #### op_names()
 
 Returns the names of all gates for which any plugin is installed.
 
 * **Return type:**
-  [list](https://docs.python.org/3/builtins/stdtypes.html#list)[[str](https://docs.python.org/3/builtins/stdtypes.html#str)]
+  list[str]

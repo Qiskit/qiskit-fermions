@@ -42,7 +42,7 @@ contiguous, is a hop across the modes in between and is synthesized exactly, too
 Initializing this plugin can be done with the arguments listed below.
 
 * **Parameters:**
-  **atol** ([*float*](https://docs.python.org/3/builtins/functions.html#float)) – the absolute tolerance on the coefficients of the operator, within which it is
+  **atol** (*float*) – the absolute tolerance on the coefficients of the operator, within which it is
   still considered a hop.
 
 ### Attributes

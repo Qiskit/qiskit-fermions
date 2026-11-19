@@ -44,5 +44,5 @@ coefficients do not make a group Hermitian, and a Hermitian group may mix magnit
 * **Returns:**
   One flag per group index, or `None` if the operator tracks no groups.
 * **Raises:**
-  [**TypeError**](https://docs.python.org/3/builtins/exceptions.html#TypeError) – if `op` is not a supported operator type (see
+  **TypeError** – if `op` is not a supported operator type (see
       [`OperatorTrait`](qiskit_fermions.operators.OperatorTrait.html.md#qiskit_fermions.operators.OperatorTrait)).

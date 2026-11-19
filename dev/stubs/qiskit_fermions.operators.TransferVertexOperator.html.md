@@ -4,7 +4,7 @@
 
 A transfer-vertex operator.
 
-Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
+Bases: `object`
 
 <a id="transfervertexoperator-definition"></a>
 
@@ -131,7 +131,7 @@ In addition, the following construction and quick helper methods are available:
 ### Formatting
 
 In the examples above, the constructed operators have been printed using the output from
-[`format()`](https://docs.python.org/3/builtins/functions.html#format), which results in a human-readable form of the operator.
+`format()`, which results in a human-readable form of the operator.
 
 ```pycon
 >>> print(format(op))
@@ -146,7 +146,7 @@ In the examples above, the constructed operators have been printed using the out
 The printing order of `format(op)` gets explicitly sorted before printing. As such, it
 does not reflect the order of the terms inside the operator.
 
-An alternative form can be obtained from the [`repr()`](https://docs.python.org/3/builtins/functions.html#repr) function, which results in a
+An alternative form can be obtained from the `repr()` function, which results in a
 Python-interpretable representation. In other words, this output can readily be copied and
 pasted into a Python shell:
 
@@ -748,7 +748,7 @@ Returns a new operator with relabeled modes.
 * **Returns:**
   A new operator with its modes relabeled.
 * **Raises:**
-  [**ValueError**](https://docs.python.org/3/builtins/exceptions.html#ValueError) – if `permutation` contains duplicate entries, or is too short to relabel
+  **ValueError** – if `permutation` contains duplicate entries, or is too short to relabel
       some mode the operator acts upon.
 
 #### simplify(atol=1e-08)

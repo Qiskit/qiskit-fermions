@@ -92,7 +92,7 @@ Initializing an instance of this gate can be done with the argument listed below
   (see the class docstring).
 * **Raises:**
   * **MissingOptionalLibraryError** – if `ffsim` is not installed.
-  * [**TypeError**](https://docs.python.org/3/builtins/exceptions.html#TypeError) – if `uccsd_op` is not one of ffsim’s four UCCSD operator types.
+  * **TypeError** – if `uccsd_op` is not one of ffsim’s four UCCSD operator types.
 
 ### Attributes
 
@@ -147,11 +147,11 @@ the exact gate sequence.
 
 * **Parameters:**
   * **vec** ([*ndarray*](https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray)) – the state vector to act on.
-  * **norb** ([*int*](https://docs.python.org/3/builtins/functions.html#int)) – the number of spatial orbitals of the *global* state vector.
-  * **nelec** ([*int*](https://docs.python.org/3/builtins/functions.html#int) *|* [*tuple*](https://docs.python.org/3/builtins/stdtypes.html#tuple) *[*[*int*](https://docs.python.org/3/builtins/functions.html#int) *,* [*int*](https://docs.python.org/3/builtins/functions.html#int) *]*) – either a single integer for a spinless system, or a pair of integers storing the
+  * **norb** (*int*) – the number of spatial orbitals of the *global* state vector.
+  * **nelec** (*int* *|* *tuple* *[**int* *,* *int* *]*) – either a single integer for a spinless system, or a pair of integers storing the
     numbers of spin alpha and spin beta fermions.
-  * **copy** ([*bool*](https://docs.python.org/3/builtins/functions.html#bool)) – whether to copy the vector before operating on it.
-  * **freg_indices** ([*list*](https://docs.python.org/3/builtins/stdtypes.html#list) *[*[*int*](https://docs.python.org/3/builtins/functions.html#int) *]*) – the absolute (global) mode indices that this gate’s local modes map onto.
+  * **copy** (*bool*) – whether to copy the vector before operating on it.
+  * **freg_indices** (*list* *[**int* *]*) – the absolute (global) mode indices that this gate’s local modes map onto.
 * **Returns:**
   The transformed vector.
 * **Return type:**

@@ -1,6 +1,6 @@
 # FermionicDAGCircuit
 
-### FermionicDAGCircuit *: [TypeAlias](https://docs.python.org/3/library/typing.html#typing.TypeAlias)* *= <class 'qiskit._accelerate.circuit.DAGCircuit'>*
+### FermionicDAGCircuit *: TypeAlias* *= <class 'qiskit._accelerate.circuit.DAGCircuit'>*
 
 A type alias of [`DAGCircuit`](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.dagcircuit.DAGCircuit).
 

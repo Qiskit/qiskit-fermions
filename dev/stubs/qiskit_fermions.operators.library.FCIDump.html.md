@@ -4,7 +4,7 @@
 
 An electronic structure Hamiltonian in FCIDump format.
 
-Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
+Bases: `object`
 
 ## Definition
 
@@ -161,8 +161,8 @@ fcidump = FCIDump.from_file("molecule.fcidump")
 * **Returns:**
   The constructed data structure.
 * **Raises:**
-  * [**OSError**](https://docs.python.org/3/builtins/exceptions.html#OSError) – if `file_path` cannot be opened or read.
-  * [**ValueError**](https://docs.python.org/3/builtins/exceptions.html#ValueError) – if the file does not honor the FCIDump format (a missing header namelist, a
+  * **OSError** – if `file_path` cannot be opened or read.
+  * **ValueError** – if the file does not honor the FCIDump format (a missing header namelist, a
         missing `NORB` or `NELEC` field, or a malformed `MS2` field), or if it carries
         an MO energy value, which is not supported yet.
 

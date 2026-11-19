@@ -19,6 +19,6 @@ chains cancel. On the balanced tree at $n = 4$ a vertex operator has weight 3.
   The mapped qubit operator, subject to the same simplification and grouping caveats as
   [`fermion_ternary_tree()`](qiskit_fermions.mappers.library.fermion_ternary_tree.html.md#qiskit_fermions.mappers.library.fermion_ternary_tree).
 * **Raises:**
-  * [**ValueError**](https://docs.python.org/3/builtins/exceptions.html#ValueError) – if `op` acts on a mode the encoding does not cover, or `num_qubits` is
+  * **ValueError** – if `op` acts on a mode the encoding does not cover, or `num_qubits` is
         smaller than the encoding’s mode count.
-  * [**OverflowError**](https://docs.python.org/3/builtins/exceptions.html#OverflowError) – if `num_qubits` is negative or does not fit in 32 bits.
+  * **OverflowError** – if `num_qubits` is negative or does not fit in 32 bits.

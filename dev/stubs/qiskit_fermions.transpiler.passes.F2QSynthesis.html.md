@@ -54,14 +54,14 @@ Initializing this transpiler pass can be done with the arguments listed below.
   by the [`F2QSynthesisPluginManager`](qiskit_fermions.transpiler.passes.synthesis.F2QSynthesisPluginManager.html.md#qiskit_fermions.transpiler.passes.synthesis.F2QSynthesisPluginManager), or with plugin instances. See
   `F2QSynthesisConfig`.
 * **Raises:**
-  * [**KeyError**](https://docs.python.org/3/builtins/exceptions.html#KeyError) – if `config` names an instruction or a method for which no plugin is
+  * **KeyError** – if `config` names an instruction or a method for which no plugin is
         installed.
-  * [**TypeError**](https://docs.python.org/3/builtins/exceptions.html#TypeError) – if `config` gives a value that is none of the forms of
+  * **TypeError** – if `config` gives a value that is none of the forms of
         `F2QSynthesisConfig`.
 
 ### Attributes
 
-#### methods *: [dict](https://docs.python.org/3/builtins/stdtypes.html#dict)[[str](https://docs.python.org/3/builtins/stdtypes.html#str), [F2QSynthesisPlugin](qiskit_fermions.transpiler.passes.synthesis.F2QSynthesisPlugin.html.md#qiskit_fermions.transpiler.passes.synthesis.F2QSynthesisPlugin)]*
+#### methods *: dict[str, [F2QSynthesisPlugin](qiskit_fermions.transpiler.passes.synthesis.F2QSynthesisPlugin.html.md#qiskit_fermions.transpiler.passes.synthesis.F2QSynthesisPlugin)]*
 
 A dictionary of fermion-to-qubit circuit instruction transpilation methods.
 
@@ -92,10 +92,10 @@ Runs this transpilation pass.
 * **Returns:**
   The output circuit with qubit-based instructions.
 * **Raises:**
-  * [**ValueError**](https://docs.python.org/3/builtins/exceptions.html#ValueError) – when a [`DAGOpNode`](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.dagcircuit.DAGOpNode) is encountered whose
+  * **ValueError** – when a [`DAGOpNode`](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.dagcircuit.DAGOpNode) is encountered whose
         [`op`](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.dagcircuit.DAGOpNode#op) is neither of type
         [`FermionicInstruction`](qiskit_fermions.circuit.FermionicInstruction.html.md#qiskit_fermions.circuit.FermionicInstruction) nor a `Barrier`.
-  * [**TypeError**](https://docs.python.org/3/builtins/exceptions.html#TypeError) – when a [`FermionicInstruction`](qiskit_fermions.circuit.FermionicInstruction.html.md#qiskit_fermions.circuit.FermionicInstruction) type is encountered for which no
+  * **TypeError** – when a [`FermionicInstruction`](qiskit_fermions.circuit.FermionicInstruction.html.md#qiskit_fermions.circuit.FermionicInstruction) type is encountered for which no
         translation plugin is present in [`methods`](#qiskit_fermions.transpiler.passes.F2QSynthesis.methods).
 * **Return type:**
   [*DAGCircuit*](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.dagcircuit.DAGCircuit)
@@ -109,18 +109,18 @@ Execute optimization task for input Qiskit IR.
 * **Parameters:**
   * **passmanager_ir** (*IR*) – Qiskit IR to optimize.
   * **state** ([*PassManagerState*](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.PassManagerState)) – State associated with workflow execution by the pass manager itself.
-  * **callback** ([*Callable*](https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable) *[* *[*[*Task*](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.Task) *,* *IR_OUT* *,* [*PropertySet*](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.PropertySet) *,* [*float*](https://docs.python.org/3/builtins/functions.html#float) *,* [*int*](https://docs.python.org/3/builtins/functions.html#int) *]* *,* *None* *]*  *|* *None*) – A callback function which is called per execution of optimization task.
+  * **callback** (*Callable* *[* *[*[*Task*](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.Task) *,* *IR_OUT* *,* [*PropertySet*](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.PropertySet) *,* *float* *,* *int* *]* *,* *None* *]*  *|* *None*) – A callback function which is called per execution of optimization task.
 * **Returns:**
   Optimized Qiskit IR and state of the workflow.
 * **Return type:**
-  [tuple](https://docs.python.org/3/builtins/stdtypes.html#tuple)[*IR_OUT*, [*PassManagerState*](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.PassManagerState)]
+  tuple[*IR_OUT*, [*PassManagerState*](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.PassManagerState)]
 
 #### name()
 
 Name of the pass.
 
 * **Return type:**
-  [str](https://docs.python.org/3/builtins/stdtypes.html#str)
+  str
 
 #### update_status(state, run_state)
 

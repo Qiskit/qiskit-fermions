@@ -89,7 +89,7 @@ amplitudes; see [`UCJ`](qiskit_fermions.circuit.library.UCJ.html.md#qiskit_fermi
 Returns the inverse of this gate, whose unitary is $U^\dagger$.
 
 * **Parameters:**
-  **annotated** ([*bool*](https://docs.python.org/3/builtins/functions.html#bool)) – ignored. The inverse of this gate is another [`OrbitalRotation`](#qiskit_fermions.circuit.library.OrbitalRotation), so it
+  **annotated** (*bool*) – ignored. The inverse of this gate is another [`OrbitalRotation`](#qiskit_fermions.circuit.library.OrbitalRotation), so it
   never needs to be an [`AnnotatedOperation`](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.AnnotatedOperation).
 * **Returns:**
   An [`OrbitalRotation`](#qiskit_fermions.circuit.library.OrbitalRotation) gate with the adjoint unitary and the same synthesis.
@@ -111,7 +111,7 @@ In the spinful case the embedded matrix must be block-diagonal across the alpha/
 A rotation with nonzero alpha/beta off-diagonal blocks mixes the spin sectors, which does not
 conserve the individual alpha/beta electron counts and hence maps amplitude out of the fixed
 `(n_alpha, n_beta)` sector – an operation the fixed-sector state vector cannot represent.
-Such a rotation is rejected with a [`ValueError`](https://docs.python.org/3/builtins/exceptions.html#ValueError).
+Such a rotation is rejected with a `ValueError`.
 
 The embedded matrix is then applied via [`ffsim.apply_orbital_rotation()`](https://qiskit.github.io/ffsim/api/stubs/ffsim.apply_orbital_rotation.html#ffsim.apply_orbital_rotation)’s Givens-rotation
 kernel. Under the spinful block-spin convention (modes `0..norb` are alpha orbitals, modes
@@ -120,19 +120,19 @@ to ffsim as `(mat_a, mat_b)`.
 
 * **Parameters:**
   * **vec** ([*ndarray*](https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray)) – the state vector to act on.
-  * **norb** ([*int*](https://docs.python.org/3/builtins/functions.html#int)) – the number of spatial orbitals of the *global* state vector.
-  * **nelec** ([*int*](https://docs.python.org/3/builtins/functions.html#int) *|* [*tuple*](https://docs.python.org/3/builtins/stdtypes.html#tuple) *[*[*int*](https://docs.python.org/3/builtins/functions.html#int) *,* [*int*](https://docs.python.org/3/builtins/functions.html#int) *]*) – either a single integer for a spinless system, or a pair of integers storing the
+  * **norb** (*int*) – the number of spatial orbitals of the *global* state vector.
+  * **nelec** (*int* *|* *tuple* *[**int* *,* *int* *]*) – either a single integer for a spinless system, or a pair of integers storing the
     numbers of spin alpha and spin beta fermions. An integer selects the spinless mode
     interpretation (the `norb` modes are orbitals); a pair selects the spinful
     `(orb, spin)` block-spin interpretation of the `2 * norb` modes.
-  * **copy** ([*bool*](https://docs.python.org/3/builtins/functions.html#bool)) – whether to copy the vector before operating on it.
-  * **freg_indices** ([*list*](https://docs.python.org/3/builtins/stdtypes.html#list) *[*[*int*](https://docs.python.org/3/builtins/functions.html#int) *]*) – the absolute (global) mode indices that this gate’s local modes map onto.
+  * **copy** (*bool*) – whether to copy the vector before operating on it.
+  * **freg_indices** (*list* *[**int* *]*) – the absolute (global) mode indices that this gate’s local modes map onto.
     The rotation is embedded onto these global modes before being applied.
 * **Returns:**
   The transformed vector.
 * **Raises:**
   * **MissingOptionalLibraryError** – if ffsim is not installed.
-  * [**ValueError**](https://docs.python.org/3/builtins/exceptions.html#ValueError) – if `nelec` is a spinful pair and the (placed) rotation mixes the alpha and
+  * **ValueError** – if `nelec` is a spinful pair and the (placed) rotation mixes the alpha and
         beta spin sectors.
 * **Return type:**
   [*ndarray*](https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray)

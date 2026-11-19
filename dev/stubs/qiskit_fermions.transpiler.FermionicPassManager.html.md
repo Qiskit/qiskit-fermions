@@ -12,8 +12,8 @@ input and output type are [`FermionicCircuit`](qiskit_fermions.circuit.Fermionic
 Initialize an empty pass manager object.
 
 * **Parameters:**
-  * **tasks** (*Task* *[**IR* *,* *IR* *]*  *|* [*list*](https://docs.python.org/3/builtins/stdtypes.html#list) *[**Task* *[**IR* *,* *IR* *]* *]*) – A pass set to be added to the pass manager schedule.
-  * **max_iteration** ([*int*](https://docs.python.org/3/builtins/functions.html#int)) – The maximum number of iterations the schedule will be looped if the
+  * **tasks** (*Task* *[**IR* *,* *IR* *]*  *|* *list* *[**Task* *[**IR* *,* *IR* *]* *]*) – A pass set to be added to the pass manager schedule.
+  * **max_iteration** (*int*) – The maximum number of iterations the schedule will be looped if the
     condition is not met.
 
 ### Inherited Methods
@@ -23,9 +23,9 @@ Initialize an empty pass manager object.
 Append tasks to the schedule of passes.
 
 * **Parameters:**
-  **tasks** ([*Task*](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.Task) *[**IR* *,* *IR* *]*  *|* [*list*](https://docs.python.org/3/builtins/stdtypes.html#list) *[*[*Task*](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.Task) *[**IR* *,* *IR* *]* *]*) – A set of pass manager tasks to be added to schedule.
+  **tasks** ([*Task*](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.Task) *[**IR* *,* *IR* *]*  *|* *list* *[*[*Task*](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.Task) *[**IR* *,* *IR* *]* *]*) – A set of pass manager tasks to be added to schedule.
 * **Raises:**
-  [**TypeError**](https://docs.python.org/3/builtins/exceptions.html#TypeError) – When any element of tasks is not a subclass of passmanager Task.
+  **TypeError** – When any element of tasks is not a subclass of passmanager Task.
 * **Return type:**
   None
 
@@ -34,7 +34,7 @@ Append tasks to the schedule of passes.
 Removes a particular pass in the scheduler.
 
 * **Parameters:**
-  **index** ([*int*](https://docs.python.org/3/builtins/functions.html#int)) – Pass index to remove, based on the position in [`passes()`](../pydoc/qiskit_fermions.transpiler.passes.html.md#module-qiskit_fermions.transpiler.passes).
+  **index** (*int*) – Pass index to remove, based on the position in [`passes()`](../pydoc/qiskit_fermions.transpiler.passes.html.md#module-qiskit_fermions.transpiler.passes).
 * **Raises:**
   **PassManagerError** – If the index is not found.
 * **Return type:**
@@ -45,10 +45,10 @@ Removes a particular pass in the scheduler.
 Replace a particular pass in the scheduler.
 
 * **Parameters:**
-  * **index** ([*int*](https://docs.python.org/3/builtins/functions.html#int)) – Task index to replace, based on the position in `tasks()`
-  * **tasks** ([*Task*](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.Task) *[**IR* *,* *IR* *]*  *|* [*list*](https://docs.python.org/3/builtins/stdtypes.html#list) *[*[*Task*](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.Task) *[**IR* *,* *IR* *]* *]*) – A set of pass manager tasks to be added to schedule.
+  * **index** (*int*) – Task index to replace, based on the position in `tasks()`
+  * **tasks** ([*Task*](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.Task) *[**IR* *,* *IR* *]*  *|* *list* *[*[*Task*](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.Task) *[**IR* *,* *IR* *]* *]*) – A set of pass manager tasks to be added to schedule.
 * **Raises:**
-  * [**TypeError**](https://docs.python.org/3/builtins/exceptions.html#TypeError) – When any element of tasks is not a subclass of passmanager Task.
+  * **TypeError** – When any element of tasks is not a subclass of passmanager Task.
   * **PassManagerError** – If the index is not found.
 * **Return type:**
   None
@@ -58,10 +58,10 @@ Replace a particular pass in the scheduler.
 Run all the passes on the specified `in_programs`.
 
 * **Parameters:**
-  * **in_programs** ([*Any*](https://docs.python.org/3/library/typing.html#typing.Any) *|* [*list*](https://docs.python.org/3/builtins/stdtypes.html#list) *[*[*Any*](https://docs.python.org/3/library/typing.html#typing.Any) *]*) – Input programs to transform via all the registered passes.
+  * **in_programs** (*Any* *|* *list* *[**Any* *]*) – Input programs to transform via all the registered passes.
     A single input object cannot be a Python builtin list object.
     A list object is considered as multiple input objects to optimize.
-  * **callback** ([*Callable*](https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable) *[* *[*[*Task*](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.Task) *,* *IR* *,* [*PropertySet*](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.PropertySet) *,* [*float*](https://docs.python.org/3/builtins/functions.html#float) *,* [*int*](https://docs.python.org/3/builtins/functions.html#int) *]* *,* *None* *]*  *|* *None*) – 
+  * **callback** (*Callable* *[* *[*[*Task*](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.Task) *,* *IR* *,* [*PropertySet*](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.PropertySet) *,* *float* *,* *int* *]* *,* *None* *]*  *|* *None*) – 
 
     A callback function that will be called after each pass execution. The
     function will be called with 5 keyword arguments:
@@ -90,11 +90,11 @@ Run all the passes on the specified `in_programs`.
         count = kwargs['count']
         ...
     ```
-  * **num_processes** ([*int*](https://docs.python.org/3/builtins/functions.html#int) *|* *None*) – The maximum number of parallel processes to launch if parallel
+  * **num_processes** (*int* *|* *None*) – The maximum number of parallel processes to launch if parallel
     execution is enabled. This argument overrides `num_processes` in the user
     configuration file, and the `QISKIT_NUM_PROCS` environment variable. If set
     to `None` the system default or local user configuration will be used.
-  * **property_set** ([*dict*](https://docs.python.org/3/builtins/stdtypes.html#dict) *[*[*str*](https://docs.python.org/3/builtins/stdtypes.html#str) *,* [*object*](https://docs.python.org/3/builtins/functions.html#object) *]*  *|* *None*) – If given, the initial value to use as the `PropertySet` for the
+  * **property_set** (*dict* *[**str* *,* *object* *]*  *|* *None*) – If given, the initial value to use as the `PropertySet` for the
     pass manager pipeline.  This can be used to persist analysis from one run to
     another, in cases where you know the analysis is safe to share.  Beware that some
     analysis will be specific to the input circuit and the particular `Target`,
@@ -103,7 +103,7 @@ Run all the passes on the specified `in_programs`.
 * **Returns:**
   The transformed program(s).
 * **Return type:**
-  [*Any*](https://docs.python.org/3/library/typing.html#typing.Any)
+  *Any*
 
 #### to_flow_controller()
 

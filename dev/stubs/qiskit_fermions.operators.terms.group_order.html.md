@@ -49,5 +49,5 @@ The result tracks no groups either.
 * **Returns:**
   A new operator of the same type with its terms ordered by group index.
 * **Raises:**
-  [**TypeError**](https://docs.python.org/3/builtins/exceptions.html#TypeError) – if `op` is not a supported operator type (see
+  **TypeError** – if `op` is not a supported operator type (see
       [`OperatorTrait`](qiskit_fermions.operators.OperatorTrait.html.md#qiskit_fermions.operators.OperatorTrait)).

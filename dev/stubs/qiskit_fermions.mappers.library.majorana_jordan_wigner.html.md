@@ -20,9 +20,9 @@ the qubit of the same index. This follows Qiskit’s little-endian qubit orderin
   the exact number of terms returned may vary with the number of threads used. This does not
   affect the operator that the result represents.
 * **Raises:**
-  * [**ValueError**](https://docs.python.org/3/builtins/exceptions.html#ValueError) – if `num_qubits` is too small to hold the operator’s support, i.e. if it is not
+  * **ValueError** – if `num_qubits` is too small to hold the operator’s support, i.e. if it is not
         larger than the largest *fermionic* mode acted upon by `op`.
-  * [**OverflowError**](https://docs.python.org/3/builtins/exceptions.html#OverflowError) – if `num_qubits` is negative or does not fit in 32 bits.
+  * **OverflowError** – if `num_qubits` is negative or does not fit in 32 bits.
 
 ## Definition
 

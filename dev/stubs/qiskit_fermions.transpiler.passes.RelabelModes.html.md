@@ -152,7 +152,7 @@ the relabeling on the sampled counts:
 Initializing this transpiler pass can be done with the arguments listed below.
 
 * **Parameters:**
-  * **permutation** ([*list*](https://docs.python.org/3/builtins/stdtypes.html#list) *[*[*int*](https://docs.python.org/3/builtins/functions.html#int) *]*  *|* *None*) – the index permutation used to relabel the fermionic mode indices. When this
+  * **permutation** (*list* *[**int* *]*  *|* *None*) – the index permutation used to relabel the fermionic mode indices. When this
     is `None`, a permutation will be determined automatically based on
     [`build_excitation_span_minimization_model()`](qiskit_fermions.mappers.optimization.build_excitation_span_minimization_model.html.md#qiskit_fermions.mappers.optimization.build_excitation_span_minimization_model). See also [`permutation`](#qiskit_fermions.transpiler.passes.RelabelModes.permutation) for
     more details.
@@ -219,10 +219,10 @@ it is `None`). When that is the case, it does the following:
 * **Returns:**
   The permutation to use. When `None`, this transpiler pass will have no effect.
 * **Raises:**
-  [**NotImplementedError**](https://docs.python.org/3/builtins/exceptions.html#NotImplementedError) – when encountering an [`Evolution`](qiskit_fermions.circuit.library.Evolution.html.md#qiskit_fermions.circuit.library.Evolution) gate containing an
+  **NotImplementedError** – when encountering an [`Evolution`](qiskit_fermions.circuit.library.Evolution.html.md#qiskit_fermions.circuit.library.Evolution) gate containing an
       operator that is not a [`FermionOperator`](qiskit_fermions.operators.FermionOperator.html.md#qiskit_fermions.operators.FermionOperator) instance.
 * **Return type:**
-  [tuple](https://docs.python.org/3/builtins/stdtypes.html#tuple)[[list](https://docs.python.org/3/builtins/stdtypes.html#list)[[int](https://docs.python.org/3/builtins/functions.html#int)] | None, [pyomo.opt.results.results_.SolverResults](https://pyomo.readthedocs.io/en/stable/api/pyomo.opt.results.results_.SolverResults.html#pyomo.opt.results.results_.SolverResults) | None]
+  tuple[list[int] | None, [pyomo.opt.results.results_.SolverResults](https://pyomo.readthedocs.io/en/stable/api/pyomo.opt.results.results_.SolverResults.html#pyomo.opt.results.results_.SolverResults) | None]
 
 #### run(dag)
 
@@ -237,7 +237,7 @@ Runs this transpilation pass.
 * **Returns:**
   The output circuit which is still acting on a fermionic register.
 * **Raises:**
-  [**NotImplementedError**](https://docs.python.org/3/builtins/exceptions.html#NotImplementedError) – when the provided input circuit has more than a single register.
+  **NotImplementedError** – when the provided input circuit has more than a single register.
 * **Return type:**
   [*DAGCircuit*](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.dagcircuit.DAGCircuit)
 
@@ -250,18 +250,18 @@ Execute optimization task for input Qiskit IR.
 * **Parameters:**
   * **passmanager_ir** (*IR*) – Qiskit IR to optimize.
   * **state** ([*PassManagerState*](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.PassManagerState)) – State associated with workflow execution by the pass manager itself.
-  * **callback** ([*Callable*](https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable) *[* *[*[*Task*](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.Task) *,* *IR_OUT* *,* [*PropertySet*](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.PropertySet) *,* [*float*](https://docs.python.org/3/builtins/functions.html#float) *,* [*int*](https://docs.python.org/3/builtins/functions.html#int) *]* *,* *None* *]*  *|* *None*) – A callback function which is called per execution of optimization task.
+  * **callback** (*Callable* *[* *[*[*Task*](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.Task) *,* *IR_OUT* *,* [*PropertySet*](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.PropertySet) *,* *float* *,* *int* *]* *,* *None* *]*  *|* *None*) – A callback function which is called per execution of optimization task.
 * **Returns:**
   Optimized Qiskit IR and state of the workflow.
 * **Return type:**
-  [tuple](https://docs.python.org/3/builtins/stdtypes.html#tuple)[*IR_OUT*, [*PassManagerState*](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.PassManagerState)]
+  tuple[*IR_OUT*, [*PassManagerState*](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.passmanager.PassManagerState)]
 
 #### name()
 
 Name of the pass.
 
 * **Return type:**
-  [str](https://docs.python.org/3/builtins/stdtypes.html#str)
+  str
 
 #### update_status(state, run_state)
 

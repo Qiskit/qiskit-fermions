@@ -45,6 +45,13 @@
   rotations on the same modes in a different order, for example `(0, 1)` followed by `(1, 0)`,
   were merged into a single rotation that prepares a different state.
 
+- [`MergeSlaterDeterminantPreparation`](stubs/qiskit_fermions.transpiler.passes.MergeSlaterDeterminantPreparation.html.md#qiskit_fermions.transpiler.passes.MergeSlaterDeterminantPreparation) now accounts for
+  the order of the wires an [`InitializeModes`](stubs/qiskit_fermions.circuit.library.InitializeModes.html.md#qiskit_fermions.circuit.library.InitializeModes) or
+  [`OrbitalRotation`](stubs/qiskit_fermions.circuit.library.OrbitalRotation.html.md#qiskit_fermions.circuit.library.OrbitalRotation) is placed on. Previously, a gate placed
+  on permuted modes, for example an [`OrbitalRotation`](stubs/qiskit_fermions.circuit.library.OrbitalRotation.html.md#qiskit_fermions.circuit.library.OrbitalRotation) on
+  modes `(1, 0)`, was fused with its occupation or unitary as written, so the resulting
+  [`PrepareSlaterDeterminant`](stubs/qiskit_fermions.circuit.library.PrepareSlaterDeterminant.html.md#qiskit_fermions.circuit.library.PrepareSlaterDeterminant) prepared a different state.
+
 <a id="release-notes-upcoming-release-main-other-notes"></a>
 
 ### Other Notes
@@ -627,7 +634,7 @@ every removed API with its replacement, and are worth reading in full before upg
 - [`jordan_wigner()`](stubs/qiskit_fermions.mappers.library.jordan_wigner.html.md#qiskit_fermions.mappers.library.jordan_wigner) now dispatches on all four operator types
   rather than only [`FermionOperator`](stubs/qiskit_fermions.operators.FermionOperator.html.md#qiskit_fermions.operators.FermionOperator), delegating to whichever
   direct implementation matches the operator it is given. Passing one of the other three operator
-  types previously raised a [`TypeError`](https://docs.python.org/3/builtins/exceptions.html#TypeError).
+  types previously raised a `TypeError`.
 
 - The [`is_hermitian()`](stubs/qiskit_fermions.operators.OperatorTrait.html.md#qiskit_fermions.operators.OperatorTrait.is_hermitian) method is now part of the
   [`OperatorTrait`](stubs/qiskit_fermions.operators.OperatorTrait.html.md#qiskit_fermions.operators.OperatorTrait) protocol. Every operator class already
@@ -665,7 +672,7 @@ every removed API with its replacement, and are worth reading in full before upg
   [`FermionOperator`](stubs/qiskit_fermions.operators.FermionOperator.html.md#qiskit_fermions.operators.FermionOperator). An operator of another type is converted through its fermionic image
   (the [`SupportsFermionOperator`](stubs/qiskit_fermions.protocols.SupportsFermionOperator.html.md#qiskit_fermions.protocols.SupportsFermionOperator) protocol) before being simulated, so evolving a
   [`MajoranaOperator`](stubs/qiskit_fermions.operators.MajoranaOperator.html.md#qiskit_fermions.operators.MajoranaOperator), [`EdgeVertexOperator`](stubs/qiskit_fermions.operators.EdgeVertexOperator.html.md#qiskit_fermions.operators.EdgeVertexOperator) or [`TransferVertexOperator`](stubs/qiskit_fermions.operators.TransferVertexOperator.html.md#qiskit_fermions.operators.TransferVertexOperator) no
-  longer raises [`NotImplementedError`](https://docs.python.org/3/builtins/exceptions.html#NotImplementedError).
+  longer raises `NotImplementedError`.
 
 - [`FermionOperator`](stubs/qiskit_fermions.operators.FermionOperator.html.md#qiskit_fermions.operators.FermionOperator) now implements [`ffsim.SupportsTrace`](https://qiskit.github.io/ffsim/api/stubs/ffsim.SupportsTrace.html#ffsim.SupportsTrace) through a new
   [`_trace_()`](stubs/qiskit_fermions.operators.FermionOperator.html.md#qiskit_fermions.operators.FermionOperator._trace_) method, so [`ffsim.trace()`](https://qiskit.github.io/ffsim/api/stubs/ffsim.trace.html#ffsim.trace) can
@@ -838,10 +845,10 @@ every removed API with its replacement, and are worth reading in full before upg
 
 - [`from_file()`](stubs/qiskit_fermions.operators.library.FCIDump.html.md#qiskit_fermions.operators.library.FCIDump.from_file) now raises a catchable Python
   exception when it cannot parse a file, instead of propagating a Rust panic. A path that cannot
-  be opened or read raises [`OSError`](https://docs.python.org/3/builtins/exceptions.html#OSError), while a file that does not honor the FCIDump format
+  be opened or read raises `OSError`, while a file that does not honor the FCIDump format
   (a missing header namelist, a missing `NORB` or `NELEC` field, or a malformed `MS2` field)
-  raises [`ValueError`](https://docs.python.org/3/builtins/exceptions.html#ValueError). An FCIDump carrying an MO energy value, which is still unsupported,
-  also raises [`ValueError`](https://docs.python.org/3/builtins/exceptions.html#ValueError).
+  raises `ValueError`. An FCIDump carrying an MO energy value, which is still unsupported,
+  also raises `ValueError`.
 
 - The `group_weights` method has been removed from every operator class and from the
   [`OperatorTrait`](stubs/qiskit_fermions.operators.OperatorTrait.html.md#qiskit_fermions.operators.OperatorTrait) protocol. It is replaced by

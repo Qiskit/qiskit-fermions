@@ -1,6 +1,6 @@
 # FermionicRegister
 
-### FermionicRegister *: [TypeAlias](https://docs.python.org/3/library/typing.html#typing.TypeAlias)* *= <class 'qiskit.circuit.QuantumRegister'>*
+### FermionicRegister *: TypeAlias* *= <class 'qiskit.circuit.QuantumRegister'>*
 
 A type alias of `QubitRegister`.
 
