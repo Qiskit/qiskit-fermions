@@ -1,0 +1,9 @@
+---
+fixes:
+  - |
+    :class:`~qiskit_fermions.transpiler.passes.MergeSlaterDeterminantPreparation` now accounts for
+    the order of the wires an :class:`~qiskit_fermions.circuit.library.InitializeModes` or
+    :class:`~qiskit_fermions.circuit.library.OrbitalRotation` is placed on. Previously, a gate placed
+    on permuted modes, for example an :class:`~qiskit_fermions.circuit.library.OrbitalRotation` on
+    modes ``(1, 0)``, was fused with its occupation or unitary as written, so the resulting
+    :class:`~qiskit_fermions.circuit.library.PrepareSlaterDeterminant` prepared a different state.

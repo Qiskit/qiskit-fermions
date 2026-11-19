@@ -170,7 +170,12 @@ class MergeSlaterDeterminantPreparation(FermionicDAGCircuitPass):
         ``gates`` is the list of ``(PrepareSlaterDeterminant, modes)`` replacements to emit in place
         of the initialization and ``consumed`` the ``OrbitalRotation`` nodes folded into them.
         """
-        init_modes = self._modes(dag, init_node)
+        # Everything below works in sorted global mode order, so that the mode sets of the two gates
+        # compare by content and the replacements can be emitted on sorted wires. A gate placed on
+        # permuted wires indexes its occupation or unitary in the order of its own ``qargs``, so both
+        # are permuted into the sorted order first; using them as written would prepare the wrong
+        # state.
+        init_modes, init_perm = self._modes(dag, init_node)
 
         # gather the OrbitalRotation successors for which this InitializeModes is the sole predecessor
         # across all their wires (i.e. they immediately follow it, nothing intervening)
@@ -186,13 +191,13 @@ class MergeSlaterDeterminantPreparation(FermionicDAGCircuitPass):
             # a bare InitializeModes with no rotation immediately following it: nothing to fuse
             return None
 
-        occupation = init_node.op.occupation
+        occupation = init_node.op.occupation[init_perm]
 
         # Pattern 1 / 2: a single rotation on exactly the initialized modes.
         if len(rotations) == 1:
             (rotation,) = rotations
-            if self._modes(dag, rotation) == init_modes:
-                gate = PrepareSlaterDeterminant(occupation, rotation.op.rotation_unitary)
+            if self._modes(dag, rotation)[0] == init_modes:
+                gate = PrepareSlaterDeterminant(occupation, self._sorted_unitary(dag, rotation))
                 return [(gate, init_modes)], [rotation]
             # otherwise fall through: it may be a per-spin rotation on one half of a full register
 
@@ -208,7 +213,7 @@ class MergeSlaterDeterminantPreparation(FermionicDAGCircuitPass):
         alpha_modes = list(range(norb))
         beta_modes = list(range(norb, num_modes))
 
-        by_modes = {tuple(self._modes(dag, rot)): rot for rot in rotations}
+        by_modes = {tuple(self._modes(dag, rot)[0]): rot for rot in rotations}
         alpha_rot = by_modes.get(tuple(alpha_modes))
         beta_rot = by_modes.get(tuple(beta_modes))
         # every gathered rotation must sit on exactly one of the two halves -- otherwise this is not
@@ -227,16 +232,31 @@ class MergeSlaterDeterminantPreparation(FermionicDAGCircuitPass):
             if rot is None:
                 unitary = np.eye(norb, dtype=complex)
             else:
-                unitary = rot.op.rotation_unitary
+                unitary = self._sorted_unitary(dag, rot)
                 consumed.append(rot)
             gates.append((PrepareSlaterDeterminant(occ, unitary), modes))
 
         return gates, consumed
 
     @staticmethod
-    def _modes(dag: FermionicDAGCircuit, node: DAGOpNode) -> list[int]:
-        """Returns the sorted global mode indices a node acts on."""
-        return sorted(dag.find_bit(qubit).index for qubit in node.qargs)
+    def _modes(dag: FermionicDAGCircuit, node: DAGOpNode) -> tuple[list[int], np.ndarray]:
+        """Returns the sorted global mode indices a node acts on, and the permutation sorting them.
+
+        Entry ``k`` of the permutation is the position in ``node.qargs`` of the ``k``-th sorted mode,
+        so indexing a per-``qargs`` array with it reorders that array into sorted mode order.
+        """
+        indices = np.array([dag.find_bit(qubit).index for qubit in node.qargs])
+        perm = np.argsort(indices)
+        return indices[perm].tolist(), perm
+
+    @classmethod
+    def _sorted_unitary(cls, dag: FermionicDAGCircuit, node: DAGOpNode) -> np.ndarray:
+        """Returns the rotation unitary of an ``OrbitalRotation`` node in sorted mode order.
+
+        Relabeling the modes permutes the rows and the columns of the unitary alike.
+        """
+        _, perm = cls._modes(dag, node)
+        return node.op.rotation_unitary[np.ix_(perm, perm)]
 
     @staticmethod
     def _immediately_follows(
