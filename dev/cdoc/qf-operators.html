@@ -10,7 +10,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Operator Representations - Qiskit Fermions 0.5.0.dev0+cd82240</title>
+        <title>Operator Representations - Qiskit Fermions 0.5.0.dev0+97a0d13</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=fc6d6d93" />
@@ -163,7 +163,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.5.0.dev0+cd82240</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.5.0.dev0+97a0d13</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -174,7 +174,7 @@
           <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
         </button>
       </div>
-      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
         <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
       </label>
     </div>
@@ -189,7 +189,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.5.0.dev0+cd82240</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.5.0.dev0+97a0d13</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -257,6 +257,7 @@
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../pydoc/qiskit_fermions.operators.terms.html">Operator Terms</a><input aria-label="Toggle navigation of Operator Terms" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../stubs/qiskit_fermions.operators.terms.group_terms_by_electronic_structure.html">group_terms_by_electronic_structure</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../stubs/qiskit_fermions.operators.terms.group_terms_by_non_commutation.html">group_terms_by_non_commutation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../stubs/qiskit_fermions.operators.terms.group_coeff_means.html">group_coeff_means</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../stubs/qiskit_fermions.operators.terms.groups_are_hermitian.html">groups_are_hermitian</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../stubs/qiskit_fermions.operators.terms.groups_have_uniform_coeffs.html">groups_have_uniform_coeffs</a></li>
@@ -452,7 +453,7 @@
               <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
             </button>
           </div>
-          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
             <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
           </label>
         </div>
@@ -482,6 +483,50 @@ operators.</p></td>
 </tbody>
 </table>
 </div>
+<section id="shared-helpers">
+<h2>Shared helpers<a class="headerlink" href="#shared-helpers" title="Link to this heading">¶</a></h2>
+<p>A few functions are not specific to any one representation and so are provided once for all of them.</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#c.qf_edges_free" title="qf_edges_free"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_edges_free()</span></code></a></p></td>
+<td><p>Frees an edge array returned by a non-commutation-edges accessor.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<dl class="c function">
+<dt class="sig sig-object c" id="c.qf_edges_free">
+<span class="target" id="group__qf__operators_1ga9e04f4a935777a6b549e2419b12560ac"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">qf_edges_free</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">edges</span></span>, <span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="n"><span class="pre">num_edges</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.qf_edges_free" title="Link to this definition">¶</a><br /></dt>
+<dd><p>Frees an edge array returned by a <code class="docutils literal notranslate"><span class="pre">qf_op_type_non_commutation_edges</span></code> call. </p>
+<p><p><p>The array is owned by the library rather than the caller, so it must be released through this
+function rather than with <code class="docutils literal notranslate"><span class="pre">free</span></code>. One function serves every operator representation, since the
+allocation carries no type information.</p>
+<p>The array is released by its size, which this function rebuilds from <code class="docutils literal notranslate"><span class="pre">num_edges</span></code>, so the two
+must be exactly the pair that one successful call wrote. Any other count is undefined behavior,
+and so is freeing the same array twice. A failed call writes neither out-parameter, so start both
+from <code class="docutils literal notranslate"><span class="pre">NULL</span></code> and <code class="docutils literal notranslate"><span class="pre">0</span></code> as below: the free is then a no-op whether or not the call succeeded,
+rather than releasing whatever a previous call left in them.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="kt">uint32_t</span><span class="w"> </span><span class="o">*</span><span class="n">edges</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span>
+<span class="linenos">2</span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">num_edges</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="linenos">3</span><span class="n">QfExitCode</span><span class="w"> </span><span class="n">exit</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_maj_op_non_commutation_edges</span><span class="p">(</span><span class="n">op</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">edges</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">num_edges</span><span class="p">);</span>
+<span class="linenos">4</span><span class="c1">// ... use the edges ...</span>
+<span class="linenos">5</span><span class="n">qf_edges_free</span><span class="p">(</span><span class="n">edges</span><span class="p">,</span><span class="w"> </span><span class="n">num_edges</span><span class="p">);</span>
+</pre></div>
+</div>
+</p>
+ </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>edges</strong> – A pointer to the edge array to free. Passing <code class="docutils literal notranslate"><span class="pre">NULL</span></code> is a no-op. </p></li>
+<li><p><strong>num_edges</strong> – The edge count that was written alongside the array, unchanged.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
 </section>
 
         </article>
@@ -528,13 +573,35 @@ operators.</p></td>
         
       </footer>
     </div>
-    <aside class="toc-drawer no-toc">
+    <aside class="toc-drawer">
       
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Operator Representations</a><ul>
+<li><a class="reference internal" href="#shared-helpers">Shared helpers</a><ul>
+<li><a class="reference internal" href="#c.qf_edges_free"><code class="docutils literal notranslate"><span class="pre">qf_edges_free()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
       
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=1a3b8b7e"></script>
+</div><script src="../_static/documentation_options.js?v=aafb43a3"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

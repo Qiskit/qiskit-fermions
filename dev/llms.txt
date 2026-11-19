@@ -47,6 +47,7 @@
 - [FCIDump](stubs/qiskit_fermions.operators.library.FCIDump.html.md): An electronic structure Hamiltonian in FCIDump format.
 - [Operator Terms](pydoc/qiskit_fermions.operators.terms.html.md): Routines that operate on the individual terms of an operator, to group, filter, and order them.
 - [group_terms_by_electronic_structure](stubs/qiskit_fermions.operators.terms.group_terms_by_electronic_structure.html.md): Groups the terms of an operator by their electronic structure.
+- [group_terms_by_non_commutation](stubs/qiskit_fermions.operators.terms.group_terms_by_non_commutation.html.md): Group the operator’s terms so that the terms sharing a group index mutually commute.
 - [group_coeff_means](stubs/qiskit_fermions.operators.terms.group_coeff_means.html.md): Returns the mean absolute coefficient magnitude of each group.
 - [groups_are_hermitian](stubs/qiskit_fermions.operators.terms.groups_are_hermitian.html.md): Returns, for each group, whether the operator formed by that group’s terms is Hermitian.
 - [groups_have_uniform_coeffs](stubs/qiskit_fermions.operators.terms.groups_have_uniform_coeffs.html.md): Returns, for each group, whether all of its coefficients are numerically equal.

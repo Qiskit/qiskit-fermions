@@ -42,8 +42,8 @@ Usage
 -----
 
 The simplest way to define an operator grouping is by setting the target
-operator's ``groups`` attribute. Below is an example for grouping terms
-according to the *line flow sets* as shown in Figure 1c of [1]_.
+operator's ``groups`` attribute. The example below groups the terms of a small
+:class:`.MajoranaOperator` by hand, collecting the edges of a lattice into lines.
 
 .. hint::
    The :mod:`qiskit_fermions.operators.terms.grouping` module provides convenience
@@ -51,18 +51,26 @@ according to the *line flow sets* as shown in Figure 1c of [1]_.
    group indices accordingly.
 
 .. plot::
-   :alt: A simple directed graph on which to define a MajoranaOperator.
    :context: close-figs
+   :nofigs:
    :include-source:
 
-    >>> import rustworkx as rx
-    >>> graph = rx.PyDiGraph()
-    >>> _ = graph.add_nodes_from(range(6))
     >>> edges = [(0, 1), (1, 2), (3, 0), (1, 4), (5, 2), (5, 4), (4, 3)]
     >>> groups = [0, 0, 1, 2, 1, 3, 3]
+
+.. plot::
+   :alt: A two-by-three lattice of six Majorana modes, numbered 0 to 5, joined by seven undirected
+         edges. Each edge is labeled with its group: the bottom row (edges 0-1 and 1-2) is group 0,
+         the two outer columns (edges 0-3 and 2-5) are group 1, the middle column (edge 1-4) is
+         group 2, and the top row (edges 3-4 and 4-5) is group 3.
+   :context: close-figs
+
+    >>> import rustworkx as rx
+    >>> from rustworkx.visualization import mpl_draw
+    >>> graph = rx.PyGraph()
+    >>> _ = graph.add_nodes_from(range(6))
     >>> edges_with_group_as_payload = [(i, j, g) for (i, j), g in zip(edges, groups)]
     >>> _ = graph.add_edges_from(edges_with_group_as_payload)
-    >>> from rustworkx.visualization import mpl_draw
     >>> mpl_draw(
     ...     graph,
     ...     pos={i: (i % 3, i // 3) for i in range(6)},
@@ -71,11 +79,12 @@ according to the *line flow sets* as shown in Figure 1c of [1]_.
     ... )
     <Figure size ... with 1 Axes>
 
-This is a simple two-by-three lattice of Majorana modes connected by
-directed edges. Each edge represents a term in the operator acting on the two
-connected modes. The goal is to group these terms according to their edge labels
-(shown on the graph). Terms connected by edges with the same label are placed in
-the same group. The following code shows how that can be done:
+This is a simple two-by-three lattice of Majorana modes, numbered like the generators of a
+:class:`.MajoranaOperator`. Each edge between modes :math:`j` and :math:`k` represents the Majorana
+bilinear :math:`\gamma_j \gamma_k`, one term of the operator. The goal is to group these terms
+according to their edge labels (shown on the graph): the bottom row, the two outer columns, the
+middle column, and the top row. Terms connected by edges with the same label are placed in the same
+group. The following code shows how that can be done:
 
 .. tab-set-code::
 
@@ -122,6 +131,203 @@ the same group. The following code shows how that can be done:
 
        QfMajoranaOperator *group_ops[4];
        qf_maj_op_split_out_groups(op, NULL, 0, group_ops);
+
+
+.. _grouping_commuting_terms:
+
+Group commuting terms
+---------------------
+
+The grouping above was written out by hand, because which terms belong together is a choice about
+the *problem*. A grouping can also be *derived* from the operator itself. The most useful such
+relation is commutation: build the graph whose nodes are the operator's terms and whose edges join
+the pairs that do **not** commute, then color it. A proper coloring places two non-commuting terms
+in different groups, so every group ends up mutually commuting.
+
+That graph is the operator's *clash graph*, and it is the fermionic counterpart of
+:meth:`~qiskit.quantum_info.PauliList.noncommutation_graph`. Commutation relates two whole terms,
+so building it is an all-to-all comparison over the terms, independent of how many generators any
+one of them multiplies together.
+
+Operators report the clashing pairs directly, and any graph library turns them into a graph:
+
+.. plot::
+   :context: close-figs
+   :include-source:
+
+    >>> from qiskit_fermions.operators import MajoranaOperator
+    >>>
+    >>> op = MajoranaOperator(
+    ...     coeffs=[1.0] * 7,
+    ...     modes=[node for edge in edges for node in edge],
+    ...     boundaries=[0, 2, 4, 6, 8, 10, 12, 14],
+    ... )
+    >>> clash_edges = op.non_commutation_edges()
+    >>> clash_edges
+    [(0, 1), (0, 2), (0, 3), (1, 3), (1, 4), (2, 6), (3, 5), (3, 6), (4, 5), (5, 6)]
+
+The figure below draws this graph on top of the lattice from the start of this guide, which is shown
+in gray. Each term is a white node at the midpoint of its edge, labeled with its bilinear, and a
+dashed red line joins every pair of terms that do not commute. Two Majorana bilinears, each on two
+distinct modes, anticommute exactly when they share one mode, so every term clashes with the terms
+on the edges that meet it at either end. For this operator, the clash graph is therefore the line
+graph of the lattice.
+
+.. plot::
+   :alt: The clash graph drawn over the gray lattice from the start of this guide. Each of the seven
+         terms is a white node at the midpoint of its edge, labeled with its bilinear, for example
+         γ₀γ₁. Dashed red lines join the ten pairs of terms that do not commute, which are exactly
+         the pairs of edges that meet at a lattice vertex.
+   :context: close-figs
+
+    >>> clash = rx.PyGraph()
+    >>> _ = clash.add_nodes_from(edges)
+    >>> _ = clash.add_edges_from_no_data(clash_edges)
+    >>> lattice_pos = {i: (i % 3, i // 3) for i in range(6)}
+    >>> # every term sits at the midpoint of its edge
+    >>> term_pos = {
+    ...     term: ((i % 3 + j % 3) / 2, (i // 3 + j // 3) / 2)
+    ...     for term, (i, j) in enumerate(edges)
+    ... }
+    >>> subscript = str.maketrans("0123456789", "₀₁₂₃₄₅₆₇₈₉")
+    >>> clash_style = {
+    ...     "edgecolors": "black",
+    ...     "node_size": 900,
+    ...     "edge_color": "tab:red",
+    ...     "style": "dashed",
+    ...     "width": 1.5,
+    ...     "with_labels": True,
+    ...     "labels": lambda term: f"γ{term[0]}γ{term[1]}".translate(subscript),
+    ... }
+    >>> _ = mpl_draw(
+    ...     graph,
+    ...     pos=lattice_pos,
+    ...     node_color="lightgray",
+    ...     edge_color="lightgray",
+    ...     font_color="gray",
+    ...     with_labels=True,
+    ... )
+    >>> mpl_draw(clash, pos=term_pos, node_color="white", **clash_style)
+    <Figure size ... with 1 Axes>
+
+Coloring it assigns the group indices directly:
+
+.. tab-set-code::
+
+    .. code-block:: python
+
+       >>> from qiskit_fermions.operators.terms.grouping import (
+       ...     group_terms_by_non_commutation,
+       ... )
+       >>>
+       >>> group_terms_by_non_commutation(op)
+       >>> op.groups
+       [1, 2, 0, 0, 0, 1, 2]
+       >>> op.num_groups()
+       3
+
+    .. code-block:: c
+
+       #include <qiskit_fermions.h>
+
+       uint64_t num_terms = 7;
+       uint64_t num_modes = 14;
+       uint32_t modes[14] = {0, 1, 1, 2, 3, 0, 1, 4, 5, 2, 5, 4, 4, 3};
+       QkComplex64 coeffs[7] = {{1.0, 0.0}, {1.0, 0.0}, {1.0, 0.0}, {1.0, 0.0},
+                                {1.0, 0.0}, {1.0, 0.0}, {1.0, 0.0}};
+       uint32_t boundaries[8] = {0, 2, 4, 6, 8, 10, 12, 14};
+       QfMajoranaOperator *op = qf_maj_op_new(num_terms, num_modes, coeffs, modes, boundaries);
+
+       qf_maj_op_group_terms_by_non_commutation(op);
+
+The figure below repeats the previous one with this coloring applied. Each term and its edge share
+the color of their commuting group, so the lattice shows the grouping the same way the edge labels
+show the hand-written groups in the first figure. Every dashed red line joins two different colors:
+that is what makes the coloring proper, and it is why every group mutually commutes. Comparing the
+two figures also shows where the groupings differ. For example, :math:`\gamma_0 \gamma_1` and
+:math:`\gamma_1 \gamma_2` share group 0 in the first figure, but they clash and so receive different
+colors here. The coloring also needs only three groups where the hand-written grouping uses four.
+
+.. plot::
+   :context:
+   :nofigs:
+
+    >>> from qiskit_fermions.operators.terms.grouping import group_terms_by_non_commutation
+    >>> group_terms_by_non_commutation(op)
+
+.. plot::
+   :alt: The clash graph over the lattice, now colored by the three commuting groups, with each
+         edge and its term in the same color. Blue holds γ₃γ₀, γ₁γ₄, and γ₅γ₂; orange holds γ₀γ₁
+         and γ₅γ₄; green holds γ₁γ₂ and γ₄γ₃. Every dashed red clash line joins two different
+         colors.
+   :context: close-figs
+
+    >>> palette = ["tab:blue", "tab:orange", "tab:green"]
+    >>> group_colors = [palette[g] for g in op.groups]
+    >>> _ = mpl_draw(
+    ...     graph,
+    ...     pos=lattice_pos,
+    ...     node_color="lightgray",
+    ...     edge_color=group_colors,
+    ...     width=2,
+    ...     with_labels=True,
+    ... )
+    >>> mpl_draw(clash, pos=term_pos, node_color=group_colors, font_color="white", **clash_style)
+    <Figure size ... with 1 Axes>
+
+.. important::
+   **The hand-written groups above are not commuting groups.** Their lines resemble the *line flow
+   sets* of [1]_, which do commute, but [1]_ defines flow sets on transfer operators rather than
+   on Majorana bilinears. Two bilinears anticommute whenever their edges meet, so group 0 above
+   contains the anticommuting pair :math:`\gamma_0 \gamma_1` and :math:`\gamma_1 \gamma_2`. The two
+   groupings on this page answer different questions, and neither is more correct than the other.
+
+   A transfer :math:`T_{jk}` is *directed*: it acts on the odd generator of its source :math:`j`
+   and the even generator of its target :math:`k`. Two transfers therefore anticommute only when
+   they share a source or a target, while a head-to-tail chain shares no generator and commutes.
+   That is the rule a flow set follows. Orienting each edge as it is listed in ``edges`` and
+   writing it as a :class:`.TransferVertexOperator` term turns the hand-written groups into
+   commuting groups. Listing the clashing pairs inside each hand-written group shows the
+   difference directly:
+
+   .. code-block:: python
+
+      >>> from qiskit_fermions.operators import TransferVertexOperator
+      >>>
+      >>> def clashes_within_groups(op):
+      ...     return [(a, b) for a, b in op.non_commutation_edges() if groups[a] == groups[b]]
+      >>>
+      >>> transfers = TransferVertexOperator(
+      ...     coeffs=[1.0] * 7,
+      ...     left_indices=[j for j, _ in edges],
+      ...     right_indices=[k for _, k in edges],
+      ...     boundaries=list(range(8)),
+      ... )
+      >>> clashes_within_groups(op)  # the Majorana bilinears
+      [(0, 1), (5, 6)]
+      >>> clashes_within_groups(transfers)
+      []
+
+   For the bilinears, the two pairs are the head-to-tail chains of group 0
+   (:math:`\gamma_0 \gamma_1` and :math:`\gamma_1 \gamma_2`) and of group 3
+   (:math:`\gamma_5 \gamma_4` and :math:`\gamma_4 \gamma_3`). Written as transfers, those same
+   chains commute, and no group contains a clash.
+
+   Only for transfers does the direction of an edge matter. For Majorana bilinears, reversing an
+   edge only flips the sign of its term, which is why this guide draws the lattice without arrows.
+
+.. note::
+   Indices refer to the operator's *current* term order, which is not preserved across every
+   transformation. Build the operator from its sparse arrays, as above, or apply
+   :func:`.canonical_order` first, when the result has to be reproducible.
+
+   Every term counts as written, except that a term with an exactly zero coefficient clashes with
+   nothing. Simplify an operator before computing its clash graph: that removes near-zero and
+   duplicate terms, which would otherwise inflate the graph. Simplifying can reorder the terms, so
+   compute the indices on the simplified operator.
+
+   The coloring is a greedy heuristic, so the number of groups is an upper bound on the smallest
+   achievable rather than a minimum.
 
 
 Analyze a grouping

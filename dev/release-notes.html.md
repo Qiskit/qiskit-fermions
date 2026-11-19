@@ -10,9 +10,74 @@
 
 ### Python API Features
 
+- Added a `non_commutation_edges` method to [`FermionOperator`](stubs/qiskit_fermions.operators.FermionOperator.html.md#qiskit_fermions.operators.FermionOperator), [`MajoranaOperator`](stubs/qiskit_fermions.operators.MajoranaOperator.html.md#qiskit_fermions.operators.MajoranaOperator),
+  [`EdgeVertexOperator`](stubs/qiskit_fermions.operators.EdgeVertexOperator.html.md#qiskit_fermions.operators.EdgeVertexOperator) and [`TransferVertexOperator`](stubs/qiskit_fermions.operators.TransferVertexOperator.html.md#qiskit_fermions.operators.TransferVertexOperator). It reports the pairs of terms
+  that do **not** commute, i.e. the operator’s *clash graph*, as index pairs that any graph library
+  can consume:
+  ```python
+  import rustworkx as rx
+  from qiskit_fermions.operators import MajoranaOperator
+
+  op = MajoranaOperator([1.0, 1.0, 1.0], [0, 1, 1, 2, 3, 4], [0, 2, 4, 6])
+
+  graph = rx.PyGraph()
+  graph.add_nodes_from(range(len(op)))
+  graph.add_edges_from_no_data(op.non_commutation_edges())
+  ```
+
+  This is the fermionic counterpart of
+  [`noncommutation_graph()`](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.quantum_info.PauliList#noncommutation_graph). Indices refer to the operator’s
+  current term order, so build the operator from its sparse arrays (or apply
+  [`canonical_order()`](stubs/qiskit_fermions.operators.terms.canonical_order.html.md#qiskit_fermions.operators.terms.canonical_order) first) when the result has to be
+  reproducible.
+
+- Added [`group_terms_by_non_commutation()`](stubs/qiskit_fermions.operators.terms.group_terms_by_non_commutation.html.md#qiskit_fermions.operators.terms.group_terms_by_non_commutation), which colors the
+  clash graph to assign group indices in place, so that the terms sharing a group index mutually
+  commute:
+  ```python
+  from qiskit_fermions.operators import MajoranaOperator
+  from qiskit_fermions.operators.terms.grouping import group_terms_by_non_commutation
+
+  op = MajoranaOperator([1.0, 1.0, 1.0], [0, 1, 1, 2, 3, 4], [0, 2, 4, 6])
+  group_terms_by_non_commutation(op)
+  ```
+
+  The coloring is a greedy heuristic, so the resulting number of groups is an upper bound on the
+  smallest achievable rather than a minimum.
+
 - [`Evolution`](stubs/qiskit_fermions.circuit.library.Evolution.html.md#qiskit_fermions.circuit.library.Evolution) has a new
   [`equiv()`](stubs/qiskit_fermions.circuit.library.Evolution.html.md#qiskit_fermions.circuit.library.Evolution.equiv) method, which compares two
   evolutions up to an absolute tolerance on both the operator and the time.
+
+<a id="release-notes-upcoming-release-main-c-api-features"></a>
+
+### C API Features
+
+- Added `qf_<prefix>_non_commutation_edges` and `qf_<prefix>_group_terms_by_non_commutation` for
+  each of the four operator representations. The first reports the pairs of terms that do **not**
+  commute, i.e. the operator’s *clash graph*, as a flat array of term indices that the caller
+  releases with [`qf_edges_free()`](cdoc/qf-operators.html.md#c.qf_edges_free). The second colors that graph to assign group indices in
+  place, so that the terms sharing a group index mutually commute.
+
+<a id="release-notes-upcoming-release-main-c-api-upgrade-notes"></a>
+
+### C API Upgrade Notes
+
+- The functions `qf_ferm_op_len`, `qf_maj_op_len`, `qf_edge_op_len` and
+  `qf_transfer_op_len` have been renamed to [`qf_ferm_op_num_terms()`](cdoc/qf-ferm-op.html.md#c.qf_ferm_op_num_terms),
+  [`qf_maj_op_num_terms()`](cdoc/qf-maj-op.html.md#c.qf_maj_op_num_terms), [`qf_edge_op_num_terms()`](cdoc/qf-edge-op.html.md#c.qf_edge_op_num_terms) and
+  [`qf_transfer_op_num_terms()`](cdoc/qf-transfer-op.html.md#c.qf_transfer_op_num_terms), respectively. Their behavior is unchanged; update any call
+  sites to the new names:
+  ```c
+  // before
+  size_t num = qf_maj_op_len(op);
+  // after
+  size_t num = qf_maj_op_num_terms(op);
+  ```
+
+  The `_len` names are now reserved, since Qiskit’s C API uses `qk_obs_len` for the total number
+  of non-identity factors rather than the number of terms. Naming these `_num_terms` keeps the two
+  APIs from disagreeing about what `len` counts.
 
 <a id="release-notes-upcoming-release-main-bug-fixes"></a>
 

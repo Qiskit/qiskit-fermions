@@ -140,10 +140,11 @@ The following functions provide operator manipulation logic:
 
 The following functions exist to check certain properties of an operator.
 
-| [`qf_transfer_op_is_hermitian()`](#c.qf_transfer_op_is_hermitian)   | Returns whether an operator is Hermitian.             |
-|----------------------------------------------------------------------------------|-------------------------------------------------------|
-| [`qf_transfer_op_len()`](#c.qf_transfer_op_len)            | Returns the number of terms in this operator.         |
-| [`qf_transfer_op_min_num_modes()`](#c.qf_transfer_op_min_num_modes)  | Returns the minimum number of modes of this operator. |
+| [`qf_transfer_op_is_hermitian()`](#c.qf_transfer_op_is_hermitian)          | Returns whether an operator is Hermitian.             |
+|-----------------------------------------------------------------------------------------|-------------------------------------------------------|
+| [`qf_transfer_op_num_terms()`](#c.qf_transfer_op_num_terms)             | Returns the number of terms in this operator.         |
+| [`qf_transfer_op_min_num_modes()`](#c.qf_transfer_op_min_num_modes)         | Returns the minimum number of modes of this operator. |
+| [`qf_transfer_op_non_commutation_edges()`](#c.qf_transfer_op_non_commutation_edges) | Gets the pairs of terms that do not commute.          |
 
 ### Mapping
 
@@ -707,7 +708,7 @@ QkComplex64 factor = {-1.0, 0.0};
 QfTransferVertexOperator *result = qf_transfer_op_scaled_add(one, other, &factor);
 
 QfTransferVertexOperator *simplified = qf_transfer_op_simplify(result, 1e-10);
-assert(qf_transfer_op_len(simplified) == 0);
+assert(qf_transfer_op_num_terms(simplified) == 0);
 ```
 
  #### NOTE
@@ -740,7 +741,7 @@ QfTransferVertexOperator *right = qf_transfer_op_one();
 
 qf_transfer_op_add_inplace(left, right);
 
-assert(qf_transfer_op_len(left) == 2);
+assert(qf_transfer_op_num_terms(left) == 2);
 ```
 
  * **Parameters:**
@@ -768,7 +769,7 @@ QkComplex64 factor = {-1.0, 0.0};
 qf_transfer_op_scaled_add_inplace(left, right, &factor);
 
 QfTransferVertexOperator *simplified = qf_transfer_op_simplify(left, 1e-10);
-assert(qf_transfer_op_len(simplified) == 0);
+assert(qf_transfer_op_num_terms(simplified) == 0);
 ```
 
  * **Parameters:**
@@ -932,7 +933,7 @@ for (int i = 0; i < 100; i++) {
 
 QfTransferVertexOperator *canon = qf_transfer_op_simplify(op, 1e-4);
 
-assert(qf_transfer_op_len(canon) == 1);
+assert(qf_transfer_op_num_terms(canon) == 1);
 ```
 
  #### NOTE
@@ -1068,7 +1069,7 @@ assert(!qf_transfer_op_equiv(op, zero, 1e-8));
 * **Returns:**
   Whether the two operators are equivalent.
 
-### size_t qf_transfer_op_len(const [QfTransferVertexOperator](#c.QfTransferVertexOperator) \*op)
+### size_t qf_transfer_op_num_terms(const [QfTransferVertexOperator](#c.QfTransferVertexOperator) \*op)
 
 Returns the length (or number of terms) of the provided operator. 
 
@@ -1081,7 +1082,7 @@ uint32_t right[2] = {1, 2};
 QkComplex64 coeff = {1.0, 0.0};
 qf_transfer_op_add_term(op, 2, left, right, &coeff);
 
-assert(qf_transfer_op_len(op) == 1);
+assert(qf_transfer_op_num_terms(op) == 1);
 ```
 
  * **Parameters:**
@@ -1123,3 +1124,45 @@ or merging terms.
   * `[QfExitCode_Success](qf-exit-code.html.md#group__qf__exit__code_1gga89daaa15e32524338df290dbd873caf1a3e14e3ca9bf1cb919c6913131132da37)` upon success
   * `[QfExitCode_DuplicateIndexError](qf-exit-code.html.md#group__qf__exit__code_1gga89daaa15e32524338df290dbd873caf1a01f24cac283f08bcfa375ff2a59772ef)` if duplicate indices were found in the permutation
   * `[QfExitCode_IndexError](qf-exit-code.html.md#group__qf__exit__code_1gga89daaa15e32524338df290dbd873caf1ae5c84289c900faf721fde93e2f249e3b)` for any other index errors, such as invalid indices.
+
+### [QfExitCode](qf-exit-code.html.md#c.QfExitCode) qf_transfer_op_non_commutation_edges(const [QfTransferVertexOperator](#c.QfTransferVertexOperator) \*op, uint32_t \*\*edges_out, uint64_t \*num_edges_out)
+
+Gets the pairs of terms of an operator that do not commute. 
+
+This is the operator’s *clash graph*: one node per term, and an edge between every pair of terms
+that do **not** commute. Each pair is reported once as `(i, j)` with `i < j`, in ascending
+order, flattened into `2 * num_edges_out` indices. The indices refer to the operator’s current
+term order.
+
+A term whose coefficient is exactly zero commutes with every other term, so it never has an edge.
+Every other term counts as written, so call [`qf_transfer_op_simplify()`](#c.qf_transfer_op_simplify) first: it removes
+near-zero terms and merges duplicates, either of which would otherwise inflate the graph. It can
+also reorder the terms, so compute the edges on its result.
+
+The array holds one pair per clash, so it grows quadratically with the number of terms. To group a
+large operator, use [`qf_transfer_op_group_terms_by_non_commutation()`](qf-operators-terms-grouping.html.md#c.qf_transfer_op_group_terms_by_non_commutation), which never builds
+it.
+
+Unlike the `qf_transfer_op_num_*`/`qf_transfer_op_get_*` pairs elsewhere in this API, the edge count is not
+available separately: it is only known once the graph has been built, and building it is the
+quadratic part. Allocating here therefore pays that cost once rather than twice.
+
+```c
+uint32_t *edges = NULL;
+uint64_t num_edges = 0;
+QfExitCode exit = qf_transfer_op_non_commutation_edges(op, &edges, &num_edges);
+
+for (uint64_t i = 0; i < num_edges; i++) {
+    uint32_t left = edges[2 * i];
+    uint32_t right = edges[2 * i + 1];
+}
+
+qf_edges_free(edges, num_edges);
+```
+
+ * **Parameters:**
+  * **op** – A pointer to the operator whose terms to relate. 
+  * **edges_out** – A pointer to the array pointer into which to write the edges. The array is allocated by this function and must be released with :c:func:`[qf_edges_free](qf-operators.html.md#group__qf__operators_1ga9e04f4a935777a6b549e2419b12560ac)`. 
+  * **num_edges_out** – A pointer to the integer into which to write the number of edges.
+* **Returns:**
+  An exit code. `[QfExitCode_ValueError](qf-exit-code.html.md#group__qf__exit__code_1gga89daaa15e32524338df290dbd873caf1a869710ce98addf007187616631c85470)` is returned if the operator has more than :math:`2^{32}` terms, which the `uint32_t` indices cannot address, in which case nothing is allocated and the out-pointers are left untouched.

@@ -139,6 +139,8 @@ The following functions exist to check certain properties of an operator.
   :c:func:`qf_ferm_op_max_rank`                   Returns the maximum rank of the terms in this operator.
   :c:func:`qf_ferm_op_min_num_modes`              Returns the minimum number of modes of this operator.
   :c:func:`qf_ferm_op_conserves_particle_number`  Returns whether an operator is particle-number conserving.
+  :c:func:`qf_ferm_op_num_terms`                  Returns the number of terms in this operator.
+  :c:func:`qf_ferm_op_non_commutation_edges`      Gets the pairs of terms that do not commute.
   ==============================================  ==========================================================
 
 ----

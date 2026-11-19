@@ -25,3 +25,19 @@ The C API provides various data structures for representing fermionic operators 
   :c:struct:`QfTransferVertexOperator` An operator in the basis of the transfer and vertex
                                        operators.
   ==================================== ============================================================
+
+Shared helpers
+==============
+
+A few functions are not specific to any one representation and so are provided once for all of them.
+
+.. table::
+
+  ============================ ===================================================================
+  :c:func:`qf_edges_free`      Frees an edge array returned by a non-commutation-edges accessor.
+  ============================ ===================================================================
+
+.. doxygengroup:: qf_operators
+   :content-only:
+   :members:
+   :undoc-members:

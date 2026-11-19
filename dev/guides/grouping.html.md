@@ -20,7 +20,7 @@ or problem-specific symmetries), you can unlock several benefits:
   original problem (for example, interaction patterns or symmetries) that can be used
   for more physically meaningful decompositions.
 - **Flow set selection**: Grouping can naturally encode flow sets and other graph-theoretic
-  structures relevant to quantum simulation, as shown in <sup>[1](#id3)</sup>.
+  structures relevant to quantum simulation, as shown in <sup>[1](#id4)</sup>.
 - **Improved algorithmic stability**: As demonstrated in the [SqDRIFT routine](sqdrift.html.md#sqdrift-getting-started), some algorithms can benefit from improved
   stability or performance due to the preservation of physical properties.
 - **Product-formula factors**: A fermionic product formula splits an operator into its groups, so
@@ -30,8 +30,8 @@ or problem-specific symmetries), you can unlock several benefits:
 ## Usage
 
 The simplest way to define an operator grouping is by setting the target
-operator’s `groups` attribute. Below is an example for grouping terms
-according to the *line flow sets* as shown in Figure 1c of <sup>[1](#id3)</sup>.
+operator’s `groups` attribute. The example below groups the terms of a small
+[`MajoranaOperator`](../stubs/qiskit_fermions.operators.MajoranaOperator.html.md#qiskit_fermions.operators.MajoranaOperator) by hand, collecting the edges of a lattice into lines.
 
 #### HINT
 The `qiskit_fermions.operators.terms.grouping` module provides convenience
@@ -39,32 +39,20 @@ methods for automatically identifying structure in an operator and assigning
 group indices accordingly.
 
 ```pycon
->>> import rustworkx as rx
->>> graph = rx.PyDiGraph()
->>> _ = graph.add_nodes_from(range(6))
 >>> edges = [(0, 1), (1, 2), (3, 0), (1, 4), (5, 2), (5, 4), (4, 3)]
 >>> groups = [0, 0, 1, 2, 1, 3, 3]
->>> edges_with_group_as_payload = [(i, j, g) for (i, j), g in zip(edges, groups)]
->>> _ = graph.add_edges_from(edges_with_group_as_payload)
->>> from rustworkx.visualization import mpl_draw
->>> mpl_draw(
-...     graph,
-...     pos={i: (i % 3, i // 3) for i in range(6)},
-...     edge_labels=str,
-...     with_labels=True,
-... )
-<Figure size ... with 1 Axes>
 ```
 
-([`png`](_downloads/b2bec7cb97dbb9145cc0977930eb3aa3/grouping-1.png), [`hires.png`](_downloads/6856fbc816a9d399c7dc318df33a1590/grouping-1.hires.png), [`pdf`](_downloads/9f998c0d43fe8391ea8286815b848f06/grouping-1.pdf))
+([`png`](_downloads/f6414962d9cef933b0e85e11ec75640e/grouping-2.png), [`hires.png`](_downloads/c65520217e69591c3f7768b5754e5266/grouping-2.hires.png), [`pdf`](_downloads/0d33175ce85e6909a97cabd85f9cf5a5/grouping-2.pdf))
 
-![A simple directed graph on which to define a MajoranaOperator.](../_images/grouping-1.png)
+![A two-by-three lattice of six Majorana modes, numbered 0 to 5, joined by seven undirected edges. Each edge is labeled with its group: the bottom row (edges 0-1 and 1-2) is group 0, the two outer columns (edges 0-3 and 2-5) are group 1, the middle column (edge 1-4) is group 2, and the top row (edges 3-4 and 4-5) is group 3.](../_images/grouping-2.png)
 
-This is a simple two-by-three lattice of Majorana modes connected by
-directed edges. Each edge represents a term in the operator acting on the two
-connected modes. The goal is to group these terms according to their edge labels
-(shown on the graph). Terms connected by edges with the same label are placed in
-the same group. The following code shows how that can be done:
+This is a simple two-by-three lattice of Majorana modes, numbered like the generators of a
+[`MajoranaOperator`](../stubs/qiskit_fermions.operators.MajoranaOperator.html.md#qiskit_fermions.operators.MajoranaOperator). Each edge between modes $j$ and $k$ represents the Majorana
+bilinear $\gamma_j \gamma_k$, one term of the operator. The goal is to group these terms
+according to their edge labels (shown on the graph): the bottom row, the two outer columns, the
+middle column, and the top row. Terms connected by edges with the same label are placed in the same
+group. The following code shows how that can be done:
 
 ### PYTHON
 
@@ -113,6 +101,145 @@ qf_maj_op_set_groups(op, groups, num_terms);
 QfMajoranaOperator *group_ops[4];
 qf_maj_op_split_out_groups(op, NULL, 0, group_ops);
 ```
+
+<a id="grouping-commuting-terms"></a>
+
+## Group commuting terms
+
+The grouping above was written out by hand, because which terms belong together is a choice about
+the *problem*. A grouping can also be *derived* from the operator itself. The most useful such
+relation is commutation: build the graph whose nodes are the operator’s terms and whose edges join
+the pairs that do **not** commute, then color it. A proper coloring places two non-commuting terms
+in different groups, so every group ends up mutually commuting.
+
+That graph is the operator’s *clash graph*, and it is the fermionic counterpart of
+[`noncommutation_graph()`](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.quantum_info.PauliList#noncommutation_graph). Commutation relates two whole terms,
+so building it is an all-to-all comparison over the terms, independent of how many generators any
+one of them multiplies together.
+
+Operators report the clashing pairs directly, and any graph library turns them into a graph:
+
+```pycon
+>>> from qiskit_fermions.operators import MajoranaOperator
+>>>
+>>> op = MajoranaOperator(
+...     coeffs=[1.0] * 7,
+...     modes=[node for edge in edges for node in edge],
+...     boundaries=[0, 2, 4, 6, 8, 10, 12, 14],
+... )
+>>> clash_edges = op.non_commutation_edges()
+>>> clash_edges
+[(0, 1), (0, 2), (0, 3), (1, 3), (1, 4), (2, 6), (3, 5), (3, 6), (4, 5), (5, 6)]
+```
+
+The figure below draws this graph on top of the lattice from the start of this guide, which is shown
+in gray. Each term is a white node at the midpoint of its edge, labeled with its bilinear, and a
+dashed red line joins every pair of terms that do not commute. Two Majorana bilinears, each on two
+distinct modes, anticommute exactly when they share one mode, so every term clashes with the terms
+on the edges that meet it at either end. For this operator, the clash graph is therefore the line
+graph of the lattice.
+
+([`png`](_downloads/4e07215e807ee48fa8933f3284056a93/grouping-4.png), [`hires.png`](_downloads/bccdd5f6cd8337acb6e991a605328ca5/grouping-4.hires.png), [`pdf`](_downloads/a3617e5c31be1696093648316eadbfa4/grouping-4.pdf))
+
+![The clash graph drawn over the gray lattice from the start of this guide. Each of the seven terms is a white node at the midpoint of its edge, labeled with its bilinear, for example γ₀γ₁. Dashed red lines join the ten pairs of terms that do not commute, which are exactly the pairs of edges that meet at a lattice vertex.](../_images/grouping-4.png)
+
+Coloring it assigns the group indices directly:
+
+### PYTHON
+
+```python
+>>> from qiskit_fermions.operators.terms.grouping import (
+...     group_terms_by_non_commutation,
+... )
+>>>
+>>> group_terms_by_non_commutation(op)
+>>> op.groups
+[1, 2, 0, 0, 0, 1, 2]
+>>> op.num_groups()
+3
+```
+
+### C
+
+```c
+#include <qiskit_fermions.h>
+
+uint64_t num_terms = 7;
+uint64_t num_modes = 14;
+uint32_t modes[14] = {0, 1, 1, 2, 3, 0, 1, 4, 5, 2, 5, 4, 4, 3};
+QkComplex64 coeffs[7] = {{1.0, 0.0}, {1.0, 0.0}, {1.0, 0.0}, {1.0, 0.0},
+                         {1.0, 0.0}, {1.0, 0.0}, {1.0, 0.0}};
+uint32_t boundaries[8] = {0, 2, 4, 6, 8, 10, 12, 14};
+QfMajoranaOperator *op = qf_maj_op_new(num_terms, num_modes, coeffs, modes, boundaries);
+
+qf_maj_op_group_terms_by_non_commutation(op);
+```
+
+The figure below repeats the previous one with this coloring applied. Each term and its edge share
+the color of their commuting group, so the lattice shows the grouping the same way the edge labels
+show the hand-written groups in the first figure. Every dashed red line joins two different colors:
+that is what makes the coloring proper, and it is why every group mutually commutes. Comparing the
+two figures also shows where the groupings differ. For example, $\gamma_0 \gamma_1$ and
+$\gamma_1 \gamma_2$ share group 0 in the first figure, but they clash and so receive different
+colors here. The coloring also needs only three groups where the hand-written grouping uses four.
+
+([`png`](_downloads/4e3ba7eff69d528a5696caaeea6a33e5/grouping-6.png), [`hires.png`](_downloads/9afabbad745e53791a9fe92df5799424/grouping-6.hires.png), [`pdf`](_downloads/bf2db3bc5cd82ba223a421dddde350d2/grouping-6.pdf))
+
+![The clash graph over the lattice, now colored by the three commuting groups, with each edge and its term in the same color. Blue holds γ₃γ₀, γ₁γ₄, and γ₅γ₂; orange holds γ₀γ₁ and γ₅γ₄; green holds γ₁γ₂ and γ₄γ₃. Every dashed red clash line joins two different colors.](../_images/grouping-6.png)
+
+#### IMPORTANT
+**The hand-written groups above are not commuting groups.** Their lines resemble the *line flow
+sets* of <sup>[1](#id4)</sup>, which do commute, but <sup>[1](#id4)</sup> defines flow sets on transfer operators rather than
+on Majorana bilinears. Two bilinears anticommute whenever their edges meet, so group 0 above
+contains the anticommuting pair $\gamma_0 \gamma_1$ and $\gamma_1 \gamma_2$. The two
+groupings on this page answer different questions, and neither is more correct than the other.
+
+A transfer $T_{jk}$ is *directed*: it acts on the odd generator of its source $j$
+and the even generator of its target $k$. Two transfers therefore anticommute only when
+they share a source or a target, while a head-to-tail chain shares no generator and commutes.
+That is the rule a flow set follows. Orienting each edge as it is listed in `edges` and
+writing it as a [`TransferVertexOperator`](../stubs/qiskit_fermions.operators.TransferVertexOperator.html.md#qiskit_fermions.operators.TransferVertexOperator) term turns the hand-written groups into
+commuting groups. Listing the clashing pairs inside each hand-written group shows the
+difference directly:
+
+```python
+>>> from qiskit_fermions.operators import TransferVertexOperator
+>>>
+>>> def clashes_within_groups(op):
+...     return [(a, b) for a, b in op.non_commutation_edges() if groups[a] == groups[b]]
+>>>
+>>> transfers = TransferVertexOperator(
+...     coeffs=[1.0] * 7,
+...     left_indices=[j for j, _ in edges],
+...     right_indices=[k for _, k in edges],
+...     boundaries=list(range(8)),
+... )
+>>> clashes_within_groups(op)  # the Majorana bilinears
+[(0, 1), (5, 6)]
+>>> clashes_within_groups(transfers)
+[]
+```
+
+For the bilinears, the two pairs are the head-to-tail chains of group 0
+($\gamma_0 \gamma_1$ and $\gamma_1 \gamma_2$) and of group 3
+($\gamma_5 \gamma_4$ and $\gamma_4 \gamma_3$). Written as transfers, those same
+chains commute, and no group contains a clash.
+
+Only for transfers does the direction of an edge matter. For Majorana bilinears, reversing an
+edge only flips the sign of its term, which is why this guide draws the lattice without arrows.
+
+#### NOTE
+Indices refer to the operator’s *current* term order, which is not preserved across every
+transformation. Build the operator from its sparse arrays, as above, or apply
+[`canonical_order()`](../stubs/qiskit_fermions.operators.terms.canonical_order.html.md#qiskit_fermions.operators.terms.canonical_order) first, when the result has to be reproducible.
+
+Every term counts as written, except that a term with an exactly zero coefficient clashes with
+nothing. Simplify an operator before computing its clash graph: that removes near-zero and
+duplicate terms, which would otherwise inflate the graph. Simplifying can reorder the terms, so
+compute the indices on the simplified operator.
+
+The coloring is a greedy heuristic, so the number of groups is an upper bound on the smallest
+achievable rather than a minimum.
 
 ## Analyze a grouping
 
@@ -256,4 +383,4 @@ guarantee of [`is_hermitian()`](../stubs/qiskit_fermions.operators.OperatorTrait
 always reliable, while a `False` entry is reliable only for operator types whose normal form is
 a genuine canonical form. Consult the specific operator type to find out which applies.
 
-* <a id='id3'>**[1]**</a> A. Gandon et al., Stabilizer-based quantum simulation of fermion dynamics with local qubit encodings, [arXiv:2512.11418v2](https://arxiv.org/abs/2512.11418v2).
+* <a id='id4'>**[1]**</a> A. Gandon et al., Stabilizer-based quantum simulation of fermion dynamics with local qubit encodings, [arXiv:2512.11418v2](https://arxiv.org/abs/2512.11418v2).

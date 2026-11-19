@@ -128,6 +128,13 @@ operators: one more than the largest *fermionic* mode, i.e. `max_index // 2 + 1`
 * **Return type:**
   [int](https://docs.python.org/3/builtins/functions.html#int)
 
+#### non_commutation_edges()
+
+Returns the pairs of terms that do not commute, i.e. this operator’s clash graph.
+
+* **Return type:**
+  [list](https://docs.python.org/3/builtins/stdtypes.html#list)[[tuple](https://docs.python.org/3/builtins/stdtypes.html#tuple)[[int](https://docs.python.org/3/builtins/functions.html#int), [int](https://docs.python.org/3/builtins/functions.html#int)]]
+
 #### normal_ordered(\*args, \*\*kwargs)
 
 Returns the normal-ordered form of this operator.

@@ -11,7 +11,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Grouping Functions - Qiskit Fermions 0.5.0.dev0+cd82240</title>
+        <title>Grouping Functions - Qiskit Fermions 0.5.0.dev0+97a0d13</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=fc6d6d93" />
@@ -164,7 +164,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.5.0.dev0+cd82240</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.5.0.dev0+97a0d13</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -190,7 +190,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.5.0.dev0+cd82240</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.5.0.dev0+97a0d13</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -258,6 +258,7 @@
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../pydoc/qiskit_fermions.operators.terms.html">Operator Terms</a><input aria-label="Toggle navigation of Operator Terms" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../stubs/qiskit_fermions.operators.terms.group_terms_by_electronic_structure.html">group_terms_by_electronic_structure</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../stubs/qiskit_fermions.operators.terms.group_terms_by_non_commutation.html">group_terms_by_non_commutation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../stubs/qiskit_fermions.operators.terms.group_coeff_means.html">group_coeff_means</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../stubs/qiskit_fermions.operators.terms.groups_are_hermitian.html">groups_are_hermitian</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../stubs/qiskit_fermions.operators.terms.groups_have_uniform_coeffs.html">groups_have_uniform_coeffs</a></li>
@@ -467,15 +468,107 @@ functionality.</p>
 <p>Rather than always relying on the user to provide the group indices themselves,
 the C API provides a collection of functions which determine the grouping
 information automatically.</p>
+<p>Unlike the analysis routines below, these are provided per operator
+representation only where the grouping makes sense for it: the
+electronic-structure grouping is specific to <a class="reference internal" href="qf-ferm-op.html#c.QfFermionOperator" title="QfFermionOperator"><code class="xref c c-struct docutils literal notranslate"><span class="pre">QfFermionOperator</span></code></a>, while
+the commuting grouping exists for every representation.</p>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#c.qf_ferm_op_group_terms_by_electronic_structure" title="qf_ferm_op_group_terms_by_electronic_structure"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_ferm_op_group_terms_by_electronic_structure()</span></code></a></p></td>
 <td><p>Groups the terms of an operator by their electronic structure.</p></td>
 </tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#c.qf_op_type_group_terms_by_non_commutation" title="qf_op_type_group_terms_by_non_commutation"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_op_type_group_terms_by_non_commutation()</span></code></a></p></td>
+<td><p>Groups the terms of an operator into mutually commuting sets.</p></td>
+</tr>
 </tbody>
 </table>
 </div>
+<section id="commuting-groups">
+<h3>Commuting groups<a class="headerlink" href="#commuting-groups" title="Link to this heading">¶</a></h3>
+<dl class="c function">
+<dt class="sig sig-object c" id="c.qf_op_type_group_terms_by_non_commutation">
+<a class="reference internal" href="qf-exit-code.html#c.QfExitCode" title="QfExitCode"><span class="n"><span class="pre">QfExitCode</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">qf_op_type_group_terms_by_non_commutation</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">OpType</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">op</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.qf_op_type_group_terms_by_non_commutation" title="Link to this definition">¶</a><br /></dt>
+<dd><div class="admonition caution">
+<p class="admonition-title">Caution</p>
+<p>The function signature here is <strong>generic</strong>! A real one will replace
+<code class="docutils literal notranslate"><span class="pre">OpType</span></code> with an actual <a class="reference internal" href="qf-operators.html#qf-operators"><span class="std std-ref">operator representation</span></a>
+and <code class="docutils literal notranslate"><span class="pre">op_type</span></code> with its matching prefix (for example, <code class="docutils literal notranslate"><span class="pre">ferm_op</span></code> for
+<a class="reference internal" href="qf-ferm-op.html#c.QfFermionOperator" title="QfFermionOperator"><code class="xref c c-struct docutils literal notranslate"><span class="pre">QfFermionOperator</span></code></a>).</p>
+</div>
+<p>Populates the <code class="docutils literal notranslate"><span class="pre">groups</span></code> attribute such that any two terms which do <strong>not</strong>
+commute receive different group indices, replacing any grouping the operator
+already carried.</p>
+<p>It does so by coloring the operator’s <em>clash graph</em> - one node per term, one
+edge per non-commuting pair. That graph is available in its own right through
+the per-representation accessors, documented alongside their operators:
+<a class="reference internal" href="qf-ferm-op.html#c.qf_ferm_op_non_commutation_edges" title="qf_ferm_op_non_commutation_edges"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_ferm_op_non_commutation_edges()</span></code></a>,
+<a class="reference internal" href="qf-maj-op.html#c.qf_maj_op_non_commutation_edges" title="qf_maj_op_non_commutation_edges"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_maj_op_non_commutation_edges()</span></code></a>,
+<a class="reference internal" href="qf-edge-op.html#c.qf_edge_op_non_commutation_edges" title="qf_edge_op_non_commutation_edges"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_edge_op_non_commutation_edges()</span></code></a> and
+<a class="reference internal" href="qf-transfer-op.html#c.qf_transfer_op_non_commutation_edges" title="qf_transfer_op_non_commutation_edges"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_transfer_op_non_commutation_edges()</span></code></a>.</p>
+<p>A term with an exactly zero coefficient clashes with nothing, while every
+other term counts as written. Simplify the operator first (with
+<code class="docutils literal notranslate"><span class="pre">qf_op_type_simplify</span></code>) to remove near-zero and duplicate terms, which would
+otherwise inflate the number of groups.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The coloring is the greedy <em>largest-first</em> heuristic (terms with the most
+clashes are placed first), so the resulting number of groups is an upper
+bound on the smallest achievable rather than a minimum. The graph itself is
+never built: memory grows linearly with the number of terms, where the edge
+array of <code class="docutils literal notranslate"><span class="pre">qf_op_type_non_commutation_edges</span></code> grows quadratically.</p>
+</div>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>Whether these commuting groups agree with the line flow sets used to
+compile the time evolution of lattice Hamiltonians depends on the operator
+representation, not on the lattice. A flow set forbids two arrows that
+share a source or a target while permitting a head-to-tail chain. A
+transfer <span class="math">\(T_{jk}\)</span> acts on the odd generator of its source and the
+even generator of its target, so for the hopping terms of a
+<a class="reference internal" href="qf-transfer-op.html#c.QfTransferVertexOperator" title="QfTransferVertexOperator"><code class="xref c c-struct docutils literal notranslate"><span class="pre">QfTransferVertexOperator</span></code></a> the clash relation <em>is</em> that rule.
+Majorana and edge-vertex bilinears instead act on the same generator of a
+shared mode however they meet, so there a head-to-tail chain does <strong>not</strong>
+commute and the two partitions diverge.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>For simplicity, the example below shows only the
+<a class="reference internal" href="qf-maj-op.html#c.QfMajoranaOperator" title="QfMajoranaOperator"><code class="xref c c-struct docutils literal notranslate"><span class="pre">QfMajoranaOperator</span></code></a> variant. The other operator representations
+follow the same pattern.</p>
+</div>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">num_terms</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">3</span><span class="p">;</span>
+<span class="linenos"> 2</span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">num_modes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">6</span><span class="p">;</span>
+<span class="linenos"> 3</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">modes</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">};</span>
+<span class="linenos"> 4</span><span class="n">QkComplex64</span><span class="w"> </span><span class="n">coeffs</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{{</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">}};</span>
+<span class="linenos"> 5</span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">boundaries</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">6</span><span class="p">};</span>
+<span class="linenos"> 6</span><span class="n">QfMajoranaOperator</span><span class="w"> </span><span class="o">*</span><span class="n">op</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_maj_op_new</span><span class="p">(</span><span class="n">num_terms</span><span class="p">,</span><span class="w"> </span><span class="n">num_modes</span><span class="p">,</span><span class="w"> </span><span class="n">coeffs</span><span class="p">,</span><span class="w"> </span><span class="n">modes</span><span class="p">,</span><span class="w"> </span><span class="n">boundaries</span><span class="p">);</span>
+<span class="linenos"> 7</span>
+<span class="linenos"> 8</span><span class="c1">// Terms 0 and 1 share Majorana mode 1, so they land in different groups.</span>
+<span class="linenos"> 9</span><span class="n">QfExitCode</span><span class="w"> </span><span class="n">exit</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_maj_op_group_terms_by_non_commutation</span><span class="p">(</span><span class="n">op</span><span class="p">);</span>
+<span class="linenos">10</span><span class="n">assert</span><span class="p">(</span><span class="n">exit</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">QfExitCode_Success</span><span class="p">);</span>
+<span class="linenos">11</span><span class="n">assert</span><span class="p">(</span><span class="n">qf_maj_op_num_groups</span><span class="p">(</span><span class="n">op</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span>
+<span class="linenos">12</span>
+<span class="linenos">13</span><span class="n">qf_maj_op_free</span><span class="p">(</span><span class="n">op</span><span class="p">);</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>op</strong> – A pointer to the operator whose terms to group.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>An exit code. <code class="docutils literal notranslate"><span class="pre">QfExitCode_ValueError</span></code> is returned exactly when
+<code class="docutils literal notranslate"><span class="pre">qf_op_type_non_commutation_edges</span></code> returns it: if <code class="docutils literal notranslate"><span class="pre">op</span></code> has more than
+<span class="math">\(2^{32}\)</span> terms, or is a <a class="reference internal" href="qf-ferm-op.html#c.QfFermionOperator" title="QfFermionOperator"><code class="xref c c-struct docutils literal notranslate"><span class="pre">QfFermionOperator</span></code></a> with a term of
+degree above 20 and a non-zero coefficient. The operator’s groups are then
+left untouched.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
 </section>
 <section id="analysis">
 <h2>Analysis<a class="headerlink" href="#analysis" title="Link to this heading">¶</a></h2>
@@ -760,6 +853,26 @@ indices get grouped into pairs of two within which permutational symmetries exis
 <span class="target" id="group__qf__operator__terms__grouping_1ga310cac650d4643117a057a8907272c54"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">qf_transfer_op_groups_have_uniform_coeffs</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="qf-transfer-op.html#c.QfTransferVertexOperator" title="QfTransferVertexOperator"><span class="n"><span class="pre">QfTransferVertexOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">op</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n"><span class="pre">atol</span></span>, <span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="n"><span class="pre">abs</span></span>, <span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">uniform_out</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.qf_transfer_op_groups_have_uniform_coeffs" title="Link to this definition">¶</a><br /></dt>
 <dd></dd></dl>
 
+<dl class="c function">
+<dt class="sig sig-object c" id="c.qf_ferm_op_group_terms_by_non_commutation">
+<span class="target" id="group__qf__operator__terms__grouping_1gac836bc12520ea008370ad8ab893b1985"></span><a class="reference internal" href="qf-exit-code.html#c.QfExitCode" title="QfExitCode"><span class="n"><span class="pre">QfExitCode</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">qf_ferm_op_group_terms_by_non_commutation</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="qf-ferm-op.html#c.QfFermionOperator" title="QfFermionOperator"><span class="n"><span class="pre">QfFermionOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">op</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.qf_ferm_op_group_terms_by_non_commutation" title="Link to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.qf_maj_op_group_terms_by_non_commutation">
+<span class="target" id="group__qf__operator__terms__grouping_1ga0afc58b6e1c9073e992d52e2393bb701"></span><a class="reference internal" href="qf-exit-code.html#c.QfExitCode" title="QfExitCode"><span class="n"><span class="pre">QfExitCode</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">qf_maj_op_group_terms_by_non_commutation</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="qf-maj-op.html#c.QfMajoranaOperator" title="QfMajoranaOperator"><span class="n"><span class="pre">QfMajoranaOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">op</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.qf_maj_op_group_terms_by_non_commutation" title="Link to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.qf_edge_op_group_terms_by_non_commutation">
+<span class="target" id="group__qf__operator__terms__grouping_1ga51f5c541c13cb8f4c2dff607dbfe2983"></span><a class="reference internal" href="qf-exit-code.html#c.QfExitCode" title="QfExitCode"><span class="n"><span class="pre">QfExitCode</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">qf_edge_op_group_terms_by_non_commutation</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="qf-edge-op.html#c.QfEdgeVertexOperator" title="QfEdgeVertexOperator"><span class="n"><span class="pre">QfEdgeVertexOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">op</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.qf_edge_op_group_terms_by_non_commutation" title="Link to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.qf_transfer_op_group_terms_by_non_commutation">
+<span class="target" id="group__qf__operator__terms__grouping_1ga5bcad291cce30fe1b77e2d5f352c5f8a"></span><a class="reference internal" href="qf-exit-code.html#c.QfExitCode" title="QfExitCode"><span class="n"><span class="pre">QfExitCode</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">qf_transfer_op_group_terms_by_non_commutation</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="qf-transfer-op.html#c.QfTransferVertexOperator" title="QfTransferVertexOperator"><span class="n"><span class="pre">QfTransferVertexOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">op</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.qf_transfer_op_group_terms_by_non_commutation" title="Link to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
 </section>
 </section>
 
@@ -820,7 +933,13 @@ indices get grouped into pairs of two within which permutational symmetries exis
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">Grouping Functions</a><ul>
-<li><a class="reference internal" href="#assignment">Assignment</a></li>
+<li><a class="reference internal" href="#assignment">Assignment</a><ul>
+<li><a class="reference internal" href="#commuting-groups">Commuting groups</a><ul>
+<li><a class="reference internal" href="#c.qf_op_type_group_terms_by_non_commutation"><code class="docutils literal notranslate"><span class="pre">qf_op_type_group_terms_by_non_commutation()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li><a class="reference internal" href="#analysis">Analysis</a><ul>
 <li><a class="reference internal" href="#group-coefficient-means">Group coefficient means</a><ul>
 <li><a class="reference internal" href="#c.qf_op_type_group_coeff_means"><code class="docutils literal notranslate"><span class="pre">qf_op_type_group_coeff_means()</span></code></a></li>
@@ -851,6 +970,10 @@ indices get grouped into pairs of two within which permutational symmetries exis
 <li><a class="reference internal" href="#c.qf_transfer_op_group_coeff_means"><code class="docutils literal notranslate"><span class="pre">qf_transfer_op_group_coeff_means()</span></code></a></li>
 <li><a class="reference internal" href="#c.qf_transfer_op_groups_are_hermitian"><code class="docutils literal notranslate"><span class="pre">qf_transfer_op_groups_are_hermitian()</span></code></a></li>
 <li><a class="reference internal" href="#c.qf_transfer_op_groups_have_uniform_coeffs"><code class="docutils literal notranslate"><span class="pre">qf_transfer_op_groups_have_uniform_coeffs()</span></code></a></li>
+<li><a class="reference internal" href="#c.qf_ferm_op_group_terms_by_non_commutation"><code class="docutils literal notranslate"><span class="pre">qf_ferm_op_group_terms_by_non_commutation()</span></code></a></li>
+<li><a class="reference internal" href="#c.qf_maj_op_group_terms_by_non_commutation"><code class="docutils literal notranslate"><span class="pre">qf_maj_op_group_terms_by_non_commutation()</span></code></a></li>
+<li><a class="reference internal" href="#c.qf_edge_op_group_terms_by_non_commutation"><code class="docutils literal notranslate"><span class="pre">qf_edge_op_group_terms_by_non_commutation()</span></code></a></li>
+<li><a class="reference internal" href="#c.qf_transfer_op_group_terms_by_non_commutation"><code class="docutils literal notranslate"><span class="pre">qf_transfer_op_group_terms_by_non_commutation()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -864,7 +987,7 @@ indices get grouped into pairs of two within which permutational symmetries exis
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=1a3b8b7e"></script>
+</div><script src="../_static/documentation_options.js?v=aafb43a3"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

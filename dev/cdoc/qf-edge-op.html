@@ -10,7 +10,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>QfEdgeVertexOperator - Qiskit Fermions 0.5.0.dev0+cd82240</title>
+        <title>QfEdgeVertexOperator - Qiskit Fermions 0.5.0.dev0+97a0d13</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=fc6d6d93" />
@@ -163,7 +163,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.5.0.dev0+cd82240</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.5.0.dev0+97a0d13</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -189,7 +189,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.5.0.dev0+cd82240</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.5.0.dev0+97a0d13</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -257,6 +257,7 @@
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../pydoc/qiskit_fermions.operators.terms.html">Operator Terms</a><input aria-label="Toggle navigation of Operator Terms" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../stubs/qiskit_fermions.operators.terms.group_terms_by_electronic_structure.html">group_terms_by_electronic_structure</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../stubs/qiskit_fermions.operators.terms.group_terms_by_non_commutation.html">group_terms_by_non_commutation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../stubs/qiskit_fermions.operators.terms.group_coeff_means.html">group_coeff_means</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../stubs/qiskit_fermions.operators.terms.groups_are_hermitian.html">groups_are_hermitian</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../stubs/qiskit_fermions.operators.terms.groups_have_uniform_coeffs.html">groups_have_uniform_coeffs</a></li>
@@ -640,11 +641,14 @@ Alternatively, an empty <a class="reference internal" href="#c.QfEdgeVertexOpera
 <tr class="row-odd"><td><p><a class="reference internal" href="#c.qf_edge_op_is_hermitian" title="qf_edge_op_is_hermitian"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_edge_op_is_hermitian()</span></code></a></p></td>
 <td><p>Returns whether an operator is Hermitian.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#c.qf_edge_op_len" title="qf_edge_op_len"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_edge_op_len()</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#c.qf_edge_op_num_terms" title="qf_edge_op_num_terms"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_edge_op_num_terms()</span></code></a></p></td>
 <td><p>Returns the number of terms in this operator.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#c.qf_edge_op_min_num_modes" title="qf_edge_op_min_num_modes"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_edge_op_min_num_modes()</span></code></a></p></td>
 <td><p>Returns the minimum number of modes of this operator.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#c.qf_edge_op_non_commutation_edges" title="qf_edge_op_non_commutation_edges"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_edge_op_non_commutation_edges()</span></code></a></p></td>
+<td><p>Gets the pairs of terms that do not commute.</p></td>
 </tr>
 </tbody>
 </table>
@@ -1384,7 +1388,7 @@ subtraction function is provided.</p>
 <span class="linenos">6</span><span class="n">QfEdgeVertexOperator</span><span class="w"> </span><span class="o">*</span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_edge_op_scaled_add</span><span class="p">(</span><span class="n">one</span><span class="p">,</span><span class="w"> </span><span class="n">other</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">factor</span><span class="p">);</span>
 <span class="linenos">7</span>
 <span class="linenos">8</span><span class="n">QfEdgeVertexOperator</span><span class="w"> </span><span class="o">*</span><span class="n">simplified</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_edge_op_simplify</span><span class="p">(</span><span class="n">result</span><span class="p">,</span><span class="w"> </span><span class="mf">1e-10</span><span class="p">);</span>
-<span class="linenos">9</span><span class="n">assert</span><span class="p">(</span><span class="n">qf_edge_op_len</span><span class="p">(</span><span class="n">simplified</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+<span class="linenos">9</span><span class="n">assert</span><span class="p">(</span><span class="n">qf_edge_op_num_terms</span><span class="p">(</span><span class="n">simplified</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
 </pre></div>
 </div>
 </section>
@@ -1427,7 +1431,7 @@ allocated result.</p>
 <span class="linenos">3</span>
 <span class="linenos">4</span><span class="n">qf_edge_op_add_inplace</span><span class="p">(</span><span class="n">left</span><span class="p">,</span><span class="w"> </span><span class="n">right</span><span class="p">);</span>
 <span class="linenos">5</span>
-<span class="linenos">6</span><span class="n">assert</span><span class="p">(</span><span class="n">qf_edge_op_len</span><span class="p">(</span><span class="n">left</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span>
+<span class="linenos">6</span><span class="n">assert</span><span class="p">(</span><span class="n">qf_edge_op_num_terms</span><span class="p">(</span><span class="n">left</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span>
 </pre></div>
 </div>
 </section>
@@ -1463,7 +1467,7 @@ without allocating a result. As there, a factor of <code class="docutils literal
 <span class="linenos">6</span><span class="n">qf_edge_op_scaled_add_inplace</span><span class="p">(</span><span class="n">left</span><span class="p">,</span><span class="w"> </span><span class="n">right</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">factor</span><span class="p">);</span>
 <span class="linenos">7</span>
 <span class="linenos">8</span><span class="n">QfEdgeVertexOperator</span><span class="w"> </span><span class="o">*</span><span class="n">simplified</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_edge_op_simplify</span><span class="p">(</span><span class="n">left</span><span class="p">,</span><span class="w"> </span><span class="mf">1e-10</span><span class="p">);</span>
-<span class="linenos">9</span><span class="n">assert</span><span class="p">(</span><span class="n">qf_edge_op_len</span><span class="p">(</span><span class="n">simplified</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+<span class="linenos">9</span><span class="n">assert</span><span class="p">(</span><span class="n">qf_edge_op_num_terms</span><span class="p">(</span><span class="n">simplified</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
 </pre></div>
 </div>
 </section>
@@ -1680,7 +1684,7 @@ filters numerically small coefficients to avoid loss of information.</p>
 <span class="linenos">6</span>
 <span class="linenos">7</span><span class="n">QfEdgeVertexOperator</span><span class="w"> </span><span class="o">*</span><span class="n">canon</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_edge_op_simplify</span><span class="p">(</span><span class="n">op</span><span class="p">,</span><span class="w"> </span><span class="mf">1e-4</span><span class="p">);</span>
 <span class="linenos">8</span>
-<span class="linenos">9</span><span class="n">assert</span><span class="p">(</span><span class="n">qf_edge_op_len</span><span class="p">(</span><span class="n">canon</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
+<span class="linenos">9</span><span class="n">assert</span><span class="p">(</span><span class="n">qf_edge_op_num_terms</span><span class="p">(</span><span class="n">canon</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
 </pre></div>
 </div>
 </section>
@@ -1865,8 +1869,8 @@ rather than two representations of one.</p>
 </dd></dl>
 
 <dl class="c function">
-<dt class="sig sig-object c" id="c.qf_edge_op_len">
-<span class="target" id="group__qf__edge__op_1gab5d921777521bd69b1c242ee91c34017"></span><span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">qf_edge_op_len</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.QfEdgeVertexOperator" title="QfEdgeVertexOperator"><span class="n"><span class="pre">QfEdgeVertexOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">op</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.qf_edge_op_len" title="Link to this definition">¶</a><br /></dt>
+<dt class="sig sig-object c" id="c.qf_edge_op_num_terms">
+<span class="target" id="group__qf__edge__op_1ga3d456feab0b035b2eb148c7860f1ac7e"></span><span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">qf_edge_op_num_terms</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.QfEdgeVertexOperator" title="QfEdgeVertexOperator"><span class="n"><span class="pre">QfEdgeVertexOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">op</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.qf_edge_op_num_terms" title="Link to this definition">¶</a><br /></dt>
 <dd><p>Returns the length (or number of terms) of the provided operator. </p>
 <p><p><section id="id34">
 <h3>Example<a class="headerlink" href="#id34" title="Link to this heading">¶</a></h3>
@@ -1876,7 +1880,7 @@ rather than two representations of one.</p>
 <span class="linenos">4</span><span class="n">QkComplex64</span><span class="w"> </span><span class="n">coeff</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">};</span>
 <span class="linenos">5</span><span class="n">qf_edge_op_add_term</span><span class="p">(</span><span class="n">op</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="n">left</span><span class="p">,</span><span class="w"> </span><span class="n">right</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">coeff</span><span class="p">);</span>
 <span class="linenos">6</span>
-<span class="linenos">7</span><span class="n">assert</span><span class="p">(</span><span class="n">qf_edge_op_len</span><span class="p">(</span><span class="n">op</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
+<span class="linenos">7</span><span class="n">assert</span><span class="p">(</span><span class="n">qf_edge_op_num_terms</span><span class="p">(</span><span class="n">op</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
 </pre></div>
 </div>
 </section>
@@ -1937,6 +1941,51 @@ or merging terms.</p>
 <li><p><code class="docutils literal notranslate"><a class="reference internal" href="qf-exit-code.html#group__qf__exit__code_1gga89daaa15e32524338df290dbd873caf1ae5c84289c900faf721fde93e2f249e3b"><span class="std std-ref"><span class="pre">QfExitCode_IndexError</span></span></a></code> for any other index errors, such as invalid indices.</p></li>
 </ul>
 </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="c function">
+<dt class="sig sig-object c" id="c.qf_edge_op_non_commutation_edges">
+<span class="target" id="group__qf__edge__op_1ga7f6581f86af53ecbaded54c44b850f49"></span><a class="reference internal" href="qf-exit-code.html#c.QfExitCode" title="QfExitCode"><span class="n"><span class="pre">QfExitCode</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">qf_edge_op_non_commutation_edges</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#c.QfEdgeVertexOperator" title="QfEdgeVertexOperator"><span class="n"><span class="pre">QfEdgeVertexOperator</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">op</span></span>, <span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">edges_out</span></span>, <span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n"><span class="pre">num_edges_out</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.qf_edge_op_non_commutation_edges" title="Link to this definition">¶</a><br /></dt>
+<dd><p>Gets the pairs of terms of an operator that do not commute. </p>
+<p><p><p>This is the operator’s <em>clash graph</em>: one node per term, and an edge between every pair of terms
+that do <strong>not</strong> commute. Each pair is reported once as <code class="docutils literal notranslate"><span class="pre">(i,</span> <span class="pre">j)</span></code> with <code class="docutils literal notranslate"><span class="pre">i</span> <span class="pre">&lt;</span> <span class="pre">j</span></code>, in ascending
+order, flattened into <code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">*</span> <span class="pre">num_edges_out</span></code> indices. The indices refer to the operator’s current
+term order.</p>
+<p>A term whose coefficient is exactly zero commutes with every other term, so it never has an edge.
+Every other term counts as written, so call <a class="reference internal" href="#c.qf_edge_op_simplify" title="qf_edge_op_simplify"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_edge_op_simplify()</span></code></a> first: it removes
+near-zero terms and merges duplicates, either of which would otherwise inflate the graph. It can
+also reorder the terms, so compute the edges on its result.</p>
+<p>The array holds one pair per clash, so it grows quadratically with the number of terms. To group a
+large operator, use <a class="reference internal" href="qf-operators-terms-grouping.html#c.qf_edge_op_group_terms_by_non_commutation" title="qf_edge_op_group_terms_by_non_commutation"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_edge_op_group_terms_by_non_commutation()</span></code></a>, which never builds it.</p>
+<p>Unlike the <code class="docutils literal notranslate"><span class="pre">qf_edge_op_num_*</span></code>/<code class="docutils literal notranslate"><span class="pre">qf_edge_op_get_*</span></code> pairs elsewhere in this API, the edge count is not
+available separately: it is only known once the graph has been built, and building it is the
+quadratic part. Allocating here therefore pays that cost once rather than twice.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kt">uint32_t</span><span class="w"> </span><span class="o">*</span><span class="n">edges</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span>
+<span class="linenos"> 2</span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">num_edges</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="linenos"> 3</span><span class="n">QfExitCode</span><span class="w"> </span><span class="n">exit</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">qf_edge_op_non_commutation_edges</span><span class="p">(</span><span class="n">op</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">edges</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">num_edges</span><span class="p">);</span>
+<span class="linenos"> 4</span>
+<span class="linenos"> 5</span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">uint64_t</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">num_edges</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="linenos"> 6</span><span class="w">    </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">left</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">edges</span><span class="p">[</span><span class="mi">2</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">i</span><span class="p">];</span>
+<span class="linenos"> 7</span><span class="w">    </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">right</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">edges</span><span class="p">[</span><span class="mi">2</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">];</span>
+<span class="linenos"> 8</span><span class="p">}</span>
+<span class="linenos"> 9</span>
+<span class="linenos">10</span><span class="n">qf_edges_free</span><span class="p">(</span><span class="n">edges</span><span class="p">,</span><span class="w"> </span><span class="n">num_edges</span><span class="p">);</span>
+</pre></div>
+</div>
+</p>
+ </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>op</strong> – A pointer to the operator whose terms to relate. </p></li>
+<li><p><strong>edges_out</strong> – A pointer to the array pointer into which to write the edges. The array is allocated by this function and must be released with :c:func:<code class="docutils literal notranslate"><a class="reference internal" href="qf-operators.html#group__qf__operators_1ga9e04f4a935777a6b549e2419b12560ac"><span class="std std-ref"><span class="pre">qf_edges_free</span></span></a></code>. </p></li>
+<li><p><strong>num_edges_out</strong> – A pointer to the integer into which to write the number of edges.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>An exit code. <code class="docutils literal notranslate"><a class="reference internal" href="qf-exit-code.html#group__qf__exit__code_1gga89daaa15e32524338df290dbd873caf1a869710ce98addf007187616631c85470"><span class="std std-ref"><span class="pre">QfExitCode_ValueError</span></span></a></code> is returned if the operator has more than :math:<code class="docutils literal notranslate"><span class="pre">2^{32}</span></code> terms, which the <code class="docutils literal notranslate"><span class="pre">uint32_t</span></code> indices cannot address, in which case nothing is allocated and the out-pointers are left untouched.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -2044,8 +2093,9 @@ or merging terms.</p>
 <li><a class="reference internal" href="#c.qf_edge_op_is_hermitian"><code class="docutils literal notranslate"><span class="pre">qf_edge_op_is_hermitian()</span></code></a></li>
 <li><a class="reference internal" href="#c.qf_edge_op_equal"><code class="docutils literal notranslate"><span class="pre">qf_edge_op_equal()</span></code></a></li>
 <li><a class="reference internal" href="#c.qf_edge_op_equiv"><code class="docutils literal notranslate"><span class="pre">qf_edge_op_equiv()</span></code></a></li>
-<li><a class="reference internal" href="#c.qf_edge_op_len"><code class="docutils literal notranslate"><span class="pre">qf_edge_op_len()</span></code></a></li>
+<li><a class="reference internal" href="#c.qf_edge_op_num_terms"><code class="docutils literal notranslate"><span class="pre">qf_edge_op_num_terms()</span></code></a></li>
 <li><a class="reference internal" href="#c.qf_edge_op_relabel_modes"><code class="docutils literal notranslate"><span class="pre">qf_edge_op_relabel_modes()</span></code></a></li>
+<li><a class="reference internal" href="#c.qf_edge_op_non_commutation_edges"><code class="docutils literal notranslate"><span class="pre">qf_edge_op_non_commutation_edges()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -2059,7 +2109,7 @@ or merging terms.</p>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=1a3b8b7e"></script>
+</div><script src="../_static/documentation_options.js?v=aafb43a3"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

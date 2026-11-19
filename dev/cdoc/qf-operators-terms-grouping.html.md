@@ -9,8 +9,90 @@ Rather than always relying on the user to provide the group indices themselves,
 the C API provides a collection of functions which determine the grouping
 information automatically.
 
+Unlike the analysis routines below, these are provided per operator
+representation only where the grouping makes sense for it: the
+electronic-structure grouping is specific to [`QfFermionOperator`](qf-ferm-op.html.md#c.QfFermionOperator), while
+the commuting grouping exists for every representation.
+
 | [`qf_ferm_op_group_terms_by_electronic_structure()`](#c.qf_ferm_op_group_terms_by_electronic_structure)   | Groups the terms of an operator by their electronic structure.   |
 |-----------------------------------------------------------------------------------------------------|------------------------------------------------------------------|
+| [`qf_op_type_group_terms_by_non_commutation()`](#c.qf_op_type_group_terms_by_non_commutation)        | Groups the terms of an operator into mutually commuting sets.    |
+
+### Commuting groups
+
+### [QfExitCode](qf-exit-code.html.md#c.QfExitCode) qf_op_type_group_terms_by_non_commutation(OpType \*op)
+
+#### CAUTION
+The function signature here is **generic**! A real one will replace
+`OpType` with an actual [operator representation](qf-operators.html.md#qf-operators)
+and `op_type` with its matching prefix (for example, `ferm_op` for
+[`QfFermionOperator`](qf-ferm-op.html.md#c.QfFermionOperator)).
+
+Populates the `groups` attribute such that any two terms which do **not**
+commute receive different group indices, replacing any grouping the operator
+already carried.
+
+It does so by coloring the operator’s *clash graph* - one node per term, one
+edge per non-commuting pair. That graph is available in its own right through
+the per-representation accessors, documented alongside their operators:
+[`qf_ferm_op_non_commutation_edges()`](qf-ferm-op.html.md#c.qf_ferm_op_non_commutation_edges),
+[`qf_maj_op_non_commutation_edges()`](qf-maj-op.html.md#c.qf_maj_op_non_commutation_edges),
+[`qf_edge_op_non_commutation_edges()`](qf-edge-op.html.md#c.qf_edge_op_non_commutation_edges) and
+[`qf_transfer_op_non_commutation_edges()`](qf-transfer-op.html.md#c.qf_transfer_op_non_commutation_edges).
+
+A term with an exactly zero coefficient clashes with nothing, while every
+other term counts as written. Simplify the operator first (with
+`qf_op_type_simplify`) to remove near-zero and duplicate terms, which would
+otherwise inflate the number of groups.
+
+#### NOTE
+The coloring is the greedy *largest-first* heuristic (terms with the most
+clashes are placed first), so the resulting number of groups is an upper
+bound on the smallest achievable rather than a minimum. The graph itself is
+never built: memory grows linearly with the number of terms, where the edge
+array of `qf_op_type_non_commutation_edges` grows quadratically.
+
+#### IMPORTANT
+Whether these commuting groups agree with the line flow sets used to
+compile the time evolution of lattice Hamiltonians depends on the operator
+representation, not on the lattice. A flow set forbids two arrows that
+share a source or a target while permitting a head-to-tail chain. A
+transfer $T_{jk}$ acts on the odd generator of its source and the
+even generator of its target, so for the hopping terms of a
+[`QfTransferVertexOperator`](qf-transfer-op.html.md#c.QfTransferVertexOperator) the clash relation *is* that rule.
+Majorana and edge-vertex bilinears instead act on the same generator of a
+shared mode however they meet, so there a head-to-tail chain does **not**
+commute and the two partitions diverge.
+
+#### NOTE
+For simplicity, the example below shows only the
+[`QfMajoranaOperator`](qf-maj-op.html.md#c.QfMajoranaOperator) variant. The other operator representations
+follow the same pattern.
+
+```c
+uint64_t num_terms = 3;
+uint64_t num_modes = 6;
+uint32_t modes[6] = {0, 1, 1, 2, 3, 4};
+QkComplex64 coeffs[3] = {{1.0, 0.0}, {1.0, 0.0}, {1.0, 0.0}};
+uint32_t boundaries[4] = {0, 2, 4, 6};
+QfMajoranaOperator *op = qf_maj_op_new(num_terms, num_modes, coeffs, modes, boundaries);
+
+// Terms 0 and 1 share Majorana mode 1, so they land in different groups.
+QfExitCode exit = qf_maj_op_group_terms_by_non_commutation(op);
+assert(exit == QfExitCode_Success);
+assert(qf_maj_op_num_groups(op) == 2);
+
+qf_maj_op_free(op);
+```
+
+* **Parameters:**
+  * **op** – A pointer to the operator whose terms to group.
+* **Returns:**
+  An exit code. `QfExitCode_ValueError` is returned exactly when
+  `qf_op_type_non_commutation_edges` returns it: if `op` has more than
+  $2^{32}$ terms, or is a [`QfFermionOperator`](qf-ferm-op.html.md#c.QfFermionOperator) with a term of
+  degree above 20 and a non-zero coefficient. The operator’s groups are then
+  left untouched.
 
 ## Analysis
 
@@ -224,3 +306,11 @@ QfExitCode exit = qf_ferm_op_group_terms_by_electronic_structure(normal, num_mod
 ### void qf_transfer_op_groups_are_hermitian(const [QfTransferVertexOperator](qf-transfer-op.html.md#c.QfTransferVertexOperator) \*op, double atol, bool \*hermitian_out)
 
 ### void qf_transfer_op_groups_have_uniform_coeffs(const [QfTransferVertexOperator](qf-transfer-op.html.md#c.QfTransferVertexOperator) \*op, double atol, bool abs, bool \*uniform_out)
+
+### [QfExitCode](qf-exit-code.html.md#c.QfExitCode) qf_ferm_op_group_terms_by_non_commutation([QfFermionOperator](qf-ferm-op.html.md#c.QfFermionOperator) \*op)
+
+### [QfExitCode](qf-exit-code.html.md#c.QfExitCode) qf_maj_op_group_terms_by_non_commutation([QfMajoranaOperator](qf-maj-op.html.md#c.QfMajoranaOperator) \*op)
+
+### [QfExitCode](qf-exit-code.html.md#c.QfExitCode) qf_edge_op_group_terms_by_non_commutation([QfEdgeVertexOperator](qf-edge-op.html.md#c.QfEdgeVertexOperator) \*op)
+
+### [QfExitCode](qf-exit-code.html.md#c.QfExitCode) qf_transfer_op_group_terms_by_non_commutation([QfTransferVertexOperator](qf-transfer-op.html.md#c.QfTransferVertexOperator) \*op)

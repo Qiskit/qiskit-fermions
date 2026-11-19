@@ -160,6 +160,8 @@
 
   
 
+  
+
 
 
   
@@ -178,6 +180,7 @@
    .. automethod:: iter_terms
    .. automethod:: iter_terms_with_groups
    .. automethod:: min_num_modes
+   .. automethod:: non_commutation_edges
    .. automethod:: normal_ordered
    .. automethod:: num_groups
    .. automethod:: one

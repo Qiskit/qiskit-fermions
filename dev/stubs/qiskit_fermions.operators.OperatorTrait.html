@@ -10,7 +10,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>OperatorTrait - Qiskit Fermions 0.5.0.dev0+cd82240</title>
+        <title>OperatorTrait - Qiskit Fermions 0.5.0.dev0+97a0d13</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=fc6d6d93" />
@@ -163,7 +163,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.5.0.dev0+cd82240</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.5.0.dev0+97a0d13</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -189,7 +189,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.5.0.dev0+cd82240</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.5.0.dev0+97a0d13</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -257,6 +257,7 @@
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../pydoc/qiskit_fermions.operators.terms.html">Operator Terms</a><input aria-label="Toggle navigation of Operator Terms" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="qiskit_fermions.operators.terms.group_terms_by_electronic_structure.html">group_terms_by_electronic_structure</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qiskit_fermions.operators.terms.group_terms_by_non_commutation.html">group_terms_by_non_commutation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="qiskit_fermions.operators.terms.group_coeff_means.html">group_coeff_means</a></li>
 <li class="toctree-l3"><a class="reference internal" href="qiskit_fermions.operators.terms.groups_are_hermitian.html">groups_are_hermitian</a></li>
 <li class="toctree-l3"><a class="reference internal" href="qiskit_fermions.operators.terms.groups_have_uniform_coeffs.html">groups_have_uniform_coeffs</a></li>
@@ -640,6 +641,17 @@ operators: one more than the largest <em>fermionic</em> mode, i.e. <code class="
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="qiskit_fermions.operators.OperatorTrait.non_commutation_edges">
+<span class="sig-name descname"><span class="pre">non_commutation_edges</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qiskit_fermions.operators.OperatorTrait.non_commutation_edges" title="Link to this definition">¶</a></dt>
+<dd><p>Returns the pairs of terms that do not commute, i.e. this operator’s clash graph.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)">list</a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)">int</a>, <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)">int</a>]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="qiskit_fermions.operators.OperatorTrait.normal_ordered">
 <span class="sig-name descname"><span class="pre">normal_ordered</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qiskit_fermions.operators.OperatorTrait.normal_ordered" title="Link to this definition">¶</a></dt>
 <dd><p>Returns the normal-ordered form of this operator.</p>
@@ -809,6 +821,7 @@ the requested indices are built, in the given order.</p>
 <li><a class="reference internal" href="#qiskit_fermions.operators.OperatorTrait.iter_terms"><code class="docutils literal notranslate"><span class="pre">OperatorTrait.iter_terms()</span></code></a></li>
 <li><a class="reference internal" href="#qiskit_fermions.operators.OperatorTrait.iter_terms_with_groups"><code class="docutils literal notranslate"><span class="pre">OperatorTrait.iter_terms_with_groups()</span></code></a></li>
 <li><a class="reference internal" href="#qiskit_fermions.operators.OperatorTrait.min_num_modes"><code class="docutils literal notranslate"><span class="pre">OperatorTrait.min_num_modes()</span></code></a></li>
+<li><a class="reference internal" href="#qiskit_fermions.operators.OperatorTrait.non_commutation_edges"><code class="docutils literal notranslate"><span class="pre">OperatorTrait.non_commutation_edges()</span></code></a></li>
 <li><a class="reference internal" href="#qiskit_fermions.operators.OperatorTrait.normal_ordered"><code class="docutils literal notranslate"><span class="pre">OperatorTrait.normal_ordered()</span></code></a></li>
 <li><a class="reference internal" href="#qiskit_fermions.operators.OperatorTrait.num_groups"><code class="docutils literal notranslate"><span class="pre">OperatorTrait.num_groups()</span></code></a></li>
 <li><a class="reference internal" href="#qiskit_fermions.operators.OperatorTrait.one"><code class="docutils literal notranslate"><span class="pre">OperatorTrait.one()</span></code></a></li>
@@ -829,7 +842,7 @@ the requested indices are built, in the given order.</p>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=1a3b8b7e"></script>
+</div><script src="../_static/documentation_options.js?v=aafb43a3"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

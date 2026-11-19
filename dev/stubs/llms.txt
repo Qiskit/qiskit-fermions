@@ -24,6 +24,7 @@
 - [double_commutator](qiskit_fermions.operators.library.double_commutator.html.md): Computes the double-commutator of three operators.
 - [FCIDump](qiskit_fermions.operators.library.FCIDump.html.md): An electronic structure Hamiltonian in FCIDump format.
 - [group_terms_by_electronic_structure](qiskit_fermions.operators.terms.group_terms_by_electronic_structure.html.md): Groups the terms of an operator by their electronic structure.
+- [group_terms_by_non_commutation](qiskit_fermions.operators.terms.group_terms_by_non_commutation.html.md): Group the operator’s terms so that the terms sharing a group index mutually commute.
 - [group_coeff_means](qiskit_fermions.operators.terms.group_coeff_means.html.md): Returns the mean absolute coefficient magnitude of each group.
 - [groups_are_hermitian](qiskit_fermions.operators.terms.groups_are_hermitian.html.md): Returns, for each group, whether the operator formed by that group’s terms is Hermitian.
 - [groups_have_uniform_coeffs](qiskit_fermions.operators.terms.groups_have_uniform_coeffs.html.md): Returns, for each group, whether all of its coefficients are numerically equal.

@@ -627,6 +627,59 @@ expressed in the Majorana indices themselves.
 * **Returns:**
   The smallest number of fermionic modes, or `0` if the operator acts on no mode.
 
+#### non_commutation_edges()
+
+Return the pairs of terms that do **not** commute, i.e. this operator’s *clash graph*.
+
+Each pair is reported once as `(i, j)` with `i < j`, in ascending order, indexing into this
+operator’s current term order. This is the fermionic counterpart of
+[`noncommutation_graph()`](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.quantum_info.PauliList#noncommutation_graph), one level up the stack: the
+relation is read off the fermionic algebra rather than off a qubit mapping, so it holds
+independently of which mapper is applied afterwards.
+
+Commutation relates two whole terms, so this is an all-to-all comparison over the terms,
+independent of how many generators any one of them multiplies together.
+
+A term whose coefficient is exactly zero commutes with every other term, so it never has an
+edge. Every other term counts as written, so call [`simplify()`](#qiskit_fermions.operators.MajoranaOperator.simplify) first: it removes
+near-zero terms and merges duplicates, either of which would otherwise inflate the graph. It
+can also reorder the terms, so compute the edges on its result.
+
+The list holds one pair per clash, so it grows quadratically with the number of terms. To
+group a large operator, use [`group_terms_by_non_commutation()`](qiskit_fermions.operators.terms.group_terms_by_non_commutation.html.md#qiskit_fermions.operators.terms.group_terms_by_non_commutation), which never builds it.
+
+* **Returns:**
+  The clashing index pairs, sorted ascending.
+* **Raises:**
+  [**ValueError**](https://docs.python.org/3/builtins/exceptions.html#ValueError) – if the operator has more than $2^{32}$ terms, which its 32-bit term
+      indices cannot address.
+
+#### NOTE
+Indices refer to the operator’s *current* term order, which is not preserved across every
+transformation. Build the operator from its sparse arrays, or apply
+[`canonical_order()`](qiskit_fermions.operators.terms.canonical_order.html.md#qiskit_fermions.operators.terms.canonical_order) first, when the result has to be reproducible.
+
+### Examples
+
+Build a graph from the edges with any graph library, for example `rustworkx`:
+
+```pycon
+>>> import rustworkx as rx
+>>> from qiskit_fermions.operators import MajoranaOperator
+>>>
+>>> # built from the sparse arrays rather than a dictionary, because only the former
+>>> # fixes the term order that the indices below refer to
+>>> op = MajoranaOperator([1.0, 1.0, 1.0], [0, 1, 1, 2, 3, 4], [0, 2, 4, 6])
+>>> edges = op.non_commutation_edges()
+>>> edges
+[(0, 1)]
+>>> graph = rx.PyGraph()
+>>> _ = graph.add_nodes_from(range(len(op)))
+>>> _ = graph.add_edges_from_no_data(edges)
+```
+
+Terms 0 and 1 clash; term 2 is disjoint from both and stays isolated.
+
 #### normal_ordered(ascending=False, reduce=True)
 
 Returns an equivalent operator with normal ordered terms.

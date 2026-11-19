@@ -928,6 +928,69 @@ number of distinct modes: see [`get_support()`](#qiskit_fermions.operators.Fermi
 An operator acting on mode index `2**32 - 1` is not supported: the count would not be
 representable, and the call panics.
 
+#### non_commutation_edges()
+
+Return the pairs of terms that do **not** commute, i.e. this operator’s *clash graph*.
+
+Each pair is reported once as `(i, j)` with `i < j`, in ascending order, indexing into this
+operator’s current term order. This is the fermionic counterpart of
+[`noncommutation_graph()`](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.quantum_info.PauliList#noncommutation_graph), one level up the stack: the
+relation is read off the fermionic algebra rather than off a qubit mapping, so it holds
+independently of which mapper is applied afterwards.
+
+Commutation relates two whole terms, so this is an all-to-all comparison over the terms,
+independent of how many generators any one of them multiplies together.
+
+A term whose coefficient is exactly zero commutes with every other term, so it never has an
+edge. Every other term counts as written, so call [`simplify()`](#qiskit_fermions.operators.FermionOperator.simplify) first: it removes
+near-zero terms and merges duplicates, either of which would otherwise inflate the graph. It
+can also reorder the terms, so compute the edges on its result.
+
+The list holds one pair per clash, so it grows quadratically with the number of terms. To
+group a large operator, use [`group_terms_by_non_commutation()`](qiskit_fermions.operators.terms.group_terms_by_non_commutation.html.md#qiskit_fermions.operators.terms.group_terms_by_non_commutation), which never builds it.
+
+Each $a$ or $a^\dagger$ is itself a sum of two Majorana generators, so a term of
+this operator class expands into a sum of Majorana monomials whose contributions to a
+commutator can cancel. That cancellation is accounted for exactly: two terms are reported only
+if their commutator is genuinely non-zero.
+
+* **Returns:**
+  The clashing index pairs, sorted ascending.
+* **Raises:**
+  [**ValueError**](https://docs.python.org/3/builtins/exceptions.html#ValueError) – if a term with a non-zero coefficient has a degree above 20. A term of degree
+      $d$ expands into $2^d$ Majorana monomials, so past that bound the
+      expansions alone could exhaust memory, and the term is refused before any are built.
+      The bound is per term. Comparing two overlapping terms costs the product of their
+      expansions, so two such terms of high degree stop being practical, and can still
+      exhaust memory, well within it. Also raised if the operator has more than
+      $2^{32}$ terms, which its 32-bit term indices cannot address.
+
+#### NOTE
+Indices refer to the operator’s *current* term order, which is not preserved across every
+transformation. Build the operator from its sparse arrays, or apply
+[`canonical_order()`](qiskit_fermions.operators.terms.canonical_order.html.md#qiskit_fermions.operators.terms.canonical_order) first, when the result has to be reproducible.
+
+### Examples
+
+Build a graph from the edges with any graph library, for example `rustworkx`:
+
+```pycon
+>>> import rustworkx as rx
+>>> from qiskit_fermions.operators import FermionOperator
+>>>
+>>> # built from the sparse arrays rather than a dictionary, because only the former
+>>> # fixes the term order that the indices below refer to
+>>> op = FermionOperator([1.0] * 3, [True, False] * 3, [0, 1, 1, 2, 3, 4], [0, 2, 4, 6])
+>>> edges = op.non_commutation_edges()
+>>> edges
+[(0, 1)]
+>>> graph = rx.PyGraph()
+>>> _ = graph.add_nodes_from(range(len(op)))
+>>> _ = graph.add_edges_from_no_data(edges)
+```
+
+Terms 0 and 1 clash; term 2 is disjoint from both and stays isolated.
+
 #### normal_ordered(sandwich=None)
 
 Returns an equivalent operator with normal ordered terms.
