@@ -16,13 +16,15 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
+import scipy.linalg
 from qiskit.passmanager import MultiStagePassManager
-from qiskit.quantum_info import Operator
+from qiskit.quantum_info import Operator, SparsePauliOp
 from qiskit.transpiler import generate_preset_pass_manager
 from qiskit.transpiler.passes.synthesis.high_level_synthesis import HLSConfig
 from qiskit_fermions.circuit import FermionicCircuit
 from qiskit_fermions.circuit.library import OrbitalRotation
 from qiskit_fermions.mappers.library import jordan_wigner
+from qiskit_fermions.operators import FermionOperator
 from qiskit_fermions.transpiler import (
     FermionicCircuitToDAG,
     FermionicPassManager,
@@ -104,6 +106,56 @@ def test_orbital_rotation_unitary_matches_the_single_particle_block(num_modes):
                 matrix[1 << target, 1 << source], unitary[target, source], atol=1e-10
             )
     np.testing.assert_allclose(matrix[0, 0], 1.0, atol=1e-10)
+
+
+def _exact_rotation_matrix(unitary, wires, num_modes):
+    """The Jordan-Wigner image of the many-body rotation on all particle-number sectors.
+
+    That is ``exp(sum_ij log(U)_ij a†_i a_j)`` on the modes ``wires``, which maps
+    ``a†_i -> sum_j U[j, i] a†_j``.
+    """
+    log = scipy.linalg.logm(unitary)
+    generator = FermionOperator.from_dict(
+        {
+            ((True, wires[i]), (False, wires[j])): log[i, j]
+            for i in range(len(wires))
+            for j in range(len(wires))
+            if abs(log[i, j]) > 1e-14
+        }
+    )
+    observable = jordan_wigner(generator, num_modes)
+    return scipy.linalg.expm(SparsePauliOp.from_sparse_observable(observable).to_matrix())
+
+
+@pytest.mark.parametrize(
+    "wires",
+    [
+        [0, 1, 2, 3, 4],
+        [0, 2],
+        [4, 0, 2],
+        [1, 0, 2, 3],
+        [0, 2, 1, 3],
+        [3, 1, 0, 2],
+        [4, 1, 3, 0],
+    ],
+)
+def test_orbital_rotation_on_permuted_or_gapped_wires_is_exact(wires):
+    """A Givens factor between modes that are adjacent in the gate but not on the register is exact.
+
+    Under Jordan-Wigner it is a hop across the modes in between, whose Z-string makes its two
+    non-commuting parts act on more than two qubits. The qubit stage once handed such a hop to a
+    product formula, and the rotation came out slightly wrong.
+    """
+    num_modes = 5
+    unitary = random_unitary(len(wires), seed=len(wires) + sum(wires))
+    circ = FermionicCircuit(num_modes)
+    circ.append(OrbitalRotation(unitary), [circ.modes[w] for w in wires])
+
+    matrix = Operator(_pass_manager(optimization_level=0).run(circ)).data
+
+    np.testing.assert_allclose(
+        matrix, _exact_rotation_matrix(unitary, wires, num_modes), atol=1e-10
+    )
 
 
 def test_successive_rotations_are_lowered_in_circuit_order():

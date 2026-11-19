@@ -82,7 +82,7 @@ Qubit-stage synthesis
 
 The plugins above map fermionic instructions to qubit ones. The following is instead a plugin of
 Qiskit's :class:`~qiskit.transpiler.passes.HighLevelSynthesis` for the qubit stage, which recognizes
-the image of a fermionic hop between adjacent modes and emits it as a single
+the Jordan-Wigner image of a fermionic hop and synthesizes it exactly around a single
 :class:`~qiskit.circuit.library.XXPlusYYGate`. The Jordan-Wigner preset registers it.
 
 .. autosummary::

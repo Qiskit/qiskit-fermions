@@ -50,7 +50,7 @@ def _map_factors(
 
     A hop between adjacent modes becomes a single :class:`~qiskit.circuit.library.XXPlusYYGate`, as
     the former plugins emitted, rather than a Pauli evolution that relies on the qubit stage to
-    recognize it.
+    recognize it. A hop across other modes becomes the exact circuit of :func:`.match_hop`.
     """
     initialize = TrivialOccupationInitializeModesSynthesis()
     evolve = MapperFnEvolutionSynthesis(jordan_wigner)
@@ -69,8 +69,12 @@ def _map_factors(
             if matched is None:
                 evolve.run(node, out_dag, f2q_layout=f2q_layout)
             else:
-                hop, (first, second) = matched
-                out_dag.apply_operation_back(hop, (qreg[first], qreg[second]))
+                hop, indices = matched
+                for hop_instruction in hop.data:
+                    out_dag.apply_operation_back(
+                        hop_instruction.operation,
+                        tuple(qreg[indices[hop.find_bit(q).index]] for q in hop_instruction.qubits),
+                    )
         else:
             raise TypeError(f"Cannot map a gate of type {type(gate).__name__} to qubits.")
 

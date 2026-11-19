@@ -42,8 +42,11 @@ class FermionicGivensDecomposition:
     The terms of a two-mode generator, :math:`a^\dagger_0 a_1` and :math:`a^\dagger_1 a_0`, do not
     commute with each other, so splitting it up any further would only approximate the factor: the
     fermion-to-qubit stage maps and synthesizes it whole. Under Jordan-Wigner, the generator of a
-    rotation between adjacent modes is a hop between adjacent qubits, which the qubit stage can
-    recognize (see :class:`.HopEvolutionSynthesis`).
+    rotation between two modes is a hop between their qubits, which the qubit stage can recognize
+    and synthesize exactly (see :class:`.HopEvolutionSynthesis`). The modes of a factor are adjacent
+    in the gate, which makes them adjacent on the register only if the gate's wires are sorted and
+    contiguous. Otherwise, the hop also acts on the qubits of the modes in between with a Z-string,
+    which costs extra two-qubit gates.
 
     Because :math:`U \mapsto \exp(\sum_{ij} \log(U)_{ij} a^\dagger_i a_j)` is a group homomorphism,
     the product of the factors equals the full rotation exactly. The decomposition itself therefore
