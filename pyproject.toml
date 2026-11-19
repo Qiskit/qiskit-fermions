@@ -59,6 +59,11 @@ ffsim = [
     # The ansatz gates of the circuit library take an ffsim operator as their input,
     # so they require this extra; everything else in the package works without it.
     "ffsim",
+    # PySCF 2.15.1 released only partial wheels and is missing a required patch
+    # for the xcfun library in its sdist distribution. Therefore, it cannot be
+    # installed properly. We explicitly disallow this version (temporarily if
+    # they can fix it or yank the release) of this transitive dependency.
+    "pyscf!=2.15.1",
 ]
 pyomo = [
     # Pyomo is a modeling layer, not a solver: choosing one is deliberately left to the user (see
