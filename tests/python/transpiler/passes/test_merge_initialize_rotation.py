@@ -345,6 +345,63 @@ def test_merge_preserves_state_and_reduces_gate_count():
     assert not {"p", "rz"} & set(merged_ops)
 
 
+@pytest.mark.parametrize(
+    ("num_modes", "occupation", "init_wires", "rotation_wires"),
+    [
+        # pattern 1: the init, the rotation, or both on reversed wires
+        (2, [1, 0], [0, 1], [[1, 0]]),
+        (2, [1, 0], [1, 0], [[0, 1]]),
+        (2, [1, 0], [1, 0], [[1, 0]]),
+        # pattern 3: a per-spin rotation on reversed wires, in either half
+        (4, [1, 0, 1, 0], [0, 1, 2, 3], [[1, 0]]),
+        (4, [1, 0, 1, 0], [0, 1, 2, 3], [[3, 2]]),
+        (4, [1, 0, 1, 0], [0, 1, 2, 3], [[1, 0], [3, 2]]),
+        # pattern 3: a full-register init on permuted wires
+        (4, [1, 0, 0, 1], [1, 0, 3, 2], [[0, 1], [2, 3]]),
+    ],
+)
+def test_merge_on_permuted_wires_preserves_state(num_modes, occupation, init_wires, rotation_wires):
+    """A gate on permuted wires fuses with its occupation and unitary in the order of its wires.
+
+    Both gates index their payload in the order of their own wires, so fusing them as written onto
+    sorted wires prepares a different state. The rotations act on adjacent modes here, on which the
+    unmerged reference synthesis is exact.
+    """
+    circ = FermionicCircuit(num_modes)
+    circ.append(InitializeModes(occupation), [circ.modes[i] for i in init_wires])
+    for seed, wires in enumerate(rotation_wires, start=1):
+        circ.append(OrbitalRotation(random_unitary(2, seed=seed)), [circ.modes[i] for i in wires])
+
+    assert all(name == "PrepareSlaterDeterminant" for name, _ in _merge(circ))
+    _assert_equal_up_to_global_phase(
+        _reference_pass_manager().run(circ), _merged_pass_manager().run(circ)
+    )
+
+
+def test_merge_on_permuted_wires_reorders_payload():
+    """The fused gate carries the occupation and unitary permuted into sorted mode order.
+
+    This checks the payload directly rather than the synthesized state, so it covers a full
+    permutation of a four-mode rotation, whose rotations are not all between adjacent modes.
+    """
+    occupation = np.array([1, 1, 0, 0], dtype=bool)
+    unitary = random_unitary(4, seed=2)
+    init_wires, rotation_wires = [2, 0, 3, 1], [3, 1, 0, 2]
+    circ = FermionicCircuit(4)
+    circ.append(InitializeModes(occupation), [circ.modes[i] for i in init_wires])
+    circ.append(OrbitalRotation(unitary), [circ.modes[i] for i in rotation_wires])
+
+    out = MergeSlaterDeterminantPreparation().run(FermionicCircuitToDAG().run(circ))
+    (node,) = out.topological_op_nodes()
+
+    assert [out.find_bit(qubit).index for qubit in node.qargs] == [0, 1, 2, 3]
+    init_perm, rotation_perm = np.argsort(init_wires), np.argsort(rotation_wires)
+    np.testing.assert_array_equal(node.op.occupation, occupation[init_perm])
+    np.testing.assert_allclose(
+        node.op.rotation_unitary, unitary[np.ix_(rotation_perm, rotation_perm)]
+    )
+
+
 def test_merge_ucj_workflow():
     """The InitializeModes.from_hartree_fock + decomposed UCJ workflow fuses (pattern 3).
 
