@@ -11,7 +11,7 @@
         <link rel="prefetch" href="_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Release Notes - Qiskit Fermions 0.4.1+1bdbc43</title>
+        <title>Release Notes - Qiskit Fermions 0.4.1+71f014e</title>
       <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="_static/styles/qiskit-sphinx-theme.css?v=fc6d6d93" />
@@ -164,7 +164,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="index.html"><div class="brand">Qiskit Fermions 0.4.1+1bdbc43</div></a>
+      <a href="index.html"><div class="brand">Qiskit Fermions 0.4.1+71f014e</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -190,7 +190,7 @@
     <img class="sidebar-logo only-dark" src="_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.4.1+1bdbc43</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.4.1+71f014e</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="search.html" role="search">
@@ -460,6 +460,25 @@
         <article role="main" id="furo-main-content">
           <section id="release-notes">
 <span id="id1"></span><h1>Release Notes<a class="headerlink" href="#release-notes" title="Link to this heading">¶</a></h1>
+<section id="upcoming-release-stable-0-4">
+<span id="release-notes-upcoming-release-stable-0-4"></span><h2>Upcoming release (<code class="docutils literal notranslate"><span class="pre">stable/0.4</span></code>)<a class="headerlink" href="#upcoming-release-stable-0-4" title="Link to this heading">¶</a></h2>
+<section id="bug-fixes">
+<span id="release-notes-upcoming-release-stable-0-4-bug-fixes"></span><h3>Bug Fixes<a class="headerlink" href="#bug-fixes" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p><a class="reference internal" href="stubs/qiskit_fermions.transpiler.presets.generate_preset_jw_pass_manager.html#qiskit_fermions.transpiler.presets.generate_preset_jw_pass_manager" title="qiskit_fermions.transpiler.presets.generate_preset_jw_pass_manager"><code class="xref py py-func docutils literal notranslate"><span class="pre">generate_preset_jw_pass_manager()</span></code></a> now lowers an
+<a class="reference internal" href="stubs/qiskit_fermions.circuit.library.OrbitalRotation.html#qiskit_fermions.circuit.library.OrbitalRotation" title="qiskit_fermions.circuit.library.OrbitalRotation"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrbitalRotation</span></code></a> or a
+<a class="reference internal" href="stubs/qiskit_fermions.circuit.library.PrepareSlaterDeterminant.html#qiskit_fermions.circuit.library.PrepareSlaterDeterminant" title="qiskit_fermions.circuit.library.PrepareSlaterDeterminant"><code class="xref py py-class docutils literal notranslate"><span class="pre">PrepareSlaterDeterminant</span></code></a> exactly when its modes are
+not contiguous or not in ascending order on the register. Previously, the result was slightly
+wrong for a rotation with complex entries: under Jordan-Wigner, a Givens factor between modes
+that are not adjacent on the register is a hop with a Z-string, which
+<code class="xref py py-class docutils literal notranslate"><span class="pre">HopEvolutionSynthesis</span></code> declined and left to a product
+formula. The plugin now synthesizes the evolution under any hop with a Z-string exactly. The
+deprecated <code class="xref py py-class docutils literal notranslate"><span class="pre">GivensDecompositionOrbitalRotationSynthesis</span></code>
+and <code class="xref py py-class docutils literal notranslate"><span class="pre">GivensDecompositionSlaterDeterminantSynthesis</span></code>
+are fixed in the same way.</p></li>
+</ul>
+</section>
+</section>
 <section id="release-notes-0-4-1">
 <span id="id2"></span><h2>0.4.1<a class="headerlink" href="#release-notes-0-4-1" title="Link to this heading">¶</a></h2>
 <section id="other-notes">
@@ -659,8 +678,8 @@ deprecated. Passing an <code class="docutils literal notranslate"><span class="p
 <code class="docutils literal notranslate"><span class="pre">QDriftTrotterization(FermionicQDrift(num_terms,</span> <span class="pre">weights=...,</span> <span class="pre">rng=...))</span></code> where it was <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p></li>
 </ul>
 </section>
-<section id="bug-fixes">
-<span id="release-notes-0-4-0-bug-fixes"></span><h3>Bug Fixes<a class="headerlink" href="#bug-fixes" title="Link to this heading">¶</a></h3>
+<section id="release-notes-0-4-0-bug-fixes">
+<span id="id4"></span><h3>Bug Fixes<a class="headerlink" href="#release-notes-0-4-0-bug-fixes" title="Link to this heading">¶</a></h3>
 <ul class="simple">
 <li><p><a class="reference internal" href="stubs/qiskit_fermions.transpiler.passes.F2QSynthesis.html#qiskit_fermions.transpiler.passes.F2QSynthesis" title="qiskit_fermions.transpiler.passes.F2QSynthesis"><code class="xref py py-class docutils literal notranslate"><span class="pre">F2QSynthesis</span></code></a>,
 <a class="reference internal" href="stubs/qiskit_fermions.transpiler.passes.RelabelModes.html#qiskit_fermions.transpiler.passes.RelabelModes" title="qiskit_fermions.transpiler.passes.RelabelModes"><code class="xref py py-class docutils literal notranslate"><span class="pre">RelabelModes</span></code></a> and
@@ -680,7 +699,7 @@ had a single factor.</p></li>
 </ul>
 </section>
 <section id="release-notes-0-4-0-other-notes">
-<span id="id4"></span><h3>Other Notes<a class="headerlink" href="#release-notes-0-4-0-other-notes" title="Link to this heading">¶</a></h3>
+<span id="id5"></span><h3>Other Notes<a class="headerlink" href="#release-notes-0-4-0-other-notes" title="Link to this heading">¶</a></h3>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">qiskit~=2.6.0</span></code> is now supported in addition to <code class="docutils literal notranslate"><span class="pre">qiskit~=2.5.0</span></code>. The Qiskit requirement
 is now <code class="docutils literal notranslate"><span class="pre">qiskit&gt;=2.5.0,&lt;2.7</span></code>.</p></li>
@@ -688,9 +707,9 @@ is now <code class="docutils literal notranslate"><span class="pre">qiskit&gt;=2
 </section>
 </section>
 <section id="release-notes-0-3-0">
-<span id="id5"></span><h2>0.3.0<a class="headerlink" href="#release-notes-0-3-0" title="Link to this heading">¶</a></h2>
+<span id="id6"></span><h2>0.3.0<a class="headerlink" href="#release-notes-0-3-0" title="Link to this heading">¶</a></h2>
 <section id="release-notes-0-3-0-prelude">
-<span id="id6"></span><h3>Prelude<a class="headerlink" href="#release-notes-0-3-0-prelude" title="Link to this heading">¶</a></h3>
+<span id="id7"></span><h3>Prelude<a class="headerlink" href="#release-notes-0-3-0-prelude" title="Link to this heading">¶</a></h3>
 <p>This release adds a framework for ternary-tree fermion-to-qubit encodings. A ternary tree is
 described once and compiled into an encoding that all four operator mappers accept, which makes
 every mapping expressible as such a tree available, including the Jordan-Wigner, parity,
@@ -704,7 +723,7 @@ mode even after the transpiler relabels modes or routes qubits, and the new <cod
 synthesis plugin is part of the preset Jordan-Wigner pass manager.</p>
 </section>
 <section id="release-notes-0-3-0-python-api-features">
-<span id="id7"></span><h3>Python API Features<a class="headerlink" href="#release-notes-0-3-0-python-api-features" title="Link to this heading">¶</a></h3>
+<span id="id8"></span><h3>Python API Features<a class="headerlink" href="#release-notes-0-3-0-python-api-features" title="Link to this heading">¶</a></h3>
 <ul>
 <li><p>Added <a class="reference internal" href="stubs/qiskit_fermions.circuit.FermionicCircuit.html#qiskit_fermions.circuit.FermionicCircuit.barrier" title="qiskit_fermions.circuit.FermionicCircuit.barrier"><code class="xref py py-meth docutils literal notranslate"><span class="pre">FermionicCircuit.barrier()</span></code></a>, which re-exposes
 <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.QuantumCircuit#barrier" title="(in Qiskit v2.6)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">barrier()</span></code></a> on the fermionic layer:</p>
@@ -810,7 +829,7 @@ encodings.</p>
 </ul>
 </section>
 <section id="release-notes-0-3-0-c-api-features">
-<span id="id8"></span><h3>C API Features<a class="headerlink" href="#release-notes-0-3-0-c-api-features" title="Link to this heading">¶</a></h3>
+<span id="id9"></span><h3>C API Features<a class="headerlink" href="#release-notes-0-3-0-c-api-features" title="Link to this heading">¶</a></h3>
 <ul>
 <li><p>Added the ternary-tree framework to the C API. Trees are built with
 <a class="reference internal" href="cdoc/qf-ternary-tree.html#c.qf_ternary_tree_new" title="qf_ternary_tree_new"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_ternary_tree_new()</span></code></a> (from a parent-and-label specification, the general interface),
@@ -836,13 +855,13 @@ code before compiling the result.</p>
 </ul>
 </section>
 <section id="release-notes-0-3-0-python-api-upgrade-notes">
-<span id="id9"></span><h3>Python API Upgrade Notes<a class="headerlink" href="#release-notes-0-3-0-python-api-upgrade-notes" title="Link to this heading">¶</a></h3>
+<span id="id10"></span><h3>Python API Upgrade Notes<a class="headerlink" href="#release-notes-0-3-0-python-api-upgrade-notes" title="Link to this heading">¶</a></h3>
 <ul class="simple">
 <li><p>We dropped support for Python 3.10 which has reached end-of-life.</p></li>
 </ul>
 </section>
 <section id="release-notes-0-3-0-bug-fixes">
-<span id="id10"></span><h3>Bug Fixes<a class="headerlink" href="#release-notes-0-3-0-bug-fixes" title="Link to this heading">¶</a></h3>
+<span id="id11"></span><h3>Bug Fixes<a class="headerlink" href="#release-notes-0-3-0-bug-fixes" title="Link to this heading">¶</a></h3>
 <ul class="simple">
 <li><p><a class="reference internal" href="cdoc/qf-mappers-library.html#c.qf_ferm_op_jordan_wigner" title="qf_ferm_op_jordan_wigner"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_ferm_op_jordan_wigner()</span></code></a>, <a class="reference internal" href="cdoc/qf-mappers-library.html#c.qf_maj_op_jordan_wigner" title="qf_maj_op_jordan_wigner"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_maj_op_jordan_wigner()</span></code></a>,
 <a class="reference internal" href="cdoc/qf-mappers-library.html#c.qf_edge_op_jordan_wigner" title="qf_edge_op_jordan_wigner"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_edge_op_jordan_wigner()</span></code></a> and <a class="reference internal" href="cdoc/qf-mappers-library.html#c.qf_transfer_op_jordan_wigner" title="qf_transfer_op_jordan_wigner"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_transfer_op_jordan_wigner()</span></code></a> now return
@@ -852,9 +871,9 @@ aborting the process.</p></li>
 </section>
 </section>
 <section id="release-notes-0-2-0">
-<span id="id11"></span><h2>0.2.0<a class="headerlink" href="#release-notes-0-2-0" title="Link to this heading">¶</a></h2>
+<span id="id12"></span><h2>0.2.0<a class="headerlink" href="#release-notes-0-2-0" title="Link to this heading">¶</a></h2>
 <section id="release-notes-0-2-0-prelude">
-<span id="id12"></span><h3>Prelude<a class="headerlink" href="#release-notes-0-2-0-prelude" title="Link to this heading">¶</a></h3>
+<span id="id13"></span><h3>Prelude<a class="headerlink" href="#release-notes-0-2-0-prelude" title="Link to this heading">¶</a></h3>
 <p>This release grows the control this package gives over circuit synthesis. An <code class="docutils literal notranslate"><span class="pre">Evolution</span></code> gate
 now takes an explicit <code class="docutils literal notranslate"><span class="pre">synthesis</span></code> method, a new <code class="docutils literal notranslate"><span class="pre">synthesis</span></code> module supplies fermionic product
 formulas of first and higher order, and the <code class="docutils literal notranslate"><span class="pre">FermionicTrotterization</span></code> pass selects and applies
@@ -878,7 +897,7 @@ release, all of this was done by removal rather than deprecation: the upgrade no
 every removed API with its replacement, and are worth reading in full before upgrading.</p>
 </section>
 <section id="release-notes-0-2-0-python-api-features">
-<span id="id13"></span><h3>Python API Features<a class="headerlink" href="#release-notes-0-2-0-python-api-features" title="Link to this heading">¶</a></h3>
+<span id="id14"></span><h3>Python API Features<a class="headerlink" href="#release-notes-0-2-0-python-api-features" title="Link to this heading">¶</a></h3>
 <ul>
 <li><p>How an <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate gets decomposed in fermionic space is now configurable through its
 new keyword-only <code class="docutils literal notranslate"><span class="pre">synthesis</span></code> argument, mirroring the <code class="docutils literal notranslate"><span class="pre">synthesis</span></code> argument of Qiskit’s
@@ -1101,7 +1120,7 @@ compute the trace of an operator on a fixed <code class="docutils literal notran
 </ul>
 </section>
 <section id="release-notes-0-2-0-c-api-features">
-<span id="id14"></span><h3>C API Features<a class="headerlink" href="#release-notes-0-2-0-c-api-features" title="Link to this heading">¶</a></h3>
+<span id="id15"></span><h3>C API Features<a class="headerlink" href="#release-notes-0-2-0-c-api-features" title="Link to this heading">¶</a></h3>
 <ul>
 <li><p>Added <a class="reference internal" href="cdoc/qf-ferm-op.html#c.qf_ferm_op_conserves_sector" title="qf_ferm_op_conserves_sector"><code class="xref c c-func docutils literal notranslate"><span class="pre">qf_ferm_op_conserves_sector()</span></code></a>, which checks that every term of a
 <a class="reference internal" href="cdoc/qf-ferm-op.html#c.QfFermionOperator" title="QfFermionOperator"><code class="xref c c-struct docutils literal notranslate"><span class="pre">QfFermionOperator</span></code></a> conserves the particle number <em>within each block</em> of modes. It
@@ -1233,7 +1252,7 @@ the existing <a class="reference internal" href="cdoc/qf-mappers-library.html#c.
 </ul>
 </section>
 <section id="release-notes-0-2-0-python-api-upgrade-notes">
-<span id="id15"></span><h3>Python API Upgrade Notes<a class="headerlink" href="#release-notes-0-2-0-python-api-upgrade-notes" title="Link to this heading">¶</a></h3>
+<span id="id16"></span><h3>Python API Upgrade Notes<a class="headerlink" href="#release-notes-0-2-0-python-api-upgrade-notes" title="Link to this heading">¶</a></h3>
 <ul>
 <li><p>The <code class="docutils literal notranslate"><span class="pre">qiskit_fermions.linalg.apply_unitary</span></code> and
 <code class="docutils literal notranslate"><span class="pre">qiskit_fermions.linalg.linear_operator</span></code> functions have been removed. They were thin wrappers
@@ -1476,7 +1495,7 @@ visible at install time. Installing <code class="docutils literal notranslate"><
 </ul>
 </section>
 <section id="release-notes-0-2-0-bug-fixes">
-<span id="id16"></span><h3>Bug Fixes<a class="headerlink" href="#release-notes-0-2-0-bug-fixes" title="Link to this heading">¶</a></h3>
+<span id="id17"></span><h3>Bug Fixes<a class="headerlink" href="#release-notes-0-2-0-bug-fixes" title="Link to this heading">¶</a></h3>
 <ul>
 <li><p>Fixed the excessive memory consumption of
 <a class="reference internal" href="stubs/qiskit_fermions.mappers.library.fermion_jordan_wigner.html#qiskit_fermions.mappers.library.fermion_jordan_wigner" title="qiskit_fermions.mappers.library.fermion_jordan_wigner"><code class="xref py py-func docutils literal notranslate"><span class="pre">fermion_jordan_wigner()</span></code></a> and of
@@ -1569,9 +1588,9 @@ the input <a class="reference internal" href="stubs/qiskit_fermions.operators.Fe
 </section>
 </section>
 <section id="release-notes-0-1-0">
-<span id="id17"></span><h2>0.1.0<a class="headerlink" href="#release-notes-0-1-0" title="Link to this heading">¶</a></h2>
+<span id="id18"></span><h2>0.1.0<a class="headerlink" href="#release-notes-0-1-0" title="Link to this heading">¶</a></h2>
 <section id="release-notes-0-1-0-prelude">
-<span id="id18"></span><h3>Prelude<a class="headerlink" href="#release-notes-0-1-0-prelude" title="Link to this heading">¶</a></h3>
+<span id="id19"></span><h3>Prelude<a class="headerlink" href="#release-notes-0-1-0-prelude" title="Link to this heading">¶</a></h3>
 <p>This is the first release of Qiskit Fermions, an extension of Qiskit with tools for fermionic
 systems.  It provides operator data structures, a framework and library for converting those
 operators to qubit form (mappers), and a framework and library for synthesizing the
@@ -1631,6 +1650,10 @@ through first-party bindings for both Python and C.</p>
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">Release Notes</a><ul>
+<li><a class="reference internal" href="#upcoming-release-stable-0-4">Upcoming release (<code class="docutils literal notranslate"><span class="pre">stable/0.4</span></code>)</a><ul>
+<li><a class="reference internal" href="#bug-fixes">Bug Fixes</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#release-notes-0-4-1">0.4.1</a><ul>
 <li><a class="reference internal" href="#other-notes">Other Notes</a></li>
 </ul>
@@ -1641,7 +1664,7 @@ through first-party bindings for both Python and C.</p>
 <li><a class="reference internal" href="#c-api-features">C API Features</a></li>
 <li><a class="reference internal" href="#python-api-upgrade-notes">Python API Upgrade Notes</a></li>
 <li><a class="reference internal" href="#python-api-deprecation-notes">Python API Deprecation Notes</a></li>
-<li><a class="reference internal" href="#bug-fixes">Bug Fixes</a></li>
+<li><a class="reference internal" href="#release-notes-0-4-0-bug-fixes">Bug Fixes</a></li>
 <li><a class="reference internal" href="#release-notes-0-4-0-other-notes">Other Notes</a></li>
 </ul>
 </li>
@@ -1679,7 +1702,7 @@ through first-party bindings for both Python and C.</p>
       
     </aside>
   </div>
-</div><script src="_static/documentation_options.js?v=946b811c"></script>
+</div><script src="_static/documentation_options.js?v=e352a2d0"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/scripts/furo.js?v=46bd48cc"></script>
