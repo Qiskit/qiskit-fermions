@@ -20,9 +20,9 @@ run’s rotations are multiplied in circuit order (later rotation on the left) t
 `rotation_unitary`. Because the merged gate implements exactly that composed basis change, the
 rewrite leaves the simulated state vector unchanged.
 
-Only rotations on the *identical* mode set are merged: two rotations on different (even
-overlapping) mode sets, or rotations separated by any other operation on a shared wire, break the
-run and are left untouched. This is the shape produced, e.g., by two adjacent per-spin rotations
+Only rotations on the *identical* modes, in the identical order, are merged: two rotations on
+different (even overlapping) mode sets, on the same modes in a different order, or separated by
+any other operation on a shared wire, break the run and are left untouched. This is the shape produced, e.g., by two adjacent per-spin rotations
 on the same spin half, or by consecutive [`UCJ`](qiskit_fermions.circuit.library.UCJ.html.md#qiskit_fermions.circuit.library.UCJ) layers whose trailing and leading orbital
 rotations meet on the same modes.
 

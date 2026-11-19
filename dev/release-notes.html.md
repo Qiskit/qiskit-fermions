@@ -38,6 +38,13 @@
   and `GivensDecompositionSlaterDeterminantSynthesis`
   are fixed in the same way.
 
+- [`MergeOrbitalRotations`](stubs/qiskit_fermions.transpiler.passes.MergeOrbitalRotations.html.md#qiskit_fermions.transpiler.passes.MergeOrbitalRotations) now merges only consecutive
+  [`OrbitalRotation`](stubs/qiskit_fermions.circuit.library.OrbitalRotation.html.md#qiskit_fermions.circuit.library.OrbitalRotation) gates that act on the same modes in the
+  same order. Previously, consecutive rotations on different mode sets, for example on modes
+  `(1, 2)`, then `(0, 1, 2)`, then `(1, 2)`, made the pass fail with a `ValueError`, and
+  rotations on the same modes in a different order, for example `(0, 1)` followed by `(1, 0)`,
+  were merged into a single rotation that prepares a different state.
+
 <a id="release-notes-upcoming-release-main-other-notes"></a>
 
 ### Other Notes

@@ -11,7 +11,7 @@
         <link rel="prefetch" href="_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Release Notes - Qiskit Fermions 0.5.0.dev0+d171014</title>
+        <title>Release Notes - Qiskit Fermions 0.5.0.dev0+602c074</title>
       <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="_static/styles/qiskit-sphinx-theme.css?v=fc6d6d93" />
@@ -164,7 +164,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="index.html"><div class="brand">Qiskit Fermions 0.5.0.dev0+d171014</div></a>
+      <a href="index.html"><div class="brand">Qiskit Fermions 0.5.0.dev0+602c074</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -190,7 +190,7 @@
     <img class="sidebar-logo only-dark" src="_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.5.0.dev0+d171014</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.5.0.dev0+602c074</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="search.html" role="search">
@@ -493,6 +493,14 @@ formula. The plugin now synthesizes the evolution under any hop with a Z-string 
 deprecated <code class="xref py py-class docutils literal notranslate"><span class="pre">GivensDecompositionOrbitalRotationSynthesis</span></code>
 and <code class="xref py py-class docutils literal notranslate"><span class="pre">GivensDecompositionSlaterDeterminantSynthesis</span></code>
 are fixed in the same way.</p></li>
+</ul>
+<ul class="simple">
+<li><p><a class="reference internal" href="stubs/qiskit_fermions.transpiler.passes.MergeOrbitalRotations.html#qiskit_fermions.transpiler.passes.MergeOrbitalRotations" title="qiskit_fermions.transpiler.passes.MergeOrbitalRotations"><code class="xref py py-class docutils literal notranslate"><span class="pre">MergeOrbitalRotations</span></code></a> now merges only consecutive
+<a class="reference internal" href="stubs/qiskit_fermions.circuit.library.OrbitalRotation.html#qiskit_fermions.circuit.library.OrbitalRotation" title="qiskit_fermions.circuit.library.OrbitalRotation"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrbitalRotation</span></code></a> gates that act on the same modes in the
+same order. Previously, consecutive rotations on different mode sets, for example on modes
+<code class="docutils literal notranslate"><span class="pre">(1,</span> <span class="pre">2)</span></code>, then <code class="docutils literal notranslate"><span class="pre">(0,</span> <span class="pre">1,</span> <span class="pre">2)</span></code>, then <code class="docutils literal notranslate"><span class="pre">(1,</span> <span class="pre">2)</span></code>, made the pass fail with a <code class="docutils literal notranslate"><span class="pre">ValueError</span></code>, and
+rotations on the same modes in a different order, for example <code class="docutils literal notranslate"><span class="pre">(0,</span> <span class="pre">1)</span></code> followed by <code class="docutils literal notranslate"><span class="pre">(1,</span> <span class="pre">0)</span></code>,
+were merged into a single rotation that prepares a different state.</p></li>
 </ul>
 </section>
 <section id="other-notes">
@@ -1714,7 +1722,7 @@ through first-party bindings for both Python and C.</p>
       
     </aside>
   </div>
-</div><script src="_static/documentation_options.js?v=692c0b73"></script>
+</div><script src="_static/documentation_options.js?v=441ac704"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/scripts/furo.js?v=46bd48cc"></script>
