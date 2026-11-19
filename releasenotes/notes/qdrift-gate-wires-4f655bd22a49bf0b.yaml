@@ -1,0 +1,14 @@
+---
+fixes:
+  - |
+    :class:`~qiskit_fermions.transpiler.passes.QDriftTrotterization` now places the gates it samples
+    on the modes of the :class:`~qiskit_fermions.circuit.library.Evolution` gate they replace, in
+    that gate's order. Previously they were placed on all modes of the circuit, so a gate that did
+    not act on every mode of the circuit in order was replaced by gates acting on the wrong modes.
+  - |
+    :class:`~qiskit_fermions.transpiler.passes.QDriftTrotterization` now compares a sampled term
+    with the occupations of the circuit modes that the term acts on. Previously it compared the
+    term's indices within its :class:`~qiskit_fermions.circuit.library.Evolution` gate with the
+    occupations of the circuit modes of the same indices. For a gate that does not act on the
+    leading modes of the circuit in order, the pass could therefore keep the wrong terms, or raise
+    a ``RuntimeError`` after rejecting every term.

@@ -281,9 +281,14 @@ class QDriftTrotterization(FermionicDAGCircuitPass):
                     category=UserWarning,
                     stacklevel=2,
                 )
+                # The sampled gates act on the modes of the gate they replace, in its order.
                 for evo in sampler.sample():
-                    out_dag.apply_operation_back(evo, qargs=out_dag.qubits)
+                    out_dag.apply_operation_back(evo, qargs=node.qargs)
                 continue
+
+            # The drawn terms index the modes of the gate, while the tracked sets index the
+            # register: `gate_modes[i]` is the register index of the gate's mode `i`.
+            gate_modes = _global_modes(dag, node)
 
             added_terms = 0
             # `failed_attempts` is reset on every acceptance because it guards against an infinite
@@ -294,7 +299,7 @@ class QDriftTrotterization(FermionicDAGCircuitPass):
             while added_terms < qdrift.num_terms:
                 evo = sampler.draw()
 
-                term_support = evo.operator.get_support()
+                term_support = {int(gate_modes[mode]) for mode in evo.operator.get_support()}
                 # A term is retained when it couples a known-occupied mode with a known-unoccupied
                 # one. This is a support-based over-approximation of "cannot change the sampled
                 # bitstring", not an equivalence: see the class docstring's warning.
@@ -316,7 +321,7 @@ class QDriftTrotterization(FermionicDAGCircuitPass):
                 occupied |= term_support
                 unoccupied |= term_support
 
-                out_dag.apply_operation_back(evo, qargs=out_dag.qubits)
+                out_dag.apply_operation_back(evo, qargs=node.qargs)
                 added_terms += 1
 
             discarded_per_gate.append(discarded)
