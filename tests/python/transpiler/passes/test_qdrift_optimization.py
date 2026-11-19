@@ -1165,3 +1165,83 @@ def test_filtered_qdrift_legacy_signature_is_still_dispatched():
 
     assert legacy.qdrift.num_terms == 3
     assert FilteredQDrift().qdrift is None
+
+
+def _evolution_wires(circuit: FermionicCircuit) -> list[list[int]]:
+    """The register indices of the modes each Evolution gate acts on, in the order of its wires."""
+    return [
+        [circuit._inner.find_bit(qubit).index for qubit in instruction.qubits]
+        for instruction in circuit._inner.data
+        if isinstance(instruction.operation, Evolution)
+    ]
+
+
+def test_filtered_qdrift_gates_sit_on_the_wires_of_the_gate_they_replace():
+    """A gate on a permuted subset of the register is replaced by gates on exactly its wires."""
+    circ = FermionicCircuit(6)
+    m = circ.modes
+    circ.append(InitializeModes([1, 0, 1, 0, 0, 0]), m)
+    wires = [5, 3, 1, 0]
+    circ.append(Evolution(4, _coupling_hamiltonian(), time=0.5), [m[i] for i in wires])
+
+    out = FermionicPassManager(FilteredQDrift(FermionicQDrift(5, rng=1))).run(circ)
+
+    assert _evolution_wires(out) == [wires] * 5
+    assert all(evolution.num_modes == 4 for evolution in _evolutions(out))
+    assert out.metadata["filter_trivial.emitted"] == [5]
+
+
+def test_filtered_qdrift_unfiltered_gates_sit_on_the_wires_of_the_gate_they_replace():
+    """The same holds when the filtering is skipped for want of occupation information."""
+    circ = FermionicCircuit(6)
+    m = circ.modes
+    wires = [5, 3, 1, 0]
+    circ.append(Evolution(4, _coupling_hamiltonian(), time=0.5), [m[i] for i in wires])
+
+    with pytest.warns(UserWarning, match="not preceded by an InitializeModes"):
+        out = FermionicPassManager(FilteredQDrift(FermionicQDrift(5, rng=1))).run(circ)
+
+    assert _evolution_wires(out) == [wires] * 5
+
+
+def test_filtered_qdrift_filters_in_the_register_indices():
+    """The support of a drawn term is read through the wires of its gate.
+
+    The hop couples the gate's modes 0 and 1, which are the register's unoccupied mode 5 and
+    occupied mode 3. Comparing the gate's own indices with the occupations of the register's modes 0
+    and 1, which are both unoccupied, would reject every draw.
+    """
+    hop = FermionOperator.from_terms_with_groups(
+        [(((True, 0), (False, 1)), 1.0, 0), (((True, 1), (False, 0)), 1.0, 0)]
+    )
+    circ = FermionicCircuit(6)
+    m = circ.modes
+    circ.append(InitializeModes([0, 0, 0, 1, 0, 0]), m)
+    circ.append(Evolution(2, hop, time=0.5), [m[5], m[3]])
+
+    out = FermionicPassManager(FilteredQDrift(FermionicQDrift(2, rng=1))).run(circ)
+
+    assert _evolution_wires(out) == [[5, 3]] * 2
+    assert out.metadata["filter_trivial.discarded"] == [0]
+    assert out.metadata["filter_trivial.emitted"] == [2]
+
+
+def test_filtered_qdrift_marks_the_register_modes_of_an_accepted_term_uncertain():
+    """An accepted term makes the register modes it touches uncertain, not the gate's own indices.
+
+    The first gate moves the particle from mode 3 to mode 5, making both uncertain. The second gate
+    couples mode 5 with the unoccupied mode 4, so it is accepted only if mode 5 was marked.
+    """
+    hop = FermionOperator.from_terms_with_groups(
+        [(((True, 0), (False, 1)), 1.0, 0), (((True, 1), (False, 0)), 1.0, 0)]
+    )
+    circ = FermionicCircuit(6)
+    m = circ.modes
+    circ.append(InitializeModes([0, 0, 0, 1, 0, 0]), m)
+    circ.append(Evolution(2, hop, time=0.5), [m[5], m[3]])
+    circ.append(Evolution(2, hop, time=0.5), [m[4], m[5]])
+
+    out = FermionicPassManager(FilteredQDrift(FermionicQDrift(2, rng=1))).run(circ)
+
+    assert _evolution_wires(out) == [[5, 3]] * 2 + [[4, 5]] * 2
+    assert out.metadata["filter_trivial.emitted"] == [2, 2]
