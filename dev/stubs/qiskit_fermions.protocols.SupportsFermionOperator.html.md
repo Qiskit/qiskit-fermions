@@ -11,10 +11,10 @@ below.
 
 #### CAUTION
 Despite the shared method name, this is *not* the same contract as
-[`ffsim.SupportsFermionOperator`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.SupportsFermionOperator.html#ffsim.SupportsFermionOperator): this one returns a
+[`ffsim.SupportsFermionOperator`](https://qiskit.github.io/ffsim/api/stubs/ffsim.SupportsFermionOperator.html#ffsim.SupportsFermionOperator): this one returns a
 [`FermionOperator`](qiskit_fermions.operators.FermionOperator.html.md#qiskit_fermions.operators.FermionOperator), whereas ffsim’s returns an
-[`ffsim.FermionOperator`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.FermionOperator.html#ffsim.FermionOperator). The two types are unrelated. Since
-[`ffsim.fermion_operator()`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.fermion_operator.html#ffsim.fermion_operator) dispatches purely on the method name, calling it on an operator
+[`ffsim.FermionOperator`](https://qiskit.github.io/ffsim/api/stubs/ffsim.FermionOperator.html#ffsim.FermionOperator). The two types are unrelated. Since
+[`ffsim.fermion_operator()`](https://qiskit.github.io/ffsim/api/stubs/ffsim.fermion_operator.html#ffsim.fermion_operator) dispatches purely on the method name, calling it on an operator
 of this package returns *this* package’s type rather than ffsim’s; use
 [`fermion_operator()`](qiskit_fermions.mappers.library.fermion_operator.html.md#qiskit_fermions.mappers.library.fermion_operator) when that is what you mean.
 

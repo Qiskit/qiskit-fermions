@@ -238,7 +238,7 @@ boundary fusion and how to prevent it.
 Applies this circuit to an ffsim state vector, implementing ffsim’s protocol.
 
 This walks the circuit in topological order and applies each instruction’s unitary effect to
-the state vector via ffsim’s [`ffsim.SupportsApplyUnitary`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.SupportsApplyUnitary.html#ffsim.SupportsApplyUnitary) protocol. Each instruction
+the state vector via ffsim’s [`ffsim.SupportsApplyUnitary`](https://qiskit.github.io/ffsim/api/stubs/ffsim.SupportsApplyUnitary.html#ffsim.SupportsApplyUnitary) protocol. Each instruction
 acting on a subset of the register has its fermionic modes relabeled to their absolute
 (global) indices before being applied.
 
@@ -256,7 +256,7 @@ are the vector’s modes `0..num_modes` (i.e. an identity mode placement).
 * **Raises:**
   * [**TypeError**](https://docs.python.org/3/builtins/exceptions.html#TypeError) – if a circuit instruction other than a
         `Barrier` does not implement ffsim’s
-        [`ffsim.SupportsApplyUnitary`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.SupportsApplyUnitary.html#ffsim.SupportsApplyUnitary) protocol.
+        [`ffsim.SupportsApplyUnitary`](https://qiskit.github.io/ffsim/api/stubs/ffsim.SupportsApplyUnitary.html#ffsim.SupportsApplyUnitary) protocol.
   * [**ValueError**](https://docs.python.org/3/builtins/exceptions.html#ValueError) – if a circuit instruction declines to apply its unitary for the given
         `norb` and `nelec`; or if an instruction implementing only the plain
         `_apply_unitary_` protocol is placed on a non-identity mode subset.
@@ -268,7 +268,7 @@ are the vector’s modes `0..num_modes` (i.e. an identity mode placement).
 Applies this circuit after placing its modes onto the vector’s global modes.
 
 This walks the circuit in topological order and applies each instruction’s unitary effect to
-the state vector via ffsim’s [`ffsim.SupportsApplyUnitary`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.SupportsApplyUnitary.html#ffsim.SupportsApplyUnitary) protocol. Each
+the state vector via ffsim’s [`ffsim.SupportsApplyUnitary`](https://qiskit.github.io/ffsim/api/stubs/ffsim.SupportsApplyUnitary.html#ffsim.SupportsApplyUnitary) protocol. Each
 instruction’s own modes are first mapped through this circuit’s placement: a circuit-local
 mode `m` maps to the
 global mode `freg_indices[m]`, so a sub-instruction acting on circuit-local modes
@@ -302,7 +302,7 @@ constrains transpilation without contributing to the state vector.
 * **Raises:**
   * [**TypeError**](https://docs.python.org/3/builtins/exceptions.html#TypeError) – if a circuit instruction other than a
         `Barrier` does not implement ffsim’s
-        [`ffsim.SupportsApplyUnitary`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.SupportsApplyUnitary.html#ffsim.SupportsApplyUnitary) protocol.
+        [`ffsim.SupportsApplyUnitary`](https://qiskit.github.io/ffsim/api/stubs/ffsim.SupportsApplyUnitary.html#ffsim.SupportsApplyUnitary) protocol.
   * [**ValueError**](https://docs.python.org/3/builtins/exceptions.html#ValueError) – if a circuit instruction declines to apply its unitary for the given
         `norb` and `nelec`; or if an instruction implementing only the plain
         `_apply_unitary_` protocol is placed on a non-identity mode subset.

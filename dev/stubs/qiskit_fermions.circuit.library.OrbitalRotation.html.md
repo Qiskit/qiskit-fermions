@@ -113,7 +113,7 @@ conserve the individual alpha/beta electron counts and hence maps amplitude out 
 `(n_alpha, n_beta)` sector – an operation the fixed-sector state vector cannot represent.
 Such a rotation is rejected with a [`ValueError`](https://docs.python.org/3/builtins/exceptions.html#ValueError).
 
-The embedded matrix is then applied via [`ffsim.apply_orbital_rotation()`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.apply_orbital_rotation.html#ffsim.apply_orbital_rotation)’s Givens-rotation
+The embedded matrix is then applied via [`ffsim.apply_orbital_rotation()`](https://qiskit.github.io/ffsim/api/stubs/ffsim.apply_orbital_rotation.html#ffsim.apply_orbital_rotation)’s Givens-rotation
 kernel. Under the spinful block-spin convention (modes `0..norb` are alpha orbitals, modes
 `norb..2*norb` are beta orbitals) the two diagonal blocks are the per-spin rotations passed
 to ffsim as `(mat_a, mat_b)`.

@@ -7,10 +7,10 @@ The concepts in this guide are only available in the Python API.
 
 [ffsim](https://qiskit-community.github.io/ffsim/) and this package divide the work rather than overlap, along a single line:
 
-| ffsim owns                                                                                                                                                                                                                                                                                                                                                                                             | `qiskit-fermions` owns                                                                                                                                                                                                                          |
-|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| The high-level ansatz *operators* ([`UCJOpSpinBalanced`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.UCJOpSpinBalanced.html#ffsim.UCJOpSpinBalanced),<br/>[`UCCSDOpRestrictedReal`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.UCCSDOpRestrictedReal.html#ffsim.UCCSDOpRestrictedReal) and their siblings), built from<br/>coupled-cluster amplitudes or a parameter vector | The fermionic *circuit* ([`FermionicCircuit`](../stubs/qiskit_fermions.circuit.FermionicCircuit.html.md#qiskit_fermions.circuit.FermionicCircuit)) those operators become, and its<br/>transpilation into a qubit circuit under any fermion-to-qubit encoding |
-| Fast simulation in a compact fixed-particle-number space                                                                                                                                                                                                                                                                                                                                               | The mapper framework and the operator data structures the circuit is built from                                                                                                                                                                 |
+| ffsim owns                                                                                                                                                                                                                                                                                                                                                                         | `qiskit-fermions` owns                                                                                                                                                                                                                          |
+|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| The high-level ansatz *operators* ([`UCJOpSpinBalanced`](https://qiskit.github.io/ffsim/api/stubs/ffsim.UCJOpSpinBalanced.html#ffsim.UCJOpSpinBalanced),<br/>[`UCCSDOpRestrictedReal`](https://qiskit.github.io/ffsim/api/stubs/ffsim.UCCSDOpRestrictedReal.html#ffsim.UCCSDOpRestrictedReal) and their siblings), built from<br/>coupled-cluster amplitudes or a parameter vector | The fermionic *circuit* ([`FermionicCircuit`](../stubs/qiskit_fermions.circuit.FermionicCircuit.html.md#qiskit_fermions.circuit.FermionicCircuit)) those operators become, and its<br/>transpilation into a qubit circuit under any fermion-to-qubit encoding |
+| Fast simulation in a compact fixed-particle-number space                                                                                                                                                                                                                                                                                                                           | The mapper framework and the operator data structures the circuit is built from                                                                                                                                                                 |
 
 The practical consequence runs both ways. The ansatz math lives in ffsim, so [`UCJ`](../stubs/qiskit_fermions.circuit.library.UCJ.html.md#qiskit_fermions.circuit.library.UCJ) and
 [`UCC`](../stubs/qiskit_fermions.circuit.library.UCC.html.md#qiskit_fermions.circuit.library.UCC) take an ffsim operator directly as their input. Conversely, ffsim’s own Qiskit gates
@@ -18,8 +18,8 @@ are specific to the Jordan-Wigner transformation, so lowering one of its ansatz 
 *different* encoding is what bringing it here buys you.
 
 Simulation is where the two meet, and this guide explains how. ffsim is this package’s simulation
-backend, reached through its own protocols rather than a wrapper: the [SKQD guide](skqd.html.md#skqd-getting-started) calls [`ffsim.apply_unitary()`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.apply_unitary.html#ffsim.apply_unitary), [`ffsim.linear_operator()`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.linear_operator.html#ffsim.linear_operator), and
-[`ffsim.sample_state_vector()`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.sample_state_vector.html#ffsim.sample_state_vector) directly on [`FermionicCircuit`](../stubs/qiskit_fermions.circuit.FermionicCircuit.html.md#qiskit_fermions.circuit.FermionicCircuit)objects and
+backend, reached through its own protocols rather than a wrapper: the [SKQD guide](skqd.html.md#skqd-getting-started) calls [`ffsim.apply_unitary()`](https://qiskit.github.io/ffsim/api/stubs/ffsim.apply_unitary.html#ffsim.apply_unitary), [`ffsim.linear_operator()`](https://qiskit.github.io/ffsim/api/stubs/ffsim.linear_operator.html#ffsim.linear_operator), and
+[`ffsim.sample_state_vector()`](https://qiskit.github.io/ffsim/api/stubs/ffsim.sample_state_vector.html#ffsim.sample_state_vector) directly on [`FermionicCircuit`](../stubs/qiskit_fermions.circuit.FermionicCircuit.html.md#qiskit_fermions.circuit.FermionicCircuit)objects and
 [`FermionOperator`](../stubs/qiskit_fermions.operators.FermionOperator.html.md#qiskit_fermions.operators.FermionOperator)objects, with no conversion step.
 
 ## Plugging into ffsim’s simulation interface
@@ -30,20 +30,20 @@ generic $2^n$-dimensional qubit statevector. It defines protocols that any objec
 can implement to participate in its simulation machinery (see [`qiskit_fermions.protocols`](../pydoc/qiskit_fermions.protocols.html.md#module-qiskit_fermions.protocols)
 for this package’s own protocols, which follow the same design):
 
-- [`ffsim.SupportsApplyUnitary`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.SupportsApplyUnitary.html#ffsim.SupportsApplyUnitary), by the method `_apply_unitary_(vec, norb, nelec, copy)`,
+- [`ffsim.SupportsApplyUnitary`](https://qiskit.github.io/ffsim/api/stubs/ffsim.SupportsApplyUnitary.html#ffsim.SupportsApplyUnitary), by the method `_apply_unitary_(vec, norb, nelec, copy)`,
   applying the object as a unitary to a fixed-particle-number state vector
-- [`ffsim.SupportsLinearOperator`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.SupportsLinearOperator.html#ffsim.SupportsLinearOperator), by the method `_linear_operator_(norb, nelec)`, returning a
+- [`ffsim.SupportsLinearOperator`](https://qiskit.github.io/ffsim/api/stubs/ffsim.SupportsLinearOperator.html#ffsim.SupportsLinearOperator), by the method `_linear_operator_(norb, nelec)`, returning a
   [`scipy.sparse.linalg.LinearOperator`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.linalg.LinearOperator.html#scipy.sparse.linalg.LinearOperator) view of the object on that same sector
-- [`ffsim.SupportsTrace`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.SupportsTrace.html#ffsim.SupportsTrace), by the method `_trace_(norb, nelec)`, returning the object’s trace
+- [`ffsim.SupportsTrace`](https://qiskit.github.io/ffsim/api/stubs/ffsim.SupportsTrace.html#ffsim.SupportsTrace), by the method `_trace_(norb, nelec)`, returning the object’s trace
   on that sector.
 
 This package implements that interface: every fermionic gate in
 [`qiskit_fermions.circuit.library`](../pydoc/qiskit_fermions.circuit.library.html.md#module-qiskit_fermions.circuit.library) provides `_apply_unitary_`, and [`FermionOperator`](../stubs/qiskit_fermions.operators.FermionOperator.html.md#qiskit_fermions.operators.FermionOperator)
 provides `_linear_operator_` and `_trace_`. That is what makes this package’s operators and
 circuits *compatible* with ffsim, so its tools work on them natively, with no conversion step.
-[`ffsim.apply_unitary()`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.apply_unitary.html#ffsim.apply_unitary)
-can simulate a [`FermionicCircuit`](../stubs/qiskit_fermions.circuit.FermionicCircuit.html.md#qiskit_fermions.circuit.FermionicCircuit) end to end, [`ffsim.linear_operator()`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.linear_operator.html#ffsim.linear_operator) can diagonalize a
-[`FermionOperator`](../stubs/qiskit_fermions.operators.FermionOperator.html.md#qiskit_fermions.operators.FermionOperator), and sampling utilities like [`ffsim.sample_state_vector()`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.sample_state_vector.html#ffsim.sample_state_vector) (used in the
+[`ffsim.apply_unitary()`](https://qiskit.github.io/ffsim/api/stubs/ffsim.apply_unitary.html#ffsim.apply_unitary)
+can simulate a [`FermionicCircuit`](../stubs/qiskit_fermions.circuit.FermionicCircuit.html.md#qiskit_fermions.circuit.FermionicCircuit) end to end, [`ffsim.linear_operator()`](https://qiskit.github.io/ffsim/api/stubs/ffsim.linear_operator.html#ffsim.linear_operator) can diagonalize a
+[`FermionOperator`](../stubs/qiskit_fermions.operators.FermionOperator.html.md#qiskit_fermions.operators.FermionOperator), and sampling utilities like [`ffsim.sample_state_vector()`](https://qiskit.github.io/ffsim/api/stubs/ffsim.sample_state_vector.html#ffsim.sample_state_vector) (used in the
 [SKQD guide](skqd.html.md#skqd-getting-started) to turn a simulated statevector into measurement counts)
 work without modification.
 
@@ -81,9 +81,9 @@ API.
 
 ffsim is declared as an optional extra (`pip install "qiskit-fermions[ffsim]"`, or transitively by
 `[all]`), guarded at runtime by [`HAS_FFSIM`](../pydoc/qiskit_fermions.utils.optionals.html.md#qiskit_fermions.utils.optionals.HAS_FFSIM) (as was shown
-above). Installing it unlocks simulation: [`ffsim.SupportsLinearOperator`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.SupportsLinearOperator.html#ffsim.SupportsLinearOperator) and
-[`ffsim.SupportsTrace`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.SupportsTrace.html#ffsim.SupportsTrace) are implemented by converting this package’s [`FermionOperator`](../stubs/qiskit_fermions.operators.FermionOperator.html.md#qiskit_fermions.operators.FermionOperator) into
-an [`ffsim.FermionOperator`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.FermionOperator.html#ffsim.FermionOperator), so without ffsim they raise
+above). Installing it unlocks simulation: [`ffsim.SupportsLinearOperator`](https://qiskit.github.io/ffsim/api/stubs/ffsim.SupportsLinearOperator.html#ffsim.SupportsLinearOperator) and
+[`ffsim.SupportsTrace`](https://qiskit.github.io/ffsim/api/stubs/ffsim.SupportsTrace.html#ffsim.SupportsTrace) are implemented by converting this package’s [`FermionOperator`](../stubs/qiskit_fermions.operators.FermionOperator.html.md#qiskit_fermions.operators.FermionOperator) into
+an [`ffsim.FermionOperator`](https://qiskit.github.io/ffsim/api/stubs/ffsim.FermionOperator.html#ffsim.FermionOperator), so without ffsim they raise
 [`MissingOptionalLibraryError`](https://quantum.cloud.ibm.com/docs/api/qiskit/exceptions#qiskit.exceptions.MissingOptionalLibraryError). Everything that does not simulate (building
 operators, mapping them, and transpiling the resulting circuits) needs none of it.
 
@@ -165,9 +165,9 @@ is supplied to a simulation call, not baked into the operator or circuit represe
 
 ### Next steps
 
-- Walk through the [SKQD](skqd.html.md#skqd-getting-started) guide to see [`ffsim.apply_unitary()`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.apply_unitary.html#ffsim.apply_unitary) and
-  [`ffsim.sample_state_vector()`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.sample_state_vector.html#ffsim.sample_state_vector) used together to sample circuits built from this package’s gates,
-  and to evaluate a Hamiltonian expectation value through [`ffsim.linear_operator()`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.linear_operator.html#ffsim.linear_operator) (itself backed
+- Walk through the [SKQD](skqd.html.md#skqd-getting-started) guide to see [`ffsim.apply_unitary()`](https://qiskit.github.io/ffsim/api/stubs/ffsim.apply_unitary.html#ffsim.apply_unitary) and
+  [`ffsim.sample_state_vector()`](https://qiskit.github.io/ffsim/api/stubs/ffsim.sample_state_vector.html#ffsim.sample_state_vector) used together to sample circuits built from this package’s gates,
+  and to evaluate a Hamiltonian expectation value through [`ffsim.linear_operator()`](https://qiskit.github.io/ffsim/api/stubs/ffsim.linear_operator.html#ffsim.linear_operator) (itself backed
   by the same `_linear_operator_` protocol method described here).
 - Walk through the [LUCJ](lucj.html.md#lucj-transpilation) guide for the other half of the story: taking an
   ffsim ansatz operator through this package’s transpilation pipeline and onto a device coupling map.

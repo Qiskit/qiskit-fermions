@@ -2,7 +2,7 @@
 
 ### *class* SupportsApplyUnitaryPlaced(\*args, \*\*kwargs)
 
-A package-specific extension of [`ffsim.SupportsApplyUnitary`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.SupportsApplyUnitary.html#ffsim.SupportsApplyUnitary).
+A package-specific extension of [`ffsim.SupportsApplyUnitary`](https://qiskit.github.io/ffsim/api/stubs/ffsim.SupportsApplyUnitary.html#ffsim.SupportsApplyUnitary).
 
 Bases: [`Protocol`](https://docs.python.org/3/library/typing.html#typing.Protocol)
 

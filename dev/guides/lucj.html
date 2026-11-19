@@ -11,13 +11,13 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Transpile an LUCJ ansatz - Qiskit Fermions 0.5.0.dev0+677d116</title>
+        <title>Transpile an LUCJ ansatz - Qiskit Fermions 0.5.0.dev0+73f1106</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=fc6d6d93" />
     <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
-    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=6a604523" />
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css" />
     <link rel="stylesheet" type="text/css" href="../_static/katex-math.css?v=05624691" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=8dab3a3b" />
@@ -164,7 +164,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.5.0.dev0+677d116</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.5.0.dev0+73f1106</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -190,7 +190,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.5.0.dev0+677d116</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.5.0.dev0+73f1106</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -503,7 +503,7 @@ stages used below.</p>
 <p>The ansatz is initialized from the amplitudes of a coupled-cluster singles and doubles (CCSD)
 calculation. Run restricted Hartree-Fock followed by CCSD for a hydrogen molecule in the <code class="docutils literal notranslate"><span class="pre">6-31g</span></code>
 basis, using <a class="reference external" href="https://pyscf.org/">PySCF</a> for the quantum chemistry, then hand the amplitudes to
-ffsim’s <a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.UCJOpSpinBalanced.html#ffsim.UCJOpSpinBalanced.from_t_amplitudes" title="(in ffsim)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_t_amplitudes()</span></code></a>. It performs a <em>double
+ffsim’s <a class="reference external" href="https://qiskit.github.io/ffsim/api/stubs/ffsim.UCJOpSpinBalanced.html#ffsim.UCJOpSpinBalanced.from_t_amplitudes" title="(in ffsim)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_t_amplitudes()</span></code></a>. It performs a <em>double
 factorization</em> of the <span class="math">\(t_2\)</span> amplitudes to obtain the per-layer diagonal Coulomb matrices and
 orbital rotations, and derives an optional final orbital rotation from the <span class="math">\(t_1\)</span> amplitudes.
 The number of repetitions <span class="math">\(L\)</span> is whatever that factorization yields; <code class="docutils literal notranslate"><span class="pre">n_reps</span></code> truncates it,
@@ -590,7 +590,7 @@ encoding is a <em>synthesis-stage</em> choice rather than something baked into t
 this package adds over ffsim’s own Qiskit gates, which are specific to the Jordan-Wigner
 transformation.</p>
 <p>For Jordan-Wigner alone you would not need this detour: ffsim ships
-<a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.qiskit.UCJOpSpinBalancedJW.html#ffsim.qiskit.UCJOpSpinBalancedJW" title="(in ffsim)"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCJOpSpinBalancedJW</span></code></a> and its siblings, which take a UCJ operator to a
+<a class="reference external" href="https://qiskit.github.io/ffsim/api/stubs/ffsim.qiskit.UCJOpSpinBalancedJW.html#ffsim.qiskit.UCJOpSpinBalancedJW" title="(in ffsim)"><code class="xref py py-class docutils literal notranslate"><span class="pre">UCJOpSpinBalancedJW</span></code></a> and its siblings, which take a UCJ operator to a
 qubit circuit on their own. The reason to route the ansatz through a fermionic circuit is everything
 <em>else</em> an encoding can buy you. Local encodings, for instance, spend extra qubits to bound the Pauli
 weight of each term, which the <a class="reference internal" href="1d_fermi_hubbard.html#d-fermi-hubbard"><span class="std std-ref">1D</span></a> and <a class="reference internal" href="2d_fermi_hubbard.html#d-fermi-hubbard"><span class="std std-ref">2D</span></a>
@@ -732,7 +732,7 @@ the preset in practice and build the stages by hand when you need to change one 
 <h2>5. Match the device topology<a class="headerlink" href="#match-the-device-topology" title="Link to this heading">¶</a></h2>
 <p>A real device has a restricted qubit coupling map, and the LUCJ ansatz is designed to match it. The
 same-spin (<code class="docutils literal notranslate"><span class="pre">pairs_aa</span></code>) interactions form two linear chains and the alpha-beta (<code class="docutils literal notranslate"><span class="pre">pairs_ab</span></code>)
-interactions bridge them. ffsim’s <a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.qiskit.generate_lucj_pass_manager.html#ffsim.qiskit.generate_lucj_pass_manager" title="(in ffsim)"><code class="xref py py-func docutils literal notranslate"><span class="pre">generate_lucj_pass_manager()</span></code></a> builds a
+interactions bridge them. ffsim’s <a class="reference external" href="https://qiskit.github.io/ffsim/api/stubs/ffsim.qiskit.generate_lucj_pass_manager.html#ffsim.qiskit.generate_lucj_pass_manager" title="(in ffsim)"><code class="xref py py-func docutils literal notranslate"><span class="pre">generate_lucj_pass_manager()</span></code></a> builds a
 device-aware qubit pipeline for this structure, and returns the subset of <code class="docutils literal notranslate"><span class="pre">pairs_ab</span></code> the
 hardware can actually accommodate. Slot that pipeline into the preset’s <code class="docutils literal notranslate"><span class="pre">qubit</span></code> stage while
 keeping the package’s own fermion-to-qubit synthesis:</p>
@@ -788,7 +788,7 @@ directly, the router must insert many <code class="docutils literal notranslate"
 <p class="rubric">Restrict the ansatz to the hardware-implementable interactions</p>
 <p>The fix is to feed <code class="docutils literal notranslate"><span class="pre">allowed_pairs_ab</span></code> back into the ansatz construction, through the
 <code class="docutils literal notranslate"><span class="pre">interaction_pairs</span></code> argument of
-<a class="reference external" href="https://qiskit-community.github.io/ffsim/api/stubs/ffsim.UCJOpSpinBalanced.html#ffsim.UCJOpSpinBalanced.from_t_amplitudes" title="(in ffsim)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_t_amplitudes()</span></code></a>, so the diagonal Coulomb operator only
+<a class="reference external" href="https://qiskit.github.io/ffsim/api/stubs/ffsim.UCJOpSpinBalanced.html#ffsim.UCJOpSpinBalanced.from_t_amplitudes" title="(in ffsim)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_t_amplitudes()</span></code></a>, so the diagonal Coulomb operator only
 contains alpha-beta terms the coupling map can implement directly. The ansatz then matches the
 device topology and the router barely has to touch it:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">restricted</span> <span class="o">=</span> <span class="n">UCJ</span><span class="p">(</span>
@@ -885,7 +885,7 @@ two packages divide the work, and which protocols let ffsim simulate this packag
             
             <a href="https://github.com/pradyunsg/furo">Furo</a>
             <div class="last-updated">
-              Last updated on 2026/11/06</div>
+              Last updated on 2026/11/19</div>
           </div>
           <div class="right-details">
             
@@ -924,13 +924,13 @@ two packages divide the work, and which protocols let ffsim simulate this packag
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=8fb1fd29"></script>
+</div><script src="../_static/documentation_options.js?v=ec44a6d4"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../_static/copybutton.js?v=6dbb43f8"></script>
-    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script data-sd-tabs-storage-prefix="sphinx-design-tab-id-" src="../_static/design-tabs.js?v=fcb327ea"></script>
     <script src="../_static/katex.min.js?v=5cc8ed51"></script>
     <script src="../_static/auto-render.min.js?v=af98beb9"></script>
     <script src="../_static/katex_autorenderer.js?v=bebc588a"></script>

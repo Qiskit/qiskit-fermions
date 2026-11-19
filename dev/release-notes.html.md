@@ -628,8 +628,8 @@ every removed API with its replacement, and are worth reading in full before upg
   [`MajoranaOperator`](stubs/qiskit_fermions.operators.MajoranaOperator.html.md#qiskit_fermions.operators.MajoranaOperator), [`EdgeVertexOperator`](stubs/qiskit_fermions.operators.EdgeVertexOperator.html.md#qiskit_fermions.operators.EdgeVertexOperator) or [`TransferVertexOperator`](stubs/qiskit_fermions.operators.TransferVertexOperator.html.md#qiskit_fermions.operators.TransferVertexOperator) no
   longer raises [`NotImplementedError`](https://docs.python.org/3/builtins/exceptions.html#NotImplementedError).
 
-- [`FermionOperator`](stubs/qiskit_fermions.operators.FermionOperator.html.md#qiskit_fermions.operators.FermionOperator) now implements [`ffsim.SupportsTrace`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.SupportsTrace.html#ffsim.SupportsTrace) through a new
-  [`_trace_()`](stubs/qiskit_fermions.operators.FermionOperator.html.md#qiskit_fermions.operators.FermionOperator._trace_) method, so [`ffsim.trace()`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.trace.html#ffsim.trace) can
+- [`FermionOperator`](stubs/qiskit_fermions.operators.FermionOperator.html.md#qiskit_fermions.operators.FermionOperator) now implements [`ffsim.SupportsTrace`](https://qiskit.github.io/ffsim/api/stubs/ffsim.SupportsTrace.html#ffsim.SupportsTrace) through a new
+  [`_trace_()`](stubs/qiskit_fermions.operators.FermionOperator.html.md#qiskit_fermions.operators.FermionOperator._trace_) method, so [`ffsim.trace()`](https://qiskit.github.io/ffsim/api/stubs/ffsim.trace.html#ffsim.trace) can
   compute the trace of an operator on a fixed `(norb, nelec)` sector. This is what preconditions
   [`scipy.sparse.linalg.expm_multiply()`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.linalg.expm_multiply.html#scipy.sparse.linalg.expm_multiply) along the evolution path.
 
@@ -764,7 +764,7 @@ every removed API with its replacement, and are worth reading in full before upg
 - The `qiskit_fermions.linalg.apply_unitary` and
   `qiskit_fermions.linalg.linear_operator` functions have been removed. They were thin wrappers
   around the `_apply_unitary_` and `_linear_operator_` protocol methods,
-  duplicating [`ffsim.apply_unitary()`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.apply_unitary.html#ffsim.apply_unitary) and [`ffsim.linear_operator()`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.linear_operator.html#ffsim.linear_operator). Call ffsim’s
+  duplicating [`ffsim.apply_unitary()`](https://qiskit.github.io/ffsim/api/stubs/ffsim.apply_unitary.html#ffsim.apply_unitary) and [`ffsim.linear_operator()`](https://qiskit.github.io/ffsim/api/stubs/ffsim.linear_operator.html#ffsim.linear_operator). Call ffsim’s
   functions instead, or, when ffsim is not installed, the protocol method on the object directly:
   ```python
   # before
@@ -788,14 +788,14 @@ every removed API with its replacement, and are worth reading in full before upg
   reason: they restated contracts that ffsim defines. Use ffsim’s own protocols, which they
   mirrored one-to-one:
   * `qiskit_fermions.protocols.SupportsApplyUnitary` becomes
-    [`ffsim.SupportsApplyUnitary`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.SupportsApplyUnitary.html#ffsim.SupportsApplyUnitary)
+    [`ffsim.SupportsApplyUnitary`](https://qiskit.github.io/ffsim/api/stubs/ffsim.SupportsApplyUnitary.html#ffsim.SupportsApplyUnitary)
   * `qiskit_fermions.protocols.SupportsLinearOperator` becomes
-    [`ffsim.SupportsLinearOperator`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.SupportsLinearOperator.html#ffsim.SupportsLinearOperator)
+    [`ffsim.SupportsLinearOperator`](https://qiskit.github.io/ffsim/api/stubs/ffsim.SupportsLinearOperator.html#ffsim.SupportsLinearOperator)
 
   The protocol *methods* (`_apply_unitary_` and `_linear_operator_`) are unchanged, so the
   objects of this package that implemented them still do; only the local restatement of the
   interface is gone. [`SupportsApplyUnitaryPlaced`](stubs/qiskit_fermions.protocols.SupportsApplyUnitaryPlaced.html.md#qiskit_fermions.protocols.SupportsApplyUnitaryPlaced) stays, since it extends
-  [`ffsim.SupportsApplyUnitary`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.SupportsApplyUnitary.html#ffsim.SupportsApplyUnitary) with a mode placement and has no ffsim counterpart.
+  [`ffsim.SupportsApplyUnitary`](https://qiskit.github.io/ffsim/api/stubs/ffsim.SupportsApplyUnitary.html#ffsim.SupportsApplyUnitary) with a mode placement and has no ffsim counterpart.
 
 - [`from_file()`](stubs/qiskit_fermions.operators.library.FCIDump.html.md#qiskit_fermions.operators.library.FCIDump.from_file) now raises a catchable Python
   exception when it cannot parse a file, instead of propagating a Rust panic. A path that cannot
@@ -844,15 +844,15 @@ every removed API with its replacement, and are worth reading in full before upg
   `double_factorized_t2_alpha_beta`, `reconstruct_t2`, `reconstruct_t2_alpha_beta` and
   `double_factorized_2body`. The `t2` variants existed to serve `UCJ.from_t_amplitudes`,
   which now lives in ffsim, and `double_factorized_2body` had no caller. Use
-  [`ffsim.linalg.double_factorized_t2()`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.linalg.double_factorized_t2.html#ffsim.linalg.double_factorized_t2),
-  [`ffsim.linalg.double_factorized_t2_alpha_beta()`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.linalg.double_factorized_t2_alpha_beta.html#ffsim.linalg.double_factorized_t2_alpha_beta) and
-  [`ffsim.linalg.double_factorized()`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.linalg.double_factorized.html#ffsim.linalg.double_factorized) instead; the last is a superset of the removed
+  [`ffsim.linalg.double_factorized_t2()`](https://qiskit.github.io/ffsim/api/stubs/ffsim.linalg.double_factorized_t2.html#ffsim.linalg.double_factorized_t2),
+  [`ffsim.linalg.double_factorized_t2_alpha_beta()`](https://qiskit.github.io/ffsim/api/stubs/ffsim.linalg.double_factorized_t2_alpha_beta.html#ffsim.linalg.double_factorized_t2_alpha_beta) and
+  [`ffsim.linalg.double_factorized()`](https://qiskit.github.io/ffsim/api/stubs/ffsim.linalg.double_factorized.html#ffsim.linalg.double_factorized) instead; the last is a superset of the removed
   two-body routine, additionally offering an optimized (`optimize=True`) decomposition.
 
 - Simulation now requires [ffsim](https://github.com/qiskit-community/ffsim). The native Rust
   FCI (full configuration interaction) kernel that used to back `_linear_operator_` has been
   removed; the method is now implemented by converting a [`FermionOperator`](stubs/qiskit_fermions.operators.FermionOperator.html.md#qiskit_fermions.operators.FermionOperator) into an
-  [`ffsim.FermionOperator`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.FermionOperator.html#ffsim.FermionOperator) and delegating to [`ffsim.linear_operator()`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.linear_operator.html#ffsim.linear_operator).
+  [`ffsim.FermionOperator`](https://qiskit.github.io/ffsim/api/stubs/ffsim.FermionOperator.html#ffsim.FermionOperator) and delegating to [`ffsim.linear_operator()`](https://qiskit.github.io/ffsim/api/stubs/ffsim.linear_operator.html#ffsim.linear_operator).
 
   Simulation is ffsim’s concern: this package focuses on fermionic mappers and the
   mapper-agnostic circuit and its transpilation. Because ffsim depends on PySCF, which does not
@@ -867,10 +867,10 @@ every removed API with its replacement, and are worth reading in full before upg
 - The `qiskit_fermions.linalg.fci` module has been removed along with the kernel, including its
   `FciLinearOperator` class and the `slater_determinant_statevector` and
   `occupation_axis_mask` functions. ffsim provides equivalents:
-  [`ffsim.slater_determinant()`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.slater_determinant.html#ffsim.slater_determinant) and [`ffsim.addresses_to_strings()`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.addresses_to_strings.html#ffsim.addresses_to_strings) respectively.
+  [`ffsim.slater_determinant()`](https://qiskit.github.io/ffsim/api/stubs/ffsim.slater_determinant.html#ffsim.slater_determinant) and [`ffsim.addresses_to_strings()`](https://qiskit.github.io/ffsim/api/stubs/ffsim.addresses_to_strings.html#ffsim.addresses_to_strings) respectively.
 
 - [`OrbitalRotation`](stubs/qiskit_fermions.circuit.library.OrbitalRotation.html.md#qiskit_fermions.circuit.library.OrbitalRotation) no longer falls back to a generator-plus-exponential path when ffsim
-  is absent; it always delegates to [`ffsim.apply_orbital_rotation()`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.apply_orbital_rotation.html#ffsim.apply_orbital_rotation). The results are
+  is absent; it always delegates to [`ffsim.apply_orbital_rotation()`](https://qiskit.github.io/ffsim/api/stubs/ffsim.apply_orbital_rotation.html#ffsim.apply_orbital_rotation). The results are
   unchanged when ffsim is installed.
 
 - The [`UCC`](stubs/qiskit_fermions.circuit.library.UCC.html.md#qiskit_fermions.circuit.library.UCC) gate is now constructed from one of ffsim’s UCCSD operators, which is its only
@@ -887,9 +887,9 @@ every removed API with its replacement, and are worth reading in full before upg
   Accordingly, `UCC.from_t_amplitudes`, `UCC.num_parameters`, `UCC.from_parameters` and
   `UCC.to_parameters` have been removed, as have the `spinless` variant and the opt-in
   `antisymmetric` parameterization, which have no ffsim equivalent. ffsim’s operators provide
-  [`n_params()`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.UCCSDOpRestrictedReal.html#ffsim.UCCSDOpRestrictedReal.n_params),
-  [`from_parameters()`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.UCCSDOpRestrictedReal.html#ffsim.UCCSDOpRestrictedReal.from_parameters) and
-  [`to_parameters()`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.UCCSDOpRestrictedReal.html#ffsim.UCCSDOpRestrictedReal.to_parameters) with identical conventions. To build
+  [`n_params()`](https://qiskit.github.io/ffsim/api/stubs/ffsim.UCCSDOpRestrictedReal.html#ffsim.UCCSDOpRestrictedReal.n_params),
+  [`from_parameters()`](https://qiskit.github.io/ffsim/api/stubs/ffsim.UCCSDOpRestrictedReal.html#ffsim.UCCSDOpRestrictedReal.from_parameters) and
+  [`to_parameters()`](https://qiskit.github.io/ffsim/api/stubs/ffsim.UCCSDOpRestrictedReal.html#ffsim.UCCSDOpRestrictedReal.to_parameters) with identical conventions. To build
   an ansatz outside that family (a spinless one, or an antisymmetrized $t_2$), construct an
   [`Evolution`](stubs/qiskit_fermions.circuit.library.Evolution.html.md#qiskit_fermions.circuit.library.Evolution) over your own cluster operator directly, which also gives you control over
   the Trotter ordering of its terms.
@@ -920,12 +920,12 @@ every removed API with its replacement, and are worth reading in full before upg
 
   Accordingly, `UCJ.from_t_amplitudes`, `UCJ.num_parameters`, `UCJ.from_parameters` and
   `UCJ.to_parameters` have been removed: ffsim’s operators provide
-  [`from_t_amplitudes()`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.UCJOpSpinBalanced.html#ffsim.UCJOpSpinBalanced.from_t_amplitudes),
-  [`n_params()`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.UCJOpSpinBalanced.html#ffsim.UCJOpSpinBalanced.n_params),
-  [`from_parameters()`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.UCJOpSpinBalanced.html#ffsim.UCJOpSpinBalanced.from_parameters) and
-  [`to_parameters()`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.UCJOpSpinBalanced.html#ffsim.UCJOpSpinBalanced.to_parameters) with identical conventions, and
+  [`from_t_amplitudes()`](https://qiskit.github.io/ffsim/api/stubs/ffsim.UCJOpSpinBalanced.html#ffsim.UCJOpSpinBalanced.from_t_amplitudes),
+  [`n_params()`](https://qiskit.github.io/ffsim/api/stubs/ffsim.UCJOpSpinBalanced.html#ffsim.UCJOpSpinBalanced.n_params),
+  [`from_parameters()`](https://qiskit.github.io/ffsim/api/stubs/ffsim.UCJOpSpinBalanced.html#ffsim.UCJOpSpinBalanced.from_parameters) and
+  [`to_parameters()`](https://qiskit.github.io/ffsim/api/stubs/ffsim.UCJOpSpinBalanced.html#ffsim.UCJOpSpinBalanced.to_parameters) with identical conventions, and
   additionally offer the compressed (`optimize=True`) double factorization and
-  [`from_cisd_vec()`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.UCJOpSpinBalanced.html#ffsim.UCJOpSpinBalanced.from_cisd_vec), which this package never implemented.
+  [`from_cisd_vec()`](https://qiskit.github.io/ffsim/api/stubs/ffsim.UCJOpSpinBalanced.html#ffsim.UCJOpSpinBalanced.from_cisd_vec), which this package never implemented.
   The wrapped operator is available as [`UCJ.ucj_op`](stubs/qiskit_fermions.circuit.library.UCJ.html.md#qiskit_fermions.circuit.library.UCJ.ucj_op), so its tensors are reachable as
   `gate.ucj_op.diag_coulomb_mats` and so on; the gate no longer mirrors them as attributes of its
   own.

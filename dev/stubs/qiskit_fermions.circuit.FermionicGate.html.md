@@ -170,7 +170,7 @@ The gate itself is left as it is, because a gate instance can be shared between 
 
 Applies this gate to an ffsim state vector, implementing ffsim’s protocol.
 
-This is the identity-placement entry point of ffsim’s [`ffsim.SupportsApplyUnitary`](https://qiskit-community.github.io/ffsim/api/stubs/ffsim.SupportsApplyUnitary.html#ffsim.SupportsApplyUnitary)
+This is the identity-placement entry point of ffsim’s [`ffsim.SupportsApplyUnitary`](https://qiskit.github.io/ffsim/api/stubs/ffsim.SupportsApplyUnitary.html#ffsim.SupportsApplyUnitary)
 protocol: it assumes the gate acts on the modes `0..num_modes` of the state vector and
 delegates to the placement-aware `_apply_unitary_placed_()` (see
 [`SupportsApplyUnitaryPlaced`](qiskit_fermions.protocols.SupportsApplyUnitaryPlaced.html.md#qiskit_fermions.protocols.SupportsApplyUnitaryPlaced)), which every concrete fermionic gate implements. See
