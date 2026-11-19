@@ -15,6 +15,7 @@
 from __future__ import annotations
 
 import numpy as np
+import pytest
 from qiskit.quantum_info import Statevector
 from qiskit_fermions.circuit import FermionicCircuit
 from qiskit_fermions.circuit.library import (
@@ -159,6 +160,88 @@ def test_no_merge_across_different_mode_sets():
         ("OrbitalRotation", [0, 1]),
         ("OrbitalRotation", [1, 2]),
     ]
+
+
+def test_no_merge_across_interleaved_mode_sets():
+    """A rotation on a different mode set splits a run of rotations without crashing.
+
+    ``collect_runs`` puts consecutive rotations on (1, 2), (0, 1, 2) and (1, 2) into one run. They
+    share no dimension, so none of them may merge.
+    """
+    circ = FermionicCircuit(3)
+    circ.append(OrbitalRotation(random_unitary(2, seed=1)), circ.modes[1:])
+    circ.append(OrbitalRotation(random_unitary(3, seed=2)), circ.modes)
+    circ.append(OrbitalRotation(random_unitary(2, seed=3)), circ.modes[1:])
+
+    assert _nodes(_merge(circ)) == [
+        ("OrbitalRotation", [1, 2]),
+        ("OrbitalRotation", [0, 1, 2]),
+        ("OrbitalRotation", [1, 2]),
+    ]
+
+
+def test_merge_within_stretches_of_a_run():
+    """Rotations on the same wires merge on either side of a rotation on different wires."""
+    circ = FermionicCircuit(3)
+    for seed in (1, 2):
+        circ.append(OrbitalRotation(random_unitary(2, seed=seed)), circ.modes[1:])
+    circ.append(OrbitalRotation(random_unitary(3, seed=3)), circ.modes)
+    for seed in (4, 5):
+        circ.append(OrbitalRotation(random_unitary(2, seed=seed)), circ.modes[1:])
+
+    assert _nodes(_merge(circ)) == [
+        ("OrbitalRotation", [1, 2]),
+        ("OrbitalRotation", [0, 1, 2]),
+        ("OrbitalRotation", [1, 2]),
+    ]
+
+
+def test_no_merge_across_permuted_wires():
+    """Rotations on the same modes in a different order do not merge.
+
+    Their unitaries are written in different mode orders, so their plain product is not the composed
+    rotation.
+    """
+    circ = FermionicCircuit(2)
+    circ.append(OrbitalRotation(random_unitary(2, seed=1)), [circ.modes[0], circ.modes[1]])
+    circ.append(OrbitalRotation(random_unitary(2, seed=2)), [circ.modes[1], circ.modes[0]])
+
+    dag = _merge(circ)
+    assert [
+        [dag.find_bit(qubit).index for qubit in node.qargs] for node in dag.topological_op_nodes()
+    ] == [[0, 1], [1, 0]]
+
+
+@pytest.mark.parametrize(
+    "wires",
+    [
+        pytest.param([[1, 2], [0, 1, 2], [1, 2]], id="interleaved-mode-sets"),
+        pytest.param([[0, 1], [1, 0]], id="permuted-wires"),
+        pytest.param([[1, 0], [1, 0], [0, 1, 2], [2, 1], [2, 1]], id="mixed"),
+    ],
+)
+def test_merge_preserves_state_across_wire_changes(wires):
+    """The pass leaves the state unchanged when the rotations of a run change their wires.
+
+    The occupation puts one particle on modes (0, 1) and one on (1, 2), so no rotation in these runs
+    reduces to a global phase.
+    """
+    circ = FermionicCircuit(3)
+    circ.append(InitializeModes([1, 0, 1]), circ.modes)
+    for seed, modes in enumerate(wires):
+        circ.append(
+            OrbitalRotation(random_unitary(len(modes), seed=seed)),
+            [circ.modes[mode] for mode in modes],
+        )
+
+    reference = reference_pass_manager(optimization_level=0).run(circ)
+    merged = reference_pass_manager([MergeOrbitalRotations()], optimization_level=0).run(circ)
+
+    sv_ref = Statevector(reference).data
+    sv_merged = Statevector(merged).data
+    k = int(np.argmax(np.abs(sv_merged)))
+    phase = sv_ref[k] / sv_merged[k]
+    np.testing.assert_allclose(sv_ref, phase * sv_merged, atol=1e-10)
 
 
 def test_merge_per_half_independently():

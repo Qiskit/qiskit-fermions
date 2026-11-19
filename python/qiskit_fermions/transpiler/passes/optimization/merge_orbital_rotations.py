@@ -15,6 +15,7 @@
 from __future__ import annotations
 
 import numpy as np
+from qiskit.dagcircuit import DAGOpNode
 
 from qiskit_fermions.circuit import FermionicDAGCircuit
 from qiskit_fermions.circuit.library import OrbitalRotation
@@ -39,9 +40,9 @@ class MergeOrbitalRotations(FermionicDAGCircuitPass):
     ``rotation_unitary``. Because the merged gate implements exactly that composed basis change, the
     rewrite leaves the simulated state vector unchanged.
 
-    Only rotations on the *identical* mode set are merged: two rotations on different (even
-    overlapping) mode sets, or rotations separated by any other operation on a shared wire, break the
-    run and are left untouched. This is the shape produced, e.g., by two adjacent per-spin rotations
+    Only rotations on the *identical* modes, in the identical order, are merged: two rotations on
+    different (even overlapping) mode sets, on the same modes in a different order, or separated by
+    any other operation on a shared wire, break the run and are left untouched. This is the shape produced, e.g., by two adjacent per-spin rotations
     on the same spin half, or by consecutive :class:`.UCJ` layers whose trailing and leading orbital
     rotations meet on the same modes.
 
@@ -78,18 +79,30 @@ class MergeOrbitalRotations(FermionicDAGCircuitPass):
         # are disjoint, so replacing one block in place does not affect the others. No circuit
         # order is needed across runs for the same reason; within a run the nodes are ordered.
         for run in dag.collect_runs(["OrbitalRotation"]):
-            if len(run) < 2:
-                continue
+            # A run from ``collect_runs`` only shares the gate name: consecutive rotations on
+            # different (e.g. overlapping) mode sets, or on the same modes in a different order, can
+            # land in the same run. Split it into stretches acting on identical wires in identical
+            # order, since only those rotations share a dimension and a mode ordering.
+            stretches: list[list[DAGOpNode]] = [[run[0]]]
+            for node in run[1:]:
+                if node.qargs == stretches[-1][-1].qargs:
+                    stretches[-1].append(node)
+                else:
+                    stretches.append([node])
 
-            # ``collect_runs`` guarantees every node in the run acts on the same wires, so all their
-            # rotations share a dimension. Multiply them in circuit order -- the later rotation
-            # multiplies from the left, mirroring the composed basis change
-            # ``a^_i -> sum_j (U_k ... U_1)_{ji} a^_j``.
-            combined = np.eye(run[0].op.num_modes, dtype=complex)
-            for node in run:
-                combined = node.op.rotation_unitary @ combined
+            for stretch in stretches:
+                if len(stretch) < 2:
+                    continue
 
-            wire_pos = {qubit: index for index, qubit in enumerate(run[0].qargs)}
-            dag.replace_block_with_op(run, OrbitalRotation(combined), wire_pos, cycle_check=False)
+                # Multiply the rotations in circuit order (the later rotation multiplies from the
+                # left), mirroring the composed basis change ``a^_i -> sum_j (U_k ... U_1)_{ji} a^_j``.
+                combined = np.eye(stretch[0].op.num_modes, dtype=complex)
+                for node in stretch:
+                    combined = node.op.rotation_unitary @ combined
+
+                wire_pos = {qubit: index for index, qubit in enumerate(stretch[0].qargs)}
+                dag.replace_block_with_op(
+                    stretch, OrbitalRotation(combined), wire_pos, cycle_check=False
+                )
 
         return dag
