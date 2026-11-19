@@ -45,6 +45,13 @@
   rotations on the same modes in a different order, for example `(0, 1)` followed by `(1, 0)`,
   were merged into a single rotation that prepares a different state.
 
+- [`MergeSlaterDeterminantPreparation`](stubs/qiskit_fermions.transpiler.passes.MergeSlaterDeterminantPreparation.html.md#qiskit_fermions.transpiler.passes.MergeSlaterDeterminantPreparation) now accounts for
+  the order of the wires an [`InitializeModes`](stubs/qiskit_fermions.circuit.library.InitializeModes.html.md#qiskit_fermions.circuit.library.InitializeModes) or
+  [`OrbitalRotation`](stubs/qiskit_fermions.circuit.library.OrbitalRotation.html.md#qiskit_fermions.circuit.library.OrbitalRotation) is placed on. Previously, a gate placed
+  on permuted modes, for example an [`OrbitalRotation`](stubs/qiskit_fermions.circuit.library.OrbitalRotation.html.md#qiskit_fermions.circuit.library.OrbitalRotation) on
+  modes `(1, 0)`, was fused with its occupation or unitary as written, so the resulting
+  [`PrepareSlaterDeterminant`](stubs/qiskit_fermions.circuit.library.PrepareSlaterDeterminant.html.md#qiskit_fermions.circuit.library.PrepareSlaterDeterminant) prepared a different state.
+
 <a id="release-notes-0-4-1"></a>
 
 ## 0.4.1
