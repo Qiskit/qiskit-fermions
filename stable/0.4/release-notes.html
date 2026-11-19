@@ -11,7 +11,7 @@
         <link rel="prefetch" href="_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Release Notes - Qiskit Fermions 0.4.1+7994449</title>
+        <title>Release Notes - Qiskit Fermions 0.4.1+6a8b426</title>
       <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="_static/styles/qiskit-sphinx-theme.css?v=fc6d6d93" />
@@ -164,7 +164,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="index.html"><div class="brand">Qiskit Fermions 0.4.1+7994449</div></a>
+      <a href="index.html"><div class="brand">Qiskit Fermions 0.4.1+6a8b426</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -190,7 +190,7 @@
     <img class="sidebar-logo only-dark" src="_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.4.1+7994449</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.4.1+6a8b426</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="search.html" role="search">
@@ -501,6 +501,20 @@ same order. Previously, consecutive rotations on different mode sets, for exampl
 <code class="docutils literal notranslate"><span class="pre">(1,</span> <span class="pre">2)</span></code>, then <code class="docutils literal notranslate"><span class="pre">(0,</span> <span class="pre">1,</span> <span class="pre">2)</span></code>, then <code class="docutils literal notranslate"><span class="pre">(1,</span> <span class="pre">2)</span></code>, made the pass fail with a <code class="docutils literal notranslate"><span class="pre">ValueError</span></code>, and
 rotations on the same modes in a different order, for example <code class="docutils literal notranslate"><span class="pre">(0,</span> <span class="pre">1)</span></code> followed by <code class="docutils literal notranslate"><span class="pre">(1,</span> <span class="pre">0)</span></code>,
 were merged into a single rotation that prepares a different state.</p></li>
+</ul>
+<ul class="simple">
+<li><p><a class="reference internal" href="stubs/qiskit_fermions.transpiler.passes.QDriftTrotterization.html#qiskit_fermions.transpiler.passes.QDriftTrotterization" title="qiskit_fermions.transpiler.passes.QDriftTrotterization"><code class="xref py py-class docutils literal notranslate"><span class="pre">QDriftTrotterization</span></code></a> now places the gates it samples
+on the modes of the <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate they replace, in
+that gate’s order. Previously they were placed on all modes of the circuit, so a gate that did
+not act on every mode of the circuit in order was replaced by gates acting on the wrong modes.</p></li>
+</ul>
+<ul class="simple">
+<li><p><a class="reference internal" href="stubs/qiskit_fermions.transpiler.passes.QDriftTrotterization.html#qiskit_fermions.transpiler.passes.QDriftTrotterization" title="qiskit_fermions.transpiler.passes.QDriftTrotterization"><code class="xref py py-class docutils literal notranslate"><span class="pre">QDriftTrotterization</span></code></a> now compares a sampled term
+with the occupations of the circuit modes that the term acts on. Previously it compared the
+term’s indices within its <a class="reference internal" href="stubs/qiskit_fermions.circuit.library.Evolution.html#qiskit_fermions.circuit.library.Evolution" title="qiskit_fermions.circuit.library.Evolution"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolution</span></code></a> gate with the
+occupations of the circuit modes of the same indices. For a gate that does not act on the
+leading modes of the circuit in order, the pass could therefore keep the wrong terms, or raise
+a <code class="docutils literal notranslate"><span class="pre">RuntimeError</span></code> after rejecting every term.</p></li>
 </ul>
 <ul class="simple">
 <li><p><a class="reference internal" href="stubs/qiskit_fermions.transpiler.passes.MergeSlaterDeterminantPreparation.html#qiskit_fermions.transpiler.passes.MergeSlaterDeterminantPreparation" title="qiskit_fermions.transpiler.passes.MergeSlaterDeterminantPreparation"><code class="xref py py-class docutils literal notranslate"><span class="pre">MergeSlaterDeterminantPreparation</span></code></a> now accounts for
@@ -1736,7 +1750,7 @@ through first-party bindings for both Python and C.</p>
       
     </aside>
   </div>
-</div><script src="_static/documentation_options.js?v=9cd0ce37"></script>
+</div><script src="_static/documentation_options.js?v=5ab28e14"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/scripts/furo.js?v=46bd48cc"></script>

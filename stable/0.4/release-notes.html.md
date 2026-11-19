@@ -45,6 +45,18 @@
   rotations on the same modes in a different order, for example `(0, 1)` followed by `(1, 0)`,
   were merged into a single rotation that prepares a different state.
 
+- [`QDriftTrotterization`](stubs/qiskit_fermions.transpiler.passes.QDriftTrotterization.html.md#qiskit_fermions.transpiler.passes.QDriftTrotterization) now places the gates it samples
+  on the modes of the [`Evolution`](stubs/qiskit_fermions.circuit.library.Evolution.html.md#qiskit_fermions.circuit.library.Evolution) gate they replace, in
+  that gate’s order. Previously they were placed on all modes of the circuit, so a gate that did
+  not act on every mode of the circuit in order was replaced by gates acting on the wrong modes.
+
+- [`QDriftTrotterization`](stubs/qiskit_fermions.transpiler.passes.QDriftTrotterization.html.md#qiskit_fermions.transpiler.passes.QDriftTrotterization) now compares a sampled term
+  with the occupations of the circuit modes that the term acts on. Previously it compared the
+  term’s indices within its [`Evolution`](stubs/qiskit_fermions.circuit.library.Evolution.html.md#qiskit_fermions.circuit.library.Evolution) gate with the
+  occupations of the circuit modes of the same indices. For a gate that does not act on the
+  leading modes of the circuit in order, the pass could therefore keep the wrong terms, or raise
+  a `RuntimeError` after rejecting every term.
+
 - [`MergeSlaterDeterminantPreparation`](stubs/qiskit_fermions.transpiler.passes.MergeSlaterDeterminantPreparation.html.md#qiskit_fermions.transpiler.passes.MergeSlaterDeterminantPreparation) now accounts for
   the order of the wires an [`InitializeModes`](stubs/qiskit_fermions.circuit.library.InitializeModes.html.md#qiskit_fermions.circuit.library.InitializeModes) or
   [`OrbitalRotation`](stubs/qiskit_fermions.circuit.library.OrbitalRotation.html.md#qiskit_fermions.circuit.library.OrbitalRotation) is placed on. Previously, a gate placed
