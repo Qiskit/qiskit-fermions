@@ -26,6 +26,18 @@
   equal to `InitializeModes([False, True])`. The synthesis method and the
   [`atomic`](stubs/qiskit_fermions.circuit.FermionicGate.html.md#qiskit_fermions.circuit.FermionicGate.atomic) flag are not part of the comparison.
 
+- [`generate_preset_jw_pass_manager()`](stubs/qiskit_fermions.transpiler.presets.generate_preset_jw_pass_manager.html.md#qiskit_fermions.transpiler.presets.generate_preset_jw_pass_manager) now lowers an
+  [`OrbitalRotation`](stubs/qiskit_fermions.circuit.library.OrbitalRotation.html.md#qiskit_fermions.circuit.library.OrbitalRotation) or a
+  [`PrepareSlaterDeterminant`](stubs/qiskit_fermions.circuit.library.PrepareSlaterDeterminant.html.md#qiskit_fermions.circuit.library.PrepareSlaterDeterminant) exactly when its modes are
+  not contiguous or not in ascending order on the register. Previously, the result was slightly
+  wrong for a rotation with complex entries: under Jordan-Wigner, a Givens factor between modes
+  that are not adjacent on the register is a hop with a Z-string, which
+  `HopEvolutionSynthesis` declined and left to a product
+  formula. The plugin now synthesizes the evolution under any hop with a Z-string exactly. The
+  deprecated `GivensDecompositionOrbitalRotationSynthesis`
+  and `GivensDecompositionSlaterDeterminantSynthesis`
+  are fixed in the same way.
+
 <a id="release-notes-upcoming-release-main-other-notes"></a>
 
 ### Other Notes

@@ -10,7 +10,7 @@
         <link rel="prefetch" href="../_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>HopEvolutionSynthesis - Qiskit Fermions 0.5.0.dev0+93de8b2</title>
+        <title>HopEvolutionSynthesis - Qiskit Fermions 0.5.0.dev0+d171014</title>
       <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/qiskit-sphinx-theme.css?v=fc6d6d93" />
@@ -163,7 +163,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../index.html"><div class="brand">Qiskit Fermions 0.5.0.dev0+93de8b2</div></a>
+      <a href="../index.html"><div class="brand">Qiskit Fermions 0.5.0.dev0+d171014</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -189,7 +189,7 @@
     <img class="sidebar-logo only-dark" src="../_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.5.0.dev0+93de8b2</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.5.0.dev0+d171014</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="../search.html" role="search">
@@ -465,11 +465,14 @@
 <dd><p>Bases: <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.transpiler.passes.synthesis.plugin.HighLevelSynthesisPlugin" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">HighLevelSynthesisPlugin</span></code></a></p>
 <p>A high-level synthesis plugin for the evolution under a hop between two qubits.</p>
 <p>A <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.library.PauliEvolutionGate" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">PauliEvolutionGate</span></code></a> whose operator is a hop (see
-<code class="xref py py-func docutils literal notranslate"><span class="pre">match_hop()</span></code>), such as the image of a fermionic hop between adjacent modes under
-Jordan-Wigner, is synthesized as a single <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.library.XXPlusYYGate" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">XXPlusYYGate</span></code></a>. That is
-the exact evolution. The generic synthesis of the same operator costs several times as many
-two-qubit gates, and a target whose only two-qubit gate is the
-<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.library.XXPlusYYGate" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">XXPlusYYGate</span></code></a> cannot be reached by it at all.</p>
+<code class="xref py py-func docutils literal notranslate"><span class="pre">match_hop()</span></code>), such as the image of a fermionic hop under Jordan-Wigner, is synthesized
+exactly around a single <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.library.XXPlusYYGate" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">XXPlusYYGate</span></code></a>. A hop between adjacent
+modes becomes that gate alone, and a hop across other modes adds the two
+<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.library.CZGate" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">CZGate</span></code></a> and the <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.library.CXGate" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">CXGate</span></code></a> ladder
+that account for its Z-string. The generic synthesis of the same operator costs more two-qubit
+gates, and a target whose only two-qubit gate is the
+<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.library.XXPlusYYGate" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">XXPlusYYGate</span></code></a> cannot be reached by it for an adjacent hop at
+all.</p>
 <p>Any other gate is declined (the plugin returns <code class="docutils literal notranslate"><span class="pre">None</span></code>), so that the next method of the
 <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.transpiler.passes.HLSConfig" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">HLSConfig</span></code></a> is tried.</p>
 <div class="admonition note">
@@ -487,7 +490,9 @@ more accurate of the two.</p>
 <p>The <a class="reference internal" href="qiskit_fermions.transpiler.presets.generate_preset_jw_pass_manager.html#qiskit_fermions.transpiler.presets.generate_preset_jw_pass_manager" title="qiskit_fermions.transpiler.presets.generate_preset_jw_pass_manager"><code class="xref py py-func docutils literal notranslate"><span class="pre">generate_preset_jw_pass_manager()</span></code></a> does so unconditionally, and merges the entry into
 any <code class="docutils literal notranslate"><span class="pre">hls_config</span></code> passed to it. That mirrors how the preset has always lowered an orbital
 rotation: it emits an <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.library.XXPlusYYGate" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">XXPlusYYGate</span></code></a> for each Givens factor, and
-the configuration cannot turn that off.</p>
+the configuration cannot turn that off. A factor between modes that are adjacent in the
+<a class="reference internal" href="qiskit_fermions.circuit.library.OrbitalRotation.html#qiskit_fermions.circuit.library.OrbitalRotation" title="qiskit_fermions.circuit.library.OrbitalRotation"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrbitalRotation</span></code></a> but not on the register, because its wires are permuted or not
+contiguous, is a hop across the modes in between and is synthesized exactly, too.</p>
 <p>Initializing this plugin can be done with the arguments listed below.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -518,9 +523,9 @@ still considered a hop.</p>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A circuit with a single <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.library.XXPlusYYGate" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">XXPlusYYGate</span></code></a> if
-<code class="docutils literal notranslate"><span class="pre">high_level_object</span></code> is a <a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.library.PauliEvolutionGate" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">PauliEvolutionGate</span></code></a> of a hop
-with a fixed evolution time, and <code class="docutils literal notranslate"><span class="pre">None</span></code> otherwise.</p>
+<dd class="field-even"><p>The circuit of <code class="xref py py-func docutils literal notranslate"><span class="pre">match_hop()</span></code> if <code class="docutils literal notranslate"><span class="pre">high_level_object</span></code> is a
+<a class="reference external" href="https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.library.PauliEvolutionGate" title="(in Qiskit v2.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">PauliEvolutionGate</span></code></a> of a hop with a fixed evolution
+time, and <code class="docutils literal notranslate"><span class="pre">None</span></code> otherwise.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -602,7 +607,7 @@ with a fixed evolution time, and <code class="docutils literal notranslate"><spa
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=21387bed"></script>
+</div><script src="../_static/documentation_options.js?v=692c0b73"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

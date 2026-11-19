@@ -11,7 +11,7 @@
         <link rel="prefetch" href="_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Release Notes - Qiskit Fermions 0.5.0.dev0+93de8b2</title>
+        <title>Release Notes - Qiskit Fermions 0.5.0.dev0+d171014</title>
       <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="_static/styles/qiskit-sphinx-theme.css?v=fc6d6d93" />
@@ -164,7 +164,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="index.html"><div class="brand">Qiskit Fermions 0.5.0.dev0+93de8b2</div></a>
+      <a href="index.html"><div class="brand">Qiskit Fermions 0.5.0.dev0+d171014</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -190,7 +190,7 @@
     <img class="sidebar-logo only-dark" src="_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.5.0.dev0+93de8b2</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.5.0.dev0+d171014</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="search.html" role="search">
@@ -480,6 +480,19 @@ when they define the same gate, and they are hashable. Previously, <code class="
 operator and the mode occupation, so for example <code class="docutils literal notranslate"><span class="pre">InitializeModes([True,</span> <span class="pre">False])</span></code> compared
 equal to <code class="docutils literal notranslate"><span class="pre">InitializeModes([False,</span> <span class="pre">True])</span></code>. The synthesis method and the
 <a class="reference internal" href="stubs/qiskit_fermions.circuit.FermionicGate.html#qiskit_fermions.circuit.FermionicGate.atomic" title="qiskit_fermions.circuit.FermionicGate.atomic"><code class="xref py py-attr docutils literal notranslate"><span class="pre">atomic</span></code></a> flag are not part of the comparison.</p></li>
+</ul>
+<ul class="simple">
+<li><p><a class="reference internal" href="stubs/qiskit_fermions.transpiler.presets.generate_preset_jw_pass_manager.html#qiskit_fermions.transpiler.presets.generate_preset_jw_pass_manager" title="qiskit_fermions.transpiler.presets.generate_preset_jw_pass_manager"><code class="xref py py-func docutils literal notranslate"><span class="pre">generate_preset_jw_pass_manager()</span></code></a> now lowers an
+<a class="reference internal" href="stubs/qiskit_fermions.circuit.library.OrbitalRotation.html#qiskit_fermions.circuit.library.OrbitalRotation" title="qiskit_fermions.circuit.library.OrbitalRotation"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrbitalRotation</span></code></a> or a
+<a class="reference internal" href="stubs/qiskit_fermions.circuit.library.PrepareSlaterDeterminant.html#qiskit_fermions.circuit.library.PrepareSlaterDeterminant" title="qiskit_fermions.circuit.library.PrepareSlaterDeterminant"><code class="xref py py-class docutils literal notranslate"><span class="pre">PrepareSlaterDeterminant</span></code></a> exactly when its modes are
+not contiguous or not in ascending order on the register. Previously, the result was slightly
+wrong for a rotation with complex entries: under Jordan-Wigner, a Givens factor between modes
+that are not adjacent on the register is a hop with a Z-string, which
+<code class="xref py py-class docutils literal notranslate"><span class="pre">HopEvolutionSynthesis</span></code> declined and left to a product
+formula. The plugin now synthesizes the evolution under any hop with a Z-string exactly. The
+deprecated <code class="xref py py-class docutils literal notranslate"><span class="pre">GivensDecompositionOrbitalRotationSynthesis</span></code>
+and <code class="xref py py-class docutils literal notranslate"><span class="pre">GivensDecompositionSlaterDeterminantSynthesis</span></code>
+are fixed in the same way.</p></li>
 </ul>
 </section>
 <section id="other-notes">
@@ -1701,7 +1714,7 @@ through first-party bindings for both Python and C.</p>
       
     </aside>
   </div>
-</div><script src="_static/documentation_options.js?v=21387bed"></script>
+</div><script src="_static/documentation_options.js?v=692c0b73"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/scripts/furo.js?v=46bd48cc"></script>

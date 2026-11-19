@@ -42,7 +42,7 @@ upon. These are the entry points of the `qiskit_fermions.transpiler.synthesis` g
 
 The plugins above map fermionic instructions to qubit ones. The following is instead a plugin of
 Qiskit’s [`HighLevelSynthesis`](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.transpiler.passes.HighLevelSynthesis) for the qubit stage, which recognizes
-the image of a fermionic hop between adjacent modes and emits it as a single
+the Jordan-Wigner image of a fermionic hop and synthesizes it exactly around a single
 [`XXPlusYYGate`](https://quantum.cloud.ibm.com/docs/api/qiskit/qiskit.circuit.library.XXPlusYYGate). The Jordan-Wigner preset registers it.
 
 ## Additional helper functions
