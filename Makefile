@@ -63,10 +63,10 @@ rustcoverage: testrust
 # `make pystubs` a complete regenerate-from-scratch that cannot leave orphans behind.
 .PHONY: pystubs pystubs-dev pystubs-clean
 pystubs: pystubs-clean
-	cargo run --release --bin stub_gen -p qiskit-fermions-pyext --no-default-features
+	cargo run --release --bin stub_gen -p qiskit-fermions-pyext
 
 pystubs-dev: pystubs-clean
-	cargo run --bin stub_gen -p qiskit-fermions-pyext --no-default-features
+	cargo run --bin stub_gen -p qiskit-fermions-pyext
 
 pystubs-clean:
 	find python/ -name '*.pyi' -delete
