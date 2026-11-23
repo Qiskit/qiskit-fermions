@@ -1,0 +1,6 @@
+﻿group\_wise
+===========
+
+.. currentmodule:: qiskit_fermions.transpiler.passes.synthesis
+
+.. autofunction:: group_wise

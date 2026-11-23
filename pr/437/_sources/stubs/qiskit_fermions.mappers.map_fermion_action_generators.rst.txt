@@ -1,0 +1,6 @@
+﻿map\_fermion\_action\_generators
+================================
+
+.. currentmodule:: qiskit_fermions.mappers
+
+.. autofunction:: map_fermion_action_generators
