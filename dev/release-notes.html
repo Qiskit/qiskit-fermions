@@ -11,7 +11,7 @@
         <link rel="prefetch" href="_static/images/qiskit-dark-logo.svg" as="image">
 
     <!-- Generated with Sphinx 9.0.4 and Furo 2025.12.19 -->
-        <title>Release Notes - Qiskit Fermions 0.5.0.dev0+fd2a5e0</title>
+        <title>Release Notes - Qiskit Fermions 0.5.0.dev0</title>
       <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="_static/styles/qiskit-sphinx-theme.css?v=fc6d6d93" />
@@ -164,7 +164,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="index.html"><div class="brand">Qiskit Fermions 0.5.0.dev0+fd2a5e0</div></a>
+      <a href="index.html"><div class="brand">Qiskit Fermions 0.5.0.dev0</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -190,7 +190,7 @@
     <img class="sidebar-logo only-dark" src="_static/images/qiskit-dark-logo.svg" alt="Dark Logo"/>
   </div>
   
-  <span class="sidebar-brand-text">Qiskit Fermions 0.5.0.dev0+fd2a5e0</span>
+  <span class="sidebar-brand-text">Qiskit Fermions 0.5.0.dev0</span>
   
 </a>
 <form class="sidebar-search-container" method="get" action="search.html" role="search">
@@ -538,6 +538,33 @@ APIs from disagreeing about what <code class="docutils literal notranslate"><spa
 </li>
 </ul>
 </section>
+<section id="build-system-changes">
+<span id="release-notes-upcoming-release-main-build-system-changes"></span><h3>Build System Changes<a class="headerlink" href="#build-system-changes" title="Link to this heading">¶</a></h3>
+<ul>
+<li><p>The Python build backend is now <a class="reference external" href="https://www.maturin.rs/">maturin</a> instead of
+<code class="docutils literal notranslate"><span class="pre">setuptools</span></code> with <code class="docutils literal notranslate"><span class="pre">setuptools-rust</span></code>, and <code class="docutils literal notranslate"><span class="pre">setup.py</span></code> no longer exists. Installing with
+<code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">.</span></code> or <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">-e</span> <span class="pre">.</span></code> works as before, but when building from source:</p>
+<ul>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">SETUPTOOLS_RUST_CARGO_PROFILE</span></code> and <code class="docutils literal notranslate"><span class="pre">RUST_DEBUG</span></code> environment variables no longer have
+any effect. Editable installs still compile in debug mode by default; to compile them in
+release mode, pass the profile to <code class="docutils literal notranslate"><span class="pre">maturin</span></code> instead:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="nv">MATURIN_PEP517_ARGS</span><span class="o">=</span><span class="s2">"--profile release"</span><span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
+</pre></div>
+</div>
+</li>
+<li><p>To rebuild only the Rust extension module of an editable install, replace
+<code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">setup.py</span> <span class="pre">build_rust</span> <span class="pre">--inplace</span> <span class="pre">[--release]</span></code> with
+<code class="docutils literal notranslate"><span class="pre">maturin</span> <span class="pre">develop</span> <span class="pre">--skip-install</span> <span class="pre">[--release]</span></code>, or run <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">pyext-dev</span></code> (debug mode) or
+<code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">pyext</span></code> (release mode).</p></li>
+<li><p>In an existing source checkout, delete two leftovers of the old build backend, or they keep
+shadowing every new build: the extension module (for example,
+<code class="docutils literal notranslate"><span class="pre">python/qiskit_fermions/_lib.cpython-313-x86_64-linux-gnu.so</span></code>, which Python imports before
+the new <code class="docutils literal notranslate"><span class="pre">_lib.abi3.so</span></code>) and the <code class="docutils literal notranslate"><span class="pre">python/qiskit_fermions.egg-info</span></code> directory (whose entry
+points go stale). <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">pyext</span></code> and <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">pyext-dev</span></code> delete both for you.</p></li>
+</ul>
+</li>
+</ul>
+</section>
 <section id="bug-fixes">
 <span id="release-notes-upcoming-release-main-bug-fixes"></span><h3>Bug Fixes<a class="headerlink" href="#bug-fixes" title="Link to this heading">¶</a></h3>
 <ul class="simple">
@@ -595,6 +622,11 @@ modes <code class="docutils literal notranslate"><span class="pre">(1,</span> <s
 </section>
 <section id="other-notes">
 <span id="release-notes-upcoming-release-main-other-notes"></span><h3>Other Notes<a class="headerlink" href="#other-notes" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>The source distribution (sdist) now contains the Rust sources (<code class="docutils literal notranslate"><span class="pre">Cargo.toml</span></code>, <code class="docutils literal notranslate"><span class="pre">Cargo.lock</span></code>
+and the <code class="docutils literal notranslate"><span class="pre">crates/</span></code> directory), so <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span></code> can build <code class="docutils literal notranslate"><span class="pre">qiskit-fermions</span></code> from it.
+Previous source distributions lacked them and could not be built.</p></li>
+</ul>
 <ul class="simple">
 <li><p>The optional downstream dependency <code class="docutils literal notranslate"><span class="pre">ffsim&gt;=0.0.86</span></code> now fully supports
 Windows and we have adjusted our documentation and guidance accordingly.</p></li>
@@ -1586,8 +1618,8 @@ terms returns <a class="reference internal" href="cdoc/qf-exit-code.html#c.QfExi
 <code class="docutils literal notranslate"><span class="pre">NULL</span></code> to clear the group indices is unaffected.</p></li>
 </ul>
 </section>
-<section id="build-system-changes">
-<span id="release-notes-0-2-0-build-system-changes"></span><h3>Build System Changes<a class="headerlink" href="#build-system-changes" title="Link to this heading">¶</a></h3>
+<section id="release-notes-0-2-0-build-system-changes">
+<span id="id19"></span><h3>Build System Changes<a class="headerlink" href="#release-notes-0-2-0-build-system-changes" title="Link to this heading">¶</a></h3>
 <ul class="simple">
 <li><p>The <code class="docutils literal notranslate"><span class="pre">simulation</span></code> optional dependency has been renamed to <code class="docutils literal notranslate"><span class="pre">ffsim</span></code>, so
 <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">&quot;qiskit-fermions[simulation]&quot;</span></code> becomes
@@ -1607,7 +1639,7 @@ visible at install time. Installing <code class="docutils literal notranslate"><
 </ul>
 </section>
 <section id="release-notes-0-2-0-bug-fixes">
-<span id="id19"></span><h3>Bug Fixes<a class="headerlink" href="#release-notes-0-2-0-bug-fixes" title="Link to this heading">¶</a></h3>
+<span id="id20"></span><h3>Bug Fixes<a class="headerlink" href="#release-notes-0-2-0-bug-fixes" title="Link to this heading">¶</a></h3>
 <ul>
 <li><p>Fixed the excessive memory consumption of
 <a class="reference internal" href="stubs/qiskit_fermions.mappers.library.fermion_jordan_wigner.html#qiskit_fermions.mappers.library.fermion_jordan_wigner" title="qiskit_fermions.mappers.library.fermion_jordan_wigner"><code class="xref py py-func docutils literal notranslate"><span class="pre">fermion_jordan_wigner()</span></code></a> and of
@@ -1700,9 +1732,9 @@ the input <a class="reference internal" href="stubs/qiskit_fermions.operators.Fe
 </section>
 </section>
 <section id="release-notes-0-1-0">
-<span id="id20"></span><h2>0.1.0<a class="headerlink" href="#release-notes-0-1-0" title="Link to this heading">¶</a></h2>
+<span id="id21"></span><h2>0.1.0<a class="headerlink" href="#release-notes-0-1-0" title="Link to this heading">¶</a></h2>
 <section id="release-notes-0-1-0-prelude">
-<span id="id21"></span><h3>Prelude<a class="headerlink" href="#release-notes-0-1-0-prelude" title="Link to this heading">¶</a></h3>
+<span id="id22"></span><h3>Prelude<a class="headerlink" href="#release-notes-0-1-0-prelude" title="Link to this heading">¶</a></h3>
 <p>This is the first release of Qiskit Fermions, an extension of Qiskit with tools for fermionic
 systems.  It provides operator data structures, a framework and library for converting those
 operators to qubit form (mappers), and a framework and library for synthesizing the
@@ -1766,6 +1798,7 @@ through first-party bindings for both Python and C.</p>
 <li><a class="reference internal" href="#python-api-features">Python API Features</a></li>
 <li><a class="reference internal" href="#c-api-features">C API Features</a></li>
 <li><a class="reference internal" href="#c-api-upgrade-notes">C API Upgrade Notes</a></li>
+<li><a class="reference internal" href="#build-system-changes">Build System Changes</a></li>
 <li><a class="reference internal" href="#bug-fixes">Bug Fixes</a></li>
 <li><a class="reference internal" href="#other-notes">Other Notes</a></li>
 </ul>
@@ -1794,7 +1827,7 @@ through first-party bindings for both Python and C.</p>
 <li><a class="reference internal" href="#release-notes-0-2-0-c-api-features">C API Features</a></li>
 <li><a class="reference internal" href="#release-notes-0-2-0-python-api-upgrade-notes">Python API Upgrade Notes</a></li>
 <li><a class="reference internal" href="#release-notes-0-2-0-c-api-upgrade-notes">C API Upgrade Notes</a></li>
-<li><a class="reference internal" href="#build-system-changes">Build System Changes</a></li>
+<li><a class="reference internal" href="#release-notes-0-2-0-build-system-changes">Build System Changes</a></li>
 <li><a class="reference internal" href="#release-notes-0-2-0-bug-fixes">Bug Fixes</a></li>
 <li><a class="reference internal" href="#performance-improvements">Performance Improvements</a></li>
 </ul>
@@ -1814,7 +1847,7 @@ through first-party bindings for both Python and C.</p>
       
     </aside>
   </div>
-</div><script src="_static/documentation_options.js?v=095101a1"></script>
+</div><script src="_static/documentation_options.js?v=be1c004d"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/scripts/furo.js?v=46bd48cc"></script>

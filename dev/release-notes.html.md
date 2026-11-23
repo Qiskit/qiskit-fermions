@@ -79,6 +79,29 @@
   of non-identity factors rather than the number of terms. Naming these `_num_terms` keeps the two
   APIs from disagreeing about what `len` counts.
 
+<a id="release-notes-upcoming-release-main-build-system-changes"></a>
+
+### Build System Changes
+
+- The Python build backend is now [maturin](https://www.maturin.rs/) instead of
+  `setuptools` with `setuptools-rust`, and `setup.py` no longer exists. Installing with
+  `pip install .` or `pip install -e .` works as before, but when building from source:
+  * The `SETUPTOOLS_RUST_CARGO_PROFILE` and `RUST_DEBUG` environment variables no longer have
+    any effect. Editable installs still compile in debug mode by default; to compile them in
+    release mode, pass the profile to `maturin` instead:
+    ```sh
+    MATURIN_PEP517_ARGS="--profile release" pip install -e .
+    ```
+  * To rebuild only the Rust extension module of an editable install, replace
+    `python setup.py build_rust --inplace [--release]` with
+    `maturin develop --skip-install [--release]`, or run `make pyext-dev` (debug mode) or
+    `make pyext` (release mode).
+  * In an existing source checkout, delete two leftovers of the old build backend, or they keep
+    shadowing every new build: the extension module (for example,
+    `python/qiskit_fermions/_lib.cpython-313-x86_64-linux-gnu.so`, which Python imports before
+    the new `_lib.abi3.so`) and the `python/qiskit_fermions.egg-info` directory (whose entry
+    points go stale). `make pyext` and `make pyext-dev` delete both for you.
+
 <a id="release-notes-upcoming-release-main-bug-fixes"></a>
 
 ### Bug Fixes
@@ -132,6 +155,10 @@
 <a id="release-notes-upcoming-release-main-other-notes"></a>
 
 ### Other Notes
+
+- The source distribution (sdist) now contains the Rust sources (`Cargo.toml`, `Cargo.lock`
+  and the `crates/` directory), so `pip install` can build `qiskit-fermions` from it.
+  Previous source distributions lacked them and could not be built.
 
 - The optional downstream dependency `ffsim>=0.0.86` now fully supports
   Windows and we have adjusted our documentation and guidance accordingly.
