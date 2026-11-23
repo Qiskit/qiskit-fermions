@@ -2,7 +2,6 @@
 # This is duplicated as `dependency-groups.build` for convenience.
 requires = [
     "maturin>=1.12.1,<2",
-    "qiskit>=2.5.0,<2.7",
 ]
 build-backend = "maturin"
 
@@ -75,7 +74,6 @@ pyomo = [
 [dependency-groups]
 build = [
     "maturin>=1.12.1,<2",
-    "qiskit>=2.5.0,<2.7",
 ]
 style = [
     "ruff==0.17.3",
