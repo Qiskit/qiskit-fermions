@@ -114,7 +114,7 @@ jobs:
           # the already-installed dev version.
           pip install "qiskit @ file:$(echo build/qiskit/dist/*.whl)"
           uv pip install --system --exclude <(echo qiskit) --group build --group test
-          SETUPTOOLS_RUST_CARGO_PROFILE=release uv pip install --system --exclude <(echo qiskit) -e .
+          MATURIN_PEP517_ARGS="--profile release" uv pip install --system --exclude <(echo qiskit) -e .
 
       - name: Python tests
         shell: bash
@@ -128,7 +128,7 @@ jobs:
       - name: Optional tests
         shell: bash
         run: |
-          SETUPTOOLS_RUST_CARGO_PROFILE=release uv pip install --system --exclude <(echo qiskit) -e ".[all]"
+          MATURIN_PEP517_ARGS="--profile release" uv pip install --system --exclude <(echo qiskit) -e ".[all]"
           make testoptional
 
       # The guides under `docs/` are documentation: their doctests are only meaningful when the

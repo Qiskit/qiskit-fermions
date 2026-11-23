@@ -14,8 +14,9 @@
 """Set the project version consistently across Python and Rust.
 
 The version is provided in :pep:`440` form (e.g. ``0.2.0``, ``0.2.0.dev0``, ``1.0.0rc1``).  It is
-written verbatim to ``python/qiskit_fermions/VERSION.txt`` (the single source of truth for the
-Python package) and, converted to Cargo's SemVer pre-release syntax, to the ``[workspace.package]``
+written verbatim to ``python/qiskit_fermions/VERSION.txt`` (read at import time by ``version.py``)
+and to the ``[project]`` version in ``pyproject.toml`` (the package metadata used by the build
+backend), and, converted to Cargo's SemVer pre-release syntax, to the ``[workspace.package]``
 version in ``Cargo.toml``.
 
 PEP 440 and SemVer spell pre-releases differently, so we translate the separator:
@@ -37,6 +38,7 @@ import sys
 ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 VERSION_TXT = os.path.join(ROOT_DIR, "python", "qiskit_fermions", "VERSION.txt")
 CARGO_TOML = os.path.join(ROOT_DIR, "Cargo.toml")
+PYPROJECT_TOML = os.path.join(ROOT_DIR, "pyproject.toml")
 
 # A deliberately strict subset of PEP 440: release segment with an optional pre-release
 # (a/b/rc) and/or dev segment.  We do not support epochs, post-releases, or local versions here
@@ -83,32 +85,36 @@ def write_version_txt(version: str) -> None:
         handle.write(version + "\n")
 
 
-def write_cargo_toml(semver: str) -> None:
-    """Rewrite the single ``[workspace.package]`` ``version`` line in ``Cargo.toml``."""
-    with open(CARGO_TOML) as handle:
+def write_toml_version(path: str, table: str, version: str) -> None:
+    """Rewrite the single ``version`` line of the TOML ``table`` in the file at ``path``.
+
+    Both manifests are edited line by line rather than round-tripped through a TOML library, so
+    that their comments and formatting survive untouched.
+    """
+    with open(path) as handle:
         lines = handle.readlines()
 
-    in_workspace_package = False
+    in_table = False
     replaced = False
     for index, line in enumerate(lines):
         stripped = line.strip()
         if stripped.startswith("["):
-            in_workspace_package = stripped == "[workspace.package]"
+            in_table = stripped == f"[{table}]"
             continue
-        if in_workspace_package and re.match(r"version\s*=", stripped):
-            lines[index] = f'version = "{semver}"\n'
+        if in_table and re.match(r"version\s*=", stripped):
+            lines[index] = f'version = "{version}"\n'
             replaced = True
             break
 
     if not replaced:
-        raise SystemExit("error: could not find [workspace.package] version in Cargo.toml")
+        raise SystemExit(f"error: could not find [{table}] version in {os.path.basename(path)}")
 
-    with open(CARGO_TOML, "w") as handle:
+    with open(path, "w") as handle:
         handle.writelines(lines)
 
 
 def main() -> int:
-    """Entry point: parse the requested version and update both manifests."""
+    """Entry point: parse the requested version and update all manifests."""
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("version", help="the new PEP 440 version, e.g. 0.2.0.dev0")
     args = parser.parse_args()
@@ -117,10 +123,12 @@ def main() -> int:
     semver = pep440_to_semver(version)
 
     write_version_txt(version)
-    write_cargo_toml(semver)
+    write_toml_version(PYPROJECT_TOML, "project", version)
+    write_toml_version(CARGO_TOML, "workspace.package", semver)
 
-    print(f"VERSION.txt -> {version}")
-    print(f"Cargo.toml  -> {semver}")
+    print(f"VERSION.txt    -> {version}")
+    print(f"pyproject.toml -> {version}")
+    print(f"Cargo.toml     -> {semver}")
     print("Remember to run the build (e.g. `make pyext-dev`) to refresh Cargo.lock.")
     return 0
 

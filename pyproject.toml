@@ -1,15 +1,15 @@
 [build-system]
 # This is duplicated as `dependency-groups.build` for convenience.
 requires = [
-    "setuptools>=77.0.1",
-    "setuptools-rust",
+    "maturin>=1.12.1,<2",
     "qiskit>=2.5.0,<2.7",
 ]
-build-backend = "setuptools.build_meta"
+build-backend = "maturin"
 
 [project]
 name = "qiskit-fermions"
-dynamic = ["version"]
+# Kept in sync with `python/qiskit_fermions/VERSION.txt` and `Cargo.toml` by `make version-bump`.
+version = "0.5.0.dev0"
 readme = "README.md"
 description = "A toolkit for working with fermionic systems"
 license = "Apache-2.0"
@@ -74,8 +74,7 @@ pyomo = [
 
 [dependency-groups]
 build = [
-    "setuptools>=77.0.1",
-    "setuptools-rust",
+    "maturin>=1.12.1,<2",
     "qiskit>=2.5.0,<2.7",
 ]
 style = [
@@ -150,21 +149,19 @@ dev = [
 "OrbitalRotation.GivensDecomposition" = "qiskit_fermions.transpiler.passes.synthesis:GivensDecompositionOrbitalRotationSynthesis"
 "PrepareSlaterDeterminant.GivensDecompositionSlater" = "qiskit_fermions.transpiler.passes.synthesis:GivensDecompositionSlaterDeterminantSynthesis"
 
-[tool.setuptools]
-include-package-data = true
-
-[tool.setuptools.dynamic]
-version = { attr = "qiskit_fermions.version.__version__" }
-
-[tool.setuptools.package-data]
-# `py.typed` marks the package as typed (PEP 561); the `_lib/**/*.pyi` stubs are the
-# pyo3-stub-gen output for the compiled extension and must ship in the wheel so the
-# native API is typed for downstream consumers (the pure-Python API is typed inline).
-qiskit_fermions = ["VERSION.txt", "py.typed", "_lib/**/*.pyi"]
-
-[tool.setuptools.packages.find]
-where = ["python"]
-include = ["qiskit_fermions", "qiskit_fermions.*"]
+[tool.maturin]
+module-name = "qiskit_fermions._lib"
+manifest-path = "crates/pyext/Cargo.toml"
+# Spelled out because `pyext` also defines the `stub_gen` binary, which must not be packaged.
+bindings = "pyo3"
+# Every file under `python/qiskit_fermions/` that git does not ignore ships in the wheel. That
+# includes `VERSION.txt`, the PEP 561 `py.typed` marker and the committed `_lib/**/*.pyi` stubs,
+# which type the native API for downstream consumers (the pure-Python API is typed inline).
+python-source = "python"
+# Optimized for wheels and regular installs; editable installs compile in debug mode, so override
+# the profile when iterating on performance (see `docs/install-py.rst`).
+profile = "release"
+editable-profile = "dev"
 
 [tool.coverage.run]
 branch = true
@@ -252,9 +249,9 @@ NDArray = "NDArray"
 [tool.typos.files]
 extend-exclude = ["crates/qiskit-pyo3-ffi"]
 
-# `pyext` is built abi3 (see `crates/pyext/Cargo.toml`'s `pyo3` feature `abi3-py311` and
-# `setup.py`'s `py_limited_api="cp311"`), so cibuildwheel collapses each platform down to a
-# single `cp311-abi3` wheel.
+# `pyext` is built abi3 (see the `abi3-py311` feature of `pyo3` in the workspace `Cargo.toml`, which
+# maturin reads to tag the wheel), so cibuildwheel collapses each platform down to a single
+# `cp311-abi3` wheel.
 [tool.cibuildwheel]
 manylinux-x86_64-image = "manylinux_2_28"
 manylinux-aarch64-image = "manylinux_2_28"
