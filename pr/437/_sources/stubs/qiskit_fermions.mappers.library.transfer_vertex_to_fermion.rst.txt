@@ -1,6 +1,0 @@
-﻿transfer\_vertex\_to\_fermion
-=============================
-
-.. currentmodule:: qiskit_fermions.mappers.library
-
-.. autofunction:: transfer_vertex_to_fermion

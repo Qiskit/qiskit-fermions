@@ -1,6 +1,0 @@
-﻿map\_edge\_vertex\_generators
-=============================
-
-.. currentmodule:: qiskit_fermions.mappers
-
-.. autofunction:: map_edge_vertex_generators

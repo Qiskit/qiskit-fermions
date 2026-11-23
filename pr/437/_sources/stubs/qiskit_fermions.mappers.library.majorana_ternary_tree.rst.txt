@@ -1,6 +1,0 @@
-﻿majorana\_ternary\_tree
-=======================
-
-.. currentmodule:: qiskit_fermions.mappers.library
-
-.. autofunction:: majorana_ternary_tree

@@ -1,6 +1,0 @@
-﻿group\_terms\_by\_non\_commutation
-==================================
-
-.. currentmodule:: qiskit_fermions.operators.terms
-
-.. autofunction:: group_terms_by_non_commutation

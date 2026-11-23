@@ -1,6 +1,0 @@
-﻿group\_terms\_by\_electronic\_structure
-=======================================
-
-.. currentmodule:: qiskit_fermions.operators.terms
-
-.. autofunction:: group_terms_by_electronic_structure
