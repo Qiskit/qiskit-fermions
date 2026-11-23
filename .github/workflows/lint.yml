@@ -68,7 +68,7 @@ jobs:
         shell: bash
         run: |
           pip install --group build --group lint qiskit
-          SETUPTOOLS_RUST_CARGO_PROFILE=release pip install -e ".[all]"
+          MATURIN_PEP517_ARGS="--profile release" pip install -e ".[all]"
 
       - name: Run lint check
         shell: bash

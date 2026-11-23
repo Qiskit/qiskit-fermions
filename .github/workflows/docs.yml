@@ -96,7 +96,7 @@ jobs:
         shell: bash
         run: |
           pip install --group build --group docs qiskit
-          SETUPTOOLS_RUST_CARGO_PROFILE=release pip install -e ".[all]"
+          MATURIN_PEP517_ARGS="--profile release" pip install -e ".[all]"
 
       - name: Build docs
         shell: bash

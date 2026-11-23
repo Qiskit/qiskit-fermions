@@ -12,11 +12,11 @@
 
 """Contains the Qiskit Fermions version.
 
-The release number is stored in ``VERSION.txt`` next to this file, which is the single source of
-truth and is committed to the repository (so a source tarball is self-contained and needs no git
-history to know its version).  When building or importing from a git checkout whose ``HEAD`` is not
-a tagged release, a :pep:`440` local version identifier ``+<sha7>`` is appended so that editable
-installs report the exact commit they were built from.
+The release number is stored in ``VERSION.txt`` next to this file, which is committed to the
+repository (so a source tarball is self-contained and needs no git history to know its version) and
+kept in sync with the package metadata in ``pyproject.toml`` by ``make version-bump``.  When importing
+from a git checkout whose ``HEAD`` is not a tagged release, a :pep:`440` local version identifier
+``+<sha7>`` is appended so that editable installs report the exact commit they were built from.
 """
 
 import os

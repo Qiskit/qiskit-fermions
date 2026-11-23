@@ -72,8 +72,9 @@ Three things about those generated stubs are easy to get wrong, so they are wort
    the stub its physical `_lib` path.
 
 2. **They are committed, and never hand-edited.** The `_lib/**/*.pyi` files are checked into git so
-   they ship in the wheel (via the `_lib/**/*.pyi` entry in `[tool.setuptools.package-data]`)
-   without requiring a Rust toolchain at build time. They are *generated output*: edit the Rust
+   they ship in the wheel (the `maturin` build backend packages every file under
+   `python/qiskit_fermions/` that git does not ignore) without requiring a Rust toolchain at build
+   time. They are *generated output*: edit the Rust
    docstrings / signatures in `crates/pyext/src` and re-run `make pystubs`, never edit a `.pyi` by
    hand. The `.gitattributes` entry marks them `linguist-generated` as a reminder.
 

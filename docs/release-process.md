@@ -23,8 +23,8 @@ On a branch off `main`:
 make version-bump VERSION=X.Y.Z
 ```
 
-This rewrites `python/qiskit_fermions/VERSION.txt` and the `[workspace.package]` version in
-`Cargo.toml`, and refreshes `Cargo.lock`. **Stage `Cargo.lock` as well** — it is committed, and
+This rewrites `python/qiskit_fermions/VERSION.txt`, the `[project]` version in `pyproject.toml` and
+the `[workspace.package]` version in `Cargo.toml`, and refreshes `Cargo.lock`. **Stage `Cargo.lock` as well** — it is committed, and
 `make lint` runs `cargo metadata --locked`, which fails if it disagrees with `Cargo.toml`.
 
 Open a pull request and merge it. Note the resulting commit on `main`; every later step refers to it

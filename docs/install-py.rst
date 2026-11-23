@@ -79,12 +79,17 @@ The next step is to install ``qiskit-fermions`` to the virtual environment.
 
 .. hint::
 
-   You can also perform an editable install while still compiling the
-   underlying Rust crate in ``release`` mode:
+   An editable install (``pip install -e .``) compiles the underlying Rust
+   crate in debug mode by default. To compile it in ``release`` mode instead,
+   pass the profile to the ``maturin`` build backend:
 
    .. code:: sh
 
-       SETUPTOOLS_RUST_CARGO_PROFILE=release pip install -e .
+       MATURIN_PEP517_ARGS="--profile release" pip install -e .
+
+   Changes to the Python sources take effect immediately, but changes to the
+   Rust sources require a rebuild. To rebuild only the Rust extension module,
+   run ``make pyext`` (``release`` mode) or ``make pyext-dev`` (debug mode).
 
 .. hint::
 
