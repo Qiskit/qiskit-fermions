@@ -1,0 +1,98 @@
+﻿Report
+======
+
+.. currentmodule:: qiskit_fermions.transpiler.passes.synthesis.commuting_evolution
+
+.. autoclass:: Report
+   :show-inheritance:
+   :no-members:
+   :no-inherited-members:
+   :special-members:
+
+
+  
+  
+   .. rubric:: Attributes
+    
+   .. autoattribute:: problem
+   .. autoattribute:: context
+   .. autoattribute:: variants
+   .. autoattribute:: chosen
+   .. autoattribute:: declined
+  
+  
+  
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+  
+  
+  
+  
+  
+  
+  
+  

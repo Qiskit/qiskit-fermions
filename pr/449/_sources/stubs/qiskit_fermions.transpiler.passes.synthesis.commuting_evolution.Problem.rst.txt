@@ -1,0 +1,113 @@
+﻿Problem
+=======
+
+.. currentmodule:: qiskit_fermions.transpiler.passes.synthesis.commuting_evolution
+
+.. autoclass:: Problem
+   :show-inheritance:
+   :no-members:
+   :no-inherited-members:
+   :special-members:
+
+
+  
+  
+   .. rubric:: Attributes
+    
+   .. autoattribute:: operator
+   .. autoattribute:: paulis
+   .. autoattribute:: x
+   .. autoattribute:: z
+   .. autoattribute:: coeffs
+   .. autoattribute:: time
+   .. autoattribute:: num_qubits
+  
+  
+  
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+  
+  
+   .. rubric:: Methods
+    
+   .. automethod:: from_gate
+   .. automethod:: from_operator
+  
+  
+  
+  
+  
+  
+  

@@ -1,0 +1,6 @@
+﻿device\_cost
+============
+
+.. currentmodule:: qiskit_fermions.transpiler.passes.synthesis.commuting_evolution
+
+.. autofunction:: device_cost
