@@ -60,6 +60,7 @@ This full triple is not always worthwhile — decide case-by-case. Features may 
 | Lint (rust + python + clang) | `make lint` |
 | Auto-fix formatting | `make style` |
 | Build docs | `make docs` (Python + C via Doxygen/breathe/Sphinx) |
+| Build docs without the `llms.txt`/Markdown pages (faster, local only) | `make docs-no-llms` |
 | Bump version | `make version-bump VERSION=0.2.0.dev0` |
 
 **Running a single Python test:**
