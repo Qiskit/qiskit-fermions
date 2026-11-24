@@ -15,6 +15,13 @@ make docs
 
 This includes both, the Python and C API documentation.
 
+It also produces the Markdown pages and `llms.txt` for LLM consumption, which `sphinx_llm.txt`
+builds with a second `sphinx-build` running alongside the HTML one. When iterating locally and you
+only need the HTML pages, skip that second build:
+```bash
+make docs-no-llms
+```
+
 To generate a clean build, run the following `make` target first:
 ```bash
 make docsclean
