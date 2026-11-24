@@ -366,6 +366,11 @@ generate fewer Pauli strings -- its unused links are legs, and a leg spells a st
 descendants do. Of those :math:`2n+1` strings, :math:`2n` pair into the Majorana operators of the
 :math:`n` modes, and exactly one is left over.
 
+.. seealso::
+   You rarely have to write such a specification by hand. The :ref:`guide on choosing a tree
+   <ternary_tree_search_explanation>` covers an algorithm that grows one adapted to a Hamiltonian,
+   and compares it against the chain and the balanced tree.
+
 Total parity
 ~~~~~~~~~~~~
 

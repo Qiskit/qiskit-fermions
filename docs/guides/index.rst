@@ -17,6 +17,7 @@ More guides
    operators
    grouping
    mappers
+   ternary_tree_search
    circuit
    sqdrift
    skqd

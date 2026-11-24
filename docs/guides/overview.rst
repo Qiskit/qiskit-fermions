@@ -38,6 +38,7 @@ as qubit operators using different `mappers`. Start here if you are building a H
 - :ref:`operators_explanation`
 - :ref:`grouping_explanation`
 - :ref:`mappers_explanation`
+- :ref:`ternary_tree_search_explanation`
 
 
 Fermionic circuits
