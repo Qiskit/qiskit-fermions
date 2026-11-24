@@ -1,0 +1,22 @@
+---
+features:
+  - |
+    :class:`~qiskit_fermions.mappers.TernaryTree` gained four local edit operations, which
+    together are the move set a search over ternary-tree encodings needs:
+    :meth:`~qiskit_fermions.mappers.TernaryTree.leg_labels` reports which of a node's links
+    terminate in a leg and can therefore accept a subtree;
+    :meth:`~qiskit_fermions.mappers.TernaryTree.reparent` moves a node and the subtree below
+    it onto another node's link; :meth:`~qiskit_fermions.mappers.TernaryTree.reroot` re-roots
+    the tree; and :meth:`~qiskit_fermions.mappers.TernaryTree.relabel` permutes the Pauli
+    labels of one node's links.
+
+    The class is immutable, so each edit returns a *new* tree and raises a :class:`ValueError` for
+    an invalid move. Every edit preserves the properties that make a tree a valid encoding.
+features_c:
+  - |
+    Added local edit operations on a :c:struct:`QfTernaryTree` to the C API:
+    :c:func:`qf_ternary_tree_leg_labels` reports which of a node's links terminate in a leg, and
+    :c:func:`qf_ternary_tree_reparent`, :c:func:`qf_ternary_tree_reroot` and
+    :c:func:`qf_ternary_tree_relabel` move a subtree, re-root the tree and permute a node's labels.
+    The three edits write the new tree through an out-parameter, which must be freed with
+    :c:func:`qf_ternary_tree_free`; the input is left untouched.

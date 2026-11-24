@@ -671,8 +671,196 @@ static int test_label_validation(void) {
     return Ok;
 }
 
+// Returns whether `node`'s links that end in a leg are exactly `expected`, in X, Y, Z order. The C
+// API exposes no parent or child accessor, so this is how the tests below see where a link went.
+static bool has_free_labels(const QfTernaryTree *tree, uint32_t node, const QfPauliLabel *expected,
+                            uint64_t num_expected) {
+    QfPauliLabel labels[3];
+    uint64_t num_labels = 0;
+    if (qf_ternary_tree_leg_labels(tree, node, labels, &num_labels) != QfExitCode_Success ||
+        num_labels != num_expected) {
+        return false;
+    }
+    for (uint64_t i = 0; i < num_labels; i++) {
+        if (labels[i] != expected[i]) {
+            return false;
+        }
+    }
+    return true;
+}
+
+// The tree edit operations: a subtree move, a re-root, and a relabel. Each returns a *new* tree, so
+// the ownership rule these exercise is that both the input and the output must be freed.
+static int test_tree_edits(void) {
+    QfTernaryTree *chain;
+    if (qf_ternary_tree_chain(6, QfPauliLabel_Z, &chain) != QfExitCode_Success) {
+        return RuntimeError;
+    }
+
+    int result = Ok;
+
+    // A chain's interior nodes spend Z on the next node, so X and Y are free; the tail has all
+    // three. Labels come back in X, Y, Z order.
+    QfPauliLabel free_labels[3];
+    uint64_t num_free = 0;
+    if (qf_ternary_tree_leg_labels(chain, 0, free_labels, &num_free) != QfExitCode_Success) {
+        result = RuntimeError;
+    } else if (num_free != 2 || free_labels[0] != QfPauliLabel_X ||
+               free_labels[1] != QfPauliLabel_Y) {
+        result = EqualityError;
+    }
+    if (qf_ternary_tree_leg_labels(chain, 5, free_labels, &num_free) != QfExitCode_Success) {
+        result = RuntimeError;
+    } else if (num_free != 3 || free_labels[0] != QfPauliLabel_X ||
+               free_labels[1] != QfPauliLabel_Y || free_labels[2] != QfPauliLabel_Z) {
+        result = EqualityError;
+    }
+
+    const QfPauliLabel x_y[2] = {QfPauliLabel_X, QfPauliLabel_Y};
+    const QfPauliLabel y_only[1] = {QfPauliLabel_Y};
+    const QfPauliLabel y_z[2] = {QfPauliLabel_Y, QfPauliLabel_Z};
+
+    // Moving a node to the link it already hangs off changes nothing: node 1 still occupies the
+    // root's Z link.
+    QfTernaryTree *unchanged;
+    if (qf_ternary_tree_reparent(chain, 1, 0, QfPauliLabel_Z, &unchanged) != QfExitCode_Success) {
+        result = RuntimeError;
+    } else {
+        if (!has_free_labels(unchanged, 0, x_y, 2) ||
+            qf_ternary_tree_max_weight(unchanged) != qf_ternary_tree_max_weight(chain)) {
+            result = EqualityError;
+        }
+        qf_ternary_tree_free(unchanged);
+    }
+
+    // Moving the chain's tail onto a free link at the root lowers the Pauli weight.
+    QfTernaryTree *moved;
+    if (qf_ternary_tree_reparent(chain, 5, 0, QfPauliLabel_X, &moved) != QfExitCode_Success) {
+        result = RuntimeError;
+    } else {
+        if (qf_ternary_tree_max_weight(chain) != 6) {
+            result = EqualityError;
+        }
+        if (qf_ternary_tree_max_weight(moved) != 5) {
+            result = EqualityError;
+        }
+        // The leg count survives every edit, whatever the shape.
+        if (qf_ternary_tree_num_legs(moved) != 13) {
+            result = EqualityError;
+        }
+        qf_ternary_tree_free(moved);
+    }
+
+    // Re-rooting a 6-chain at an interior node keeps the node and leg counts and makes it
+    // shallower. Node 3 keeps its Z child, so the reversed link to node 2 takes the lowest free
+    // slot, X, leaving only Y free; node 2 then finds its Z slot free and keeps it for node 1.
+    QfTernaryTree *rerooted;
+    if (qf_ternary_tree_reroot(chain, 3, &rerooted) != QfExitCode_Success) {
+        result = RuntimeError;
+    } else {
+        if (qf_ternary_tree_num_nodes(rerooted) != 6 || qf_ternary_tree_num_legs(rerooted) != 13) {
+            result = EqualityError;
+        }
+        if (qf_ternary_tree_max_weight(rerooted) >= qf_ternary_tree_max_weight(chain)) {
+            result = EqualityError;
+        }
+        if (!has_free_labels(rerooted, 3, y_only, 1) || !has_free_labels(rerooted, 2, x_y, 2)) {
+            result = EqualityError;
+        }
+        qf_ternary_tree_free(rerooted);
+    }
+
+    // Relabeling the root by (Y, Z, X) moves its Z child to the X link, leaving Y and Z free.
+    QfTernaryTree *relabeled;
+    QfPauliLabel permutation[3] = {QfPauliLabel_Y, QfPauliLabel_Z, QfPauliLabel_X};
+    if (qf_ternary_tree_relabel(chain, 0, permutation, &relabeled) != QfExitCode_Success) {
+        result = RuntimeError;
+    } else {
+        if (!has_free_labels(relabeled, 0, y_z, 2)) {
+            result = EqualityError;
+        }
+        qf_ternary_tree_free(relabeled);
+    }
+
+    qf_ternary_tree_free(chain);
+    return result;
+}
+
+// Checks that an edit failed with `expected`. Should it unexpectedly succeed, the tree it wrote to
+// `*out` is freed, so a regression shows up as a failure rather than a leak.
+static int expect_edit_error(QfExitCode code, QfExitCode expected, QfTernaryTree **out) {
+    if (code == QfExitCode_Success) {
+        qf_ternary_tree_free(*out);
+        *out = NULL;
+    }
+    return code == expected ? Ok : EqualityError;
+}
+
+// Every precondition of the edits must be reported rather than aborting.
+static int test_tree_edit_errors(void) {
+    QfPauliLabel order[3] = {QfPauliLabel_X, QfPauliLabel_Y, QfPauliLabel_Z};
+    QfTernaryTree *tree;
+    if (qf_ternary_tree_breadth_first(13, 3, order, &tree) != QfExitCode_Success) {
+        return RuntimeError;
+    }
+
+    int result = Ok;
+    QfTernaryTree *out = NULL;
+    const QfExitCode value = QfExitCode_ValueError;
+    const QfExitCode null = QfExitCode_NullPointerError;
+
+    // The root has no parent to be moved away from.
+    result |=
+        expect_edit_error(qf_ternary_tree_reparent(tree, 0, 5, QfPauliLabel_X, &out), value, &out);
+    // A node cannot move under itself. Node 4 is a leaf, so its X link is free and only the
+    // self-move check can reject the move.
+    result |=
+        expect_edit_error(qf_ternary_tree_reparent(tree, 4, 4, QfPauliLabel_X, &out), value, &out);
+    // Node 0's X link already carries a child in a branching-3 tree.
+    result |=
+        expect_edit_error(qf_ternary_tree_reparent(tree, 5, 0, QfPauliLabel_X, &out), value, &out);
+    // Out of range.
+    result |=
+        expect_edit_error(qf_ternary_tree_reparent(tree, 99, 0, QfPauliLabel_X, &out), value, &out);
+    // Node 1 of this tree has three children, so it cannot take a fourth link for its old parent.
+    result |= expect_edit_error(qf_ternary_tree_reroot(tree, 1, &out), value, &out);
+    result |= expect_edit_error(qf_ternary_tree_reroot(tree, 99, &out), value, &out);
+    // Not a permutation.
+    QfPauliLabel repeated[3] = {QfPauliLabel_X, QfPauliLabel_X, QfPauliLabel_Z};
+    result |= expect_edit_error(qf_ternary_tree_relabel(tree, 0, repeated, &out), value, &out);
+    // A value that is no Pauli label at all, as a label or inside a permutation.
+    result |= expect_edit_error(qf_ternary_tree_reparent(tree, 4, 5, 9, &out), value, &out);
+    QfPauliLabel invalid[3] = {QfPauliLabel_X, QfPauliLabel_Y, 9};
+    result |= expect_edit_error(qf_ternary_tree_relabel(tree, 0, invalid, &out), value, &out);
+    // Leg labels of an out-of-range node.
+    QfPauliLabel labels[3];
+    uint64_t len = 0;
+    if (qf_ternary_tree_leg_labels(tree, 99, labels, &len) != QfExitCode_ValueError) {
+        result = EqualityError;
+    }
+
+    // Null pointers are reported, not dereferenced, whether the output or the tree itself.
+    result |=
+        expect_edit_error(qf_ternary_tree_reparent(tree, 5, 6, QfPauliLabel_X, NULL), null, &out);
+    result |=
+        expect_edit_error(qf_ternary_tree_reparent(NULL, 5, 6, QfPauliLabel_X, &out), null, &out);
+    result |= expect_edit_error(qf_ternary_tree_reroot(NULL, 0, &out), null, &out);
+    result |= expect_edit_error(qf_ternary_tree_relabel(NULL, 0, order, &out), null, &out);
+    result |= expect_edit_error(qf_ternary_tree_relabel(tree, 0, NULL, &out), null, &out);
+    if (qf_ternary_tree_leg_labels(NULL, 0, labels, &len) != QfExitCode_NullPointerError ||
+        qf_ternary_tree_leg_labels(tree, 0, NULL, &len) != QfExitCode_NullPointerError ||
+        qf_ternary_tree_leg_labels(tree, 0, labels, NULL) != QfExitCode_NullPointerError) {
+        result = EqualityError;
+    }
+
+    qf_ternary_tree_free(tree);
+    return result;
+}
+
 int test_ternary_tree(void) {
     int num_failed = 0;
+    num_failed += RUN_TEST(test_tree_edits);
+    num_failed += RUN_TEST(test_tree_edit_errors);
     num_failed += RUN_TEST(test_chain_matches_jordan_wigner);
     num_failed += RUN_TEST(test_balanced_tree_is_shallower);
     num_failed += RUN_TEST(test_arbitrary_tree);

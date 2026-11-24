@@ -31,6 +31,15 @@ fn parse_label(label: char) -> PyResult<PauliLabel> {
     }
 }
 
+/// Parses exactly three Pauli labels given as a string, such as ``"XYZ"``; `what` names the
+/// argument in the error message.
+fn parse_three_labels(labels: &str, what: &str) -> PyResult<[PauliLabel; 3]> {
+    let parsed: Vec<PauliLabel> = labels.chars().map(parse_label).collect::<PyResult<_>>()?;
+    parsed
+        .try_into()
+        .map_err(|_| crate::value_err(format!("{what} must name exactly 3 labels, got {labels:?}")))
+}
+
 /// Renders a Pauli label as a single character.
 fn label_char(label: PauliLabel) -> char {
     match label {
@@ -240,10 +249,7 @@ impl PyTernaryTree {
                 "branching must be between 1 and 3, got {branching}"
             ))
         })?;
-        let labels: Vec<PauliLabel> = order.chars().map(parse_label).collect::<PyResult<_>>()?;
-        let order: [PauliLabel; 3] = labels.try_into().map_err(|_| {
-            crate::value_err(format!("order must name exactly 3 labels, got {order:?}"))
-        })?;
+        let order = parse_three_labels(order, "order")?;
         Ok(Self {
             inner: TernaryTree::breadth_first(num_nodes, branching, order)
                 .map_err(crate::value_err)?,
@@ -335,17 +341,166 @@ impl PyTernaryTree {
         Ok(children)
     }
 
+    /// Return the labels of ``node``'s links that terminate in a leg.
+    ///
+    /// These are the links a subtree can be attached to with :meth:`reparent`. A node with three
+    /// children returns an empty list.
+    ///
+    /// Args:
+    ///     node: the node to inspect.
+    ///
+    /// Returns:
+    ///     The labels of the links that terminate in a leg, in ``X``, ``Y``, ``Z`` order.
+    ///
+    /// Raises:
+    ///     ValueError: if ``node`` is out of range.
+    ///     OverflowError: if ``node`` is negative or does not fit in 32 bits.
+    ///
+    /// .. doctest::
+    ///
+    ///     >>> from qiskit_fermions.mappers import TernaryTree
+    ///     >>> tree = TernaryTree.chain(3, "Z")
+    ///     >>> tree.leg_labels(0), tree.leg_labels(2)
+    ///     (['X', 'Y'], ['X', 'Y', 'Z'])
+    ///
+    /// The chain's interior nodes each spend their ``Z`` link on the next node, so only the last one
+    /// has all three free.
+    fn leg_labels(&self, node: NodeId) -> PyResult<Vec<char>> {
+        Ok(self
+            .inner
+            .leg_labels(node)
+            .map_err(crate::value_err)?
+            .map(label_char)
+            .collect())
+    }
+
+    /// Return a new tree in which ``node`` hangs off ``new_parent``'s ``label`` link.
+    ///
+    /// The subtree rooted at ``node`` moves with it. This is the primitive a local search spends
+    /// most of its time in. Moving ``node`` to the link it already hangs off returns an equal tree.
+    ///
+    /// Args:
+    ///     node: the node to move. May not be the root.
+    ///     new_parent: the node to attach it to. May not be ``node`` itself or lie inside its
+    ///         subtree.
+    ///     label: which of ``new_parent``'s links to use. Must currently terminate in a leg (see
+    ///         :meth:`leg_labels`), unless it is the link ``node`` already hangs off.
+    ///
+    /// Returns:
+    ///     A new tree. This class is immutable, so the original is untouched.
+    ///
+    /// Raises:
+    ///     ValueError: if either index is out of range.
+    ///     ValueError: if ``node`` is the root.
+    ///     ValueError: if ``new_parent`` is ``node`` itself.
+    ///     ValueError: if ``new_parent``'s ``label`` link already descends to another child.
+    ///     ValueError: if ``new_parent`` lies inside ``node``'s subtree, which would create a cycle.
+    ///     OverflowError: if either index is negative or does not fit in 32 bits.
+    ///
+    /// .. doctest::
+    ///
+    ///     >>> from qiskit_fermions.mappers import TernaryTree
+    ///     >>> chain = TernaryTree.chain(6, "Z")
+    ///     >>> chain.max_weight
+    ///     6
+    ///     >>> # Peel the chain's tail onto a free link at the root.
+    ///     >>> chain.reparent(5, 0, "X").max_weight
+    ///     5
+    ///
+    /// Moving a subtree is how a local search lowers the Pauli weight of a poorly shaped tree.
+    fn reparent(&self, node: NodeId, new_parent: NodeId, label: char) -> PyResult<Self> {
+        Ok(Self {
+            inner: self
+                .inner
+                .reparent(node, new_parent, parse_label(label)?)
+                .map_err(crate::value_err)?,
+        })
+    }
+
+    /// Return a new tree rooted at ``node``, reversing the links along the path to the old root.
+    ///
+    /// Re-rooting at the current root is a no-op.
+    ///
+    /// A reversed link has to occupy a slot that is free at its new parent. It keeps its old label
+    /// when that slot is free and otherwise takes the lowest free slot in ``X``, ``Y``, ``Z`` order,
+    /// which is deterministic. In a chain along ``"Z"``, for instance, every interior node has
+    /// already spent its ``Z`` slot on the next node, so the ``Z`` link arriving from above must take
+    /// a different one. A consequence worth knowing: a label that had to change is not changed back,
+    /// so re-rooting is **not** in general an exact inverse of itself. Rooting away and back gives the
+    /// same shape, but not necessarily the same Pauli strings.
+    ///
+    /// Args:
+    ///     node: the node to make the root. It must have at most two children.
+    ///
+    /// Returns:
+    ///     A new tree.
+    ///
+    /// Raises:
+    ///     ValueError: if ``node`` is out of range.
+    ///     ValueError: if ``node`` already has three children.
+    ///     OverflowError: if ``node`` is negative or does not fit in 32 bits.
+    ///
+    /// Note:
+    ///     The at-most-two-children requirement is not a formality: re-rooting gives ``node`` a
+    ///     fourth downward link (the one pointing back at its former parent), and a node has only
+    ///     three. Re-rooting and :meth:`relabel` never change which nodes are joined, so a search
+    ///     that should reach trees of a different shape also needs :meth:`reparent`.
+    fn reroot(&self, node: NodeId) -> PyResult<Self> {
+        Ok(Self {
+            inner: self.inner.reroot(node).map_err(crate::value_err)?,
+        })
+    }
+
+    /// Return a new tree with ``node``'s three links relabeled.
+    ///
+    /// ``permutation[k]`` becomes the new label of the link currently labeled ``"XYZ"[k]``. This
+    /// changes which Pauli strings the encoding produces without moving anything, so no leg changes
+    /// depth and :attr:`max_weight` is unchanged. Only the links that descend to a child are
+    /// stored, and the legs fill whichever slots remain, so relabeling a leaf returns an equal tree.
+    ///
+    /// Args:
+    ///     node: the node to relabel.
+    ///     permutation: the three labels, as a 3-character string, in ``X``, ``Y``, ``Z`` slot order.
+    ///
+    /// Returns:
+    ///     A new tree.
+    ///
+    /// Raises:
+    ///     ValueError: if ``node`` is out of range.
+    ///     ValueError: if ``permutation`` is not a permutation of ``"XYZ"``.
+    ///     OverflowError: if ``node`` is negative or does not fit in 32 bits.
+    ///
+    /// .. doctest::
+    ///
+    ///     >>> from qiskit_fermions.mappers import TernaryTree
+    ///     >>> tree = TernaryTree.breadth_first(4, 3)
+    ///     >>> shuffled = tree.relabel(0, "YZX")
+    ///     >>> shuffled.max_weight == tree.max_weight
+    ///     True
+    ///     >>> shuffled.leg_paths()[0] != tree.leg_paths()[0]
+    ///     True
+    ///
+    /// Relabeling is the only edit guaranteed to leave every depth unchanged.
+    fn relabel(&self, node: NodeId, permutation: &str) -> PyResult<Self> {
+        let permutation = parse_three_labels(permutation, "permutation")?;
+        Ok(Self {
+            inner: self
+                .inner
+                .relabel(node, permutation)
+                .map_err(crate::value_err)?,
+        })
+    }
+
     /// Returns the constructor arguments needed to pickle this tree.
     ///
     /// The parent-and-label specification is recovered from the tree itself rather than stored: it
     /// is exactly what the tree records per node, so there is nothing to keep in sync.
     fn __getnewargs__(&self) -> (Vec<Option<(NodeId, char)>>,) {
-        let spec = (0..self.inner.num_nodes())
-            .map(|node| {
-                self.inner
-                    .parent_of(node)
-                    .map(|(parent, label)| (parent, label_char(label)))
-            })
+        let spec = self
+            .inner
+            .to_spec()
+            .into_iter()
+            .map(|entry| entry.map(|(parent, label)| (parent, label_char(label))))
             .collect();
         (spec,)
     }

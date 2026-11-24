@@ -357,8 +357,8 @@ pub unsafe extern "C" fn qf_ternary_tree_max_weight(tree: *const TernaryTree) ->
 ///
 /// # Safety
 ///
-/// `tree` must be a pointer returned by one of the `qf_ternary_tree_*` constructors and not already
-/// freed, or `NULL`.
+/// `tree` must be a pointer written by one of the `qf_ternary_tree_*` functions that create a tree
+/// (constructors and edits alike) and not already freed, or `NULL`.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn qf_ternary_tree_free(tree: *mut TernaryTree) {
     if !tree.is_null() {
@@ -370,6 +370,263 @@ pub unsafe extern "C" fn qf_ternary_tree_free(tree: *mut TernaryTree) {
         unsafe {
             let _ = Box::from_raw(tree);
         }
+    }
+}
+
+/// @ingroup qf_ternary_tree
+///
+/// @brief Writes the labels of a node's links that terminate in a leg.
+///
+/// @param tree A pointer to the tree.
+/// @param node The node to inspect.
+/// @param out_labels A pointer to an array of at least **3** ``QfPauliLabel`` values, into which the
+///        labels are written.
+/// @param out_len A pointer to where the number written will be stored, between 0 and 3. Both
+///        outputs are left untouched if an error occurs.
+///
+/// @return An exit code. This is ``>0`` if an error occurred, in particular a
+///         ``QfExitCode_ValueError`` if ``node`` is out of range.
+///
+/// @rst
+///
+/// These are the links a subtree may be attached to with :c:func:`qf_ternary_tree_reparent`. A node
+/// with three children writes nothing and reports a length of 0.
+///
+/// Because a node has exactly three links, the output is bounded and the caller supplies the buffer;
+/// nothing is allocated and there is nothing to free.
+///
+/// @endrst
+///
+/// # Safety
+///
+/// `tree` must be a valid `QfTernaryTree` pointer, and `out_labels` must point to space for at least
+/// 3 `QfPauliLabel` values. `out_len` must be non-null and aligned. A null or misaligned pointer is
+/// reported as `QfExitCode_NullPointerError` or `QfExitCode_AlignmentError`.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn qf_ternary_tree_leg_labels(
+    tree: *const TernaryTree,
+    node: u32,
+    out_labels: *mut PauliLabel,
+    out_len: *mut u64,
+) -> ExitCode {
+    // `tree` is checked rather than left to `const_ptr_as_ref`, whose panic on a null pointer cannot
+    // unwind out of an `extern "C"` function and would abort the caller instead.
+    if let Err(err) = check_ptr(tree)
+        .and_then(|()| check_ptr(out_labels))
+        .and_then(|()| check_ptr(out_len))
+    {
+        return err.into();
+    }
+    // SAFETY: Checked above to be non-null and aligned.
+    let tree = unsafe { const_ptr_as_ref(tree) };
+    let Ok(labels) = tree.leg_labels(node) else {
+        return ExitCode::ValueError;
+    };
+
+    let mut count = 0u64;
+    for label in labels {
+        // SAFETY: A node has three links, so at most three labels are written, and per documentation
+        // `out_labels` has space for three.
+        unsafe { out_labels.add(count as usize).write(label) };
+        count += 1;
+    }
+    // SAFETY: Per documentation, `out_len` is non-null and aligned.
+    unsafe { out_len.write(count) };
+    ExitCode::Success
+}
+
+/// @ingroup qf_ternary_tree
+///
+/// @brief Moves a node, and the subtree below it, onto another node's link.
+///
+/// @param tree A pointer to the tree to edit. It is not modified.
+/// @param node The node to move. This may not be the root.
+/// @param new_parent The node to attach it to. This may not be ``node`` itself or lie inside its
+///        subtree.
+/// @param label Which of ``new_parent``'s links to use. It must currently terminate in a leg, unless
+///        it is the link ``node`` already hangs off.
+/// @param out A pointer to where the new tree will be written on success. It is left untouched if
+///        the edit fails.
+///
+/// @return An exit code. This is ``>0`` if an error occurred. In particular, a
+///         ``QfExitCode_ValueError`` is returned if ``node`` is the root, if ``new_parent`` is
+///         ``node`` or lies inside its subtree (which would create a cycle), if the link already
+///         descends to another child, if either index is out of range, or if ``label`` is not a
+///         ``QfPauliLabel``.
+///
+/// @rst
+///
+/// The subtree below ``node`` moves with it. This is the primitive a local search over trees spends
+/// most of its time in. Use :c:func:`qf_ternary_tree_leg_labels` to find the links that can accept
+/// a subtree. Moving ``node`` to the link it already hangs off succeeds and returns an equal tree.
+///
+/// The input tree is left untouched: the edit returns a new tree, which must be freed with
+/// :c:func:`qf_ternary_tree_free`.
+///
+/// @endrst
+///
+/// # Safety
+///
+/// `tree` must be a valid `QfTernaryTree` pointer, and `out` must be non-null and aligned. A null or
+/// misaligned pointer is reported as `QfExitCode_NullPointerError` or `QfExitCode_AlignmentError`.
+/// `label` need not hold a valid label: an invalid one is reported as `QfExitCode_ValueError`.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn qf_ternary_tree_reparent(
+    tree: *const TernaryTree,
+    node: u32,
+    new_parent: u32,
+    // Taken as the `u8` a `QfPauliLabel` is laid out as, for the reason given in
+    // `qf_ternary_tree_chain`.
+    label: u8,
+    out: *mut *mut TernaryTree,
+) -> ExitCode {
+    // Checked rather than left to `const_ptr_as_ref`, as in `qf_ternary_tree_leg_labels`.
+    if let Err(err) = check_ptr(tree).and_then(|()| check_ptr(out)) {
+        return err.into();
+    }
+    // SAFETY: Checked above to be non-null and aligned.
+    let tree = unsafe { const_ptr_as_ref(tree) };
+    let Ok(label) = PauliLabel::try_from(label) else {
+        return ExitCode::ValueError;
+    };
+
+    match tree.reparent(node, new_parent, label) {
+        Ok(edited) => {
+            // SAFETY: Per documentation, `out` is non-null and aligned.
+            unsafe { out.write(Box::into_raw(Box::new(edited))) };
+            ExitCode::Success
+        }
+        Err(_) => ExitCode::ValueError,
+    }
+}
+
+/// @ingroup qf_ternary_tree
+///
+/// @brief Re-roots a tree at a given node.
+///
+/// @param tree A pointer to the tree to edit. It is not modified.
+/// @param node The node to make the root. It must have at most two children.
+/// @param out A pointer to where the new tree will be written on success. It is left untouched if
+///        the edit fails.
+///
+/// @return An exit code. This is ``>0`` if an error occurred, in particular a
+///         ``QfExitCode_ValueError`` if ``node`` already has three children or is out of range.
+///
+/// @rst
+///
+/// Each link on the path from ``node`` to the old root is re-pointed the other way. A reversed link
+/// has to occupy a slot that is free at its new parent: it keeps its old label when that slot is
+/// free and otherwise takes the lowest free slot in ``X``, ``Y``, ``Z`` order. The rule is
+/// deterministic, but a label that had to change is not changed back, so re-rooting is not in
+/// general an exact inverse of itself. Re-rooting at the current root succeeds and returns an equal
+/// tree.
+///
+/// .. note::
+///    The at-most-two-children requirement is not a formality: re-rooting gives ``node`` a fourth
+///    downward link (the one pointing back at its former parent), and a node has only three.
+///    Re-rooting and :c:func:`qf_ternary_tree_relabel` never change which nodes are joined, so a
+///    search that should reach trees of a different shape also needs
+///    :c:func:`qf_ternary_tree_reparent`.
+///
+/// The new tree must be freed with :c:func:`qf_ternary_tree_free`.
+///
+/// @endrst
+///
+/// # Safety
+///
+/// `tree` must be a valid `QfTernaryTree` pointer, and `out` must be non-null and aligned. A null or
+/// misaligned pointer is reported as `QfExitCode_NullPointerError` or `QfExitCode_AlignmentError`.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn qf_ternary_tree_reroot(
+    tree: *const TernaryTree,
+    node: u32,
+    out: *mut *mut TernaryTree,
+) -> ExitCode {
+    // Checked rather than left to `const_ptr_as_ref`, as in `qf_ternary_tree_leg_labels`.
+    if let Err(err) = check_ptr(tree).and_then(|()| check_ptr(out)) {
+        return err.into();
+    }
+    // SAFETY: Checked above to be non-null and aligned.
+    let tree = unsafe { const_ptr_as_ref(tree) };
+
+    match tree.reroot(node) {
+        Ok(edited) => {
+            // SAFETY: Per documentation, `out` is non-null and aligned.
+            unsafe { out.write(Box::into_raw(Box::new(edited))) };
+            ExitCode::Success
+        }
+        Err(_) => ExitCode::ValueError,
+    }
+}
+
+/// @ingroup qf_ternary_tree
+///
+/// @brief Permutes the Pauli labels of a node's three links.
+///
+/// @param tree A pointer to the tree to edit. It is not modified.
+/// @param node The node to relabel.
+/// @param permutation A pointer to an array of **3** ``QfPauliLabel`` values, which must be a
+///        permutation of ``X``, ``Y``, ``Z``. Entry ``k`` becomes the new label of the link currently
+///        labeled ``QfPauliLabel_X``, ``_Y``, ``_Z`` respectively.
+/// @param out A pointer to where the new tree will be written on success. It is left untouched if
+///        the edit fails.
+///
+/// @return An exit code. This is ``>0`` if an error occurred, in particular a
+///         ``QfExitCode_ValueError`` if ``permutation`` repeats a label, holds a value that is not a
+///         ``QfPauliLabel``, or ``node`` is out of range.
+///
+/// @rst
+///
+/// This changes which Pauli strings the encoding produces without moving anything, so no leg changes
+/// depth and :c:func:`qf_ternary_tree_max_weight` is unchanged. It is the only edit guaranteed to
+/// leave every depth unchanged. Only the links that descend to a child are stored, and the legs fill
+/// whichever slots remain, so relabeling a leaf returns an equal tree.
+///
+/// The new tree must be freed with :c:func:`qf_ternary_tree_free`.
+///
+/// @endrst
+///
+/// # Safety
+///
+/// `tree` must be a valid `QfTernaryTree` pointer, `permutation` must point to 3 initialized
+/// `QfPauliLabel` values, and `out` must be non-null and aligned. A null or misaligned pointer is
+/// reported as `QfExitCode_NullPointerError` or `QfExitCode_AlignmentError`.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn qf_ternary_tree_relabel(
+    tree: *const TernaryTree,
+    node: u32,
+    permutation: *const PauliLabel,
+    out: *mut *mut TernaryTree,
+) -> ExitCode {
+    // `tree` is checked rather than left to `const_ptr_as_ref`, as in `qf_ternary_tree_leg_labels`.
+    if let Err(err) = check_ptr(tree)
+        .and_then(|()| check_ptr(permutation))
+        .and_then(|()| check_ptr(out))
+    {
+        return err.into();
+    }
+    // SAFETY: Checked above to be non-null and aligned.
+    let tree = unsafe { const_ptr_as_ref(tree) };
+    // SAFETY: Per documentation, `permutation` points to 3 initialized entries. They are read as the
+    // `u8`s they are laid out as and validated before becoming `PauliLabel`s, for the reason given in
+    // `qf_ternary_tree_new`.
+    let permutation = unsafe { ::std::slice::from_raw_parts(permutation.cast::<u8>(), 3) };
+    let (Ok(x), Ok(y), Ok(z)) = (
+        PauliLabel::try_from(permutation[0]),
+        PauliLabel::try_from(permutation[1]),
+        PauliLabel::try_from(permutation[2]),
+    ) else {
+        return ExitCode::ValueError;
+    };
+    let permutation = [x, y, z];
+
+    match tree.relabel(node, permutation) {
+        Ok(edited) => {
+            // SAFETY: Per documentation, `out` is non-null and aligned.
+            unsafe { out.write(Box::into_raw(Box::new(edited))) };
+            ExitCode::Success
+        }
+        Err(_) => ExitCode::ValueError,
     }
 }
 

@@ -19,8 +19,8 @@
 //! [`library::ternary_tree`](crate::mappers::library::ternary_tree).
 //!
 //! Building a tree, pairing its legs into Majorana operators and checking its invariants are all
-//! pure index arithmetic, so future tree-search code (Bonsai, HATT, Treespilation) can work on
-//! trees without building an observable; the only method here that produces one is
+//! pure index arithmetic, so tree-search code can work on trees without building an observable;
+//! the only method here that produces one is
 //! [`TernaryTreeEncoding::total_parity`](encoding::TernaryTreeEncoding::total_parity).
 //!
 //! # References
@@ -211,8 +211,8 @@ pub enum TernaryTreeError {
         /// How many parentless nodes the specification contained.
         num_roots: usize,
     },
-    /// A specification entry refers to a node outside the tree.
-    #[error("the specification references node {node}, but the tree has only {num_nodes} nodes")]
+    /// A node index lies outside the tree, whether in a specification entry or as an argument.
+    #[error("node {node} is out of range for a tree with {num_nodes} nodes")]
     NodeOutOfRange {
         /// The out-of-range index.
         node: NodeId,
@@ -238,6 +238,72 @@ pub enum TernaryTreeError {
         num_nodes: u32,
         /// The largest supported node count.
         max: u32,
+    },
+    /// A [`reparent`](TernaryTree::reparent) would have made a node its own ancestor.
+    ///
+    /// Moving a node beneath one of its own descendants would disconnect that subtree from the root
+    /// and leave a cycle, so the result would not be a tree at all.
+    #[error(
+        "moving node {node} under {new_parent} would create a cycle: {new_parent} is a descendant of {node}"
+    )]
+    WouldCycle {
+        /// The node that was to be moved.
+        node: NodeId,
+        /// The proposed new parent, which lies inside `node`'s own subtree.
+        new_parent: NodeId,
+    },
+    /// A [`reparent`](TernaryTree::reparent) named the moved node as its own new parent.
+    ///
+    /// The special case of [`Self::WouldCycle`] in which the cycle is a self-loop, reported on its
+    /// own because "a descendant of itself" would be a confusing way to say so.
+    #[error("node {node} cannot be moved under itself")]
+    MoveUnderItself {
+        /// The node that was to be moved.
+        node: NodeId,
+    },
+    /// A [`relabel`](TernaryTree::relabel) was given labels that are not a permutation of `X`, `Y`
+    /// and `Z`.
+    ///
+    /// Reported against the argument rather than a node, like [`Self::DuplicateOrderLabel`]: the
+    /// node's links are fine, the requested relabeling is not.
+    #[error(
+        "the relabeling {} is not a permutation: it repeats {label:?}",
+        permutation.iter().map(|label| format!("{label:?}")).collect::<String>()
+    )]
+    NotAPermutation {
+        /// The rejected labels.
+        permutation: [PauliLabel; 3],
+        /// The first label given twice.
+        label: PauliLabel,
+    },
+    /// The link a node was to be attached to already descends to a child.
+    #[error("node {node} already has a child on its {label:?} link")]
+    LinkOccupied {
+        /// The node whose link is taken.
+        node: NodeId,
+        /// The occupied label.
+        label: PauliLabel,
+    },
+    /// The root cannot be reparented, since it has no parent to be moved away from.
+    ///
+    /// Use [`reroot`](TernaryTree::reroot) to change which node is the root.
+    #[error("node {root} is the root and cannot be reparented; use reroot instead")]
+    CannotMoveRoot {
+        /// The root.
+        root: NodeId,
+    },
+    /// A node with three children cannot become the root.
+    ///
+    /// Re-rooting gives the new root a fourth downward link (the one pointing back at its former
+    /// parent), and a node has only three.
+    #[error(
+        "node {node} has {num_children} children, so it cannot become the root: it needs a free link for its former parent"
+    )]
+    TooManyChildrenToReroot {
+        /// The candidate root.
+        node: NodeId,
+        /// How many children it has.
+        num_children: usize,
     },
 }
 
@@ -611,6 +677,253 @@ impl TernaryTree {
             .max()
             .unwrap_or(0)
     }
+
+    /// Returns this tree as the parent-and-label specification [`Self::try_new`] accepts.
+    ///
+    /// The inverse of that constructor, and the basis of every edit below: an edit is expressed as a
+    /// change to the specification, and the tree is rebuilt from it. Rebuilding rather than patching
+    /// in place is what keeps the edits honest: `try_new` re-runs every structural check and
+    /// renumbers the legs, and leg numbering is a function of the whole shape (legs are numbered in
+    /// `(node, X, Y, Z)` order), so a structural change cannot leave the old numbering valid.
+    pub fn to_spec(&self) -> Vec<Option<(NodeId, PauliLabel)>> {
+        self.parent.clone()
+    }
+
+    /// Iterates over the labels of `node`'s links that terminate in a leg.
+    ///
+    /// These are the links a subtree may be attached to; see [`Self::reparent`]. A node with three
+    /// children yields nothing.
+    ///
+    /// # Errors
+    ///
+    /// * [`NodeOutOfRange`](TernaryTreeError::NodeOutOfRange) if `node` is out of range.
+    pub fn leg_labels(
+        &self,
+        node: NodeId,
+    ) -> Result<impl Iterator<Item = PauliLabel> + '_, TernaryTreeError> {
+        let num_nodes = self.num_nodes();
+        if node >= num_nodes {
+            return Err(TernaryTreeError::NodeOutOfRange { node, num_nodes });
+        }
+        Ok(PauliLabel::ALL
+            .into_iter()
+            .filter(move |&label| matches!(self.child_of(node, label), Slot::Leg(_))))
+    }
+
+    /// Returns whether `candidate` lies in the subtree rooted at `node`.
+    ///
+    /// Walks upwards from `candidate`, which is `O(depth)` thanks to the cached parents, rather than
+    /// descending through `node`'s subtree.
+    fn is_descendant_of(&self, candidate: NodeId, node: NodeId) -> bool {
+        let mut current = candidate;
+        loop {
+            if current == node {
+                return true;
+            }
+            match self.parent[current as usize] {
+                Some((parent, _)) => current = parent,
+                None => return false,
+            }
+        }
+    }
+
+    /// Returns how many of `node`'s links descend to a child.
+    fn num_children(&self, node: NodeId) -> usize {
+        PauliLabel::ALL
+            .into_iter()
+            .filter(|&label| matches!(self.child_of(node, label), Slot::Edge(_)))
+            .count()
+    }
+
+    /// Returns a new tree in which `node` hangs off `new_parent`'s `label` link.
+    ///
+    /// The subtree rooted at `node` moves with it. This is the primitive a local search spends most
+    /// of its time in.
+    ///
+    /// Moving `node` to the link it already hangs off is a no-op and returns an equal tree, so a
+    /// search need not filter such proposals out.
+    ///
+    /// # Errors
+    ///
+    /// * [`NodeOutOfRange`](TernaryTreeError::NodeOutOfRange) if either index is out of range.
+    /// * [`CannotMoveRoot`](TernaryTreeError::CannotMoveRoot) if `node` is the root. Use
+    ///   [`Self::reroot`] to change that.
+    /// * [`MoveUnderItself`](TernaryTreeError::MoveUnderItself) if `new_parent` is `node` itself.
+    /// * [`LinkOccupied`](TernaryTreeError::LinkOccupied) if `new_parent`'s `label` link already
+    ///   descends to another child. Use [`Self::leg_labels`] to find the ones that do not.
+    /// * [`WouldCycle`](TernaryTreeError::WouldCycle) if `new_parent` lies within `node`'s subtree,
+    ///   which would disconnect the subtree and leave a cycle.
+    ///
+    /// # Cost
+    ///
+    /// The specification edit is `O(1)` and the descendant check `O(depth)`, but the tree is rebuilt,
+    /// so the call allocates and is `O(N)` overall. That is deliberate: see [`Self::to_spec`].
+    pub fn reparent(
+        &self,
+        node: NodeId,
+        new_parent: NodeId,
+        label: PauliLabel,
+    ) -> Result<Self, TernaryTreeError> {
+        let num_nodes = self.num_nodes();
+        for candidate in [node, new_parent] {
+            if candidate >= num_nodes {
+                return Err(TernaryTreeError::NodeOutOfRange {
+                    node: candidate,
+                    num_nodes,
+                });
+            }
+        }
+        if node == self.root {
+            return Err(TernaryTreeError::CannotMoveRoot { root: self.root });
+        }
+        if node == new_parent {
+            return Err(TernaryTreeError::MoveUnderItself { node });
+        }
+        if self.parent[node as usize] == Some((new_parent, label)) {
+            return Ok(self.clone());
+        }
+        if let Slot::Edge(_) = self.child_of(new_parent, label) {
+            return Err(TernaryTreeError::LinkOccupied {
+                node: new_parent,
+                label,
+            });
+        }
+        // The only check that is not `O(1)`, so it runs last.
+        if self.is_descendant_of(new_parent, node) {
+            return Err(TernaryTreeError::WouldCycle { node, new_parent });
+        }
+
+        let mut spec = self.to_spec();
+        spec[node as usize] = Some((new_parent, label));
+        Self::try_new(&spec)
+    }
+
+    /// Returns a new tree rooted at `node`, reversing the links along the path to the old root.
+    ///
+    /// Each link on that path is re-pointed the other way. The reversed link has to occupy a slot that
+    /// is free at its new parent, so it keeps its old label when that slot is free and otherwise takes
+    /// the lowest free slot, in `X`, `Y`, `Z` order. In a Jordan-Wigner chain, for instance, every
+    /// interior node already spends its `Z` slot on the next node, so reversing the `Z` link that
+    /// arrives from above must pick a different label. The rule is deterministic and keeps the result
+    /// a valid tree. The Pauli strings change even where every label is kept, since each leg's path
+    /// to the root is now a different one.
+    ///
+    /// Re-rooting only reverses links, so it never changes which nodes are joined; neither does
+    /// [`Self::relabel`]. A search that should reach trees of a different shape therefore also needs
+    /// [`Self::reparent`]. Re-rooting at the current root is a no-op and returns an equal tree.
+    ///
+    /// # Errors
+    ///
+    /// * [`NodeOutOfRange`](TernaryTreeError::NodeOutOfRange) if `node` is out of range.
+    /// * [`TooManyChildrenToReroot`](TernaryTreeError::TooManyChildrenToReroot) if `node` already has
+    ///   three children. Re-rooting gives it a fourth downward link (the one pointing back at its
+    ///   former parent), and a node has only three.
+    pub fn reroot(&self, node: NodeId) -> Result<Self, TernaryTreeError> {
+        let num_nodes = self.num_nodes();
+        if node >= num_nodes {
+            return Err(TernaryTreeError::NodeOutOfRange { node, num_nodes });
+        }
+        if node == self.root {
+            return Ok(self.clone());
+        }
+        let num_children = self.num_children(node);
+        if num_children >= 3 {
+            return Err(TernaryTreeError::TooManyChildrenToReroot { node, num_children });
+        }
+
+        // Reverse the parent pointers along `node -> ... -> root`. Every other entry is untouched.
+        //
+        // `used[v]` tracks which of `v`'s slots are already spoken for, so a reversed link can be
+        // given one that is actually free. A node keeps the labels of the children it is not losing,
+        // and gains one for the link that now descends to its former parent.
+        let mut spec = self.to_spec();
+        let mut used: Vec<[bool; 3]> = (0..num_nodes)
+            .map(|v| {
+                let mut slots = [false; 3];
+                for label in PauliLabel::ALL {
+                    if let Slot::Edge(_) = self.child_of(v, label) {
+                        slots[label.slot()] = true;
+                    }
+                }
+                slots
+            })
+            .collect();
+
+        // Collect the path `node -> ... -> old root` first, so the rewrite below can be a simple
+        // forward pass rather than a walk that has to undo its own bookkeeping.
+        let mut path = vec![node];
+        let mut current = node;
+        while let Some((parent, old_label)) = self.parent[current as usize] {
+            // `current` stops descending from `parent`, so that slot becomes free for reuse.
+            used[parent as usize][old_label.slot()] = false;
+            path.push(parent);
+            current = parent;
+        }
+
+        // `node` becomes the root and every link on the path points the other way: for consecutive
+        // `(child, parent)` on the path, `parent` now descends *from* `child`.
+        spec[node as usize] = None;
+        for window in path.windows(2) {
+            let (new_parent, new_child) = (window[0], window[1]);
+            let free = |l: &PauliLabel| !used[new_parent as usize][l.slot()];
+            // The label the link carried before it was reversed, kept when the slot allows it.
+            let (_, old_label) = self.parent[new_parent as usize]
+                .expect("every node on the path but the last has a parent");
+            let label = Some(old_label)
+                .filter(free)
+                .or_else(|| PauliLabel::ALL.into_iter().find(free))
+                .expect(
+                    "the new root has a free slot by the check above, and every other node on the \
+                     path released the slot that pointed down the path",
+                );
+            used[new_parent as usize][label.slot()] = true;
+            spec[new_child as usize] = Some((new_parent, label));
+        }
+        Self::try_new(&spec)
+    }
+
+    /// Returns a new tree with `node`'s three links relabeled by `permutation`.
+    ///
+    /// `permutation[k]` becomes the new label of the link whose current label has
+    /// [`PauliLabel::slot`] `k`, i.e. the labels are given in `X`, `Y`, `Z` order.
+    /// This changes which Pauli strings the encoding produces without moving anything, so depths
+    /// (and hence [`Self::max_weight`]) are untouched.
+    ///
+    /// Only the links that descend to a child are stored; the legs fill whichever slots remain. So
+    /// relabeling a leaf, which has no children, returns an equal tree.
+    ///
+    /// # Errors
+    ///
+    /// * [`NodeOutOfRange`](TernaryTreeError::NodeOutOfRange) if `node` is out of range.
+    /// * [`NotAPermutation`](TernaryTreeError::NotAPermutation) if `permutation` is not a
+    ///   permutation of the three labels.
+    pub fn relabel(
+        &self,
+        node: NodeId,
+        permutation: [PauliLabel; 3],
+    ) -> Result<Self, TernaryTreeError> {
+        let num_nodes = self.num_nodes();
+        if node >= num_nodes {
+            return Err(TernaryTreeError::NodeOutOfRange { node, num_nodes });
+        }
+        if let Some(index) = (0..3).find(|&i| permutation[..i].contains(&permutation[i])) {
+            return Err(TernaryTreeError::NotAPermutation {
+                permutation,
+                label: permutation[index],
+            });
+        }
+
+        // A node's label assignment lives in its *children's* specification entries, since that is
+        // where `try_new` reads it from. Relabeling `node` therefore rewrites the entries of its
+        // children, not its own.
+        let mut spec = self.to_spec();
+        for (index, old_label) in PauliLabel::ALL.into_iter().enumerate() {
+            if let Slot::Edge(child) = self.child_of(node, old_label) {
+                spec[child as usize] = Some((node, permutation[index]));
+            }
+        }
+        Self::try_new(&spec)
+    }
 }
 
 #[cfg(test)]
@@ -718,22 +1031,7 @@ mod tests {
         }
 
         for (name, tree) in &trees {
-            let paths: Vec<Vec<(NodeId, PauliLabel)>> =
-                (0..tree.num_legs()).map(|l| tree.leg_path(l)).collect();
-            for (i, left) in paths.iter().enumerate() {
-                for right in paths.iter().skip(i + 1) {
-                    let overlap = left
-                        .iter()
-                        .filter(|(qubit, label)| {
-                            right.iter().any(|(q, l)| q == qubit && l != label)
-                        })
-                        .count();
-                    assert_eq!(
-                        overlap, 1,
-                        "{name}: two legs must anticommute on exactly one qubit, found {overlap}"
-                    );
-                }
-            }
+            assert_legs_still_anticommute(tree, name);
         }
     }
 
@@ -1189,5 +1487,430 @@ mod tests {
         for label in PauliLabel::ALL {
             assert!(matches!(tree.child_of(0, label), Slot::Leg(_)));
         }
+    }
+
+    /// Asserts that every pair of legs overlaps non-trivially on exactly one qubit.
+    ///
+    /// This is the property that makes a tree a *valid encoding* rather than merely a valid tree.
+    /// Every tree [`TernaryTree::try_new`] accepts has it, and every edit rebuilds through that
+    /// constructor, so for the edits this is a sanity check of [`TernaryTree::leg_path`] on the
+    /// rebuilt tree rather than evidence that an edit did what was asked; the tests below check
+    /// placement separately.
+    fn assert_legs_still_anticommute(tree: &TernaryTree, context: &str) {
+        let paths: Vec<Vec<(NodeId, PauliLabel)>> =
+            (0..tree.num_legs()).map(|l| tree.leg_path(l)).collect();
+        for (i, left) in paths.iter().enumerate() {
+            for right in paths.iter().skip(i + 1) {
+                let overlap = left
+                    .iter()
+                    .filter(|(qubit, label)| right.iter().any(|(q, l)| q == qubit && l != label))
+                    .count();
+                assert_eq!(
+                    overlap, 1,
+                    "{context}: legs must overlap non-trivially on exactly one qubit, found {overlap}"
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn test_to_spec_round_trips() {
+        // Every edit is expressed as a change to the specification, so the specification had better
+        // describe the tree it came from.
+        for seed in 0..20u64 {
+            let n = 1 + (seed % 10) as u32;
+            let tree = random_tree(n, seed + 1);
+            assert_eq!(TernaryTree::try_new(&tree.to_spec()).unwrap(), tree);
+        }
+    }
+
+    /// Every edge of `tree` as an unordered pair, ignoring direction and label.
+    fn undirected_edges(tree: &TernaryTree) -> std::collections::BTreeSet<(NodeId, NodeId)> {
+        (0..tree.num_nodes())
+            .filter_map(|node| {
+                tree.parent_of(node)
+                    .map(|(parent, _)| (node.min(parent), node.max(parent)))
+            })
+            .collect()
+    }
+
+    #[test]
+    fn test_leg_labels_are_exactly_the_legs() {
+        use PauliLabel::{X, Y, Z};
+        let labels = |tree: &TernaryTree, node| tree.leg_labels(node).unwrap().collect::<Vec<_>>();
+        // A chain spends every node's `Z` link on the next node, except the last, which has three
+        // legs; labels come back in `X`, `Y`, `Z` order.
+        let chain = jordan_wigner(4);
+        for node in 0..3 {
+            assert_eq!(labels(&chain, node), [X, Y]);
+        }
+        assert_eq!(labels(&chain, 3), [X, Y, Z]);
+        // A full node has no legs, and a single `Y` child leaves `X` and `Z`.
+        assert!(labels(&balanced(13), 0).is_empty());
+        let single = TernaryTree::try_new(&[None, Some((0, Y))]).unwrap();
+        assert_eq!(labels(&single, 0), [X, Z]);
+        assert_eq!(
+            chain.leg_labels(4).err(),
+            Some(TernaryTreeError::NodeOutOfRange {
+                node: 4,
+                num_nodes: 4
+            })
+        );
+    }
+
+    #[test]
+    fn test_reparent_round_trips() {
+        // Moving a subtree away and back must restore the original tree exactly, including the leg
+        // numbering, which is why `PartialEq` on the whole tree is the right assertion here.
+        let tree = balanced(13);
+        for node in 1..13u32 {
+            let (old_parent, old_label) = tree.parent_of(node).unwrap();
+            // Find somewhere else to hang it that is not in its own subtree.
+            let target = (0..13u32).find(|&candidate| {
+                candidate != node
+                    && !tree.is_descendant_of(candidate, node)
+                    && tree.leg_labels(candidate).unwrap().next().is_some()
+            });
+            let Some(target) = target else { continue };
+            let label = tree.leg_labels(target).unwrap().next().unwrap();
+
+            let moved = tree.reparent(node, target, label).unwrap();
+            assert_ne!(
+                moved, tree,
+                "reparenting node {node} should change the tree"
+            );
+            let restored = moved.reparent(node, old_parent, old_label).unwrap();
+            assert_eq!(
+                restored, tree,
+                "reparenting node {node} back should restore it"
+            );
+        }
+    }
+
+    #[test]
+    fn test_edits_preserve_validity() {
+        // A long random walk of moves. Every accepted move must have done what was asked (the moved
+        // node sits where it was put, the new root is the requested one, the children follow the
+        // permutation), every rejected move must have been rejected for the reason that applies,
+        // and the tree must still be a valid encoding: `2N+1` legs and pairwise one-qubit overlap.
+        let mut state: u64 = 0x5eed;
+        let mut next_rand = move || {
+            state ^= state << 13;
+            state ^= state >> 7;
+            state ^= state << 17;
+            state
+        };
+
+        // All six permutations of the labels, in `X`, `Y`, `Z` slot order.
+        const PERMUTATIONS: [[PauliLabel; 3]; 6] = {
+            use PauliLabel::{X, Y, Z};
+            [
+                [X, Y, Z],
+                [X, Z, Y],
+                [Y, X, Z],
+                [Y, Z, X],
+                [Z, X, Y],
+                [Z, Y, X],
+            ]
+        };
+
+        let n = 9u32;
+        let mut tree = balanced(n);
+        let mut applied = 0;
+        for step in 0..200 {
+            let node = (next_rand() % n as u64) as NodeId;
+            let candidate = match next_rand() % 3 {
+                0 => {
+                    let target = (next_rand() % n as u64) as NodeId;
+                    let free: Vec<PauliLabel> = tree.leg_labels(target).unwrap().collect();
+                    if free.is_empty() {
+                        continue;
+                    }
+                    let label = free[(next_rand() % free.len() as u64) as usize];
+                    // The label is free, so the only possible rejections are these, in this order.
+                    let expected = if node == tree.root() {
+                        Some(TernaryTreeError::CannotMoveRoot { root: tree.root() })
+                    } else if node == target {
+                        Some(TernaryTreeError::MoveUnderItself { node })
+                    } else if tree.is_descendant_of(target, node) {
+                        Some(TernaryTreeError::WouldCycle {
+                            node,
+                            new_parent: target,
+                        })
+                    } else {
+                        None
+                    };
+                    let result = tree.reparent(node, target, label);
+                    assert_eq!(result.as_ref().err(), expected.as_ref(), "step {step}");
+                    result.inspect(|moved| {
+                        assert_eq!(moved.parent_of(node), Some((target, label)), "step {step}");
+                    })
+                }
+                1 => {
+                    let result = tree.reroot(node);
+                    assert_eq!(
+                        result.is_err(),
+                        tree.num_children(node) == 3,
+                        "step {step}: only a full node may be refused as the root"
+                    );
+                    result.inspect(|moved| {
+                        assert_eq!(moved.root(), node, "step {step}");
+                    })
+                }
+                _ => {
+                    let permutation = PERMUTATIONS[(next_rand() % 6) as usize];
+                    // A permutation on a node in range is always accepted.
+                    let result = tree.relabel(node, permutation);
+                    assert!(
+                        result.is_ok(),
+                        "step {step}: a valid relabeling was refused"
+                    );
+                    result.inspect(|moved| {
+                        for label in PauliLabel::ALL {
+                            if let Slot::Edge(child) = tree.child_of(node, label) {
+                                assert_eq!(
+                                    moved.parent_of(child),
+                                    Some((node, permutation[label.slot()])),
+                                    "step {step}"
+                                );
+                            }
+                        }
+                    })
+                }
+            };
+            // Rejected moves are values, not panics: that is the point of returning `Result`.
+            if let Ok(next) = candidate {
+                tree = next;
+                applied += 1;
+                assert_eq!(
+                    tree.num_legs(),
+                    2 * n + 1,
+                    "step {step}: leg count must survive every edit"
+                );
+                assert_legs_still_anticommute(&tree, &format!("step {step}"));
+            }
+        }
+        // ... and the walk must actually have moved, or the assertions above prove nothing.
+        assert!(applied > 50, "expected many applied moves, got {applied}");
+    }
+
+    #[test]
+    fn test_reroot_identity_and_round_trip() {
+        let tree = balanced(13);
+        assert_eq!(
+            tree.reroot(tree.root()).unwrap(),
+            tree,
+            "reroot at the root is a no-op"
+        );
+
+        // Re-rooting is not in general its own inverse, and it is worth being precise about why: a
+        // reversed link cannot always keep its label (in a Jordan-Wigner chain every interior node
+        // has already spent its `Z` slot on the next node), and a label that had to change is not
+        // changed back. Going back therefore returns a tree with the same *shape* but not
+        // necessarily the same labels.
+        //
+        // What must hold is that re-rooting never changes which nodes are joined, that the round
+        // trip restores the root, and that the result is still a valid encoding.
+        for node in 0..13u32 {
+            let Ok(moved) = tree.reroot(node) else {
+                continue;
+            };
+            if node != tree.root() {
+                assert_eq!(moved.root(), node);
+                assert_ne!(moved, tree);
+            }
+            assert_eq!(undirected_edges(&moved), undirected_edges(&tree));
+            assert_legs_still_anticommute(&moved, &format!("rerooted at {node}"));
+
+            let back = moved.reroot(tree.root()).unwrap();
+            assert_eq!(back.root(), tree.root());
+            assert_eq!(undirected_edges(&back), undirected_edges(&tree));
+            assert_legs_still_anticommute(&back, &format!("round-tripped via {node}"));
+        }
+    }
+
+    #[test]
+    fn test_reroot_reassigns_labels_when_it_must() {
+        // The case that forces label reassignment: in a chain along `Z`, node 3's `Z` slot already
+        // holds node 4, so the `Z` link arriving from node 2 cannot simply be reversed and has to
+        // take a free slot instead.
+        let tree = jordan_wigner(6);
+        let rerooted = tree
+            .reroot(3)
+            .expect("re-rooting a chain interior must succeed");
+        assert_eq!(rerooted.root(), 3);
+        assert_eq!(rerooted.num_legs(), tree.num_legs());
+        // Node 3 keeps its `Z` child, so the link from node 2 takes the lowest free slot, `X`. Further
+        // up, each node released the `Z` slot that pointed down the path, so the reversed `Z` links
+        // keep their label.
+        assert_eq!(rerooted.parent_of(4), Some((3, PauliLabel::Z)));
+        assert_eq!(rerooted.parent_of(2), Some((3, PauliLabel::X)));
+        assert_eq!(rerooted.parent_of(1), Some((2, PauliLabel::Z)));
+        assert_eq!(rerooted.parent_of(0), Some((1, PauliLabel::Z)));
+        // Re-rooting a chain at an interior node makes it shallower, which is the point of the move.
+        assert!(
+            rerooted.max_weight() < tree.max_weight(),
+            "expected a shallower tree, got {} vs {}",
+            rerooted.max_weight(),
+            tree.max_weight()
+        );
+        assert_legs_still_anticommute(&rerooted, "chain rerooted at its middle");
+    }
+
+    #[test]
+    fn test_reroot_keeps_a_free_label() {
+        // Node 1's `Z` slot is free, so the reversed link to node 0 keeps its label, and re-rooting
+        // back restores the original tree exactly.
+        let tree =
+            TernaryTree::try_new(&[None, Some((0, PauliLabel::Z)), Some((1, PauliLabel::X))])
+                .unwrap();
+        let rerooted = tree.reroot(1).unwrap();
+        assert_eq!(rerooted.parent_of(0), Some((1, PauliLabel::Z)));
+        assert_eq!(rerooted.parent_of(2), Some((1, PauliLabel::X)));
+        assert_eq!(rerooted.reroot(0).unwrap(), tree);
+    }
+
+    #[test]
+    fn test_reroot_rejects_a_full_node() {
+        // A node with three children has no free link left for its former parent, so it cannot
+        // become the root.
+        let tree = balanced(13);
+        // Node 1 of a branching-3 breadth-first tree on 13 nodes has three children.
+        assert_eq!(
+            tree.num_children(1),
+            3,
+            "test premise: node 1 should be full"
+        );
+        assert_eq!(
+            tree.reroot(1),
+            Err(TernaryTreeError::TooManyChildrenToReroot {
+                node: 1,
+                num_children: 3
+            })
+        );
+    }
+
+    #[test]
+    fn test_relabel_changes_strings_but_not_weight() {
+        let tree = balanced(13);
+        let rotated = tree
+            .relabel(0, [PauliLabel::Y, PauliLabel::Z, PauliLabel::X])
+            .unwrap();
+        assert_ne!(rotated, tree, "relabeling should change the tree");
+        // Nothing moved, so every leg is at the same depth as before.
+        assert_eq!(rotated.max_weight(), tree.max_weight());
+        for leg in 0..tree.num_legs() {
+            assert_eq!(rotated.leg_depth(leg), tree.leg_depth(leg));
+        }
+        assert_legs_still_anticommute(&rotated, "relabeled");
+
+        // The identity permutation is a no-op.
+        assert_eq!(tree.relabel(0, PauliLabel::ALL).unwrap(), tree);
+        // So is relabeling a leaf: it has no children, and its legs fill whatever slots remain.
+        let leaf = (0..13).find(|&node| tree.num_children(node) == 0).unwrap();
+        assert_eq!(
+            tree.relabel(leaf, [PauliLabel::Z, PauliLabel::X, PauliLabel::Y])
+                .unwrap(),
+            tree
+        );
+    }
+
+    #[test]
+    fn test_relabel_rejects_a_non_permutation() {
+        let tree = balanced(4);
+        let permutation = [PauliLabel::X, PauliLabel::X, PauliLabel::Z];
+        assert_eq!(
+            tree.relabel(0, permutation),
+            Err(TernaryTreeError::NotAPermutation {
+                permutation,
+                label: PauliLabel::X
+            })
+        );
+    }
+
+    #[test]
+    fn test_reparent_rejections() {
+        let tree = balanced(13);
+
+        // The root has no parent to be moved away from.
+        assert_eq!(
+            tree.reparent(tree.root(), 5, PauliLabel::X),
+            Err(TernaryTreeError::CannotMoveRoot { root: tree.root() })
+        );
+
+        // A node cannot move under itself ...
+        let Slot::Edge(child) = tree.child_of(1, PauliLabel::X) else {
+            panic!("test premise: node 1 should have an X child");
+        };
+        assert_eq!(
+            tree.reparent(child, child, PauliLabel::X),
+            Err(TernaryTreeError::MoveUnderItself { node: child })
+        );
+        // ... nor under one of its own descendants.
+        assert_eq!(
+            tree.reparent(1, child, PauliLabel::X),
+            Err(TernaryTreeError::WouldCycle {
+                node: 1,
+                new_parent: child
+            })
+        );
+
+        // An occupied link cannot take another child.
+        assert_eq!(
+            tree.reparent(5, 0, PauliLabel::X),
+            Err(TernaryTreeError::LinkOccupied {
+                node: 0,
+                label: PauliLabel::X
+            })
+        );
+        // A move that breaks both rules reports the self-move: node 1 is full, so its own `X` link
+        // is occupied too, but moving a node under itself is the more fundamental mistake.
+        assert_eq!(
+            tree.reparent(1, 1, PauliLabel::X),
+            Err(TernaryTreeError::MoveUnderItself { node: 1 })
+        );
+        // Moving a node to the link it already hangs off is not a rejection: it changes nothing.
+        assert_eq!(tree.reparent(child, 1, PauliLabel::X).unwrap(), tree);
+
+        // Out-of-range indices are reported rather than panicking.
+        assert_eq!(
+            tree.reparent(99, 0, PauliLabel::X),
+            Err(TernaryTreeError::NodeOutOfRange {
+                node: 99,
+                num_nodes: 13
+            })
+        );
+        assert_eq!(
+            tree.reroot(99),
+            Err(TernaryTreeError::NodeOutOfRange {
+                node: 99,
+                num_nodes: 13
+            })
+        );
+        assert_eq!(
+            tree.relabel(99, PauliLabel::ALL),
+            Err(TernaryTreeError::NodeOutOfRange {
+                node: 99,
+                num_nodes: 13
+            })
+        );
+    }
+
+    #[test]
+    fn test_reparent_can_lower_the_weight() {
+        // The point of having the edits at all: a local move can improve the figure of merit. Peel the
+        // deepest node of a Jordan-Wigner chain onto a free link near the root.
+        let tree = jordan_wigner(6);
+        assert_eq!(tree.max_weight(), 6);
+        let deepest = 5;
+        let label = tree.leg_labels(0).unwrap().next().unwrap();
+        let moved = tree.reparent(deepest, 0, label).unwrap();
+        assert!(
+            moved.max_weight() < tree.max_weight(),
+            "moving the chain's tail to the root should lower the weight, got {} vs {}",
+            moved.max_weight(),
+            tree.max_weight()
+        );
+        assert_legs_still_anticommute(&moved, "peeled chain");
     }
 }
