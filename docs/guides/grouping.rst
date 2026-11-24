@@ -424,6 +424,7 @@ either direction.
    :nofigs:
    :include-source:
 
+   >>> from qiskit_fermions.operators import FermionOperator
    >>> from qiskit_fermions.operators.terms.grouping import (
    ...     groups_are_hermitian,
    ...     groups_have_uniform_coeffs,
