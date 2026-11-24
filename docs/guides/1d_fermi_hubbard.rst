@@ -30,9 +30,10 @@ That choice drives everything below. It calls for the following:
   **ancilla qubit** so the qubit count associated with the implementation of a
   given Hamiltonian term no longer grows with the number of fermionic modes (as
   is the case for Jordan-Wigner (JW)).
-* A **custom synthesis** that exploits the commutativity within each set. The payoff is a
-  circuit whose two-qubit depth is **constant in the system size**, against the linear
-  growth of a JW-based term-by-term Trotterization.
+* A **synthesis** that exploits the commutativity within each set, which the
+  :class:`~qiskit_fermions.transpiler.passes.synthesis.commuting_evolution.CommutingDiagonalizationSynthesis`
+  plugin provides without any knowledge of the model or the encoding. The payoff is a circuit whose two-qubit depth is **constant in the system
+  size**, against the linear growth of a JW-based term-by-term Trotterization.
 
 The machinery that gets an encoding of your own into the transpiler
 (:class:`.CustomF2QLayout` and :class:`.MapperFnEvolutionSynthesis`)
@@ -620,7 +621,7 @@ The encoding is now ready to be used by the transpiler. Two more pieces are need
   convention. Its :attr:`~.MapperFnEvolutionSynthesis.product_formula` decides how that gate is
   turned into rotations. Note that this is a *second*, independent product formula, acting on
   qubits after the mapping: Qiskit's :class:`~qiskit.synthesis.LieTrotter` is passed here, and
-  step 7 replaces it with one that knows about flow sets.
+  step 7 replaces it with a synthesis that knows the terms of each flow set commute.
 
 Since every comparison below reruns this pipeline, it is worth wrapping once:
 
@@ -719,115 +720,67 @@ Section IV C of Ref. [1]_: because all terms of a flow set commute, they can be
 simultaneously diagonalized by a single Clifford circuit, rotated in one shared basis
 and rotated back, instead of once per term.
 
-For this encoding, the Clifford is simple. Conjugating by a chain of ``CZ``
-gates on nearest neighbors maps
+For this encoding, such a Clifford is simple. Conjugating by a chain of ``CZ`` gates on nearest
+neighbors maps
 
 .. math::
 
    X_{j+1} \; \longmapsto \; Z_j X_{j+1} Z_{j+2}
 
-simultaneously for every :math:`j`. One ``CZ`` chain turns the entire weight-3
-(west) flow set into a layer of independent single-qubit :math:`X` rotations. The
-:class:`~qiskit.synthesis.EvolutionSynthesis` interface only requests a
-:meth:`~qiskit.synthesis.EvolutionSynthesis.synthesize` method, which is all this class
-implements. It carries no number of Trotter steps, because it receives one flow set at a time
-and so cannot subdivide the evolution across the sets. That subdivision belongs a level up, in
-fermionic space, where an :class:`.F2FSynthesisPlugin` sees all of them at once (see
-:ref:`step 9 <flowsets_check_dynamics>`):
+simultaneously for every :math:`j`, so one ``CZ`` chain turns the entire weight-3 (west) flow set
+into a layer of independent single-qubit :math:`X` rotations.
+
+You do not have to find such a Clifford yourself, for this encoding or any other. The
+:class:`~qiskit_fermions.transpiler.passes.synthesis.commuting_evolution.CommutingDiagonalizationSynthesis`
+plugin synthesizes the :class:`~qiskit.circuit.library.PauliEvolutionGate` of a group of mutually commuting Pauli terms
+exactly, as :math:`U^\dagger e^{-itM} U` with a Clifford :math:`U` and a middle part :math:`M`
+that is cheap to synthesize. It builds several candidate circuits for every gate and keeps the
+cheapest. It looks only at the Pauli terms, so it needs no knowledge of the flow sets or of the
+encoding that produced them (see :ref:`commuting_evolution_explanation`).
+
+The plugin is registered with Qiskit as ``"commuting_diagonalization"``, so a
+:class:`~qiskit.transpiler.passes.HighLevelSynthesis` pass selects it by name. Run on the qubit
+circuit of step 6, the pass synthesizes each mapped flow set as one gate. The plugin ignores the
+product formula attached to the gate, so the pipeline needs none:
 
 .. plot::
    :context:
    :nofigs:
    :include-source:
 
-   >>> from qiskit.circuit import QuantumCircuit
-   >>> from qiskit.synthesis.evolution import EvolutionSynthesis
+   >>> from qiskit.transpiler import PassManager
+   >>> from qiskit.transpiler.passes import HighLevelSynthesis
+   >>> from qiskit.transpiler.passes.synthesis.high_level_synthesis import HLSConfig
    >>>
-   >>> def cz_brickwork(circuit):
-   ...     # emit even and odd bonds as two layers, so the CZs are scheduled in
-   ...     # parallel: a chain of overlapping CZs has depth 2, not num_qubits - 1
-   ...     #
-   ...     # NOTE: CZ gates are diagonal, so they all commute and each is its own inverse.
-   ...     # This whole layer is therefore self-inverse, which is why the conjugation below
-   ...     # calls it twice rather than calling it and then its inverse.
-   ...     for offset in (0, 1):
-   ...         for j in range(offset, circuit.num_qubits - 1, 2):
-   ...             circuit.cz(j, j + 1)
+   >>> commuting_synthesis = PassManager(
+   ...     HighLevelSynthesis(hls_config=HLSConfig(PauliEvolution=["commuting_diagonalization"]))
+   ... )
    >>>
-   >>> # The interaction reaches nearest (distance 1) and next-nearest (distance 2)
-   >>> # neighbors, so every interior qubit carries four Rzz gates and can only do one at
-   >>> # a time: four layers is the best any schedule can do. These offsets achieve it.
-   >>> def rzz_layers(circuit, angles):
-   ...     """Emit the diagonal Rzz gates in four layers of disjoint qubit pairs."""
-   ...     near = [(j, k) for j, k in angles if k - j == 1]
-   ...     far = [(j, k) for j, k in angles if k - j == 2]
-   ...     schedule = [
-   ...         [(j, k) for j, k in near if j % 2 == 0],
-   ...         [(j, k) for j, k in far if j % 4 in (0, 1)],
-   ...         [(j, k) for j, k in near if j % 2 == 1],
-   ...         [(j, k) for j, k in far if j % 4 in (2, 3)],
-   ...     ]
-   ...     # emit layer by layer, since Qiskit's depth follows the order gates were added
-   ...     for layer in schedule:
-   ...         for j, k in layer:
-   ...             circuit.rzz(angles[j, k], j, k)
+   >>> def flow_set_transpile(circuit):
+   ...     '''Map `circuit` with the flow-set encoding, then synthesize each flow set at once.'''
+   ...     qubit_circuit = flow_set_pass_manager(circuit.register).run(circuit)
+   ...     return commuting_synthesis.run(qubit_circuit)
+
+For the west flow set, the second gate of the qubit circuit, the plugin finds the ``CZ`` chain of
+the previous equation by itself. It emits the chain as two layers on alternating bonds, then a
+single-qubit rotation per term, then the chain again (a layer of ``CZ`` gates is its own inverse):
+
+.. plot::
+   :context: close-figs
+   :include-source:
+   :alt: The plugin's circuit for the west flow set: two layers of CZ gates on alternating
+         neighboring pairs, an H, Rz, H sequence on every inner qubit, and the two CZ layers again.
+
+   >>> from qiskit_fermions.transpiler.passes import CommutingDiagonalizationSynthesis
    >>>
-   >>> class FlowSetSynthesis(EvolutionSynthesis):
-   ...     '''Synthesize one flow set of the encoded Hamiltonian at a time.'''
-   ...
-   ...     preserve_order = True
-   ...
-   ...     def synthesize(self, evolution):
-   ...         circuit = QuantumCircuit(evolution.operator.num_qubits)
-   ...         east, west, diagonal = [], [], {}
-   ...
-   ...         for label, indices, coeff in evolution.operator.to_sparse_list():
-   ...             angle = 2 * evolution.time * coeff.real
-   ...             match label, indices:
-   ...                 case "", _:  # the identity contributes only a global phase
-   ...                     circuit.global_phase -= angle / 2
-   ...                 case "X", [qubit]:  # east flow set: already weight-1
-   ...                     east.append((qubit, angle))
-   ...                 case "ZXZ", [j, k, l] if (k, l) == (j + 1, j + 2):
-   ...                     west.append((k, angle))  # needs the CZ conjugation below
-   ...                 case "ZZ", [j, k]:  # interaction: diagonal, see rzz_layers above
-   ...                     diagonal[min(j, k), max(j, k)] = angle
-   ...                 case _:
-   ...                     raise ValueError(f"unexpected Pauli term: {label} on {indices}")
-   ...
-   ...         # east flow set: bare rotations, no entangling gates at all
-   ...         for qubit, angle in east:
-   ...             circuit.rx(angle, qubit)
-   ...
-   ...         # west flow set: one CZ chain diagonalizes the WHOLE set at once
-   ...         if west:
-   ...             cz_brickwork(circuit)
-   ...             for qubit, angle in west:
-   ...                 circuit.rx(angle, qubit)
-   ...             cz_brickwork(circuit)
-   ...
-   ...         if diagonal:
-   ...             rzz_layers(circuit, diagonal)
-   ...
-   ...         return circuit
+   >>> west = qubit_circuit.data[1].operation
+   >>> CommutingDiagonalizationSynthesis().run(west).draw("mpl")
+   <Figure size ... with 1 Axes>
 
 .. note::
-   Two details are easy to miss. A custom
-   :class:`~qiskit.synthesis.EvolutionSynthesis` must expose a ``preserve_order``
-   attribute, which the high-level-synthesis pass reads.
-
-   Both helpers emit their gates in explicit layers rather than in term order, because
-   :meth:`~qiskit.circuit.QuantumCircuit.depth` schedules gates *as soon as possible, in the
-   order they were added*. Since all the gates within one of these sets commute, the order is free
-   to choose.
-   A term-by-term synthesis chooses the order badly. Emitting
-   the overlapping ``CZ`` chain sequentially reports a depth that grows with the qubit count
-   rather than the constant ``2`` the hardware could achieve.
-
-.. note::
-   This is why the synthesis above carries no number of Trotter steps. It receives one flow set
-   per gate, so a repetition inside it would repeat *within* a set rather than cycling between
-   them:
+   The plugin carries no number of Trotter steps. It receives one flow set per gate, and since
+   the terms of a set commute, it synthesizes the set's evolution without approximation. A
+   repetition inside it would repeat *within* a set rather than cycling between them:
 
    .. code-block:: text
 
@@ -842,21 +795,16 @@ fermionic space, where an :class:`.F2FSynthesisPlugin` sees all of them at once 
    :class:`.FermionicLieTrotter` of :ref:`step 5 <flowsets_build>`, which reads the
    :attr:`~qiskit_fermions.operators.OperatorTrait.groups` and can interleave them. That division
    of labor is the point: the fermionic formula decides *how many steps* and *in what order*, and
-   this class decides *how cheaply* each resulting set is realized.
+   the plugin decides *how cheaply* each resulting set is realized.
 
-To select the order, pass it to
-:attr:`.MapperFnEvolutionSynthesis.product_formula`, which is the argument
-``flow_set_pass_manager`` takes. Nothing else about the pipeline (or the fermionic circuit
-it runs on) changes:
+Nothing else about the pipeline (or the fermionic circuit it runs on) changes:
 
 .. plot::
    :context:
    :nofigs:
    :include-source:
 
-   >>> pass_manager = flow_set_pass_manager(flow_set_circuit.register, FlowSetSynthesis())
-   >>>
-   >>> flow_circuit = pass_manager.run(flow_set_circuit).decompose(reps=6)
+   >>> flow_circuit = flow_set_transpile(flow_set_circuit).decompose(reps=6)
    >>> flow_circuit.count_ops()["cx"]
    22
    >>> flow_circuit.depth(lambda instruction: len(instruction.qubits) == 2)
@@ -870,42 +818,40 @@ it runs on) changes:
    >>> flow_circuit.draw("mpl", fold=-1)
    <Figure size ... with 1 Axes>
 
-From depth 23 with 26 ``CX`` gates down to depth 12 with 22 ``CX`` gates.  Note that this is fewer entangling gates and
-nearly half the depth. Comparing the two pictures, the difference is not that the gates are
-cheaper but that they *stack*. The serial ladders are gone; entangling gates now sit above
-one another in shared layers because the whole west flow set is rotated in a single shared
-basis and the interaction is emitted in layers of disjoint pairs.
-
-.. note::
-   ``FlowSetSynthesis`` pattern-matches *absolute* qubit indices, which is safe here only because
-   every flow set of this Hamiltonian spans the whole register. A fermionic product formula narrows
-   each factor to the modes it actually touches, so a grouping whose sets covered only part of the
-   chain would arrive relabeled and the patterns above would not match.
+From depth 23 with 26 ``CX`` gates down to depth 12 with 22 ``CX`` gates. This is fewer
+entangling gates and nearly half the depth. Comparing the two pictures, the difference is not
+that the gates are cheaper but that they *stack*. The serial ladders are gone; entangling gates
+now sit above one another in shared layers because the whole west flow set is rotated in a single
+shared basis and the interaction is emitted in layers of disjoint pairs.
 
 .. note::
    Both drawings show the circuit after ``decompose(reps=6)``, which rewrites everything
-   into the ``U`` and ``CX`` basis, so the ``CZ``, ``Rx``, and ``Rzz`` gates emitted by
-   ``FlowSetSynthesis`` are not visible as such. That is deliberate: it puts both circuits
-   in the same basis, which is the only way the two-qubit counts and depths above are
-   comparable. It is the *layer structure* that is notable in these figures, not the
-   gate labels.
+   into the ``U`` and ``CX`` basis, so the gates the plugin emits are not visible as such. That
+   is deliberate: it puts both circuits in the same basis, which is the only way the two-qubit
+   counts and depths above are comparable. It is the *layer structure* that is notable in these
+   figures, not the gate labels.
 
 .. _flowsets_scaling:
 
 8. Constant depth at scale
 --------------------------
 
-The interesting question is not the count at four modes but how it *scales*. The two
-``CZ`` brickwork layers do not grow with the chain length, so the two-qubit depth of one
-Trotter step should be constant. Measuring it directly on the full Fermi-Hubbard
-Hamiltonian, well past what could be simulated by brute force:
+The interesting question is not the count at four modes but how it *scales*. One Clifford
+diagonalizes a whole flow set, and the ``CZ`` chain shows that it need not grow with the chain
+length, so the two-qubit depth of one Trotter step should be constant. Measuring it directly on
+the full Fermi-Hubbard Hamiltonian, well past what could be simulated by brute force, against the
+term-by-term baseline of step 6:
 
 .. plot::
    :context:
    :nofigs:
    :include-source:
 
-   >>> def evolution_stats(num_sites, product_formula):
+   >>> def lie_trotter_transpile(circuit):
+   ...     '''The baseline of step 6: every flow set Trotterized term by term.'''
+   ...     return flow_set_pass_manager(circuit.register, LieTrotter()).run(circuit)
+   >>>
+   >>> def evolution_stats(num_sites, transpile):
    ...     operator = fermi_hubbard_1d(num_sites, tunneling=1.0, interaction=2.0)
    ...     operator.groups = flow_set_groups(operator)
    ...
@@ -918,14 +864,13 @@ Hamiltonian, well past what could be simulated by brute force:
    ...     )
    ...     circuit = circuit.decompose()  # one Evolution per flow set, as in step 5
    ...
-   ...     pass_manager = flow_set_pass_manager(circuit.register, product_formula)
-   ...     decomposed = pass_manager.run(circuit).decompose(reps=6)
+   ...     decomposed = transpile(circuit).decompose(reps=6)
    ...     two_qubit = lambda instruction: len(instruction.qubits) == 2
    ...     return decomposed.count_ops()["cx"], decomposed.depth(two_qubit)
    >>>
    >>> sites = [4, 10, 20, 50, 100]
-   >>> flow = [evolution_stats(n, FlowSetSynthesis()) for n in sites]
-   >>> lie_trotter = [evolution_stats(n, LieTrotter()) for n in sites]
+   >>> flow = [evolution_stats(n, flow_set_transpile) for n in sites]
+   >>> lie_trotter = [evolution_stats(n, lie_trotter_transpile) for n in sites]
    >>>
    >>> [depth for _, depth in flow]
    [12, 12, 12, 12, 12]
@@ -961,15 +906,15 @@ parallel layers. This is the constant-depth result of Ref. [1]_.
    :nofigs:
 
    This is the claim the prose above rests on, but which none of the visible doctests illustrate.
-   ``FlowSetSynthesis`` reproduces each flow set's evolution *exactly*, not
-   just to some Trotter order. The published numbers only fix behavior at the sizes and
-   step counts they were written with, so a change that silently breaks exactness (such as a
-   dropped ``CZ`` layer or a conjugation applied in the wrong order) could leave every
-   visible output intact. This is checked here across two chain lengths, group by group, against
-   ``expm``.
+   The plugin reproduces each flow set's evolution *exactly*, not just to some Trotter order. The
+   published numbers only fix behavior at the sizes and step counts they were written with, so a
+   change that silently breaks exactness (such as a sign of a rotation lost in the Clifford) could
+   leave every visible output intact. This is checked here across two chain lengths, group by
+   group, against ``expm``.
 
    >>> from qiskit.circuit.library import PauliEvolutionGate
    >>> from qiskit.quantum_info import Operator
+   >>> from qiskit_fermions.transpiler.passes import CommutingDiagonalizationSynthesis
    >>> from scipy.linalg import expm
    >>>
    >>> def flow_set_is_exact(num_sites, time=0.37):
@@ -980,7 +925,7 @@ parallel layers. This is the constant-depth result of Ref. [1]_.
    ...         if not encoded.to_sparse_list():  # all-identity group
    ...             continue
    ...         gate = PauliEvolutionGate(encoded, time=time)
-   ...         synthesized = FlowSetSynthesis().synthesize(gate)
+   ...         synthesized = CommutingDiagonalizationSynthesis().run(gate)
    ...         exact = expm(-1j * time * to_matrix(encoded))
    ...         # `global_phase` is carried by the circuit, so compare up to a phase
    ...         got = Operator(synthesized).data
@@ -994,12 +939,12 @@ parallel layers. This is the constant-depth result of Ref. [1]_.
 
 .. note::
    The depth 12 splits across the three flow sets as 0 + 4 + 8, at every chain length. The
-   east flow set contributes **zero**; it is bare ``Rx`` rotations. The west flow set costs 4,
-   from the two ``CZ`` brickwork layers going in and the two coming out; dropping the
+   east flow set contributes **zero**; it is bare single-qubit rotations. The west flow set costs 4,
+   from the two ``CZ`` layers going in and the two coming out; dropping the
    interaction leaves a two-qubit depth of **four** at any chain length. The remaining
-   **eight** is the interaction whose ``Rzz`` terms act on both nearest and next-nearest neighbors
+   **eight** is the interaction whose ``ZZ`` terms act on both nearest and next-nearest neighbors
    and so need four disjoint layers, each costing two ``CX``\ gates. Four is optimal here: every
-   interior qubit carries four ``Rzz`` gates (two to each neighbor and two to each
+   interior qubit carries four ``ZZ`` rotations (two to each neighbor and two to each
    next-nearest one) and can only take part in one at a time, so no schedule can do
    better.
 
@@ -1032,11 +977,11 @@ helper from step 4 gives the right label:
 With the state prepared, two questions remain, and they are best asked separately: does the
 flow-set synthesis compute the *right* thing, and does it compute it more *cheaply*?
 
-Take correctness first. ``FlowSetSynthesis`` and Qiskit's
-:class:`~qiskit.synthesis.LieTrotter` receive the same encoded flow sets from the same fermionic
-Trotterization, so they must realize the same unitary up to a global phase. The custom Cliffords
-reorganize the work; they do not change the result. Random statevectors detect any discrepancy far
-more cheaply than building the full unitary:
+Take correctness first. The plugin and Qiskit's :class:`~qiskit.synthesis.LieTrotter` receive
+the same encoded flow sets from the same fermionic Trotterization, so they must realize the same
+unitary up to a global phase. The shared Cliffords reorganize the work; they do not change the
+result. Random statevectors detect any discrepancy far more cheaply than building the full
+unitary:
 
 .. plot::
    :context: close-figs
@@ -1050,9 +995,8 @@ more cheaply than building the full unitary:
    >>> def agrees_up_to_one_phase(reps, samples=3):
    ...     """Compare both qubit-side syntheses of the same fermionic Trotterization."""
    ...     step = trotter_steps(reps)
-   ...     trotter = flow_set_pass_manager(step.register, LieTrotter()).run(step)
-   ...     flow = flow_set_pass_manager(step.register, FlowSetSynthesis()).run(step)
-   ...     trotter, flow = trotter.decompose(reps=6), flow.decompose(reps=6)
+   ...     trotter = lie_trotter_transpile(step).decompose(reps=6)
+   ...     flow = flow_set_transpile(step).decompose(reps=6)
    ...     dimension = 2**trotter.num_qubits
    ...     residuals, phases = [], []
    ...     for _ in range(samples):
@@ -1079,7 +1023,7 @@ more cheaply than building the full unitary:
 
 So the choice of qubit-side synthesis is free of consequence for accuracy, which is what makes a
 cost comparison meaningful. The remaining question is what the encoding as a whole buys against the
-obvious alternative: plain Jordan-Wigner on ``num_sites`` qubits, with no ancilla and no custom
+obvious alternative: plain Jordan-Wigner on ``num_sites`` qubits, with no ancilla and no shared
 Cliffords. Both the encoding and the qubit-side synthesis differ between the two columns, but the
 check above showed the latter cannot affect the result, so what the fidelities test is the encoding.
 Both pipelines also start from the *same* fermionic Trotterization, so any difference in fidelity
@@ -1114,7 +1058,7 @@ Jordan-Wigner:
    >>>
    >>> def cost_and_fidelity(reps):
    ...     step = trotter_steps(reps)
-   ...     flow = flow_set_pass_manager(step.register, FlowSetSynthesis()).run(step)
+   ...     flow = flow_set_transpile(step)
    ...     jw = jordan_wigner_pass_manager(step.register, LieTrotter()).run(step)
    ...     flow, jw = flow.decompose(reps=6), jw.decompose(reps=6)
    ...     two_qubit = lambda instruction: len(instruction.qubits) == 2
@@ -1223,28 +1167,28 @@ What to take away
   :class:`.MapperFnEvolutionSynthesis` do the rest.
 - **The mapping and the grouping alone are not enough.** Splitting the evolution per flow
   set only slowed the linear growth in depth; a term-by-term synthesis of each set still
-  threw away the fact that its terms commute. Only supplying a flow-set-aware
-  :class:`~qiskit.synthesis.EvolutionSynthesis` made the depth constant. Custom encodings,
-  grouping, and custom synthesis are complementary: all three are needed.
-- **Two product formulas, two jobs.** :class:`.FermionicLieTrotter` fixes the approximation in
-  fermionic space, where the grouping is still visible, so it alone sets the Trotter error and the
-  step count. The qubit-side :class:`~qiskit.synthesis.EvolutionSynthesis` then decides only how
-  cheaply each set is realized: step 9 confirms both choices give the same unitary. Separating the
-  two is what lets the accuracy and the cost be tuned independently. See
-  :ref:`fermionic_synthesis_explanation`.
+  threw away the fact that its terms commute. Only a synthesis that diagonalizes each set with one
+  shared Clifford made the depth constant. Custom encodings, grouping, and such a synthesis are
+  complementary: all three are needed.
+- **The synthesis needs no knowledge of the model.**
+  :class:`~qiskit_fermions.transpiler.passes.synthesis.commuting_evolution.CommutingDiagonalizationSynthesis`
+  sees only the Pauli terms of each mapped flow set, and it found the ``CZ`` chain that diagonalizes
+  the west flow set without being told about the encoding. Selecting it by name is the whole
+  integration.
+- **Two jobs, two levels.** :class:`.FermionicLieTrotter` fixes the approximation in fermionic
+  space, where the grouping is still visible, so it alone sets the Trotter error and the step
+  count. The qubit-side synthesis then decides only how cheaply each set is realized: step 9
+  confirms both choices give the same unitary. Separating the two is what lets the accuracy and the
+  cost be tuned independently. See :ref:`fermionic_synthesis_explanation`.
 - **Verify it.** An encoding that satisfies the commutation relations might still represent
   a different Hamiltonian if a prefactor or sign is off. Checking an intertwining relation
   (or, more cheaply, the spectrum) catches this.
 
 .. note::
-   The ``FlowSetSynthesis`` above is deliberately written for *this* encoding on a 1D
-   chain. It pattern-matches the specific Pauli labels the encoding produces and raises on
-   anything else, rather than silently falling back to a generic product formula. A general
-   implementation has two halves. Reading the flow-set structure from the operator's
-   :attr:`~.TransferVertexOperator.groups` is what a
-   :class:`.F2FSynthesisPlugin` for an evolution already does. Deriving the diagonalizing Clifford from the
-   stabilizer group, as described in Section IV C of Ref. [1]_, is the half that remains encoding
-   specific.
+   The plugin handles a :class:`~qiskit.circuit.library.PauliEvolutionGate` only if all of its
+   terms commute, and leaves any other gate to the next synthesis method. Splitting a Hamiltonian
+   into commuting groups, one gate per group, is the job of the grouping: here, the
+   :attr:`~.TransferVertexOperator.groups` of step 2 and the fermionic product formula of step 5.
 
    Also, delocalizing the parity makes the interaction term :math:`n_j n_{j+1}`
    weight-2 rather than diagonal in single qubits, which is the counterpart cost to the
@@ -1274,13 +1218,14 @@ changes both state preparation and the verification recipe from
 The pieces this guide builds are the ones that carry over:
 :class:`.CustomF2QLayout` for a register whose size differs from the mode count,
 :func:`.map_transfer_vertex_generators` for the encoding itself,
-:class:`.MapperFnEvolutionSynthesis` for wiring it into the transpiler, and a custom
-:class:`~qiskit.synthesis.EvolutionSynthesis` for making the flow-set structure pay off.
-Only the encoding and the flow-set decomposition are different.
+:class:`.MapperFnEvolutionSynthesis` for wiring it into the transpiler, and
+:class:`~qiskit_fermions.transpiler.passes.synthesis.commuting_evolution.CommutingDiagonalizationSynthesis`
+for making the flow-set structure pay off. Only the encoding and the flow-set decomposition are different.
 
 The :ref:`2D flow-set guide <2d_fermi_hubbard>` picks up here, working
-through the Verstraete-Cirac encoding on a square lattice: four flow sets, a depth-2
-Clifford for each, and the stabilizer projection the verification then needs.
+through the Verstraete-Cirac encoding on a square lattice: four flow sets, a shared Clifford for
+each that the plugin finds on the qubit pairs of the register, and the stabilizer projection the
+verification then needs.
 
 .. [1] A. Gandon, S. Piccinelli, M. Rossmannek, F. Tacchino, A. Baiardi, J. Nys, and
        I. Tavernelli, Stabilizer-based quantum simulation of fermion dynamics with local

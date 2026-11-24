@@ -22,6 +22,7 @@ More guides
    skqd
    transpilation
    fermionic_synthesis
+   commuting_evolution
    merge_slater_determinant
    lucj
    ffsim

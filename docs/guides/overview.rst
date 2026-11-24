@@ -70,6 +70,7 @@ Guides explaining how a :class:`.FermionicCircuit` becomes a :class:`~qiskit.cir
 
 - :ref:`transpilation_explanation`
 - :ref:`fermionic_synthesis_explanation`
+- :ref:`commuting_evolution_explanation`
 - :ref:`merge_slater_determinant_explanation`
 - :ref:`lucj_transpilation`
 
