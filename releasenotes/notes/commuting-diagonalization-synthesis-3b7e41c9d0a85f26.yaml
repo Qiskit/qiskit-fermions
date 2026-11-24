@@ -1,0 +1,16 @@
+---
+features:
+  - |
+    Added :class:`~qiskit_fermions.transpiler.passes.CommutingDiagonalizationSynthesis`, a plugin for
+    Qiskit's :class:`~qiskit.transpiler.passes.HighLevelSynthesis` that synthesizes the
+    :class:`~qiskit.circuit.library.PauliEvolutionGate` of a group of mutually commuting Pauli terms
+    exactly. It is registered with Qiskit under the name ``"commuting_diagonalization"``, so
+    ``HLSConfig(PauliEvolution=["commuting_diagonalization", "default"])`` selects it. It is not part
+    of any preset pass manager. A gate whose terms do not commute is left to the next method.
+
+    For each gate, a set of candidates builds circuits and a selector chooses one of them. Pass
+    ``candidates`` to choose which candidates are asked, including candidates of your own, and
+    ``selector`` to rank the circuits by your own metric, for example
+    ``CommutingDiagonalizationSynthesis(selector=MinCost(my_cost))``. The built-in candidates, the
+    selectors and the cost functions live in
+    :mod:`qiskit_fermions.transpiler.passes.synthesis.commuting_evolution`.

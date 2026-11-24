@@ -89,6 +89,7 @@ from .optimization import (
     RelabelModes,
 )
 from .synthesis import (
+    CommutingDiagonalizationSynthesis,
     F2QSynthesis,
     F2QSynthesisConfig,
     F2QSynthesisPlugin,
@@ -104,6 +105,7 @@ from .synthesis import (
 )
 
 __all__ = [
+    "CommutingDiagonalizationSynthesis",
     "CustomF2QLayout",
     "F2FSynthesis",
     "F2FSynthesisConfig",

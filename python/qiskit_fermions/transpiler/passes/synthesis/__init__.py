@@ -90,6 +90,16 @@ the Jordan-Wigner image of a fermionic hop and synthesizes it exactly around a s
 
    HopEvolutionSynthesis
 
+The :class:`.CommutingDiagonalizationSynthesis` plugin is the second plugin of this kind. It
+synthesizes the evolution under any group of mutually commuting Pauli terms exactly: a set of
+candidates builds circuits, and a selector chooses one of them, and both can be replaced. It is
+registered with Qiskit under the name ``"commuting_diagonalization"``.
+
+.. seealso::
+   :mod:`~qiskit_fermions.transpiler.passes.synthesis.commuting_evolution` documents the plugin
+   together with its built-in candidates, selectors and cost functions, and shows how to write
+   candidates and cost functions of your own.
+
 Additional helper functions
 ---------------------------
 
@@ -108,6 +118,7 @@ from ._deprecated_givens import (
     GivensDecompositionOrbitalRotationSynthesis,
     GivensDecompositionSlaterDeterminantSynthesis,
 )
+from .commuting_evolution import CommutingDiagonalizationSynthesis
 from .evolution import MapperFnEvolutionSynthesis, group_wise, simplify
 from .f2q_synthesis import F2QSynthesis, F2QSynthesisConfig
 from .fermionic_measure import TrivialOccupationFermionicMeasureSynthesis
@@ -116,6 +127,7 @@ from .initialize_modes import TrivialOccupationInitializeModesSynthesis
 from .plugin import F2QSynthesisPlugin, F2QSynthesisPluginManager
 
 __all__ = [
+    "CommutingDiagonalizationSynthesis",
     "F2QSynthesis",
     "F2QSynthesisConfig",
     "F2QSynthesisPlugin",

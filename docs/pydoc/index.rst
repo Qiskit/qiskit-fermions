@@ -59,6 +59,7 @@ Transpiler
    qiskit_fermions.transpiler
    qiskit_fermions.transpiler.passes
    qiskit_fermions.transpiler.passes.synthesis
+   qiskit_fermions.transpiler.passes.synthesis.commuting_evolution
    qiskit_fermions.transpiler.passes.utils
    qiskit_fermions.transpiler.presets
 

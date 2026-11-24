@@ -38,6 +38,10 @@ dependencies = [
     # newer minors, but full C ABI stability is not yet guaranteed, hence the upper bound. Widen
     # it only once a new minor has been verified against the vendored FFI.
     "qiskit>=2.5.0,<2.7",
+    # The floors of `rustworkx` and `numpy` are the ones the oldest supported Qiskit requires,
+    # so that the minimum-version tests run against them.
+    "rustworkx>=0.15.0",
+    "numpy>=2.0",
     "scipy>=1.10",
     "stevedore>=3.0.0",
     "typing-extensions",
@@ -146,6 +150,11 @@ dev = [
 # DEPRECATED all of the following entry-points are deprecated and subject to removal in a future release
 "OrbitalRotation.GivensDecomposition" = "qiskit_fermions.transpiler.passes.synthesis:GivensDecompositionOrbitalRotationSynthesis"
 "PrepareSlaterDeterminant.GivensDecompositionSlater" = "qiskit_fermions.transpiler.passes.synthesis:GivensDecompositionSlaterDeterminantSynthesis"
+
+# Qiskit's own plugin group for high-level synthesis: `HLSConfig(PauliEvolution=["commuting_diagonalization"])` finds this
+# plugin by name once the package is installed.
+[project.entry-points."qiskit.synthesis"]
+"PauliEvolution.commuting_diagonalization" = "qiskit_fermions.transpiler.passes.synthesis.commuting_evolution:CommutingDiagonalizationSynthesis"
 
 [tool.maturin]
 module-name = "qiskit_fermions._lib"
