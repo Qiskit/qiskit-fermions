@@ -42,6 +42,10 @@ Not every encoding in the family has a convenience constructor. Bravyi-Kitaev, f
 that is not uniform, so it is built by computing its specification: the binary-branching tree above
 matches its Pauli weight but is a different tree, whatever its label order.
 
+Choosing a tree is its own problem. :c:func:`qf_ternary_tree_hatt` shapes the tree around a
+Hamiltonian's own term structure, so the operators that actually appear in it land close together in
+the tree.
+
 Once built, a tree is compiled into a :c:struct:`QfTernaryTreeEncoding` with
 :c:func:`qf_ternary_tree_encoding_new`, which pairs its legs into Majorana operators and builds their
 Pauli strings once. That encoding is then passed to the mappers in :ref:`qf_mapper_library`, and should
@@ -79,6 +83,7 @@ be reused across every operator mapped through it.
   :c:func:`qf_ternary_tree_encoding_total_parity`      Build the total fermionic parity observable of
                                                        the encoding.
   :c:func:`qf_ternary_tree_encoding_free`              Free a compiled encoding.
+  :c:func:`qf_ternary_tree_hatt`                       Grow a tree adapted to a Hamiltonian.
   ==================================================== ================================================
 
 ----

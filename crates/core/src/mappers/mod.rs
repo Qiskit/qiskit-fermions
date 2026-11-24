@@ -11,5 +11,6 @@
 // that they have been altered from the originals.
 
 pub mod library;
+pub mod optimization;
 pub mod qk_obs;
 pub mod ternary_tree;
