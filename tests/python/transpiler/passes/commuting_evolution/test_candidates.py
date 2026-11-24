@@ -18,12 +18,22 @@ import pytest
 from qiskit_fermions.transpiler.passes.synthesis.commuting_evolution import (
     DEFAULT_CANDIDATES,
     Local,
+    Majority,
+    Plain,
+    Search,
+    TwinFold,
 )
 
 from .groups import GROUPS, plaquettes, same_unitary
 from .helpers import TIME, context_of, problem_of
 
-ALL = (Local(),)
+ALL = (
+    Plain(),
+    Majority(),
+    TwinFold(),
+    Local(),
+    Search(),
+)
 LAYOUT: set[str] = set()
 
 
@@ -32,7 +42,8 @@ LAYOUT: set[str] = set()
 def test_every_variant_is_exact(candidate, name):
     """Every circuit a candidate offers equals the matrix exponential, including the global phase.
 
-    The layout candidates are placed on a line, the others not.
+    The layout candidates are placed on a line, the others not (``search`` runs only for a gate that
+    is not placed).
     """
     op = GROUPS[name]()
     context = context_of(op.num_qubits, device=candidate.name in LAYOUT)
@@ -56,9 +67,11 @@ def test_names_are_unique():
     assert len(names) == len(set(names))
 
 
-def test_the_default_candidates_are_all_built_in_ones():
-    """Ties go to the earlier candidate, so the order of the default candidates matters."""
+def test_the_default_candidates_are_all_built_in_ones_with_search_last():
+    """Ties go to the earlier candidate, so the most expensive one decides only where it is strictly
+    better."""
     assert [c.name for c in DEFAULT_CANDIDATES] == [c.name for c in ALL]
+    assert DEFAULT_CANDIDATES[-1].name == "search"
 
 
 @pytest.mark.parametrize("candidate", ALL, ids=lambda c: c.name)

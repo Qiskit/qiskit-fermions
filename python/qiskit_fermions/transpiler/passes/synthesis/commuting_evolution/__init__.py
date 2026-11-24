@@ -132,7 +132,11 @@ groups with this plugin, put each of them into a gate of its own.
    :toctree: ../stubs/
 
    Candidate
+   Plain
+   Majority
+   TwinFold
    Local
+   Search
 
 .. autodata:: DEFAULT_CANDIDATES
 
@@ -147,7 +151,15 @@ groups with this plugin, put each of them into a gate of its own.
    device_cost
 """
 
-from .candidates import DEFAULT_CANDIDATES, Candidate, Local
+from .candidates import (
+    DEFAULT_CANDIDATES,
+    Candidate,
+    Local,
+    Majority,
+    Plain,
+    Search,
+    TwinFold,
+)
 from .cost import abstract_cost, device_cost
 from .plugin import CommutingDiagonalizationSynthesis
 from .problem import Context, Problem, Report, Variant
@@ -159,10 +171,14 @@ __all__ = [
     "CommutingDiagonalizationSynthesis",
     "Context",
     "Local",
+    "Majority",
     "MinCost",
+    "Plain",
     "Problem",
     "Report",
+    "Search",
     "Selector",
+    "TwinFold",
     "Variant",
     "abstract_cost",
     "device_cost",
