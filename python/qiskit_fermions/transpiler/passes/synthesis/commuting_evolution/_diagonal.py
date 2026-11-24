@@ -12,18 +12,22 @@
 
 """The middle part of the evolution, ``U^dagger exp(-i t M) U``, for a given Clifford ``U``.
 
-``M`` is diagonal (:func:`evolve_from_clifford`).
+``M`` is diagonal (:func:`evolve_from_clifford`), or a layer of generic two-qubit blocks next to a
+diagonal (:func:`evolve_with_pair_blocks`).
 """
 
 from __future__ import annotations
 
 import itertools
 from collections.abc import Collection, Sequence
+from functools import cache
 from typing import Literal
 
 import numpy as np
 from qiskit import QuantumCircuit
-from qiskit.quantum_info import Clifford
+from qiskit.circuit.library import CXGate, RXGate, RYGate
+from qiskit.quantum_info import Clifford, Pauli
+from qiskit.synthesis import TwoQubitBasisDecomposer
 
 from ._layers import edge_color_layers, first_fit_layers, pairwise_tree
 from .problem import Problem
@@ -167,3 +171,116 @@ def _append_diagonal(
             circuit.rzz(two[a, b], a, b)
     for parity_layer in first_fit_layers(many.items(), key=lambda item: item[0]):
         rotate_parities(circuit, parity_layer, shape)
+
+
+_LETTERS = {(0, 0): "I", (1, 0): "X", (0, 1): "Z", (1, 1): "Y"}
+"""The Pauli letter of ``(x, z)`` bits."""
+
+_ROTATIONS = {"X": RXGate, "Y": RYGate}
+"""The rotation gates of the single-qubit images ``X`` and ``Y`` outside every block."""
+
+
+@cache
+def _two_qubit_decomposer() -> TwoQubitBasisDecomposer:
+    """The exact KAK synthesis of a two-qubit unitary with at most three CX gates.
+
+    It is built once, on first use.
+    """
+    return TwoQubitBasisDecomposer(CXGate())
+
+
+def evolve_with_pair_blocks(
+    problem: Problem,
+    clifford: QuantumCircuit,
+    *,
+    shape: ParityShape = "tree",
+) -> QuantumCircuit:
+    """Builds ``exp(-i t sum c P)`` as ``U^dagger exp(-i t M) U``, with two-qubit blocks in ``M``.
+
+    Every image ``U P U^dagger`` must be a Z-string or act on at most two qubits (checked, and
+    :class:`NotDiagonalizedError` raised otherwise). The images on one or two qubits that are not
+    Z-strings form one block per support. A Z-string on exactly the qubits of a two-qubit block, and
+    an image on one qubit of it, join the block, which is then synthesized as one exact two-qubit
+    unitary (at most three CX gates). A single-qubit image outside every block becomes a
+    single-qubit rotation, and the remaining Z-strings are the diagonal of
+    :func:`evolve_from_clifford`. All terms commute, so the blocks and the diagonal can be applied
+    in any order.
+
+    A block is worth it when the images on a pair form an entangled group such as ``{XX, YY, ZZ}``:
+    the group cannot be diagonalized by single-qubit gates, so the diagonal form would need an
+    entangling gate on each side of the rotation stage, while one block with all three coefficients
+    costs three CX gates.
+
+    Args:
+        problem: the commuting terms, with real coefficients, and the time ``t``.
+        clifford: the circuit ``U``.
+        shape: the parity shape of the diagonal rotations of weight three and more.
+
+    Returns:
+        The circuit, on ``problem.num_qubits`` qubits.
+
+    Raises:
+        NotDiagonalizedError: if ``clifford`` sends a term to a non-Hermitian Pauli (a phase of
+            ``i`` or ``-i``).
+        NotDiagonalizedError: if ``clifford`` sends a term to a Pauli on three or more qubits that
+            is not a Z-string.
+    """
+    time = problem.time
+    cliff = Clifford(clifford)
+    circuit = QuantumCircuit(problem.num_qubits)
+    circuit.compose(clifford, inplace=True)
+
+    diagonal: dict[tuple[int, ...], float] = {}
+    # support -> Pauli label on it -> coefficient
+    local: dict[tuple[int, ...], dict[str, float]] = {}
+    for pauli, coeff in zip(problem.paulis, problem.coeffs, strict=True):
+        mapped = pauli.evolve(cliff, frame="s")  # U P U^dagger
+        if int(mapped.phase) not in (0, 2):
+            raise NotDiagonalizedError(f"the Clifford sends {pauli} to a non-Hermitian Pauli")
+        sign = 1.0 if int(mapped.phase) == 0 else -1.0
+        support = tuple(int(i) for i in np.nonzero(mapped.x | mapped.z)[0])
+        if not mapped.x.any():
+            diagonal[support] = diagonal.get(support, 0.0) + sign * float(coeff)
+        elif len(support) <= 2:
+            # a Qiskit label lists the highest qubit first
+            label = "".join(_LETTERS[int(mapped.x[q]), int(mapped.z[q])] for q in reversed(support))
+            block = local.setdefault(support, {})
+            block[label] = block.get(label, 0.0) + sign * float(coeff)
+        else:
+            raise NotDiagonalizedError(
+                f"the Clifford sends {pauli} to neither a Z-string"
+                " nor a Pauli on at most two qubits"
+            )
+
+    blocks = {s: dict(terms) for s, terms in sorted(local.items()) if len(s) == 2}
+    owner: dict[int, tuple[int, ...]] = {}
+    for s in blocks:
+        for q in s:
+            owner.setdefault(q, s)
+    for s, block in blocks.items():
+        if s in diagonal:
+            block["ZZ"] = block.get("ZZ", 0.0) + diagonal.pop(s)
+    for (q,), terms in sorted((s, t) for s, t in local.items() if len(s) == 1):
+        if q in owner:
+            a, b = owner[q]
+            block = blocks[a, b]
+            for letter, c in terms.items():
+                padded = f"I{letter}" if q == a else f"{letter}I"
+                block[padded] = block.get(padded, 0.0) + c
+        else:
+            for letter, c in terms.items():  # exp(-i t c X) = RX(2 t c), likewise for Y
+                circuit.append(_ROTATIONS[letter](2.0 * time * c), [q])
+
+    eye = np.eye(4, dtype=complex)
+    for (a, b), block in blocks.items():
+        unitary = eye
+        for label, c in block.items():  # commuting factors: exp(-i t c P) = cos(t c) - i sin(t c) P
+            theta = time * c
+            unitary = (
+                np.cos(theta) * eye - 1j * np.sin(theta) * Pauli(label).to_matrix()
+            ) @ unitary
+        circuit.compose(_two_qubit_decomposer()(unitary), qubits=[a, b], inplace=True)
+
+    _append_diagonal(circuit, diagonal, time, shape, reverse_two_body=False)
+    circuit.compose(clifford.inverse(), inplace=True)
+    return circuit
