@@ -17,6 +17,7 @@ from __future__ import annotations
 import pytest
 from qiskit_fermions.transpiler.passes.synthesis.commuting_evolution import (
     DEFAULT_CANDIDATES,
+    CzLocal,
     Local,
     Majority,
     Plain,
@@ -32,9 +33,10 @@ ALL = (
     Majority(),
     TwinFold(),
     Local(),
+    CzLocal(),
     Search(),
 )
-LAYOUT: set[str] = set()
+LAYOUT = {"cz-local"}
 
 
 @pytest.mark.parametrize("name", sorted(GROUPS))

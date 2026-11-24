@@ -100,6 +100,12 @@ so that the built-in candidates have to beat it:
     >>> plugin.run(gate) is not None
     True
 
+The candidates that use the device's connectivity need the physical qubits of the gate, so they
+offer circuits only when the high-level synthesis happens after the layout stage, with an initial
+layout that places the problem sensibly on the device, or when the plugin is given ``edges``. When
+run in the ``init`` stage, which is the default, the plugin sees no qubits and uses only the other
+candidates.
+
 The plugin does not group terms. It handles a :class:`~qiskit.circuit.library.PauliEvolutionGate`
 only if all of its terms commute with each other, and declines it otherwise, so splitting a
 Hamiltonian into commuting groups, one gate per group, is the caller's job. A gate whose operator is
@@ -137,6 +143,7 @@ groups with this plugin, put each of them into a gate of its own.
    TwinFold
    Local
    Search
+   CzLocal
 
 .. autodata:: DEFAULT_CANDIDATES
 
@@ -154,6 +161,7 @@ groups with this plugin, put each of them into a gate of its own.
 from .candidates import (
     DEFAULT_CANDIDATES,
     Candidate,
+    CzLocal,
     Local,
     Majority,
     Plain,
@@ -170,6 +178,7 @@ __all__ = [
     "Candidate",
     "CommutingDiagonalizationSynthesis",
     "Context",
+    "CzLocal",
     "Local",
     "Majority",
     "MinCost",

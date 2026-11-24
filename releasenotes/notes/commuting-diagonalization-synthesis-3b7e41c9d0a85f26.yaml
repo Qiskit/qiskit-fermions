@@ -14,3 +14,6 @@ features:
     ``CommutingDiagonalizationSynthesis(selector=MinCost(my_cost))``. The built-in candidates, the
     selectors and the cost functions live in
     :mod:`qiskit_fermions.transpiler.passes.synthesis.commuting_evolution`.
+
+    The candidates that use the connectivity of the device need the physical qubits, so they offer
+    circuits only when the plugin runs after the layout stage, or when it is given ``edges``.
