@@ -26,10 +26,24 @@ more details.
    :toctree: ../stubs/
 
    build_excitation_span_minimization_model
+
+Ternary-tree search
+===================
+
+A ternary tree defines a fermion-to-qubit encoding (see :class:`.TernaryTree`), and which tree you
+pick decides the encoding's cost. The routine below chooses one from information the balanced tree
+ignores.
+
+.. autosummary::
+   :toctree: ../stubs/
+
+   hatt_tree
 """
 
 from .minimize_excitation_spans import build_excitation_span_minimization_model
+from .ternary_tree_search import hatt_tree
 
 __all__ = [
     "build_excitation_span_minimization_model",
+    "hatt_tree",
 ]

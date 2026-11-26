@@ -11,6 +11,7 @@
 // that they have been altered from the originals.
 
 #include "common.h"
+#include <math.h>
 #include <qiskit.h>
 #include <qiskit_fermions.h>
 #include <stdint.h>
@@ -857,10 +858,104 @@ static int test_tree_edit_errors(void) {
     return result;
 }
 
+// HATT: a tree grown around the term structure of a Hamiltonian.
+static int test_hatt_tree(void) {
+    int outcome = Ok;
+
+    // A nearest-neighbor hopping Hamiltonian on four modes, in the Majorana representation the
+    // algorithm works in.
+    QfMajoranaOperator *ham = qf_maj_op_zero();
+    QkComplex64 coeff = {1.0, 0.0};
+    for (uint32_t mode = 0; mode < 3; mode++) {
+        uint32_t modes[2] = {2 * mode, 2 * (mode + 1) + 1};
+        qf_maj_op_add_term(ham, 2, modes, &coeff);
+    }
+
+    QfTernaryTree *tree;
+    if (qf_ternary_tree_hatt(ham, 4, false, &tree) != QfExitCode_Success) {
+        qf_maj_op_free(ham);
+        return RuntimeError;
+    }
+    if (qf_ternary_tree_num_nodes(tree) != 4 || qf_ternary_tree_num_legs(tree) != 9) {
+        outcome = EqualityError;
+    }
+
+    // The result is an ordinary tree, owned by the caller, so it compiles and maps like any other.
+    QfTernaryTreeEncoding *encoding;
+    if (qf_ternary_tree_encoding_new(tree, NULL, &encoding) != QfExitCode_Success) {
+        outcome = RuntimeError;
+    } else {
+        QkObs *mapped;
+        if (qf_maj_op_ternary_tree(ham, encoding, 4, &mapped) != QfExitCode_Success) {
+            outcome = RuntimeError;
+        } else {
+            qk_obs_free(mapped);
+        }
+        qf_ternary_tree_encoding_free(encoding);
+    }
+    qf_ternary_tree_free(tree);
+
+    // The weighted flag reaches the search: with three negligible terms and one dominant one,
+    // counting terms and weighting them grow different trees. Counted, mode 0 ends up a leaf, with
+    // all three links free; weighted, it becomes the root and keeps only X free.
+    {
+        QfMajoranaOperator *skewed = qf_maj_op_zero();
+        uint32_t skewed_modes[4][2] = {{0, 3}, {1, 2}, {2, 5}, {0, 4}};
+        QkComplex64 small = {1e-3, 0.0};
+        QkComplex64 large = {1.0, 0.0};
+        for (int i = 0; i < 4; i++) {
+            qf_maj_op_add_term(skewed, 2, skewed_modes[i], i < 3 ? &small : &large);
+        }
+        const QfPauliLabel all[3] = {QfPauliLabel_X, QfPauliLabel_Y, QfPauliLabel_Z};
+        const QfPauliLabel x_only[1] = {QfPauliLabel_X};
+        QfTernaryTree *counted, *weighted;
+        if (qf_ternary_tree_hatt(skewed, 3, false, &counted) != QfExitCode_Success) {
+            outcome = RuntimeError;
+        } else {
+            if (!has_free_labels(counted, 0, all, 3)) {
+                outcome = EqualityError;
+            }
+            qf_ternary_tree_free(counted);
+        }
+        if (qf_ternary_tree_hatt(skewed, 3, true, &weighted) != QfExitCode_Success) {
+            outcome = RuntimeError;
+        } else {
+            if (!has_free_labels(weighted, 0, x_only, 1)) {
+                outcome = EqualityError;
+            }
+            qf_ternary_tree_free(weighted);
+        }
+        qf_maj_op_free(skewed);
+    }
+
+    // Zero modes, and a Hamiltonian wider than the requested encoding, are both reported.
+    QfTernaryTree *rejected = NULL;
+    outcome |= expect_edit_error(qf_ternary_tree_hatt(ham, 0, false, &rejected),
+                                 QfExitCode_ValueError, &rejected);
+    outcome |= expect_edit_error(qf_ternary_tree_hatt(ham, 2, false, &rejected),
+                                 QfExitCode_ValueError, &rejected);
+    // So are null pointers, rather than being dereferenced.
+    outcome |= expect_edit_error(qf_ternary_tree_hatt(NULL, 4, false, &rejected),
+                                 QfExitCode_NullPointerError, &rejected);
+    outcome |= expect_edit_error(qf_ternary_tree_hatt(ham, 4, false, NULL),
+                                 QfExitCode_NullPointerError, &rejected);
+
+    // A NaN coefficient is rejected.
+    QkComplex64 nan_coeff = {NAN, 0.0};
+    uint32_t nan_modes[2] = {0, 1};
+    qf_maj_op_add_term(ham, 2, nan_modes, &nan_coeff);
+    outcome |= expect_edit_error(qf_ternary_tree_hatt(ham, 4, false, &rejected),
+                                 QfExitCode_ValueError, &rejected);
+
+    qf_maj_op_free(ham);
+    return outcome;
+}
+
 int test_ternary_tree(void) {
     int num_failed = 0;
     num_failed += RUN_TEST(test_tree_edits);
     num_failed += RUN_TEST(test_tree_edit_errors);
+    num_failed += RUN_TEST(test_hatt_tree);
     num_failed += RUN_TEST(test_chain_matches_jordan_wigner);
     num_failed += RUN_TEST(test_balanced_tree_is_shallower);
     num_failed += RUN_TEST(test_arbitrary_tree);

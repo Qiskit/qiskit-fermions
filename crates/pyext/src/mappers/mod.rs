@@ -13,12 +13,16 @@
 use pyo3::prelude::*;
 
 pub mod library;
+pub mod optimization;
 pub mod ternary_tree;
 
 #[pymodule]
 pub mod mappers {
     #[pymodule_export]
     use super::library::mappers_library;
+
+    #[pymodule_export]
+    use super::optimization::mappers_optimization;
 
     #[pymodule_export]
     use super::ternary_tree::ternary_tree_structures;

@@ -1,0 +1,29 @@
+---
+features:
+  - |
+    Added :func:`~qiskit_fermions.mappers.optimization.hatt_tree`, which grows a
+    :class:`~qiskit_fermions.mappers.TernaryTree` adapted to a particular Hamiltonian
+    following the HATT algorithm. It is topology-blind and shapes the tree around which Majorana
+    operators actually appear together in the operator being mapped.
+
+    .. code-block:: python
+
+       from qiskit_fermions.mappers import TernaryTreeEncoding
+       from qiskit_fermions.mappers.library import fermion_ternary_tree, majorana_operator
+       from qiskit_fermions.mappers.optimization import hatt_tree
+       from qiskit_fermions.operators import FermionOperator
+
+       hamiltonian = FermionOperator.from_dict(
+           {((True, 0), (False, 1)): 1.0, ((True, 1), (False, 0)): 1.0}
+       )
+       # HATT counts the terms it is given, so drop those that cancel first.
+       tree = hatt_tree(majorana_operator(hamiltonian).normal_ordered().simplify(1e-10))
+       observable = fermion_ternary_tree(hamiltonian, TernaryTreeEncoding(tree), tree.num_nodes)
+
+    By default, candidate merges are scored by term count, as in the published algorithm, so the
+    Hamiltonian's coefficients are ignored. Pass ``weighted=True`` to weight each term by the
+    magnitude of its coefficient instead.
+features_c:
+  - |
+    Added :c:func:`qf_ternary_tree_hatt`, the C equivalent of
+    :func:`~qiskit_fermions.mappers.optimization.hatt_tree`.
