@@ -47,9 +47,11 @@ The payoff is the same shape as in 1D: the two-qubit depth of one Trotter step b
 constant in the lattice size, at :math:`24` (:math:`16` for the hopping, matching
 Ref. [1]_, plus :math:`8` for the interaction), while a term-by-term Trotterization of the
 same encoded Hamiltonian grows linearly. The gate count still grows with the number
-of bonds, of course; what becomes size-independent is how many layers those gates occupy.
-Depths throughout are counted on an abstract, fully connected register; mapping the encoding
-onto a device's restricted coupling map is its own problem, which is discussed at the end.
+of bonds, of course; what becomes size-independent is how many layers those gates occupy. As in
+1D, the
+:class:`~qiskit_fermions.transpiler.passes.synthesis.commuting_evolution.CommutingDiagonalizationSynthesis`
+plugin finds the circuit of every flow set, here on the qubit pairs that the encoding couples. Mapping the encoding onto a device's
+restricted coupling map is its own problem, which is discussed at the end.
 
 The lattice and its four orientations
 -------------------------------------
@@ -359,7 +361,8 @@ single Pauli shape, uniform across the whole set.
 The four hopping shapes are distinct, so each flow set gets its own Clifford in
 :ref:`step 5 <flowsets_2d_synthesis>`. The reverse orientations are different
 Paulis, not the same ones relabeled; this is why a 2D flow-set synthesis
-needs four circuits, where the 1D synthesis needs one.
+needs four circuits, where the 1D synthesis needs one. The plugin finds each of them from the
+terms alone.
 
 .. plot::
    :context:
@@ -505,377 +508,149 @@ depth grows with the lattice.
 
 .. _flowsets_2d_synthesis:
 
-5. A depth-2 Clifford per flow set
-----------------------------------
+5. A shared Clifford per flow set
+---------------------------------
 
-The mechanism is the same as in 1D: conjugate a whole commuting flow set by a Clifford that maps
-each of its terms to a distinct weight-1 Pauli, so that the evolution of the entire
-set costs only single-qubit rotations. In 1D, one brickwork of ``CZ`` gates did this.
+The mechanism is the same as in 1D: conjugate a whole commuting flow set by one Clifford, so
+that the evolution of the entire set costs little more than single-qubit rotations. In 1D, one
+brickwork of ``CZ`` gates did this, and
+:class:`~qiskit_fermions.transpiler.passes.synthesis.commuting_evolution.CommutingDiagonalizationSynthesis`
+found it on its own. It does so here too, and the only thing it needs to know about the device is which pairs
+of qubits can interact.
 
-In 2D, each flow set needs its own circuit, following Section IV C and Fig. 7 of Ref. [1]_.
-All four act on one line of the lattice at a time (a row for east/west, a column for
-north/south) together with that line's ancillas, and all four have the same three-part
-shape:
+Ref. [1]_ builds the Cliffords of the four flow sets from two layers of ``CX`` gates on one line
+of the lattice at a time (a row for east and west, a column for north and south) together with
+that line's ancillas (Section IV C and Fig. 7). Its gates act on four kinds of pairs:
 
-- A layer of single-qubit rotations, putting each qubit in the basis its flow set needs.
-- A first ``CX`` layer, always site-to-ancilla on the same site.
-- A second ``CX`` layer, coupling neighbors along the line.
+- A site and its own ancilla.
+- Two neighboring sites.
+- Two neighboring ancillas.
+- Along a row, a site and the ancilla of its left neighbor.
 
-Steps 2 and 3 are the only two-qubit layers, so the two-qubit depth is :math:`2`, regardless
-of how long the line is. They are written out one function per flow set below. The
-rotations are what they are because they were found, by conjugating each flow set's
-terms and requiring distinct weight-1 images, so treat them as given and rely on the
-check that follows.
-
-The two horizontal sets are the simplest. Their terms are weight-3, ``XXZ`` and ``YYZ``, and
-differ only by the extra :math:`S` that turns :math:`X` into :math:`Y` on the sites:
+Those are the pairs this guide gives the plugin, in the qubit indices of the transpiled circuit
+(the sites first, then their ancillas). Every two-qubit gate the plugin then emits is on one of
+them, so the circuit needs no routing on a device that couples them:
 
 .. plot::
    :context:
    :nofigs:
    :include-source:
 
-   >>> from qiskit.circuit import QuantumCircuit
-   >>>
-   >>> def east_clifford(circuit, line, ancilla):
-   ...     """Diagonalize the east flow set (XXZ) on one lattice row."""
-   ...     for j in line:
-   ...         circuit.h(ancilla(j))
-   ...     for j in line[:-1]:  # layer 1: each site with its own ancilla
-   ...         circuit.cx(ancilla(j), j)
-   ...     for j, k in zip(line, line[1:]):  # layer 2: ancilla with the next site along
-   ...         circuit.cx(k, ancilla(j))
-   >>>
-   >>> def west_clifford(circuit, line, ancilla):
-   ...     """Diagonalize the west flow set (YYZ) on one lattice row."""
-   ...     for j in line:
-   ...         circuit.s(j)  # the only difference from east: X -> Y on the sites
-   ...         circuit.h(ancilla(j))
-   ...     for j in line[:-1]:
-   ...         circuit.cx(ancilla(j), j)
-   ...     for j, k in zip(line, line[1:]):
-   ...         circuit.cx(k, ancilla(j))
-
-The two vertical sets are weight-4, ``XYXY`` and ``YXXY``, and are correspondingly busier:
-the rotations alternate with the position along the line, and the second ``CX`` layer
-alternates too, coupling sites on even positions and ancillas on odd ones (or the reverse):
-
-.. plot::
-   :context:
-   :nofigs:
-   :include-source:
-
-   >>> def south_clifford(circuit, line, ancilla):
-   ...     """Diagonalize the south flow set (XYXY) on one lattice column."""
-   ...     for position, j in enumerate(line):
-   ...         if position % 2 == 0:
-   ...             circuit.sdg(ancilla(j))
-   ...             circuit.h(ancilla(j))
-   ...         else:
-   ...             circuit.h(j)
-   ...             circuit.s(j)
-   ...             circuit.h(ancilla(j))
-   ...             circuit.s(ancilla(j))
-   ...     for j in line:  # layer 1
-   ...         circuit.cx(ancilla(j), j)
-   ...     for position, (j, k) in enumerate(zip(line, line[1:])):  # layer 2
-   ...         if position % 2 == 0:
-   ...             circuit.cx(ancilla(j), ancilla(k))  # ancilla to ancilla
-   ...         else:
-   ...             circuit.cx(j, k)  # site to site
-   >>>
-   >>> def north_clifford(circuit, line, ancilla):
-   ...     """Diagonalize the north flow set (YXXY) on one lattice column."""
-   ...     for position, j in enumerate(line):
-   ...         if position % 2 == 0:
-   ...             circuit.h(ancilla(j))
-   ...             circuit.s(ancilla(j))
-   ...         else:
-   ...             circuit.h(j)
-   ...             circuit.s(j)
-   ...             circuit.sdg(ancilla(j))
-   ...             circuit.h(ancilla(j))
-   ...     for j in line:  # layer 1
-   ...         circuit.cx(ancilla(j), j)
-   ...     for position, (j, k) in enumerate(zip(line, line[1:])):  # layer 2
-   ...         if position % 2 == 0:
-   ...             circuit.cx(k, j)  # site to site, and the other way round from south
-   ...         else:
-   ...             circuit.cx(ancilla(j), ancilla(k))
-
-Drawn on a single three-site line (its sites first, then their ancillas) the whole
-mechanism fits in one picture. The triangle shape is the clearer of the two: a basis change
-on the ancillas, then two ``CX`` layers, the first pairs each site with its own ancilla
-and the second reaches to the next site along the line.
-
-.. plot::
-   :context: close-figs
-   :include-source:
-   :alt: The east Clifford on a three-site line: three H gates on the ancillas followed by
-         two layers of two CX gates each.
-
-   >>> line = [0, 1, 2]  # three sites, with ancillas on qubits 3, 4, 5
-   >>> triangle = QuantumCircuit(6)
-   >>> east_clifford(triangle, line, lambda mode: 3 + mode)
-   >>> triangle.draw("mpl")
-   <Figure size ... with 1 Axes>
-
-The square shape needs more single-qubit work (the rotations alternate along the line)
-and its second ``CX`` layer alternates between coupling sites and coupling ancillas:
-
-.. plot::
-   :context: close-figs
-   :include-source:
-   :alt: The south Clifford on a three-site line: alternating single-qubit rotations followed
-         by two CX layers, the second mixing site-site and ancilla-ancilla pairs.
-
-   >>> square = QuantumCircuit(6)
-   >>> south_clifford(square, line, lambda mode: 3 + mode)
-   >>> square.draw("mpl")
-   <Figure size ... with 1 Axes>
-
-Both are two ``CX`` layers deep, and adding sites to the line widens them without deepening
-them; that is the whole constant-depth claim, visible by inspection. The west and north
-Cliffords differ only in their single-qubit layers, so they are not drawn separately.
-
-What the synthesis still needs is determining where each term ends up. A line of :math:`L` sites carries
-:math:`L - 1` bonds, each contributing one term, so the helper below returns one entry per
-bond: the qubit that the term landed on, and the single-qubit Pauli it became. Crucially, these are
-read off the conjugation rather than predicted.  Unlike 1D, where one ``CZ`` brickwork
-maps :math:`X_{j+1} \mapsto Z_j X_{j+1} Z_{j+2}` in closed form, there is no such formula
-here, and the ancillas of a column line are not contiguous. The only thing that differs
-between the flow sets is the Pauli string going in, which step 3 already printed:
-
-.. plot::
-   :context:
-   :nofigs:
-   :include-source:
-
-   >>> from qiskit.quantum_info import Clifford, SparsePauliOp
-   >>>
-   >>> def clifford_supports(clifford, pauli, line, ancilla, num_qubits):
-   ...     """Conjugate a flow set's terms to find which qubit each one lands on.
-   ...
-   ...     `pauli` is the flow set's Pauli string, as printed in step 3. Its letters apply
-   ...     to the i-th term's qubits in the order below: the two sites of the bond, then
-   ...     their ancillas.
-   ...
-   ...     This is the one check that needs SparsePauliOp: Clifford conjugation wants a
-   ...     `Pauli` and its symplectic bits, and SparseObservable exposes neither -- its own
-   ...     `evolve` conjugates by a Pauli, not by a Clifford.
-   ...     """
-   ...     supports = []
-   ...     for i in range(len(line) - 1):
-   ...         qubits = [line[i], line[i + 1], ancilla(line[i]), ancilla(line[i + 1])]
-   ...         term = SparsePauliOp.from_sparse_list(
-   ...             [(pauli, qubits[: len(pauli)], 1.0)], num_qubits=num_qubits
-   ...         )
-   ...         image = term.paulis[0].evolve(clifford, frame="s")
-   ...         # a weight-1 image has exactly one qubit with an X and/or Z bit set
-   ...         (support,) = np.nonzero(image.x | image.z)
-   ...         assert len(support) == 1, f"term {i} is not weight-1"
-   ...         supports.append((int(support[0]), image[support].to_label()))
-   ...     return supports
-
-
-The images must come out distinct and weight-1, so that each term can be rotated
-independently on its own qubit; the two-qubit depth of :math:`2` is already visible in the
-four constructions above, each emitting two ``CX`` layers irrespective of the line length.
-Below, both properties are checked across every flow set, every line, and several lattice
-sizes. Step 6 then calls ``clifford_supports``, so it is a working part of the
-synthesis rather than only a demonstration.
-
-.. plot::
-   :context:
-   :nofigs:
-
-   Nothing above actually runs the four Cliffords, so note their two claims here: two-qubit
-   depth 2, and distinct weight-1 images. The constant-depth result rests on those claims, and
-   both are swept over every flow set, every line of a lattice, and several sizes. Thus,
-   if a rotation was put on the site where it belonged on the ancilla, it would pass a single-line spot
-   check but fail a longer one.
-
-   Consider what this does not claim, deliberately. Exchanging a control and target in one of the
-   second ``CX`` layers still diagonalizes the flow set (the terms land on the
-   ancillas instead of the sites) and the synthesis stays correct, because
-   ``clifford_supports`` reads the supports off the conjugation rather than assuming them.
-   There is more than one valid Clifford here, and the sweep checks the property that
-   matters (distinct, weight-1, constant depth) rather than one particular circuit.
-
-   >>> def cliffords_are_depth_two_and_distinct(rows, cols):
-   ...     """Check every flow set on every line: 2q-depth 2, distinct weight-1 images."""
+   >>> def register_pairs(rows, cols):
+   ...     """The qubit pairs of the VC register that the flow-set Cliffords act on."""
    ...     num_sites = rows * cols
-   ...     num_qubits = 2 * num_sites
    ...     ancilla = partial(ancilla_qubit, num_sites=num_sites)
-   ...     two_qubit = lambda instruction: len(instruction.qubits) == 2
-   ...     horizontal = [[r * cols + c for c in range(cols)] for r in range(rows)]
-   ...     vertical = [[r * cols + c for r in range(rows)] for c in range(cols)]
-   ...     for clifford_function, pauli, lines in (
-   ...         (east_clifford, "XXZ", horizontal),
-   ...         (west_clifford, "YYZ", horizontal),
-   ...         (south_clifford, "XYXY", vertical),
-   ...         (north_clifford, "YXXY", vertical),
-   ...     ):
-   ...         for line in lines:
-   ...             probe = QuantumCircuit(num_qubits)
-   ...             clifford_function(probe, line, ancilla)
-   ...             if probe.depth(two_qubit) != 2:
-   ...                 return False
-   ...             supports = clifford_supports(
-   ...                 Clifford(probe), pauli, line, ancilla, num_qubits
-   ...             )
-   ...             if len(set(supports)) != len(supports):  # must be *distinct*
-   ...                 return False
+   ...     pairs = [(j, ancilla(j)) for j in range(num_sites)]
+   ...     for j in range(num_sites):
+   ...         row, col = divmod(j, cols)
+   ...         if col + 1 < cols:  # the right neighbor in the row
+   ...             pairs += [(j, j + 1), (ancilla(j), ancilla(j + 1)), (j + 1, ancilla(j))]
+   ...         if row + 1 < rows:  # the neighbor below in the column
+   ...             pairs += [(j, j + cols), (ancilla(j), ancilla(j + cols))]
+   ...     return pairs
+
+The plugin offers its device-aware candidates only when it knows the allowed pairs: from the
+device once the gate's qubits are placed on it, or from ``edges``, as here. It ranks every
+candidate circuit by its two-qubit depth, then its two-qubit gate count. For the vertical flow
+sets, its cheapest circuit is a layer of ``CZ`` gates, a layer of generic two-qubit blocks (two
+``CX`` gates each), and the ``CZ`` layer again. The ``CZ`` layer only has to bring every term onto
+one allowed pair, which is cheaper than diagonalizing every term, and each block carries the
+evolution of the terms on its pair. Drawn for the north flow set (the third gate of the qubit
+circuit of step 4) on the :math:`3 \times 3` lattice built in step 1:
+
+.. plot::
+   :context: close-figs
+   :include-source:
+   :alt: The plugin's circuit for the north flow set on a 3 by 3 lattice: a layer of CZ gates,
+         a layer of two-qubit unitary blocks, and the same CZ layer again, with single-qubit
+         gates in between.
+
+   >>> from qiskit_fermions.transpiler.passes import CommutingDiagonalizationSynthesis
+   >>>
+   >>> plugin = CommutingDiagonalizationSynthesis(edges=register_pairs(rows, cols))
+   >>> north = qubit_circuit.data[2].operation
+   >>> plugin.run(north).draw("mpl", fold=-1)
+   <Figure size ... with 1 Axes>
+
+The lines of a flow set act on disjoint qubits, so their ``CZ`` layers and blocks run side by
+side, and adding lines to the lattice widens the circuit without deepening it. That is the whole
+constant-depth claim. This flow set costs four two-qubit layers: one for each ``CZ`` layer and
+two for the blocks. The other three cost four as well, whatever circuit the plugin picks for them.
+
+.. plot::
+   :context:
+   :nofigs:
+
+   The constant-depth result rests on two claims that the drawing shows only for one flow set
+   on one lattice: every hopping flow set costs four two-qubit layers whatever the lattice size,
+   and every two-qubit gate is on an allowed pair. Both are swept here over the four hopping
+   flow sets and several lattice sizes, rectangular ones included, so that a confusion between
+   rows and columns cannot cancel out.
+
+   >>> from qiskit.circuit.library import PauliEvolutionGate
+   >>>
+   >>> def hopping_sets_are_local_and_shallow(rows, cols):
+   ...     """Every hopping flow set: two-qubit depth 4, all two-qubit gates on allowed pairs."""
+   ...     pairs = {tuple(sorted(pair)) for pair in register_pairs(rows, cols)}
+   ...     encoding = partial(vc_encoding, cols=cols)
+   ...     operator = fermi_hubbard_2d(rows, cols, 1.0, 2.0)
+   ...     operator.groups = flow_set_groups(operator, cols)
+   ...     plugin = CommutingDiagonalizationSynthesis(edges=list(pairs))
+   ...     for group in operator.split_out_groups()[:4]:  # the hopping sets come first
+   ...         gate = PauliEvolutionGate(encoding(group, 2 * rows * cols), time=0.3)
+   ...         circuit = plugin.run(gate).decompose(reps=6)
+   ...         used = {
+   ...             tuple(sorted(circuit.find_bit(q).index for q in inst.qubits))
+   ...             for inst in circuit.data
+   ...             if len(inst.qubits) == 2
+   ...         }
+   ...         if circuit.depth(lambda inst: len(inst.qubits) == 2) != 4 or not used <= pairs:
+   ...             return False
    ...     return True
    >>>
-   >>> all(cliffords_are_depth_two_and_distinct(n, n) for n in (2, 3, 4, 5))
+   >>> all(hopping_sets_are_local_and_shallow(r, c) for r, c in [(2, 3), (3, 2), (4, 4), (5, 5)])
    True
 
 6. Flow-set-aware synthesis
 ---------------------------
 
 The synthesis gets a helpful head start. Because :class:`.Evolution` splits itself group by
-group, ``synthesize`` is called once per flow set (five times here, four hopping sets
-plus the diagonal group) so every hopping term it sees shares one Pauli shape, and one
-Clifford diagonalizes all of them. It only has to read that shape off the first term and sort
-the rest by which line they sit on. Then comes the observation that makes two dimensions
+group, the high-level synthesis hands the plugin one flow set per gate (five times here, four
+hopping sets plus the diagonal group), so it never has to re-derive the partition, and every
+gate it sees consists of commuting terms. Then comes the observation that makes two dimensions
 cheaper than one might fear:
 
 .. important::
-   The components of a single flow set are vertex-disjoint: the west set's rows share
-   no qubits. So all of a flow set's Cliffords can be emitted together and they share the
-   same two two-qubit layers, rather than queueing up one row after another. A flow set
-   therefore costs a fixed number of layers (two for the Clifford and two for its inverse)
-   no matter how many rows or columns the lattice has, which is why the total
-   depth ends up constant.
+   The lines of a single flow set are vertex-disjoint: the west set's rows share no qubits.
+   The plugin solves the disjoint parts of a gate one by one and emits them side by side, so
+   all the lines of a flow set share the same two-qubit layers, rather than queueing up one
+   line after another. Lines that are copies of each other are even solved once. A flow set
+   therefore costs a fixed number of layers no matter how many rows or columns the lattice
+   has, which is why the total depth ends up constant.
+
+As in 1D, a :class:`~qiskit.transpiler.passes.HighLevelSynthesis` pass applies the plugin to the
+qubit circuit. Here it is given as an instance, to pass it the pairs of the register:
 
 .. plot::
    :context:
    :nofigs:
    :include-source:
 
-   >>> from qiskit.synthesis.evolution import EvolutionSynthesis
+   >>> from qiskit.transpiler import PassManager
+   >>> from qiskit.transpiler.passes import HighLevelSynthesis
+   >>> from qiskit.transpiler.passes.synthesis.high_level_synthesis import HLSConfig
    >>>
-   >>> # The interaction couples nearest neighbors only, so every interior site carries four
-   >>> # Rzz gates -- one per bond -- and can only do one at a time: four layers is the best
-   >>> # any schedule can achieve. Horizontal bonds split by column parity, vertical ones by
-   >>> # row parity, which achieves it.
-   >>> def rzz_layers(circuit, angles, cols):
-   ...     """Emit the diagonal Rzz gates in four layers of disjoint qubit pairs."""
-   ...     horizontal = [(j, k) for j, k in angles if k - j == 1]
-   ...     vertical = [(j, k) for j, k in angles if k - j == cols]
-   ...     schedule = [
-   ...         [(j, k) for j, k in horizontal if (j % cols) % 2 == 0],
-   ...         [(j, k) for j, k in horizontal if (j % cols) % 2 == 1],
-   ...         [(j, k) for j, k in vertical if (j // cols) % 2 == 0],
-   ...         [(j, k) for j, k in vertical if (j // cols) % 2 == 1],
-   ...     ]
-   ...     # emit layer by layer, since Qiskit's depth follows the order gates were added
-   ...     for layer in schedule:
-   ...         for j, k in layer:
-   ...             circuit.rzz(angles[j, k], j, k)
-   >>>
-   >>> class FlowSetSynthesis(EvolutionSynthesis):
-   ...     """Synthesize one 2D line flow set at a time, via its depth-2 Clifford."""
-   ...
-   ...     preserve_order = True
-   ...
-   ...     def __init__(self, rows, cols):
-   ...         self.rows, self.cols = rows, cols
-   ...
-   ...     def rows_of_lattice(self):
-   ...         return [[r * self.cols + c for c in range(self.cols)] for r in range(self.rows)]
-   ...
-   ...     def columns_of_lattice(self):
-   ...         return [[r * self.cols + c for r in range(self.rows)] for c in range(self.cols)]
-   ...
-   ...     def synthesize(self, evolution):
-   ...         num_qubits = 2 * self.rows * self.cols
-   ...         ancilla = partial(ancilla_qubit, num_sites=self.rows * self.cols)
-   ...         circuit = QuantumCircuit(evolution.operator.num_qubits)
-   ...         terms = [
-   ...             (label, indices, 2 * evolution.time * coeff.real)
-   ...             for label, indices, coeff in evolution.operator.to_sparse_list()
-   ...         ]
-   ...
-   ...         # `Evolution.decompose()` hands us one gate per flow set, so every hopping term
-   ...         # here shares a single Pauli shape and one Clifford diagonalizes all of them
-   ...         shapes = tuple({label for label, _, _ in terms} - {"", "Z", "ZZ"})
-   ...         match shapes:
-   ...             case ("XXZ",):
-   ...                 clifford_function, lines = east_clifford, self.rows_of_lattice()
-   ...                 along_rows = True
-   ...             case ("YYZ",):
-   ...                 clifford_function, lines = west_clifford, self.rows_of_lattice()
-   ...                 along_rows = True
-   ...             case ("XYXY",):
-   ...                 clifford_function, lines = south_clifford, self.columns_of_lattice()
-   ...                 along_rows = False
-   ...             case ("YXXY",):
-   ...                 clifford_function, lines = north_clifford, self.columns_of_lattice()
-   ...                 along_rows = False
-   ...             case ():  # the diagonal group: no conjugation needed
-   ...                 self.diagonal(circuit, terms)
-   ...                 return circuit
-   ...             case _:
-   ...                 raise ValueError(f"expected one known flow set per gate, got {shapes}")
-   ...
-   ...         # a term's line is the row it sits in and its slot the column, or vice versa
-   ...         rotations: dict[int, list] = defaultdict(list)
-   ...         for _, indices, angle in terms:
-   ...             row, col = divmod(indices[0], self.cols)
-   ...             line, slot = (row, col) if along_rows else (col, row)
-   ...             rotations[line].append((slot, angle))
-   ...
-   ...         active = sorted(rotations)
-   ...         # the lines of one flow set are vertex-disjoint, so all of their Cliffords
-   ...         # are emitted together and share the same two two-qubit layers
-   ...         conjugation = QuantumCircuit(num_qubits)
-   ...         for line in active:
-   ...             clifford_function(conjugation, lines[line], ancilla)
-   ...         circuit.compose(conjugation, inplace=True)
-   ...         for line in active:
-   ...             supports = clifford_supports(
-   ...                 Clifford(conjugation), shapes[0], lines[line], ancilla, num_qubits
-   ...             )
-   ...             for slot, angle in rotations[line]:
-   ...                 match supports[slot]:
-   ...                     case qubit, "X":
-   ...                         circuit.rx(angle, qubit)
-   ...                     case qubit, "Y":
-   ...                         circuit.ry(angle, qubit)
-   ...                     case qubit, "Z":
-   ...                         circuit.rz(angle, qubit)
-   ...         circuit.compose(conjugation.inverse(), inplace=True)
-   ...         return circuit
-   ...
-   ...     def diagonal(self, circuit, terms):
-   ...         """Synthesize the diagonal group: a phase, single-qubit Z and paired Rzz."""
-   ...         rzz = {}
-   ...         for label, indices, angle in terms:
-   ...             match label, indices:
-   ...                 case "", _:  # the identity contributes only a global phase
-   ...                     circuit.global_phase -= angle / 2
-   ...                 case "Z", [qubit]:  # a lone vertex operator
-   ...                     circuit.rz(angle, qubit)
-   ...                 case "ZZ", [j, k]:  # interaction, see rzz_layers above
-   ...                     rzz[min(j, k), max(j, k)] = angle
-   ...                 case _:
-   ...                     raise ValueError(f"unexpected Pauli term: {label} on {indices}")
-   ...         rzz_layers(circuit, rzz, self.cols)
-
-As in 1D, this is deliberately written for this encoding: it recognizes the four Pauli
-shapes and raises on anything else rather than falling back silently. It also assumes the
-one-flow-set-per-gate split above, and says so; more than one hopping shape in a single
-gate means the grouping was not applied, which is an error rather than something to work
-around.
+   >>> def commuting_synthesis(rows, cols):
+   ...     """Synthesize every flow set with the plugin, on the pairs of the VC register."""
+   ...     plugin = CommutingDiagonalizationSynthesis(edges=register_pairs(rows, cols))
+   ...     return PassManager(HighLevelSynthesis(hls_config=HLSConfig(PauliEvolution=[plugin])))
 
 .. note::
-   Like its 1D counterpart, this synthesis takes no number of Trotter steps. A Trotter step has to
-   cycle *between* the flow sets, but ``transpile_trotter_step`` below decomposes the fermionic
-   circuit into one :class:`.Evolution` gate per set, so this method only ever sees one set at a
-   time and could only repeat *within* it, which changes nothing: repeating one operator just
-   splits its own evolution into equal pieces.
+   As in 1D, the plugin takes no number of Trotter steps. A Trotter step has to cycle *between*
+   the flow sets, but ``transpile_trotter_step`` below decomposes the fermionic circuit into one
+   :class:`.Evolution` gate per set, so the plugin only ever sees one set at a time. It
+   synthesizes that set without approximation, and a repetition *within* it would change
+   nothing: repeating one operator just splits its own evolution into equal pieces.
 
    Multi-step Trotterization therefore needs a product formula that respects the operator's
    :attr:`~qiskit_fermions.operators.OperatorTrait.groups` inside a single gate, before the
@@ -899,8 +674,12 @@ grouping, encoding, circuit, pass manager) repeated per size, so it is worth wra
    :nofigs:
    :include-source:
 
-   >>> def transpile_trotter_step(rows, cols, product_formula, steps=1):
-   ...     """Transpile `steps` Trotter steps on a `rows` x `cols` lattice."""
+   >>> def transpile_trotter_step(rows, cols, product_formula=None, steps=1):
+   ...     """Transpile `steps` Trotter steps on a `rows` x `cols` lattice.
+   ...
+   ...     Every flow set is synthesized by the plugin, unless a qubit-side product formula is
+   ...     given for the baseline.
+   ...     """
    ...     num_sites = rows * cols
    ...     operator = fermi_hubbard_2d(rows, cols, 1.0, 2.0)
    ...     operator.groups = flow_set_groups(operator, cols)
@@ -919,7 +698,10 @@ grouping, encoding, circuit, pass manager) repeated per size, so it is worth wra
    ...     circuit = circuit.decompose()  # split into one Evolution per flow set
    ...
    ...     pass_manager = flow_set_pass_manager(circuit.register, encoding, product_formula)
-   ...     return pass_manager.run(circuit)
+   ...     qubit_circuit = pass_manager.run(circuit)
+   ...     if product_formula is not None:
+   ...         return qubit_circuit
+   ...     return commuting_synthesis(rows, cols).run(qubit_circuit)
 
 Collecting both metrics across a range of lattice sizes and plotting them against the lattice
 edge makes the difference plain:
@@ -934,9 +716,7 @@ edge makes the difference plain:
    >>> lie_trotter = [
    ...     two_qubit_stats(transpile_trotter_step(n, n, LieTrotter())) for n in sizes
    ... ]
-   >>> flow = [
-   ...     two_qubit_stats(transpile_trotter_step(n, n, FlowSetSynthesis(n, n))) for n in sizes
-   ... ]
+   >>> flow = [two_qubit_stats(transpile_trotter_step(n, n)) for n in sizes]
    >>>
    >>> figure, axes = plt.subplots(1, 2, figsize=(9, 3.5), layout="constrained")
    >>> for panel, index, title in zip(axes, (1, 0), ("two-qubit depth", "CX count")):
@@ -955,11 +735,12 @@ the flow sets remove is the growth in how many layers those gates occupy.
 
 The budget splits into 16 for the hopping and eight for the interaction:
 
-* Each of the four flow sets costs :math:`2 + 2` two-qubit layers: its Clifford going in
-  and the inverse coming out, both depth two by construction, with only single-qubit rotations
-  in between. That is :math:`4 \times 4 = 16`, which is the figure Ref. [1]_ quotes,
-  since it counts the hopping terms only. Setting :math:`U = 0` in the code above reproduces
-  it.
+* Each of the four flow sets costs four two-qubit layers, as step 5 checked; in the circuit drawn
+  there, a ``CZ`` layer going in, the two-qubit blocks, and the ``CZ`` layer coming out. The
+  circuits of Ref. [1]_ spend the same four layers differently, on a depth-two Clifford going in
+  and its inverse coming out, with only single-qubit rotations in between. Either way that is
+  :math:`4 \times 4 = 16`, which is the figure Ref. [1]_ quotes, since it counts the hopping terms
+  only. Setting :math:`U = 0` in the code above reproduces it.
 * The diagonal group adds the remaining eight. Its ``Rzz`` gates pack into four layers, and each
   ``Rzz`` decomposes into two ``CX`` gates around a single-qubit rotation, so :math:`4 \times 2 = 8`.
   Four layers is optimal: on a square lattice, the interaction reaches only nearest
@@ -1003,9 +784,7 @@ Random statevectors detect any discrepancy far more cheaply than building the fu
    ...     lie_trotter = transpile_trotter_step(
    ...         rows, cols, LieTrotter()
    ...     ).decompose(reps=6)
-   ...     flow = transpile_trotter_step(
-   ...         rows, cols, FlowSetSynthesis(rows, cols)
-   ...     ).decompose(reps=6)
+   ...     flow = transpile_trotter_step(rows, cols).decompose(reps=6)
    ...     dimension = 2**lie_trotter.num_qubits
    ...     residuals, phases = [], []
    ...     for _ in range(samples):
@@ -1228,6 +1007,7 @@ this section cheap.
    :nofigs:
    :include-source:
 
+   >>> from qiskit.quantum_info import SparsePauliOp
    >>> from scipy.sparse.linalg import expm_multiply
    >>> from qiskit_fermions.mappers.library import transfer_vertex_jordan_wigner
    >>>
@@ -1337,9 +1117,7 @@ within any one of them:
    >>> def trotter_fidelity(steps):
    ...     # `steps` goes to the fermionic formula inside transpile_trotter_step, so the
    ...     # repetition cycles between the flow sets rather than within any one of them
-   ...     circuit = transpile_trotter_step(
-   ...         rows, cols, FlowSetSynthesis(rows, cols), steps=steps
-   ...     )
+   ...     circuit = transpile_trotter_step(rows, cols, steps=steps)
    ...     evolved = Statevector(initial_state).evolve(circuit.decompose(reps=6))
    ...     return abs(np.vdot(evolved.data, exact)) ** 2
    >>>
@@ -1359,12 +1137,6 @@ A single step of this Hamiltonian at :math:`t = 1` is a poor approximation
 (the four hopping sets and the interaction do not commute) so the first row is far from one, and
 that is the point: the convergence is what confirms the construction, not any single row.
 
-.. note::
-   Each factor of the schedule spans every mode of this lattice, so narrowing a factor to its
-   support is a no-op here and the absolute qubit indices ``FlowSetSynthesis`` matches on are
-   unchanged. A synthesis written for an operator whose groups touch only part of the register
-   would have to account for that relabeling.
-
 What to take away
 -----------------
 
@@ -1372,26 +1144,24 @@ What to take away
   guide carries over unmodified: :attr:`~.TransferVertexOperator.groups` for the grouping,
   :func:`.map_transfer_vertex_generators` for the encoding,
   :class:`.CustomF2QLayout` for the mismatched register, and
-  :class:`.MapperFnEvolutionSynthesis` to wire it into the transpiler. What grew is the
-  number of cases inside each.
+  :class:`.MapperFnEvolutionSynthesis` to wire it into the transpiler, and
+  :class:`~qiskit_fermions.transpiler.passes.synthesis.commuting_evolution.CommutingDiagonalizationSynthesis`
+  to synthesize each flow set. What grew is the number of cases inside each, and the plugin handles those without being told about them.
 - **Disjointness is what makes 2D constant-depth.** A flow set decomposes into
-  vertex-disjoint lines, so its Cliffords are emitted in parallel and share two two-qubit
-  layers no matter how large the lattice is. Four flow sets and a diagonal group then give a
-  fixed budget: here :math:`16` for the four flow sets plus :math:`8` for the diagonal
+  vertex-disjoint lines, so the circuits of its lines run in parallel and share the same
+  two-qubit layers no matter how large the lattice is. Four flow sets and a diagonal group then
+  give a fixed budget: here :math:`16` for the four flow sets plus :math:`8` for the diagonal
   interaction group.
 - **Each orientation is its own Pauli shape.** :math:`T_{kj} = -V_j V_k T_{jk}` turns
   ``XXZ`` into ``YYZ`` and ``XYXY`` into ``YXXY``, so the four flow sets need four
-  Cliffords. Assuming that one Clifford covers both orientations of an axis is the easiest way to
-  get a 2D flow-set synthesis wrong.
-- **Read supports off the conjugation.** In 1D, one ``CZ`` brickwork gives the images in
-  closed form. In 2D there is no such formula, and column lines have non-contiguous ancillas,
-  so a hand-derived guess at where each term lands is fragile. Conjugating and inspecting the
-  result costs one :class:`~qiskit.quantum_info.Clifford` construction and cannot be wrong;
-  it also means an equally valid Clifford that lands the terms elsewhere keeps working.
+  Cliffords. Deriving them by hand is where a 2D flow-set synthesis most easily goes wrong; the
+  plugin derives each from the terms of its gate, and checks that it sends every term where the
+  middle part of the circuit expects it.
+- **Name the qubit pairs, not the circuit.** The plugin needs the pairs of qubits that can
+  interact, and keeps every two-qubit gate on them. Here those are the pairs of the VC register;
+  once a circuit is placed on a device, the plugin reads them off the device's coupling map.
 - **Let the grouping do the sorting.** Because :class:`.Evolution` splits itself per group,
-  the synthesis is handed one flow set at a time and never has to re-derive the partition:
-  it reads one Pauli shape off the first term and picks the matching Clifford. Assuming that,
-  and raising when it does not hold, is what keeps ``synthesize`` short.
+  the plugin is handed one flow set at a time and never has to re-derive the partition.
 - **The step count sits above the split.** The synthesis here sees one flow set per gate, so it
   cannot subdivide the evolution across the sets. :class:`.FermionicLieTrotter` does that in
   fermionic space, before the decomposition, which is what makes a convergence test possible at all.
@@ -1412,36 +1182,38 @@ Next
 
 Two directions extend what is above, and both are changes of ingredient rather than of
 method. The first is the encoding: Verstraete-Cirac was chosen here because Ref. [1]_ gives
-its diagonalizing Cliffords in closed form, but Derby-Klassen spends one ancilla per odd
-plaquette instead of one per site, for a qubit-to-mode ratio of :math:`3/2` rather than
-:math:`2`. Its transfer operators have different Pauli shapes, so a port amounts to
-rewriting the encoding function of :ref:`step 3 <flowsets_2d_encoding>` and finding
-the Clifford for each new shape; the grouping, the layout, and the synthesis scaffolding
-carry over untouched.
+its diagonalizing Cliffords in closed form, which makes the plugin's result easy to compare
+against, but Derby-Klassen spends one ancilla per odd plaquette instead of one per site, for a
+qubit-to-mode ratio of :math:`3/2` rather than :math:`2`. Its transfer operators have different
+Pauli shapes, so a port amounts to rewriting the encoding function of
+:ref:`step 3 <flowsets_2d_encoding>` and the qubit pairs of
+:ref:`step 5 <flowsets_2d_synthesis>`; the plugin finds the Cliffords for the new shapes, and the
+grouping, the layout, and the pipeline carry over untouched.
 
 The second is the lattice itself. Everything here assumes open boundaries and a single
 fermionic species. Periodic boundaries close each line into a cycle: the arrows still all
-commute, since each meets the next head-to-tail, but the two Clifford shapes of
-:ref:`step 5 <flowsets_2d_synthesis>` are built for a line with endpoints. A cycle of
-:math:`L` sites carries :math:`L` bonds per orientation where a line carries :math:`L - 1`,
-so the wrap-around bond has no place in the construction and needs handling of its own. A
+commute, since each meets the next head-to-tail, so every flow set is still a group of commuting
+terms that the plugin accepts. A cycle of :math:`L` sites carries :math:`L` bonds per
+orientation where a line carries :math:`L - 1`, and the wrap-around bond adds pairs of its own,
+so whether a flow set still costs four layers on a cycle is a question this guide leaves open. A
 spinful model is easier: it doubles the register and adds on-site interaction terms to the
 diagonal group, without touching the flow sets. Neither disturbs the constant-depth
 argument, but both change the bookkeeping, which, as the first takeaway says, is the part
 that two dimensions makes bigger.
 
 .. important::
-   **Hardware connectivity is not addressed here.** Every circuit above is built on an
-   abstract register where any pair of qubits can interact, and the reported depths are
-   counted in that setting. Real devices have a restricted coupling map, and mapping this
-   encoding onto one is a substantial problem in its own right: the VC register is a
-   :math:`2N`-qubit graph whose gates run between a site and its own ancilla, between
-   neighboring sites and between neighboring ancillas, so a layout has to keep all three
-   kinds of pairs adjacent simultaneously. If it cannot, the transpiler inserts ``SWAP`` gates, and
-   the layers they add are what the constant-depth construction was buying back.
-   Ref. [1]_ likewise quotes its depth figure under an assumed square connectivity graph with
-   ``CX`` as the only native entangler. Finding good layouts and routing strategies for local
-   encodings on a given device topology is beyond this guide's scope.
+   **Hardware connectivity is only partly addressed here.** Every two-qubit gate of a Trotter
+   step above is on one of the qubit pairs of :ref:`step 5 <flowsets_2d_synthesis>`, so on a
+   device that couples those pairs the circuit needs no routing, and the reported depths are its
+   depths there. Real devices have a restricted coupling map, and mapping this encoding onto one
+   is a substantial problem in its own right: a layout has to keep all four kinds of pairs
+   adjacent simultaneously. Where a device couples fewer pairs, give the plugin those (or run the
+   high-level synthesis after the layout stage, so that it reads them off the device), and it
+   keeps every gate on them, at whatever depth they allow. Otherwise the transpiler inserts
+   ``SWAP`` gates, and the layers they add are what the constant-depth construction was buying
+   back. Ref. [1]_ likewise quotes its depth figure under an assumed square connectivity graph
+   with ``CX`` as the only native entangler. Finding good layouts and routing strategies for
+   local encodings on a given device topology is beyond this guide's scope.
 
 .. [1] A. Gandon, S. Piccinelli, M. Rossmannek, F. Tacchino, A. Baiardi, J. Nys, and
        I. Tavernelli, Stabilizer-based quantum simulation of fermion dynamics with local

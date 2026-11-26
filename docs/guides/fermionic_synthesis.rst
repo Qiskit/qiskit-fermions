@@ -466,7 +466,9 @@ Next steps
 - Read :ref:`grouping_explanation` for how the groups these product formulas split on are assigned.
 - Read :ref:`transpilation_explanation` for the stages a :class:`.FermionicCircuit` passes through.
 - See :ref:`1d_fermi_hubbard` for a worked case where the fermionic formula supplies the step count
-  that a custom qubit-side synthesis cannot.
+  that the qubit-side synthesis cannot.
+- Read :ref:`commuting_evolution_explanation` for a qubit-side synthesis of each group, once its
+  terms commute after the mapping.
 - Consult :mod:`~qiskit_fermions.circuit.library.synthesis` for the synthesis methods themselves,
   and :class:`.FermionicQDrift` for a randomized alternative.
 
