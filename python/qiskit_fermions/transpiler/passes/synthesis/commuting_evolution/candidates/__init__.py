@@ -16,6 +16,7 @@ from __future__ import annotations
 
 from .base import Candidate
 from .clifford import Majority, Plain, TwinFold
+from .cz_local import CzLocal
 from .local import Local
 from .search import Search
 
@@ -24,6 +25,7 @@ DEFAULT_CANDIDATES: tuple[Candidate, ...] = (
     Majority(),
     TwinFold(),
     Local(),
+    CzLocal(),
     Search(),
 )
 """The candidates the plugin uses by default, in the order in which ties are broken: every built-in
@@ -36,6 +38,7 @@ better, and it runs only for a gate that is not placed on the device.
 __all__ = [
     "DEFAULT_CANDIDATES",
     "Candidate",
+    "CzLocal",
     "Local",
     "Majority",
     "Plain",

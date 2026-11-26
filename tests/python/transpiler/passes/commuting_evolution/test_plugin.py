@@ -30,6 +30,7 @@ from qiskit_fermions.transpiler.passes import CommutingDiagonalizationSynthesis
 from qiskit_fermions.transpiler.passes.synthesis.commuting_evolution import (
     DEFAULT_CANDIDATES,
     Context,
+    CzLocal,
     Local,
     MinCost,
     Plain,
@@ -117,13 +118,7 @@ class TestDeclines:
         assert reports[0].variants and reports[0].chosen is None and reports[0].declined
 
     def test_no_candidate_offers_a_circuit(self):
-        class Nothing:
-            name = "nothing"
-
-            def generate(self, problem, context):
-                return {}
-
-        plugin, reports = _recording(candidates=[Nothing()])
+        plugin, reports = _recording(candidates=[CzLocal()])  # needs connectivity
         assert _run(plugin, zxz_windows(5)) is None
         assert reports[0].variants == () and reports[0].declined
 
@@ -242,6 +237,16 @@ class TestCandidates:
         assert _run(plugin, plaquettes(4)) is not None
         assert reports[0].chosen.candidate == "twin-fold"
 
+    def test_layout_candidates_need_the_physical_qubits(self):
+        """Stock recipe (no qubits): no layout candidate offers a circuit. Staged: they do."""
+        op = zxz_windows(6)
+        plugin, reports = _recording()
+        _run(plugin, op, line=True, staged=False)
+        _run(plugin, op, line=True, staged=True)
+        stock, staged = ({v.candidate for v in r.variants} for r in reports)
+        assert not any(name.startswith("cz-") for name in stock)
+        assert any(name.startswith("cz-") for name in staged)
+
 
 class TestEdges:
     def test_user_edges_are_in_the_circuit_qubits(self):
@@ -258,6 +263,7 @@ class TestEdges:
         }  # the two gates may come in either order
         assert by_width[4].context.user_edges == ((0, 1), (1, 2), (2, 3))
         assert by_width[2].context.user_edges == ()  # 1 and 3 are not a pair
+        assert any(v.candidate.startswith("cz-") for v in by_width[4].variants)
 
     def test_user_edges_of_a_direct_call(self):
         """Without the circuit's qubits, the pairs are in the gate's own indices; the ones past the
@@ -266,6 +272,11 @@ class TestEdges:
         for op in (SparsePauliOp(["XX", "YY"], [0.4, 0.6]), zxz_windows(4)):
             assert same_unitary(plugin.run(_gate(op)), op, TIME)
         assert [r.context.user_edges for r in reports] == [((0, 1),), ((0, 1), (1, 2), (2, 3))]
+
+    def test_user_edges_enable_the_layout_candidates(self):
+        plugin, reports = _recording(edges=[(k, k + 1) for k in range(5)])
+        _run(plugin, zxz_windows(6))
+        assert "cz-local" in {v.candidate for v in reports[0].variants}
 
     @pytest.mark.parametrize("edges", [[(0, 0)], [(-1, 2)], [(0, 1, 2)]])
     def test_invalid_user_edges(self, edges):
@@ -366,7 +377,8 @@ class TestSelectors:
         assert reports[0].chosen is reports[0].variants[-1]
 
     def test_abstract_cost_never_routes(self, monkeypatch):
-        """``MinCost(abstract_cost)`` never runs the routed scoring transpile."""
+        """``MinCost(abstract_cost)`` keeps the layout candidates but never runs the routed scoring
+        transpile."""
         from qiskit_fermions.transpiler.passes.synthesis.commuting_evolution import cost
 
         def fail(*args, **kwargs):
@@ -374,9 +386,10 @@ class TestSelectors:
 
         monkeypatch.setattr(cost, "transpile", fail)
         op = zxz_windows(6)
-        plugin = CommutingDiagonalizationSynthesis(selector=MinCost(abstract_cost))
+        plugin, reports = _recording(selector=MinCost(abstract_cost))
         circuit = _run(plugin, op, line=True, staged=True)
         assert same_unitary(circuit, op, TIME)
+        assert any(v.candidate.startswith("cz-") for v in reports[0].variants)
 
 
 class TestStructure:
@@ -466,4 +479,5 @@ class TestThroughThePassManager:
         )
         out = pm.run(qc)
         assert reports[0].context.physical_qubits == tuple(range(6))
+        assert any(v.candidate.startswith("cz-") for v in reports[0].variants)
         assert same_unitary(out, op, TIME, atol=1e-9)
