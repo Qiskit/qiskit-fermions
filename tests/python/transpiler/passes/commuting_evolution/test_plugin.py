@@ -32,6 +32,7 @@ from qiskit_fermions.transpiler.passes.synthesis.commuting_evolution import (
     Context,
     Local,
     MinCost,
+    Plain,
     Problem,
     Report,
     Variant,
@@ -205,16 +206,24 @@ class TestCandidates:
         assert _run(plugin, zxz_windows(5)) is not None
         assert {v.candidate for v in reports[0].variants} == {"local"}
 
+    def test_search_runs_by_default_only_for_a_gate_that_is_not_placed(self):
+        plugin, reports = _recording()
+        _run(plugin, zxz_windows(6))
+        _run(plugin, zxz_windows(6), line=True, staged=True)
+        unplaced, placed = ({v.candidate for v in r.variants} for r in reports)
+        assert "search" in unplaced
+        assert "search" not in placed
+
     def test_duplicate_names(self):
         with pytest.raises(ValueError, match="unique"):
-            CommutingDiagonalizationSynthesis(candidates=[Local(), _Fixed("stock"), Local()])
+            CommutingDiagonalizationSynthesis(candidates=[Plain(), Local(), Plain()])
 
     def test_iterators_are_read_once(self):
         """Candidates and edges given as iterators are not lost to the validation."""
         plugin = CommutingDiagonalizationSynthesis(
-            candidates=iter([_Fixed("stock"), Local()]), edges=iter([(1, 0), (1, 2)])
+            candidates=iter([Plain(), Local()]), edges=iter([(1, 0), (1, 2)])
         )
-        assert [c.name for c in plugin.candidates] == ["stock", "local"]
+        assert [c.name for c in plugin.candidates] == ["plain", "local"]
         assert plugin.edges == ((0, 1), (1, 2))
 
     def test_a_user_candidate_takes_part(self):
@@ -227,6 +236,11 @@ class TestCandidates:
         plugin, reports = _recording(candidates=[_Fixed("stock")])
         assert same_unitary(_run(plugin, op), op, TIME)
         assert reports[0].chosen.label == "stock"
+
+    def test_twin_fold_wins_on_the_plaquettes(self):
+        plugin, reports = _recording()
+        assert _run(plugin, plaquettes(4)) is not None
+        assert reports[0].chosen.candidate == "twin-fold"
 
 
 class TestEdges:
@@ -323,27 +337,20 @@ class TestSelectors:
         assert same_unitary(circuit, op, TIME)
 
     def test_a_custom_metric_changes_the_choice(self):
-        """The default ranks by two-qubit cost; ranking by the number of two-qubit gates between
-        qubits that are not neighbors picks a different one."""
-
-        def long_range(circuit, context):
-            decomposed = circuit.decompose(reps=6)
-            return sum(
-                1
-                for i in decomposed.data
-                if len(i.qubits) == 2
-                and abs(
-                    decomposed.find_bit(i.qubits[0]).index - decomposed.find_bit(i.qubits[1]).index
-                )
-                > 1
-            )
-
-        op = SparsePauliOp(["ZZZZZZ"], [0.4])
+        """The default ranks by two-qubit cost; ranking by the number of single-qubit gates picks a
+        different one."""
+        op = plaquettes(3)
         by_default = _recording()
-        by_long_range = _recording(selector=MinCost(long_range))
-        for plugin, _ in (by_default, by_long_range):
+        by_one_qubit = _recording(
+            selector=MinCost(
+                lambda circuit, context: sum(
+                    1 for i in circuit.decompose(reps=6).data if len(i.qubits) == 1
+                )
+            )
+        )
+        for plugin, _ in (by_default, by_one_qubit):
             _run(plugin, op)
-        first, second = by_default[1][0].chosen, by_long_range[1][0].chosen
+        first, second = by_default[1][0].chosen, by_one_qubit[1][0].chosen
         assert first.label != second.label
 
     def test_a_custom_selector_sees_every_variant(self):

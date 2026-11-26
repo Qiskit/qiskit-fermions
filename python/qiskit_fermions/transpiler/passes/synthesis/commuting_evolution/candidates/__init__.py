@@ -15,14 +15,30 @@
 from __future__ import annotations
 
 from .base import Candidate
+from .clifford import Majority, Plain, TwinFold
 from .local import Local
+from .search import Search
 
-DEFAULT_CANDIDATES: tuple[Candidate, ...] = (Local(),)
-"""The candidates used by default, in the order in which ties are broken: every built-in
-candidate."""
+DEFAULT_CANDIDATES: tuple[Candidate, ...] = (
+    Plain(),
+    Majority(),
+    TwinFold(),
+    Local(),
+    Search(),
+)
+"""The candidates the plugin uses by default, in the order in which ties are broken: every built-in
+candidate.
+
+:class:`.Search`, the most expensive one, comes last, so that it decides only where it is strictly
+better, and it runs only for a gate that is not placed on the device.
+"""
 
 __all__ = [
     "DEFAULT_CANDIDATES",
     "Candidate",
     "Local",
+    "Majority",
+    "Plain",
+    "Search",
+    "TwinFold",
 ]
