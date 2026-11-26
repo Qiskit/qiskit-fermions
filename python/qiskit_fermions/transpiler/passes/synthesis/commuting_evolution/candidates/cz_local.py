@@ -15,7 +15,7 @@
 Its diagonal variant is ``U = L2 CZ(Gamma) L1``. For fixed per-qubit layers the graph ``Gamma`` and
 the final letters are the solution of a linear system over GF(2); the per-qubit layer ``L1`` is
 found by coordinate descent. This is the hardware-tailored diagonalization of Miller et al.,
-arXiv:2203.03646.
+arXiv:2203.03646. Its pair-block variants come from :mod:`.._pair_blocks`.
 """
 
 from __future__ import annotations
@@ -29,10 +29,11 @@ import numpy as np
 from qiskit import QuantumCircuit
 
 from .._components import LocalProblem, components_of
-from .._diagonal import NotDiagonalizedError, evolve_from_clifford
+from .._diagonal import NotDiagonalizedError, evolve_from_clifford, evolve_with_pair_blocks
 from .._elimination import to_circuit
 from .._gf2 import cooccurring_edges, incidence, solve_gamma_joint
 from .._layers import edge_color_layers
+from .._pair_blocks import pair_block_fswap, pair_block_one_layer
 from .._symplectic import Gate, apply_cz, apply_layer, coordinate_descent, layer_gates, relabel
 from ..problem import Context, Problem
 
@@ -195,13 +196,24 @@ class CzLocal:
     """CZ layers on the allowed pairs between single-qubit layers.
 
     It needs the allowed CZ pairs (:attr:`.Context.edges`): the device's, once the gate's qubits are
-    placed, or the user's. Without them it offers nothing. Every CZ gate is on an allowed pair.
+    placed, or the user's. Without them it offers nothing. Every CZ gate is on an allowed pair, and
+    so is every block of the pair-block variants.
 
     **Variants:**
 
     * ``"diagonal"``: ``U = L2 CZ(G) L1`` sends every term to a Z-string, and the middle is a
       diagonal rotation stage. ``G`` and the letters come out of a linear system over GF(2); there
       is no variant when it has no solution.
+    * ``"pair-blocks"``: ``U = CZ(G) L1``, with ``G`` a matching, only has to send every term onto
+      one qubit or one allowed pair, and the middle holds one generic two-qubit block per pair. This
+      weaker target helps when the terms on a pair form an entangled set such as ``{XX, YY, ZZ}``,
+      which no single-qubit layer diagonalizes. The circuit needs no routing.
+    * ``"fswap-pair-blocks"``: the same target, for the components of the group that one CZ layer
+      cannot solve, with ``U = CZ(F) L2 CZ(F) L1``, both CZ layers on the same matching ``F``. Such
+      a ``U`` is a layer of moves of the kind of the fermionic swap ``fSWAP = SWAP . CZ`` (two CX
+      gates each): it brings a term onto a pair that one CZ layer cannot reach, by moving a mode
+      next to its partner. The components that one CZ layer solves keep that solution, and the
+      variant is offered only when some component needed the moves. The circuit needs no routing.
     """
 
     name = "cz-local"
@@ -214,6 +226,15 @@ class CzLocal:
         if gates is not None:
             with contextlib.suppress(NotDiagonalizedError):
                 variants["diagonal"] = evolve_from_clifford(
+                    problem, to_circuit(gates, problem.num_qubits)
+                )
+        for name, search in (
+            ("pair-blocks", pair_block_one_layer),
+            ("fswap-pair-blocks", pair_block_fswap),
+        ):
+            gates = search(problem.x, problem.z, context.edges)
+            if gates is not None:
+                variants[name] = evolve_with_pair_blocks(
                     problem, to_circuit(gates, problem.num_qubits)
                 )
         return variants
