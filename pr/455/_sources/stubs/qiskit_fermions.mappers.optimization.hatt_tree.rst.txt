@@ -1,0 +1,6 @@
+﻿hatt\_tree
+==========
+
+.. currentmodule:: qiskit_fermions.mappers.optimization
+
+.. autofunction:: hatt_tree

@@ -1,0 +1,48 @@
+# groups_are_hermitian
+
+### groups_are_hermitian(op, , atol=1e-08)
+
+Returns, for each group, whether the operator formed by that group’s terms is Hermitian.
+
+Groups prescribe no meaning of their own; this checks one *common* convention, namely that each
+group is separately Hermitian. That is the property a randomized product formula relies on when it
+samples whole groups, since only a Hermitian group has a unitary time evolution. If the operator
+tracks no groups, this returns `None`.
+
+An empty group counts as Hermitian, because the zero operator is.
+
+#### NOTE
+This inherits the one-sided guarantee of [`is_hermitian()`](qiskit_fermions.operators.OperatorTrait.html.md#qiskit_fermions.operators.OperatorTrait.is_hermitian):
+a `True` entry is always reliable, while a `False` entry is reliable only for operator
+types whose normal form is a genuine canonical form. For the others the check is
+*conservative* and can report `False` for a group that is in fact Hermitian.
+
+#### NOTE
+This is *not* implied by (nor does it imply) [`groups_have_uniform_coeffs()`](qiskit_fermions.operators.terms.groups_have_uniform_coeffs.html.md#qiskit_fermions.operators.terms.groups_have_uniform_coeffs). Uniform
+coefficients do not make a group Hermitian, and a Hermitian group may mix magnitudes.
+
+```pycon
+>>> from qiskit_fermions.operators import FermionOperator
+>>> from qiskit_fermions.operators.terms.grouping import groups_are_hermitian
+>>> # built from the sparse arrays rather than a dictionary, because only the former
+>>> # fixes the term order that the group indices are paired with
+>>> op = FermionOperator(
+...     [1.0, 1.0, 1.0],
+...     [True, False, True, False, True, False],
+...     [0, 1, 1, 0, 2, 3],
+...     [0, 2, 4, 6],
+... )
+>>> op.groups = [0, 0, 1]  # the leading conjugate pair, then one unpaired term
+>>> groups_are_hermitian(op)
+[True, False]
+```
+
+* **Parameters:**
+  * **op** – the operator whose groups to check.
+  * **atol** – The numerical accuracy upto which coefficients are considered equal. This value
+    defaults to `1e-8`.
+* **Returns:**
+  One flag per group index, or `None` if the operator tracks no groups.
+* **Raises:**
+  [**TypeError**](https://docs.python.org/3/builtins/exceptions.html#TypeError) – if `op` is not a supported operator type (see
+      [`OperatorTrait`](qiskit_fermions.operators.OperatorTrait.html.md#qiskit_fermions.operators.OperatorTrait)).

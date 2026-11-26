@@ -1,0 +1,6 @@
+﻿order\_terms
+============
+
+.. currentmodule:: qiskit_fermions.operators.terms
+
+.. autofunction:: order_terms

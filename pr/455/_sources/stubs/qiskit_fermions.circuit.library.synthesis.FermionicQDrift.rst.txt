@@ -1,0 +1,96 @@
+﻿FermionicQDrift
+===============
+
+.. currentmodule:: qiskit_fermions.circuit.library.synthesis
+
+.. autoclass:: FermionicQDrift
+   :show-inheritance:
+   :no-members:
+   :no-inherited-members:
+   :special-members:
+
+
+  
+  
+   .. rubric:: Attributes
+    
+   .. autoattribute:: num_terms
+   .. autoattribute:: weights
+  
+  
+  
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+  
+  
+   .. rubric:: Methods
+    
+   .. automethod:: sampler
+   .. automethod:: synthesize
+  
+  
+  
+  
+  
+  
+  

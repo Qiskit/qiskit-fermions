@@ -1,0 +1,6 @@
+﻿group\_order
+============
+
+.. currentmodule:: qiskit_fermions.operators.terms
+
+.. autofunction:: group_order

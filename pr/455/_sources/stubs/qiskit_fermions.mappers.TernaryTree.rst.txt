@@ -1,0 +1,122 @@
+﻿TernaryTree
+===========
+
+.. currentmodule:: qiskit_fermions.mappers
+
+.. autoclass:: TernaryTree
+   :show-inheritance:
+   :no-members:
+   :no-inherited-members:
+   :special-members:
+
+
+  
+  
+   .. rubric:: Attributes
+    
+   .. autoattribute:: max_weight
+   .. autoattribute:: num_legs
+   .. autoattribute:: num_nodes
+   .. autoattribute:: root
+  
+  
+  
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+  
+  
+   .. rubric:: Methods
+    
+   .. automethod:: breadth_first
+   .. automethod:: chain
+   .. automethod:: children
+   .. automethod:: leg_labels
+   .. automethod:: leg_paths
+   .. automethod:: relabel
+   .. automethod:: reparent
+   .. automethod:: reroot
+  
+  
+  
+  
+  
+  
+  
