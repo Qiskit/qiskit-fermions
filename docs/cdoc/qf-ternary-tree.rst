@@ -64,6 +64,12 @@ be reused across every operator mapped through it.
   :c:func:`qf_ternary_tree_num_legs`                   The number of legs, always ``2 * num_nodes + 1``.
   :c:func:`qf_ternary_tree_max_weight`                 The largest Pauli weight of any single Majorana
                                                        operator.
+  :c:func:`qf_ternary_tree_leg_labels`                 The labels of a node's links that terminate
+                                                       in a leg.
+  :c:func:`qf_ternary_tree_reparent`                   Move a node, and the subtree below it, onto
+                                                       another node's link.
+  :c:func:`qf_ternary_tree_reroot`                     Re-root the tree at a given node.
+  :c:func:`qf_ternary_tree_relabel`                    Permute the Pauli labels of a node's links.
   :c:func:`qf_ternary_tree_free`                       Free a tree.
   :c:func:`qf_ternary_tree_encoding_new`               Compile a tree into the Pauli images of its
                                                        Majorana operators.

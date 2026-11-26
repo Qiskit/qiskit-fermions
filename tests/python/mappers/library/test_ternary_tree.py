@@ -176,6 +176,58 @@ class TestTreeBindings:
         assert "TernaryTree" in repr(TernaryTree.chain(3, "Z"))
 
 
+class TestTreeEditBindings:
+    """The edit operations' arguments and results across the boundary.
+
+    That the edits preserve a valid encoding is tested in Rust; here it is the label and permutation
+    parsing, the list and tree return values, and that the input tree is left untouched.
+    """
+
+    def test_leg_labels_returns_label_characters(self):
+        tree = TernaryTree.chain(3, "Z")
+        assert tree.leg_labels(0) == ["X", "Y"]
+        assert tree.leg_labels(2) == ["X", "Y", "Z"]
+        # A full node has no free link, which crosses as an empty list.
+        assert TernaryTree.breadth_first(4, 3).leg_labels(0) == []
+
+    def test_reparent_returns_a_new_tree(self):
+        chain = TernaryTree.chain(6, "Z")
+        moved = chain.reparent(5, 0, "X")
+        assert isinstance(moved, TernaryTree)
+        assert moved.children(0) == {"X": 5, "Z": 1}
+        # The input is untouched.
+        assert chain == TernaryTree.chain(6, "Z")
+
+    def test_reroot_returns_a_new_tree(self):
+        chain = TernaryTree.chain(6, "Z")
+        rerooted = chain.reroot(3)
+        assert rerooted.root == 3
+        assert chain.root == 0
+        # Node 3 keeps its Z child, so the reversed link to node 2 takes the lowest free slot, X;
+        # further up, the reversed links find their Z slot free and keep it.
+        assert rerooted.children(3) == {"X": 2, "Z": 4}
+        assert rerooted.children(2) == {"Z": 1}
+        assert rerooted.children(1) == {"Z": 0}
+        # Re-rooting at the current root is a no-op.
+        assert chain.reroot(0) == chain
+
+    def test_relabel_takes_a_string(self):
+        tree = TernaryTree([None, (0, "X"), (0, "Z")])
+        relabeled = tree.relabel(0, "YZX")
+        # The X child moves to Y and the Z child to X.
+        assert relabeled.children(0) == {"Y": 1, "X": 2}
+        assert tree.children(0) == {"X": 1, "Z": 2}
+        # A leaf has no children to move, and its legs fill whatever slots remain.
+        assert tree.relabel(1, "ZXY") == tree
+
+    def test_edited_trees_compile(self):
+        """An edited tree is an ordinary tree, so it compiles and pickles like any other."""
+        moved = TernaryTree.chain(4, "Z").reparent(3, 0, "X")
+        enc = TernaryTreeEncoding(moved)
+        assert enc.num_modes == 4
+        assert pickle.loads(pickle.dumps(moved)) == moved
+
+
 class TestEncodingBindings:
     """The compiled encoding's accessors and its mode-map argument."""
 
@@ -378,7 +430,7 @@ class TestErrors:
             TernaryTree([None, (2, "X"), (1, "X")])
 
     def test_rejects_out_of_range_parent(self):
-        with pytest.raises(ValueError, match="references node"):
+        with pytest.raises(ValueError, match="node 7 is out of range for a tree with 2 nodes"):
             TernaryTree([None, (7, "X")])
 
     def test_rejects_bad_branching_order(self):
@@ -497,6 +549,62 @@ class TestErrors:
     def test_rejects_out_of_range_node(self):
         with pytest.raises(ValueError, match="out of range"):
             TernaryTree.chain(3, "Z").children(9)
+
+    def test_edits_reject_out_of_range_node(self):
+        tree = TernaryTree.chain(3, "Z")
+        with pytest.raises(ValueError, match="node 9 is out of range"):
+            tree.leg_labels(9)
+        with pytest.raises(ValueError, match="node 9 is out of range"):
+            tree.reparent(9, 0, "X")
+        with pytest.raises(ValueError, match="node 9 is out of range"):
+            tree.reparent(1, 9, "X")
+        with pytest.raises(ValueError, match="node 9 is out of range"):
+            tree.reroot(9)
+        with pytest.raises(ValueError, match="node 9 is out of range"):
+            tree.relabel(9, "XYZ")
+
+    @pytest.mark.parametrize("node", [-1, 2**32])
+    def test_edits_reject_node_outside_u32(self, node):
+        """Node indices are 32-bit unsigned integers, so anything outside is an OverflowError."""
+        tree = TernaryTree.chain(3, "Z")
+        with pytest.raises(OverflowError):
+            tree.leg_labels(node)
+        with pytest.raises(OverflowError):
+            tree.reroot(node)
+
+    def test_reparent_rejections(self):
+        tree = TernaryTree.chain(4, "Z")
+        with pytest.raises(ValueError, match="is the root"):
+            tree.reparent(0, 3, "X")
+        with pytest.raises(ValueError, match="already has a child"):
+            tree.reparent(3, 0, "Z")
+        with pytest.raises(ValueError, match="would create a cycle"):
+            tree.reparent(1, 3, "X")
+        with pytest.raises(ValueError, match="cannot be moved under itself"):
+            tree.reparent(2, 2, "X")
+        # Moving a node to the link it already hangs off is not a rejection: it changes nothing.
+        assert tree.reparent(1, 0, "Z") == tree
+
+    def test_reroot_rejects_a_full_node(self):
+        with pytest.raises(ValueError, match="cannot become the root"):
+            TernaryTree.breadth_first(13, 3).reroot(1)
+
+    def test_edits_reject_bad_label(self):
+        tree = TernaryTree.chain(4, "Z")
+        for label in ("Q", "x"):
+            with pytest.raises(ValueError, match="invalid Pauli label"):
+                tree.reparent(3, 0, label)
+            with pytest.raises(ValueError, match="invalid Pauli label"):
+                tree.relabel(0, label + "YZ")
+
+    @pytest.mark.parametrize("permutation", ["", "XY", "XYZX"])
+    def test_relabel_rejects_wrong_length(self, permutation):
+        with pytest.raises(ValueError, match="exactly 3 labels"):
+            TernaryTree.chain(3, "Z").relabel(0, permutation)
+
+    def test_relabel_rejects_a_non_permutation(self):
+        with pytest.raises(ValueError, match="is not a permutation: it repeats X"):
+            TernaryTree.chain(3, "Z").relabel(0, "XXZ")
 
 
 class TestTypeAgnosticWrapper:
